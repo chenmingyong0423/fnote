@@ -20,16 +20,22 @@
 # Go workspace file
 go.work
 
-.idea/*
+.idea/c*
+backend/.idea
 
-node_modules
+frontend/node_modules
+
 *.log*
-.nuxt
+
+frontend/.nuxt
+
 .nitro
 .cache
 .output
 .env
-dist
-.DS_Store
+
+frontend/dist
+
+*/.DS_Store
 
 
