@@ -12,30 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+package middleware
 
 import (
-	"net/http"
+	"github.com/gin-gonic/gin"
+	uuid "github.com/satori/go.uuid"
 )
 
-type ResponseBody[T any] struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Data    T      `json:"data,omitempty"`
-}
+const (
+	XRequestIDKey = "X-Request-ID"
+)
 
-func ErrResponse(message string) ResponseBody[any] {
-	return ResponseBody[any]{
-		Code:    http.StatusInternalServerError,
-		Message: http.StatusText(http.StatusInternalServerError),
-		Data:    nil,
-	}
-}
-
-func SuccessResponse[T any](data T) ResponseBody[T] {
-	return ResponseBody[T]{
-		Code:    http.StatusOK,
-		Message: http.StatusText(http.StatusOK),
-		Data:    data,
+func RequestId() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		rid := ctx.GetHeader(XRequestIDKey)
+		if rid == "" {
+			rid = uuid.NewV4().String()
+			ctx.Request.Header.Set(XRequestIDKey, rid)
+			ctx.Set(XRequestIDKey, rid)
+		}
+		ctx.Writer.Header().Set(XRequestIDKey, rid)
+		ctx.Next()
 	}
 }

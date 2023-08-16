@@ -21,9 +21,12 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/repository"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/middleware"
+	"github.com/gin-gonic/contrib/cors"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -40,6 +43,21 @@ func main() {
 	configColl := db.Collection("config")
 
 	r := gin.Default()
+
+	r.Use(middleware.RequestId())
+	r.Use(middleware.Logger())
+
+	r.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			if strings.HasPrefix(origin, "http://localhost") {
+				// 你的开发环境
+				return true
+			}
+			return strings.Contains(origin, "chenmingyong.cn")
+		},
+		MaxAge: 12 * time.Hour,
+	}))
 	_ = http.NewConfigHandler(r, service.NewConfigService(repository.NewConfigRepository(dao.NewConfigDao(configColl))))
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
