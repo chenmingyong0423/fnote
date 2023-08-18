@@ -45,7 +45,7 @@ jobs:
           working-directory: ./backend
 
           # Optional: golangci-lint command line arguments.
-          args: -c ./backend/golangci.yml
+          args: -c .golangci.yml
 
           # Optional: show only new issues if it's a pull request. The default value is `false`.
           only-new-issues: true
