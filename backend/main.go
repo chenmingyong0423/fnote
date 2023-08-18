@@ -17,6 +17,10 @@ package main
 import (
 	"context"
 	"errors"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/http"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/repository"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/repository/dao"
@@ -25,9 +29,6 @@ import (
 	"github.com/gin-gonic/contrib/cors"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"os"
-	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -59,7 +60,10 @@ func main() {
 		MaxAge: 12 * time.Hour,
 	}))
 	_ = http.NewConfigHandler(r, service.NewConfigService(repository.NewConfigRepository(dao.NewConfigDao(configColl))))
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	err := r.Run()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func initDb(username, password string) *mongo.Database {
