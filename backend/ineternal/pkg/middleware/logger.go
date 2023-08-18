@@ -16,11 +16,12 @@ package middleware
 
 import (
 	"bytes"
-	"github.com/gin-gonic/gin"
 	"io"
 	"log/slog"
 	"os"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 var logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {

@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SOURCE_COMMIT=.github/pre-commit
-TARGET_COMMIT=.git/hooks/pre-commit
-SOURCE_PUSH=.github/pre-push
-TARGET_PUSH=.git/hooks/pre-push
+SOURCE_COMMIT=../.github/pre-commit
+TARGET_COMMIT=../.git/hooks/pre-commit
+SOURCE_PUSH=../.github/pre-push
+TARGET_PUSH=../.git/hooks/pre-push
 
 # copy pre-commit file if not exist.
 echo "setting git pre-commit hooks..."
