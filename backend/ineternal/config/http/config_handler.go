@@ -15,12 +15,13 @@
 package http
 
 import (
+	"log/slog"
+	"net/http"
+
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
 	http2 "github.com/chenmingyong0423/fnote/backend/pkg/http"
 	"github.com/gin-gonic/gin"
-	"log/slog"
-	"net/http"
 )
 
 func NewConfigHandler(engine *gin.Engine, serv service.IConfigService) *ConfigHandler {
