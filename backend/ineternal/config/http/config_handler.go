@@ -15,12 +15,12 @@
 package http
 
 import (
+	http2 "github.com/chenmingyong0423/fnote/backend/ineternal/pkg/http"
 	"log/slog"
 	"net/http"
 
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
-	http2 "github.com/chenmingyong0423/fnote/backend/pkg/http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,11 +41,11 @@ type ConfigHandler struct {
 }
 
 func (c *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) {
-	masterConfig, err := c.serv.GetWebmasterInfo(ctx, "webmaster")
+	masterConfigVO, err := c.serv.GetWebmasterInfo(ctx, "webmaster")
 	if err != nil {
 		slog.ErrorContext(ctx, "config", err)
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, http2.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, http2.SuccessResponse[*domain.WebMasterConfig](masterConfig))
+	ctx.JSON(http.StatusOK, http2.SuccessResponse[*domain.WebMasterConfigVO](masterConfigVO))
 }
