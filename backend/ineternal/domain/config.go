@@ -16,7 +16,7 @@ package domain
 
 type WebMasterConfig struct {
 	Name            string
-	ArticleCount    uint
+	PostCount       uint
 	ColumnCount     uint
 	WebsiteViews    uint
 	WebsiteLiveTime string
@@ -27,7 +27,7 @@ type WebMasterConfig struct {
 
 type WebMasterConfigVO struct {
 	Name            string `json:"name"`
-	ArticleCount    uint   `json:"article_count"`
+	PostCount       uint   `json:"post_count"`
 	ColumnCount     uint   `json:"column_count"`
 	WebsiteViews    uint   `json:"website_views"`
 	WebsiteLiveTime string `json:"website_live_time"`
