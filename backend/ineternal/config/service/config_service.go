@@ -32,7 +32,7 @@ func NewConfigService(repo repository.IConfigRepository) *ConfigService {
 	}
 }
 
-var _ IConfigService = &ConfigService{}
+var _ IConfigService = (*ConfigService)(nil)
 
 type ConfigService struct {
 	repo repository.IConfigRepository

@@ -12,30 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package domain
 
-import (
-	"net/http"
-)
-
-type ResponseBody[T any] struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Data    T      `json:"data,omitempty"`
+type CategoryListVO struct {
+	List []CategoryVO `json:"list"`
 }
 
-func ErrResponse(message string) ResponseBody[any] {
-	return ResponseBody[any]{
-		Code:    http.StatusInternalServerError,
-		Message: http.StatusText(http.StatusInternalServerError),
-		Data:    nil,
-	}
+type CategoryVO struct {
+	Name string   `json:"name"`
+	Tags []string `json:"tags"`
 }
 
-func SuccessResponse[T any](data T) ResponseBody[T] {
-	return ResponseBody[T]{
-		Code:    http.StatusOK,
-		Message: http.StatusText(http.StatusOK),
-		Data:    data,
-	}
+type Category struct {
+	Name string   `json:"name"`
+	Tags []string `json:"tags"`
 }
