@@ -17,14 +17,18 @@ package main
 import (
 	"context"
 	"errors"
+	ctgHandler "github.com/chenmingyong0423/fnote/backend/ineternal/category/handler"
+	ctgRepository "github.com/chenmingyong0423/fnote/backend/ineternal/category/repository"
+	ctgDao "github.com/chenmingyong0423/fnote/backend/ineternal/category/repository/dao"
+	ctgService "github.com/chenmingyong0423/fnote/backend/ineternal/category/service"
+	cHandler "github.com/chenmingyong0423/fnote/backend/ineternal/config/handler"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/chenmingyong0423/fnote/backend/ineternal/config/http"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/config/repository"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/config/repository/dao"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
+	cRepository "github.com/chenmingyong0423/fnote/backend/ineternal/config/repository"
+	cDao "github.com/chenmingyong0423/fnote/backend/ineternal/config/repository/dao"
+	cService "github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/middleware"
 	"github.com/gin-gonic/contrib/cors"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -40,8 +44,6 @@ func main() {
 	username := os.Args[1]
 	password := os.Args[2]
 	db := initDb(username, password)
-
-	configColl := db.Collection("config")
 
 	r := gin.Default()
 
@@ -59,7 +61,8 @@ func main() {
 		},
 		MaxAge: 12 * time.Hour,
 	}))
-	_ = http.NewConfigHandler(r, service.NewConfigService(repository.NewConfigRepository(dao.NewConfigDao(configColl))))
+	_ = cHandler.NewConfigHandler(r, cService.NewConfigService(cRepository.NewConfigRepository(cDao.NewConfigDao(db.Collection("config")))))
+	_ = ctgHandler.NewCategoryHandler(r, ctgService.NewCategoryService(ctgRepository.NewCategoryRepository(ctgDao.NewCategoryDao(db.Collection("category")))))
 	err := r.Run()
 	if err != nil {
 		panic(err)

@@ -16,43 +16,45 @@ package dao
 
 import (
 	"context"
-
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Config defines for the MongoDB Collection "config"
-type Config struct {
+type Category struct {
 	Id         primitive.ObjectID `bson:"_id"`
-	Props      any                `bson:"props"`
-	Typ        string             `bson:"typ"`
+	Name       string             `bson:"name"`
+	Tags       []string           `bson:"tags"`
 	CreateTime int64              `bson:"create_time"`
 	UpdateTime int64              `bson:"update_time"`
 }
 
-type IConfigDao interface {
-	FindByTyp(ctx context.Context, typ string) (*Config, error)
+type ICategoryDao interface {
+	GetAll(ctx context.Context) ([]Category, error)
 }
 
-func NewConfigDao(coll *mongo.Collection) *ConfigDao {
-	return &ConfigDao{
+var _ ICategoryDao = (*CategoryDao)(nil)
+
+func NewCategoryDao(coll *mongo.Collection) *CategoryDao {
+	return &CategoryDao{
 		coll: coll,
 	}
 }
 
-var _ IConfigDao = (*ConfigDao)(nil)
-
-type ConfigDao struct {
+type CategoryDao struct {
 	coll *mongo.Collection
 }
 
-func (d *ConfigDao) FindByTyp(ctx context.Context, typ string) (*Config, error) {
-	c := &Config{}
-	err := d.coll.FindOne(ctx, bson.M{"typ": typ}).Decode(c)
+func (d *CategoryDao) GetAll(ctx context.Context) ([]Category, error) {
+	result := make([]Category, 0)
+	cursor, err := d.coll.Find(ctx, bson.M{})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Find %s failed, typ=%s", d.coll.Name(), typ)
+		return nil, errors.Wrap(err, "d.coll.Find failed")
 	}
-	return c, nil
+	defer cursor.Close(ctx)
+	if err = cursor.All(ctx, &result); err != nil {
+		return nil, errors.Wrap(err, "cursor.Decode failed")
+	}
+	return result, nil
 }

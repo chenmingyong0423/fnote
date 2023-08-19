@@ -33,7 +33,7 @@ func NewConfigRepository(dao dao.IConfigDao) *ConfigRepository {
 	}
 }
 
-var _ IConfigRepository = &ConfigRepository{}
+var _ IConfigRepository = (*ConfigRepository)(nil)
 
 type ConfigRepository struct {
 	dao dao.IConfigDao
