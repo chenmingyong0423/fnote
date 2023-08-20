@@ -5,7 +5,7 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: [ "dev" ]
   pull_request:
     branches: [ "main", "dev" ]
 
@@ -25,8 +25,8 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+        cache: 'yarn'
         working-directory: ./frontend
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+    - run: yarn ci
+    - run: yarn run build --if-present
+    - run: yarn test
