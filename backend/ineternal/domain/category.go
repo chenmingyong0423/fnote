@@ -15,17 +15,28 @@
 package domain
 
 type SearchCategoryVO struct {
-	Name string   `json:"name"`
-	Tags []string `json:"tags"`
+	CategoryName `json:"name"`
+	Tags         `json:"tags"`
 }
 
-type MenuCategoryVO struct {
-	Name  string `json:"name"`
-	Route string `json:"route"`
+type MenuVO struct {
+	Menu
 }
+
+type TagsVO struct {
+	Tags `json:"tags"`
+}
+
+type Menu struct {
+	CategoryName `json:"name"`
+	Route        string `json:"route"`
+}
+
+type Tags []string
+
+type CategoryName string
 
 type Category struct {
-	Name  string   `json:"name"`
-	Tags  []string `json:"tags"`
-	Route string   `json:"route"`
+	Menu
+	Tags `json:"tags"`
 }
