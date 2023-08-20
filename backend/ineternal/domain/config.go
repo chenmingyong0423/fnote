@@ -14,15 +14,17 @@
 
 package domain
 
+// WebMasterConfig 站长信息
 type WebMasterConfig struct {
-	Name            string
-	PostCount       uint
-	ColumnCount     uint
-	WebsiteViews    uint
-	WebsiteLiveTime string
-	Profile         string
-	Picture         string
-	WebsiteIcon     string
+	Name            string `bson:"name" json:"name"`
+	PostCount       uint   `bson:"postCount" json:"postCount"`
+	ColumnCount     uint   `bson:"columnCount" json:"columnCount"`
+	WebsiteViews    uint   `bson:"websiteViews" json:"websiteViews"`
+	WebsiteLiveTime string `bson:"websiteLiveTime" json:"websiteLiveTime"`
+	Profile         string `bson:"profile" json:"profile"`
+	Picture         string `bson:"picture" json:"picture"`
+	WebsiteIcon     string `bson:"websiteIcon" json:"websiteIcon"`
+	Domain          string `bson:"domain" json:"domain"`
 }
 
 type WebMasterConfigVO struct {
@@ -34,4 +36,5 @@ type WebMasterConfigVO struct {
 	Profile         string `json:"profile"`
 	Picture         string `json:"picture"`
 	WebsiteIcon     string `json:"website_icon"`
+	Domain          string `json:"domain"`
 }
