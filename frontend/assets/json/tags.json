@@ -1,0 +1,16 @@
+{
+  "code": 200,
+  "message": "OK",
+  "data": {
+    "list": [
+      {
+        "name": "后端",
+        "tags": ["Java", "Go"]
+      },
+      {
+        "name": "前端",
+        "tags": ["Vue", "Nuxt"]
+      }
+    ]
+  }
+}
