@@ -8,13 +8,13 @@
                     :ellipsis="false" background-color="transparent" text-color="#fff">
                     <el-menu-item index="index">首页</el-menu-item>
                     <el-menu-item index="list">大列表页</el-menu-item>
-                    <template v-for="item, index in menuList.list" :key="index">
-                        <el-menu-item :index="String(index)" v-if="item.tags.length === 0">
+                    <template v-for="item, index in menuList.data.list" :key="index">
+                        <el-menu-item :index="String(index)" v-if="!item?.tags">
                             {{ item.name }}
                         </el-menu-item>
                         <el-sub-menu :index="String(index)" v-else popper-class=" bg-#000/50 dark_bg_gray important:b-0">
                             <template #title>{{ item.name }}</template>
-                            <el-menu-item v-for="tag, index in item.tags" :index="tag" :key="index">
+                            <el-menu-item v-for="tag, index in item?.tags" :index="tag" :key="index">
                                 {{ tag }}
                             </el-menu-item>
                         </el-sub-menu>
@@ -40,10 +40,24 @@
 
 <script lang="ts" setup>
 import { Sunny, Moon } from '@element-plus/icons-vue'
-import list from '@/assets/json/tags.json'
 const value1 = ref(false)
 const activeIndex = ref('index')
-const menuList = list.data
+const menuList = {
+    "code": 200,
+    "message": "OK",
+    "data": {
+        "list": [
+            {
+                "name": "后端",
+                "route": "/category/backend"
+            },
+            {
+                "name": "前端",
+                "route": "/category/frontend"
+            }
+        ]
+    }
+}
 watch(value1, () => {
     if (value1.value == true) {
         document.querySelector('html')!.classList.add("dark");
