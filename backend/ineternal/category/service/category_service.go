@@ -18,12 +18,14 @@ import (
 	"context"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/category/repository"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/result"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ICategoryService interface {
-	GetCategoriesAndTags(ctx context.Context) (domain.CategoryListVO, error)
+	GetCategoriesAndTagsByQueryCond(ctx context.Context) (result.ListVO, error)
+	GetMenus(ctx context.Context) (result.ListVO, error)
 }
 
 var _ ICategoryService = (*CategoryService)(nil)
@@ -38,16 +40,28 @@ type CategoryService struct {
 	repo repository.ICategoryRepository
 }
 
-func (s *CategoryService) GetCategoriesAndTags(ctx context.Context) (domain.CategoryListVO, error) {
-	var result domain.CategoryListVO
+func (s *CategoryService) GetMenus(ctx context.Context) (result.ListVO, error) {
+	var listVO result.ListVO
 	categories, err := s.repo.GetAll(ctx)
 	if err != nil && !errors.Is(err, mongo.ErrNilDocument) {
-		return result, err
+		return listVO, errors.WithMessage(err, "s.repo.GetAll failed")
 	}
-	result.List = make([]domain.CategoryVO, 0, len(categories))
+	listVO.List = make([]any, 0, len(categories))
 	for _, category := range categories {
-		result.List = append(result.List, domain.CategoryVO{Name: category.Name, Tags: category.Tags})
+		listVO.List = append(listVO.List, domain.MenuCategoryVO{Name: category.Name, Route: category.Route})
 	}
-	return result, nil
+	return listVO, nil
+}
 
+func (s *CategoryService) GetCategoriesAndTagsByQueryCond(ctx context.Context) (result.ListVO, error) {
+	var listVO result.ListVO
+	categories, err := s.repo.GetAll(ctx)
+	if err != nil && !errors.Is(err, mongo.ErrNilDocument) {
+		return listVO, errors.WithMessage(err, "s.repo.GetAll failed")
+	}
+	listVO.List = make([]any, 0, len(categories))
+	for _, category := range categories {
+		listVO.List = append(listVO.List, domain.SearchCategoryVO{Name: category.Name, Tags: category.Tags})
+	}
+	return listVO, nil
 }

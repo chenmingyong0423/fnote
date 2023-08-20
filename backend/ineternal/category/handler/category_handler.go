@@ -16,7 +16,6 @@ package handler
 
 import (
 	"github.com/chenmingyong0423/fnote/backend/ineternal/category/service"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/result"
 	"github.com/gin-gonic/gin"
 	"log/slog"
@@ -28,6 +27,7 @@ func NewCategoryHandler(engine *gin.Engine, serv service.ICategoryService) *Cate
 		serv: serv,
 	}
 	engine.GET("/categories", ch.GetCategoriesAndTags)
+	engine.GET("/menus", ch.GetMenus)
 	return ch
 }
 
@@ -36,11 +36,21 @@ type CategoryHandler struct {
 }
 
 func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) {
-	categoryListVO, err := h.serv.GetCategoriesAndTags(ctx)
+	categoryListVO, err := h.serv.GetCategoriesAndTagsByQueryCond(ctx)
 	if err != nil {
 		slog.ErrorContext(ctx, "category", err.Error())
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, result.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, result.SuccessResponse[domain.CategoryListVO](categoryListVO))
+	ctx.JSON(http.StatusOK, result.SuccessResponse[result.ListVO](categoryListVO))
+}
+
+func (h *CategoryHandler) GetMenus(ctx *gin.Context) {
+	menusListVO, err := h.serv.GetMenus(ctx)
+	if err != nil {
+		slog.ErrorContext(ctx, "menu", err.Error())
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, result.ErrResponse)
+		return
+	}
+	ctx.JSON(http.StatusOK, result.SuccessResponse[result.ListVO](menusListVO))
 }

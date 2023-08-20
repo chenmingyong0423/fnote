@@ -43,7 +43,7 @@ func (r *CategoryRepository) GetAll(ctx context.Context) ([]domain.Category, err
 	}
 	result := make([]domain.Category, 0, len(categories))
 	for _, category := range categories {
-		result = append(result, domain.Category{Name: category.Name, Tags: category.Tags})
+		result = append(result, domain.Category{Name: category.Name, Tags: category.Tags, Route: category.Route})
 	}
 	return result, nil
 }
