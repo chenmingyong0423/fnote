@@ -18,10 +18,12 @@ import (
 	"context"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/category/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
+	"github.com/pkg/errors"
 )
 
 type ICategoryRepository interface {
 	GetAll(ctx context.Context) ([]domain.Category, error)
+	GetTagsByName(ctx context.Context, name string) (domain.Tags, error)
 }
 
 var _ ICategoryRepository = (*CategoryRepository)(nil)
@@ -36,6 +38,14 @@ type CategoryRepository struct {
 	dao dao.ICategoryDao
 }
 
+func (r *CategoryRepository) GetTagsByName(ctx context.Context, name string) (domain.Tags, error) {
+	category, err := r.dao.GetCategoryByName(ctx, name)
+	if err != nil {
+		return nil, errors.WithMessage(err, "r.dao.GetCategoryByName failed")
+	}
+	return category.Tags, nil
+}
+
 func (r *CategoryRepository) GetAll(ctx context.Context) ([]domain.Category, error) {
 	categories, err := r.dao.GetAll(ctx)
 	if err != nil {
@@ -43,7 +53,7 @@ func (r *CategoryRepository) GetAll(ctx context.Context) ([]domain.Category, err
 	}
 	result := make([]domain.Category, 0, len(categories))
 	for _, category := range categories {
-		result = append(result, domain.Category{Name: category.Name, Tags: category.Tags, Route: category.Route})
+		result = append(result, domain.Category{Menu: domain.Menu{CategoryName: domain.CategoryName(category.Name), Route: category.Route}, Tags: category.Tags})
 	}
 	return result, nil
 }

@@ -24,8 +24,9 @@ import (
 )
 
 type ICategoryService interface {
-	GetCategoriesAndTagsByQueryCond(ctx context.Context) (result.ListVO, error)
+	GetCategoriesAndTags(ctx context.Context) (result.ListVO, error)
 	GetMenus(ctx context.Context) (result.ListVO, error)
+	GetTagsByName(ctx context.Context, name string) (result.ListVO, error)
 }
 
 var _ ICategoryService = (*CategoryService)(nil)
@@ -40,6 +41,18 @@ type CategoryService struct {
 	repo repository.ICategoryRepository
 }
 
+func (s *CategoryService) GetTagsByName(ctx context.Context, name string) (result.ListVO, error) {
+	var listVO result.ListVO
+	tags, err := s.repo.GetTagsByName(ctx, name)
+	if err != nil {
+		return listVO, err
+	}
+	for _, tag := range tags {
+		listVO.List = append(listVO.List, tag)
+	}
+	return listVO, nil
+}
+
 func (s *CategoryService) GetMenus(ctx context.Context) (result.ListVO, error) {
 	var listVO result.ListVO
 	categories, err := s.repo.GetAll(ctx)
@@ -48,12 +61,12 @@ func (s *CategoryService) GetMenus(ctx context.Context) (result.ListVO, error) {
 	}
 	listVO.List = make([]any, 0, len(categories))
 	for _, category := range categories {
-		listVO.List = append(listVO.List, domain.MenuCategoryVO{Name: category.Name, Route: category.Route})
+		listVO.List = append(listVO.List, domain.MenuVO{Menu: domain.Menu{CategoryName: category.CategoryName, Route: category.Route}})
 	}
 	return listVO, nil
 }
 
-func (s *CategoryService) GetCategoriesAndTagsByQueryCond(ctx context.Context) (result.ListVO, error) {
+func (s *CategoryService) GetCategoriesAndTags(ctx context.Context) (result.ListVO, error) {
 	var listVO result.ListVO
 	categories, err := s.repo.GetAll(ctx)
 	if err != nil && !errors.Is(err, mongo.ErrNilDocument) {
@@ -61,7 +74,7 @@ func (s *CategoryService) GetCategoriesAndTagsByQueryCond(ctx context.Context) (
 	}
 	listVO.List = make([]any, 0, len(categories))
 	for _, category := range categories {
-		listVO.List = append(listVO.List, domain.SearchCategoryVO{Name: category.Name, Tags: category.Tags})
+		listVO.List = append(listVO.List, domain.SearchCategoryVO{CategoryName: category.CategoryName, Tags: category.Tags})
 	}
 	return listVO, nil
 }
