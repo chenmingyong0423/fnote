@@ -23,7 +23,7 @@ import (
 )
 
 type IConfigService interface {
-	GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfig, error)
+	GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfigVO, error)
 }
 
 func NewConfigService(repo repository.IConfigRepository) *ConfigService {
@@ -32,16 +32,16 @@ func NewConfigService(repo repository.IConfigRepository) *ConfigService {
 	}
 }
 
-var _ IConfigService = &ConfigService{}
+var _ IConfigService = (*ConfigService)(nil)
 
 type ConfigService struct {
 	repo repository.IConfigRepository
 }
 
-func (s *ConfigService) GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfig, error) {
+func (s *ConfigService) GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfigVO, error) {
 	webMasterConfig, err := s.repo.FindByTyp(ctx, typ)
 	if err != nil {
 		return nil, errors.WithMessage(err, "s.repo.FindByTyp failed")
 	}
-	return webMasterConfig, nil
+	return &domain.WebMasterConfigVO{Name: webMasterConfig.Name, PostCount: webMasterConfig.PostCount, ColumnCount: webMasterConfig.ColumnCount, WebsiteViews: webMasterConfig.WebsiteViews, WebsiteLiveTime: webMasterConfig.WebsiteLiveTime, Profile: webMasterConfig.Profile, Picture: webMasterConfig.Picture, WebsiteIcon: webMasterConfig.WebsiteIcon}, nil
 }
