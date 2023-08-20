@@ -25,6 +25,7 @@ import (
 type Category struct {
 	Id         primitive.ObjectID `bson:"_id"`
 	Name       string             `bson:"name"`
+	Route      string             `bson:"route"`
 	Tags       []string           `bson:"tags"`
 	CreateTime int64              `bson:"create_time"`
 	UpdateTime int64              `bson:"update_time"`
