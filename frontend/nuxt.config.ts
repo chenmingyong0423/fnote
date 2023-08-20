@@ -16,7 +16,9 @@ export default defineNuxtConfig({
       { 'dark_bg_gray': 'dark:bg-#202020' },
       { 'dark_text_white': 'dark:c-#fff' },
     ],
-    rules: [],
+    rules: [
+      ['footer_shadow', { 'box-shadow': ' 0 0 10px rgba(0, 0, 0, .5)' }]
+    ],
     safelist: [],
   },
   pinia: {

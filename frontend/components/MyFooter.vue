@@ -9,11 +9,6 @@
 
 
 <script lang="ts" setup>
-
 </script>
 
-<style scoped>
-.footer_shadow {
-    box-shadow: 0 0 10px rgba(0, 0, 0, .5);
-}
-</style>    
+<style scoped></style>    

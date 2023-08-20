@@ -7,14 +7,14 @@
                 <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect"
                     :ellipsis="false" background-color="transparent" text-color="#fff">
                     <el-menu-item index="index">首页</el-menu-item>
-                    <el-menu-item index="list">大列表页</el-menu-item>
+                    <el-menu-item index="list">文章列表</el-menu-item>
                     <template v-for="item, index in menuList.data.list" :key="index">
                         <el-menu-item :index="String(index)" v-if="!item?.tags">
                             {{ item.name }}
                         </el-menu-item>
                         <el-sub-menu :index="String(index)" v-else popper-class=" bg-#000/50 dark_bg_gray important:b-0">
                             <template #title>{{ item.name }}</template>
-                            <el-menu-item v-for="tag, index in item?.tags" :index="tag" :key="index">
+                            <el-menu-item v-for="tag, index in item!.tags" :index="tag" :key="index">
                                 {{ tag }}
                             </el-menu-item>
                         </el-sub-menu>
@@ -40,8 +40,8 @@
 
 <script lang="ts" setup>
 import { Sunny, Moon } from '@element-plus/icons-vue'
-const value1 = ref(false)
-const activeIndex = ref('index')
+const value1 = ref<boolean>(false)
+const activeIndex = ref<string>('index')
 const menuList = {
     "code": 200,
     "message": "OK",
