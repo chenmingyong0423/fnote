@@ -20,7 +20,7 @@
                         </div>
                     </el-col>
                     <el-col :span="8">
-                        <div class="w-full b-l-1 b-red">
+                        <div class="w-full b-x-1 b-y-0 b-#ccc/60 b-solid">
                             <el-space direction="vertical" :size="5">
                                 <div>{{ data.column_count }}</div>
                                 <div>专栏</div>

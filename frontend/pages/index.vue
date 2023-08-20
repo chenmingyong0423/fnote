@@ -12,7 +12,7 @@
             <el-row :gutter="20">
                 <el-col :span="17">
                     <div>
-                        <Content @click="router.push(`detail/${5}`)" v-for="item in 5 "></Content>
+                        <Content @click="router.push(`post/${item}`)" v-for="item in 5 "></Content>
                     </div>
                 </el-col>
                 <el-col :span="7">
