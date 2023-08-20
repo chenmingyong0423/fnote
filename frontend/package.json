@@ -12,7 +12,7 @@
     "@iconify-json/grommet-icons": "^1.1.7",
     "@nuxt/devtools": "latest",
     "@types/node": "^18.17.3",
-    "@unocss/nuxt": "^0.55.0",
+    "@unocss/nuxt": "^0.55.1",
     "nuxt": "^3.6.5"
   },
   "dependencies": {

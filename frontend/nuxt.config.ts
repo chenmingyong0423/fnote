@@ -1,5 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-export default {
+export default defineNuxtConfig({
   modules: [
     '@unocss/nuxt',
     "@pinia/nuxt",
@@ -11,7 +11,11 @@ export default {
     icons: true, // enabled `@unocss/preset-icons`
     attributify: true, // enabled `@unocss/preset-attributify`,
     // core options
-    shortcuts: [],
+    shortcuts: [
+      { 'dark_bg_black': 'dark:bg-#000' },
+      { 'dark_bg_gray': 'dark:bg-#202020' },
+      { 'dark_text_white': 'dark:c-#fff' },
+    ],
     rules: [],
     safelist: [],
   },
@@ -22,8 +26,10 @@ export default {
       "storeToRefs"
     ],
   },
-  elementPlus: { /** Options */ },
+  elementPlus: {
+    /** Options */
+  },
   css: [
     '@/styles/main.css'
   ]
-}
+})

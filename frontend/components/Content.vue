@@ -1,5 +1,5 @@
 <template>
-    <div class="h150  bg-#fff mb25 py25 px25 rounded-10">
+    <div class=" h150  bg-#fff mb25 py25 px25 rounded-10 dark_bg_gray dark_text_white">
         <el-space :size="30">
             <el-image class="w300 h-150 rounded-10" fit="cover"
                 src='https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'></el-image>
