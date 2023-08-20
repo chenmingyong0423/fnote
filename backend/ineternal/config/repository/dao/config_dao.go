@@ -25,12 +25,11 @@ import (
 
 // Config defines for the MongoDB Collection "config"
 type Config struct {
-	Id    primitive.ObjectID `bson:"_id"`
-	Props any                `bson:"props"`
-
-	Typ             string `bson:"typ"`
-	CreateTimestamp int64  `bson:"createTimestamp"`
-	UpdateTimestamp int64  `bson:"updateTimestamp"`
+	Id         primitive.ObjectID `bson:"_id"`
+	Props      any                `bson:"props"`
+	Typ        string             `bson:"typ"`
+	CreateTime int64              `bson:"create_time"`
+	UpdateTime int64              `bson:"update_time"`
 }
 
 type IConfigDao interface {
@@ -43,13 +42,13 @@ func NewConfigDao(coll *mongo.Collection) *ConfigDao {
 	}
 }
 
-var _ IConfigDao = &ConfigDao{}
+var _ IConfigDao = (*ConfigDao)(nil)
 
 type ConfigDao struct {
 	coll *mongo.Collection
 }
 
-func (d ConfigDao) FindByTyp(ctx context.Context, typ string) (*Config, error) {
+func (d *ConfigDao) FindByTyp(ctx context.Context, typ string) (*Config, error) {
 	c := &Config{}
 	err := d.coll.FindOne(ctx, bson.M{"typ": typ}).Decode(c)
 	if err != nil {

@@ -15,12 +15,23 @@
 package domain
 
 type WebMasterConfig struct {
-	Name            string `bson:"name" json:"name"`
-	ArticleCount    uint   `bson:"articleCount" json:"articleCount"`
-	ColumnCount     uint   `bson:"columnCount" json:"columnCount"`
-	WebsiteViews    uint   `bson:"websiteViews" json:"websiteViews"`
-	WebsiteLiveTime string `bson:"websiteLiveTime" json:"websiteLiveTime"`
-	Profile         string `bson:"profile" json:"profile"`
-	Picture         string `bson:"picture" json:"picture"`
-	WebsiteIcon     string `bson:"websiteIcon" json:"websiteIcon"`
+	Name            string
+	PostCount       uint
+	ColumnCount     uint
+	WebsiteViews    uint
+	WebsiteLiveTime string
+	Profile         string
+	Picture         string
+	WebsiteIcon     string
+}
+
+type WebMasterConfigVO struct {
+	Name            string `json:"name"`
+	PostCount       uint   `json:"post_count"`
+	ColumnCount     uint   `json:"column_count"`
+	WebsiteViews    uint   `json:"website_views"`
+	WebsiteLiveTime string `json:"website_live_time"`
+	Profile         string `json:"profile"`
+	Picture         string `json:"picture"`
+	WebsiteIcon     string `json:"website_icon"`
 }
