@@ -5,7 +5,7 @@
             <div class="text-shadow-xl text-center w-full font-bold text-70 absolute c-#fff top-30% ">
                 xxx's Blog
             </div>
-            <img src="../assets/images/bg.png" class="w-full h-100vh object-cover" object-fit="cover" />
+            <img src="../assets/images/bg.png" class="w-full h-100vh object-cover" />
         </div>
 
         <div class=" py40 px25">
