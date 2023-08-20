@@ -1,2 +1,2 @@
-# GoNex
+# fnote
 A simple blog framework.
