@@ -1,11 +1,15 @@
 <template>
-    <div class=" h150  bg-#fff mb25 py25 px25 rounded-10 dark_bg_gray dark_text_white">
+    <div class="group h150  bg-#fff mb25 py25 px25 rounded-10 dark_bg_gray dark_text_white cursor-pointer">
         <el-space :size="30">
-            <el-image class="w300 h-150 rounded-10" fit="cover"
-                src='https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'></el-image>
+            <div class="w300 h150 overflow-hidden rounded-10">
+                <el-image class=" w-full h-full  group-hover:w105% group-hover:h105% ease-in duration-200" position="top"
+                    fit="cover" src='https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg' />
+            </div>
+
             <div class="flex flex-col justify-between h-150">
                 <div>
-                    <div class="text-24">Go 1.21 新内置函数：min、max 和 clear</div>
+                    <div class="text-24 origin-center hover:translate-y--5 ease-in duration-200">Go 1.21 新内置函数：min、max 和
+                        clear</div>
                     <div class="text-16">Go max 内置函数、Go min 内置函数 和 Go clear，接下来的内容将详细介绍这些函数的用途和特点。</div>
                 </div>
                 <div class="flex justify-between text-16">
