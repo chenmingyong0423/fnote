@@ -18,8 +18,8 @@ import (
 	"net/http"
 )
 
-type ListVO struct {
-	List []any `json:"list"`
+type ListVO[T any] struct {
+	List []T `json:"list"`
 }
 
 type ResponseBody[T any] struct {
