@@ -16,6 +16,7 @@ package handler
 
 import (
 	"github.com/chenmingyong0423/fnote/backend/ineternal/category/service"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/result"
 	"github.com/gin-gonic/gin"
 	"log/slog"
@@ -43,7 +44,7 @@ func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, result.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, result.SuccessResponse[result.ListVO](listVO))
+	ctx.JSON(http.StatusOK, result.SuccessResponse[result.ListVO[domain.SearchCategoryVO]](listVO))
 }
 
 func (h *CategoryHandler) GetMenus(ctx *gin.Context) {
@@ -53,7 +54,7 @@ func (h *CategoryHandler) GetMenus(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, result.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, result.SuccessResponse[result.ListVO](listVO))
+	ctx.JSON(http.StatusOK, result.SuccessResponse[result.ListVO[domain.MenuVO]](listVO))
 }
 
 func (h *CategoryHandler) GetTagsByName(ctx *gin.Context) {
@@ -64,5 +65,5 @@ func (h *CategoryHandler) GetTagsByName(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, result.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, result.SuccessResponse[result.ListVO](listVO))
+	ctx.JSON(http.StatusOK, result.SuccessResponse[result.ListVO[string]](listVO))
 }
