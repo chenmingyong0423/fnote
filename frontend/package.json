@@ -9,8 +9,16 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
+    "@iconify-json/grommet-icons": "^1.1.7",
     "@nuxt/devtools": "latest",
     "@types/node": "^18.17.3",
+    "@unocss/nuxt": "^0.55.1",
     "nuxt": "^3.6.5"
+  },
+  "dependencies": {
+    "@element-plus/nuxt": "^1.0.5",
+    "@pinia/nuxt": "^0.4.11",
+    "@unocss/preset-icons": "^0.55.0",
+    "element-plus": "^2.3.9"
   }
 }
