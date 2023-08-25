@@ -14,6 +14,26 @@
 
 package domain
 
+import "github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
+
+type PostsQueryCondition struct {
+	Size int64
+	Skip int64
+
+	Search *string
+
+	Sort *api.Sorting
+
+	Category *string
+	Tag      *string
+}
+
+type PostRequest struct {
+	api.PageRequest
+	Category *string `form:"category"`
+	Tag      *string `form:"tag"`
+}
+
 type PostVO struct {
 	BasePost
 }

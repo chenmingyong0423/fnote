@@ -18,15 +18,15 @@ import (
 	"context"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/category/repository"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/result"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ICategoryService interface {
-	GetCategoriesAndTags(ctx context.Context) (result.ListVO[domain.SearchCategoryVO], error)
-	GetMenus(ctx context.Context) (result.ListVO[domain.MenuVO], error)
-	GetTagsByName(ctx context.Context, name string) (result.ListVO[string], error)
+	GetCategoriesAndTags(ctx context.Context) (api.ListVO[domain.SearchCategoryVO], error)
+	GetMenus(ctx context.Context) (api.ListVO[domain.MenuVO], error)
+	GetTagsByName(ctx context.Context, name string) (api.ListVO[string], error)
 }
 
 var _ ICategoryService = (*CategoryService)(nil)
@@ -41,8 +41,8 @@ type CategoryService struct {
 	repo repository.ICategoryRepository
 }
 
-func (s *CategoryService) GetTagsByName(ctx context.Context, name string) (result.ListVO[string], error) {
-	var listVO result.ListVO[string]
+func (s *CategoryService) GetTagsByName(ctx context.Context, name string) (api.ListVO[string], error) {
+	var listVO api.ListVO[string]
 	tags, err := s.repo.GetTagsByName(ctx, name)
 	if err != nil {
 		return listVO, errors.WithMessage(err, "s.repo.GetTagsByName failed")
@@ -53,8 +53,8 @@ func (s *CategoryService) GetTagsByName(ctx context.Context, name string) (resul
 	return listVO, nil
 }
 
-func (s *CategoryService) GetMenus(ctx context.Context) (result.ListVO[domain.MenuVO], error) {
-	var listVO result.ListVO[domain.MenuVO]
+func (s *CategoryService) GetMenus(ctx context.Context) (api.ListVO[domain.MenuVO], error) {
+	var listVO api.ListVO[domain.MenuVO]
 	categories, err := s.repo.GetAll(ctx)
 	if err != nil && !errors.Is(err, mongo.ErrNilDocument) {
 		return listVO, errors.WithMessage(err, "s.repo.GetAll failed")
@@ -66,8 +66,8 @@ func (s *CategoryService) GetMenus(ctx context.Context) (result.ListVO[domain.Me
 	return listVO, nil
 }
 
-func (s *CategoryService) GetCategoriesAndTags(ctx context.Context) (result.ListVO[domain.SearchCategoryVO], error) {
-	var listVO result.ListVO[domain.SearchCategoryVO]
+func (s *CategoryService) GetCategoriesAndTags(ctx context.Context) (api.ListVO[domain.SearchCategoryVO], error) {
+	var listVO api.ListVO[domain.SearchCategoryVO]
 	categories, err := s.repo.GetAll(ctx)
 	if err != nil && !errors.Is(err, mongo.ErrNilDocument) {
 		return listVO, errors.WithMessage(err, "s.repo.GetAll failed")
