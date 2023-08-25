@@ -17,24 +17,28 @@ package main
 import (
 	"context"
 	"errors"
+	"os"
+	"strings"
+	"time"
+
 	ctgHandler "github.com/chenmingyong0423/fnote/backend/ineternal/category/handler"
 	ctgRepository "github.com/chenmingyong0423/fnote/backend/ineternal/category/repository"
 	ctgDao "github.com/chenmingyong0423/fnote/backend/ineternal/category/repository/dao"
 	ctgService "github.com/chenmingyong0423/fnote/backend/ineternal/category/service"
 	cHandler "github.com/chenmingyong0423/fnote/backend/ineternal/config/handler"
-	"os"
-	"strings"
-	"time"
-
 	cRepository "github.com/chenmingyong0423/fnote/backend/ineternal/config/repository"
 	cDao "github.com/chenmingyong0423/fnote/backend/ineternal/config/repository/dao"
 	cService "github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
+	postHanlder "github.com/chenmingyong0423/fnote/backend/ineternal/post/handler"
+	postRepository "github.com/chenmingyong0423/fnote/backend/ineternal/post/repository"
+	postDao "github.com/chenmingyong0423/fnote/backend/ineternal/post/repository/dao"
+	postService "github.com/chenmingyong0423/fnote/backend/ineternal/post/service"
+
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/middleware"
 	"github.com/gin-gonic/contrib/cors"
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -63,6 +67,7 @@ func main() {
 	}))
 	_ = cHandler.NewConfigHandler(r, cService.NewConfigService(cRepository.NewConfigRepository(cDao.NewConfigDao(db.Collection("config")))))
 	_ = ctgHandler.NewCategoryHandler(r, ctgService.NewCategoryService(ctgRepository.NewCategoryRepository(ctgDao.NewCategoryDao(db.Collection("category")))))
+	_ = postHanlder.NewPostHandler(r, postService.NewPostService(postRepository.NewPostRepository(postDao.NewPostDao(db.Collection("posts")))))
 	err := r.Run()
 	if err != nil {
 		panic(err)
