@@ -47,6 +47,7 @@ type Post struct {
 }
 type IPostDao interface {
 	GetLatest5Posts(ctx context.Context) ([]*Post, error)
+	QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error)
 }
 
 var _ IPostDao = (*PostDao)(nil)
@@ -59,6 +60,24 @@ func NewPostDao(coll *mongo.Collection) *PostDao {
 
 type PostDao struct {
 	coll *mongo.Collection
+}
+
+func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error) {
+	cnt, err := d.coll.CountDocuments(ctx, con)
+	if err != nil {
+		return nil, 0, errors.Wrapf(err, "Fails to find the count of documents from %s, con=%v", d.coll.Name(), con)
+	}
+	cursor, err := d.coll.Find(ctx, con, findOptions)
+	defer cursor.Close(ctx)
+	if err != nil {
+		return nil, 0, errors.Wrapf(err, "Fails to find the documents from %s, con=%v, findOptions=%v", d.coll.Name(), con, findOptions)
+	}
+	posts := make([]*Post, 5)
+	err = cursor.All(ctx, &posts)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "Fails to decode the result")
+	}
+	return posts, cnt, nil
 }
 
 func (d *PostDao) GetLatest5Posts(ctx context.Context) ([]*Post, error) {

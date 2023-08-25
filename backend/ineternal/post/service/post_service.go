@@ -17,12 +17,14 @@ package service
 import (
 	"context"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/result"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/post/repository"
+	"github.com/pkg/errors"
 )
 
 type IPostService interface {
-	GetHomePosts(ctx context.Context) (result.ListVO[*domain.PostVO], error)
+	GetHomePosts(ctx context.Context) (api.ListVO[*domain.PostVO], error)
+	GetPosts(ctx context.Context, pageRequest *domain.PostRequest) (*api.PageVO[*domain.PostVO], error)
 }
 
 var _ IPostService = (*PostService)(nil)
@@ -37,8 +39,22 @@ type PostService struct {
 	repo repository.IPostRepository
 }
 
-func (s *PostService) GetHomePosts(ctx context.Context) (result.ListVO[*domain.PostVO], error) {
-	listVO := result.ListVO[*domain.PostVO]{}
+func (s *PostService) GetPosts(ctx context.Context, pageRequest *domain.PostRequest) (*api.PageVO[*domain.PostVO], error) {
+	pageVO := &api.PageVO[*domain.PostVO]{Page: pageRequest.Page}
+
+	posts, cnt, err := s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageRequest.PageSize, Skip: (pageRequest.PageNo - 1) * pageRequest.PageSize, Search: pageRequest.Search, Sort: pageRequest.Sort, Category: pageRequest.Category, Tag: pageRequest.Tag})
+	if err != nil {
+		return pageVO, errors.WithMessage(err, "s.repo.QueryPostsPage failed")
+	}
+
+	pageVO.List = s.postsToPostVOs(posts)
+	pageVO.SetTotalCountAndCalculateTotalPages(cnt)
+
+	return pageVO, nil
+}
+
+func (s *PostService) GetHomePosts(ctx context.Context) (api.ListVO[*domain.PostVO], error) {
+	listVO := api.ListVO[*domain.PostVO]{}
 	posts, err := s.repo.GetLatest5Posts(ctx)
 	if err != nil {
 		return listVO, err

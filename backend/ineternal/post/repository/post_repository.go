@@ -16,13 +16,19 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/post/repository/dao"
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"strings"
 )
 
 type IPostRepository interface {
 	GetLatest5Posts(ctx context.Context) ([]*domain.Post, error)
+	QueryPostsPage(ctx context.Context, postsQueryCondition domain.PostsQueryCondition) ([]*domain.Post, int64, error)
 }
 
 var _ IPostRepository = (*PostRepository)(nil)
@@ -35,6 +41,46 @@ func NewPostRepository(dao dao.IPostDao) *PostRepository {
 
 type PostRepository struct {
 	dao dao.IPostDao
+}
+
+func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition domain.PostsQueryCondition) ([]*domain.Post, int64, error) {
+	con := bson.D{}
+	if postsQueryCondition.Category != nil {
+		con = append(con, bson.E{Key: "category", Value: *postsQueryCondition.Category})
+	}
+	if postsQueryCondition.Tag != nil {
+		con = append(con, bson.E{Key: "tags", Value: *postsQueryCondition.Tag})
+	}
+	if postsQueryCondition.Search != nil {
+		con = append(con, bson.E{Key: "title", Value: primitive.Regex{
+			Pattern: fmt.Sprintf(".*%s.*", strings.TrimSpace(*postsQueryCondition.Search)),
+		}})
+	}
+
+	findOptions := options.Find()
+	findOptions.SetSkip(postsQueryCondition.Skip).SetLimit(postsQueryCondition.Size)
+	if postsQueryCondition.Sort != nil {
+		findOptions.SetSort(bson.D{{postsQueryCondition.Sort.Filed, orderConvertToInt(postsQueryCondition.Sort.Order)}})
+	} else {
+		findOptions.SetSort(bson.D{{"create_time", -1}})
+	}
+
+	posts, cnt, err := r.dao.QueryPostsPage(ctx, con, findOptions)
+	if err != nil {
+		return nil, 0, errors.WithMessage(err, "r.dao.QueryPostsPage failed")
+	}
+	return r.toDomainPosts(posts), cnt, nil
+}
+
+func orderConvertToInt(order string) int {
+	switch order {
+	case "ASC":
+		return 1
+	case "DESC":
+		return -1
+	default:
+		return -1
+	}
 }
 
 func (r *PostRepository) GetLatest5Posts(ctx context.Context) ([]*domain.Post, error) {
