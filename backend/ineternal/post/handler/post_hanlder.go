@@ -34,7 +34,7 @@ func (h *PostHandler) GetHomePosts(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse[api.ListVO[*domain.PostVO]](listVO))
+	ctx.JSON(http.StatusOK, api.SuccessResponse[api.ListVO[*domain.SummaryPostVO]](listVO))
 }
 
 func (h *PostHandler) GetPosts(ctx *gin.Context) {
@@ -52,7 +52,18 @@ func (h *PostHandler) GetPosts(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse[*api.PageVO[*domain.PostVO]](pageVO))
+	ctx.JSON(http.StatusOK, api.SuccessResponse[*api.PageVO[*domain.SummaryPostVO]](pageVO))
+}
+
+func (h *PostHandler) GetPostBySug(ctx *gin.Context) {
+	sug := ctx.Param("sug")
+	detailPostVO, err := h.serv.GetPostBySug(ctx, sug)
+	if err != nil {
+		slog.ErrorContext(ctx, "post", err.Error())
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		return
+	}
+	ctx.JSON(http.StatusOK, api.SuccessResponse(detailPostVO))
 }
 
 func NewPostHandler(engine *gin.Engine, serv service.IPostService) *PostHandler {
@@ -62,6 +73,7 @@ func NewPostHandler(engine *gin.Engine, serv service.IPostService) *PostHandler 
 
 	engine.GET("/home/posts", ch.GetHomePosts)
 	engine.GET("/posts", ch.GetPosts)
+	engine.GET("/post/:sug", ch.GetPostBySug)
 
 	return ch
 }

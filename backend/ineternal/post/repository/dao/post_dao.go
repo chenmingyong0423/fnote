@@ -48,6 +48,8 @@ type Post struct {
 type IPostDao interface {
 	GetLatest5Posts(ctx context.Context) ([]*Post, error)
 	QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error)
+	GetPostById(ctx context.Context, sug string) (*Post, error)
+	IncreaseVisitsById(ctx context.Context, sug string) (int64, error)
 }
 
 var _ IPostDao = (*PostDao)(nil)
@@ -60,6 +62,23 @@ func NewPostDao(coll *mongo.Collection) *PostDao {
 
 type PostDao struct {
 	coll *mongo.Collection
+}
+
+func (d *PostDao) IncreaseVisitsById(ctx context.Context, sug string) (int64, error) {
+	result, err := d.coll.UpdateByID(ctx, sug, bson.D{{"$inc", bson.D{{"visits", 1}}}})
+	if err != nil {
+		return 0, errors.Wrapf(err, "the visits of post increases failed, id=%s", sug)
+	}
+	return result.UpsertedCount, nil
+}
+
+func (d *PostDao) GetPostById(ctx context.Context, sug string) (*Post, error) {
+	post := new(Post)
+	err := d.coll.FindOne(ctx, bson.M{"_id": sug}).Decode(post)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Fails to find the documents from %s, sug=%s", d.coll.Name(), sug)
+	}
+	return post, nil
 }
 
 func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error) {
