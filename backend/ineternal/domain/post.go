@@ -50,6 +50,7 @@ type Post struct {
 }
 
 type ExtraPost struct {
+	Content         string   `json:"content"`
 	Likes           []string `json:"-"`
 	MetaDescription string   `json:"meta_description"`
 	MetaKeywords    string   `json:"meta_keywords"`

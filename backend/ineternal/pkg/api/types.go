@@ -72,7 +72,7 @@ type ListVO[T any] struct {
 type ResponseBody[T any] struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
-	Data    T      `json:"data"`
+	Data    T      `json:"data,omitempty"`
 }
 
 func ErrResponse(message string) ResponseBody[any] {
@@ -83,10 +83,18 @@ func ErrResponse(message string) ResponseBody[any] {
 	}
 }
 
-func SuccessResponse[T any](data T) ResponseBody[T] {
+func SuccessResponseWithData[T any](data T) ResponseBody[T] {
 	return ResponseBody[T]{
 		Code:    http.StatusOK,
 		Message: http.StatusText(http.StatusOK),
 		Data:    data,
+	}
+}
+
+func SuccessResponse() ResponseBody[any] {
+	return ResponseBody[any]{
+		Code:    http.StatusOK,
+		Message: http.StatusText(http.StatusOK),
+		Data:    nil,
 	}
 }

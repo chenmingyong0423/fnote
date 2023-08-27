@@ -23,12 +23,15 @@ import (
 	"github.com/pkg/errors"
 	"log/slog"
 	"slices"
+	"sync"
 )
 
 type IPostService interface {
 	GetHomePosts(ctx context.Context) (api.ListVO[*domain.SummaryPostVO], error)
 	GetPosts(ctx context.Context, pageRequest *domain.PostRequest) (*api.PageVO[*domain.SummaryPostVO], error)
 	GetPostBySug(ctx context.Context, sug string) (*domain.DetailPostVO, error)
+	AddLike(ctx context.Context, sug string, ip string) error
+	DeleteLike(ctx context.Context, sug string, ip string) error
 }
 
 var _ IPostService = (*PostService)(nil)
@@ -40,7 +43,48 @@ func NewPostService(repo repository.IPostRepository) *PostService {
 }
 
 type PostService struct {
-	repo repository.IPostRepository
+	repo  repository.IPostRepository
+	ipMap sync.Map
+}
+
+func (s *PostService) DeleteLike(ctx context.Context, sug string, ip string) error {
+	// 先判断是否已经点过赞
+	had, err := s.repo.HadLikePost(ctx, sug, ip)
+	if err != nil {
+		return errors.WithMessage(err, "s.repo.HadLikePost failed")
+	}
+	if !had {
+		return nil
+	}
+	_, isExist := s.ipMap.LoadOrStore(ip, struct{}{})
+	if !isExist {
+		defer s.ipMap.Delete(ip)
+		err := s.repo.DeleteLike(ctx, sug, ip)
+		if err != nil {
+			return errors.WithMessage(err, "s.repo.DeleteLike")
+		}
+	}
+	return nil
+}
+
+func (s *PostService) AddLike(ctx context.Context, sug string, ip string) error {
+	// 先判断是否已经点过赞
+	had, err := s.repo.HadLikePost(ctx, sug, ip)
+	if err != nil {
+		return errors.WithMessage(err, "s.repo.HadLikePost failed")
+	}
+	if had {
+		return nil
+	}
+	_, isExist := s.ipMap.LoadOrStore(ip, struct{}{})
+	if !isExist {
+		defer s.ipMap.Delete(ip)
+		err := s.repo.AddLike(ctx, sug, ip)
+		if err != nil {
+			return errors.WithMessage(err, "s.repo.AddLike")
+		}
+	}
+	return nil
 }
 
 func (s *PostService) GetPostBySug(ctx context.Context, sug string) (*domain.DetailPostVO, error) {
