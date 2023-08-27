@@ -19,9 +19,24 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/post/service"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"log/slog"
 	"net/http"
 )
+
+func NewPostHandler(engine *gin.Engine, serv service.IPostService) *PostHandler {
+	ch := &PostHandler{
+		serv: serv,
+	}
+
+	engine.GET("/home/posts", ch.GetHomePosts)
+	engine.GET("/posts", ch.GetPosts)
+	engine.GET("/post/:sug", ch.GetPostBySug)
+	engine.POST("/post/:sug/likes", ch.AddLike)
+	engine.DELETE("/post/:sug/likes", ch.DeleteLike)
+
+	return ch
+}
 
 type PostHandler struct {
 	serv service.IPostService
@@ -34,7 +49,7 @@ func (h *PostHandler) GetHomePosts(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse[api.ListVO[*domain.SummaryPostVO]](listVO))
+	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[api.ListVO[*domain.SummaryPostVO]](listVO))
 }
 
 func (h *PostHandler) GetPosts(ctx *gin.Context) {
@@ -52,7 +67,7 @@ func (h *PostHandler) GetPosts(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse[*api.PageVO[*domain.SummaryPostVO]](pageVO))
+	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[*api.PageVO[*domain.SummaryPostVO]](pageVO))
 }
 
 func (h *PostHandler) GetPostBySug(ctx *gin.Context) {
@@ -63,17 +78,39 @@ func (h *PostHandler) GetPostBySug(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse(detailPostVO))
+	ctx.JSON(http.StatusOK, api.SuccessResponseWithData(detailPostVO))
 }
 
-func NewPostHandler(engine *gin.Engine, serv service.IPostService) *PostHandler {
-	ch := &PostHandler{
-		serv: serv,
+func (h *PostHandler) AddLike(ctx *gin.Context) {
+	ip := ctx.ClientIP()
+	if ip == "" {
+		slog.ErrorContext(ctx, "post", errors.New("Fails to like without ip."))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		return
 	}
+	sug := ctx.Param("sug")
+	err := h.serv.AddLike(ctx, sug, ip)
+	if err != nil {
+		slog.ErrorContext(ctx, "post", err.Error())
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		return
+	}
+	ctx.JSON(http.StatusOK, api.SuccessResponse())
+}
 
-	engine.GET("/home/posts", ch.GetHomePosts)
-	engine.GET("/posts", ch.GetPosts)
-	engine.GET("/post/:sug", ch.GetPostBySug)
-
-	return ch
+func (h *PostHandler) DeleteLike(ctx *gin.Context) {
+	ip := ctx.ClientIP()
+	if ip == "" {
+		slog.ErrorContext(ctx, "post", errors.New("Fails to unlike without ip."))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		return
+	}
+	sug := ctx.Param("sug")
+	err := h.serv.DeleteLike(ctx, sug, ip)
+	if err != nil {
+		slog.ErrorContext(ctx, "post", err.Error())
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		return
+	}
+	ctx.JSON(http.StatusOK, api.SuccessResponse())
 }

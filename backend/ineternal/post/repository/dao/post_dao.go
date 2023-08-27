@@ -50,6 +50,9 @@ type IPostDao interface {
 	QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error)
 	GetPostById(ctx context.Context, sug string) (*Post, error)
 	IncreaseVisitsById(ctx context.Context, sug string) (int64, error)
+	FindByIdAndIp(ctx context.Context, sug string, ip string) (*Post, error)
+	AddLike(ctx context.Context, sug string, ip string) error
+	DeleteLike(ctx context.Context, sug string, ip string) error
 }
 
 var _ IPostDao = (*PostDao)(nil)
@@ -61,7 +64,45 @@ func NewPostDao(coll *mongo.Collection) *PostDao {
 }
 
 type PostDao struct {
+	db   *mongo.Database
 	coll *mongo.Collection
+}
+
+func (d *PostDao) DeleteLike(ctx context.Context, sug string, ip string) error {
+	result, err := d.coll.UpdateByID(ctx, sug, bson.D{
+		{"$pull", bson.D{{"likes", ip}}},
+		{"$inc", bson.D{{"like_count", -1}}},
+	})
+	if err != nil {
+		return errors.Wrapf(err, "Fails to delete a like, sug=%s, ip=%s", sug, ip)
+	}
+	if result.ModifiedCount == 0 {
+		return errors.Wrapf(err, "ModifiedCount = 0, fails to delete a like, sug=%s, ip=%s", sug, ip)
+	}
+	return nil
+}
+
+func (d *PostDao) AddLike(ctx context.Context, sug string, ip string) error {
+	result, err := d.coll.UpdateByID(ctx, sug, bson.D{
+		{"$push", bson.D{{"likes", ip}}},
+		{"$inc", bson.D{{"like_count", 1}}},
+	})
+	if err != nil {
+		return errors.Wrapf(err, "Fails to add a like, sug=%s, ip=%s", sug, ip)
+	}
+	if result.ModifiedCount == 0 {
+		return errors.Wrapf(err, "ModifiedCount = 0, fails to add a like, sug=%s, ip=%s", sug, ip)
+	}
+	return nil
+}
+
+func (d *PostDao) FindByIdAndIp(ctx context.Context, sug string, ip string) (*Post, error) {
+	post := new(Post)
+	err := d.coll.FindOne(ctx, bson.D{{"_id", sug}, {"likes", ip}}).Decode(post)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Fails to find the documents from %s, sug=%s, ip=%s", d.coll.Name(), sug, ip)
+	}
+	return post, nil
 }
 
 func (d *PostDao) IncreaseVisitsById(ctx context.Context, sug string) (int64, error) {
