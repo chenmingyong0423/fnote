@@ -4,11 +4,11 @@
             <el-space>
                 <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" :size="50"
                     class="mx30" />
-                <el-menu router :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect"
-                    :ellipsis="false" background-color="transparent" :text-color="homeStore.headerTextColor">
+                <el-menu router :default-active="activeIndex" mode="horizontal" @select="handleSelect" :ellipsis="false"
+                    background-color="transparent" :text-color="homeStore.headerTextColor">
                     <el-menu-item index="/">首页</el-menu-item>
-                    <el-menu-item index="/list">文章列表</el-menu-item>
-                    <template v-for="item, index in menuList.data.list" :key="index">
+                    <el-menu-item index="/category">文章列表</el-menu-item>
+                    <template v-for="item, index in homeStore.menuList.data.list" :key="index">
                         <el-sub-menu :index="String(index)" v-if="item.tags"
                             popper-class=" bg-#000/50 dark_bg_gray important:b-0">
                             <template #title>{{ item.name }}</template>
@@ -43,22 +43,7 @@ import { useHomeStore } from '~/store/home';
 import { Sunny, Moon } from '@element-plus/icons-vue'
 const isBlackMode = ref<boolean>(false)
 const activeIndex = ref<string>('/')
-const menuList = {
-    "code": 200,
-    "message": "OK",
-    "data": {
-        "list": [
-            {
-                "name": "后端",
-                "route": "/category/backend"
-            },
-            {
-                "name": "前端",
-                "route": "/category/frontend"
-            }
-        ]
-    }
-}
+
 watch(isBlackMode, (newValue) => {
     if (newValue)
         document.querySelector('html')!.classList.add("dark");
@@ -66,7 +51,7 @@ watch(isBlackMode, (newValue) => {
         document.querySelector('html')!.classList.remove("dark");
 })
 const handleSelect = (key: string, keyPath: string[]) => {
-    console.log(key, keyPath)
+    // console.log(key, keyPath)
 }
 const homeStore = useHomeStore()
 
