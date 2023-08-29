@@ -44,7 +44,7 @@ func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse[api.ListVO[domain.SearchCategoryVO]](listVO))
+	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[api.ListVO[domain.SearchCategoryVO]](listVO))
 }
 
 func (h *CategoryHandler) GetMenus(ctx *gin.Context) {
@@ -54,7 +54,7 @@ func (h *CategoryHandler) GetMenus(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse[api.ListVO[domain.MenuVO]](listVO))
+	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[api.ListVO[domain.MenuVO]](listVO))
 }
 
 func (h *CategoryHandler) GetTagsByName(ctx *gin.Context) {
@@ -65,5 +65,5 @@ func (h *CategoryHandler) GetTagsByName(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse[api.ListVO[string]](listVO))
+	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[api.ListVO[string]](listVO))
 }
