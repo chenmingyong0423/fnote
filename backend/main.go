@@ -17,6 +17,10 @@ package main
 import (
 	"context"
 	"errors"
+	vlLogDao "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/dao"
+	vlHandler "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/handler"
+	vlReposotory "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/repository"
+	vlService "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/service"
 	"os"
 	"strings"
 	"time"
@@ -65,9 +69,10 @@ func main() {
 		},
 		MaxAge: 12 * time.Hour,
 	}))
-	_ = cHandler.NewConfigHandler(r, cService.NewConfigService(cRepository.NewConfigRepository(cDao.NewConfigDao(db.Collection("config")))))
-	_ = ctgHandler.NewCategoryHandler(r, ctgService.NewCategoryService(ctgRepository.NewCategoryRepository(ctgDao.NewCategoryDao(db.Collection("category")))))
-	_ = postHanlder.NewPostHandler(r, postService.NewPostService(postRepository.NewPostRepository(postDao.NewPostDao(db.Collection("posts")))))
+	cHandler.NewConfigHandler(r, cService.NewConfigService(cRepository.NewConfigRepository(cDao.NewConfigDao(db.Collection("config")))))
+	ctgHandler.NewCategoryHandler(r, ctgService.NewCategoryService(ctgRepository.NewCategoryRepository(ctgDao.NewCategoryDao(db.Collection("category")))))
+	postHanlder.NewPostHandler(r, postService.NewPostService(postRepository.NewPostRepository(postDao.NewPostDao(db.Collection("posts")))))
+	vlHandler.NewVisitLogHandler(r, vlService.NewVisitLogService(vlReposotory.NewVisitLogRepository(vlLogDao.NewVisitLogDao(db.Collection("visit_log")))))
 	err := r.Run()
 	if err != nil {
 		panic(err)

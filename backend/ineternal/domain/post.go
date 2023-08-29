@@ -34,15 +34,32 @@ type PostRequest struct {
 	Tag      *string `form:"tag"`
 }
 
-type PostVO struct {
-	BasePost
+type DetailPostVO struct {
+	PrimaryPost
+	ExtraPost
+	IsLiked bool `json:"is_liked"`
+}
+
+type SummaryPostVO struct {
+	PrimaryPost
 }
 
 type Post struct {
-	BasePost
+	PrimaryPost
+	ExtraPost
 }
 
-type BasePost struct {
+type ExtraPost struct {
+	Content         string   `json:"content"`
+	Likes           []string `json:"-"`
+	MetaDescription string   `json:"meta_description"`
+	MetaKeywords    string   `json:"meta_keywords"`
+	WordCount       int      `json:"word_count"`
+	AllowComment    bool     `json:"allow_comment"`
+	UpdateTime      int64    `json:"update_time"`
+}
+
+type PrimaryPost struct {
 	Sug        string   `json:"sug"`
 	Author     string   `json:"author"`
 	Title      string   `json:"title"`

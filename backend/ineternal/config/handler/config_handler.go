@@ -46,5 +46,5 @@ func (c *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse[*domain.WebMasterConfigVO](masterConfigVO))
+	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[*domain.WebMasterConfigVO](masterConfigVO))
 }

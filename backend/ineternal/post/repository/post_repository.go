@@ -22,6 +22,7 @@ import (
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"strings"
 )
@@ -29,6 +30,11 @@ import (
 type IPostRepository interface {
 	GetLatest5Posts(ctx context.Context) ([]*domain.Post, error)
 	QueryPostsPage(ctx context.Context, postsQueryCondition domain.PostsQueryCondition) ([]*domain.Post, int64, error)
+	GetPostBySug(ctx context.Context, sug string) (*domain.Post, error)
+	IncreaseVisits(ctx context.Context, sug string) error
+	HadLikePost(ctx context.Context, sug string, ip string) (bool, error)
+	AddLike(ctx context.Context, sug string, ip string) error
+	DeleteLike(ctx context.Context, sug string, ip string) error
 }
 
 var _ IPostRepository = (*PostRepository)(nil)
@@ -41,6 +47,53 @@ func NewPostRepository(dao dao.IPostDao) *PostRepository {
 
 type PostRepository struct {
 	dao dao.IPostDao
+}
+
+func (r *PostRepository) DeleteLike(ctx context.Context, sug string, ip string) error {
+	err := r.dao.DeleteLike(ctx, sug, ip)
+	if err != nil {
+		return errors.WithMessage(err, "r.dao.DeleteLike failed")
+	}
+	return nil
+}
+
+func (r *PostRepository) AddLike(ctx context.Context, sug string, ip string) error {
+	err := r.dao.AddLike(ctx, sug, ip)
+	if err != nil {
+		return errors.WithMessage(err, "r.dao.AddLike failed")
+	}
+	return nil
+}
+
+func (r *PostRepository) HadLikePost(ctx context.Context, sug string, ip string) (bool, error) {
+	_, err := r.dao.FindByIdAndIp(ctx, sug, ip)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return false, nil
+		}
+		return false, errors.WithMessage(err, "r.dao.FindByIdAndIp")
+	}
+	return true, nil
+}
+
+func (r *PostRepository) IncreaseVisits(ctx context.Context, sug string) error {
+	cnt, err := r.dao.IncreaseVisitsById(ctx, sug)
+	if err != nil {
+		return errors.WithMessage(err, "r.dao.IncreaseVisitsById failed")
+	}
+	if cnt == 0 {
+		return fmt.Errorf("the visits of post increases failed, id=%s", sug)
+	}
+	return nil
+}
+
+func (r *PostRepository) GetPostBySug(ctx context.Context, sug string) (*domain.Post, error) {
+
+	post, err := r.dao.GetPostById(ctx, sug)
+	if err != nil {
+		return nil, errors.WithMessage(err, "r.dao.GetPostById failed")
+	}
+	return r.daoPostToDomainPost(post), nil
 }
 
 func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition domain.PostsQueryCondition) ([]*domain.Post, int64, error) {
@@ -99,5 +152,5 @@ func (r *PostRepository) toDomainPosts(posts []*dao.Post) []*domain.Post {
 }
 
 func (r *PostRepository) daoPostToDomainPost(post *dao.Post) *domain.Post {
-	return &domain.Post{BasePost: domain.BasePost{Sug: post.Sug, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Category: post.Category, Tags: post.Tags, LikeCount: post.LikeCount, Comments: post.Comments, Visits: post.Visits, Priority: post.Priority, CreateTime: post.CreateTime}}
+	return &domain.Post{PrimaryPost: domain.PrimaryPost{Sug: post.Sug, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Category: post.Category, Tags: post.Tags, LikeCount: post.LikeCount, Comments: post.Comments, Visits: post.Visits, Priority: post.Priority, CreateTime: post.CreateTime}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, AllowComment: post.AllowComment, UpdateTime: post.UpdateTime}}
 }
