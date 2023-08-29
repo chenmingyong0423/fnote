@@ -25,17 +25,17 @@ import (
 )
 
 func NewPostHandler(engine *gin.Engine, serv service.IPostService) *PostHandler {
-	ch := &PostHandler{
+	h := &PostHandler{
 		serv: serv,
 	}
 
-	engine.GET("/home/posts", ch.GetHomePosts)
-	engine.GET("/posts", ch.GetPosts)
-	engine.GET("/post/:sug", ch.GetPostBySug)
-	engine.POST("/post/:sug/likes", ch.AddLike)
-	engine.DELETE("/post/:sug/likes", ch.DeleteLike)
+	engine.GET("/home/posts", h.GetHomePosts)
+	engine.GET("/posts", h.GetPosts)
+	engine.GET("/post/:sug", h.GetPostBySug)
+	engine.POST("/post/:sug/likes", h.AddLike)
+	engine.DELETE("/post/:sug/likes", h.DeleteLike)
 
-	return ch
+	return h
 }
 
 type PostHandler struct {
@@ -85,7 +85,7 @@ func (h *PostHandler) AddLike(ctx *gin.Context) {
 	ip := ctx.ClientIP()
 	if ip == "" {
 		slog.ErrorContext(ctx, "post", errors.New("Fails to like without ip."))
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, api.ErrResponse)
 		return
 	}
 	sug := ctx.Param("sug")
@@ -102,7 +102,7 @@ func (h *PostHandler) DeleteLike(ctx *gin.Context) {
 	ip := ctx.ClientIP()
 	if ip == "" {
 		slog.ErrorContext(ctx, "post", errors.New("Fails to unlike without ip."))
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, api.ErrResponse)
 		return
 	}
 	sug := ctx.Param("sug")

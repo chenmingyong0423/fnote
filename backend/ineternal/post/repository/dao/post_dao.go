@@ -64,7 +64,6 @@ func NewPostDao(coll *mongo.Collection) *PostDao {
 }
 
 type PostDao struct {
-	db   *mongo.Database
 	coll *mongo.Collection
 }
 
