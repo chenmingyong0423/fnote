@@ -23,9 +23,8 @@ const router = useRouter()
 const homeStore = useHomeStore()
 
 const tag = homeStore.menuList.data.list.filter((item) => {
-    if (item.route === route.path) {
+    if (item.route === route.path)
         return item
-    }
 })
 
 const data = {

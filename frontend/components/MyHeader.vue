@@ -9,14 +9,14 @@
                     <el-menu-item index="/">首页</el-menu-item>
                     <el-menu-item index="/category">文章列表</el-menu-item>
                     <template v-for="item, index in homeStore.menuList.data.list" :key="index">
-                        <el-sub-menu :index="String(index)" v-if="item.tags"
+                        <!-- <el-sub-menu :index="String(index)" v-if="item.tags"
                             popper-class=" bg-#000/50 dark_bg_gray important:b-0">
                             <template #title>{{ item.name }}</template>
                             <el-menu-item v-for="tag, index in item.tags" :index="tag" :key="index">
                                 {{ tag }}
                             </el-menu-item>
-                        </el-sub-menu>
-                        <el-menu-item :index="item.route" v-else>
+                        </el-sub-menu> -->
+                        <el-menu-item :index="item.route">
                             {{ item.name }}
                         </el-menu-item>
                     </template>
