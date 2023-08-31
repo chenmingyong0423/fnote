@@ -14,7 +14,7 @@
             </div>
 
         </div>
-        <div class="pl500">
+        <div class="">
             <el-pagination layout="prev, pager, next" :total="5000" />
         </div>
     </div>
@@ -113,4 +113,8 @@ const data = {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.el-pagination {
+    justify-content: center;
+}
+</style>
