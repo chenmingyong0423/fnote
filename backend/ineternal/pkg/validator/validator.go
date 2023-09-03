@@ -12,34 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package result
+package validator
 
 import (
-	"net/http"
+	"github.com/go-playground/validator/v10"
+	"regexp"
 )
 
-type ListVO struct {
-	List []any `json:"list"`
-}
-
-type ResponseBody[T any] struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Data    T      `json:"data,omitempty"`
-}
-
-func ErrResponse(message string) ResponseBody[any] {
-	return ResponseBody[any]{
-		Code:    http.StatusInternalServerError,
-		Message: http.StatusText(http.StatusInternalServerError),
-		Data:    nil,
+func ValidateEmailFormat(fl validator.FieldLevel) bool {
+	if val, ok := fl.Field().Interface().(string); ok {
+		regExp := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+		if regExp.MatchString(val) {
+			return true
+		}
 	}
-}
-
-func SuccessResponse[T any](data T) ResponseBody[T] {
-	return ResponseBody[T]{
-		Code:    http.StatusOK,
-		Message: http.StatusText(http.StatusOK),
-		Data:    data,
-	}
+	return false
 }
