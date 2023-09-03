@@ -113,9 +113,9 @@ func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition
 	findOptions := options.Find()
 	findOptions.SetSkip(postsQueryCondition.Skip).SetLimit(postsQueryCondition.Size)
 	if postsQueryCondition.Sort != nil {
-		findOptions.SetSort(bson.D{{postsQueryCondition.Sort.Filed, orderConvertToInt(postsQueryCondition.Sort.Order)}})
+		findOptions.SetSort(bson.E{Key: postsQueryCondition.Sort.Filed, Value: orderConvertToInt(postsQueryCondition.Sort.Order)})
 	} else {
-		findOptions.SetSort(bson.D{{"create_time", -1}})
+		findOptions.SetSort(bson.E{Key: "create_time", Value: -1})
 	}
 
 	posts, cnt, err := r.dao.QueryPostsPage(ctx, con, findOptions)
