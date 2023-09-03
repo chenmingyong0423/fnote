@@ -19,17 +19,16 @@ import (
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Config defines for the MongoDB Collection "config"
 type Config struct {
-	Id         primitive.ObjectID `bson:"_id"`
-	Props      any                `bson:"props"`
-	Typ        string             `bson:"typ"`
-	CreateTime int64              `bson:"create_time"`
-	UpdateTime int64              `bson:"update_time"`
+	Id         string `bson:"_id"`
+	Props      any    `bson:"props"`
+	Typ        string `bson:"typ"`
+	CreateTime int64  `bson:"create_time"`
+	UpdateTime int64  `bson:"update_time"`
 }
 
 type IConfigDao interface {

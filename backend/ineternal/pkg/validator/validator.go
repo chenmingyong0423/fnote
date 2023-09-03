@@ -12,26 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package middleware
+package validator
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"github.com/go-playground/validator/v10"
+	"regexp"
 )
 
-const (
-	XRequestIDKey = "X-Request-ID"
-)
-
-func RequestId() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		rid := ctx.GetHeader(XRequestIDKey)
-		if rid == "" {
-			rid = uuid.NewString()
-			ctx.Request.Header.Set(XRequestIDKey, rid)
-			ctx.Set(XRequestIDKey, rid)
+func ValidateEmailFormat(fl validator.FieldLevel) bool {
+	if val, ok := fl.Field().Interface().(string); ok {
+		regExp := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+		if regExp.MatchString(val) {
+			return true
 		}
-		ctx.Writer.Header().Set(XRequestIDKey, rid)
-		ctx.Next()
 	}
+	return false
 }

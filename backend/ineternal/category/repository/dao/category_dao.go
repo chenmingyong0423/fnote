@@ -18,17 +18,16 @@ import (
 	"context"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Category struct {
-	Id         primitive.ObjectID `bson:"_id"`
-	Name       string             `bson:"name"`
-	Route      string             `bson:"route"`
-	Tags       []string           `bson:"tags"`
-	CreateTime int64              `bson:"create_time"`
-	UpdateTime int64              `bson:"update_time"`
+	Id         string   `bson:"_id"`
+	Name       string   `bson:"name"`
+	Route      string   `bson:"route"`
+	Tags       []string `bson:"tags"`
+	CreateTime int64    `bson:"create_time"`
+	UpdateTime int64    `bson:"update_time"`
 }
 
 type ICategoryDao interface {
