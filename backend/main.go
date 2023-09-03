@@ -17,16 +17,23 @@ package main
 import (
 	"context"
 	"errors"
-	vlLogDao "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/dao"
+	friendHanlder "github.com/chenmingyong0423/fnote/backend/ineternal/friend/hanlder"
+	friendRepo "github.com/chenmingyong0423/fnote/backend/ineternal/friend/repository"
+	friendDao "github.com/chenmingyong0423/fnote/backend/ineternal/friend/repository/dao"
+	friendServ "github.com/chenmingyong0423/fnote/backend/ineternal/friend/service"
+	myValidator "github.com/chenmingyong0423/fnote/backend/ineternal/pkg/validator"
 	vlHandler "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/handler"
-	vlReposotory "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/repository"
-	vlService "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/service"
+	vlRepo "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/repository"
+	vlLogDao "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/repository/dao"
+	vlServ "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/service"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"os"
 	"strings"
 	"time"
 
 	ctgHandler "github.com/chenmingyong0423/fnote/backend/ineternal/category/handler"
-	ctgRepository "github.com/chenmingyong0423/fnote/backend/ineternal/category/repository"
+	ctgRepo "github.com/chenmingyong0423/fnote/backend/ineternal/category/repository"
 	ctgDao "github.com/chenmingyong0423/fnote/backend/ineternal/category/repository/dao"
 	ctgService "github.com/chenmingyong0423/fnote/backend/ineternal/category/service"
 	cHandler "github.com/chenmingyong0423/fnote/backend/ineternal/config/handler"
@@ -34,9 +41,9 @@ import (
 	cDao "github.com/chenmingyong0423/fnote/backend/ineternal/config/repository/dao"
 	cService "github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	postHanlder "github.com/chenmingyong0423/fnote/backend/ineternal/post/handler"
-	postRepository "github.com/chenmingyong0423/fnote/backend/ineternal/post/repository"
+	postRepo "github.com/chenmingyong0423/fnote/backend/ineternal/post/repository"
 	postDao "github.com/chenmingyong0423/fnote/backend/ineternal/post/repository/dao"
-	postService "github.com/chenmingyong0423/fnote/backend/ineternal/post/service"
+	postServ "github.com/chenmingyong0423/fnote/backend/ineternal/post/service"
 
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/middleware"
 	"github.com/gin-gonic/contrib/cors"
@@ -55,6 +62,13 @@ func main() {
 
 	r := gin.Default()
 
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		err := v.RegisterValidation("validateEmailFormat", myValidator.ValidateEmailFormat)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	r.Use(middleware.RequestId())
 	r.Use(middleware.Logger())
 
@@ -69,10 +83,11 @@ func main() {
 		},
 		MaxAge: 12 * time.Hour,
 	}))
-	cHandler.NewConfigHandler(r, cService.NewConfigService(cRepository.NewConfigRepository(cDao.NewConfigDao(db.Collection("config")))))
-	ctgHandler.NewCategoryHandler(r, ctgService.NewCategoryService(ctgRepository.NewCategoryRepository(ctgDao.NewCategoryDao(db.Collection("category")))))
-	postHanlder.NewPostHandler(r, postService.NewPostService(postRepository.NewPostRepository(postDao.NewPostDao(db.Collection("posts")))))
-	vlHandler.NewVisitLogHandler(r, vlService.NewVisitLogService(vlReposotory.NewVisitLogRepository(vlLogDao.NewVisitLogDao(db.Collection("visit_log")))))
+	cHandler.NewConfigHandler(r, cService.NewConfigService(cRepository.NewConfigRepository(cDao.NewConfigDao(db.Collection("configs")))))
+	ctgHandler.NewCategoryHandler(r, ctgService.NewCategoryService(ctgRepo.NewCategoryRepository(ctgDao.NewCategoryDao(db.Collection("categories")))))
+	postHanlder.NewPostHandler(r, postServ.NewPostService(postRepo.NewPostRepository(postDao.NewPostDao(db.Collection("posts")))))
+	vlHandler.NewVisitLogHandler(r, vlServ.NewVisitLogService(vlRepo.NewVisitLogRepository(vlLogDao.NewVisitLogDao(db.Collection("visit_logs")))))
+	friendHanlder.NewFriendHandler(r, friendServ.NewFriendService(friendRepo.NewFriendRepository(friendDao.NewFriendDao(db.Collection("friends")))))
 	err := r.Run()
 	if err != nil {
 		panic(err)

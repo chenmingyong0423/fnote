@@ -7,31 +7,29 @@
 //     http://www.apache.org/licenses/LICENSE-2.0
 
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,0
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package middleware
+package domain
 
-import (
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-)
+type Friend struct {
+	Id          string
+	Name        string
+	Url         string
+	Logo        string
+	Description string
+	Email       string
+	Status      int
+	Priority    int
+}
 
-const (
-	XRequestIDKey = "X-Request-ID"
-)
-
-func RequestId() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		rid := ctx.GetHeader(XRequestIDKey)
-		if rid == "" {
-			rid = uuid.NewString()
-			ctx.Request.Header.Set(XRequestIDKey, rid)
-			ctx.Set(XRequestIDKey, rid)
-		}
-		ctx.Writer.Header().Set(XRequestIDKey, rid)
-		ctx.Next()
-	}
+type FriendVO struct {
+	Name        string `json:"name"`
+	Url         string `json:"url"`
+	Logo        string `json:"logo"`
+	Description string `json:"description"`
+	Status      int    `json:"status"`
+	Priority    int    `json:"priority"`
 }

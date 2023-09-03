@@ -69,8 +69,8 @@ type PostDao struct {
 
 func (d *PostDao) DeleteLike(ctx context.Context, sug string, ip string) error {
 	result, err := d.coll.UpdateByID(ctx, sug, bson.D{
-		{"$pull", bson.D{{"likes", ip}}},
-		{"$inc", bson.D{{"like_count", -1}}},
+		bson.E{Key: "$pull", Value: bson.E{Key: "likes", Value: ip}},
+		bson.E{Key: "$inc", Value: bson.E{Key: "like_count", Value: -1}},
 	})
 	if err != nil {
 		return errors.Wrapf(err, "Fails to delete a like, sug=%s, ip=%s", sug, ip)
@@ -83,8 +83,8 @@ func (d *PostDao) DeleteLike(ctx context.Context, sug string, ip string) error {
 
 func (d *PostDao) AddLike(ctx context.Context, sug string, ip string) error {
 	result, err := d.coll.UpdateByID(ctx, sug, bson.D{
-		{"$push", bson.D{{"likes", ip}}},
-		{"$inc", bson.D{{"like_count", 1}}},
+		bson.E{Key: "$push", Value: bson.D{bson.E{Key: "likes", Value: ip}}},
+		bson.E{Key: "$inc", Value: bson.D{bson.E{Key: "like_count", Value: 1}}},
 	})
 	if err != nil {
 		return errors.Wrapf(err, "Fails to add a like, sug=%s, ip=%s", sug, ip)
@@ -97,7 +97,7 @@ func (d *PostDao) AddLike(ctx context.Context, sug string, ip string) error {
 
 func (d *PostDao) FindByIdAndIp(ctx context.Context, sug string, ip string) (*Post, error) {
 	post := new(Post)
-	err := d.coll.FindOne(ctx, bson.D{{"_id", sug}, {"likes", ip}}).Decode(post)
+	err := d.coll.FindOne(ctx, bson.D{bson.E{Key: "_id", Value: sug}, bson.E{Key: "likes", Value: ip}}).Decode(post)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Fails to find the documents from %s, sug=%s, ip=%s", d.coll.Name(), sug, ip)
 	}
@@ -105,7 +105,7 @@ func (d *PostDao) FindByIdAndIp(ctx context.Context, sug string, ip string) (*Po
 }
 
 func (d *PostDao) IncreaseVisitsById(ctx context.Context, sug string) (int64, error) {
-	result, err := d.coll.UpdateByID(ctx, sug, bson.D{{"$inc", bson.D{{"visits", 1}}}})
+	result, err := d.coll.UpdateByID(ctx, sug, bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: "visits", Value: 1}}}})
 	if err != nil {
 		return 0, errors.Wrapf(err, "the visits of post increases failed, id=%s", sug)
 	}
@@ -116,7 +116,7 @@ func (d *PostDao) GetPostById(ctx context.Context, sug string) (*Post, error) {
 	post := new(Post)
 	err := d.coll.FindOne(ctx, bson.M{"_id": sug}).Decode(post)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Fails to find the documents from %s, sug=%s", d.coll.Name(), sug)
+		return nil, errors.Wrapf(err, "Fails to find the document from %s, sug=%s", d.coll.Name(), sug)
 	}
 	return post, nil
 }
@@ -127,10 +127,10 @@ func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *o
 		return nil, 0, errors.Wrapf(err, "Fails to find the count of documents from %s, con=%v", d.coll.Name(), con)
 	}
 	cursor, err := d.coll.Find(ctx, con, findOptions)
-	defer cursor.Close(ctx)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "Fails to find the documents from %s, con=%v, findOptions=%v", d.coll.Name(), con, findOptions)
 	}
+	defer cursor.Close(ctx)
 	posts := make([]*Post, 5)
 	err = cursor.All(ctx, &posts)
 	if err != nil {
@@ -142,10 +142,10 @@ func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *o
 func (d *PostDao) GetLatest5Posts(ctx context.Context) ([]*Post, error) {
 	findOptions := options.Find().SetSort(bson.M{"create_time": -1}).SetLimit(5)
 	cursor, err := d.coll.Find(ctx, bson.M{}, findOptions)
-	defer cursor.Close(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Fails to find the documents from %s, findOptions=%v", d.coll.Name(), findOptions)
 	}
+	defer cursor.Close(ctx)
 	posts := make([]*Post, 5)
 	err = cursor.All(ctx, &posts)
 	if err != nil {

@@ -17,17 +17,17 @@ package dao
 import (
 	"context"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type VisitHistory struct {
-	Id        primitive.ObjectID `bson:"id"`
-	Url       string             `bson:"url"`
-	Ip        string             `bson:"ip"`
-	UserAgent string             `bson:"user_agent"`
-	Origin    string             `bson:"origin"`
-	Referer   string             `bson:"referer"`
+	Id         string `bson:"_id"`
+	Url        string `bson:"url"`
+	Ip         string `bson:"ip"`
+	UserAgent  string `bson:"user_agent"`
+	Origin     string `bson:"origin"`
+	Referer    string `bson:"referer"`
+	CreateTime int64  `bson:"create_time"`
 }
 
 type IVisitLogDao interface {
