@@ -27,8 +27,8 @@
         </div>
         <div>
             <el-space :size="15">
-                <el-switch size="large" v-model="isBlackMode" :active-action-icon="Moon" :inactive-action-icon="Sunny"
-                    inactive-color="rgba(0,0,0,0.2)" active-color="#000" />
+                <el-switch size="large" v-model="homeStore.isBlackMode" :active-action-icon="Moon"
+                    :inactive-action-icon="Sunny" inactive-color="rgba(0,0,0,0.2)" active-color="#000" />
                 <div class=" bg-#1890ff rounded-50% py6 px6 dark_bg_black">
                     <div class="i-grommet-icons:search text-24 c-#fff " />
                 </div>
@@ -41,7 +41,8 @@
 <script lang="ts" setup>
 import { useHomeStore } from '~/store/home';
 import { Sunny, Moon } from '@element-plus/icons-vue'
-const isBlackMode = ref<boolean>(false)
+const homeStore = useHomeStore()
+const isBlackMode = computed(() => homeStore.isBlackMode)
 const activeIndex = ref<string>('/')
 
 watch(isBlackMode, (newValue) => {
@@ -53,7 +54,7 @@ watch(isBlackMode, (newValue) => {
 const handleSelect = (key: string, keyPath: string[]) => {
     // console.log(key, keyPath)
 }
-const homeStore = useHomeStore()
+
 
 onMounted(() => {
     window.addEventListener('scroll', () => {

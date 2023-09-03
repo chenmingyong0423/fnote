@@ -2,12 +2,12 @@
     <div>
         <div class="py15">
             <div class="text-30 mb20 ml10">标签</div>
-            <el-check-tag size="large" v-for="tag in homeStore.menuList.data.list" :key="tag.name" class="mx5" checked
-                @click="router.push(tag.route)">
+            <my-tag v-for="tag in homeStore.menuList.data.list" :key="tag.name" @click="router.push(tag.route)">
                 {{ tag.name }}
-            </el-check-tag>
+            </my-tag>
         </div>
-        <div>
+        <div class="mt40">
+            <div class="text-30 mb20 ml10">我的文章</div>
             <div v-for="item in data.data.list ">
                 <Content @click="router.push(`post/${item}`)" :postData="item"></Content>
                 <el-divider />
