@@ -17,8 +17,9 @@ package repository
 import (
 	"context"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/dao"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/repository/dao"
 	"github.com/pkg/errors"
+	"time"
 )
 
 type IVisitLogRepository interface {
@@ -32,7 +33,7 @@ type VisitLogRepository struct {
 }
 
 func (r *VisitLogRepository) Add(ctx context.Context, visitHistory domain.VisitHistory) error {
-	err := r.dao.Add(ctx, dao.VisitHistory{Url: visitHistory.Url, Ip: visitHistory.Ip, UserAgent: visitHistory.UserAgent, Origin: visitHistory.Origin, Referer: visitHistory.Referer})
+	err := r.dao.Add(ctx, dao.VisitHistory{Url: visitHistory.Url, Ip: visitHistory.Ip, UserAgent: visitHistory.UserAgent, Origin: visitHistory.Origin, Referer: visitHistory.Referer, CreateTime: time.Now().Unix()})
 	if err != nil {
 		return errors.WithMessage(err, "r.dao.Add failed")
 	}
