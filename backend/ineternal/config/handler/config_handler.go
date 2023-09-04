@@ -43,7 +43,7 @@ func (c *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) {
 	masterConfigVO, err := c.serv.GetWebmasterInfo(ctx, "webmaster")
 	if err != nil {
 		slog.ErrorContext(ctx, "config", err)
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[*domain.WebMasterConfigVO](masterConfigVO))

@@ -46,7 +46,7 @@ func (h *PostHandler) GetHomePosts(ctx *gin.Context) {
 	listVO, err := h.serv.GetHomePosts(ctx)
 	if err != nil {
 		slog.ErrorContext(ctx, "post", err.Error())
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[api.ListVO[*domain.SummaryPostVO]](listVO))
@@ -57,14 +57,14 @@ func (h *PostHandler) GetPosts(ctx *gin.Context) {
 	err := ctx.ShouldBindQuery(pageRequest)
 	if err != nil {
 		slog.ErrorContext(ctx, "post", err.Error())
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	pageRequest.ValidateAndSetDefault()
 	pageVO, err := h.serv.GetPosts(ctx, pageRequest)
 	if err != nil {
 		slog.ErrorContext(ctx, "post", err.Error())
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[*api.PageVO[*domain.SummaryPostVO]](pageVO))
@@ -75,7 +75,7 @@ func (h *PostHandler) GetPostBySug(ctx *gin.Context) {
 	detailPostVO, err := h.serv.GetPostBySug(ctx, sug)
 	if err != nil {
 		slog.ErrorContext(ctx, "post", err.Error())
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	ctx.JSON(http.StatusOK, api.SuccessResponseWithData(detailPostVO))
@@ -85,32 +85,32 @@ func (h *PostHandler) AddLike(ctx *gin.Context) {
 	ip := ctx.ClientIP()
 	if ip == "" {
 		slog.ErrorContext(ctx, "post", errors.New("Fails to like without ip."))
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	sug := ctx.Param("sug")
 	err := h.serv.AddLike(ctx, sug, ip)
 	if err != nil {
 		slog.ErrorContext(ctx, "post", err.Error())
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse())
+	ctx.JSON(http.StatusOK, api.SuccessResponse)
 }
 
 func (h *PostHandler) DeleteLike(ctx *gin.Context) {
 	ip := ctx.ClientIP()
 	if ip == "" {
 		slog.ErrorContext(ctx, "post", errors.New("Fails to unlike without ip."))
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	sug := ctx.Param("sug")
 	err := h.serv.DeleteLike(ctx, sug, ip)
 	if err != nil {
 		slog.ErrorContext(ctx, "post", err.Error())
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse())
+	ctx.JSON(http.StatusOK, api.SuccessResponse)
 }
