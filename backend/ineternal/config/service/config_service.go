@@ -25,6 +25,7 @@ import (
 type IConfigService interface {
 	GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfigVO, error)
 	GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error)
+	IncreaseWebsiteViews(ctx context.Context) error
 }
 
 func NewConfigService(repo repository.IConfigRepository) *ConfigService {
@@ -37,6 +38,10 @@ var _ IConfigService = (*ConfigService)(nil)
 
 type ConfigService struct {
 	repo repository.IConfigRepository
+}
+
+func (s *ConfigService) IncreaseWebsiteViews(ctx context.Context) error {
+	return s.repo.Increase(ctx, "websiteViews")
 }
 
 func (s *ConfigService) GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error) {

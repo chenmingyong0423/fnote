@@ -87,7 +87,7 @@ func main() {
 	cHandler.NewConfigHandler(r, cfgServ)
 	ctgHandler.NewCategoryHandler(r, ctgService.NewCategoryService(ctgRepo.NewCategoryRepository(ctgDao.NewCategoryDao(db.Collection("categories")))))
 	postHanlder.NewPostHandler(r, postServ.NewPostService(postRepo.NewPostRepository(postDao.NewPostDao(db.Collection("posts")))))
-	vlHandler.NewVisitLogHandler(r, vlServ.NewVisitLogService(vlRepo.NewVisitLogRepository(vlLogDao.NewVisitLogDao(db.Collection("visit_logs")))))
+	vlHandler.NewVisitLogHandler(r, vlServ.NewVisitLogService(vlRepo.NewVisitLogRepository(vlLogDao.NewVisitLogDao(db.Collection("visit_logs")))), cfgServ)
 	friendHanlder.NewFriendHandler(r, friendServ.NewFriendService(friendRepo.NewFriendRepository(friendDao.NewFriendDao(db.Collection("friends")))), cfgServ)
 	err := r.Run()
 	if err != nil {
