@@ -16,9 +16,9 @@ package service
 
 import (
 	"context"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/repository"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
 	"github.com/pkg/errors"
 )
 

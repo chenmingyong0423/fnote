@@ -17,9 +17,9 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/friend/repository"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )

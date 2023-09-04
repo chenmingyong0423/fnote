@@ -15,8 +15,8 @@
 package handler
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/service"
 	"github.com/gin-gonic/gin"
 	"log/slog"
