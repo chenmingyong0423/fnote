@@ -16,9 +16,9 @@ package repository
 
 import (
 	"context"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/repository/dao"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 )
