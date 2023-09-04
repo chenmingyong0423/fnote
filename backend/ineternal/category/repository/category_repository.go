@@ -17,7 +17,7 @@ package repository
 import (
 	"context"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/category/repository/dao"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/pkg/errors"
 )
 

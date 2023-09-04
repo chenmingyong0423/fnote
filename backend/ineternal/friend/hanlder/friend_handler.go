@@ -15,17 +15,19 @@
 package hanlder
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
+	configServ "github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/friend/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"
 )
 
-func NewFriendHandler(engine *gin.Engine, serv service.IFriendService) *FriendHandler {
+func NewFriendHandler(engine *gin.Engine, serv service.IFriendService, cfgServ configServ.IConfigService) *FriendHandler {
 	h := &FriendHandler{
-		serv: serv,
+		serv:    serv,
+		cfgServ: cfgServ,
 	}
 	engine.GET("/friends", h.GetFriends)
 	engine.POST("/friend", h.ApplyForFriend)
@@ -33,14 +35,15 @@ func NewFriendHandler(engine *gin.Engine, serv service.IFriendService) *FriendHa
 }
 
 type FriendHandler struct {
-	serv service.IFriendService
+	serv    service.IFriendService
+	cfgServ configServ.IConfigService
 }
 
 func (h *FriendHandler) GetFriends(ctx *gin.Context) {
 	vo, err := h.serv.GetFriends(ctx)
 	if err != nil {
 		slog.ErrorContext(ctx, "friend", err.Error())
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	ctx.JSON(http.StatusOK, api.SuccessResponseWithData(vo))
@@ -58,9 +61,21 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
 	err := ctx.BindJSON(req)
 	if err != nil {
 		slog.ErrorContext(ctx, "friend", err.Error())
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+
+	switchConfig, err := h.cfgServ.GetSwitchStatusByTyp(ctx, "friend")
+	if err != nil {
+		slog.ErrorContext(ctx, "friend", err.Error())
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	if !switchConfig.Status {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
 	err = h.serv.ApplyForFriend(ctx, domain.Friend{
 		Name:        req.Name,
 		Url:         req.Url,
@@ -70,8 +85,8 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "friend", err.Error())
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse())
+	ctx.JSON(http.StatusOK, api.SuccessResponse)
 }

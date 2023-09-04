@@ -18,6 +18,14 @@ import (
 	"net/http"
 )
 
+var (
+	SuccessResponse = ResponseBody[any]{
+		Code:    http.StatusOK,
+		Message: http.StatusText(http.StatusOK),
+		Data:    nil,
+	}
+)
+
 type PageVO[T any] struct {
 	Page
 	// 总页数
@@ -75,26 +83,10 @@ type ResponseBody[T any] struct {
 	Data    T      `json:"data,omitempty"`
 }
 
-func ErrResponse(message string) ResponseBody[any] {
-	return ResponseBody[any]{
-		Code:    http.StatusInternalServerError,
-		Message: http.StatusText(http.StatusInternalServerError),
-		Data:    nil,
-	}
-}
-
 func SuccessResponseWithData[T any](data T) ResponseBody[T] {
 	return ResponseBody[T]{
 		Code:    http.StatusOK,
 		Message: http.StatusText(http.StatusOK),
 		Data:    data,
-	}
-}
-
-func SuccessResponse() ResponseBody[any] {
-	return ResponseBody[any]{
-		Code:    http.StatusOK,
-		Message: http.StatusText(http.StatusOK),
-		Data:    nil,
 	}
 }

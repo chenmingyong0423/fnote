@@ -16,8 +16,8 @@ package handler
 
 import (
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"
@@ -43,7 +43,7 @@ func (c *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) {
 	masterConfigVO, err := c.serv.GetWebmasterInfo(ctx, "webmaster")
 	if err != nil {
 		slog.ErrorContext(ctx, "config", err)
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[*domain.WebMasterConfigVO](masterConfigVO))

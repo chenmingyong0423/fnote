@@ -16,8 +16,8 @@ package handler
 
 import (
 	"github.com/chenmingyong0423/fnote/backend/ineternal/category/service"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"
@@ -41,7 +41,7 @@ func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) {
 	listVO, err := h.serv.GetCategoriesAndTags(ctx)
 	if err != nil {
 		slog.ErrorContext(ctx, "category", err.Error())
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[api.ListVO[domain.SearchCategoryVO]](listVO))
@@ -51,7 +51,7 @@ func (h *CategoryHandler) GetMenus(ctx *gin.Context) {
 	listVO, err := h.serv.GetMenus(ctx)
 	if err != nil {
 		slog.ErrorContext(ctx, "menu", err.Error())
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[api.ListVO[domain.MenuVO]](listVO))
@@ -62,7 +62,7 @@ func (h *CategoryHandler) GetTagsByName(ctx *gin.Context) {
 	listVO, err := h.serv.GetTagsByName(ctx, name)
 	if err != nil {
 		slog.ErrorContext(ctx, "tag", err.Error())
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[api.ListVO[string]](listVO))
