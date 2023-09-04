@@ -15,8 +15,8 @@
 package handler
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/service"
 	"github.com/gin-gonic/gin"
 	"log/slog"
@@ -49,7 +49,7 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(req)
 	if err != nil {
 		slog.ErrorContext(ctx, "visitLog", err)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	req.Ip = ctx.ClientIP()
@@ -59,8 +59,8 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
 	err = h.serv.CollectVisitLog(ctx, domain.VisitHistory{Url: req.Url, Ip: req.Ip, UserAgent: req.UserAgent, Origin: req.UserAgent, Referer: req.Referer})
 	if err != nil {
 		slog.ErrorContext(ctx, "visitLog", err)
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse())
+	ctx.JSON(http.StatusOK, api.SuccessResponse)
 }

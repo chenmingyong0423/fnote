@@ -38,3 +38,7 @@ type WebMasterConfigVO struct {
 	WebsiteIcon     string `json:"website_icon"`
 	Domain          string `json:"domain"`
 }
+
+type SwitchConfig struct {
+	Status bool `bson:"status" json:"status"`
+}
