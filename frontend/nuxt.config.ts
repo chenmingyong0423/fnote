@@ -5,7 +5,6 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     '@element-plus/nuxt'
   ],
-
   unocss: {
     uno: true, // enabled `@unocss/preset-uno`
     icons: true, // enabled `@unocss/preset-icons`
