@@ -26,6 +26,7 @@ type IConfigService interface {
 	GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfigVO, error)
 	GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error)
 	IncreaseWebsiteViews(ctx context.Context) error
+	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
 }
 
 func NewConfigService(repo repository.IConfigRepository) *ConfigService {
@@ -40,17 +41,34 @@ type ConfigService struct {
 	repo repository.IConfigRepository
 }
 
+func (s *ConfigService) GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error) {
+	emailConfig := new(domain.EmailConfig)
+	err := s.getConfigAndConvertTo(ctx, "emailConfig", emailConfig)
+	if err != nil {
+		return nil, err
+	}
+	return emailConfig, nil
+}
+
+func (s *ConfigService) getConfigAndConvertTo(ctx context.Context, typ string, config any) error {
+	props, err := s.repo.FindByTyp(ctx, typ)
+	if err != nil {
+		return err
+	}
+	err = s.anyToStruct(props, config)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *ConfigService) IncreaseWebsiteViews(ctx context.Context) error {
 	return s.repo.Increase(ctx, "websiteViews")
 }
 
 func (s *ConfigService) GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error) {
-	props, err := s.repo.FindByTyp(ctx, typ)
-	if err != nil {
-		return nil, err
-	}
 	switchConfig := new(domain.SwitchConfig)
-	err = s.anyToStruct(props, switchConfig)
+	err := s.getConfigAndConvertTo(ctx, typ, switchConfig)
 	if err != nil {
 		return nil, err
 	}
