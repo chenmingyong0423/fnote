@@ -2,8 +2,9 @@
     <!-- bg-#F0F2F5 -->
     <div>
         <div class="text-0 relative">
-            <div class="text-shadow-xl text-center w-full font-bold text-70 absolute c-#fff top-30% ">
+            <div class="text-center w-full font-bold text-70 absolute c-#fff top-30% text-shadow-xl">
                 xxx's Blog
+                <TypeIt></TypeIt>
             </div>
             <img src="../assets/images/bg.png" class="w-full h-100vh object-cover" />
         </div>
