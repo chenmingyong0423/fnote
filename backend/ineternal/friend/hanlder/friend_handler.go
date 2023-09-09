@@ -15,19 +15,18 @@
 package hanlder
 
 import (
-	configServ "github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/friend/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"log/slog"
 	"net/http"
 )
 
-func NewFriendHandler(engine *gin.Engine, serv service.IFriendService, cfgServ configServ.IConfigService) *FriendHandler {
+func NewFriendHandler(engine *gin.Engine, serv service.IFriendService) *FriendHandler {
 	h := &FriendHandler{
-		serv:    serv,
-		cfgServ: cfgServ,
+		serv: serv,
 	}
 	engine.GET("/friends", h.GetFriends)
 	engine.POST("/friend", h.ApplyForFriend)
@@ -35,8 +34,7 @@ func NewFriendHandler(engine *gin.Engine, serv service.IFriendService, cfgServ c
 }
 
 type FriendHandler struct {
-	serv    service.IFriendService
-	cfgServ configServ.IConfigService
+	serv service.IFriendService
 }
 
 func (h *FriendHandler) GetFriends(ctx *gin.Context) {
@@ -65,17 +63,6 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
 		return
 	}
 
-	switchConfig, err := h.cfgServ.GetSwitchStatusByTyp(ctx, "friend")
-	if err != nil {
-		slog.ErrorContext(ctx, "friend", err.Error())
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	if !switchConfig.Status {
-		ctx.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
 	err = h.serv.ApplyForFriend(ctx, domain.Friend{
 		Name:        req.Name,
 		Url:         req.Url,
@@ -84,8 +71,13 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
 		Email:       req.Email,
 	})
 	if err != nil {
-		slog.ErrorContext(ctx, "friend", err.Error())
-		ctx.AbortWithStatus(http.StatusInternalServerError)
+		var httpCodeError *api.HttpCodeError
+		if errors.As(err, &httpCodeError) {
+			ctx.AbortWithStatus(int(*httpCodeError))
+		} else {
+			slog.ErrorContext(ctx, "friend", err.Error())
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+		}
 		return
 	}
 	ctx.JSON(http.StatusOK, api.SuccessResponse)
