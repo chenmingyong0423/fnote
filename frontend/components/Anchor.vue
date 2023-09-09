@@ -1,12 +1,14 @@
 <template>
-    <div class="bg-#fff rounded-15 p20 dark_bg_gray dark_text_white">
+    <div class="bg-#fff rounded-15 p20 dark_bg_gray dark_text_white ">
         <div class="text-24">目录</div>
         <el-divider></el-divider>
-        <div v-for="anchor, index in titleList" :style="{ 'padding-left': `${anchor.indent * 20 + 20}px` }"
-            @click="rollTo(anchor, index)" :class="index === heightTitle ? 'title-active' : ''"
-            class="cursor-pointer text-16 py10 my10">
-            <a>{{ anchor.title }}</a>
-        </div>
+        <el-scrollbar height="400px">
+            <div v-for="anchor, index in titleList" :style="{ 'padding-left': `${anchor.indent * 20 + 20}px` }"
+                @click="rollTo(anchor, index)" :class="index === heightTitle ? 'title-active' : ''"
+                class="cursor-pointer text-16 py10 my10">
+                <a>{{ anchor.title }}</a>
+            </div>
+        </el-scrollbar>
     </div>
 </template>
 
@@ -53,7 +55,10 @@ const rollTo = (anchor, index) => {
     );
     // 页面跳转
     if (heading) {
-        heading.scrollIntoView({ behavior: "smooth", block: "start" })
+        scrollTo({
+            top: heading.offsetTop,
+            behavior: 'smooth'
+        })
     }
     // 修改当前高亮的标题
     heightTitle.value = index
@@ -71,6 +76,7 @@ const scroll = () => {
             const absList = [] // 各个h标签与当前距离绝对值
             titleList.value.forEach((item) => {
                 absList.push(Math.abs(item.height - scrollTop))
+                // console.log('height', item.height);
             })
             // 屏幕滚动距离与标题高度最近的index高亮
             heightTitle.value = absList.indexOf(Math.min.apply(null, absList))
