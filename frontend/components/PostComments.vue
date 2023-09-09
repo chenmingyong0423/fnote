@@ -135,6 +135,7 @@
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElDivider } from 'element-plus'
+const props = defineProps(['commentInfo'])
 const spacer = h(ElDivider)
 const ruleFormRef = ref<FormInstance>()
 const form = ref({
@@ -149,40 +150,40 @@ const resetForm = (formEl: FormInstance | undefined) => {
     if (!formEl) return
     formEl.resetFields()
 }
-const commentInfo = [
-    {
-        "id": "8fbe8dfd-32bd-4901-9eae-4d7f0287b799",
-        "content": "超时控制代码的 select 没看明白，case \u003c-time.After()是什么意思？",
-        "username": "威",
-        "commentTime": "2023-07-27 09:16:55",
-        "replies": [
-            {
-                "id": "3050a13b-7639-4f5e-aade-d48430f3a0ef",
-                "commentId": "8fbe8dfd-32bd-4901-9eae-4d7f0287b799",
-                "content": "`case \u003c-time.After(10 * time.Second)`\n\n表示，只要不超时（不触发第一个 `case`），每 `10 s` 都会触发这个 `case`，然后执行 `case` 里的逻辑 `fmt.Println(\"操作完成\")`\n\n不过不建议这样使用哈，本文这个例子举的不好，容易造成内存溢出，推荐使用以下用法：\n\n```go\n    ticker := time.NewTicker(time.Second * 10)\n    for {\n       select {\n           case \u003c-ctx.Done():\n              fmt.Println(\"操作已超时\")\n              return\n          case \u003c-ticker.C:\n             fmt.Println(\"操作完成\")\n        }\n    }\n```",
-                "username": "陈明勇",
-                "replyToId": "",
-                "replyTo": "",
-                "replyTime": "2023-07-27 22:04:35"
-            },
-            {
-                "id": "ef448c18-fed6-41e3-8470-c6f217c30c96",
-                "commentId": "8fbe8dfd-32bd-4901-9eae-4d7f0287b799",
-                "content": "懂了。就是如果没有 cancel 信号，程序会在 select 处阻塞 10 秒，然后打印“操作完成”",
-                "username": "威",
-                "replyToId": "3050a13b-7639-4f5e-aade-d48430f3a0ef",
-                "replyTo": "陈明勇",
-                "replyTime": "2023-07-27 22:30:12"
-            }
-        ]
-    },
-    {
-        "id": "a87b6410-ca0a-4040-9d76-d556897303f9",
-        "content": "不错不错",
-        "username": "zq",
-        "commentTime": "2023-05-17 10:20:24"
-    }
-]
+// const commentInfo = [
+//     {
+//         "id": "8fbe8dfd-32bd-4901-9eae-4d7f0287b799",
+//         "content": "超时控制代码的 select 没看明白，case \u003c-time.After()是什么意思？",
+//         "username": "威",
+//         "commentTime": "2023-07-27 09:16:55",
+//         "replies": [
+//             {
+//                 "id": "3050a13b-7639-4f5e-aade-d48430f3a0ef",
+//                 "commentId": "8fbe8dfd-32bd-4901-9eae-4d7f0287b799",
+//                 "content": "`case \u003c-time.After(10 * time.Second)`\n\n表示，只要不超时（不触发第一个 `case`），每 `10 s` 都会触发这个 `case`，然后执行 `case` 里的逻辑 `fmt.Println(\"操作完成\")`\n\n不过不建议这样使用哈，本文这个例子举的不好，容易造成内存溢出，推荐使用以下用法：\n\n```go\n    ticker := time.NewTicker(time.Second * 10)\n    for {\n       select {\n           case \u003c-ctx.Done():\n              fmt.Println(\"操作已超时\")\n              return\n          case \u003c-ticker.C:\n             fmt.Println(\"操作完成\")\n        }\n    }\n```",
+//                 "username": "陈明勇",
+//                 "replyToId": "",
+//                 "replyTo": "",
+//                 "replyTime": "2023-07-27 22:04:35"
+//             },
+//             {
+//                 "id": "ef448c18-fed6-41e3-8470-c6f217c30c96",
+//                 "commentId": "8fbe8dfd-32bd-4901-9eae-4d7f0287b799",
+//                 "content": "懂了。就是如果没有 cancel 信号，程序会在 select 处阻塞 10 秒，然后打印“操作完成”",
+//                 "username": "威",
+//                 "replyToId": "3050a13b-7639-4f5e-aade-d48430f3a0ef",
+//                 "replyTo": "陈明勇",
+//                 "replyTime": "2023-07-27 22:30:12"
+//             }
+//         ]
+//     },
+//     {
+//         "id": "a87b6410-ca0a-4040-9d76-d556897303f9",
+//         "content": "不错不错",
+//         "username": "zq",
+//         "commentTime": "2023-05-17 10:20:24"
+//     }
+// ]
 </script>
 
 <style scoped>
