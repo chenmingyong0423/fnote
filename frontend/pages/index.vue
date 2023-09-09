@@ -29,7 +29,6 @@
     </div>
 </template>
 
-
 <script lang="ts" setup>
 const router = useRouter()
 const data = {
@@ -126,6 +125,7 @@ const data = {
     }
 }
 onMounted(() => {
+
 
 })
 definePageMeta({
