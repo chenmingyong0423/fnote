@@ -13,7 +13,7 @@
             <el-row :gutter="20">
                 <el-col :span="17">
                     <div>
-                        <Content @click="router.push(`post/${item}`)" v-for="item in data.data.list " :postData="item">
+                        <Content v-for="item in data.data.list " :postData="item">
                         </Content>
                     </div>
                 </el-col>
