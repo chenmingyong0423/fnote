@@ -14,7 +14,6 @@
             </el-space>
             <el-divider class="important:my10" />
         </div>
-
     </div>
 </template>
 
