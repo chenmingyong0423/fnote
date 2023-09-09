@@ -15,6 +15,7 @@
 package handler
 
 import (
+	configServ "github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/service"
@@ -23,9 +24,10 @@ import (
 	"net/http"
 )
 
-func NewVisitLogHandler(engine *gin.Engine, serv service.IVisitLogService) *VisitLogHandler {
+func NewVisitLogHandler(engine *gin.Engine, serv service.IVisitLogService, cfgServ configServ.IConfigService) *VisitLogHandler {
 	h := &VisitLogHandler{
-		serv: serv,
+		serv:    serv,
+		cfgServ: cfgServ,
 	}
 
 	routerGroup := engine.Group("/log")
@@ -34,7 +36,8 @@ func NewVisitLogHandler(engine *gin.Engine, serv service.IVisitLogService) *Visi
 }
 
 type VisitLogHandler struct {
-	serv service.IVisitLogService
+	serv    service.IVisitLogService
+	cfgServ configServ.IConfigService
 }
 
 func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
@@ -62,5 +65,13 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+
+	go func() {
+		gErr := h.cfgServ.IncreaseWebsiteViews(ctx)
+		if gErr != nil {
+			slog.ErrorContext(ctx, "config", gErr)
+		}
+	}()
+
 	ctx.JSON(http.StatusOK, api.SuccessResponse)
 }
