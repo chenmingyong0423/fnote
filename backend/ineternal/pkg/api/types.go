@@ -90,3 +90,14 @@ func SuccessResponseWithData[T any](data T) ResponseBody[T] {
 		Data:    data,
 	}
 }
+
+type HttpCodeError int
+
+func NewHttpCodeError(httpCode int) *HttpCodeError {
+	httpCodeError := HttpCodeError(httpCode)
+	return &httpCodeError
+}
+
+func (hc *HttpCodeError) Error() string {
+	return http.StatusText(int(*hc))
+}
