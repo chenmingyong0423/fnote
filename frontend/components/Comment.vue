@@ -1,5 +1,6 @@
 <template>
-    <div class="bg-#fff rounded-10 mt30 pb30 dark_bg_gray dark_text_white">
+    <div
+        class="bg-#fff rounded-10 mt30 pb30 dark_bg_gray dark_text_white cursor-pointer ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--5">
         <div class="text-16 pt20 px20">
             最新评论
         </div>
