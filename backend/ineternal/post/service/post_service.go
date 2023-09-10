@@ -19,19 +19,19 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/post/repository"
-	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"log/slog"
-	"slices"
 	"sync"
 )
 
 type IPostService interface {
 	GetHomePosts(ctx context.Context) (api.ListVO[*domain.SummaryPostVO], error)
 	GetPosts(ctx context.Context, pageRequest *domain.PostRequest) (*api.PageVO[*domain.SummaryPostVO], error)
-	GetPostBySug(ctx context.Context, sug string) (*domain.DetailPostVO, error)
-	AddLike(ctx context.Context, sug string, ip string) error
-	DeleteLike(ctx context.Context, sug string, ip string) error
+	GetPostById(ctx context.Context, id string) (*domain.Post, error)
+	AddLike(ctx context.Context, id string, ip string) error
+	DeleteLike(ctx context.Context, id string, ip string) error
+	IncreaseVisitCount(ctx context.Context, id string) error
+	InternalGetPostById(ctx context.Context, id string) (*domain.Post, error)
 }
 
 var _ IPostService = (*PostService)(nil)
@@ -47,9 +47,17 @@ type PostService struct {
 	ipMap sync.Map
 }
 
-func (s *PostService) DeleteLike(ctx context.Context, sug string, ip string) error {
+func (s *PostService) InternalGetPostById(ctx context.Context, id string) (*domain.Post, error) {
+	return s.repo.GetPostById(ctx, id)
+}
+
+func (s *PostService) IncreaseVisitCount(ctx context.Context, id string) error {
+	return s.repo.IncreaseCommentCount(ctx, id)
+}
+
+func (s *PostService) DeleteLike(ctx context.Context, id string, ip string) error {
 	// 先判断是否已经点过赞
-	had, err := s.repo.HadLikePost(ctx, sug, ip)
+	had, err := s.repo.HadLikePost(ctx, id, ip)
 	if err != nil {
 		return errors.WithMessage(err, "s.repo.HadLikePost failed")
 	}
@@ -59,7 +67,7 @@ func (s *PostService) DeleteLike(ctx context.Context, sug string, ip string) err
 	_, isExist := s.ipMap.LoadOrStore(ip, struct{}{})
 	if !isExist {
 		defer s.ipMap.Delete(ip)
-		err := s.repo.DeleteLike(ctx, sug, ip)
+		err := s.repo.DeleteLike(ctx, id, ip)
 		if err != nil {
 			return errors.WithMessage(err, "s.repo.DeleteLike")
 		}
@@ -67,9 +75,9 @@ func (s *PostService) DeleteLike(ctx context.Context, sug string, ip string) err
 	return nil
 }
 
-func (s *PostService) AddLike(ctx context.Context, sug string, ip string) error {
+func (s *PostService) AddLike(ctx context.Context, id string, ip string) error {
 	// 先判断是否已经点过赞
-	had, err := s.repo.HadLikePost(ctx, sug, ip)
+	had, err := s.repo.HadLikePost(ctx, id, ip)
 	if err != nil {
 		return errors.WithMessage(err, "s.repo.HadLikePost failed")
 	}
@@ -79,7 +87,7 @@ func (s *PostService) AddLike(ctx context.Context, sug string, ip string) error 
 	_, isExist := s.ipMap.LoadOrStore(ip, struct{}{})
 	if !isExist {
 		defer s.ipMap.Delete(ip)
-		err := s.repo.AddLike(ctx, sug, ip)
+		err := s.repo.AddLike(ctx, id, ip)
 		if err != nil {
 			return errors.WithMessage(err, "s.repo.AddLike")
 		}
@@ -87,23 +95,21 @@ func (s *PostService) AddLike(ctx context.Context, sug string, ip string) error 
 	return nil
 }
 
-func (s *PostService) GetPostBySug(ctx context.Context, sug string) (*domain.DetailPostVO, error) {
-	post, err := s.repo.GetPostBySug(ctx, sug)
+func (s *PostService) GetPostById(ctx context.Context, id string) (*domain.Post, error) {
+	post, err := s.repo.GetPostById(ctx, id)
 	if err != nil {
-		return nil, errors.WithMessage(err, "s.repo.GetPostBySug failed")
+		return nil, err
 	}
 
 	// increase visits
 	go func() {
-		gErr := s.repo.IncreaseVisits(ctx, post.Sug)
+		gErr := s.repo.IncreaseVisitCount(ctx, post.Sug)
 		if gErr != nil {
 			slog.WarnContext(ctx, "post", err)
 		}
 	}()
-	postVO := &domain.DetailPostVO{PrimaryPost: post.PrimaryPost, ExtraPost: post.ExtraPost}
-	postVO.IsLiked = slices.Contains(post.Likes, ctx.(*gin.Context).ClientIP())
 
-	return postVO, nil
+	return post, nil
 }
 
 func (s *PostService) GetPosts(ctx context.Context, pageRequest *domain.PostRequest) (*api.PageVO[*domain.SummaryPostVO], error) {

@@ -17,16 +17,21 @@ package main
 import (
 	"context"
 	"errors"
-	emailCfg "github.com/chenmingyong0423/fnote/backend/ineternal/email/service"
+	commentHandler "github.com/chenmingyong0423/fnote/backend/ineternal/comment/hanlder"
+	commentRepository "github.com/chenmingyong0423/fnote/backend/ineternal/comment/repository"
+	commentDao "github.com/chenmingyong0423/fnote/backend/ineternal/comment/repository/dao"
+	commentService "github.com/chenmingyong0423/fnote/backend/ineternal/comment/service"
+	emailService "github.com/chenmingyong0423/fnote/backend/ineternal/email/service"
 	friendHanlder "github.com/chenmingyong0423/fnote/backend/ineternal/friend/hanlder"
-	friendRepo "github.com/chenmingyong0423/fnote/backend/ineternal/friend/repository"
+	friendRepository "github.com/chenmingyong0423/fnote/backend/ineternal/friend/repository"
 	friendDao "github.com/chenmingyong0423/fnote/backend/ineternal/friend/repository/dao"
-	friendServ "github.com/chenmingyong0423/fnote/backend/ineternal/friend/service"
+	friendService "github.com/chenmingyong0423/fnote/backend/ineternal/friend/service"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/message/service"
 	myValidator "github.com/chenmingyong0423/fnote/backend/ineternal/pkg/validator"
 	vlHandler "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/handler"
-	vlRepo "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/repository"
+	vlRepository "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/repository"
 	vlLogDao "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/repository/dao"
-	vlServ "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/service"
+	vlService "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/service"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"os"
@@ -44,7 +49,7 @@ import (
 	postHanlder "github.com/chenmingyong0423/fnote/backend/ineternal/post/handler"
 	postRepo "github.com/chenmingyong0423/fnote/backend/ineternal/post/repository"
 	postDao "github.com/chenmingyong0423/fnote/backend/ineternal/post/repository/dao"
-	postServ "github.com/chenmingyong0423/fnote/backend/ineternal/post/service"
+	postService "github.com/chenmingyong0423/fnote/backend/ineternal/post/service"
 
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/middleware"
 	"github.com/gin-gonic/contrib/cors"
@@ -87,10 +92,13 @@ func main() {
 	cfgServ := cService.NewConfigService(cRepository.NewConfigRepository(cDao.NewConfigDao(db.Collection("configs"))))
 	cHandler.NewConfigHandler(r, cfgServ)
 	ctgHandler.NewCategoryHandler(r, ctgService.NewCategoryService(ctgRepo.NewCategoryRepository(ctgDao.NewCategoryDao(db.Collection("categories")))))
-	postHanlder.NewPostHandler(r, postServ.NewPostService(postRepo.NewPostRepository(postDao.NewPostDao(db.Collection("posts")))))
-	vlHandler.NewVisitLogHandler(r, vlServ.NewVisitLogService(vlRepo.NewVisitLogRepository(vlLogDao.NewVisitLogDao(db.Collection("visit_logs")))), cfgServ)
-	emailServ := emailCfg.NewEmailService()
-	friendHanlder.NewFriendHandler(r, friendServ.NewFriendService(friendRepo.NewFriendRepository(friendDao.NewFriendDao(db.Collection("friends"))), emailServ, cfgServ))
+	postServ := postService.NewPostService(postRepo.NewPostRepository(postDao.NewPostDao(db.Collection("posts"))))
+	postHanlder.NewPostHandler(r, postServ)
+	vlHandler.NewVisitLogHandler(r, vlService.NewVisitLogService(vlRepository.NewVisitLogRepository(vlLogDao.NewVisitLogDao(db.Collection("visit_logs")))), cfgServ)
+	emailServ := emailService.NewEmailService()
+	msgServ := service.NewMessageService(cfgServ, emailServ)
+	friendHanlder.NewFriendHandler(r, friendService.NewFriendService(friendRepository.NewFriendRepository(friendDao.NewFriendDao(db.Collection("friends"))), emailServ, cfgServ))
+	commentHandler.NewCommentHandler(r, commentService.NewCommentService(commentRepository.NewCommentRepository(commentDao.NewCommentDao(db.Collection("comment")))), cfgServ, postServ, msgServ)
 	err := r.Run()
 	if err != nil {
 		panic(err)

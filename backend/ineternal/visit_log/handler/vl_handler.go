@@ -69,7 +69,7 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
 	go func() {
 		gErr := h.cfgServ.IncreaseWebsiteViews(ctx)
 		if gErr != nil {
-			slog.ErrorContext(ctx, "config", gErr)
+			slog.WarnContext(ctx, "config", gErr)
 		}
 	}()
 
