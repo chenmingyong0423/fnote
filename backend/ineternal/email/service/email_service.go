@@ -17,28 +17,33 @@ package service
 import (
 	"context"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/repository"
 	"github.com/pkg/errors"
+	"gopkg.in/gomail.v2"
 )
 
-type IVisitLogService interface {
-	CollectVisitLog(ctx context.Context, visitHistory domain.VisitHistory) error
+type IEmailService interface {
+	SendEmail(ctx context.Context, email domain.Email) error
 }
 
-var _ IVisitLogService = (*VisitLogService)(nil)
+var _ IEmailService = (*EmailService)(nil)
 
-type VisitLogService struct {
-	repo repository.IVisitLogRepository
+type EmailService struct {
 }
 
-func (s *VisitLogService) CollectVisitLog(ctx context.Context, visitHistory domain.VisitHistory) error {
-	err := s.repo.Add(ctx, visitHistory)
+func NewEmailService() *EmailService {
+	return &EmailService{}
+}
+
+func (s *EmailService) SendEmail(ctx context.Context, email domain.Email) error {
+	m := gomail.NewMessage()
+	m.SetHeader("From", email.Account)
+	m.SetHeader("To", email.To...)
+	m.SetHeader("Subject", email.Subject)
+	m.SetBody(email.ContentType, email.Body)
+	dialer := gomail.NewDialer(email.Host, email.Port, email.Account, email.Password)
+	err := dialer.DialAndSend(m)
 	if err != nil {
-		return errors.WithMessage(err, "s.repo.Add failed")
+		return errors.Wrap(err, "dialer.DialAndSend failed")
 	}
 	return nil
-}
-
-func NewVisitLogService(repo repository.IVisitLogRepository) *VisitLogService {
-	return &VisitLogService{repo: repo}
 }
