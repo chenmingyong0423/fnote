@@ -15,17 +15,19 @@
 package handler
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
+	configServ "github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/service"
 	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"
 )
 
-func NewVisitLogHandler(engine *gin.Engine, serv service.IVisitLogService) *VisitLogHandler {
+func NewVisitLogHandler(engine *gin.Engine, serv service.IVisitLogService, cfgServ configServ.IConfigService) *VisitLogHandler {
 	h := &VisitLogHandler{
-		serv: serv,
+		serv:    serv,
+		cfgServ: cfgServ,
 	}
 
 	routerGroup := engine.Group("/log")
@@ -34,7 +36,8 @@ func NewVisitLogHandler(engine *gin.Engine, serv service.IVisitLogService) *Visi
 }
 
 type VisitLogHandler struct {
-	serv service.IVisitLogService
+	serv    service.IVisitLogService
+	cfgServ configServ.IConfigService
 }
 
 func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
@@ -49,7 +52,7 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(req)
 	if err != nil {
 		slog.ErrorContext(ctx, "visitLog", err)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	req.Ip = ctx.ClientIP()
@@ -59,8 +62,16 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
 	err = h.serv.CollectVisitLog(ctx, domain.VisitHistory{Url: req.Url, Ip: req.Ip, UserAgent: req.UserAgent, Origin: req.UserAgent, Referer: req.Referer})
 	if err != nil {
 		slog.ErrorContext(ctx, "visitLog", err)
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, api.ErrResponse)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse())
+
+	go func() {
+		gErr := h.cfgServ.IncreaseWebsiteViews(ctx)
+		if gErr != nil {
+			slog.ErrorContext(ctx, "config", gErr)
+		}
+	}()
+
+	ctx.JSON(http.StatusOK, api.SuccessResponse)
 }

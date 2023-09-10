@@ -16,15 +16,13 @@ package repository
 
 import (
 	"context"
-
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/repository/dao"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type IConfigRepository interface {
-	FindByTyp(ctx context.Context, typ string) (*domain.WebMasterConfig, error)
+	FindByTyp(ctx context.Context, typ string) (any, error)
+	Increase(ctx context.Context, field string) error
 }
 
 func NewConfigRepository(dao dao.IConfigDao) *ConfigRepository {
@@ -39,19 +37,14 @@ type ConfigRepository struct {
 	dao dao.IConfigDao
 }
 
-func (r *ConfigRepository) FindByTyp(ctx context.Context, typ string) (*domain.WebMasterConfig, error) {
+func (r *ConfigRepository) Increase(ctx context.Context, field string) error {
+	return r.dao.Increase(ctx, field)
+}
+
+func (r *ConfigRepository) FindByTyp(ctx context.Context, typ string) (any, error) {
 	config, err := r.dao.FindByTyp(ctx, typ)
 	if err != nil {
 		return nil, errors.WithMessage(err, "r.dao.FindByTyp failed")
 	}
-	marshal, err := bson.Marshal(config.Props)
-	if err != nil {
-		return nil, err
-	}
-	webMasterConfig := &domain.WebMasterConfig{}
-	err = bson.Unmarshal(marshal, webMasterConfig)
-	if err != nil {
-		return nil, err
-	}
-	return webMasterConfig, nil
+	return config.Props, nil
 }

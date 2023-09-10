@@ -38,3 +38,15 @@ type WebMasterConfigVO struct {
 	WebsiteIcon     string `json:"website_icon"`
 	Domain          string `json:"domain"`
 }
+
+type SwitchConfig struct {
+	Status bool `bson:"status" json:"status"`
+}
+
+type EmailConfig struct {
+	Host     string `bson:"host"`
+	Port     int    `bson:"port"`
+	Account  string `bson:"account"`
+	Password string `bson:"password"`
+	Email    string `bson:"email"`
+}

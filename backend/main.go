@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"errors"
+	emailCfg "github.com/chenmingyong0423/fnote/backend/ineternal/email/service"
 	friendHanlder "github.com/chenmingyong0423/fnote/backend/ineternal/friend/hanlder"
 	friendRepo "github.com/chenmingyong0423/fnote/backend/ineternal/friend/repository"
 	friendDao "github.com/chenmingyong0423/fnote/backend/ineternal/friend/repository/dao"
@@ -83,11 +84,13 @@ func main() {
 		},
 		MaxAge: 12 * time.Hour,
 	}))
-	cHandler.NewConfigHandler(r, cService.NewConfigService(cRepository.NewConfigRepository(cDao.NewConfigDao(db.Collection("configs")))))
+	cfgServ := cService.NewConfigService(cRepository.NewConfigRepository(cDao.NewConfigDao(db.Collection("configs"))))
+	cHandler.NewConfigHandler(r, cfgServ)
 	ctgHandler.NewCategoryHandler(r, ctgService.NewCategoryService(ctgRepo.NewCategoryRepository(ctgDao.NewCategoryDao(db.Collection("categories")))))
 	postHanlder.NewPostHandler(r, postServ.NewPostService(postRepo.NewPostRepository(postDao.NewPostDao(db.Collection("posts")))))
-	vlHandler.NewVisitLogHandler(r, vlServ.NewVisitLogService(vlRepo.NewVisitLogRepository(vlLogDao.NewVisitLogDao(db.Collection("visit_logs")))))
-	friendHanlder.NewFriendHandler(r, friendServ.NewFriendService(friendRepo.NewFriendRepository(friendDao.NewFriendDao(db.Collection("friends")))))
+	vlHandler.NewVisitLogHandler(r, vlServ.NewVisitLogService(vlRepo.NewVisitLogRepository(vlLogDao.NewVisitLogDao(db.Collection("visit_logs")))), cfgServ)
+	emailServ := emailCfg.NewEmailService()
+	friendHanlder.NewFriendHandler(r, friendServ.NewFriendService(friendRepo.NewFriendRepository(friendDao.NewFriendDao(db.Collection("friends"))), emailServ, cfgServ))
 	err := r.Run()
 	if err != nil {
 		panic(err)

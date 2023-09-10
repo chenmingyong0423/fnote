@@ -16,8 +16,9 @@ package repository
 
 import (
 	"context"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/domain"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/repository/dao"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"time"
 )
@@ -33,7 +34,7 @@ type VisitLogRepository struct {
 }
 
 func (r *VisitLogRepository) Add(ctx context.Context, visitHistory domain.VisitHistory) error {
-	err := r.dao.Add(ctx, dao.VisitHistory{Url: visitHistory.Url, Ip: visitHistory.Ip, UserAgent: visitHistory.UserAgent, Origin: visitHistory.Origin, Referer: visitHistory.Referer, CreateTime: time.Now().Unix()})
+	err := r.dao.Add(ctx, dao.VisitHistory{Id: uuid.NewString(), Url: visitHistory.Url, Ip: visitHistory.Ip, UserAgent: visitHistory.UserAgent, Origin: visitHistory.Origin, Referer: visitHistory.Referer, CreateTime: time.Now().Unix()})
 	if err != nil {
 		return errors.WithMessage(err, "r.dao.Add failed")
 	}
