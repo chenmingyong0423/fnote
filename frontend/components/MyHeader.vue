@@ -4,7 +4,7 @@
             <el-space>
                 <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" :size="50"
                     class="mx30" />
-                <el-menu router :default-active="activeIndex" mode="horizontal" @select="handleSelect" :ellipsis="false"
+                <el-menu router :default-active="$route.path" mode="horizontal" @select="handleSelect" :ellipsis="false"
                     background-color="transparent" :text-color="homeStore.headerTextColor">
                     <el-menu-item index="/">首页</el-menu-item>
                     <el-menu-item index="/category">文章列表</el-menu-item>
@@ -43,7 +43,6 @@ import { useHomeStore } from '~/store/home';
 import { Sunny, Moon } from '@element-plus/icons-vue'
 const homeStore = useHomeStore()
 const isBlackMode = computed(() => homeStore.isBlackMode)
-const activeIndex = ref<string>('/')
 
 watch(isBlackMode, (newValue) => {
     if (newValue)
@@ -52,7 +51,8 @@ watch(isBlackMode, (newValue) => {
         document.querySelector('html')!.classList.remove("dark");
 })
 const handleSelect = (key: string, keyPath: string[]) => {
-    // console.log(key, keyPath)
+    console.log(key, keyPath)
+    // router.push(key)
 }
 
 
