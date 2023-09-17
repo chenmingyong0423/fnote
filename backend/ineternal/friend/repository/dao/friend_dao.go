@@ -56,7 +56,7 @@ type FriendDao struct {
 func (d *FriendDao) FindByUrl(ctx context.Context, url string) (*Friend, error) {
 	friend := new(Friend)
 	if err := d.coll.FindOne(ctx, bson.M{"url": url}).Decode(friend); err != nil {
-		return nil, errors.Wrapf(err, "Fails to find the document from %s, url=%s", d.coll.Name(), url)
+		return nil, errors.Wrapf(err, "fails to find the document from %s, url=%s", d.coll.Name(), url)
 	}
 	return friend, nil
 }
@@ -64,7 +64,7 @@ func (d *FriendDao) FindByUrl(ctx context.Context, url string) (*Friend, error) 
 func (d *FriendDao) Add(ctx context.Context, friend Friend) error {
 	result, err := d.coll.InsertOne(ctx, friend)
 	if err != nil {
-		return errors.Wrapf(err, "Fails to insert into %s, friend=%v", d.coll.Name(), friend)
+		return errors.Wrapf(err, "fails to insert into %s, friend=%v", d.coll.Name(), friend)
 	}
 	if result.InsertedID == nil {
 		return errors.Wrapf(err, "InsertedID=nil, fails to insert into %s, friend=%v", d.coll.Name(), friend)
@@ -75,13 +75,13 @@ func (d *FriendDao) Add(ctx context.Context, friend Friend) error {
 func (d *FriendDao) FindDisplaying(ctx context.Context) ([]*Friend, error) {
 	cursor, err := d.coll.Find(ctx, bson.M{"status": 2})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Fails to find the documents from %s", d.coll.Name())
+		return nil, errors.Wrapf(err, "fails to find the documents from %s", d.coll.Name())
 	}
 	defer cursor.Close(ctx)
 	friends := make([]*Friend, 0)
 	err = cursor.All(ctx, &friends)
 	if err != nil {
-		return nil, errors.Wrap(err, "Fails to decode the result")
+		return nil, errors.Wrap(err, "fails to decode the result")
 	}
 	return friends, nil
 }
