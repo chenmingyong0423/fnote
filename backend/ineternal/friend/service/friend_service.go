@@ -71,14 +71,14 @@ func (s *FriendService) ApplyForFriend(ctx context.Context, friend domain.Friend
 	go func() {
 		emailCfg, gErr := s.configServ.GetEmailConfig(ctx)
 		if gErr != nil {
-			slog.ErrorContext(ctx, "emailConfig", gErr)
-			slog.ErrorContext(ctx, "friend", "Fails to send email message.")
+			slog.WarnContext(ctx, "emailConfig", gErr)
+			slog.WarnContext(ctx, "friend", "fails to send email message.")
 			return
 		}
 		webNMasterCfg, gErr := s.configServ.GetWebmasterInfo(ctx, "webmaster")
 		if gErr != nil {
-			slog.ErrorContext(ctx, "webNMasterCfg", gErr)
-			slog.ErrorContext(ctx, "friend", "Fails to send email message.")
+			slog.WarnContext(ctx, "webNMasterCfg", gErr)
+			slog.WarnContext(ctx, "friend", "fails to send email message.")
 			return
 		}
 		// todo 后面标题内容弄成动态的形式
@@ -93,8 +93,8 @@ func (s *FriendService) ApplyForFriend(ctx context.Context, friend domain.Friend
 			Body:        fmt.Sprintf("您好，您在《%s》网站中提交的友链申请已通过，详情请前往<a href='https://%s/friends'>友链</a>进行查看。", webNMasterCfg.Name, webNMasterCfg.Domain),
 			ContentType: "text/plain",
 		})
-		if err != nil {
-			slog.ErrorContext(ctx, "friend", errors.WithMessage(gErr, "Fails to send email message."))
+		if gErr != nil {
+			slog.WarnContext(ctx, "friend", errors.WithMessage(gErr, "fails to send email message."))
 		}
 	}()
 	return nil
