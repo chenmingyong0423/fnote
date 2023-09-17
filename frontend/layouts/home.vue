@@ -1,6 +1,6 @@
 <template>
     <div>
-        <MyHeader class="fixed top-0 w-full z-99 " />
+        <MyHeader />
         <div class="bg-#F0F2F5 dark_bg_black min-h-100vh">
             <slot></slot>
         </div>
