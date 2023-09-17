@@ -1,7 +1,7 @@
 export const useHomeStore = defineStore("home", {
     state: () => ({
         isBlackMode: false,
-        myHeaderBg: 'bg-#000/20 backdrop-blur-20',
+        // myHeaderBg: 'bg-#000/20 backdrop-blur-20',
         headerTextColor: '#fff',
         menuList: {
             "code": 200,
