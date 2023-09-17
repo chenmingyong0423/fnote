@@ -6,15 +6,15 @@
                 {{ tag.name }}
             </my-tag>
         </div>
-        <div class="mt40">
+        <div class="mt40 bg-#e5e5e5/40 p20 rounded-10">
             <div class="text-30 mb20 ml10">我的文章</div>
             <div v-for="item in data.data.list ">
                 <Content @click="router.push(`post/${item}`)" :postData="item"></Content>
-                <el-divider />
+                <!-- <el-divider /> -->
             </div>
 
         </div>
-        <div class="">
+        <div class="mt20">
             <el-pagination layout="prev, pager, next" :total="5000" />
         </div>
     </div>
