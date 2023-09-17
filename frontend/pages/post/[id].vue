@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-
+import { ElMessage } from 'element-plus'
 
 
 // const router = useRouter()
@@ -121,8 +121,11 @@ const data2 = {
 }
 
 const handleCopyCodeSuccess = () => {
-    console.log('copy success');
-
+    ElMessage({
+        message: 'copy success',
+        type: 'success',
+        customClass: 'text-16'
+    });
 }
 definePageMeta({
     layout: "home"

@@ -1,7 +1,6 @@
 <template>
     <div ref="myHeader"
-        class="fixed top-0 w-full z-99 flex justify-between items-center dark_bg_gray duration-200 ease-linear"
-        :class="homeStore.myHeaderBg">
+        class="bg-#000/20 backdrop-blur-20 fixed top-0 w-full z-99 flex justify-between items-center  dark_bg_gray duration-200 ease-linear">
         <!-- <div>
             <el-space>
                 <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" :size="50"
@@ -81,10 +80,11 @@ const handleSelect = (key: string, keyPath: string[]) => {
 const myHeader = ref()
 let scrollCount = ref(0)
 const headerScroll = () => {
+
     // const scrollNow = ref(document.documentElement.scrollTop)
     // console.log(Math.abs(scrollNow.value - scrollCount.value));
     if (document.documentElement.scrollTop > scrollCount.value) {
-        myHeader.value.setAttribute('style', 'top:-50px');
+        myHeader.value.setAttribute('style', `top:-${myHeader.value.clientHeight}px`);
     }
     else {
         myHeader.value.setAttribute('style', 'top:0px');
