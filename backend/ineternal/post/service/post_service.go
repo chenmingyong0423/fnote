@@ -115,7 +115,10 @@ func (s *PostService) GetPostById(ctx context.Context, id string) (*domain.Post,
 func (s *PostService) GetPosts(ctx context.Context, pageRequest *domain.PostRequest) (*api.PageVO[*domain.SummaryPostVO], error) {
 	pageVO := &api.PageVO[*domain.SummaryPostVO]{Page: pageRequest.Page}
 
-	posts, cnt, err := s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageRequest.PageSize, Skip: (pageRequest.PageNo - 1) * pageRequest.PageSize, Search: pageRequest.Search, Sort: pageRequest.Sort, Category: pageRequest.Category, Tag: pageRequest.Tag})
+	posts, cnt, err := s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageRequest.PageSize, Skip: (pageRequest.PageNo - 1) * pageRequest.PageSize, Search: pageRequest.Search, Sorting: api.Sorting{
+		Filed: pageRequest.Sorting.Filed,
+		Order: pageRequest.Sorting.Order,
+	}, Category: pageRequest.Category, Tag: pageRequest.Tag})
 	if err != nil {
 		return pageVO, errors.WithMessage(err, "s.repo.QueryPostsPage failed")
 	}
