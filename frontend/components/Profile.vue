@@ -2,7 +2,8 @@
     <div>
         <div
             class="text-center bg-#fff rounded-10 py25 dark_bg_gray dark_text_white cursor-pointer ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--5">
-            <el-avatar :size="100" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+            <el-avatar :size="100" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+                class="hover:rotate-360 ease-out duration-1000 hover:drop-shadow-xl" />
             <div class="text-14 c-#000/60 mt35 dark_text_white">
                 <el-space direction="vertical">
                     <div>{{ data.name }}</div>
