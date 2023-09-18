@@ -43,9 +43,9 @@ type IFriendDao interface {
 
 var _ IFriendDao = (*FriendDao)(nil)
 
-func NewFriendDao(coll *mongo.Collection) *FriendDao {
+func NewFriendDao(db *mongo.Database) *FriendDao {
 	return &FriendDao{
-		coll: coll,
+		coll: db.Collection("friends"),
 	}
 }
 

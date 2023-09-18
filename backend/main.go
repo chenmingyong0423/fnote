@@ -89,16 +89,16 @@ func main() {
 		},
 		MaxAge: 12 * time.Hour,
 	}))
-	cfgServ := cService.NewConfigService(cRepository.NewConfigRepository(cDao.NewConfigDao(db.Collection("configs"))))
+	cfgServ := cService.NewConfigService(cRepository.NewConfigRepository(cDao.NewConfigDao(db)))
 	cHandler.NewConfigHandler(r, cfgServ)
-	ctgHandler.NewCategoryHandler(r, ctgService.NewCategoryService(ctgRepo.NewCategoryRepository(ctgDao.NewCategoryDao(db.Collection("categories")))))
-	postServ := postService.NewPostService(postRepo.NewPostRepository(postDao.NewPostDao(db.Collection("posts"))))
+	ctgHandler.NewCategoryHandler(r, ctgService.NewCategoryService(ctgRepo.NewCategoryRepository(ctgDao.NewCategoryDao(db))))
+	postServ := postService.NewPostService(postRepo.NewPostRepository(postDao.NewPostDao(db)))
 	postHanlder.NewPostHandler(r, postServ)
-	vlHandler.NewVisitLogHandler(r, vlService.NewVisitLogService(vlRepository.NewVisitLogRepository(vlLogDao.NewVisitLogDao(db.Collection("visit_logs")))), cfgServ)
+	vlHandler.NewVisitLogHandler(r, vlService.NewVisitLogService(vlRepository.NewVisitLogRepository(vlLogDao.NewVisitLogDao(db))), cfgServ)
 	emailServ := emailService.NewEmailService()
 	msgServ := service.NewMessageService(cfgServ, emailServ)
-	friendHanlder.NewFriendHandler(r, friendService.NewFriendService(friendRepository.NewFriendRepository(friendDao.NewFriendDao(db.Collection("friends"))), emailServ, cfgServ))
-	commentHandler.NewCommentHandler(r, commentService.NewCommentService(commentRepository.NewCommentRepository(commentDao.NewCommentDao(db.Collection("comment")))), cfgServ, postServ, msgServ)
+	friendHanlder.NewFriendHandler(r, friendService.NewFriendService(friendRepository.NewFriendRepository(friendDao.NewFriendDao(db)), emailServ, cfgServ))
+	commentHandler.NewCommentHandler(r, commentService.NewCommentService(commentRepository.NewCommentRepository(commentDao.NewCommentDao(db))), cfgServ, postServ, msgServ)
 	err := r.Run()
 	if err != nil {
 		panic(err)

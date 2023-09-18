@@ -58,9 +58,9 @@ type IPostDao interface {
 
 var _ IPostDao = (*PostDao)(nil)
 
-func NewPostDao(coll *mongo.Collection) *PostDao {
+func NewPostDao(db *mongo.Database) *PostDao {
 	return &PostDao{
-		coll: coll,
+		coll: db.Collection("posts"),
 	}
 }
 
