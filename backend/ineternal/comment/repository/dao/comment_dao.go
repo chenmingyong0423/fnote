@@ -58,9 +58,9 @@ type ICommentDao interface {
 	AddComment(ctx context.Context, comment Comment) (any, error)
 }
 
-func NewCommentDao(coll *mongo.Collection) *CommentDao {
+func NewCommentDao(db *mongo.Database) *CommentDao {
 	return &CommentDao{
-		coll: coll,
+		coll: db.Collection("comment"),
 	}
 }
 
