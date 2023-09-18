@@ -15,28 +15,33 @@
 package handler
 
 import (
+	"github.com/chenmingyong0423/fnote/backend/ineternal/config/repository"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/config/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 	"log/slog"
 	"net/http"
 )
 
-func NewConfigHandler(engine *gin.Engine, serv service.IConfigService) *ConfigHandler {
-	ch := &ConfigHandler{
+var ConfigSet = wire.NewSet(NewConfigHandler, service.NewConfigService, repository.NewConfigRepository, dao.NewConfigDao)
+
+func NewConfigHandler(serv service.IConfigService) *ConfigHandler {
+	return &ConfigHandler{
 		serv: serv,
 	}
-
-	routerGroup := engine.Group("/config")
-	// 获取站长信息
-	routerGroup.GET("/webmaster", ch.GetWebmasterInfo)
-
-	return ch
 }
 
 type ConfigHandler struct {
 	serv service.IConfigService
+}
+
+func (h *ConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
+	routerGroup := engine.Group("/config")
+	// 获取站长信息
+	routerGroup.GET("/webmaster", h.GetWebmasterInfo)
 }
 
 func (c *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) {

@@ -15,26 +15,33 @@
 package handler
 
 import (
+	"github.com/chenmingyong0423/fnote/backend/ineternal/category/repository"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/category/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/category/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 	"log/slog"
 	"net/http"
 )
 
-func NewCategoryHandler(engine *gin.Engine, serv service.ICategoryService) *CategoryHandler {
-	ch := &CategoryHandler{
+var CategorySet = wire.NewSet(NewCategoryHandler, service.NewCategoryService, repository.NewCategoryRepository, dao.NewCategoryDao)
+
+func NewCategoryHandler(serv service.ICategoryService) *CategoryHandler {
+	return &CategoryHandler{
 		serv: serv,
 	}
-	engine.GET("/categories", ch.GetCategoriesAndTags)
-	engine.GET("/category/:name/tags", ch.GetTagsByName)
-	engine.GET("/menus", ch.GetMenus)
-	return ch
 }
 
 type CategoryHandler struct {
 	serv service.ICategoryService
+}
+
+func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
+	engine.GET("/categories", h.GetCategoriesAndTags)
+	engine.GET("/category/:name/tags", h.GetTagsByName)
+	engine.GET("/menus", h.GetMenus)
 }
 
 func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) {
