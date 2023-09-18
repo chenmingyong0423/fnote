@@ -15,6 +15,8 @@
 // Package types 存放公共属性的包
 package types
 
+import "github.com/gin-gonic/gin"
+
 type Comment struct {
 	// 文章信息
 	PostInfo PostInfo4Comment `bson:"post_info"`
@@ -36,4 +38,8 @@ type UserInfo4Comment struct {
 	Email   string `bson:"email"`
 	Ip      string `bson:"ip"`
 	Website string `bson:"website"`
+}
+
+type GinRoutes interface {
+	RegisterGinRoutes(engine *gin.Engine)
 }

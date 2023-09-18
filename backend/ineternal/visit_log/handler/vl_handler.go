@@ -18,26 +18,32 @@ import (
 	configServ "github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/repository"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/service"
 	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 	"log/slog"
 	"net/http"
 )
 
-func NewVisitLogHandler(engine *gin.Engine, serv service.IVisitLogService, cfgServ configServ.IConfigService) *VisitLogHandler {
-	h := &VisitLogHandler{
+var VlSet = wire.NewSet(NewVisitLogHandler, service.NewVisitLogService, repository.NewVisitLogRepository, dao.NewVisitLogDao)
+
+func NewVisitLogHandler(serv service.IVisitLogService, cfgServ configServ.IConfigService) *VisitLogHandler {
+	return &VisitLogHandler{
 		serv:    serv,
 		cfgServ: cfgServ,
 	}
-
-	routerGroup := engine.Group("/log")
-	routerGroup.POST("", h.CollectVisitLog)
-	return h
 }
 
 type VisitLogHandler struct {
 	serv    service.IVisitLogService
 	cfgServ configServ.IConfigService
+}
+
+func (h *VisitLogHandler) RegisterGinRoutes(engine *gin.Engine) {
+	routerGroup := engine.Group("/log")
+	routerGroup.POST("", h.CollectVisitLog)
 }
 
 func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {

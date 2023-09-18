@@ -12,26 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package ioc
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/ioc"
-	"github.com/pkg/errors"
-	"os"
+	"context"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
 )
 
-func main() {
-	if len(os.Args) < 3 {
-		panic(errors.New("missing parameters"))
-	}
-	username := os.Args[1]
-	password := os.Args[2]
-	app, err := initializeApp(ioc.Username(username), ioc.Password(password))
+type Username string
+type Password string
+
+func NewMongoDB(username Username, password Password) *mongo.Database {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
+		Username:   string(username),
+		Password:   string(password),
+		AuthSource: "fnote",
+	}).SetDirect(true))
 	if err != nil {
 		panic(err)
 	}
-	err = app.Run()
-	if err != nil {
-		panic(err)
-	}
+	return client.Database("fnote")
 }

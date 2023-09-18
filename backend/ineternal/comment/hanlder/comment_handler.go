@@ -15,6 +15,8 @@
 package hanlder
 
 import (
+	"github.com/chenmingyong0423/fnote/backend/ineternal/comment/repository"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/comment/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/comment/service"
 	configServ "github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	msgService "github.com/chenmingyong0423/fnote/backend/ineternal/message/service"
@@ -23,20 +25,20 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/types"
 	postServ "github.com/chenmingyong0423/fnote/backend/ineternal/post/service"
 	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 	"log/slog"
 	"net/http"
 )
 
-func NewCommentHandler(engine *gin.Engine, serv service.ICommentService, cfgService configServ.IConfigService, postServ postServ.IPostService, msgServ msgService.IMessageService) *CommentHandler {
-	ch := &CommentHandler{
+var CommentSet = wire.NewSet(NewCommentHandler, service.NewCommentService, repository.NewCommentRepository, dao.NewCommentDao)
+
+func NewCommentHandler(serv service.ICommentService, cfgService configServ.IConfigService, postServ postServ.IPostService, msgServ msgService.IMessageService) *CommentHandler {
+	return &CommentHandler{
 		serv:       serv,
 		cfgService: cfgService,
 		postServ:   postServ,
 		msgServ:    msgServ,
 	}
-	group := engine.Group("/comment")
-	group.POST("", ch.AddComment)
-	return ch
 }
 
 type CommentHandler struct {
@@ -44,6 +46,11 @@ type CommentHandler struct {
 	cfgService configServ.IConfigService
 	postServ   postServ.IPostService
 	msgServ    msgService.IMessageService
+}
+
+func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
+	group := engine.Group("/comment")
+	group.POST("", h.AddComment)
 }
 
 func (h *CommentHandler) AddComment(ctx *gin.Context) {
