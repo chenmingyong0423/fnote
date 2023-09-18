@@ -1,6 +1,7 @@
 <template>
-    <div class="flex justify-between items-center py5 dark_bg_gray" :class="homeStore.myHeaderBg">
-        <div>
+    <div ref="myHeader"
+        class="bg-#000/20 backdrop-blur-20 fixed top-0 w-full z-99 flex justify-between items-center  dark_bg_gray duration-200 ease-linear">
+        <!-- <div>
             <el-space>
                 <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" :size="50"
                     class="mx30" />
@@ -9,13 +10,6 @@
                     <el-menu-item index="/">首页</el-menu-item>
                     <el-menu-item index="/category">文章列表</el-menu-item>
                     <template v-for="item, index in homeStore.menuList.data.list" :key="index">
-                        <!-- <el-sub-menu :index="String(index)" v-if="item.tags"
-                            popper-class=" bg-#000/50 dark_bg_gray important:b-0">
-                            <template #title>{{ item.name }}</template>
-                            <el-menu-item v-for="tag, index in item.tags" :index="tag" :key="index">
-                                {{ tag }}
-                            </el-menu-item>
-                        </el-sub-menu> -->
                         <el-menu-item :index="item.route">
                             {{ item.name }}
                         </el-menu-item>
@@ -23,6 +17,32 @@
                     <el-menu-item index="/friends">友链</el-menu-item>
                     <el-menu-item index="/about">关于我</el-menu-item>
                 </el-menu>
+            </el-space>
+        </div> -->
+        <div>
+            <el-space>
+                <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" :size="36"
+                    class="mx30 cursor-pointer hover:rotate-360 ease-out duration-1000" @click="router.push('/')" />
+                <div class="flex">
+                    <div class="menu_item" @click="router.push('/')" :class="route.path === '/' ? 'active' : ''">
+                        首页
+                    </div>
+                    <div class="menu_item" @click="router.push('/category')"
+                        :class="route.path === '/category' ? 'active' : ''">
+                        文章列表
+                    </div>
+                    <div class="menu_item" @click="router.push(item.route)" v-for="item in homeStore.menuList.data.list"
+                        :class="route.path === item.route ? 'active' : ''">
+                        {{ item.name }}
+                    </div>
+                    <div class="menu_item" @click="router.push('/friends')"
+                        :class="route.path === '/friends' ? 'active' : ''">
+                        友链
+                    </div>
+                    <div class="menu_item" @click="router.push('/about')" :class="route.path === '/about' ? 'active' : ''">
+                        关于我
+                    </div>
+                </div>
             </el-space>
         </div>
         <div>
@@ -43,6 +63,9 @@ import { useHomeStore } from '~/store/home';
 import { Sunny, Moon } from '@element-plus/icons-vue'
 const homeStore = useHomeStore()
 const isBlackMode = computed(() => homeStore.isBlackMode)
+const router = useRouter()
+const route = useRoute()
+
 
 watch(isBlackMode, (newValue) => {
     if (newValue)
@@ -54,20 +77,31 @@ const handleSelect = (key: string, keyPath: string[]) => {
     console.log(key, keyPath)
     // router.push(key)
 }
+const myHeader = ref()
+let scrollCount = ref(0)
+const headerScroll = () => {
 
-
+    // const scrollNow = ref(document.documentElement.scrollTop)
+    // console.log(Math.abs(scrollNow.value - scrollCount.value));
+    if (document.documentElement.scrollTop > scrollCount.value) {
+        myHeader.value.setAttribute('style', `top:-${myHeader.value.clientHeight}px`);
+    }
+    else {
+        myHeader.value.setAttribute('style', 'top:0px');
+    }
+    scrollCount.value = document.documentElement.scrollTop
+}
 onMounted(() => {
-    window.addEventListener('scroll', () => {
-        if (document.documentElement.scrollTop > 500) {
-            homeStore.myHeaderBg = 'bg-#fff/80 backdrop-blur-60'
-            homeStore.headerTextColor = '#000'
-        }
-        else {
-            homeStore.myHeaderBg = 'bg-#000/20 backdrop-blur-20'
-            homeStore.headerTextColor = '#fff'
-        }
-    })
+    window.addEventListener('scroll', headerScroll)
+})
+onBeforeUnmount(() => {
+    window.removeEventListener('scroll', headerScroll)
 })
 
-
 </script>
+<style scoped>
+.active {
+    background-color: rgba(0, 0, 0, 0.2);
+
+}
+</style>

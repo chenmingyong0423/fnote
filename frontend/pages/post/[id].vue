@@ -15,7 +15,7 @@
                             <div>{{ data.data.visit }}</div>
                         </el-space>
                     </div>
-                    <v-md-preview :text="data2.data.content"></v-md-preview>
+                    <v-md-preview :text="data2.data.content" @copy-code-success="handleCopyCodeSuccess"></v-md-preview>
                     <!-- 点赞 -->
                     <div
                         class=" mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-
+import { ElMessage } from 'element-plus'
 
 
 // const router = useRouter()
@@ -118,6 +118,14 @@ const data2 = {
         ],
         "isLike": false
     }
+}
+
+const handleCopyCodeSuccess = () => {
+    ElMessage({
+        message: 'copy success',
+        type: 'success',
+        customClass: 'text-16'
+    });
 }
 definePageMeta({
     layout: "home"
