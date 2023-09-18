@@ -6,7 +6,7 @@
             </div>
             <el-row :gutter="20">
                 <el-col :span="8" v-for="item in testData.data.list" :key="item.name">
-                    <a :href="item.url"
+                    <a :href="item.url" target="blank"
                         class="block b-2 b-blue b-solid p20 h100 rounded-20 text-16 mt30 cursor-pointer hover:b-lightblue  hover:bg-#e5e5e5/30 active:bg-#e5e5e5 group">
                         <el-space alignment="flex-start" :size="0">
                             <el-avatar :src="item.logo" :size="50" class="mr15" />
