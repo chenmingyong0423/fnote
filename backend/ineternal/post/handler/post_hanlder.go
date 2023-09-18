@@ -17,30 +17,35 @@ package handler
 import (
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/post/repository"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/post/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/post/service"
 	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 	"github.com/pkg/errors"
 	"log/slog"
 	"net/http"
 	"slices"
 )
 
-func NewPostHandler(engine *gin.Engine, serv service.IPostService) *PostHandler {
-	h := &PostHandler{
+var PostSet = wire.NewSet(NewPostHandler, service.NewPostService, repository.NewPostRepository, dao.NewPostDao)
+
+func NewPostHandler(serv service.IPostService) *PostHandler {
+	return &PostHandler{
 		serv: serv,
 	}
+}
 
+type PostHandler struct {
+	serv service.IPostService
+}
+
+func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	engine.GET("/home/posts", h.GetHomePosts)
 	engine.GET("/posts", h.GetPosts)
 	engine.GET("/post/:sug", h.GetPostBySug)
 	engine.POST("/post/:sug/likes", h.AddLike)
 	engine.DELETE("/post/:sug/likes", h.DeleteLike)
-
-	return h
-}
-
-type PostHandler struct {
-	serv service.IPostService
 }
 
 func (h *PostHandler) GetHomePosts(ctx *gin.Context) {
