@@ -3,13 +3,13 @@
         <div class="py15">
             <div class="text-30 mb20 ml10">标签:{{ tag[0]?.name || '未知' }}</div>
         </div>
-        <div>
+        <div class="bg-#e5e5e5/40 p20 rounded-10">
             <div v-for="item in data.data.list ">
                 <Content @click="router.push(`/post/${item.sug}`)" :postData="item"></Content>
-                <el-divider />
+                <!-- <el-divider /> -->
             </div>
         </div>
-        <div class="pl500">
+        <div class=" mt20">
             <el-pagination layout="prev, pager, next" :total="5000" />
         </div>
     </div>
@@ -58,4 +58,8 @@ const data = {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.el-pagination {
+    justify-content: center;
+}
+</style>
