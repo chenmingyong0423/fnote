@@ -22,7 +22,7 @@ type PostsQueryCondition struct {
 
 	Search *string
 
-	Sort *api.Sorting
+	api.Sorting
 
 	Category *string
 	Tag      *string
@@ -47,29 +47,29 @@ type SummaryPostVO struct {
 type Post struct {
 	PrimaryPost
 	ExtraPost
+	IsCommentAllowed bool     `json:"is_comment_allowed"`
+	Likes            []string `json:"-"`
 }
 
 type ExtraPost struct {
-	Content         string   `json:"content"`
-	Likes           []string `json:"-"`
-	MetaDescription string   `json:"meta_description"`
-	MetaKeywords    string   `json:"meta_keywords"`
-	WordCount       int      `json:"word_count"`
-	AllowComment    bool     `json:"allow_comment"`
-	UpdateTime      int64    `json:"update_time"`
+	Content         string `json:"content"`
+	MetaDescription string `json:"meta_description"`
+	MetaKeywords    string `json:"meta_keywords"`
+	WordCount       int    `json:"word_count"`
+	UpdateTime      int64  `json:"update_time"`
 }
 
 type PrimaryPost struct {
-	Sug        string   `json:"sug"`
-	Author     string   `json:"author"`
-	Title      string   `json:"title"`
-	Summary    string   `json:"summary"`
-	CoverImg   string   `json:"cover_img"`
-	Category   string   `json:"category"`
-	Tags       []string `json:"tags"`
-	LikeCount  int      `json:"likeCount"`
-	Comments   int      `json:"comments"`
-	Visits     int      `json:"visit"`
-	Priority   int      `json:"priority"`
-	CreateTime int64    `json:"createTime"`
+	Sug          string   `json:"sug"`
+	Author       string   `json:"author"`
+	Title        string   `json:"title"`
+	Summary      string   `json:"summary"`
+	CoverImg     string   `json:"cover_img"`
+	Category     string   `json:"category"`
+	Tags         []string `json:"tags"`
+	LikeCount    int      `json:"like_count"`
+	CommentCount int      `json:"comment_count"`
+	VisitCount   int      `json:"visit_count"`
+	Priority     int      `json:"priority"`
+	CreateTime   int64    `json:"create_time"`
 }

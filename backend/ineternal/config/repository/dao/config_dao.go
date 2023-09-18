@@ -37,9 +37,9 @@ type IConfigDao interface {
 	Increase(ctx context.Context, field string) error
 }
 
-func NewConfigDao(coll *mongo.Collection) *ConfigDao {
+func NewConfigDao(db *mongo.Database) *ConfigDao {
 	return &ConfigDao{
-		coll: coll,
+		coll: db.Collection("configs"),
 	}
 }
 
@@ -53,7 +53,7 @@ func (d *ConfigDao) Increase(ctx context.Context, field string) error {
 	field = fmt.Sprintf("props.%s", field)
 	updateResult, err := d.coll.UpdateOne(ctx, bson.D{bson.E{Key: "typ", Value: "webmaster"}}, bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: field, Value: 1}}}})
 	if err != nil {
-		return errors.Wrapf(err, "Fails to increase %s", field)
+		return errors.Wrapf(err, "fails to increase %s", field)
 	}
 	if updateResult.ModifiedCount == 0 {
 		return fmt.Errorf("ModifiedCount=0, fails to increase %s", field)

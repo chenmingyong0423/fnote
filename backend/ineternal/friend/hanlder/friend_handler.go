@@ -15,26 +15,34 @@
 package hanlder
 
 import (
+	"github.com/chenmingyong0423/fnote/backend/ineternal/friend/repository"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/friend/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/friend/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 	"github.com/pkg/errors"
 	"log/slog"
 	"net/http"
 )
 
-func NewFriendHandler(engine *gin.Engine, serv service.IFriendService) *FriendHandler {
-	h := &FriendHandler{
+var FriendSet = wire.NewSet(NewFriendHandler, service.NewFriendService, repository.NewFriendRepository, dao.NewFriendDao)
+
+func NewFriendHandler(serv service.IFriendService) *FriendHandler {
+	return &FriendHandler{
 		serv: serv,
 	}
-	engine.GET("/friends", h.GetFriends)
-	engine.POST("/friend", h.ApplyForFriend)
-	return h
+
 }
 
 type FriendHandler struct {
 	serv service.IFriendService
+}
+
+func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
+	engine.GET("/friends", h.GetFriends)
+	engine.POST("/friend", h.ApplyForFriend)
 }
 
 func (h *FriendHandler) GetFriends(ctx *gin.Context) {

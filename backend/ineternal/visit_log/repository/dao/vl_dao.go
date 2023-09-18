@@ -43,7 +43,7 @@ type VisitLogDao struct {
 func (d *VisitLogDao) Add(ctx context.Context, visitHistory VisitHistory) error {
 	result, err := d.coll.InsertOne(ctx, visitHistory)
 	if err != nil {
-		return errors.Wrapf(err, "Fails to insert info %s, visitHistory=%v", d.coll.Name(), visitHistory)
+		return errors.Wrapf(err, "fails to insert info %s, visitHistory=%v", d.coll.Name(), visitHistory)
 	}
 	if result == nil {
 		return errors.Wrapf(err, "result=nil, fails to insert info %s, visitHistory=%v", d.coll.Name(), visitHistory)
@@ -51,6 +51,6 @@ func (d *VisitLogDao) Add(ctx context.Context, visitHistory VisitHistory) error 
 	return nil
 }
 
-func NewVisitLogDao(coll *mongo.Collection) *VisitLogDao {
-	return &VisitLogDao{coll: coll}
+func NewVisitLogDao(db *mongo.Database) *VisitLogDao {
+	return &VisitLogDao{coll: db.Collection("visit_logs")}
 }

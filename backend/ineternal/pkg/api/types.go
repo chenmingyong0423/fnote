@@ -47,7 +47,7 @@ func (p *PageVO[T]) SetTotalCountAndCalculateTotalPages(totalCount int64) {
 type PageRequest struct {
 	Page
 	// 排序字段
-	Sort *Sorting `form:"sort,omitempty"`
+	Sorting
 	// 搜索内容
 	Search *string `form:"search,omitempty"`
 }
@@ -62,8 +62,8 @@ func (p *PageRequest) ValidateAndSetDefault() {
 }
 
 type Sorting struct {
-	Filed string
-	Order string
+	Filed *string `form:"sortFiled,omitempty"`
+	Order *string `form:"sortOrder,omitempty"`
 }
 
 type Page struct {
