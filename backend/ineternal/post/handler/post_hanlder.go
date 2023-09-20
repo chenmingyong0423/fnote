@@ -78,7 +78,7 @@ func (h *PostHandler) GetPosts(ctx *gin.Context) {
 
 func (h *PostHandler) GetPostBySug(ctx *gin.Context) {
 	sug := ctx.Param("sug")
-	post, err := h.serv.GetPostById(ctx, sug)
+	post, err := h.serv.GetPunishedPostById(ctx, sug)
 	if err != nil {
 		slog.ErrorContext(ctx, "post", err.Error())
 		ctx.AbortWithStatus(http.StatusInternalServerError)
