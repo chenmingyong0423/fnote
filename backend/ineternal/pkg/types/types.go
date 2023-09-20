@@ -15,7 +15,22 @@
 // Package types 存放公共属性的包
 package types
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
+
+type CommentReply struct {
+	ReplyId string `bson:"reply_id"`
+	// 回复内容
+	Content string `bson:"content"`
+	// 被回复的回复 Id
+	ReplyToId string `bson:"reply_to_id"`
+	// 用户信息
+	UserInfo UserInfo4Reply `bson:"user_info"`
+	// 被回复用户的信息
+	RepliedUserInfo UserInfo4Reply `bson:"replied_user_info"`
+}
+type UserInfo4Reply UserInfo4Comment
 
 type Comment struct {
 	// 文章信息

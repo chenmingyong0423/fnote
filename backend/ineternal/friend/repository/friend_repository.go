@@ -58,7 +58,7 @@ func (r *FriendRepository) Add(ctx context.Context, friend domain.Friend) error 
 		Logo:        friend.Logo,
 		Description: friend.Description,
 		Email:       friend.Email,
-		Status:      1,
+		Status:      domain.FriendStatusPending,
 		CreateTime:  now.Unix(),
 		UpdateTime:  now.Unix(),
 	})
