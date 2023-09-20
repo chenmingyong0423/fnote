@@ -2,6 +2,7 @@
     <div class="bg-#F0F2F5 dark_bg_black pt100 pb30 px25">
         <el-row :gutter="40">
             <el-col :span="18">
+
                 <div class=" rounded-15 bg-#fff p30">
                     <!-- 文章标题 -->
                     <div class="text-center text-42 font-500">{{ data2.data.title }}</div>
@@ -9,7 +10,9 @@
                     <div class="text-center text-16 c-#999/80 my20 ">
                         <el-space :size="4">
                             <div>{{ data.data.author }}</div>
-                            <div>{{ data.data.createTime }}</div>
+                            <div>
+                                {{ dayjs(data.data.createTime).format('YYYY-MM-DD HH:mm:ss') }}
+                            </div>
                             <div>·</div>
                             <div>阅读 </div>
                             <div>{{ data.data.visit }}</div>
@@ -22,7 +25,13 @@
                         <div class="i-grommet-icons:like"></div>
                     </div>
                 </div>
-                <PostComments class="mt25" :commentInfo="data2.data.commentInfo" />
+                <div class="rounded-15 bg-#fff pt20 pb80 px30 mt25">
+                    <!-- 发布评论 -->
+                    <SubmitComments />
+                    <div class="text-16">{{ data2.data.commentInfo.length + ' 评论' }}</div>
+                    <PostCommentsFather v-for="item, index in data2.data.commentInfo" :key="index" class=""
+                        :commentInfo="item" />
+                </div>
             </el-col>
             <el-col :span="6">
                 <el-affix :offset="90">
@@ -37,8 +46,8 @@
 
 <script lang="ts" setup>
 import { ElMessage } from 'element-plus'
-
-
+import { dayjs } from 'element-plus'
+import type { } from 'element-plus'
 // const router = useRouter()
 // const route = useRoute()
 
