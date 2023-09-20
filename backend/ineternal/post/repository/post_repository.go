@@ -30,7 +30,7 @@ import (
 type IPostRepository interface {
 	GetLatest5Posts(ctx context.Context) ([]*domain.Post, error)
 	QueryPostsPage(ctx context.Context, postsQueryCondition domain.PostsQueryCondition) ([]*domain.Post, int64, error)
-	GetPostById(ctx context.Context, id string) (*domain.Post, error)
+	GetPunishedPostById(ctx context.Context, id string) (*domain.Post, error)
 	IncreaseVisitCount(ctx context.Context, id string) error
 	HadLikePost(ctx context.Context, id string, ip string) (bool, error)
 	AddLike(ctx context.Context, id string, ip string) error
@@ -85,10 +85,10 @@ func (r *PostRepository) IncreaseVisitCount(ctx context.Context, id string) erro
 	return r.dao.IncreaseFieldById(ctx, id, "visit_count")
 }
 
-func (r *PostRepository) GetPostById(ctx context.Context, id string) (*domain.Post, error) {
-	post, err := r.dao.GetPostById(ctx, id)
+func (r *PostRepository) GetPunishedPostById(ctx context.Context, id string) (*domain.Post, error) {
+	post, err := r.dao.GetPunishedPostById(ctx, id)
 	if err != nil {
-		return nil, errors.WithMessage(err, "r.dao.GetPostById failed")
+		return nil, errors.WithMessage(err, "r.dao.GetPunishedPostById failed")
 	}
 	return r.daoPostToDomainPost(post), nil
 }

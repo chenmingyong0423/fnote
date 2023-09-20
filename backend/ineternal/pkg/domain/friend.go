@@ -21,15 +21,28 @@ type Friend struct {
 	Logo        string
 	Description string
 	Email       string
-	Status      int
+	Status      FriendStatus
 	Priority    int
 }
 
 type FriendVO struct {
-	Name        string `json:"name"`
-	Url         string `json:"url"`
-	Logo        string `json:"logo"`
-	Description string `json:"description"`
-	Status      int    `json:"status"`
-	Priority    int    `json:"priority"`
+	Name        string       `json:"name"`
+	Url         string       `json:"url"`
+	Logo        string       `json:"logo"`
+	Description string       `json:"description"`
+	Status      FriendStatus `json:"status"`
+	Priority    int          `json:"priority"`
 }
+
+// 0 hiding，1 pending，2 showing
+
+type FriendStatus uint
+
+const (
+	// FriendStatusPending 审核中
+	FriendStatusPending FriendStatus = iota
+	// FriendStatusShowing 展示
+	FriendStatusShowing
+	// FriendStatusHiding 隐藏
+	FriendStatusHiding
+)

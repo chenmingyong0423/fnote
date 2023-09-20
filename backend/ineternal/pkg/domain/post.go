@@ -73,3 +73,14 @@ type PrimaryPost struct {
 	Priority     int      `json:"priority"`
 	CreateTime   int64    `json:"create_time"`
 }
+
+type PostStatus uint
+
+const (
+	// PostStatusDraft 草稿
+	PostStatusDraft PostStatus = iota
+	// PostStatusPunished 已发布
+	PostStatusPunished
+	// PostStatusDeleted 已删除
+	PostStatusDeleted
+)

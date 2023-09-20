@@ -27,11 +27,11 @@ import (
 type IPostService interface {
 	GetHomePosts(ctx context.Context) (api.ListVO[*domain.SummaryPostVO], error)
 	GetPosts(ctx context.Context, pageRequest *domain.PostRequest) (*api.PageVO[*domain.SummaryPostVO], error)
-	GetPostById(ctx context.Context, id string) (*domain.Post, error)
+	GetPunishedPostById(ctx context.Context, id string) (*domain.Post, error)
 	AddLike(ctx context.Context, id string, ip string) error
 	DeleteLike(ctx context.Context, id string, ip string) error
 	IncreaseVisitCount(ctx context.Context, id string) error
-	InternalGetPostById(ctx context.Context, id string) (*domain.Post, error)
+	InternalGetPunishedPostById(ctx context.Context, id string) (*domain.Post, error)
 }
 
 var _ IPostService = (*PostService)(nil)
@@ -47,8 +47,8 @@ type PostService struct {
 	ipMap sync.Map
 }
 
-func (s *PostService) InternalGetPostById(ctx context.Context, id string) (*domain.Post, error) {
-	return s.repo.GetPostById(ctx, id)
+func (s *PostService) InternalGetPunishedPostById(ctx context.Context, id string) (*domain.Post, error) {
+	return s.repo.GetPunishedPostById(ctx, id)
 }
 
 func (s *PostService) IncreaseVisitCount(ctx context.Context, id string) error {
@@ -95,8 +95,8 @@ func (s *PostService) AddLike(ctx context.Context, id string, ip string) error {
 	return nil
 }
 
-func (s *PostService) GetPostById(ctx context.Context, id string) (*domain.Post, error) {
-	post, err := s.repo.GetPostById(ctx, id)
+func (s *PostService) GetPunishedPostById(ctx context.Context, id string) (*domain.Post, error) {
+	post, err := s.repo.GetPunishedPostById(ctx, id)
 	if err != nil {
 		return nil, err
 	}

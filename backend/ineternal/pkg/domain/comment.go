@@ -16,6 +16,27 @@ package domain
 
 import "github.com/chenmingyong0423/fnote/backend/ineternal/pkg/types"
 
+type CommentWithReplies struct {
+	Comment
+	Replies []CommentReply
+}
+
 type Comment struct {
 	types.Comment
 }
+
+type CommentReply struct {
+	types.CommentReply
+	Status CommentStatus `bson:"status"`
+}
+
+type CommentStatus uint
+
+const (
+	// CommentStatusPending 审核中
+	CommentStatusPending CommentStatus = iota
+	// CommentStatusApproved 审核通过
+	CommentStatusApproved
+	// CommentStatusRejected 审核不通过
+	CommentStatusRejected
+)

@@ -16,23 +16,23 @@ package dao
 
 import (
 	"context"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Friend struct {
-	Id          string `bson:"_id"`
-	Name        string `bson:"name"`
-	Url         string `bson:"url"`
-	Logo        string `bson:"logo"`
-	Description string `bson:"description"`
-	Email       string `bson:"email"`
-	// 0 hiding，1 pending，2 showing
-	Status     int   `bson:"status"`
-	Priority   int   `bson:"priority"`
-	CreateTime int64 `bson:"create_time"`
-	UpdateTime int64 `bson:"update_time"`
+	Id          string              `bson:"_id"`
+	Name        string              `bson:"name"`
+	Url         string              `bson:"url"`
+	Logo        string              `bson:"logo"`
+	Description string              `bson:"description"`
+	Email       string              `bson:"email"`
+	Status      domain.FriendStatus `bson:"status"`
+	Priority    int                 `bson:"priority"`
+	CreateTime  int64               `bson:"create_time"`
+	UpdateTime  int64               `bson:"update_time"`
 }
 
 type IFriendDao interface {
@@ -73,7 +73,7 @@ func (d *FriendDao) Add(ctx context.Context, friend Friend) error {
 }
 
 func (d *FriendDao) FindDisplaying(ctx context.Context) ([]*Friend, error) {
-	cursor, err := d.coll.Find(ctx, bson.M{"status": 2})
+	cursor, err := d.coll.Find(ctx, bson.M{"status": domain.FriendStatusShowing})
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from %s", d.coll.Name())
 	}
