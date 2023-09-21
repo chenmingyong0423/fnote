@@ -26,7 +26,11 @@ import (
 	"net/http"
 )
 
-var CategorySet = wire.NewSet(NewCategoryHandler, service.NewCategoryService, repository.NewCategoryRepository, dao.NewCategoryDao)
+var CategorySet = wire.NewSet(NewCategoryHandler, service.NewCategoryService, repository.NewCategoryRepository, dao.NewCategoryDao,
+	wire.Bind(new(service.ICategoryService), new(*service.CategoryService)),
+	wire.Bind(new(repository.ICategoryRepository), new(*repository.CategoryRepository)),
+	wire.Bind(new(dao.ICategoryDao), new(*dao.CategoryDao)),
+)
 
 func NewCategoryHandler(serv service.ICategoryService) *CategoryHandler {
 	return &CategoryHandler{

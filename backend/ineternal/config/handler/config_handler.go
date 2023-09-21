@@ -26,7 +26,10 @@ import (
 	"net/http"
 )
 
-var ConfigSet = wire.NewSet(NewConfigHandler, service.NewConfigService, repository.NewConfigRepository, dao.NewConfigDao)
+var ConfigSet = wire.NewSet(NewConfigHandler, service.NewConfigService, repository.NewConfigRepository, dao.NewConfigDao,
+	wire.Bind(new(service.IConfigService), new(*service.ConfigService)),
+	wire.Bind(new(repository.IConfigRepository), new(*repository.ConfigRepository)),
+	wire.Bind(new(dao.IConfigDao), new(*dao.ConfigDao)))
 
 func NewConfigHandler(serv service.IConfigService) *ConfigHandler {
 	return &ConfigHandler{

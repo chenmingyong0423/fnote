@@ -17,6 +17,7 @@ package service
 import (
 	"context"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
+	"github.com/google/wire"
 	"github.com/pkg/errors"
 	"gopkg.in/gomail.v2"
 )
@@ -25,7 +26,10 @@ type IEmailService interface {
 	SendEmail(ctx context.Context, email domain.Email) error
 }
 
-var _ IEmailService = (*EmailService)(nil)
+var (
+	_        IEmailService = (*EmailService)(nil)
+	EmailSet               = wire.NewSet(NewEmailService, wire.Bind(new(IEmailService), new(*EmailService)))
+)
 
 type EmailService struct {
 }

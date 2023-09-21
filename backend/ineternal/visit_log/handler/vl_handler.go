@@ -27,7 +27,10 @@ import (
 	"net/http"
 )
 
-var VlSet = wire.NewSet(NewVisitLogHandler, service.NewVisitLogService, repository.NewVisitLogRepository, dao.NewVisitLogDao)
+var VlSet = wire.NewSet(NewVisitLogHandler, service.NewVisitLogService, repository.NewVisitLogRepository, dao.NewVisitLogDao,
+	wire.Bind(new(service.IVisitLogService), new(*service.VisitLogService)),
+	wire.Bind(new(repository.IVisitLogRepository), new(*repository.VisitLogRepository)),
+	wire.Bind(new(dao.IVisitLogDao), new(*dao.VisitLogDao)))
 
 func NewVisitLogHandler(serv service.IVisitLogService, cfgServ configServ.IConfigService) *VisitLogHandler {
 	return &VisitLogHandler{

@@ -27,7 +27,10 @@ import (
 	"net/http"
 )
 
-var FriendSet = wire.NewSet(NewFriendHandler, service.NewFriendService, repository.NewFriendRepository, dao.NewFriendDao)
+var FriendSet = wire.NewSet(NewFriendHandler, service.NewFriendService, repository.NewFriendRepository, dao.NewFriendDao,
+	wire.Bind(new(service.IFriendService), new(*service.FriendService)),
+	wire.Bind(new(repository.IFriendRepository), new(*repository.FriendRepository)),
+	wire.Bind(new(dao.IFriendDao), new(*dao.FriendDao)))
 
 func NewFriendHandler(serv service.IFriendService) *FriendHandler {
 	return &FriendHandler{

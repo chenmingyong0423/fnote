@@ -19,6 +19,7 @@ import (
 	configServ "github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	emailServ "github.com/chenmingyong0423/fnote/backend/ineternal/email/service"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
+	"github.com/google/wire"
 )
 
 type IMessageService interface {
@@ -26,7 +27,10 @@ type IMessageService interface {
 	SendEmailToWebmaster(ctx context.Context, subject string, body string, contentType string) error
 }
 
-var _ IMessageService = (*MessageService)(nil)
+var (
+	_      IMessageService = (*MessageService)(nil)
+	MsgSet                 = wire.NewSet(NewMessageService, wire.Bind(new(IMessageService), new(*MessageService)))
+)
 
 func NewMessageService(configServ configServ.IConfigService, emailServ emailServ.IEmailService) *MessageService {
 	return &MessageService{
