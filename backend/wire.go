@@ -17,14 +17,14 @@
 package main
 
 import (
-	ctgHandler "github.com/chenmingyong0423/fnote/backend/ineternal/category/handler"
-	commentHandler "github.com/chenmingyong0423/fnote/backend/ineternal/comment/hanlder"
-	cfgHandler "github.com/chenmingyong0423/fnote/backend/ineternal/config/handler"
-	emailServ "github.com/chenmingyong0423/fnote/backend/ineternal/email/service"
-	friendHanlder "github.com/chenmingyong0423/fnote/backend/ineternal/friend/hanlder"
-	msgServ "github.com/chenmingyong0423/fnote/backend/ineternal/message/service"
-	postHanlder "github.com/chenmingyong0423/fnote/backend/ineternal/post/handler"
-	vlHandler "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/handler"
+	ctgHandler "github.com/chenmingyong0423/fnote/backend/internal/category/handler"
+	commentHandler "github.com/chenmingyong0423/fnote/backend/internal/comment/hanlder"
+	cfgHandler "github.com/chenmingyong0423/fnote/backend/internal/config/handler"
+	emailServ "github.com/chenmingyong0423/fnote/backend/internal/email/service"
+	friendHanlder "github.com/chenmingyong0423/fnote/backend/internal/friend/hanlder"
+	msgServ "github.com/chenmingyong0423/fnote/backend/internal/message/service"
+	postHanlder "github.com/chenmingyong0423/fnote/backend/internal/post/handler"
+	vlHandler "github.com/chenmingyong0423/fnote/backend/internal/visit_log/handler"
 	"github.com/chenmingyong0423/fnote/backend/ioc"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"

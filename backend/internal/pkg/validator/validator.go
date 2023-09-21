@@ -12,27 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package validator
 
 import (
-	"os"
+	"regexp"
 
-	"github.com/chenmingyong0423/fnote/backend/ioc"
-	"github.com/pkg/errors"
+	"github.com/go-playground/validator/v10"
 )
 
-func main() {
-	if len(os.Args) < 3 {
-		panic(errors.New("missing parameters"))
+func ValidateEmailFormat(fl validator.FieldLevel) bool {
+	if val, ok := fl.Field().Interface().(string); ok {
+		regExp := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+		if regExp.MatchString(val) {
+			return true
+		}
 	}
-	username := os.Args[1]
-	password := os.Args[2]
-	app, err := initializeApp(ioc.Username(username), ioc.Password(password))
-	if err != nil {
-		panic(err)
-	}
-	err = app.Run()
-	if err != nil {
-		panic(err)
-	}
+	return false
 }

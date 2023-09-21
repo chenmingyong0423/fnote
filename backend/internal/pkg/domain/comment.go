@@ -12,27 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package domain
 
-import (
-	"os"
+import "github.com/chenmingyong0423/fnote/backend/internal/pkg/types"
 
-	"github.com/chenmingyong0423/fnote/backend/ioc"
-	"github.com/pkg/errors"
-)
-
-func main() {
-	if len(os.Args) < 3 {
-		panic(errors.New("missing parameters"))
-	}
-	username := os.Args[1]
-	password := os.Args[2]
-	app, err := initializeApp(ioc.Username(username), ioc.Password(password))
-	if err != nil {
-		panic(err)
-	}
-	err = app.Run()
-	if err != nil {
-		panic(err)
-	}
+type CommentWithReplies struct {
+	Comment
+	Replies []CommentReply
 }
+
+type Comment struct {
+	types.Comment
+}
+
+type CommentReply struct {
+	types.CommentReply
+	Status CommentStatus `bson:"status"`
+}
+
+type CommentStatus uint
+
+const (
+	// CommentStatusPending 审核中
+	CommentStatusPending CommentStatus = iota
+	// CommentStatusApproved 审核通过
+	CommentStatusApproved
+	// CommentStatusRejected 审核不通过
+	CommentStatusRejected
+)
