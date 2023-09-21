@@ -1,15 +1,16 @@
 <template>
     <!-- bg-#F0F2F5 -->
     <div>
-        <div class="text-0 relative">
+        <!-- 后期加 -->
+        <!-- <div class="text-0 relative">
             <div class="text-center w-full font-bold text-70 absolute c-#fff top-30% text-shadow-xl">
                 xxx's Blog
                 <TypeIt></TypeIt>
             </div>
             <img src="../assets/images/bg.png" class="w-full h-100vh object-cover" />
-        </div>
+        </div> -->
 
-        <div class=" py40 px25">
+        <div class="pt70 pb40 px25">
             <el-row :gutter="20">
                 <el-col :span="17">
                     <div>
@@ -20,7 +21,7 @@
                 <el-col :span="7">
                     <div class="w-full">
                         <Profile />
-                        <el-affix :offset="50">
+                        <el-affix :offset="0">
                             <Comment />
                         </el-affix>
                     </div>

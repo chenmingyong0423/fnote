@@ -15,20 +15,21 @@
 package ioc
 
 import (
-	ctgHandler "github.com/chenmingyong0423/fnote/backend/ineternal/category/handler"
-	commentHandler "github.com/chenmingyong0423/fnote/backend/ineternal/comment/hanlder"
-	cfgHandler "github.com/chenmingyong0423/fnote/backend/ineternal/config/handler"
-	friendHanlder "github.com/chenmingyong0423/fnote/backend/ineternal/friend/hanlder"
-	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/middleware"
-	myValidator "github.com/chenmingyong0423/fnote/backend/ineternal/pkg/validator"
-	postHanlder "github.com/chenmingyong0423/fnote/backend/ineternal/post/handler"
-	vlHandler "github.com/chenmingyong0423/fnote/backend/ineternal/visit_log/handler"
+	"strings"
+	"time"
+
+	ctgHandler "github.com/chenmingyong0423/fnote/backend/internal/category/handler"
+	commentHandler "github.com/chenmingyong0423/fnote/backend/internal/comment/hanlder"
+	cfgHandler "github.com/chenmingyong0423/fnote/backend/internal/config/handler"
+	friendHanlder "github.com/chenmingyong0423/fnote/backend/internal/friend/hanlder"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/middleware"
+	myValidator "github.com/chenmingyong0423/fnote/backend/internal/pkg/validator"
+	postHanlder "github.com/chenmingyong0423/fnote/backend/internal/post/handler"
+	vlHandler "github.com/chenmingyong0423/fnote/backend/internal/visit_log/handler"
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"strings"
-	"time"
 )
 
 func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *cfgHandler.ConfigHandler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler) (*gin.Engine, error) {
