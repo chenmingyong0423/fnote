@@ -28,7 +28,10 @@ import (
 	"slices"
 )
 
-var PostSet = wire.NewSet(NewPostHandler, service.NewPostService, repository.NewPostRepository, dao.NewPostDao)
+var PostSet = wire.NewSet(NewPostHandler, service.NewPostService, repository.NewPostRepository, dao.NewPostDao,
+	wire.Bind(new(service.IPostService), new(*service.PostService)),
+	wire.Bind(new(repository.IPostRepository), new(*repository.PostRepository)),
+	wire.Bind(new(dao.IPostDao), new(*dao.PostDao)))
 
 func NewPostHandler(serv service.IPostService) *PostHandler {
 	return &PostHandler{

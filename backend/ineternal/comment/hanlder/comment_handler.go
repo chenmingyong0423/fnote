@@ -32,7 +32,10 @@ import (
 	"net/http"
 )
 
-var CommentSet = wire.NewSet(NewCommentHandler, service.NewCommentService, repository.NewCommentRepository, dao.NewCommentDao)
+var CommentSet = wire.NewSet(NewCommentHandler, service.NewCommentService, repository.NewCommentRepository, dao.NewCommentDao,
+	wire.Bind(new(service.ICommentService), new(*service.CommentService)),
+	wire.Bind(new(repository.ICommentRepository), new(*repository.CommentRepository)),
+	wire.Bind(new(dao.ICommentDao), new(*dao.CommentDao)))
 
 func NewCommentHandler(serv service.ICommentService, cfgService configServ.IConfigService, postServ postServ.IPostService, msgServ msgService.IMessageService) *CommentHandler {
 	return &CommentHandler{
