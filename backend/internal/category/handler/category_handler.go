@@ -45,7 +45,7 @@ type CategoryHandler struct {
 
 func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 	engine.GET("/categories", h.GetCategoriesAndTags)
-	engine.GET("/category/:name/tags", h.GetTagsByName)
+	engine.GET("/categories/:name/tags", h.GetTagsByName)
 	engine.GET("/menus", h.GetMenus)
 }
 
