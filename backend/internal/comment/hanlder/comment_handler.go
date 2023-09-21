@@ -55,9 +55,9 @@ type CommentHandler struct {
 }
 
 func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
-	group := engine.Group("/comment")
+	group := engine.Group("/comments")
 	group.POST("", h.AddComment)
-	group.POST("/:commentId/reply", h.AddCommentReply)
+	group.POST("/:commentId/replies", h.AddCommentReply)
 }
 
 func (h *CommentHandler) AddComment(ctx *gin.Context) {

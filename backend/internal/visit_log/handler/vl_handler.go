@@ -46,7 +46,7 @@ type VisitLogHandler struct {
 }
 
 func (h *VisitLogHandler) RegisterGinRoutes(engine *gin.Engine) {
-	routerGroup := engine.Group("/log")
+	routerGroup := engine.Group("/logs")
 	routerGroup.POST("", h.CollectVisitLog)
 }
 

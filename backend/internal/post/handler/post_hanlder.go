@@ -47,9 +47,9 @@ type PostHandler struct {
 func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	engine.GET("/home/posts", h.GetHomePosts)
 	engine.GET("/posts", h.GetPosts)
-	engine.GET("/post/:sug", h.GetPostBySug)
-	engine.POST("/post/:sug/likes", h.AddLike)
-	engine.DELETE("/post/:sug/likes", h.DeleteLike)
+	engine.GET("/posts/:sug", h.GetPostBySug)
+	engine.POST("/posts/:sug/likes", h.AddLike)
+	engine.DELETE("/posts/:sug/likes", h.DeleteLike)
 }
 
 func (h *PostHandler) GetHomePosts(ctx *gin.Context) {

@@ -46,7 +46,7 @@ type FriendHandler struct {
 
 func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 	engine.GET("/friends", h.GetFriends)
-	engine.POST("/friend", h.ApplyForFriend)
+	engine.POST("/friends", h.ApplyForFriend)
 }
 
 func (h *FriendHandler) GetFriends(ctx *gin.Context) {

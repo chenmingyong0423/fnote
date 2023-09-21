@@ -43,7 +43,7 @@ type ConfigHandler struct {
 }
 
 func (h *ConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
-	routerGroup := engine.Group("/config")
+	routerGroup := engine.Group("/configs")
 	// 获取站长信息
 	routerGroup.GET("/webmaster", h.GetWebmasterInfo)
 }
