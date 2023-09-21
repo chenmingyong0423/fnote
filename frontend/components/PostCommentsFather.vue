@@ -34,40 +34,12 @@
  *                不见满街漂亮妹，哪个归得程序员？
  -->
 <template>
-    <div class="rounded-15 bg-#fff pt20 pb80 px30">
-        <!-- 发布评论 -->
-        <div>
-            <el-form ref="ruleFormRef" :model="form" class="mt30">
-                <el-row :gutter="50">
-                    <el-col :span="12">
-                        <el-form-item label="昵称" prop="nickName">
-                            <el-input v-model="form.nickName" placeholder="请输入昵称" clearable />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="邮箱" prop="email">
-                            <el-input v-model="form.email" placeholder="请输入邮箱地址(用于接收通知)" clearable />
-                        </el-form-item>
-                    </el-col>
-                </el-row>
+    <div>
 
-                <el-form-item prop="introduce">
-                    <el-input show-word-limit :maxlength="30" clearable type="textarea" v-model="form.content"
-                        placeholder="请输入评论内容，支持markdown格式" />
-                </el-form-item>
-                <el-form-item>
-                    <div class="w-full text-center">
-                        <el-button type="primary" @click="onSubmit">提交评论</el-button>
-                        <el-button @click="resetForm(ruleFormRef)">清空</el-button>
-                    </div>
-                </el-form-item>
-            </el-form>
-        </div>
         <!-- 展示评论 -->
         <div>
 
-            <div class="text-16">{{ commentInfo.length + ' 评论' }}</div>
-            <div v-for="item, index in commentInfo" :key="index">
+            <div>
                 <!-- 一级评论 -->
                 <el-divider class="important:my24"></el-divider>
                 <div>
@@ -76,55 +48,23 @@
                         <div>
                             <el-space :size="0">
                                 <div class="ml8">
-                                    {{ item.username }}
+                                    {{ commentInfo.username }}
                                 </div>
                                 <div class="ml8">
                                     发表于
                                 </div>
                                 <div class="ml4">
-                                    {{ item.commentTime }}
+                                    {{ commentInfo.commentTime }}
                                 </div>
                             </el-space>
                         </div>
                     </el-space>
-                    <v-md-preview :text="item.content" class="px18"></v-md-preview>
-                    <el-button class="ml50">回复</el-button>
-
+                    <v-md-preview :text="commentInfo.content" class="px18"></v-md-preview>
+                    <el-button class="ml50" @click="showReply = true">回复</el-button>
+                    <el-button class="ml50" v-if="showReply" @click="showReply = false">取消</el-button>
+                    <SubmitComments v-if="showReply" />
                     <!-- 二级评论 -->
-                    <div v-if="item.replies" class="mt25 px50">
-                        <el-space direction="vertical" :fill="true" class="w-full" :spacer="spacer">
-
-                            <div v-for="replies in item.replies" :key="replies.id"
-                                class="b-1 b-#DDDBDB b-solid p20 rounded-10">
-                                <el-space :size="8" alignment="flex-start">
-                                    <el-avatar :size="36"
-                                        src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
-                                    <div>
-                                        <el-space :size="0">
-                                            <div class="ml8 flex">
-                                                <div>{{ replies.username }}</div>
-                                                <div v-if="replies.replyTo" class="ml8">
-                                                    <el-space>
-                                                        <div>回复</div>
-                                                        <div>{{ replies.replyTo }}</div>
-                                                    </el-space>
-                                                </div>
-                                            </div>
-                                            <div class="ml8">
-                                                发表于
-                                            </div>
-                                            <div class="ml4">
-                                                {{ replies.replyTime }}
-                                            </div>
-                                        </el-space>
-                                    </div>
-                                </el-space>
-                                <v-md-preview :text="replies.content" class="px18"></v-md-preview>
-                                <el-button class="ml50">回复</el-button>
-                            </div>
-                        </el-space>
-                    </div>
-
+                    <PostCommentsSon :replies="commentInfo.replies" />
                 </div>
             </div>
         </div>
@@ -133,23 +73,10 @@
 
 
 <script lang="ts" setup>
-import type { FormInstance, FormRules } from 'element-plus'
-import { ElDivider } from 'element-plus'
+
 const props = defineProps(['commentInfo'])
-const spacer = h(ElDivider)
-const ruleFormRef = ref<FormInstance>()
-const form = ref({
-    nickName: '',
-    email: '',
-    content: ''
-})
-const onSubmit = () => {
-    console.log('submit!')
-}
-const resetForm = (formEl: FormInstance | undefined) => {
-    if (!formEl) return
-    formEl.resetFields()
-}
+let showReply = ref(false)
+
 // const commentInfo = [
 //     {
 //         "id": "8fbe8dfd-32bd-4901-9eae-4d7f0287b799",
