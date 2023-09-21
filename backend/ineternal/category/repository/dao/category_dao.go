@@ -37,9 +37,9 @@ type ICategoryDao interface {
 
 var _ ICategoryDao = (*CategoryDao)(nil)
 
-func NewCategoryDao(coll *mongo.Collection) *CategoryDao {
+func NewCategoryDao(db *mongo.Database) *CategoryDao {
 	return &CategoryDao{
-		coll: coll,
+		coll: db.Collection("categories"),
 	}
 }
 

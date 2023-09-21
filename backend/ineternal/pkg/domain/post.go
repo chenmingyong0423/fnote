@@ -22,7 +22,7 @@ type PostsQueryCondition struct {
 
 	Search *string
 
-	Sort *api.Sorting
+	api.Sorting
 
 	Category *string
 	Tag      *string
@@ -67,9 +67,20 @@ type PrimaryPost struct {
 	CoverImg     string   `json:"cover_img"`
 	Category     string   `json:"category"`
 	Tags         []string `json:"tags"`
-	LikeCount    int      `json:"likeCount"`
+	LikeCount    int      `json:"like_count"`
 	CommentCount int      `json:"comment_count"`
 	VisitCount   int      `json:"visit_count"`
 	Priority     int      `json:"priority"`
-	CreateTime   int64    `json:"createTime"`
+	CreateTime   int64    `json:"create_time"`
 }
+
+type PostStatus uint
+
+const (
+	// PostStatusDraft 草稿
+	PostStatusDraft PostStatus = iota
+	// PostStatusPunished 已发布
+	PostStatusPunished
+	// PostStatusDeleted 已删除
+	PostStatusDeleted
+)

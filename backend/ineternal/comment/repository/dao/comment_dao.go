@@ -16,51 +16,43 @@ package dao
 
 import (
 	"context"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/types"
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Comment struct {
-	Id string `bson:"_id"`
-	types.Comment
+	Id            string `bson:"_id"`
+	types.Comment `bson:"inline"`
 	// 该评论下的所有回复的内容
-	Replies []CommentReply `bson:"replies"`
-	// 评论状态：审核不通过 0 未审核 1 审核通过 2
-	Status int `bson:"status"`
+	Replies []CommentReply       `bson:"replies"`
+	Status  domain.CommentStatus `bson:"status"`
 	// 评论时间
 	CreateTime int64 `bson:"created_at" bson:"create_time"`
 	// 修改时间
 	UpdateTime int64 `bson:"updated_at" bson:"update_time"`
 }
 
-type UserInfo4Reply types.UserInfo4Comment
-
 type CommentReply struct {
-	ReplyId string `bson:"reply_id"`
-	// 回复内容
-	Content string `bson:"content"`
-	// 被回复的回复 Id
-	ReplyToId string `bson:"reply_to_id"`
-	// 用户信息
-	UserInfo UserInfo4Reply `bson:"user_info"`
-	// 被回复用户的信息
-	RepliedUserInfo UserInfo4Reply `bson:"replied_user_info"`
+	types.CommentReply `bson:"inline"`
+	Status             domain.CommentStatus `bson:"status"`
 	// 回复时间
 	CreateTime int64 `bson:"created_at" bson:"create_time"`
 	// 修改时间
 	UpdateTime int64 `bson:"updated_at" bson:"update_time"`
-	// 评论状态：审核不通过 0 未审核 1 审核通过 2
-	Status int `bson:"status"`
 }
 
 type ICommentDao interface {
 	AddComment(ctx context.Context, comment Comment) (any, error)
+	FindCommentById(ctx context.Context, cmtId string) (*Comment, error)
+	AddCommentReply(ctx context.Context, cmtId string, commentReply CommentReply) error
 }
 
-func NewCommentDao(coll *mongo.Collection) *CommentDao {
+func NewCommentDao(db *mongo.Database) *CommentDao {
 	return &CommentDao{
-		coll: coll,
+		coll: db.Collection("comment"),
 	}
 }
 
@@ -68,6 +60,33 @@ var _ ICommentDao = (*CommentDao)(nil)
 
 type CommentDao struct {
 	coll *mongo.Collection
+}
+
+func (d *CommentDao) AddCommentReply(ctx context.Context, cmtId string, commentReply CommentReply) error {
+	// 构建查询条件
+	filter := bson.M{"_id": cmtId}
+
+	// 构建更新操作
+	update := bson.M{
+		"$push": bson.M{"replies": commentReply},
+	}
+	result, err := d.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return errors.Wrapf(err, "fails to update one from %s, filter=%v, update=%v", d.coll.Name(), filter, update)
+	}
+	if result.ModifiedCount == 0 {
+		return errors.Wrapf(err, "modifiedCount = 0, fails to update one from %s, filter=%v, update=%v", d.coll.Name(), filter, update)
+	}
+	return nil
+}
+
+func (d *CommentDao) FindCommentById(ctx context.Context, cmtId string) (*Comment, error) {
+	comment := new(Comment)
+	err := d.coll.FindOne(ctx, bson.D{bson.E{Key: "_id", Value: cmtId}, bson.E{Key: "status", Value: domain.CommentStatusApproved}}).Decode(comment)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fails to find the document from %s, cmtId=%s", d.coll.Name(), cmtId)
+	}
+	return comment, nil
 }
 
 func (d *CommentDao) AddComment(ctx context.Context, comment Comment) (any, error) {
