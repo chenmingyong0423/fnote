@@ -37,9 +37,9 @@ type IConfigDao interface {
 	Increase(ctx context.Context, field string) error
 }
 
-func NewConfigDao(coll *mongo.Collection) *ConfigDao {
+func NewConfigDao(db *mongo.Database) *ConfigDao {
 	return &ConfigDao{
-		coll: coll,
+		coll: db.Collection("configs"),
 	}
 }
 

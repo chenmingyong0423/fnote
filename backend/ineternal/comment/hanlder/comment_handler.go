@@ -15,6 +15,8 @@
 package hanlder
 
 import (
+	"github.com/chenmingyong0423/fnote/backend/ineternal/comment/repository"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/comment/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/ineternal/comment/service"
 	configServ "github.com/chenmingyong0423/fnote/backend/ineternal/config/service"
 	msgService "github.com/chenmingyong0423/fnote/backend/ineternal/message/service"
@@ -23,20 +25,22 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/types"
 	postServ "github.com/chenmingyong0423/fnote/backend/ineternal/post/service"
 	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log/slog"
 	"net/http"
 )
 
-func NewCommentHandler(engine *gin.Engine, serv service.ICommentService, cfgService configServ.IConfigService, postServ postServ.IPostService, msgServ msgService.IMessageService) *CommentHandler {
-	ch := &CommentHandler{
+var CommentSet = wire.NewSet(NewCommentHandler, service.NewCommentService, repository.NewCommentRepository, dao.NewCommentDao)
+
+func NewCommentHandler(serv service.ICommentService, cfgService configServ.IConfigService, postServ postServ.IPostService, msgServ msgService.IMessageService) *CommentHandler {
+	return &CommentHandler{
 		serv:       serv,
 		cfgService: cfgService,
 		postServ:   postServ,
 		msgServ:    msgServ,
 	}
-	group := engine.Group("/comment")
-	group.POST("", ch.AddComment)
-	return ch
 }
 
 type CommentHandler struct {
@@ -44,6 +48,12 @@ type CommentHandler struct {
 	cfgService configServ.IConfigService
 	postServ   postServ.IPostService
 	msgServ    msgService.IMessageService
+}
+
+func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
+	group := engine.Group("/comment")
+	group.POST("", h.AddComment)
+	group.POST("/:commentId/reply", h.AddCommentReply)
 }
 
 func (h *CommentHandler) AddComment(ctx *gin.Context) {
@@ -76,7 +86,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-	post, err := h.postServ.InternalGetPostById(ctx, req.PostId)
+	post, err := h.postServ.InternalGetPunishedPostById(ctx, req.PostId)
 	if err != nil {
 		slog.ErrorContext(ctx, "post", err.Error())
 		ctx.AbortWithStatus(http.StatusInternalServerError)
@@ -102,6 +112,90 @@ func (h *CommentHandler) AddComment(ctx *gin.Context) {
 	if err != nil {
 		slog.ErrorContext(ctx, "comment", err.Error())
 		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	go func() {
+		gErr := h.postServ.IncreaseVisitCount(ctx, req.PostId)
+		if gErr != nil {
+			slog.WarnContext(ctx, "comment", gErr.Error())
+		}
+		gErr = h.msgServ.SendEmailToWebmaster(ctx, "文章评论通知", "您好，您在文章有新的评论，详情请前往后台进行查看。", "text/plain")
+		if gErr != nil {
+			slog.WarnContext(ctx, "message", gErr.Error())
+		}
+	}()
+	ctx.JSON(http.StatusOK, api.SuccessResponse)
+}
+
+func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
+	type ReplyRequest struct {
+		PostId string `json:"postId" binding:"required"`
+		// 如果是对某个回复进行回复，则是某个回复的 id
+		ReplyToId string `json:"replyToId"`
+		UserName  string `json:"username" binding:"required"`
+		Email     string `json:"email" binding:"required,validateEmailFormat"`
+		Website   string `json:"website"`
+		Content   string `json:"content" binding:"required,max=200"`
+	}
+	req := new(ReplyRequest)
+	err := ctx.BindJSON(req)
+	if err != nil {
+		slog.ErrorContext(ctx, "reply", err.Error())
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	// 根评论的 id
+	commentId := ctx.Param("commentId")
+	ip := ctx.ClientIP()
+	if ip == "" {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "comment")
+	if err != nil {
+		slog.ErrorContext(ctx, "reply", err.Error())
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	if !switchConfig.Status {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	post, err := h.postServ.InternalGetPunishedPostById(ctx, req.PostId)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			slog.ErrorContext(ctx, "post", err.Error())
+			ctx.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+		slog.ErrorContext(ctx, "post", err.Error())
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	if !post.IsCommentAllowed {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	err = h.serv.AddCommentReply(ctx, commentId, req.PostId, domain.CommentReply{
+		CommentReply: types.CommentReply{
+			Content:   req.Content,
+			ReplyToId: req.ReplyToId,
+			UserInfo: types.UserInfo4Reply{
+				Name:    req.UserName,
+				Email:   req.Email,
+				Website: req.Website,
+				Ip:      ip,
+			},
+		}})
+	if err != nil {
+		var httpCodeError *api.HttpCodeError
+		if errors.As(err, &httpCodeError) {
+			ctx.AbortWithStatus(int(*httpCodeError))
+		} else {
+			slog.ErrorContext(ctx, "reply", err.Error())
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+		}
 		return
 	}
 	go func() {

@@ -17,6 +17,7 @@ package dao
 import (
 	"context"
 	"fmt"
+	"github.com/chenmingyong0423/fnote/backend/ineternal/pkg/domain"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,32 +25,31 @@ import (
 )
 
 type Post struct {
-	Sug      string   `bson:"_id"`
-	Author   string   `bson:"author"`
-	Title    string   `bson:"title"`
-	Summary  string   `bson:"summary"`
-	Content  string   `bson:"content"`
-	CoverImg string   `bson:"cover_img"`
-	Category string   `bson:"category"`
-	Tags     []string `bson:"tags"`
-	// 0 - 草稿，1 - 私密，2 - 已发布
-	Status           string   `bson:"status"`
-	Likes            []string `bson:"likes"`
-	LikeCount        int      `bson:"like_count"`
-	CommentCount     int      `bson:"comment_count"`
-	VisitCount       int      `bson:"visit_count"`
-	Priority         int      `bson:"priority"`
-	MetaDescription  string   `bson:"meta_description"`
-	MetaKeywords     string   `bson:"meta_keywords"`
-	WordCount        int      `bson:"word_count"`
-	IsCommentAllowed bool     `bson:"is_comment_allowed"`
-	CreateTime       int64    `bson:"create_time"`
-	UpdateTime       int64    `bson:"update_time"`
+	Sug              string            `bson:"_id"`
+	Author           string            `bson:"author"`
+	Title            string            `bson:"title"`
+	Summary          string            `bson:"summary"`
+	Content          string            `bson:"content"`
+	CoverImg         string            `bson:"cover_img"`
+	Category         string            `bson:"category"`
+	Tags             []string          `bson:"tags"`
+	Status           domain.PostStatus `bson:"status"`
+	Likes            []string          `bson:"likes"`
+	LikeCount        int               `bson:"like_count"`
+	CommentCount     int               `bson:"comment_count"`
+	VisitCount       int               `bson:"visit_count"`
+	Priority         int               `bson:"priority"`
+	MetaDescription  string            `bson:"meta_description"`
+	MetaKeywords     string            `bson:"meta_keywords"`
+	WordCount        int               `bson:"word_count"`
+	IsCommentAllowed bool              `bson:"is_comment_allowed"`
+	CreateTime       int64             `bson:"create_time"`
+	UpdateTime       int64             `bson:"update_time"`
 }
 type IPostDao interface {
 	GetLatest5Posts(ctx context.Context) ([]*Post, error)
 	QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error)
-	GetPostById(ctx context.Context, sug string) (*Post, error)
+	GetPunishedPostById(ctx context.Context, sug string) (*Post, error)
 	FindByIdAndIp(ctx context.Context, sug string, ip string) (*Post, error)
 	AddLike(ctx context.Context, sug string, ip string) error
 	DeleteLike(ctx context.Context, sug string, ip string) error
@@ -58,9 +58,9 @@ type IPostDao interface {
 
 var _ IPostDao = (*PostDao)(nil)
 
-func NewPostDao(coll *mongo.Collection) *PostDao {
+func NewPostDao(db *mongo.Database) *PostDao {
 	return &PostDao{
-		coll: coll,
+		coll: db.Collection("posts"),
 	}
 }
 
@@ -116,9 +116,9 @@ func (d *PostDao) FindByIdAndIp(ctx context.Context, id string, ip string) (*Pos
 	return post, nil
 }
 
-func (d *PostDao) GetPostById(ctx context.Context, id string) (*Post, error) {
+func (d *PostDao) GetPunishedPostById(ctx context.Context, id string) (*Post, error) {
 	post := new(Post)
-	err := d.coll.FindOne(ctx, bson.M{"_id": id}).Decode(post)
+	err := d.coll.FindOne(ctx, bson.M{"_id": id, "status": domain.PostStatusPunished}).Decode(post)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the document from %s, id=%s", d.coll.Name(), id)
 	}
@@ -145,7 +145,7 @@ func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *o
 
 func (d *PostDao) GetLatest5Posts(ctx context.Context) ([]*Post, error) {
 	findOptions := options.Find().SetSort(bson.M{"create_time": -1}).SetLimit(5)
-	cursor, err := d.coll.Find(ctx, bson.M{}, findOptions)
+	cursor, err := d.coll.Find(ctx, bson.M{"status": domain.PostStatusPunished}, findOptions)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from %s, findOptions=%v", d.coll.Name(), findOptions)
 	}

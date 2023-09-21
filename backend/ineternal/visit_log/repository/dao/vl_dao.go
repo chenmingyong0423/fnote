@@ -51,6 +51,6 @@ func (d *VisitLogDao) Add(ctx context.Context, visitHistory VisitHistory) error 
 	return nil
 }
 
-func NewVisitLogDao(coll *mongo.Collection) *VisitLogDao {
-	return &VisitLogDao{coll: coll}
+func NewVisitLogDao(db *mongo.Database) *VisitLogDao {
+	return &VisitLogDao{coll: db.Collection("visit_logs")}
 }
