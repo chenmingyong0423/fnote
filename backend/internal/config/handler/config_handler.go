@@ -18,19 +18,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/config/repository"
-	"github.com/chenmingyong0423/fnote/backend/internal/config/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 )
-
-var ConfigSet = wire.NewSet(NewConfigHandler, service.NewConfigService, repository.NewConfigRepository, dao.NewConfigDao,
-	wire.Bind(new(service.IConfigService), new(*service.ConfigService)),
-	wire.Bind(new(repository.IConfigRepository), new(*repository.ConfigRepository)),
-	wire.Bind(new(dao.IConfigDao), new(*dao.ConfigDao)))
 
 func NewConfigHandler(serv service.IConfigService) *ConfigHandler {
 	return &ConfigHandler{

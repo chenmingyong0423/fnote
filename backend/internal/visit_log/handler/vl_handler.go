@@ -21,17 +21,9 @@ import (
 	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository"
-	"github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/internal/visit_log/service"
 	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 )
-
-var VlSet = wire.NewSet(NewVisitLogHandler, service.NewVisitLogService, repository.NewVisitLogRepository, dao.NewVisitLogDao,
-	wire.Bind(new(service.IVisitLogService), new(*service.VisitLogService)),
-	wire.Bind(new(repository.IVisitLogRepository), new(*repository.VisitLogRepository)),
-	wire.Bind(new(dao.IVisitLogDao), new(*dao.VisitLogDao)))
 
 func NewVisitLogHandler(serv service.IVisitLogService, cfgServ configServ.IConfigService) *VisitLogHandler {
 	return &VisitLogHandler{

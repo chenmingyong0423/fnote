@@ -17,29 +17,22 @@
 package main
 
 import (
-	ctgHandler "github.com/chenmingyong0423/fnote/backend/internal/category/handler"
-	commentHandler "github.com/chenmingyong0423/fnote/backend/internal/comment/hanlder"
-	cfgHandler "github.com/chenmingyong0423/fnote/backend/internal/config/handler"
-	emailServ "github.com/chenmingyong0423/fnote/backend/internal/email/service"
-	friendHanlder "github.com/chenmingyong0423/fnote/backend/internal/friend/hanlder"
-	msgServ "github.com/chenmingyong0423/fnote/backend/internal/message/service"
-	postHanlder "github.com/chenmingyong0423/fnote/backend/internal/post/handler"
-	vlHandler "github.com/chenmingyong0423/fnote/backend/internal/visit_log/handler"
-	"github.com/chenmingyong0423/fnote/backend/ioc"
+	"github.com/chenmingyong0423/fnote/backend/internal/ioc"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
 func initializeApp(username ioc.Username, password ioc.Password) (*gin.Engine, error) {
 	panic(wire.Build(
-		ctgHandler.CategorySet,
-		commentHandler.CommentSet,
-		cfgHandler.ConfigSet,
-		friendHanlder.FriendSet,
-		postHanlder.PostSet,
-		vlHandler.VlSet,
-		emailServ.EmailSet,
-		msgServ.MsgSet,
+		ioc.CategorySet,
+		ioc.CommentSet,
+		ioc.ConfigSet,
+		ioc.FriendSet,
+		ioc.PostSet,
+		ioc.VlSet,
+		ioc.EmailSet,
+		ioc.MsgSet,
+
 		ioc.NewMongoDB,
 		ioc.NewGinEngine,
 	))

@@ -18,7 +18,6 @@ import (
 	"context"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/google/wire"
 	"github.com/pkg/errors"
 	"gopkg.in/gomail.v2"
 )
@@ -28,8 +27,7 @@ type IEmailService interface {
 }
 
 var (
-	_        IEmailService = (*EmailService)(nil)
-	EmailSet               = wire.NewSet(NewEmailService, wire.Bind(new(IEmailService), new(*EmailService)))
+	_ IEmailService = (*EmailService)(nil)
 )
 
 type EmailService struct {

@@ -17,7 +17,8 @@ package main
 import (
 	"os"
 
-	"github.com/chenmingyong0423/fnote/backend/ioc"
+	"github.com/chenmingyong0423/fnote/backend/internal/ioc"
+
 	"github.com/pkg/errors"
 )
 

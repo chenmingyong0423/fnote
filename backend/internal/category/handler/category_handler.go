@@ -18,19 +18,10 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/category/repository"
-	"github.com/chenmingyong0423/fnote/backend/internal/category/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/internal/category/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
-)
-
-var CategorySet = wire.NewSet(NewCategoryHandler, service.NewCategoryService, repository.NewCategoryRepository, dao.NewCategoryDao,
-	wire.Bind(new(service.ICategoryService), new(*service.CategoryService)),
-	wire.Bind(new(repository.ICategoryRepository), new(*repository.CategoryRepository)),
-	wire.Bind(new(dao.ICategoryDao), new(*dao.CategoryDao)),
 )
 
 func NewCategoryHandler(serv service.ICategoryService) *CategoryHandler {
