@@ -24,6 +24,7 @@ import (
 	repository5 "github.com/chenmingyong0423/fnote/backend/internal/friend/repository"
 	dao5 "github.com/chenmingyong0423/fnote/backend/internal/friend/repository/dao"
 	service7 "github.com/chenmingyong0423/fnote/backend/internal/friend/service"
+	"github.com/chenmingyong0423/fnote/backend/internal/ioc"
 	service6 "github.com/chenmingyong0423/fnote/backend/internal/message/service"
 	handler3 "github.com/chenmingyong0423/fnote/backend/internal/post/handler"
 	repository4 "github.com/chenmingyong0423/fnote/backend/internal/post/repository"
@@ -33,7 +34,6 @@ import (
 	repository6 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository"
 	dao6 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository/dao"
 	service8 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/service"
-	"github.com/chenmingyong0423/fnote/backend/ioc"
 	"github.com/gin-gonic/gin"
 )
 

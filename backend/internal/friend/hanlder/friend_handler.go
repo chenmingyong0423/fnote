@@ -18,20 +18,12 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/friend/repository"
-	"github.com/chenmingyong0423/fnote/backend/internal/friend/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/internal/friend/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 	"github.com/pkg/errors"
 )
-
-var FriendSet = wire.NewSet(NewFriendHandler, service.NewFriendService, repository.NewFriendRepository, dao.NewFriendDao,
-	wire.Bind(new(service.IFriendService), new(*service.FriendService)),
-	wire.Bind(new(repository.IFriendRepository), new(*repository.FriendRepository)),
-	wire.Bind(new(dao.IFriendDao), new(*dao.FriendDao)))
 
 func NewFriendHandler(serv service.IFriendService) *FriendHandler {
 	return &FriendHandler{

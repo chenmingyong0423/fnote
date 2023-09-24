@@ -20,7 +20,6 @@ import (
 	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	emailServ "github.com/chenmingyong0423/fnote/backend/internal/email/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/google/wire"
 )
 
 type IMessageService interface {
@@ -29,8 +28,7 @@ type IMessageService interface {
 }
 
 var (
-	_      IMessageService = (*MessageService)(nil)
-	MsgSet                 = wire.NewSet(NewMessageService, wire.Bind(new(IMessageService), new(*MessageService)))
+	_ IMessageService = (*MessageService)(nil)
 )
 
 func NewMessageService(configServ configServ.IConfigService, emailServ emailServ.IEmailService) *MessageService {

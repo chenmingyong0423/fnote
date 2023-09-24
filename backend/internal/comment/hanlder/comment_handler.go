@@ -20,8 +20,6 @@ import (
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/vo"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/comment/repository"
-	"github.com/chenmingyong0423/fnote/backend/internal/comment/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/internal/comment/service"
 	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	msgService "github.com/chenmingyong0423/fnote/backend/internal/message/service"
@@ -29,15 +27,9 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	postServ "github.com/chenmingyong0423/fnote/backend/internal/post/service"
 	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-var CommentSet = wire.NewSet(NewCommentHandler, service.NewCommentService, repository.NewCommentRepository, dao.NewCommentDao,
-	wire.Bind(new(service.ICommentService), new(*service.CommentService)),
-	wire.Bind(new(repository.ICommentRepository), new(*repository.CommentRepository)),
-	wire.Bind(new(dao.ICommentDao), new(*dao.CommentDao)))
 
 func NewCommentHandler(serv service.ICommentService, cfgService configServ.IConfigService, postServ postServ.IPostService, msgServ msgService.IMessageService) *CommentHandler {
 	return &CommentHandler{

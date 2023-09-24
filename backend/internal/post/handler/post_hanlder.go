@@ -21,18 +21,10 @@ import (
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/backend/internal/post/repository"
-	"github.com/chenmingyong0423/fnote/backend/internal/post/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/internal/post/service"
 	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 	"github.com/pkg/errors"
 )
-
-var PostSet = wire.NewSet(NewPostHandler, service.NewPostService, repository.NewPostRepository, dao.NewPostDao,
-	wire.Bind(new(service.IPostService), new(*service.PostService)),
-	wire.Bind(new(repository.IPostRepository), new(*repository.PostRepository)),
-	wire.Bind(new(dao.IPostDao), new(*dao.PostDao)))
 
 func NewPostHandler(serv service.IPostService) *PostHandler {
 	return &PostHandler{
