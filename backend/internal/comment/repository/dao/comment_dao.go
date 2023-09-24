@@ -98,6 +98,7 @@ type ICommentDao interface {
 	FindCommentById(ctx context.Context, cmtId string) (*Comment, error)
 	AddCommentReply(ctx context.Context, cmtId string, commentReply CommentReply) error
 	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error)
+	FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus uint) ([]Comment, error)
 }
 
 func NewCommentDao(db *mongo.Database) *CommentDao {
@@ -110,6 +111,20 @@ var _ ICommentDao = (*CommentDao)(nil)
 
 type CommentDao struct {
 	coll *mongo.Collection
+}
+
+func (d *CommentDao) FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus uint) ([]Comment, error) {
+	result := make([]Comment, 0, 4)
+	con := bson.D{bson.E{Key: "post_info.post_id", Value: postId}, bson.E{Key: "status", Value: cmtStatus}}
+	cursor, err := d.coll.Find(ctx, con)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Fails to find the docs from %s, condition=%v", d.coll.Name(), con)
+	}
+	defer cursor.Close(ctx)
+	if err := cursor.All(ctx, &result); err != nil {
+		return nil, errors.Wrapf(err, "Fails to cursor.All, cursor=%v", cursor)
+	}
+	return result, nil
 }
 
 func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error) {

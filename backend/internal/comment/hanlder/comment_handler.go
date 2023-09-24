@@ -56,6 +56,7 @@ type CommentHandler struct {
 }
 
 func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
+	engine.GET("/posts/:sug/comments", h.GetCommentsByPostId)
 	group := engine.Group("/comments")
 	group.POST("", h.AddComment)
 	group.POST("/:commentId/replies", h.AddCommentReply)
@@ -233,4 +234,40 @@ func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) {
 		})
 	}
 	ctx.JSON(http.StatusOK, api.SuccessResponseWithData(result))
+}
+
+func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) {
+	postId := ctx.Param("sug")
+	comments, err := h.serv.FindCommentsByPostId(ctx, postId)
+	if err != nil {
+		slog.ErrorContext(ctx, "comment", err)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	pc := make([]vo.PostCommentVO, 0, len(comments))
+	for _, comment := range comments {
+		replies := make([]vo.PostCommentReplyVO, 0, len(comment.Replies))
+		for _, reply := range comment.Replies {
+			if reply.Status != domain.CommentStatusApproved {
+				continue
+			}
+			replies = append(replies, vo.PostCommentReplyVO{
+				Id:        reply.ReplyId,
+				CommentId: comment.Id,
+				Content:   reply.Content,
+				Name:      reply.UserInfo.Name,
+				ReplyToId: reply.ReplyToId,
+				ReplyTo:   reply.RepliedUserInfo.Name,
+				ReplyTime: reply.CreateTime,
+			})
+		}
+		pc = append(pc, vo.PostCommentVO{
+			Id:          comment.Id,
+			Content:     comment.Content,
+			Name:        comment.UserInfo.Name,
+			CommentTime: comment.CreateTime,
+			Replies:     replies,
+		})
+	}
+	ctx.JSON(http.StatusOK, api.SuccessResponseWithData(api.NewListVO[vo.PostCommentVO](pc)))
 }

@@ -29,6 +29,7 @@ type ICommentRepository interface {
 	FindApprovedCommentById(ctx context.Context, cmtId string) (*domain.CommentWithReplies, error)
 	AddCommentReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) error
 	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]domain.LatestComment, error)
+	FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus domain.CommentStatus) ([]domain.CommentWithReplies, error)
 }
 
 func NewCommentRepository(dao dao.ICommentDao) *CommentRepository {
@@ -41,6 +42,14 @@ var _ ICommentRepository = (*CommentRepository)(nil)
 
 type CommentRepository struct {
 	dao dao.ICommentDao
+}
+
+func (r *CommentRepository) FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus domain.CommentStatus) ([]domain.CommentWithReplies, error) {
+	comments, err := r.dao.FindCommentsByPostIdAndCmtStatus(ctx, postId, uint(cmtStatus))
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainComment(comments), nil
 }
 
 func (r *CommentRepository) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]domain.LatestComment, error) {
@@ -121,4 +130,33 @@ func (r *CommentRepository) AddComment(ctx context.Context, comment domain.Comme
 		CreateTime: unix,
 		UpdateTime: unix,
 	})
+}
+
+func (r *CommentRepository) toDomainComment(comments []dao.Comment) []domain.CommentWithReplies {
+	result := make([]domain.CommentWithReplies, 0, len(comments))
+	for _, comment := range comments {
+		replies := make([]domain.CommentReply, 0, len(comment.Replies))
+		for _, commentReply := range comment.Replies {
+			replies = append(replies, domain.CommentReply{
+				ReplyId:         commentReply.ReplyId,
+				Content:         commentReply.Content,
+				ReplyToId:       commentReply.ReplyToId,
+				UserInfo:        domain.UserInfo4Reply(commentReply.UserInfo),
+				RepliedUserInfo: domain.UserInfo4Reply(commentReply.RepliedUserInfo),
+				Status:          domain.CommentStatus(commentReply.Status),
+				CreateTime:      commentReply.CreateTime,
+			})
+		}
+		result = append(result, domain.CommentWithReplies{
+			Comment: domain.Comment{
+				Id:         comment.Id,
+				PostInfo:   domain.PostInfo4Comment(comment.PostInfo),
+				Content:    comment.Content,
+				UserInfo:   domain.UserInfo4Comment(comment.UserInfo),
+				CreateTime: comment.CreateTime,
+			},
+			Replies: replies,
+		})
+	}
+	return result
 }

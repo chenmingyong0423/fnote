@@ -29,6 +29,7 @@ type ICommentService interface {
 	AddComment(ctx context.Context, comment domain.Comment) error
 	AddCommentReply(ctx context.Context, cmtId string, postId string, commentReply domain.CommentReply) error
 	FineLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error)
+	FindCommentsByPostId(ctx context.Context, postId string) ([]domain.CommentWithReplies, error)
 }
 
 func NewCommentService(repo repository.ICommentRepository) *CommentService {
@@ -41,6 +42,10 @@ var _ ICommentService = (*CommentService)(nil)
 
 type CommentService struct {
 	repo repository.ICommentRepository
+}
+
+func (s *CommentService) FindCommentsByPostId(ctx context.Context, postId string) ([]domain.CommentWithReplies, error) {
+	return s.repo.FindCommentsByPostIdAndCmtStatus(ctx, postId, domain.CommentStatusApproved)
 }
 
 func (s *CommentService) FineLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error) {
@@ -71,7 +76,7 @@ func (s *CommentService) AddCommentReply(ctx context.Context, cmtId string, post
 	if commentReply.ReplyToId != "" {
 		isExist := false
 		for _, reply := range commentWithReplies.Replies {
-			if reply.ReplyId == commentReply.ReplyToId && reply.Status == 2 {
+			if reply.ReplyId == commentReply.ReplyToId && reply.Status == domain.CommentStatusApproved {
 				commentReply.RepliedUserInfo.Name, commentReply.RepliedUserInfo.Email, commentReply.RepliedUserInfo.Website, commentReply.RepliedUserInfo.Ip = reply.UserInfo.Name, reply.UserInfo.Email, reply.UserInfo.Website, reply.UserInfo.Ip
 				isExist = true
 				break

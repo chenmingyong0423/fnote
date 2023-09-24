@@ -77,6 +77,12 @@ type ListVO[T any] struct {
 	List []T `json:"list"`
 }
 
+func NewListVO[T any](t []T) ListVO[T] {
+	return ListVO[T]{
+		List: t,
+	}
+}
+
 type ResponseBody[T any] struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
