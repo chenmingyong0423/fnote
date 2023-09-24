@@ -27,3 +27,28 @@ type PostInfo4Comment struct {
 	// 文章标题字段
 	PostTitle string `json:"post_title"`
 }
+
+type PostCommentVO struct {
+	Id string `json:"id"`
+	// 评论的内容
+	Content string `json:"content"`
+	// 评论的用户
+	Name        string               `json:"username"`
+	CommentTime int64                `json:"comment_time"`
+	Replies     []PostCommentReplyVO `json:"replies,omitempty"`
+}
+
+type PostCommentReplyVO struct {
+	Id        string `json:"id"`
+	CommentId string `json:"comment_id"`
+	// 回复的内容
+	Content string `json:"content"`
+	// 回复的用户
+	Name string `json:"name"`
+	// 被回复的回复 Id
+	ReplyToId string `json:"reply_to_id"`
+	// 被回复的用户
+	ReplyTo string `json:"reply_to"`
+	// 回复时间
+	ReplyTime int64 `json:"reply_time"`
+}

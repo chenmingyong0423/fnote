@@ -27,12 +27,14 @@ type CommentWithReplies struct {
 }
 
 type Comment struct {
+	Id string
 	// 文章信息
 	PostInfo PostInfo4Comment
 	// 评论的内容
 	Content string
 	// 用户信息
-	UserInfo UserInfo4Comment
+	UserInfo   UserInfo4Comment
+	CreateTime int64
 }
 
 type CommentReply struct {
@@ -46,6 +48,7 @@ type CommentReply struct {
 	// 被回复用户的信息
 	RepliedUserInfo UserInfo4Reply
 	Status          CommentStatus
+	CreateTime      int64
 }
 
 type UserInfo4Reply UserInfo4Comment
