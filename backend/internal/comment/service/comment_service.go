@@ -21,7 +21,6 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/internal/comment/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/types"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -29,6 +28,7 @@ import (
 type ICommentService interface {
 	AddComment(ctx context.Context, comment domain.Comment) error
 	AddCommentReply(ctx context.Context, cmtId string, postId string, commentReply domain.CommentReply) error
+	FineLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error)
 }
 
 func NewCommentService(repo repository.ICommentRepository) *CommentService {
@@ -43,6 +43,15 @@ type CommentService struct {
 	repo repository.ICommentRepository
 }
 
+func (s *CommentService) FineLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error) {
+	// 默认查找最新的前 5 条，后续可能考虑动态配置
+	cmts, err := s.repo.FineLatestCommentAndReply(ctx, 5)
+	if err != nil {
+		return nil, err
+	}
+	return cmts, err
+}
+
 func (s *CommentService) AddCommentReply(ctx context.Context, cmtId string, postId string, commentReply domain.CommentReply) error {
 	commentWithReplies, err := s.repo.FindApprovedCommentById(ctx, cmtId)
 	if err != nil {
@@ -54,7 +63,7 @@ func (s *CommentService) AddCommentReply(ctx context.Context, cmtId string, post
 	if commentWithReplies.PostInfo.PostId != postId {
 		return api.NewHttpCodeError(http.StatusBadRequest)
 	}
-	commentReply.RepliedUserInfo = types.UserInfo4Reply{
+	commentReply.RepliedUserInfo = domain.UserInfo4Reply{
 		Name:  commentWithReplies.UserInfo.Name,
 		Email: commentWithReplies.UserInfo.Email,
 		Ip:    commentWithReplies.UserInfo.Ip,

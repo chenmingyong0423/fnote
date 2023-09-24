@@ -18,6 +18,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/vo"
+
 	"github.com/chenmingyong0423/fnote/backend/internal/comment/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/comment/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/internal/comment/service"
@@ -25,7 +27,6 @@ import (
 	msgService "github.com/chenmingyong0423/fnote/backend/internal/message/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/types"
 	postServ "github.com/chenmingyong0423/fnote/backend/internal/post/service"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
@@ -58,6 +59,7 @@ func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/comments")
 	group.POST("", h.AddComment)
 	group.POST("/:commentId/replies", h.AddCommentReply)
+	group.GET("/latest", h.GetLatestCommentAndReply)
 }
 
 func (h *CommentHandler) AddComment(ctx *gin.Context) {
@@ -100,19 +102,19 @@ func (h *CommentHandler) AddComment(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-	err = h.serv.AddComment(ctx, domain.Comment{Comment: types.Comment{
-		PostInfo: types.PostInfo4Comment{
+	err = h.serv.AddComment(ctx, domain.Comment{
+		PostInfo: domain.PostInfo4Comment{
 			PostId:    req.PostId,
 			PostTitle: post.Title,
 		},
 		Content: req.Content,
-		UserInfo: types.UserInfo4Comment{
+		UserInfo: domain.UserInfo4Comment{
 			Name:    req.UserName,
 			Email:   req.Email,
 			Ip:      ip,
 			Website: req.Website,
 		},
-	}})
+	})
 	if err != nil {
 		slog.ErrorContext(ctx, "comment", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
@@ -182,16 +184,15 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
 		return
 	}
 	err = h.serv.AddCommentReply(ctx, commentId, req.PostId, domain.CommentReply{
-		CommentReply: types.CommentReply{
-			Content:   req.Content,
-			ReplyToId: req.ReplyToId,
-			UserInfo: types.UserInfo4Reply{
-				Name:    req.UserName,
-				Email:   req.Email,
-				Website: req.Website,
-				Ip:      ip,
-			},
-		}})
+		Content:   req.Content,
+		ReplyToId: req.ReplyToId,
+		UserInfo: domain.UserInfo4Reply{
+			Name:    req.UserName,
+			Email:   req.Email,
+			Website: req.Website,
+			Ip:      ip,
+		},
+	})
 	if err != nil {
 		var httpCodeError *api.HttpCodeError
 		if errors.As(err, &httpCodeError) {
@@ -213,4 +214,23 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
 		}
 	}()
 	ctx.JSON(http.StatusOK, api.SuccessResponse)
+}
+
+func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) {
+	latestComments, err := h.serv.FineLatestCommentAndReply(ctx)
+	if err != nil {
+		slog.ErrorContext(ctx, "comment", err)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	result := make([]vo.LatestCommentVO, 0, len(latestComments))
+	for _, latestComment := range latestComments {
+		result = append(result, vo.LatestCommentVO{
+			PostInfo4Comment: vo.PostInfo4Comment(latestComment.PostInfo4Comment),
+			Name:             latestComment.Name,
+			Content:          latestComment.Content,
+			CreateTime:       latestComment.CreateTime,
+		})
+	}
+	ctx.JSON(http.StatusOK, api.SuccessResponseWithData(result))
 }
