@@ -3,14 +3,14 @@
         <div ref="myDom">
             <MyHeader />
         </div>
-        <el-scrollbar max-height="100vh" @scroll="headerScroll">
-            <div class="bg-#F0F2F5 dark_bg_black pt100">
-                <div class="max-w-1280 mx-auto  rounded-t-23 bg-#fff p30 min-h-100vh">
-                    <slot></slot>
-                </div>
+        <!-- <el-scrollbar max-height="100vh" @scroll="headerScroll"> -->
+        <div class="bg-#F0F2F5 dark_bg_black pt100">
+            <div class="max-w-1280 mx-auto  rounded-t-23 bg-#fff p30 min-h-100vh">
+                <slot></slot>
             </div>
-            <MyFooter />
-        </el-scrollbar>
+        </div>
+        <MyFooter />
+        <!-- </el-scrollbar> -->
         <el-backtop :right="100" :bottom="100" />
     </div>
 </template>

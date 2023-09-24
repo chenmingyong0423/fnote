@@ -3,12 +3,12 @@
         <div ref="myDom">
             <MyHeader />
         </div>
-        <el-scrollbar max-height="100vh" @scroll="headerScroll">
-            <div class="bg-#F0F2F5 dark_bg_black">
-                <slot></slot>
-            </div>
-            <MyFooter />
-        </el-scrollbar>
+        <!-- <el-scrollbar max-height="100vh" @scroll="headerScroll"> -->
+        <div class="bg-#F0F2F5 dark_bg_black">
+            <slot></slot>
+        </div>
+        <MyFooter />
+        <!-- </el-scrollbar> -->
         <el-backtop :right="100" :bottom="100" />
     </div>
 </template>

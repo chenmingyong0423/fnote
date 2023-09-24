@@ -1,24 +1,24 @@
 <template>
     <div
-        class="group relative mb25 rounded-10 overflow-hidden cursor-pointer ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--5">
+        class="group relative mb25 rounded-10 overflow-hidden  ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--5">
         <div class=" bg-#fff  p25  dark_bg_gray dark_text_white">
 
             <el-space :size="30">
                 <div class="w300 h150 overflow-hidden rounded-10">
-                    <el-image @click="router.push(`post/${postData.sug}`)" class=" w-full h-full" position="top" fit="cover"
+                    <el-image @click="router.push(`post/${postData.sug}`)" class="cursor-pointer w-full h-full"
+                        position="top" fit="cover"
                         src='https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg' />
                 </div>
 
                 <div class=" text-16 flex justify-between items-end w700">
-
                     <div class="flex flex-col justify-between h150 ">
                         <div>
                             <div @click="router.push(`post/${postData.sug}`)"
-                                class="text-24 c_title_blue group-hover:text-red ease-in duration-200">
-                                {{ props.postData.title }}
+                                class="cursor-pointer text-24 c_title_blue group-hover:text-red ease-in duration-200">
+                                {{ postData.title }}
                             </div>
                             <div class="text-16 ">
-                                {{ props.postData.summary }}
+                                {{ postData.summary }}
                             </div>
                         </div>
                         <div>
@@ -42,12 +42,10 @@
                                     </el-space>
                                 </div>
                             </el-space>
-
-
                         </div>
                     </div>
                     <div class="text-center w-full">
-                        2023-08-13 20:08:09
+                        {{ dayjs(postData.createTime).format('YYYY-MM-DD HH:mm:ss') }}
                     </div>
                 </div>
 
@@ -63,6 +61,7 @@
 
 
 <script lang="ts" setup>
+import { dayjs } from 'element-plus'
 const props = defineProps(['postData'])
 const router = useRouter()
 
