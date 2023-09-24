@@ -12,11 +12,8 @@
                 <Content @click="router.push(`post/${item}`)" :postData="item"></Content>
                 <!-- <el-divider /> -->
             </div>
-
         </div>
-        <div class="mt20">
-            <el-pagination layout="prev, pager, next" :total="5000" />
-        </div>
+        <Pagination />
     </div>
 </template>
 

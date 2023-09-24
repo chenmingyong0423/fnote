@@ -13,6 +13,7 @@
 </template>
 
 <script setup>
+import { throttle } from '~/utils'
 const props = defineProps(['text'])
 // markdown-文章标题列表
 const titleList = ref([])
@@ -67,30 +68,29 @@ const rollTo = (anchor, index) => {
 // markdown-页面滚动。
 const scroll = () => {
     // 监听屏幕滚动时防抖（在规定的时间内触发的事件，只执行最后一次，降低性能开销）
-    let timeOut = null; // 初始化空定时器
+
     return () => {
-        clearTimeout(timeOut)   // 频繁操作，一直清空先前的定时器
-        timeOut = setTimeout(() => {  // 只执行最后一次事件
-            let scrollTop = window.pageYOffset
-            // console.log(window.pageYOffset)
-            const absList = [] // 各个h标签与当前距离绝对值
-            titleList.value.forEach((item) => {
-                absList.push(Math.abs(item.height - scrollTop))
-                // console.log('height', item.height);
-            })
-            // 屏幕滚动距离与标题高度最近的index高亮
-            heightTitle.value = absList.indexOf(Math.min.apply(null, absList))
-        }, 100)
+        throttle(jump, 100)
     }
 }
-
+const jump = () => {
+    let scrollTop = window.pageYOffset
+    // console.log(window.pageYOffset)
+    const absList = [] // 各个h标签与当前距离绝对值
+    titleList.value.forEach((item) => {
+        absList.push(Math.abs(item.height - scrollTop))
+        // console.log('height', item.height);
+    })
+    // 屏幕滚动距离与标题高度最近的index高亮
+    heightTitle.value = absList.indexOf(Math.min.apply(null, absList))
+}
 onMounted(() => {
     // 生成文章标题列表
     getTitle()
-    window.addEventListener('scroll', scroll())
+    window.addEventListener('scroll', throttle(jump, 100))
 })
 onBeforeUnmount(() => {
-    window.removeEventListener('scroll', scroll())
+    window.removeEventListener('scroll', throttle(jump, 100))
 })
 </script>
 <style scoped>

@@ -15,9 +15,11 @@
 package main
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/ioc"
-	"github.com/pkg/errors"
 	"os"
+
+	"github.com/chenmingyong0423/fnote/backend/internal/ioc"
+
+	"github.com/pkg/errors"
 )
 
 func main() {

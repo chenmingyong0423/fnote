@@ -9,9 +9,7 @@
                 <!-- <el-divider /> -->
             </div>
         </div>
-        <div class=" mt20">
-            <el-pagination layout="prev, pager, next" :total="5000" />
-        </div>
+        <Pagination />
     </div>
 </template>
 
@@ -58,8 +56,4 @@ const data = {
 }
 </script>
 
-<style scoped>
-.el-pagination {
-    justify-content: center;
-}
-</style>
+<style scoped></style>
