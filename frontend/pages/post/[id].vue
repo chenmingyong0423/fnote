@@ -1,7 +1,29 @@
 <template>
     <div class="bg-#F0F2F5 dark_bg_black pt100 pb30 px25">
         <el-row :gutter="40">
-            <el-col :span="18">
+
+            <el-col :span="2">
+                <el-affix :offset="350">
+                    <div class=" text-center">
+                        <el-space direction="vertical" :size="25">
+                            <!-- 点赞 -->
+                            <div
+                                class="bg-#fff drop-shadow-lg mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
+                                <div class="i-grommet-icons:like"></div>
+                            </div>
+                            <div
+                                class="bg-#fff drop-shadow-lg mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
+                                <div class="i-grommet-icons:share-rounded"></div>
+                            </div>
+                            <div
+                                class="bg-#fff drop-shadow-lg mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
+                                <div class="i-grommet-icons:tooltip"></div>
+                            </div>
+                        </el-space>
+                    </div>
+                </el-affix>
+            </el-col>
+            <el-col :span="16">
 
                 <div class=" rounded-15 bg-#fff p30">
                     <!-- 文章标题 -->
@@ -19,11 +41,6 @@
                         </el-space>
                     </div>
                     <v-md-preview :text="data2.data.content" @copy-code-success="handleCopyCodeSuccess"></v-md-preview>
-                    <!-- 点赞 -->
-                    <div
-                        class=" mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
-                        <div class="i-grommet-icons:like"></div>
-                    </div>
                 </div>
                 <div class="rounded-15 bg-#fff pt20 pb80 px30 mt25">
                     <!-- 发布评论 -->
@@ -45,9 +62,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ElMessage } from 'element-plus'
-import { dayjs } from 'element-plus'
-import type { } from 'element-plus'
+import { ElMessage, dayjs } from 'element-plus'
+
 // const router = useRouter()
 // const route = useRoute()
 
