@@ -1,8 +1,9 @@
 module github.com/chenmingyong0423/fnote/backend
 
-go 1.21
+go 1.21.0
 
 require (
+	github.com/chenmingyong0423/ginx v0.0.2
 	github.com/gin-gonic/contrib v0.0.0-20221130124618-7e01895a63f2
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.15.0
