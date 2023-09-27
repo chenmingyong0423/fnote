@@ -15,14 +15,17 @@
 package ioc
 
 import (
+	"log/slog"
 	"strings"
 	"time"
+
+	"github.com/chenmingyong0423/ginx/middlewares/id"
+	"github.com/chenmingyong0423/ginx/middlewares/log"
 
 	ctgHandler "github.com/chenmingyong0423/fnote/backend/internal/category/handler"
 	commentHandler "github.com/chenmingyong0423/fnote/backend/internal/comment/hanlder"
 	cfgHandler "github.com/chenmingyong0423/fnote/backend/internal/config/handler"
 	friendHanlder "github.com/chenmingyong0423/fnote/backend/internal/friend/hanlder"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/middleware"
 	myValidator "github.com/chenmingyong0423/fnote/backend/internal/pkg/validator"
 	postHanlder "github.com/chenmingyong0423/fnote/backend/internal/post/handler"
 	vlHandler "github.com/chenmingyong0423/fnote/backend/internal/visit_log/handler"
@@ -42,8 +45,8 @@ func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.Com
 		}
 	}
 
-	engine.Use(middleware.RequestId())
-	engine.Use(middleware.Logger())
+	engine.Use(id.RequestId())
+	engine.Use(log.RequestLogger(*log.NewLoggerConfig(slog.LevelInfo)))
 
 	engine.Use(cors.New(cors.Config{
 		AllowCredentials: true,
