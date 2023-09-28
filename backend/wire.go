@@ -22,8 +22,15 @@ import (
 	"github.com/google/wire"
 )
 
-func initializeApp(username ioc.Username, password ioc.Password) (*gin.Engine, error) {
+func initializeApp(cfgPath string) (*gin.Engine, error) {
 	panic(wire.Build(
+		ioc.InitConfig,
+		ioc.InitLogger,
+		ioc.NewMongoDB,
+		ioc.InitMiddlewares,
+		ioc.InitGinValidators,
+		ioc.NewGinEngine,
+
 		ioc.CategorySet,
 		ioc.CommentSet,
 		ioc.ConfigSet,
@@ -32,8 +39,5 @@ func initializeApp(username ioc.Username, password ioc.Password) (*gin.Engine, e
 		ioc.VlSet,
 		ioc.EmailSet,
 		ioc.MsgSet,
-
-		ioc.NewMongoDB,
-		ioc.NewGinEngine,
 	))
 }
