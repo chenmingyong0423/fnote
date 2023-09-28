@@ -39,8 +39,9 @@ import (
 
 // Injectors from wire.go:
 
-func initializeApp(username ioc.Username, password ioc.Password) (*gin.Engine, error) {
-	database := ioc.NewMongoDB(username, password)
+func initializeApp(cfgPath string) (*gin.Engine, error) {
+	config := ioc.InitConfig(cfgPath)
+	database := ioc.NewMongoDB(config)
 	categoryDao := dao.NewCategoryDao(database)
 	categoryRepository := repository.NewCategoryRepository(categoryDao)
 	categoryService := service.NewCategoryService(categoryRepository)
@@ -67,7 +68,10 @@ func initializeApp(username ioc.Username, password ioc.Password) (*gin.Engine, e
 	visitLogRepository := repository6.NewVisitLogRepository(visitLogDao)
 	visitLogService := service8.NewVisitLogService(visitLogRepository)
 	visitLogHandler := handler4.NewVisitLogHandler(visitLogService, configService)
-	engine, err := ioc.NewGinEngine(categoryHandler, commentHandler, configHandler, friendHandler, postHandler, visitLogHandler)
+	writer := ioc.InitLogger(config)
+	v := ioc.InitMiddlewares(config, writer)
+	validators := ioc.InitGinValidators()
+	engine, err := ioc.NewGinEngine(categoryHandler, commentHandler, configHandler, friendHandler, postHandler, visitLogHandler, v, validators)
 	if err != nil {
 		return nil, err
 	}

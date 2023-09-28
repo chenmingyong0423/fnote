@@ -15,24 +15,21 @@
 package main
 
 import (
-	"os"
+	"flag"
+)
 
-	"github.com/chenmingyong0423/fnote/backend/internal/ioc"
-
-	"github.com/pkg/errors"
+var (
+	configPath = flag.String("config", "./config/fnote.yaml", "配置文件路径")
+	port       = flag.String("port", ":8000", "HTTP 端口号")
 )
 
 func main() {
-	if len(os.Args) < 3 {
-		panic(errors.New("missing parameters"))
-	}
-	username := os.Args[1]
-	password := os.Args[2]
-	app, err := initializeApp(ioc.Username(username), ioc.Password(password))
+	flag.Parse()
+	app, err := initializeApp(*configPath)
 	if err != nil {
 		panic(err)
 	}
-	err = app.Run()
+	err = app.Run(*port)
 	if err != nil {
 		panic(err)
 	}

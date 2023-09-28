@@ -15,7 +15,9 @@
 package ioc
 
 import (
+	"io"
 	"log/slog"
+	"slices"
 	"strings"
 	"time"
 
@@ -35,30 +37,21 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *cfgHandler.ConfigHandler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler) (*gin.Engine, error) {
+func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *cfgHandler.ConfigHandler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, middleware []gin.HandlerFunc, validators Validators) (*gin.Engine, error) {
 	engine := gin.Default()
 
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		err := v.RegisterValidation("validateEmailFormat", myValidator.ValidateEmailFormat)
-		if err != nil {
-			return nil, err
+	// 参数校验器注册
+	if validate, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		for k, v := range validators {
+			err := validate.RegisterValidation(k, v)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
-	engine.Use(id.RequestId())
-	engine.Use(log.RequestLogger(*log.NewLoggerConfig(slog.LevelInfo)))
-
-	engine.Use(cors.New(cors.Config{
-		AllowCredentials: true,
-		AllowOriginFunc: func(origin string) bool {
-			if strings.HasPrefix(origin, "http://localhost") {
-				// 你的开发环境
-				return true
-			}
-			return strings.Contains(origin, "chenmingyong.cn")
-		},
-		MaxAge: 12 * time.Hour,
-	}))
+	// 中间件注册
+	engine.Use(middleware...)
 
 	// 注册路由
 	{
@@ -70,4 +63,45 @@ func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.Com
 		vlHdr.RegisterGinRoutes(engine)
 	}
 	return engine, nil
+}
+
+func InitMiddlewares(cfg *Config, writer io.Writer) []gin.HandlerFunc {
+	return []gin.HandlerFunc{
+		gin.LoggerWithWriter(writer),
+		id.RequestId(),
+		log.RequestLogger(*log.NewLoggerConfig(func(level string) slog.Level {
+			switch level {
+			case "DEBUG":
+				return slog.LevelDebug
+			case "INFO":
+				return slog.LevelInfo
+			case "WARN":
+				return slog.LevelWarn
+			case "ERROR":
+				return slog.LevelError
+			default:
+				return slog.LevelInfo
+			}
+		}(cfg.Logger.Level))),
+		cors.New(cors.Config{
+			AllowCredentials: true,
+			AllowOriginFunc: func(origin string) bool {
+				if slices.Contains(cfg.Gin.AllowedOrigins, "*") {
+					return true
+				}
+				return slices.ContainsFunc(cfg.Gin.AllowedOrigins, func(s string) bool {
+					return strings.Contains(origin, s)
+				})
+			},
+			MaxAge: 12 * time.Hour,
+		}),
+	}
+}
+
+type Validators map[string]func(fl validator.FieldLevel) bool
+
+func InitGinValidators() Validators {
+	return map[string]func(fl validator.FieldLevel) bool{
+		"validateEmailFormat": myValidator.ValidateEmailFormat,
+	}
 }
