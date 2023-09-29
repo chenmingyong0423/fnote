@@ -52,7 +52,7 @@ type MongodbConfig struct {
 	Uri        string `json:"uri" yaml:"uri"`
 	Username   string `json:"username" yaml:"username"`
 	Password   string `json:"password" yaml:"password"`
-	AuthSource string `json:"auth_source" yaml:"authSource"`
+	AuthSource string `json:"auth_source" yaml:"auth_source"`
 	Database   string `json:"database" yaml:"database"`
 }
 

@@ -27,7 +27,7 @@ import (
 func NewMongoDB(cfg *Config) *mongo.Database {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.MongoDb.Uri).SetAuth(options.Credential{
 		Username:   cfg.MongoDb.Username,
 		Password:   cfg.MongoDb.Password,
 		AuthSource: cfg.MongoDb.AuthSource,
