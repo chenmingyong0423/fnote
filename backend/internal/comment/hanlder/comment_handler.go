@@ -119,7 +119,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context) {
 		if gErr != nil {
 			log.WarnWithStack(ctx, "post", gErr)
 		}
-		gErr = h.msgServ.SendEmailToWebmaster(ctx, "文章评论通知", "您好，您在文章有新的评论，详情请前往后台进行查看。", "text/plain")
+		gErr = h.msgServ.SendEmailToWebmaster(ctx, "comment", "text/plain")
 		if gErr != nil {
 			log.WarnWithStack(ctx, "message", gErr)
 		}
@@ -202,7 +202,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
 		if gErr != nil {
 			log.WarnWithStack(ctx, "comment", gErr)
 		}
-		gErr = h.msgServ.SendEmailToWebmaster(ctx, "文章评论通知", "您好，您在文章有新的评论，详情请前往后台进行查看。", "text/plain")
+		gErr = h.msgServ.SendEmailToWebmaster(ctx, "comment", "text/plain")
 		if gErr != nil {
 			log.WarnWithStack(ctx, "message", gErr)
 		}

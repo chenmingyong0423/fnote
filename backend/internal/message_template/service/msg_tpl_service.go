@@ -14,13 +14,27 @@
 
 package service
 
-import "github.com/chenmingyong0423/fnote/backend/internal/message_template/repository"
+import (
+	"context"
+
+	"github.com/chenmingyong0423/fnote/backend/internal/message_template/repository"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+)
 
 type IMsgTplService interface {
+	FindMsgTplByNameAndRcpType(ctx context.Context, name string, recipientType uint) (*domain.MessageTemplate, error)
 }
 
 var _ IMsgTplService = (*MsgTplService)(nil)
 
 type MsgTplService struct {
 	repo repository.IMsgTplRepository
+}
+
+func (s *MsgTplService) FindMsgTplByNameAndRcpType(ctx context.Context, name string, recipientType uint) (*domain.MessageTemplate, error) {
+	return s.repo.FindMsgTplByNameAndRcpType(ctx, name, recipientType)
+}
+
+func NewMsgTplService(repo repository.IMsgTplRepository) *MsgTplService {
+	return &MsgTplService{repo: repo}
 }

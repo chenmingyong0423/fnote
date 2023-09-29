@@ -33,6 +33,10 @@ import (
 	dao4 "github.com/chenmingyong0423/fnote/backend/internal/friend/repository/dao"
 	service4 "github.com/chenmingyong0423/fnote/backend/internal/friend/service"
 	service8 "github.com/chenmingyong0423/fnote/backend/internal/message/service"
+	handler7 "github.com/chenmingyong0423/fnote/backend/internal/message_template/handler"
+	repository7 "github.com/chenmingyong0423/fnote/backend/internal/message_template/repository"
+	dao7 "github.com/chenmingyong0423/fnote/backend/internal/message_template/repository/dao"
+	service9 "github.com/chenmingyong0423/fnote/backend/internal/message_template/service"
 	handler5 "github.com/chenmingyong0423/fnote/backend/internal/post/handler"
 	repository5 "github.com/chenmingyong0423/fnote/backend/internal/post/repository"
 	dao5 "github.com/chenmingyong0423/fnote/backend/internal/post/repository/dao"
@@ -45,33 +49,38 @@ import (
 )
 
 var (
-	CategorySet = wire.NewSet(handler.NewCategoryHandler, service.NewCategoryService, repository.NewCategoryRepository, dao.NewCategoryDao,
+	CategoryProviders = wire.NewSet(handler.NewCategoryHandler, service.NewCategoryService, repository.NewCategoryRepository, dao.NewCategoryDao,
 		wire.Bind(new(service.ICategoryService), new(*service.CategoryService)),
 		wire.Bind(new(repository.ICategoryRepository), new(*repository.CategoryRepository)),
 		wire.Bind(new(dao.ICategoryDao), new(*dao.CategoryDao)),
 	)
-	CommentSet = wire.NewSet(handler2.NewCommentHandler, service2.NewCommentService, repository2.NewCommentRepository, dao2.NewCommentDao,
+	CommentProviders = wire.NewSet(handler2.NewCommentHandler, service2.NewCommentService, repository2.NewCommentRepository, dao2.NewCommentDao,
 		wire.Bind(new(service2.ICommentService), new(*service2.CommentService)),
 		wire.Bind(new(repository2.ICommentRepository), new(*repository2.CommentRepository)),
 		wire.Bind(new(dao2.ICommentDao), new(*dao2.CommentDao)))
-	ConfigSet = wire.NewSet(handler3.NewConfigHandler, service3.NewConfigService, repository3.NewConfigRepository, dao3.NewConfigDao,
+	ConfigProviders = wire.NewSet(handler3.NewConfigHandler, service3.NewConfigService, repository3.NewConfigRepository, dao3.NewConfigDao,
 		wire.Bind(new(service3.IConfigService), new(*service3.ConfigService)),
 		wire.Bind(new(repository3.IConfigRepository), new(*repository3.ConfigRepository)),
 		wire.Bind(new(dao3.IConfigDao), new(*dao3.ConfigDao)))
-	FriendSet = wire.NewSet(handler4.NewFriendHandler, service4.NewFriendService, repository4.NewFriendRepository, dao4.NewFriendDao,
+	FriendProviders = wire.NewSet(handler4.NewFriendHandler, service4.NewFriendService, repository4.NewFriendRepository, dao4.NewFriendDao,
 		wire.Bind(new(service4.IFriendService), new(*service4.FriendService)),
 		wire.Bind(new(repository4.IFriendRepository), new(*repository4.FriendRepository)),
 		wire.Bind(new(dao4.IFriendDao), new(*dao4.FriendDao)))
-	PostSet = wire.NewSet(handler5.NewPostHandler, service5.NewPostService, repository5.NewPostRepository, dao5.NewPostDao,
+	PostProviders = wire.NewSet(handler5.NewPostHandler, service5.NewPostService, repository5.NewPostRepository, dao5.NewPostDao,
 		wire.Bind(new(service5.IPostService), new(*service5.PostService)),
 		wire.Bind(new(repository5.IPostRepository), new(*repository5.PostRepository)),
 		wire.Bind(new(dao5.IPostDao), new(*dao5.PostDao)))
-	VlSet = wire.NewSet(handler6.NewVisitLogHandler, service6.NewVisitLogService, repository6.NewVisitLogRepository, dao6.NewVisitLogDao,
+	VlProviders = wire.NewSet(handler6.NewVisitLogHandler, service6.NewVisitLogService, repository6.NewVisitLogRepository, dao6.NewVisitLogDao,
 		wire.Bind(new(service6.IVisitLogService), new(*service6.VisitLogService)),
 		wire.Bind(new(repository6.IVisitLogRepository), new(*repository6.VisitLogRepository)),
 		wire.Bind(new(dao6.IVisitLogDao), new(*dao6.VisitLogDao)))
 
-	EmailSet = wire.NewSet(service7.NewEmailService, wire.Bind(new(service7.IEmailService), new(*service7.EmailService)))
+	EmailProviders = wire.NewSet(service7.NewEmailService, wire.Bind(new(service7.IEmailService), new(*service7.EmailService)))
 
-	MsgSet = wire.NewSet(service8.NewMessageService, wire.Bind(new(service8.IMessageService), new(*service8.MessageService)))
+	MsgProviders = wire.NewSet(service8.NewMessageService, wire.Bind(new(service8.IMessageService), new(*service8.MessageService)))
+
+	MsgTplProviders = wire.NewSet(handler7.NewMsgTplHandler, service9.NewMsgTplService, repository7.NewMsgTplRepository, dao7.NewMsgTplDao,
+		wire.Bind(new(service9.IMsgTplService), new(*service9.MsgTplService)),
+		wire.Bind(new(repository7.IMsgTplRepository), new(*repository7.MsgTplRepository)),
+		wire.Bind(new(dao7.IMsgTplDao), new(*dao7.MsgTplDao)))
 )

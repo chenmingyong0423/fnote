@@ -14,7 +14,10 @@
 
 package handler
 
-import "github.com/chenmingyong0423/fnote/backend/internal/message_template/service"
+import (
+	"github.com/chenmingyong0423/fnote/backend/internal/message_template/service"
+	"github.com/gin-gonic/gin"
+)
 
 func NewMsgTplHandler(serv service.IMsgTplService) *MsgTplHandler {
 	return &MsgTplHandler{
@@ -24,4 +27,8 @@ func NewMsgTplHandler(serv service.IMsgTplService) *MsgTplHandler {
 
 type MsgTplHandler struct {
 	serv service.IMsgTplService
+}
+
+func (h *MsgTplHandler) RegisterGinRoutes(engine *gin.Engine) {
+
 }

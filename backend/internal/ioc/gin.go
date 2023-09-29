@@ -21,6 +21,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/backend/internal/message_template/handler"
+
 	"github.com/chenmingyong0423/ginx/middlewares/id"
 	"github.com/chenmingyong0423/ginx/middlewares/log"
 
@@ -37,7 +39,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *cfgHandler.ConfigHandler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, middleware []gin.HandlerFunc, validators Validators) (*gin.Engine, error) {
+func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *cfgHandler.ConfigHandler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, middleware []gin.HandlerFunc, validators Validators) (*gin.Engine, error) {
 	engine := gin.Default()
 
 	// 参数校验器注册
@@ -61,6 +63,7 @@ func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.Com
 		frdHdr.RegisterGinRoutes(engine)
 		postHdr.RegisterGinRoutes(engine)
 		vlHdr.RegisterGinRoutes(engine)
+		msgTplHandler.RegisterGinRoutes(engine)
 	}
 	return engine, nil
 }

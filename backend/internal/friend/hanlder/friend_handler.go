@@ -15,7 +15,11 @@
 package hanlder
 
 import (
+	"log/slog"
 	"net/http"
+
+	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
+	msgService "github.com/chenmingyong0423/fnote/backend/internal/message/service"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 
@@ -23,18 +27,21 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 )
 
-func NewFriendHandler(serv service.IFriendService) *FriendHandler {
+func NewFriendHandler(serv service.IFriendService, msgServ msgService.IMessageService, cfgService configServ.IConfigService) *FriendHandler {
 	return &FriendHandler{
-		serv: serv,
+		serv:       serv,
+		msgServ:    msgServ,
+		cfgService: cfgService,
 	}
 
 }
 
 type FriendHandler struct {
-	serv service.IFriendService
+	serv       service.IFriendService
+	msgServ    msgService.IMessageService
+	cfgService configServ.IConfigService
 }
 
 func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
@@ -67,7 +74,17 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-
+	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "friend")
+	if err != nil {
+		log.ErrorWithStack(ctx, "config", err)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	if !switchConfig.Status {
+		slog.WarnContext(ctx, "config", "Friend module is close.")
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 	err = h.serv.ApplyForFriend(ctx, domain.Friend{
 		Name:        req.Name,
 		Url:         req.Url,
@@ -76,14 +93,18 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
 		Email:       req.Email,
 	})
 	if err != nil {
-		var httpCodeError *api.HttpCodeError
-		if errors.As(err, &httpCodeError) {
-			ctx.AbortWithStatus(int(*httpCodeError))
-		} else {
-			log.ErrorWithStack(ctx, "friend", err)
-			ctx.AbortWithStatus(http.StatusInternalServerError)
-		}
+		log.ErrorWithStack(ctx, "friend", err)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+
+	// 发送邮件
+	go func() {
+		gErr := h.msgServ.SendEmailToWebmaster(ctx, "friend", "text/plain")
+		if gErr != nil {
+			log.WarnWithStack(ctx, "message", gErr)
+		}
+	}()
+
 	ctx.JSON(http.StatusOK, api.SuccessResponse)
 }

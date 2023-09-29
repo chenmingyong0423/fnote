@@ -27,5 +27,4 @@ func ErrorWithStack(ctx context.Context, msg string, err error) {
 
 func WarnWithStack(ctx context.Context, msg string, err error) {
 	slog.WarnContext(ctx, msg, err)
-	log.Printf("%+v/n", err)
 }

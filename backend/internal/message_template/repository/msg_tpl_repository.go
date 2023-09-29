@@ -15,14 +15,34 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/chenmingyong0423/fnote/backend/internal/message_template/repository/dao"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 )
 
 type IMsgTplRepository interface {
+	FindMsgTplByNameAndRcpType(ctx context.Context, name string, recipientType uint) (*domain.MessageTemplate, error)
 }
 
 var _ IMsgTplRepository = (*MsgTplRepository)(nil)
 
+func NewMsgTplRepository(dao dao.IMsgTplDao) *MsgTplRepository {
+	return &MsgTplRepository{dao: dao}
+}
+
 type MsgTplRepository struct {
 	dao dao.IMsgTplDao
+}
+
+func (r *MsgTplRepository) FindMsgTplByNameAndRcpType(ctx context.Context, name string, recipientType uint) (*domain.MessageTemplate, error) {
+	msgTplByName, err := r.dao.FindMsgTplByName(ctx, name, recipientType)
+	if err != nil {
+		return nil, err
+	}
+	return &domain.MessageTemplate{
+		Name:    msgTplByName.Name,
+		Title:   msgTplByName.Title,
+		Content: msgTplByName.Content,
+	}, nil
 }
