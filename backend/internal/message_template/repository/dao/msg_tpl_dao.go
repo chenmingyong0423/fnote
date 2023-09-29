@@ -21,6 +21,7 @@ import (
 type MessageTemplate struct {
 	Id         string `bson:"_id"`
 	Name       string `bson:"name"`
+	Title      string `bson:"title"`
 	Content    string `bson:"content"`
 	Active     uint   `bson:"active"`
 	CreateTime int64  `bson:"create_time"`

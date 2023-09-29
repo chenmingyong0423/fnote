@@ -16,5 +16,6 @@ package domain
 
 type MessageTemplate struct {
 	Name    string
+	Title   string
 	Content string
 }
