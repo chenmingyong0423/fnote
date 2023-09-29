@@ -15,7 +15,7 @@
 package handler
 
 import (
-	"log/slog"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 	"net/http"
 
 	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
@@ -53,7 +53,7 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
 	req := new(VisitLogReq)
 	err := ctx.ShouldBindJSON(req)
 	if err != nil {
-		slog.ErrorContext(ctx, "visitLog", err)
+		log.ErrorWithStack(ctx, "visitLog", err)
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
@@ -63,7 +63,7 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
 	req.Referer = ctx.GetHeader("Referer")
 	err = h.serv.CollectVisitLog(ctx, domain.VisitHistory{Url: req.Url, Ip: req.Ip, UserAgent: req.UserAgent, Origin: req.UserAgent, Referer: req.Referer})
 	if err != nil {
-		slog.ErrorContext(ctx, "visitLog", err)
+		log.ErrorWithStack(ctx, "visitLog", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -71,7 +71,7 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
 	go func() {
 		gErr := h.cfgServ.IncreaseWebsiteViews(ctx)
 		if gErr != nil {
-			slog.WarnContext(ctx, "config", gErr)
+			log.WarnWithStack(ctx, "config", gErr)
 		}
 	}()
 

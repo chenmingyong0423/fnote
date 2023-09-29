@@ -15,6 +15,7 @@
 package handler
 
 import (
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 	"log/slog"
 	"net/http"
 	"slices"
@@ -47,7 +48,7 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 func (h *PostHandler) GetHomePosts(ctx *gin.Context) {
 	listVO, err := h.serv.GetHomePosts(ctx)
 	if err != nil {
-		slog.ErrorContext(ctx, "post", err)
+		log.ErrorWithStack(ctx, "post", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -58,14 +59,14 @@ func (h *PostHandler) GetPosts(ctx *gin.Context) {
 	pageRequest := &domain.PostRequest{}
 	err := ctx.ShouldBindQuery(pageRequest)
 	if err != nil {
-		slog.ErrorContext(ctx, "post", err)
+		log.ErrorWithStack(ctx, "post", err)
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	pageRequest.ValidateAndSetDefault()
 	pageVO, err := h.serv.GetPosts(ctx, pageRequest)
 	if err != nil {
-		slog.ErrorContext(ctx, "post", err)
+		log.ErrorWithStack(ctx, "post", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -76,7 +77,7 @@ func (h *PostHandler) GetPostBySug(ctx *gin.Context) {
 	sug := ctx.Param("sug")
 	post, err := h.serv.GetPunishedPostById(ctx, sug)
 	if err != nil {
-		slog.ErrorContext(ctx, "post", err)
+		log.ErrorWithStack(ctx, "post", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -95,7 +96,7 @@ func (h *PostHandler) AddLike(ctx *gin.Context) {
 	sug := ctx.Param("sug")
 	err := h.serv.AddLike(ctx, sug, ip)
 	if err != nil {
-		slog.ErrorContext(ctx, "post", err)
+		log.ErrorWithStack(ctx, "post", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -112,7 +113,7 @@ func (h *PostHandler) DeleteLike(ctx *gin.Context) {
 	sug := ctx.Param("sug")
 	err := h.serv.DeleteLike(ctx, sug, ip)
 	if err != nil {
-		slog.ErrorContext(ctx, "post", err)
+		log.ErrorWithStack(ctx, "post", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

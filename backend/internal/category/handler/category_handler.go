@@ -15,7 +15,7 @@
 package handler
 
 import (
-	"log/slog"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 	"net/http"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/category/service"
@@ -43,7 +43,7 @@ func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) {
 	listVO, err := h.serv.GetCategoriesAndTags(ctx)
 	if err != nil {
-		slog.ErrorContext(ctx, "category", err)
+		log.ErrorWithStack(ctx, "category", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -53,7 +53,7 @@ func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) {
 func (h *CategoryHandler) GetMenus(ctx *gin.Context) {
 	listVO, err := h.serv.GetMenus(ctx)
 	if err != nil {
-		slog.ErrorContext(ctx, "menu", err)
+		log.ErrorWithStack(ctx, "menu", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -64,7 +64,7 @@ func (h *CategoryHandler) GetTagsByName(ctx *gin.Context) {
 	name := ctx.Param("name")
 	listVO, err := h.serv.GetTagsByName(ctx, name)
 	if err != nil {
-		slog.ErrorContext(ctx, "tag", err)
+		log.ErrorWithStack(ctx, "tag", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

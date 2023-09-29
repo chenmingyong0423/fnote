@@ -15,7 +15,7 @@
 package handler
 
 import (
-	"log/slog"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 	"net/http"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/config/service"
@@ -43,7 +43,7 @@ func (h *ConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 func (c *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) {
 	masterConfigVO, err := c.serv.GetWebmasterInfo(ctx, "webmaster")
 	if err != nil {
-		slog.ErrorContext(ctx, "config", err)
+		log.ErrorWithStack(ctx, "config", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

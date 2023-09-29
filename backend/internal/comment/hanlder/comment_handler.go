@@ -15,7 +15,7 @@
 package hanlder
 
 import (
-	"log/slog"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 	"net/http"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/vo"
@@ -66,7 +66,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context) {
 	req := new(CommentRequest)
 	err := ctx.BindJSON(req)
 	if err != nil {
-		slog.ErrorContext(ctx, "comment", err)
+		log.ErrorWithStack(ctx, "comment", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -77,7 +77,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context) {
 	}
 	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "comment")
 	if err != nil {
-		slog.ErrorContext(ctx, "comment", err)
+		log.ErrorWithStack(ctx, "comment", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -87,7 +87,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context) {
 	}
 	post, err := h.postServ.InternalGetPunishedPostById(ctx, req.PostId)
 	if err != nil {
-		slog.ErrorContext(ctx, "post", err)
+		log.ErrorWithStack(ctx, "post", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -109,18 +109,18 @@ func (h *CommentHandler) AddComment(ctx *gin.Context) {
 		},
 	})
 	if err != nil {
-		slog.ErrorContext(ctx, "comment", err)
+		log.ErrorWithStack(ctx, "comment", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	go func() {
 		gErr := h.postServ.IncreaseVisitCount(ctx, req.PostId)
 		if gErr != nil {
-			slog.WarnContext(ctx, "comment", gErr)
+			log.WarnWithStack(ctx, "post", gErr)
 		}
 		gErr = h.msgServ.SendEmailToWebmaster(ctx, "文章评论通知", "您好，您在文章有新的评论，详情请前往后台进行查看。", "text/plain")
 		if gErr != nil {
-			slog.WarnContext(ctx, "message", gErr)
+			log.WarnWithStack(ctx, "message", gErr)
 		}
 	}()
 	ctx.JSON(http.StatusOK, api.SuccessResponse)
@@ -139,7 +139,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
 	req := new(ReplyRequest)
 	err := ctx.BindJSON(req)
 	if err != nil {
-		slog.ErrorContext(ctx, "reply", err)
+		log.ErrorWithStack(ctx, "reply", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -153,7 +153,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
 
 	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "comment")
 	if err != nil {
-		slog.ErrorContext(ctx, "reply", err)
+		log.ErrorWithStack(ctx, "reply", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -164,11 +164,11 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
 	post, err := h.postServ.InternalGetPunishedPostById(ctx, req.PostId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			slog.ErrorContext(ctx, "post", err)
+			log.ErrorWithStack(ctx, "post", err)
 			ctx.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
-		slog.ErrorContext(ctx, "post", err)
+		log.ErrorWithStack(ctx, "post", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -191,7 +191,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
 		if errors.As(err, &httpCodeError) {
 			ctx.AbortWithStatus(int(*httpCodeError))
 		} else {
-			slog.ErrorContext(ctx, "reply", err)
+			log.ErrorWithStack(ctx, "reply", err)
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 		}
 		return
@@ -199,11 +199,11 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
 	go func() {
 		gErr := h.postServ.IncreaseVisitCount(ctx, req.PostId)
 		if gErr != nil {
-			slog.WarnContext(ctx, "comment", gErr)
+			log.WarnWithStack(ctx, "comment", gErr)
 		}
 		gErr = h.msgServ.SendEmailToWebmaster(ctx, "文章评论通知", "您好，您在文章有新的评论，详情请前往后台进行查看。", "text/plain")
 		if gErr != nil {
-			slog.WarnContext(ctx, "message", gErr)
+			log.WarnWithStack(ctx, "message", gErr)
 		}
 	}()
 	ctx.JSON(http.StatusOK, api.SuccessResponse)
@@ -212,7 +212,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
 func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) {
 	latestComments, err := h.serv.FineLatestCommentAndReply(ctx)
 	if err != nil {
-		slog.ErrorContext(ctx, "comment", err)
+		log.ErrorWithStack(ctx, "comment", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -232,7 +232,7 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) {
 	postId := ctx.Param("sug")
 	comments, err := h.serv.FindCommentsByPostId(ctx, postId)
 	if err != nil {
-		slog.ErrorContext(ctx, "comment", err)
+		log.ErrorWithStack(ctx, "comment", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
