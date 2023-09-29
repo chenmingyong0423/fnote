@@ -15,10 +15,11 @@
 package handler
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 	"log/slog"
 	"net/http"
 	"slices"
+
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
