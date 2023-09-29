@@ -15,8 +15,9 @@
 package handler
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 	"net/http"
+
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
