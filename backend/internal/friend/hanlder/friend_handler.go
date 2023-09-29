@@ -15,7 +15,7 @@
 package hanlder
 
 import (
-	"log/slog"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 	"net/http"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/friend/service"
@@ -44,7 +44,7 @@ func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 func (h *FriendHandler) GetFriends(ctx *gin.Context) {
 	vo, err := h.serv.GetFriends(ctx)
 	if err != nil {
-		slog.ErrorContext(ctx, "friend", err)
+		log.ErrorWithStack(ctx, "friend", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -62,7 +62,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
 	req := new(FriendRequest)
 	err := ctx.BindJSON(req)
 	if err != nil {
-		slog.ErrorContext(ctx, "friend", err)
+		log.ErrorWithStack(ctx, "friend", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -79,7 +79,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
 		if errors.As(err, &httpCodeError) {
 			ctx.AbortWithStatus(int(*httpCodeError))
 		} else {
-			slog.ErrorContext(ctx, "friend", err)
+			log.ErrorWithStack(ctx, "friend", err)
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 		}
 		return
