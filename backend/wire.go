@@ -31,13 +31,14 @@ func initializeApp(cfgPath string) (*gin.Engine, error) {
 		ioc.InitGinValidators,
 		ioc.NewGinEngine,
 
-		ioc.CategorySet,
-		ioc.CommentSet,
-		ioc.ConfigSet,
-		ioc.FriendSet,
-		ioc.PostSet,
-		ioc.VlSet,
-		ioc.EmailSet,
-		ioc.MsgSet,
+		ioc.CategoryProviders,
+		ioc.CommentProviders,
+		ioc.ConfigProviders,
+		ioc.FriendProviders,
+		ioc.PostProviders,
+		ioc.VlProviders,
+		ioc.EmailProviders,
+		ioc.MsgProviders,
+		ioc.MsgTplProviders,
 	))
 }
