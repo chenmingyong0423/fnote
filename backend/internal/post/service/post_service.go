@@ -16,8 +16,11 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"sync"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
@@ -100,7 +103,8 @@ func (s *PostService) GetPunishedPostById(ctx context.Context, id string) (*doma
 	go func() {
 		gErr := s.repo.IncreaseVisitCount(ctx, post.Sug)
 		if gErr != nil {
-			slog.WarnContext(ctx, "post", err)
+			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
 	return post, nil
