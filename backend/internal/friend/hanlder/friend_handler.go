@@ -15,12 +15,12 @@
 package hanlder
 
 import (
+	"fmt"
+	"log/slog"
 	"net/http"
 
 	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	msgService "github.com/chenmingyong0423/fnote/backend/internal/message/service"
-
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/friend/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
@@ -51,8 +51,6 @@ func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[domain.FriendVO], err error) {
 	friends, err := h.serv.GetFriends(ctx)
 	if err != nil {
-		log.ErrorWithStack(ctx, "friend", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	listVO.List = h.toFriendVOs(friends)
@@ -106,7 +104,8 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any
 	go func() {
 		gErr := h.msgServ.SendEmailToWebmaster(ctx, "friend", "text/plain")
 		if gErr != nil {
-			log.WarnWithStack(ctx, "message", gErr)
+			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
 
