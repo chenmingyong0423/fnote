@@ -15,8 +15,10 @@
 package handler
 
 import (
+	"fmt"
+	"log/slog"
+
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 
 	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
@@ -61,7 +63,8 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context, req VisitLogReq) (r 
 	go func() {
 		gErr := h.cfgServ.IncreaseWebsiteViews(ctx)
 		if gErr != nil {
-			log.WarnWithStack(ctx, "config", gErr)
+			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
 	return

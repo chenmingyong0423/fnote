@@ -15,9 +15,9 @@
 package hanlder
 
 import (
+	"fmt"
+	"log/slog"
 	"net/http"
-
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/vo"
 
@@ -100,13 +100,14 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo ap
 		return
 	}
 	go func() {
+		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 		gErr := h.postServ.IncreaseVisitCount(ctx, req.PostId)
 		if gErr != nil {
-			log.WarnWithStack(ctx, "post", gErr)
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 		gErr = h.msgServ.SendEmailToWebmaster(ctx, "comment", "text/plain")
 		if gErr != nil {
-			log.WarnWithStack(ctx, "message", gErr)
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
 	return
@@ -160,13 +161,14 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (vo
 		return
 	}
 	go func() {
+		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 		gErr := h.postServ.IncreaseVisitCount(ctx, req.PostId)
 		if gErr != nil {
-			log.WarnWithStack(ctx, "comment", gErr)
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 		gErr = h.msgServ.SendEmailToWebmaster(ctx, "comment", "text/plain")
 		if gErr != nil {
-			log.WarnWithStack(ctx, "message", gErr)
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
 	return
