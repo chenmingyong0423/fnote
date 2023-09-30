@@ -25,9 +25,9 @@ import (
 )
 
 type IFriendRepository interface {
-	FindDisplaying(ctx context.Context) ([]*domain.Friend, error)
+	FindDisplaying(ctx context.Context) ([]domain.Friend, error)
 	Add(ctx context.Context, friend domain.Friend) error
-	FindByUrl(ctx context.Context, url string) (*domain.Friend, error)
+	FindByUrl(ctx context.Context, url string) (domain.Friend, error)
 }
 
 var _ IFriendRepository = (*FriendRepository)(nil)
@@ -42,12 +42,13 @@ type FriendRepository struct {
 	dao dao.IFriendDao
 }
 
-func (r *FriendRepository) FindByUrl(ctx context.Context, url string) (*domain.Friend, error) {
-	friend, err := r.dao.FindByUrl(ctx, url)
+func (r *FriendRepository) FindByUrl(ctx context.Context, url string) (friend domain.Friend, err error) {
+	friendDao, err := r.dao.FindByUrl(ctx, url)
 	if err != nil {
-		return nil, err
+		return friend, err
 	}
-	return r.toDomainFriend(friend), nil
+	friend = r.toDomainFriend(friendDao)
+	return
 }
 
 func (r *FriendRepository) Add(ctx context.Context, friend domain.Friend) error {
@@ -69,24 +70,24 @@ func (r *FriendRepository) Add(ctx context.Context, friend domain.Friend) error 
 	return nil
 }
 
-func (r *FriendRepository) FindDisplaying(ctx context.Context) ([]*domain.Friend, error) {
+func (r *FriendRepository) FindDisplaying(ctx context.Context) ([]domain.Friend, error) {
 	friends, err := r.dao.FindDisplaying(ctx)
 	if err != nil {
-		return nil, errors.WithMessage(err, "r.dao.FindDisplaying failed")
+		return nil, err
 	}
 	return r.toDomainFriends(friends), nil
 }
 
-func (r *FriendRepository) toDomainFriends(friends []*dao.Friend) []*domain.Friend {
-	results := make([]*domain.Friend, 0, len(friends))
+func (r *FriendRepository) toDomainFriends(friends []*dao.Friend) []domain.Friend {
+	results := make([]domain.Friend, 0, len(friends))
 	for _, friend := range friends {
 		results = append(results, r.toDomainFriend(friend))
 	}
 	return results
 }
 
-func (r *FriendRepository) toDomainFriend(friend *dao.Friend) *domain.Friend {
-	return &domain.Friend{
+func (r *FriendRepository) toDomainFriend(friend *dao.Friend) domain.Friend {
+	return domain.Friend{
 		Id:          friend.Id,
 		Name:        friend.Name,
 		Url:         friend.Url,

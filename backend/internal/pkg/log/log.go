@@ -16,15 +16,14 @@ package log
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"log/slog"
 )
 
 func ErrorWithStack(ctx context.Context, msg string, err error) {
-	slog.ErrorContext(ctx, msg, err)
-	log.Printf("%+v/n", err)
+	slog.ErrorContext(ctx, fmt.Sprintf("%+v", err), nil)
 }
 
 func WarnWithStack(ctx context.Context, msg string, err error) {
-	slog.WarnContext(ctx, msg, err)
+	slog.WarnContext(ctx, fmt.Sprintf("%+v", err), nil)
 }

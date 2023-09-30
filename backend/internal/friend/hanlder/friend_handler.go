@@ -15,7 +15,6 @@
 package hanlder
 
 import (
-	"log/slog"
 	"net/http"
 
 	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
@@ -45,45 +44,52 @@ type FriendHandler struct {
 }
 
 func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
-	engine.GET("/friends", h.GetFriends)
-	engine.POST("/friends", h.ApplyForFriend)
+	engine.GET("/friends", api.Wrap(h.GetFriends))
+	engine.POST("/friends", api.WrapWithBody(h.ApplyForFriend))
 }
 
-func (h *FriendHandler) GetFriends(ctx *gin.Context) {
-	vo, err := h.serv.GetFriends(ctx)
+func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[domain.FriendVO], err error) {
+	friends, err := h.serv.GetFriends(ctx)
 	if err != nil {
 		log.ErrorWithStack(ctx, "friend", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponseWithData(vo))
+	listVO.List = h.toFriendVOs(friends)
+	return
+}
+func (h *FriendHandler) toFriendVOs(friends []domain.Friend) []domain.FriendVO {
+	result := make([]domain.FriendVO, 0, len(friends))
+	for _, friend := range friends {
+		result = append(result, h.toFriendVO(friend))
+	}
+	return result
+}
+func (h *FriendHandler) toFriendVO(friend domain.Friend) domain.FriendVO {
+	return domain.FriendVO{
+		Name:        friend.Name,
+		Url:         friend.Url,
+		Logo:        friend.Logo,
+		Description: friend.Description,
+		Priority:    friend.Priority,
+	}
 }
 
-func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
-	type FriendRequest struct {
-		Name        string `json:"name" binding:"required"`
-		Url         string `json:"url" binding:"required"`
-		Logo        string `json:"logo" binding:"required"`
-		Description string `json:"description" binding:"required"`
-		Email       string `json:"email" binding:"required,validateEmailFormat"`
-	}
-	req := new(FriendRequest)
-	err := ctx.BindJSON(req)
-	if err != nil {
-		log.ErrorWithStack(ctx, "friend", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
+type FriendRequest struct {
+	Name        string `json:"name" binding:"required"`
+	Url         string `json:"url" binding:"required"`
+	Logo        string `json:"logo" binding:"required"`
+	Description string `json:"description" binding:"required"`
+	Email       string `json:"email" binding:"required,validateEmailFormat"`
+}
+
+func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any, error) {
 	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "friend")
 	if err != nil {
-		log.ErrorWithStack(ctx, "config", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 	if !switchConfig.Status {
-		slog.WarnContext(ctx, "config", "Friend module is close.")
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
+		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Friend module is close.")
 	}
 	err = h.serv.ApplyForFriend(ctx, domain.Friend{
 		Name:        req.Name,
@@ -93,9 +99,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
 		Email:       req.Email,
 	})
 	if err != nil {
-		log.ErrorWithStack(ctx, "friend", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	// 发送邮件
@@ -106,5 +110,5 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
 		}
 	}()
 
-	ctx.JSON(http.StatusOK, api.SuccessResponse)
+	return nil, nil
 }

@@ -16,17 +16,14 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/friend/repository"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type IFriendService interface {
-	GetFriends(ctx context.Context) (api.ListVO[*domain.FriendVO], error)
+	GetFriends(ctx context.Context) ([]domain.Friend, error)
 	ApplyForFriend(ctx context.Context, friend domain.Friend) error
 }
 
@@ -43,12 +40,6 @@ type FriendService struct {
 }
 
 func (s *FriendService) ApplyForFriend(ctx context.Context, friend domain.Friend) error {
-	if f, err := s.repo.FindByUrl(ctx, friend.Url); !errors.Is(err, mongo.ErrNoDocuments) {
-		if err != nil {
-			return err
-		}
-		return fmt.Errorf("the friend had already applied for, friend=%v", f)
-	}
 	err := s.repo.Add(ctx, friend)
 	if err != nil {
 		return errors.WithMessage(err, "s.repo.Add failed")
@@ -56,31 +47,6 @@ func (s *FriendService) ApplyForFriend(ctx context.Context, friend domain.Friend
 	return nil
 }
 
-func (s *FriendService) GetFriends(ctx context.Context) (api.ListVO[*domain.FriendVO], error) {
-	vo := api.ListVO[*domain.FriendVO]{}
-	friends, err := s.repo.FindDisplaying(ctx)
-	if err != nil {
-		return vo, errors.WithMessage(err, "s.repo.FindDisplaying failed")
-	}
-	vo.List = s.toFriendVOs(friends)
-	return vo, nil
-}
-
-func (s *FriendService) toFriendVOs(friends []*domain.Friend) []*domain.FriendVO {
-	result := make([]*domain.FriendVO, 0, len(friends))
-	for _, friend := range friends {
-		result = append(result, s.toFriendVO(friend))
-	}
-	return result
-}
-
-func (s *FriendService) toFriendVO(friend *domain.Friend) *domain.FriendVO {
-	return &domain.FriendVO{
-		Name:        friend.Name,
-		Url:         friend.Url,
-		Logo:        friend.Logo,
-		Description: friend.Description,
-		Status:      friend.Status,
-		Priority:    friend.Priority,
-	}
+func (s *FriendService) GetFriends(ctx context.Context) ([]domain.Friend, error) {
+	return s.repo.FindDisplaying(ctx)
 }

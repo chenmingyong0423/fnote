@@ -15,17 +15,16 @@
 package handler
 
 import (
-	"log/slog"
 	"net/http"
 	"slices"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/internal/post/service"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 )
 
 func NewPostHandler(serv service.IPostService) *PostHandler {
@@ -39,84 +38,70 @@ type PostHandler struct {
 }
 
 func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
-	engine.GET("/home/posts", h.GetHomePosts)
-	engine.GET("/posts", h.GetPosts)
-	engine.GET("/posts/:sug", h.GetPostBySug)
-	engine.POST("/posts/:sug/likes", h.AddLike)
-	engine.DELETE("/posts/:sug/likes", h.DeleteLike)
+	engine.GET("/home/posts", api.Wrap(h.GetHomePosts))
+	engine.GET("/posts", api.WrapWithBody(h.GetPosts))
+	engine.GET("/posts/:sug", api.Wrap(h.GetPostBySug))
+	engine.POST("/posts/:sug/likes", api.Wrap(h.AddLike))
+	engine.DELETE("/posts/:sug/likes", api.Wrap(h.DeleteLike))
 }
 
-func (h *PostHandler) GetHomePosts(ctx *gin.Context) {
-	listVO, err := h.serv.GetHomePosts(ctx)
+func (h *PostHandler) GetHomePosts(ctx *gin.Context) (listVO api.ListVO[*domain.SummaryPostVO], err error) {
+	posts, err := h.serv.GetHomePosts(ctx)
 	if err != nil {
-		log.ErrorWithStack(ctx, "post", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[api.ListVO[*domain.SummaryPostVO]](listVO))
+	listVO.List = h.postsToPostVOs(posts)
+	return
 }
 
-func (h *PostHandler) GetPosts(ctx *gin.Context) {
-	pageRequest := &domain.PostRequest{}
-	err := ctx.ShouldBindQuery(pageRequest)
-	if err != nil {
-		log.ErrorWithStack(ctx, "post", err)
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
+func (h *PostHandler) postsToPostVOs(posts []*domain.Post) []*domain.SummaryPostVO {
+	postVOs := make([]*domain.SummaryPostVO, 0, len(posts))
+	for _, post := range posts {
+		postVOs = append(postVOs, &domain.SummaryPostVO{PrimaryPost: post.PrimaryPost})
 	}
-	pageRequest.ValidateAndSetDefault()
-	pageVO, err := h.serv.GetPosts(ctx, pageRequest)
-	if err != nil {
-		log.ErrorWithStack(ctx, "post", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[*api.PageVO[*domain.SummaryPostVO]](pageVO))
+	return postVOs
 }
 
-func (h *PostHandler) GetPostBySug(ctx *gin.Context) {
+func (h *PostHandler) GetPosts(ctx *gin.Context, req *domain.PostRequest) (pageVO api.PageVO[*domain.SummaryPostVO], err error) {
+	req.ValidateAndSetDefault()
+	posts, cnt, err := h.serv.GetPosts(ctx, req)
+	if err != nil {
+		return
+	}
+	pageVO.Page = req.Page
+	pageVO.List = h.postsToPostVOs(posts)
+	pageVO.SetTotalCountAndCalculateTotalPages(cnt)
+	return
+}
+
+func (h *PostHandler) GetPostBySug(ctx *gin.Context) (vo *domain.DetailPostVO, err error) {
 	sug := ctx.Param("sug")
 	post, err := h.serv.GetPunishedPostById(ctx, sug)
 	if err != nil {
-		log.ErrorWithStack(ctx, "post", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, api.NewErrorResponseBody(http.StatusBadRequest, "The postId does not exist.")
+		}
 		return
 	}
-	postVO := &domain.DetailPostVO{PrimaryPost: post.PrimaryPost, ExtraPost: post.ExtraPost}
-	postVO.IsLiked = slices.Contains(post.Likes, ctx.ClientIP())
-	ctx.JSON(http.StatusOK, api.SuccessResponseWithData(postVO))
+	vo = new(domain.DetailPostVO)
+	vo.PrimaryPost, vo.ExtraPost, vo.IsLiked = post.PrimaryPost, post.ExtraPost, slices.Contains(post.Likes, ctx.ClientIP())
+	return
 }
 
-func (h *PostHandler) AddLike(ctx *gin.Context) {
+func (h *PostHandler) AddLike(ctx *gin.Context) (r any, err error) {
 	ip := ctx.ClientIP()
 	if ip == "" {
-		slog.ErrorContext(ctx, "post", errors.New("fails to like without ip."))
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
+		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
 	sug := ctx.Param("sug")
-	err := h.serv.AddLike(ctx, sug, ip)
-	if err != nil {
-		log.ErrorWithStack(ctx, "post", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse)
+	return r, h.serv.AddLike(ctx, sug, ip)
 }
 
-func (h *PostHandler) DeleteLike(ctx *gin.Context) {
+func (h *PostHandler) DeleteLike(ctx *gin.Context) (r any, err error) {
 	ip := ctx.ClientIP()
 	if ip == "" {
-		slog.ErrorContext(ctx, "post", errors.New("fails to unlike without ip."))
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
+		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
 	sug := ctx.Param("sug")
-	err := h.serv.DeleteLike(ctx, sug, ip)
-	if err != nil {
-		log.ErrorWithStack(ctx, "post", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse)
+	return r, h.serv.DeleteLike(ctx, sug, ip)
 }

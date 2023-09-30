@@ -18,16 +18,15 @@ import (
 	"context"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/category/repository"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ICategoryService interface {
-	GetCategoriesAndTags(ctx context.Context) (api.ListVO[domain.SearchCategoryVO], error)
-	GetMenus(ctx context.Context) (api.ListVO[domain.MenuVO], error)
-	GetTagsByName(ctx context.Context, name string) (api.ListVO[string], error)
+	GetCategoriesAndTags(ctx context.Context) ([]domain.Category, error)
+	GetMenus(ctx context.Context) ([]domain.MenuVO, error)
+	GetTagsByName(ctx context.Context, name string) ([]string, error)
 }
 
 var _ ICategoryService = (*CategoryService)(nil)
@@ -42,40 +41,26 @@ type CategoryService struct {
 	repo repository.ICategoryRepository
 }
 
-func (s *CategoryService) GetTagsByName(ctx context.Context, name string) (api.ListVO[string], error) {
-	var listVO api.ListVO[string]
-	tags, err := s.repo.GetTagsByName(ctx, name)
-	if err != nil {
-		return listVO, errors.WithMessage(err, "s.repo.GetTagsByName failed")
-	}
-	for _, tag := range tags {
-		listVO.List = append(listVO.List, tag)
-	}
-	return listVO, nil
+func (s *CategoryService) GetTagsByName(ctx context.Context, name string) ([]string, error) {
+	return s.repo.GetTagsByName(ctx, name)
 }
 
-func (s *CategoryService) GetMenus(ctx context.Context) (api.ListVO[domain.MenuVO], error) {
-	var listVO api.ListVO[domain.MenuVO]
+func (s *CategoryService) GetMenus(ctx context.Context) (menuVO []domain.MenuVO, err error) {
 	categories, err := s.repo.GetAll(ctx)
 	if err != nil && !errors.Is(err, mongo.ErrNilDocument) {
-		return listVO, errors.WithMessage(err, "s.repo.GetAll failed")
+		return nil, err
 	}
-	listVO.List = make([]domain.MenuVO, 0, len(categories))
+	menuVO = make([]domain.MenuVO, 0, len(categories))
 	for _, category := range categories {
-		listVO.List = append(listVO.List, domain.MenuVO{Menu: domain.Menu{CategoryName: category.CategoryName, Route: category.Route}})
+		menuVO = append(menuVO, domain.MenuVO{Menu: domain.Menu{CategoryName: category.CategoryName, Route: category.Route}})
 	}
-	return listVO, nil
+	return menuVO, nil
 }
 
-func (s *CategoryService) GetCategoriesAndTags(ctx context.Context) (api.ListVO[domain.SearchCategoryVO], error) {
-	var listVO api.ListVO[domain.SearchCategoryVO]
+func (s *CategoryService) GetCategoriesAndTags(ctx context.Context) ([]domain.Category, error) {
 	categories, err := s.repo.GetAll(ctx)
 	if err != nil && !errors.Is(err, mongo.ErrNilDocument) {
-		return listVO, errors.WithMessage(err, "s.repo.GetAll failed")
+		return categories, err
 	}
-	listVO.List = make([]domain.SearchCategoryVO, 0, len(categories))
-	for _, category := range categories {
-		listVO.List = append(listVO.List, domain.SearchCategoryVO{CategoryName: category.CategoryName, Tags: category.Tags})
-	}
-	return listVO, nil
+	return categories, nil
 }

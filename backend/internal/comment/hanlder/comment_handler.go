@@ -48,55 +48,42 @@ type CommentHandler struct {
 	msgServ    msgService.IMessageService
 }
 
-func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
-	engine.GET("/posts/:sug/comments", h.GetCommentsByPostId)
-	group := engine.Group("/comments")
-	group.POST("", h.AddComment)
-	group.POST("/:commentId/replies", h.AddCommentReply)
-	group.GET("/latest", h.GetLatestCommentAndReply)
+type CommentRequest struct {
+	PostId   string `json:"postId" binding:"required"`
+	UserName string `json:"username" binding:"required"`
+	Email    string `json:"email" binding:"required,validateEmailFormat"`
+	Website  string `json:"website"`
+	Content  string `json:"content" binding:"required,max=200"`
 }
 
-func (h *CommentHandler) AddComment(ctx *gin.Context) {
-	type CommentRequest struct {
-		PostId   string `json:"postId" binding:"required"`
-		UserName string `json:"username" binding:"required"`
-		Email    string `json:"email" binding:"required,validateEmailFormat"`
-		Website  string `json:"website"`
-		Content  string `json:"content" binding:"required,max=200"`
-	}
-	req := new(CommentRequest)
-	err := ctx.BindJSON(req)
-	if err != nil {
-		log.ErrorWithStack(ctx, "comment", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
+func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
+	engine.GET("/posts/:sug/comments", api.Wrap(h.GetCommentsByPostId))
+	group := engine.Group("/comments")
+	group.POST("", api.WrapWithBody(h.AddComment))
+	group.POST("/:commentId/replies", api.WrapWithBody(h.AddCommentReply))
+	group.GET("/latest", api.Wrap(h.GetLatestCommentAndReply))
+}
+
+func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo api.IdVO, err error) {
 	ip := ctx.ClientIP()
 	if ip == "" {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
+		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
 	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "comment")
 	if err != nil {
-		log.ErrorWithStack(ctx, "comment", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	if !switchConfig.Status {
-		ctx.AbortWithStatus(http.StatusForbidden)
-		return
+		return vo, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
-	post, err := h.postServ.InternalGetPunishedPostById(ctx, req.PostId)
+	post, err := h.postServ.GetPunishedPostById(ctx, req.PostId)
 	if err != nil {
-		log.ErrorWithStack(ctx, "post", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	if !post.IsCommentAllowed {
-		ctx.AbortWithStatus(http.StatusForbidden)
-		return
+		return vo, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
-	err = h.serv.AddComment(ctx, domain.Comment{
+	vo.Id, err = h.serv.AddComment(ctx, domain.Comment{
 		PostInfo: domain.PostInfo4Comment{
 			PostId:    req.PostId,
 			PostTitle: post.Title,
@@ -110,8 +97,6 @@ func (h *CommentHandler) AddComment(ctx *gin.Context) {
 		},
 	})
 	if err != nil {
-		log.ErrorWithStack(ctx, "comment", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	go func() {
@@ -124,60 +109,44 @@ func (h *CommentHandler) AddComment(ctx *gin.Context) {
 			log.WarnWithStack(ctx, "message", gErr)
 		}
 	}()
-	ctx.JSON(http.StatusOK, api.SuccessResponse)
+	return
 }
 
-func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
-	type ReplyRequest struct {
-		PostId string `json:"postId" binding:"required"`
-		// 如果是对某个回复进行回复，则是某个回复的 id
-		ReplyToId string `json:"replyToId"`
-		UserName  string `json:"username" binding:"required"`
-		Email     string `json:"email" binding:"required,validateEmailFormat"`
-		Website   string `json:"website"`
-		Content   string `json:"content" binding:"required,max=200"`
-	}
-	req := new(ReplyRequest)
-	err := ctx.BindJSON(req)
-	if err != nil {
-		log.ErrorWithStack(ctx, "reply", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
+type ReplyRequest struct {
+	PostId string `json:"postId" binding:"required"`
+	// 如果是对某个回复进行回复，则是某个回复的 id
+	ReplyToId string `json:"replyToId"`
+	UserName  string `json:"username" binding:"required"`
+	Email     string `json:"email" binding:"required,validateEmailFormat"`
+	Website   string `json:"website"`
+	Content   string `json:"content" binding:"required,max=200"`
+}
+
+func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (vo api.IdVO, err error) {
 	// 根评论的 id
 	commentId := ctx.Param("commentId")
 	ip := ctx.ClientIP()
 	if ip == "" {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
+		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
-
 	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "comment")
 	if err != nil {
-		log.ErrorWithStack(ctx, "reply", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	if !switchConfig.Status {
-		ctx.AbortWithStatus(http.StatusForbidden)
-		return
+		return vo, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
-	post, err := h.postServ.InternalGetPunishedPostById(ctx, req.PostId)
+	post, err := h.postServ.GetPunishedPostById(ctx, req.PostId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			log.ErrorWithStack(ctx, "post", err)
-			ctx.AbortWithStatus(http.StatusBadRequest)
-			return
+			return vo, api.NewErrorResponseBody(http.StatusForbidden, "The postId does not exist.")
 		}
-		log.ErrorWithStack(ctx, "post", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	if !post.IsCommentAllowed {
-		ctx.AbortWithStatus(http.StatusForbidden)
-		return
+		return vo, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
-	err = h.serv.AddCommentReply(ctx, commentId, req.PostId, domain.CommentReply{
+	vo.Id, err = h.serv.AddCommentReply(ctx, commentId, req.PostId, domain.CommentReply{
 		Content:   req.Content,
 		ReplyToId: req.ReplyToId,
 		UserInfo: domain.UserInfo4Reply{
@@ -188,13 +157,6 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
 		},
 	})
 	if err != nil {
-		var httpCodeError *api.HttpCodeError
-		if errors.As(err, &httpCodeError) {
-			ctx.AbortWithStatus(int(*httpCodeError))
-		} else {
-			log.ErrorWithStack(ctx, "reply", err)
-			ctx.AbortWithStatus(http.StatusInternalServerError)
-		}
 		return
 	}
 	go func() {
@@ -207,34 +169,31 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context) {
 			log.WarnWithStack(ctx, "message", gErr)
 		}
 	}()
-	ctx.JSON(http.StatusOK, api.SuccessResponse)
+	return
 }
 
-func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) {
+func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) (result api.ListVO[vo.LatestCommentVO], err error) {
 	latestComments, err := h.serv.FineLatestCommentAndReply(ctx)
 	if err != nil {
-		log.ErrorWithStack(ctx, "comment", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	result := make([]vo.LatestCommentVO, 0, len(latestComments))
+	lc := make([]vo.LatestCommentVO, 0, len(latestComments))
 	for _, latestComment := range latestComments {
-		result = append(result, vo.LatestCommentVO{
+		lc = append(lc, vo.LatestCommentVO{
 			PostInfo4Comment: vo.PostInfo4Comment(latestComment.PostInfo4Comment),
 			Name:             latestComment.Name,
 			Content:          latestComment.Content,
 			CreateTime:       latestComment.CreateTime,
 		})
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponseWithData(result))
+	result.List = lc
+	return
 }
 
-func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) {
+func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (listVO api.ListVO[vo.PostCommentVO], err error) {
 	postId := ctx.Param("sug")
 	comments, err := h.serv.FindCommentsByPostId(ctx, postId)
 	if err != nil {
-		log.ErrorWithStack(ctx, "comment", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	pc := make([]vo.PostCommentVO, 0, len(comments))
@@ -262,5 +221,6 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) {
 			Replies:     replies,
 		})
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponseWithData(api.NewListVO[vo.PostCommentVO](pc)))
+	listVO.List = pc
+	return
 }
