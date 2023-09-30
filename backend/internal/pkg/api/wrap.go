@@ -16,10 +16,10 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,13 +35,14 @@ func Wrap[T any](fn func(ctx *gin.Context) (T, error)) gin.HandlerFunc {
 }
 
 func ErrorHandler(ctx *gin.Context, err error) {
+	l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 	var e ErrorResponseBody
 	switch {
 	case errors.As(err, &e):
-		slog.ErrorContext(ctx, e.Error())
+		l.ErrorContext(ctx, e.Error())
 		ctx.JSON(e.HttpCode, nil)
 	default:
-		log.ErrorWithStack(ctx, err.Error(), err)
+		l.ErrorContext(ctx, fmt.Sprintf("%+v", err))
 		ctx.JSON(http.StatusInternalServerError, nil)
 	}
 }
