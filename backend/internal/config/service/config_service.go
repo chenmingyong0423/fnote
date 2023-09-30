@@ -24,7 +24,7 @@ import (
 )
 
 type IConfigService interface {
-	GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfigVO, error)
+	GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfig, error)
 	GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error)
 	IncreaseWebsiteViews(ctx context.Context) error
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
@@ -76,17 +76,14 @@ func (s *ConfigService) GetSwitchStatusByTyp(ctx context.Context, typ string) (*
 	return switchConfig, nil
 }
 
-func (s *ConfigService) GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfigVO, error) {
+func (s *ConfigService) GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfig, error) {
 	props, err := s.repo.FindByTyp(ctx, typ)
 	if err != nil {
 		return nil, errors.WithMessage(err, "s.repo.FindByTyp failed")
 	}
 	webMasterConfig := new(domain.WebMasterConfig)
 	err = s.anyToStruct(props, webMasterConfig)
-	if err != nil {
-		return nil, err
-	}
-	return &domain.WebMasterConfigVO{Name: webMasterConfig.Name, PostCount: webMasterConfig.PostCount, ColumnCount: webMasterConfig.ColumnCount, WebsiteViews: webMasterConfig.WebsiteViews, WebsiteLiveTime: webMasterConfig.WebsiteLiveTime, Profile: webMasterConfig.Profile, Picture: webMasterConfig.Picture, WebsiteIcon: webMasterConfig.WebsiteIcon, Domain: webMasterConfig.Domain}, nil
+	return webMasterConfig, err
 }
 
 func (s *ConfigService) anyToStruct(props any, cfgInfos any) error {

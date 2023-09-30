@@ -15,9 +15,6 @@
 package handler
 
 import (
-	"log/slog"
-	"net/http"
-
 	"github.com/chenmingyong0423/fnote/backend/internal/category/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
@@ -35,38 +32,38 @@ type CategoryHandler struct {
 }
 
 func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
-	engine.GET("/categories", h.GetCategoriesAndTags)
-	engine.GET("/categories/:name/tags", h.GetTagsByName)
-	engine.GET("/menus", h.GetMenus)
+	engine.GET("/categories", api.Wrap(h.GetCategoriesAndTags))
+	engine.GET("/categories/:name/tags", api.Wrap(h.GetTagsByName))
+	engine.GET("/menus", api.Wrap(h.GetMenus))
 }
 
-func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) {
-	listVO, err := h.serv.GetCategoriesAndTags(ctx)
+func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) (listVO api.ListVO[domain.SearchCategoryVO], err error) {
+	categories, err := h.serv.GetCategoriesAndTags(ctx)
 	if err != nil {
-		slog.ErrorContext(ctx, "category", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[api.ListVO[domain.SearchCategoryVO]](listVO))
+	listVO.List = make([]domain.SearchCategoryVO, 0, len(categories))
+	for _, category := range categories {
+		listVO.List = append(listVO.List, domain.SearchCategoryVO{CategoryName: category.CategoryName, Tags: category.Tags})
+	}
+	return
 }
 
-func (h *CategoryHandler) GetMenus(ctx *gin.Context) {
-	listVO, err := h.serv.GetMenus(ctx)
+func (h *CategoryHandler) GetMenus(ctx *gin.Context) (listVO api.ListVO[domain.MenuVO], err error) {
+	menuVO, err := h.serv.GetMenus(ctx)
 	if err != nil {
-		slog.ErrorContext(ctx, "menu", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[api.ListVO[domain.MenuVO]](listVO))
+	listVO.List = menuVO
+	return
 }
 
-func (h *CategoryHandler) GetTagsByName(ctx *gin.Context) {
+func (h *CategoryHandler) GetTagsByName(ctx *gin.Context) (listVO api.ListVO[string], err error) {
 	name := ctx.Param("name")
-	listVO, err := h.serv.GetTagsByName(ctx, name)
+	tags, err := h.serv.GetTagsByName(ctx, name)
 	if err != nil {
-		slog.ErrorContext(ctx, "tag", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[api.ListVO[string]](listVO))
+	listVO.List = append(listVO.List, tags...)
+	return
 }

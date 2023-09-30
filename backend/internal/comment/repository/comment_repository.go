@@ -25,9 +25,9 @@ import (
 )
 
 type ICommentRepository interface {
-	AddComment(ctx context.Context, comment domain.Comment) (any, error)
+	AddComment(ctx context.Context, comment domain.Comment) (string, error)
 	FindApprovedCommentById(ctx context.Context, cmtId string) (*domain.CommentWithReplies, error)
-	AddCommentReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) error
+	AddCommentReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) (string, error)
 	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]domain.LatestComment, error)
 	FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus domain.CommentStatus) ([]domain.CommentWithReplies, error)
 }
@@ -69,10 +69,11 @@ func (r *CommentRepository) FineLatestCommentAndReply(ctx context.Context, cnt i
 	return result, nil
 }
 
-func (r *CommentRepository) AddCommentReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) error {
+func (r *CommentRepository) AddCommentReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) (string, error) {
 	unix := time.Now().Unix()
-	return r.dao.AddCommentReply(ctx, cmtId, dao.CommentReply{
-		ReplyId:         uuid.NewString(),
+	id := uuid.NewString()
+	return id, r.dao.AddCommentReply(ctx, cmtId, dao.CommentReply{
+		ReplyId:         id,
 		Content:         commentReply.Content,
 		ReplyToId:       commentReply.ReplyToId,
 		UserInfo:        dao.UserInfo4Reply(commentReply.UserInfo),
@@ -118,7 +119,7 @@ func (r *CommentRepository) FindApprovedCommentById(ctx context.Context, cmtId s
 	}, nil
 }
 
-func (r *CommentRepository) AddComment(ctx context.Context, comment domain.Comment) (any, error) {
+func (r *CommentRepository) AddComment(ctx context.Context, comment domain.Comment) (string, error) {
 	unix := time.Now().Unix()
 	return r.dao.AddComment(ctx, dao.Comment{
 		Id:         uuid.NewString(),

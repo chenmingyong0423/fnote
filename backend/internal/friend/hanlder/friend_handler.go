@@ -15,58 +15,82 @@
 package hanlder
 
 import (
-	"log/slog"
 	"net/http"
+
+	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
+	msgService "github.com/chenmingyong0423/fnote/backend/internal/message/service"
+
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/friend/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 )
 
-func NewFriendHandler(serv service.IFriendService) *FriendHandler {
+func NewFriendHandler(serv service.IFriendService, msgServ msgService.IMessageService, cfgService configServ.IConfigService) *FriendHandler {
 	return &FriendHandler{
-		serv: serv,
+		serv:       serv,
+		msgServ:    msgServ,
+		cfgService: cfgService,
 	}
 
 }
 
 type FriendHandler struct {
-	serv service.IFriendService
+	serv       service.IFriendService
+	msgServ    msgService.IMessageService
+	cfgService configServ.IConfigService
 }
 
 func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
-	engine.GET("/friends", h.GetFriends)
-	engine.POST("/friends", h.ApplyForFriend)
+	engine.GET("/friends", api.Wrap(h.GetFriends))
+	engine.POST("/friends", api.WrapWithBody(h.ApplyForFriend))
 }
 
-func (h *FriendHandler) GetFriends(ctx *gin.Context) {
-	vo, err := h.serv.GetFriends(ctx)
+func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[domain.FriendVO], err error) {
+	friends, err := h.serv.GetFriends(ctx)
 	if err != nil {
-		slog.ErrorContext(ctx, "friend", err)
+		log.ErrorWithStack(ctx, "friend", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponseWithData(vo))
+	listVO.List = h.toFriendVOs(friends)
+	return
+}
+func (h *FriendHandler) toFriendVOs(friends []domain.Friend) []domain.FriendVO {
+	result := make([]domain.FriendVO, 0, len(friends))
+	for _, friend := range friends {
+		result = append(result, h.toFriendVO(friend))
+	}
+	return result
+}
+func (h *FriendHandler) toFriendVO(friend domain.Friend) domain.FriendVO {
+	return domain.FriendVO{
+		Name:        friend.Name,
+		Url:         friend.Url,
+		Logo:        friend.Logo,
+		Description: friend.Description,
+		Priority:    friend.Priority,
+	}
 }
 
-func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
-	type FriendRequest struct {
-		Name        string `json:"name" binding:"required"`
-		Url         string `json:"url" binding:"required"`
-		Logo        string `json:"logo" binding:"required"`
-		Description string `json:"description" binding:"required"`
-		Email       string `json:"email" binding:"required,validateEmailFormat"`
-	}
-	req := new(FriendRequest)
-	err := ctx.BindJSON(req)
-	if err != nil {
-		slog.ErrorContext(ctx, "friend", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
+type FriendRequest struct {
+	Name        string `json:"name" binding:"required"`
+	Url         string `json:"url" binding:"required"`
+	Logo        string `json:"logo" binding:"required"`
+	Description string `json:"description" binding:"required"`
+	Email       string `json:"email" binding:"required,validateEmailFormat"`
+}
 
+func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any, error) {
+	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "friend")
+	if err != nil {
+		return nil, err
+	}
+	if !switchConfig.Status {
+		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Friend module is close.")
+	}
 	err = h.serv.ApplyForFriend(ctx, domain.Friend{
 		Name:        req.Name,
 		Url:         req.Url,
@@ -75,14 +99,16 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context) {
 		Email:       req.Email,
 	})
 	if err != nil {
-		var httpCodeError *api.HttpCodeError
-		if errors.As(err, &httpCodeError) {
-			ctx.AbortWithStatus(int(*httpCodeError))
-		} else {
-			slog.ErrorContext(ctx, "friend", err)
-			ctx.AbortWithStatus(http.StatusInternalServerError)
-		}
-		return
+		return nil, err
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponse)
+
+	// 发送邮件
+	go func() {
+		gErr := h.msgServ.SendEmailToWebmaster(ctx, "friend", "text/plain")
+		if gErr != nil {
+			log.WarnWithStack(ctx, "message", gErr)
+		}
+	}()
+
+	return nil, nil
 }

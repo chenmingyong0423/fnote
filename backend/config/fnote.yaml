@@ -22,7 +22,7 @@ logger:
   time_format: "2006-01-02 15:04:05"
 mongo_db:
   uri: mongodb://localhost:27017
-  username: fnote_user
-  password: fnote_pass
+  username: cmy
+  password: lsyily999
   auth_source: fnote
   database: fnote

@@ -16,6 +16,7 @@ package dao
 
 import (
 	"context"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -94,7 +95,7 @@ type CommentReply struct {
 }
 
 type ICommentDao interface {
-	AddComment(ctx context.Context, comment Comment) (any, error)
+	AddComment(ctx context.Context, comment Comment) (string, error)
 	FindCommentById(ctx context.Context, cmtId string) (*Comment, error)
 	AddCommentReply(ctx context.Context, cmtId string, commentReply CommentReply) error
 	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error)
@@ -189,7 +190,7 @@ func (d *CommentDao) AddCommentReply(ctx context.Context, cmtId string, commentR
 		return errors.Wrapf(err, "fails to update one from %s, filter=%v, update=%v", d.coll.Name(), filter, update)
 	}
 	if result.ModifiedCount == 0 {
-		return errors.Wrapf(err, "modifiedCount = 0, fails to update one from %s, filter=%v, update=%v", d.coll.Name(), filter, update)
+		return fmt.Errorf("modifiedCount = 0, fails to update one from %s, filter=%v, update=%v", d.coll.Name(), filter, update)
 	}
 	return nil
 }
@@ -203,10 +204,10 @@ func (d *CommentDao) FindCommentById(ctx context.Context, cmtId string) (*Commen
 	return comment, nil
 }
 
-func (d *CommentDao) AddComment(ctx context.Context, comment Comment) (any, error) {
+func (d *CommentDao) AddComment(ctx context.Context, comment Comment) (string, error) {
 	result, err := d.coll.InsertOne(ctx, comment)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fails to insert into %s, comment=%v", d.coll.Name(), comment)
+		return "", errors.Wrapf(err, "fails to insert into %s, comment=%v", d.coll.Name(), comment)
 	}
-	return result.InsertedID, nil
+	return result.InsertedID.(string), nil
 }
