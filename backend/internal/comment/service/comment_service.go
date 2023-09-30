@@ -16,18 +16,15 @@ package service
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/comment/repository"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ICommentService interface {
-	AddComment(ctx context.Context, comment domain.Comment) error
-	AddCommentReply(ctx context.Context, cmtId string, postId string, commentReply domain.CommentReply) error
+	AddComment(ctx context.Context, comment domain.Comment) (string, error)
+	AddCommentReply(ctx context.Context, cmtId string, postId string, commentReply domain.CommentReply) (string, error)
 	FineLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error)
 	FindCommentsByPostId(ctx context.Context, postId string) ([]domain.CommentWithReplies, error)
 }
@@ -49,24 +46,18 @@ func (s *CommentService) FindCommentsByPostId(ctx context.Context, postId string
 }
 
 func (s *CommentService) FineLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error) {
-	// 默认查找最新的前 5 条，后续可能考虑动态配置
-	cmts, err := s.repo.FineLatestCommentAndReply(ctx, 5)
-	if err != nil {
-		return nil, err
-	}
-	return cmts, err
+	// todo 默认查找最新的前 5 条，后续可能考虑动态配置
+	return s.repo.FineLatestCommentAndReply(ctx, 5)
 }
 
-func (s *CommentService) AddCommentReply(ctx context.Context, cmtId string, postId string, commentReply domain.CommentReply) error {
+func (s *CommentService) AddCommentReply(ctx context.Context, cmtId string, postId string, commentReply domain.CommentReply) (string, error) {
+	// todo 待优化，直接查询评论信息
 	commentWithReplies, err := s.repo.FindApprovedCommentById(ctx, cmtId)
 	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return api.NewHttpCodeError(http.StatusBadRequest)
-		}
-		return err
+		return "", err
 	}
 	if commentWithReplies.PostInfo.PostId != postId {
-		return api.NewHttpCodeError(http.StatusBadRequest)
+		return "", errors.New("PostId is invalid.")
 	}
 	commentReply.RepliedUserInfo = domain.UserInfo4Reply{
 		Name:  commentWithReplies.UserInfo.Name,
@@ -83,13 +74,12 @@ func (s *CommentService) AddCommentReply(ctx context.Context, cmtId string, post
 			}
 		}
 		if !isExist {
-			return errors.New("the replyToId does not exist.")
+			return "", errors.New("The replyToId does not exist.")
 		}
 	}
 	return s.repo.AddCommentReply(ctx, cmtId, commentReply)
 }
 
-func (s *CommentService) AddComment(ctx context.Context, comment domain.Comment) error {
-	_, err := s.repo.AddComment(ctx, comment)
-	return err
+func (s *CommentService) AddComment(ctx context.Context, comment domain.Comment) (string, error) {
+	return s.repo.AddComment(ctx, comment)
 }

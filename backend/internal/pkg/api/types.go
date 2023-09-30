@@ -35,6 +35,10 @@ type PageVO[T any] struct {
 	List       []T   `json:"list"`
 }
 
+type IdVO struct {
+	Id string `json:"id"`
+}
+
 func (p *PageVO[T]) SetTotalCountAndCalculateTotalPages(totalCount int64) {
 	if p.PageSize == 0 {
 		p.TotalPages = 0
@@ -99,11 +103,18 @@ func SuccessResponseWithData[T any](data T) ResponseBody[T] {
 
 type HttpCodeError int
 
-func NewHttpCodeError(httpCode int) *HttpCodeError {
-	httpCodeError := HttpCodeError(httpCode)
-	return &httpCodeError
+type ErrorResponseBody struct {
+	HttpCode int
+	Message  string
 }
 
-func (hc *HttpCodeError) Error() string {
-	return http.StatusText(int(*hc))
+func NewErrorResponseBody(httpCode int, message string) ErrorResponseBody {
+	return ErrorResponseBody{
+		HttpCode: httpCode,
+		Message:  message,
+	}
+}
+
+func (er ErrorResponseBody) Error() string {
+	return er.Message
 }

@@ -15,12 +15,10 @@
 package handler
 
 import (
-	"net/http"
-
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/log"
 
 	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/internal/visit_log/service"
 	"github.com/gin-gonic/gin"
@@ -40,41 +38,31 @@ type VisitLogHandler struct {
 
 func (h *VisitLogHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/logs")
-	routerGroup.POST("", h.CollectVisitLog)
+	routerGroup.POST("", api.WrapWithBody(h.CollectVisitLog))
 }
 
-func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
-	type VisitLogReq struct {
-		Url       string `json:"url" bind:"required"`
-		Ip        string `json:"ip"`
-		UserAgent string `json:"user_agent"`
-		Origin    string `json:"origin"`
-		Referer   string `json:"referer"`
-	}
-	req := new(VisitLogReq)
-	err := ctx.ShouldBindJSON(req)
-	if err != nil {
-		log.ErrorWithStack(ctx, "visitLog", err)
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+type VisitLogReq struct {
+	Url       string `json:"url" bind:"required"`
+	Ip        string `json:"ip"`
+	UserAgent string `json:"user_agent"`
+	Origin    string `json:"origin"`
+	Referer   string `json:"referer"`
+}
+
+func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context, req VisitLogReq) (r any, err error) {
 	req.Ip = ctx.ClientIP()
 	req.UserAgent = ctx.GetHeader("User-Agent")
 	req.Origin = ctx.GetHeader("Origin")
 	req.Referer = ctx.GetHeader("Referer")
 	err = h.serv.CollectVisitLog(ctx, domain.VisitHistory{Url: req.Url, Ip: req.Ip, UserAgent: req.UserAgent, Origin: req.UserAgent, Referer: req.Referer})
 	if err != nil {
-		log.ErrorWithStack(ctx, "visitLog", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-
 	go func() {
 		gErr := h.cfgServ.IncreaseWebsiteViews(ctx)
 		if gErr != nil {
 			log.WarnWithStack(ctx, "config", gErr)
 		}
 	}()
-
-	ctx.JSON(http.StatusOK, api.SuccessResponse)
+	return
 }
