@@ -12,33 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build wireinject
-
-package main
+package log
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/internal/ioc"
-	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
+	"context"
+	"fmt"
+	"log/slog"
 )
 
-func initializeApp(cfgPath string) (*gin.Engine, error) {
-	panic(wire.Build(
-		ioc.InitConfig,
-		ioc.InitLogger,
-		ioc.NewMongoDB,
-		ioc.InitMiddlewares,
-		ioc.InitGinValidators,
-		ioc.NewGinEngine,
+func ErrorWithStack(ctx context.Context, msg string, err error) {
+	slog.ErrorContext(ctx, fmt.Sprintf("%+v", err), nil)
+}
 
-		ioc.CategoryProviders,
-		ioc.CommentProviders,
-		ioc.ConfigProviders,
-		ioc.FriendProviders,
-		ioc.PostProviders,
-		ioc.VlProviders,
-		ioc.EmailProviders,
-		ioc.MsgProviders,
-		ioc.MsgTplProviders,
-	))
+func WarnWithStack(ctx context.Context, msg string, err error) {
+	slog.WarnContext(ctx, fmt.Sprintf("%+v", err), nil)
 }

@@ -12,33 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build wireinject
+package domain
 
-package main
-
-import (
-	"github.com/chenmingyong0423/fnote/backend/internal/ioc"
-	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
-)
-
-func initializeApp(cfgPath string) (*gin.Engine, error) {
-	panic(wire.Build(
-		ioc.InitConfig,
-		ioc.InitLogger,
-		ioc.NewMongoDB,
-		ioc.InitMiddlewares,
-		ioc.InitGinValidators,
-		ioc.NewGinEngine,
-
-		ioc.CategoryProviders,
-		ioc.CommentProviders,
-		ioc.ConfigProviders,
-		ioc.FriendProviders,
-		ioc.PostProviders,
-		ioc.VlProviders,
-		ioc.EmailProviders,
-		ioc.MsgProviders,
-		ioc.MsgTplProviders,
-	))
+type MessageTemplate struct {
+	Name    string
+	Title   string
+	Content string
 }

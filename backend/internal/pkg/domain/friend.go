@@ -26,12 +26,11 @@ type Friend struct {
 }
 
 type FriendVO struct {
-	Name        string       `json:"name"`
-	Url         string       `json:"url"`
-	Logo        string       `json:"logo"`
-	Description string       `json:"description"`
-	Status      FriendStatus `json:"status"`
-	Priority    int          `json:"priority"`
+	Name        string `json:"name"`
+	Url         string `json:"url"`
+	Logo        string `json:"logo"`
+	Description string `json:"description"`
+	Priority    int    `json:"priority"`
 }
 
 // 0 hiding，1 pending，2 showing
