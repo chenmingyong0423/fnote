@@ -15,23 +15,16 @@
 package handler
 
 import (
+	"fmt"
 	"log/slog"
-	"net/http"
+
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 
 	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository"
-	"github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/internal/visit_log/service"
 	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 )
-
-var VlSet = wire.NewSet(NewVisitLogHandler, service.NewVisitLogService, repository.NewVisitLogRepository, dao.NewVisitLogDao,
-	wire.Bind(new(service.IVisitLogService), new(*service.VisitLogService)),
-	wire.Bind(new(repository.IVisitLogRepository), new(*repository.VisitLogRepository)),
-	wire.Bind(new(dao.IVisitLogDao), new(*dao.VisitLogDao)))
 
 func NewVisitLogHandler(serv service.IVisitLogService, cfgServ configServ.IConfigService) *VisitLogHandler {
 	return &VisitLogHandler{
@@ -46,42 +39,33 @@ type VisitLogHandler struct {
 }
 
 func (h *VisitLogHandler) RegisterGinRoutes(engine *gin.Engine) {
-	routerGroup := engine.Group("/log")
-	routerGroup.POST("", h.CollectVisitLog)
+	routerGroup := engine.Group("/logs")
+	routerGroup.POST("", api.WrapWithBody(h.CollectVisitLog))
 }
 
-func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context) {
-	type VisitLogReq struct {
-		Url       string `json:"url" bind:"required"`
-		Ip        string `json:"ip"`
-		UserAgent string `json:"user_agent"`
-		Origin    string `json:"origin"`
-		Referer   string `json:"referer"`
-	}
-	req := new(VisitLogReq)
-	err := ctx.ShouldBindJSON(req)
-	if err != nil {
-		slog.ErrorContext(ctx, "visitLog", err)
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+type VisitLogReq struct {
+	Url       string `json:"url" bind:"required"`
+	Ip        string `json:"ip"`
+	UserAgent string `json:"user_agent"`
+	Origin    string `json:"origin"`
+	Referer   string `json:"referer"`
+}
+
+func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context, req VisitLogReq) (r any, err error) {
 	req.Ip = ctx.ClientIP()
 	req.UserAgent = ctx.GetHeader("User-Agent")
 	req.Origin = ctx.GetHeader("Origin")
 	req.Referer = ctx.GetHeader("Referer")
 	err = h.serv.CollectVisitLog(ctx, domain.VisitHistory{Url: req.Url, Ip: req.Ip, UserAgent: req.UserAgent, Origin: req.UserAgent, Referer: req.Referer})
 	if err != nil {
-		slog.ErrorContext(ctx, "visitLog", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-
 	go func() {
 		gErr := h.cfgServ.IncreaseWebsiteViews(ctx)
 		if gErr != nil {
-			slog.WarnContext(ctx, "config", gErr)
+			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-
-	ctx.JSON(http.StatusOK, api.SuccessResponse)
+	return
 }

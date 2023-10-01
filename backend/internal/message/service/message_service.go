@@ -17,39 +17,41 @@ package service
 import (
 	"context"
 
+	"github.com/chenmingyong0423/fnote/backend/internal/message_template/service"
+
 	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	emailServ "github.com/chenmingyong0423/fnote/backend/internal/email/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/google/wire"
 )
 
 type IMessageService interface {
-	SendEmail(ctx context.Context, subject string, body string, email string, contentType string) error
-	SendEmailToWebmaster(ctx context.Context, subject string, body string, contentType string) error
+	SendEmailWithEmail(ctx context.Context, msgTplName, email, contentType string) error
+	SendEmailToWebmaster(ctx context.Context, msgTplName, contentType string) error
 }
 
 var (
-	_      IMessageService = (*MessageService)(nil)
-	MsgSet                 = wire.NewSet(NewMessageService, wire.Bind(new(IMessageService), new(*MessageService)))
+	_ IMessageService = (*MessageService)(nil)
 )
 
-func NewMessageService(configServ configServ.IConfigService, emailServ emailServ.IEmailService) *MessageService {
+func NewMessageService(configServ configServ.IConfigService, emailServ emailServ.IEmailService, msgTplService service.IMsgTplService) *MessageService {
 	return &MessageService{
-		configServ: configServ,
-		emailServ:  emailServ,
+		configServ:    configServ,
+		emailServ:     emailServ,
+		msgTplService: msgTplService,
 	}
 }
 
 type MessageService struct {
-	configServ configServ.IConfigService
-	emailServ  emailServ.IEmailService
+	configServ    configServ.IConfigService
+	emailServ     emailServ.IEmailService
+	msgTplService service.IMsgTplService
 }
 
-func (s *MessageService) SendEmailToWebmaster(ctx context.Context, subject string, body string, contentType string) error {
-	return s.sendEmail(ctx, subject, body, contentType, "")
+func (s *MessageService) SendEmailToWebmaster(ctx context.Context, msgTplName, contentType string) error {
+	return s.sendEmail(ctx, msgTplName, contentType, 0, "")
 }
 
-func (s *MessageService) sendEmail(ctx context.Context, subject, body, contentType, email string) error {
+func (s *MessageService) sendEmail(ctx context.Context, msgTplName, contentType string, recipientType uint, email string) error {
 	emailCfg, err := s.configServ.GetEmailConfig(ctx)
 	if err != nil {
 		return err
@@ -61,6 +63,10 @@ func (s *MessageService) sendEmail(ctx context.Context, subject, body, contentTy
 	if email == "" {
 		email = emailCfg.Email
 	}
+	msgTpl, err := s.msgTplService.FindMsgTplByNameAndRcpType(ctx, msgTplName, recipientType)
+	if err != nil {
+		return err
+	}
 	return s.emailServ.SendEmail(ctx, domain.Email{
 		Host:        emailCfg.Host,
 		Port:        emailCfg.Port,
@@ -68,12 +74,12 @@ func (s *MessageService) sendEmail(ctx context.Context, subject, body, contentTy
 		Password:    emailCfg.Password,
 		Name:        webNMasterCfg.Name,
 		To:          []string{email},
-		Subject:     subject,
-		Body:        body,
+		Subject:     msgTpl.Title,
+		Body:        msgTpl.Content,
 		ContentType: contentType,
 	})
 }
 
-func (s *MessageService) SendEmail(ctx context.Context, subject string, body string, email string, contentType string) error {
-	return s.sendEmail(ctx, subject, body, contentType, email)
+func (s *MessageService) SendEmailWithEmail(ctx context.Context, msgTplName string, email, contentType string) error {
+	return s.sendEmail(ctx, msgTplName, contentType, 1, email)
 }

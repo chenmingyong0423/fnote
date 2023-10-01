@@ -14,7 +14,12 @@
 
 package domain
 
-import "github.com/chenmingyong0423/fnote/backend/internal/pkg/types"
+type LatestComment struct {
+	PostInfo4Comment
+	Name       string
+	Content    string
+	CreateTime int64
+}
 
 type CommentWithReplies struct {
 	Comment
@@ -22,12 +27,44 @@ type CommentWithReplies struct {
 }
 
 type Comment struct {
-	types.Comment
+	Id string
+	// 文章信息
+	PostInfo PostInfo4Comment
+	// 评论的内容
+	Content string
+	// 用户信息
+	UserInfo   UserInfo4Comment
+	CreateTime int64
 }
 
 type CommentReply struct {
-	types.CommentReply
-	Status CommentStatus `bson:"status"`
+	ReplyId string
+	// 回复内容
+	Content string
+	// 被回复的回复 Id
+	ReplyToId string
+	// 用户信息
+	UserInfo UserInfo4Reply
+	// 被回复用户的信息
+	RepliedUserInfo UserInfo4Reply
+	Status          CommentStatus
+	CreateTime      int64
+}
+
+type UserInfo4Reply UserInfo4Comment
+
+type PostInfo4Comment struct {
+	// 文章 ID
+	PostId string
+	// 文章标题字段
+	PostTitle string
+}
+
+type UserInfo4Comment struct {
+	Name    string
+	Email   string
+	Ip      string
+	Website string
 }
 
 type CommentStatus uint

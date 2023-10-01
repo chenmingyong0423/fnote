@@ -64,11 +64,7 @@ func (r *PostRepository) DeleteLike(ctx context.Context, id string, ip string) e
 }
 
 func (r *PostRepository) AddLike(ctx context.Context, id string, ip string) error {
-	err := r.dao.AddLike(ctx, id, ip)
-	if err != nil {
-		return errors.WithMessage(err, "r.dao.AddLike failed")
-	}
-	return nil
+	return r.dao.AddLike(ctx, id, ip)
 }
 
 func (r *PostRepository) HadLikePost(ctx context.Context, id string, ip string) (bool, error) {

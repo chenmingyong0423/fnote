@@ -15,22 +15,11 @@
 package handler
 
 import (
-	"log/slog"
-	"net/http"
-
-	"github.com/chenmingyong0423/fnote/backend/internal/config/repository"
-	"github.com/chenmingyong0423/fnote/backend/internal/config/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 )
-
-var ConfigSet = wire.NewSet(NewConfigHandler, service.NewConfigService, repository.NewConfigRepository, dao.NewConfigDao,
-	wire.Bind(new(service.IConfigService), new(*service.ConfigService)),
-	wire.Bind(new(repository.IConfigRepository), new(*repository.ConfigRepository)),
-	wire.Bind(new(dao.IConfigDao), new(*dao.ConfigDao)))
 
 func NewConfigHandler(serv service.IConfigService) *ConfigHandler {
 	return &ConfigHandler{
@@ -43,17 +32,15 @@ type ConfigHandler struct {
 }
 
 func (h *ConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
-	routerGroup := engine.Group("/config")
+	routerGroup := engine.Group("/configs")
 	// 获取站长信息
-	routerGroup.GET("/webmaster", h.GetWebmasterInfo)
+	routerGroup.GET("/webmaster", api.Wrap(h.GetWebmasterInfo))
 }
 
-func (c *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) {
-	masterConfigVO, err := c.serv.GetWebmasterInfo(ctx, "webmaster")
+func (c *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) (*domain.WebMasterConfigVO, error) {
+	webMasterConfig, err := c.serv.GetWebmasterInfo(ctx, "webmaster")
 	if err != nil {
-		slog.ErrorContext(ctx, "config", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
+		return nil, err
 	}
-	ctx.JSON(http.StatusOK, api.SuccessResponseWithData[*domain.WebMasterConfigVO](masterConfigVO))
+	return &domain.WebMasterConfigVO{Name: webMasterConfig.Name, PostCount: webMasterConfig.PostCount, ColumnCount: webMasterConfig.ColumnCount, WebsiteViews: webMasterConfig.WebsiteViews, WebsiteLiveTime: webMasterConfig.WebsiteLiveTime, Profile: webMasterConfig.Profile, Picture: webMasterConfig.Picture, WebsiteIcon: webMasterConfig.WebsiteIcon, Domain: webMasterConfig.Domain}, nil
 }
