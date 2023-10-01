@@ -16,8 +16,11 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"sync"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
@@ -26,13 +29,12 @@ import (
 )
 
 type IPostService interface {
-	GetHomePosts(ctx context.Context) (api.ListVO[*domain.SummaryPostVO], error)
-	GetPosts(ctx context.Context, pageRequest *domain.PostRequest) (*api.PageVO[*domain.SummaryPostVO], error)
+	GetHomePosts(ctx context.Context) ([]*domain.Post, error)
+	GetPosts(ctx context.Context, pageRequest *domain.PostRequest) ([]*domain.Post, int64, error)
 	GetPunishedPostById(ctx context.Context, id string) (*domain.Post, error)
 	AddLike(ctx context.Context, id string, ip string) error
 	DeleteLike(ctx context.Context, id string, ip string) error
 	IncreaseVisitCount(ctx context.Context, id string) error
-	InternalGetPunishedPostById(ctx context.Context, id string) (*domain.Post, error)
 }
 
 var _ IPostService = (*PostService)(nil)
@@ -46,10 +48,6 @@ func NewPostService(repo repository.IPostRepository) *PostService {
 type PostService struct {
 	repo  repository.IPostRepository
 	ipMap sync.Map
-}
-
-func (s *PostService) InternalGetPunishedPostById(ctx context.Context, id string) (*domain.Post, error) {
-	return s.repo.GetPunishedPostById(ctx, id)
 }
 
 func (s *PostService) IncreaseVisitCount(ctx context.Context, id string) error {
@@ -68,7 +66,7 @@ func (s *PostService) DeleteLike(ctx context.Context, id string, ip string) erro
 	_, isExist := s.ipMap.LoadOrStore(ip, struct{}{})
 	if !isExist {
 		defer s.ipMap.Delete(ip)
-		err := s.repo.DeleteLike(ctx, id, ip)
+		err = s.repo.DeleteLike(ctx, id, ip)
 		if err != nil {
 			return errors.WithMessage(err, "s.repo.DeleteLike")
 		}
@@ -88,7 +86,7 @@ func (s *PostService) AddLike(ctx context.Context, id string, ip string) error {
 	_, isExist := s.ipMap.LoadOrStore(ip, struct{}{})
 	if !isExist {
 		defer s.ipMap.Delete(ip)
-		err := s.repo.AddLike(ctx, id, ip)
+		err = s.repo.AddLike(ctx, id, ip)
 		if err != nil {
 			return errors.WithMessage(err, "s.repo.AddLike")
 		}
@@ -101,49 +99,25 @@ func (s *PostService) GetPunishedPostById(ctx context.Context, id string) (*doma
 	if err != nil {
 		return nil, err
 	}
-
 	// increase visits
 	go func() {
 		gErr := s.repo.IncreaseVisitCount(ctx, post.Sug)
 		if gErr != nil {
-			slog.WarnContext(ctx, "post", err)
+			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-
 	return post, nil
 }
 
-func (s *PostService) GetPosts(ctx context.Context, pageRequest *domain.PostRequest) (*api.PageVO[*domain.SummaryPostVO], error) {
-	pageVO := &api.PageVO[*domain.SummaryPostVO]{Page: pageRequest.Page}
-
-	posts, cnt, err := s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageRequest.PageSize, Skip: (pageRequest.PageNo - 1) * pageRequest.PageSize, Search: pageRequest.Search, Sorting: api.Sorting{
+func (s *PostService) GetPosts(ctx context.Context, pageRequest *domain.PostRequest) ([]*domain.Post, int64, error) {
+	return s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageRequest.PageSize, Skip: (pageRequest.PageNo - 1) * pageRequest.PageSize, Search: pageRequest.Search, Sorting: api.Sorting{
 		Filed: pageRequest.Sorting.Filed,
 		Order: pageRequest.Sorting.Order,
 	}, Category: pageRequest.Category, Tag: pageRequest.Tag})
-	if err != nil {
-		return pageVO, errors.WithMessage(err, "s.repo.QueryPostsPage failed")
-	}
 
-	pageVO.List = s.postsToPostVOs(posts)
-	pageVO.SetTotalCountAndCalculateTotalPages(cnt)
-
-	return pageVO, nil
 }
 
-func (s *PostService) GetHomePosts(ctx context.Context) (api.ListVO[*domain.SummaryPostVO], error) {
-	listVO := api.ListVO[*domain.SummaryPostVO]{}
-	posts, err := s.repo.GetLatest5Posts(ctx)
-	if err != nil {
-		return listVO, err
-	}
-	listVO.List = s.postsToPostVOs(posts)
-	return listVO, nil
-}
-
-func (s *PostService) postsToPostVOs(posts []*domain.Post) []*domain.SummaryPostVO {
-	postVOs := make([]*domain.SummaryPostVO, 0, len(posts))
-	for _, post := range posts {
-		postVOs = append(postVOs, &domain.SummaryPostVO{PrimaryPost: post.PrimaryPost})
-	}
-	return postVOs
+func (s *PostService) GetHomePosts(ctx context.Context) ([]*domain.Post, error) {
+	return s.repo.GetLatest5Posts(ctx)
 }

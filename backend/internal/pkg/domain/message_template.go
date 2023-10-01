@@ -12,26 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package middleware
+package domain
 
-import (
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-)
-
-const (
-	XRequestIDKey = "X-Request-ID"
-)
-
-func RequestId() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		rid := ctx.GetHeader(XRequestIDKey)
-		if rid == "" {
-			rid = uuid.NewString()
-			ctx.Request.Header.Set(XRequestIDKey, rid)
-			ctx.Set(XRequestIDKey, rid)
-		}
-		ctx.Writer.Header().Set(XRequestIDKey, rid)
-		ctx.Next()
-	}
+type MessageTemplate struct {
+	Name    string
+	Title   string
+	Content string
 }

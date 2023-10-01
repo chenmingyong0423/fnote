@@ -82,14 +82,14 @@ func (d *PostDao) IncreaseFieldById(ctx context.Context, id string, field string
 
 func (d *PostDao) DeleteLike(ctx context.Context, id string, ip string) error {
 	result, err := d.coll.UpdateByID(ctx, id, bson.D{
-		bson.E{Key: "$pull", Value: bson.E{Key: "likes", Value: ip}},
-		bson.E{Key: "$inc", Value: bson.E{Key: "like_count", Value: -1}},
+		bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "likes", Value: ip}}},
+		bson.E{Key: "$inc", Value: bson.D{bson.E{Key: "like_count", Value: -1}}},
 	})
 	if err != nil {
 		return errors.Wrapf(err, "fails to delete a like, id=%s, ip=%s", id, ip)
 	}
 	if result.ModifiedCount == 0 {
-		return errors.Wrapf(err, "ModifiedCount = 0, fails to delete a like, id=%s, ip=%s", id, ip)
+		return fmt.Errorf("ModifiedCount = 0, fails to delete a like, id=%s, ip=%s", id, ip)
 	}
 	return nil
 }
@@ -103,7 +103,7 @@ func (d *PostDao) AddLike(ctx context.Context, id string, ip string) error {
 		return errors.Wrapf(err, "fails to add a like, id=%s, ip=%s", id, ip)
 	}
 	if result.ModifiedCount == 0 {
-		return errors.Wrapf(err, "ModifiedCount = 0, fails to add a like, id=%s, ip=%s", id, ip)
+		return fmt.Errorf("ModifiedCount = 0, fails to add a like, id=%s, ip=%s", id, ip)
 	}
 	return nil
 }

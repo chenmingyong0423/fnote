@@ -1,0 +1,28 @@
+system:
+  # 存放静态文件的目录，例如文章封面，建议 /fnote/static/
+  static_path: /fnote/static/
+gin:
+  # 跨域配置，默认 “*“
+  allowed_origins:
+    - "*"
+logger:
+  # 日志文件路径，建议 /fnote/logs/log.log，如果为空则不输出日志到文件
+  file_name:
+  # 日志文件最大的大小， 默认为 100 m
+  max_size: 100
+  # 保留日志文件最大的数量，默认为 0 是保留所有旧的日志文件
+  Max_backups: 0
+  # 确定用于格式化备份文件中的时间戳的时间是否为计算机的本地时间。默认情况下使用 UTC 时间
+  local_time: false
+  # 决定是否应该使用 gzip 压缩旋转的日志文件。默认情况下不执行压缩
+  compress: true
+  # 日志等级：DEBUG，INFO，WARN，ERROR。默认：INFO
+  level: INFO
+  # 日志时间格式，默认 "2006-01-02 15:04:05"
+  time_format: "2006-01-02 15:04:05"
+mongo_db:
+  uri: mongodb://localhost:27017
+  username: cmy
+  password: lsyily999
+  auth_source: fnote
+  database: fnote

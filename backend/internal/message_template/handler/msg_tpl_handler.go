@@ -12,25 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package handler
 
 import (
-	"flag"
+	"github.com/chenmingyong0423/fnote/backend/internal/message_template/service"
+	"github.com/gin-gonic/gin"
 )
 
-var (
-	configPath = flag.String("config", "./config/fnote.yaml", "配置文件路径")
-	port       = flag.String("port", ":8000", "HTTP 端口号")
-)
+func NewMsgTplHandler(serv service.IMsgTplService) *MsgTplHandler {
+	return &MsgTplHandler{
+		serv: serv,
+	}
+}
 
-func main() {
-	flag.Parse()
-	app, err := initializeApp(*configPath)
-	if err != nil {
-		panic(err)
-	}
-	err = app.Run(*port)
-	if err != nil {
-		panic(err)
-	}
+type MsgTplHandler struct {
+	serv service.IMsgTplService
+}
+
+func (h *MsgTplHandler) RegisterGinRoutes(engine *gin.Engine) {
+
 }
