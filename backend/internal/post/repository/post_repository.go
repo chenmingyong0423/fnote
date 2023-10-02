@@ -92,13 +92,13 @@ func (r *PostRepository) GetPunishedPostById(ctx context.Context, id string) (*d
 
 func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition domain.PostsQueryCondition) ([]*domain.Post, int64, error) {
 	con := bson.D{}
-	if postsQueryCondition.Category != nil {
+	if postsQueryCondition.Category != nil && *postsQueryCondition.Category != "" {
 		con = append(con, bson.E{Key: "category", Value: *postsQueryCondition.Category})
 	}
-	if postsQueryCondition.Tag != nil {
-		con = append(con, bson.E{Key: "tags", Value: *postsQueryCondition.Tag})
+	if postsQueryCondition.Tags != nil {
+		con = append(con, bson.E{Key: "tags", Value: bson.D{bson.E{Key: "$in", Value: postsQueryCondition.Tags}}})
 	}
-	if postsQueryCondition.Search != nil {
+	if postsQueryCondition.Search != nil && *postsQueryCondition.Search != "" {
 		con = append(con, bson.E{Key: "title", Value: primitive.Regex{
 			Pattern: fmt.Sprintf(".*%s.*", strings.TrimSpace(*postsQueryCondition.Search)),
 		}})
