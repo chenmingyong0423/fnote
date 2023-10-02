@@ -44,8 +44,9 @@ type FriendHandler struct {
 }
 
 func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
-	engine.GET("/friends", api.Wrap(h.GetFriends))
-	engine.POST("/friends", api.WrapWithBody(h.ApplyForFriend))
+	group := engine.Group("/friends")
+	group.GET("", api.Wrap(h.GetFriends))
+	group.POST("", api.WrapWithBody(h.ApplyForFriend))
 }
 
 func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[domain.FriendVO], err error) {

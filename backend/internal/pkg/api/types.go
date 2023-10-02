@@ -72,9 +72,9 @@ type Sorting struct {
 
 type Page struct {
 	// 当前页
-	PageNo int64 `form:"pageNo" binding:"required"`
+	PageNo int64 `form:"pageNo" json:"pageNo" binding:"required"`
 	// 每页数量
-	PageSize int64 `form:"pageSize" binding:"required"`
+	PageSize int64 `form:"pageSize" json:"pageSize" binding:"required"`
 }
 
 type ListVO[T any] struct {
