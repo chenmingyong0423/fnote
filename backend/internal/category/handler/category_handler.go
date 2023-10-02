@@ -32,9 +32,10 @@ type CategoryHandler struct {
 }
 
 func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
-	engine.GET("/categories", api.Wrap(h.GetCategoriesAndTags))
-	engine.GET("/categories/:name/tags", api.Wrap(h.GetTagsByName))
-	engine.GET("/menus", api.Wrap(h.GetMenus))
+	group := engine.Group("/categories")
+	group.GET("/categories", api.Wrap(h.GetCategoriesAndTags))
+	group.GET("/categories/:name/tags", api.Wrap(h.GetTagsByName))
+	group.GET("/menus", api.Wrap(h.GetMenus))
 }
 
 func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) (listVO api.ListVO[domain.SearchCategoryVO], err error) {
