@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	configPath = flag.String("config", "./config/fnote.yaml", "配置文件路径")
-	port       = flag.String("port", ":8000", "HTTP 端口号")
+	configPath = flag.String("config", "./config/fnote.yaml", "the path of config")
+	port       = flag.String("port", ":8000", "HTTP port")
 )
 
 func main() {
