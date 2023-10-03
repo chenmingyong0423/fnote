@@ -7,7 +7,7 @@
                 <div class="w300 h150 overflow-hidden rounded-10">
                     <el-image @click="router.push(`post/${postData.sug}`)" class="cursor-pointer w-full h-full"
                         position="top" fit="cover"
-                        src='https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg' />
+                        :src='postData.cover_img' />
                 </div>
 
                 <div class=" text-16 flex justify-between items-end w700">
