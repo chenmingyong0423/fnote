@@ -78,7 +78,7 @@ type FriendRequest struct {
 	Name        string `json:"name" binding:"required"`
 	Url         string `json:"url" binding:"required"`
 	Logo        string `json:"logo" binding:"required"`
-	Description string `json:"description" binding:"required"`
+	Description string `json:"description" binding:"required,max=20"`
 	Email       string `json:"email" binding:"required,validateEmailFormat"`
 }
 
