@@ -92,13 +92,13 @@ func (r *PostRepository) GetPunishedPostById(ctx context.Context, id string) (*d
 
 func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition domain.PostsQueryCondition) ([]*domain.Post, int64, error) {
 	con := bson.D{}
-	if postsQueryCondition.Category != nil {
+	if postsQueryCondition.Category != nil && *postsQueryCondition.Category != "" {
 		con = append(con, bson.E{Key: "category", Value: *postsQueryCondition.Category})
 	}
-	if postsQueryCondition.Tag != nil {
-		con = append(con, bson.E{Key: "tags", Value: *postsQueryCondition.Tag})
+	if postsQueryCondition.Tags != nil {
+		con = append(con, bson.E{Key: "tags", Value: bson.D{bson.E{Key: "$in", Value: postsQueryCondition.Tags}}})
 	}
-	if postsQueryCondition.Search != nil {
+	if postsQueryCondition.Search != nil && *postsQueryCondition.Search != "" {
 		con = append(con, bson.E{Key: "title", Value: primitive.Regex{
 			Pattern: fmt.Sprintf(".*%s.*", strings.TrimSpace(*postsQueryCondition.Search)),
 		}})
@@ -146,5 +146,5 @@ func (r *PostRepository) toDomainPosts(posts []*dao.Post) []*domain.Post {
 }
 
 func (r *PostRepository) daoPostToDomainPost(post *dao.Post) *domain.Post {
-	return &domain.Post{PrimaryPost: domain.PrimaryPost{Sug: post.Sug, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Category: post.Category, Tags: post.Tags, LikeCount: post.LikeCount, CommentCount: post.CommentCount, VisitCount: post.VisitCount, Priority: post.Priority, CreateTime: post.CreateTime}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, UpdateTime: post.UpdateTime}, IsCommentAllowed: post.IsCommentAllowed, Likes: post.Likes}
+	return &domain.Post{PrimaryPost: domain.PrimaryPost{Sug: post.Sug, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Category: post.Category, Tags: post.Tags, LikeCount: post.LikeCount, CommentCount: post.CommentCount, VisitCount: post.VisitCount, Priority: post.Priority, CreateTime: post.CreateTime}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, WordCount: post.WordCount, UpdateTime: post.UpdateTime}, IsCommentAllowed: post.IsCommentAllowed, Likes: post.Likes}
 }

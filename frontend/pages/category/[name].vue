@@ -1,10 +1,10 @@
 <template>
     <div>
         <div class="py15">
-            <div class="text-30 mb20 ml10">标签:{{ tag[0]?.name || '未知' }}</div>
+            <div class="text-30 mb20 ml10">标签:{{ menu?.name || '未知' }}</div>
         </div>
         <div class="bg-#e5e5e5/40 p20 rounded-10">
-            <div v-for="item in data.data.list ">
+            <div v-for="item in dataList ">
                 <Content @click="router.push(`/post/${item.sug}`)" :postData="item"></Content>
                 <!-- <el-divider /> -->
             </div>
@@ -15,45 +15,41 @@
 
 <script lang="ts" setup>
 import { useHomeStore } from '~/store/home';
+import { IPost, getPosts, PageRequest } from '~/api/post';
+import { IResponse, IPageData } from "~/api/http";
+import { IMenu } from "~/api/category"
 
 const route = useRoute()
 const router = useRouter()
 const homeStore = useHomeStore()
 
-const tag = homeStore.menuList.data.list.filter((item) => {
+const menu : IMenu | undefined= homeStore.menuList.find((item : IMenu) => {
     if (item.route === route.path)
         return item
 })
 
-const data = {
-    "code": 200,
-    "message": "OK",
-    "data": {
-        "PageNo": 1,
-        "PageSize": 1,
-        "totalPages": 5,
-        "totalCount": 5,
-        "list": [
-            {
-                "sug": "post5",
-                "author": "陈明勇",
-                "title": "哈哈",
-                "summary": "Summary 1",
-                "cover_img": "/images/cover1.jpg",
-                "category": "D",
-                "tags": [
-                    "tag1",
-                    "tag2"
-                ],
-                "likeCount": 2,
-                "comments": 3,
-                "visit": 0,
-                "priority": 1,
-                "createTime": 1692806408149
-            }
-        ]
+
+const dataList = ref([] as IPost[])
+const rq = ref({
+    pageNo: 1,
+    pageSize: 5,
+    sortField: '',
+    sortOrder:'',
+    search: '',
+    category: '',
+    tags: [menu?.name]
+} as PageRequest)
+const postInfos = async () => {
+    try {
+        let postRes: any = await getPosts(rq)
+        let res : IResponse<IPageData<IPost>> = postRes.data.value
+        dataList.value = res.data?.list || []
+    } catch (error) {
+        console.log(error);
     }
-}
+};
+postInfos()
+
 </script>
 
 <style scoped></style>

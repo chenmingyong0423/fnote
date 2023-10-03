@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"regexp"
+	"strings"
 
 	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	msgService "github.com/chenmingyong0423/fnote/backend/internal/message/service"
@@ -44,8 +46,9 @@ type FriendHandler struct {
 }
 
 func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
-	engine.GET("/friends", api.Wrap(h.GetFriends))
-	engine.POST("/friends", api.WrapWithBody(h.ApplyForFriend))
+	group := engine.Group("/friends")
+	group.GET("", api.Wrap(h.GetFriends))
+	group.POST("", api.WrapWithBody(h.ApplyForFriend))
 }
 
 func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[domain.FriendVO], err error) {
@@ -77,11 +80,17 @@ type FriendRequest struct {
 	Name        string `json:"name" binding:"required"`
 	Url         string `json:"url" binding:"required"`
 	Logo        string `json:"logo" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	Email       string `json:"email" binding:"required,validateEmailFormat"`
+	Description string `json:"description" binding:"required,max=20"`
+	Email       string `json:"email"`
 }
 
 func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any, error) {
+	if req.Email != "" {
+		regExp := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+		if !regExp.MatchString(req.Email) {
+			return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Email format is incorrect.")
+		}
+	}
 	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "friend")
 	if err != nil {
 		return nil, err
@@ -97,6 +106,9 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any
 		Email:       req.Email,
 	})
 	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key error") {
+			return nil, api.NewErrorResponseBody(http.StatusTooManyRequests, "Already applied for")
+		}
 		return nil, err
 	}
 

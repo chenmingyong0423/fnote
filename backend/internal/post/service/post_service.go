@@ -114,7 +114,7 @@ func (s *PostService) GetPosts(ctx context.Context, pageRequest *domain.PostRequ
 	return s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageRequest.PageSize, Skip: (pageRequest.PageNo - 1) * pageRequest.PageSize, Search: pageRequest.Search, Sorting: api.Sorting{
 		Filed: pageRequest.Sorting.Filed,
 		Order: pageRequest.Sorting.Order,
-	}, Category: pageRequest.Category, Tag: pageRequest.Tag})
+	}, Category: pageRequest.Category, Tags: pageRequest.Tags})
 
 }
 

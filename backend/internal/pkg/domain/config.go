@@ -18,9 +18,9 @@ package domain
 type WebMasterConfig struct {
 	Name            string `bson:"name" json:"name"`
 	PostCount       uint   `bson:"postCount" json:"postCount"`
-	ColumnCount     uint   `bson:"columnCount" json:"columnCount"`
+	CategoryCount   uint   `bson:"categoryCount" json:"categoryCount"`
 	WebsiteViews    uint   `bson:"websiteViews" json:"websiteViews"`
-	WebsiteLiveTime string `bson:"websiteLiveTime" json:"websiteLiveTime"`
+	WebsiteLiveTime int64  `bson:"websiteLiveTime" json:"websiteLiveTime"`
 	Profile         string `bson:"profile" json:"profile"`
 	Picture         string `bson:"picture" json:"picture"`
 	WebsiteIcon     string `bson:"websiteIcon" json:"websiteIcon"`
@@ -30,9 +30,9 @@ type WebMasterConfig struct {
 type WebMasterConfigVO struct {
 	Name            string `json:"name"`
 	PostCount       uint   `json:"post_count"`
-	ColumnCount     uint   `json:"column_count"`
+	CategoryCount   uint   `json:"category_count"`
 	WebsiteViews    uint   `json:"website_views"`
-	WebsiteLiveTime string `json:"website_live_time"`
+	WebsiteLiveTime int64  `json:"website_live_time"`
 	Profile         string `json:"profile"`
 	Picture         string `json:"picture"`
 	WebsiteIcon     string `json:"website_icon"`
