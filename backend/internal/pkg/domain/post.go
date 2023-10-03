@@ -25,13 +25,13 @@ type PostsQueryCondition struct {
 	api.Sorting
 
 	Category *string
-	Tag      *string
+	Tags     []string
 }
 
 type PostRequest struct {
 	api.PageRequest
-	Category *string `form:"category"`
-	Tag      *string `form:"tag"`
+	Category *string  `form:"category"`
+	Tags     []string `form:"tags"`
 }
 
 type DetailPostVO struct {

@@ -38,11 +38,12 @@ type PostHandler struct {
 }
 
 func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
-	engine.GET("/home/posts", api.Wrap(h.GetHomePosts))
-	engine.GET("/posts", api.WrapWithBody(h.GetPosts))
-	engine.GET("/posts/:sug", api.Wrap(h.GetPostBySug))
-	engine.POST("/posts/:sug/likes", api.Wrap(h.AddLike))
-	engine.DELETE("/posts/:sug/likes", api.Wrap(h.DeleteLike))
+	group := engine.Group("/posts")
+	group.GET("/latest", api.Wrap(h.GetHomePosts))
+	group.GET("", api.WrapWithBody(h.GetPosts))
+	group.GET("/:sug", api.Wrap(h.GetPostBySug))
+	group.POST("/:sug/likes", api.Wrap(h.AddLike))
+	group.DELETE("/:sug/likes", api.Wrap(h.DeleteLike))
 }
 
 func (h *PostHandler) GetHomePosts(ctx *gin.Context) (listVO api.ListVO[*domain.SummaryPostVO], err error) {
