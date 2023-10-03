@@ -26,5 +26,36 @@ const headerScroll = (res: any) => {
     }
     scrollCount.value = res.scrollTop
 }
+
+import { useHomeStore } from '../store/home';
+import { getWebMaster, IWebmaster } from "~/api/config"
+import { IResponse } from "../api/http";
+const info = useHomeStore()
+const webMaster = async () => {
+    try {
+        let postRes: any = await getWebMaster()
+        let res: IResponse<IWebmaster> = postRes.data.value
+        if (res.data) {
+            info.masterInfo = res.data
+
+
+            // const newLink = document.createElement('link');
+            // newLink.rel = 'icon';
+            // newLink.type = 'image/x-icon';
+            // newLink.href = info.masterInfo.website_icon;
+            // const oldLink = document.querySelector("link[rel*='icon']");
+
+            // if (oldLink) {
+            //     document.head.removeChild(oldLink);
+            // }
+            // document.head.appendChild(newLink);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
+webMaster()
+
+
 </script>
 

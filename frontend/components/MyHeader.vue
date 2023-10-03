@@ -21,7 +21,7 @@
         </div> -->
         <div>
             <el-space>
-                <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" :size="36"
+                <el-avatar :src="picture" :size="36"
                     class="mx30 cursor-pointer hover:rotate-360 ease-out duration-1000" @click="router.push('/')" />
                 <div class="flex">
                     <div class="menu_item" @click="router.push('/')" :class="route.path === '/' ? 'active' : ''">
@@ -31,7 +31,7 @@
                         :class="route.path === '/category' ? 'active' : ''">
                         文章列表
                     </div>
-                    <div class="menu_item" @click="router.push(item.route)" v-for="item in homeStore.menuList.data.list"
+                    <div class="menu_item" @click="router.push(item.route)" v-for="item in homeStore.menuList"
                         :class="route.path === item.route ? 'active' : ''">
                         {{ item.name }}
                     </div>
@@ -98,10 +98,26 @@ onBeforeUnmount(() => {
     window.removeEventListener('scroll', headerScroll)
 })
 
+const picture = homeStore.masterInfo.picture
+
+
+import { getMenus, IMenu } from "../api/category"
+import { IResponse, IListData } from "../api/http";
+const menus = async () => {
+    try {
+        let postRes: any = await getMenus()
+        let res : IResponse<IListData<IMenu>> = postRes.data.value
+        homeStore.menuList = res.data?.list || []
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+menus()
+
 </script>
 <style scoped>
 .active {
     background-color: rgba(0, 0, 0, 0.2);
-
 }
 </style>
