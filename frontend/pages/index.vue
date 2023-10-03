@@ -14,7 +14,7 @@
             <el-row :gutter="20">
                 <el-col :span="17">
                     <div>
-                        <Content v-for="item in data.data.list " :postData="item">
+                        <Content v-for="item in dataList" :postData="item">
                         </Content>
                     </div>
                 </el-col>
@@ -32,100 +32,21 @@
 </template>
 
 <script lang="ts" setup>
-const router = useRouter()
-const data = {
-    "code": 200,
-    "message": "OK",
-    "data": {
-        "list": [
-            {
-                "sug": "post5",
-                "author": "陈明勇",
-                "title": "哈哈",
-                "summary": "Summary 1",
-                "cover_img": "/images/cover1.jpg",
-                "category": "D",
-                "tags": [
-                    "tag1",
-                    "tag2"
-                ],
-                "likeCount": 2,
-                "comments": 3,
-                "visit": 0,
-                "priority": 1,
-                "createTime": 1692806408149
-            },
-            {
-                "sug": "post5",
-                "author": "陈明勇",
-                "title": "哈哈",
-                "summary": "Summary 1",
-                "cover_img": "/images/cover1.jpg",
-                "category": "D",
-                "tags": [
-                    "tag1",
-                    "tag2"
-                ],
-                "likeCount": 2,
-                "comments": 3,
-                "visit": 0,
-                "priority": 1,
-                "createTime": 1692806408149
-            },
-            {
-                "sug": "post5",
-                "author": "陈明勇",
-                "title": "哈哈",
-                "summary": "Summary 1",
-                "cover_img": "/images/cover1.jpg",
-                "category": "D",
-                "tags": [
-                    "tag1",
-                    "tag2"
-                ],
-                "likeCount": 2,
-                "comments": 3,
-                "visit": 0,
-                "priority": 1,
-                "createTime": 1692806408149
-            },
-            {
-                "sug": "post5",
-                "author": "陈明勇",
-                "title": "哈哈",
-                "summary": "Summary 1",
-                "cover_img": "/images/cover1.jpg",
-                "category": "D",
-                "tags": [
-                    "tag1",
-                    "tag2"
-                ],
-                "likeCount": 2,
-                "comments": 3,
-                "visit": 0,
-                "priority": 1,
-                "createTime": 1692806408149
-            },
-            {
-                "sug": "post5",
-                "author": "陈明勇",
-                "title": "哈哈",
-                "summary": "Summary 1",
-                "cover_img": "/images/cover1.jpg",
-                "category": "D",
-                "tags": [
-                    "tag1",
-                    "tag2"
-                ],
-                "likeCount": 2,
-                "comments": 3,
-                "visit": 0,
-                "priority": 1,
-                "createTime": 1692806408149
-            }
-        ]
+import { getLatestPosts, IPost } from "~/api/post"
+import { IResponse, IListData } from "~/api/http";
+
+const dataList = ref([] as IPost[]);
+const postInfos = async () => {
+    try {
+        let postRes: any = await getLatestPosts()
+        let res : IResponse<IListData<IPost>> = postRes.data.value
+        dataList.value = res.data?.list || []
+    } catch (error) {
+        console.log(error);
     }
-}
+};
+postInfos()
+
 onMounted(() => {
 
 
