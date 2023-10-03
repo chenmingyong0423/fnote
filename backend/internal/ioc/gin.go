@@ -15,15 +15,16 @@
 package ioc
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/internal/message_template/handler"
-	"github.com/chenmingyong0423/ginx/middlewares/id"
-	"github.com/chenmingyong0423/ginx/middlewares/log"
-	"github.com/gin-contrib/cors"
 	"io"
 	"log/slog"
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/chenmingyong0423/fnote/backend/internal/message_template/handler"
+	"github.com/chenmingyong0423/ginx/middlewares/id"
+	"github.com/chenmingyong0423/ginx/middlewares/log"
+	"github.com/gin-contrib/cors"
 
 	ctgHandler "github.com/chenmingyong0423/fnote/backend/internal/category/handler"
 	commentHandler "github.com/chenmingyong0423/fnote/backend/internal/comment/hanlder"
