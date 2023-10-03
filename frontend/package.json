@@ -16,6 +16,7 @@
     "nuxt": "^3.6.5"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.1.0",
     "@element-plus/nuxt": "^1.0.5",
     "@kangc/v-md-editor": "^2.3.17",
     "@pinia/nuxt": "^0.4.11",

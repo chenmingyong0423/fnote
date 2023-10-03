@@ -2,14 +2,14 @@
     <div>
         <div class="py15">
             <div class="text-30 mb20 ml10">标签</div>
-            <my-tag v-for="tag in homeStore.menuList.data.list" :key="tag.name" @click="router.push(tag.route)">
+            <my-tag v-for="tag in homeStore.menuList" :key="tag.name" @click="router.push(tag.route)">
                 {{ tag.name }}
             </my-tag>
         </div>
         <div class="mt40 bg-#e5e5e5/40 p20 rounded-10">
             <div class="text-30 mb20 ml10">我的文章</div>
-            <div v-for="item in data.data.list ">
-                <Content @click="router.push(`post/${item}`)" :postData="item"></Content>
+            <div v-for="item in dataList ">
+                <Content @click="router.push(`post/${item.sug}`)" :postData="item"></Content>
                 <!-- <el-divider /> -->
             </div>
         </div>
@@ -19,95 +19,33 @@
 
 <script lang="ts" setup>
 import { useHomeStore } from '~/store/home';
+import { IPost, getPosts, PageRequest } from '~/api/post';
+import { IResponse, IPageData } from "~/api/http";
+
 const homeStore = useHomeStore()
-const tags = ref([
-    { name: '前端', type: '' },
-    { name: '后端', type: 'success' },
-    { name: 'Java', type: 'info' },
-    { name: 'JavaScript', type: 'warning' },
-    { name: 'python', type: 'danger' },
-])
 const router = useRouter()
-const data = {
-    "code": 200,
-    "message": "OK",
-    "data": {
-        "PageNo": 1,
-        "PageSize": 1,
-        "totalPages": 5,
-        "totalCount": 5,
-        "list": [
-            {
-                "sug": "post5",
-                "author": "陈明勇",
-                "title": "哈哈",
-                "summary": "Summary 1",
-                "cover_img": "/images/cover1.jpg",
-                "category": "D",
-                "tags": [
-                    "tag1",
-                    "tag2"
-                ],
-                "likeCount": 2,
-                "comments": 3,
-                "visit": 0,
-                "priority": 1,
-                "createTime": 1692806408149
-            },
-            {
-                "sug": "post5",
-                "author": "陈明勇",
-                "title": "哈哈",
-                "summary": "Summary 1",
-                "cover_img": "/images/cover1.jpg",
-                "category": "D",
-                "tags": [
-                    "tag1",
-                    "tag2"
-                ],
-                "likeCount": 2,
-                "comments": 3,
-                "visit": 0,
-                "priority": 1,
-                "createTime": 1692806408149
-            },
-            {
-                "sug": "post5",
-                "author": "陈明勇",
-                "title": "哈哈",
-                "summary": "Summary 1",
-                "cover_img": "/images/cover1.jpg",
-                "category": "D",
-                "tags": [
-                    "tag1",
-                    "tag2"
-                ],
-                "likeCount": 2,
-                "comments": 3,
-                "visit": 0,
-                "priority": 1,
-                "createTime": 1692806408149
-            },
-            {
-                "sug": "post5",
-                "author": "陈明勇",
-                "title": "哈哈",
-                "summary": "Summary 1",
-                "cover_img": "/images/cover1.jpg",
-                "category": "D",
-                "tags": [
-                    "tag1",
-                    "tag2"
-                ],
-                "likeCount": 2,
-                "comments": 3,
-                "visit": 0,
-                "priority": 1,
-                "createTime": 1692806408149
-            }
-        ]
+const dataList = ref([] as IPost[])
+const rq = ref({
+    pageNo: 1,
+    pageSize: 5,
+    sortField: '',
+    sortOrder:'',
+    search: '',
+    category: '',
+    tags: []
+} as PageRequest)
+const postInfos = async () => {
+    try {
+        let postRes: any = await getPosts(rq)
+        let res : IResponse<IPageData<IPost>> = postRes.data.value
+        dataList.value = res.data?.list || []
+    } catch (error) {
+        console.log(error);
     }
-}
+};
+postInfos()
+
+
 </script>
 
 <style scoped>

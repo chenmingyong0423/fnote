@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-goimports -l -w "$(find . -type f -name '*.go' -not -path "./.idea/*")"
+find . -type f -name '*.go' -not -path "./.idea/*" | xargs goimports -l -w
