@@ -57,8 +57,8 @@ type CommentRequest struct {
 }
 
 func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
-	engine.GET("/posts/:sug/comments", api.Wrap(h.GetCommentsByPostId))
 	group := engine.Group("/comments")
+	group.GET("/sug/:sug", api.Wrap(h.GetCommentsByPostId))
 	group.POST("", api.WrapWithBody(h.AddComment))
 	group.POST("/:commentId/replies", api.WrapWithBody(h.AddCommentReply))
 	group.GET("/latest", api.Wrap(h.GetLatestCommentAndReply))

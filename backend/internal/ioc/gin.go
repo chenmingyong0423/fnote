@@ -22,9 +22,9 @@ import (
 	"time"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/message_template/handler"
-
 	"github.com/chenmingyong0423/ginx/middlewares/id"
 	"github.com/chenmingyong0423/ginx/middlewares/log"
+	"github.com/gin-contrib/cors"
 
 	ctgHandler "github.com/chenmingyong0423/fnote/backend/internal/category/handler"
 	commentHandler "github.com/chenmingyong0423/fnote/backend/internal/comment/hanlder"
@@ -33,7 +33,6 @@ import (
 	myValidator "github.com/chenmingyong0423/fnote/backend/internal/pkg/validator"
 	postHanlder "github.com/chenmingyong0423/fnote/backend/internal/post/handler"
 	vlHandler "github.com/chenmingyong0423/fnote/backend/internal/visit_log/handler"
-	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -96,7 +95,9 @@ func InitMiddlewares(cfg *Config, writer io.Writer) []gin.HandlerFunc {
 					return strings.Contains(origin, s)
 				})
 			},
-			MaxAge: 12 * time.Hour,
+			AllowMethods: cfg.Gin.AllowedMethods,
+			AllowHeaders: cfg.Gin.AllowedHeaders,
+			MaxAge:       12 * time.Hour,
 		}),
 	}
 }

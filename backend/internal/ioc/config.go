@@ -35,6 +35,8 @@ type SystemConfig struct {
 
 type GinConfig struct {
 	AllowedOrigins []string `json:"allowed_origins" yaml:"allowed_origins"`
+	AllowedMethods []string `json:"allowed_methods" yaml:"allowed_methods"`
+	AllowedHeaders []string `json:"allowed_headers" yaml:"allowed_headers"`
 }
 
 type LoggerConfig struct {
@@ -71,9 +73,6 @@ func InitConfig(cfgPath string) *Config {
 func defaultConfig() *Config {
 	return &Config{
 		System: SystemConfig{StaticPath: "/fnote/static/"},
-		Gin: GinConfig{
-			AllowedOrigins: []string{"*"},
-		},
 		Logger: LoggerConfig{
 			MaxSize:    100,
 			Compress:   true,
