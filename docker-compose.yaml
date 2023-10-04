@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mongo:
-    container_name: fnote-mongo2
+    container_name: fnote-mongo
     image: mongo:6.0.5
     environment:
       MONGO_INITDB_ROOT_USERNAME: fnote
