@@ -43,7 +43,7 @@ import { applyForFriend, FriendReq } from '~/api/friend'
 import { IResponse } from "~/api/http";
 
 const ruleFormRef = ref<FormInstance>()
-const req = ref<FriendReq>({})
+const req = ref<FriendReq>()
 
 const rules = reactive<FormRules<FriendReq>>({
     name: [
