@@ -16,27 +16,29 @@ package domain
 
 // WebMasterConfig 站长信息
 type WebMasterConfig struct {
-	Name            string `bson:"name" json:"name"`
-	PostCount       uint   `bson:"postCount" json:"postCount"`
-	CategoryCount   uint   `bson:"categoryCount" json:"categoryCount"`
-	WebsiteViews    uint   `bson:"websiteViews" json:"websiteViews"`
-	WebsiteLiveTime int64  `bson:"websiteLiveTime" json:"websiteLiveTime"`
-	Profile         string `bson:"profile" json:"profile"`
-	Picture         string `bson:"picture" json:"picture"`
-	WebsiteIcon     string `bson:"websiteIcon" json:"websiteIcon"`
-	Domain          string `bson:"domain" json:"domain"`
+	Name            string   `bson:"name" json:"name"`
+	PostCount       uint     `bson:"postCount" json:"postCount"`
+	CategoryCount   uint     `bson:"categoryCount" json:"categoryCount"`
+	WebsiteViews    uint     `bson:"websiteViews" json:"websiteViews"`
+	WebsiteLiveTime int64    `bson:"websiteLiveTime" json:"websiteLiveTime"`
+	Profile         string   `bson:"profile" json:"profile"`
+	Picture         string   `bson:"picture" json:"picture"`
+	WebsiteIcon     string   `bson:"websiteIcon" json:"websiteIcon"`
+	Domain          string   `bson:"domain" json:"domain"`
+	Records         []string `bson:"records" json:"records"`
 }
 
 type WebMasterConfigVO struct {
-	Name            string `json:"name"`
-	PostCount       uint   `json:"post_count"`
-	CategoryCount   uint   `json:"category_count"`
-	WebsiteViews    uint   `json:"website_views"`
-	WebsiteLiveTime int64  `json:"website_live_time"`
-	Profile         string `json:"profile"`
-	Picture         string `json:"picture"`
-	WebsiteIcon     string `json:"website_icon"`
-	Domain          string `json:"domain"`
+	Name            string   `json:"name"`
+	PostCount       uint     `json:"post_count"`
+	CategoryCount   uint     `json:"category_count"`
+	WebsiteViews    uint     `json:"website_views"`
+	WebsiteLiveTime int64    `json:"website_live_time"`
+	Profile         string   `json:"profile"`
+	Picture         string   `json:"picture"`
+	WebsiteIcon     string   `json:"website_icon"`
+	Domain          string   `json:"domain"`
+	Records         []string `json:"records"`
 }
 
 type SwitchConfig struct {
