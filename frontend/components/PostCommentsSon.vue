@@ -1,17 +1,19 @@
 <template>
     <div v-if="replies" class="mt25 px50">
         <el-space direction="vertical" :fill="true" class="w-full" :spacer="spacer">
-            <div v-for="item in replies" :key="replies.id" class="b-1 b-#DDDBDB b-solid p20 rounded-10">
+            <div class="b-1 b-#DDDBDB b-solid p20 rounded-10">
+
+                <!-- 回复信息 -->
                 <el-space :size="8" alignment="flex-start">
                     <el-avatar :size="36" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
                     <div>
                         <el-space :size="0">
                             <div class="ml8 flex">
-                                <div>{{ item.name }}</div>
-                                <div v-if="item.reply_to" class="ml8">
+                                <div>{{ replies.name }}</div>
+                                <div v-if="replies.reply_to" class="ml8">
                                     <el-space>
                                         <div>回复</div>
-                                        <div>{{ item.reply_to }}</div>
+                                        <div>{{ replies.reply_to }}</div>
                                     </el-space>
                                 </div>
                             </div>
@@ -19,17 +21,18 @@
                                 发表于
                             </div>
                             <div class="ml4">
-                                {{ formatTimestamp(item.reply_time) }}
+                                {{ formatTimestamp(replies.reply_time) }}
                             </div>
                         </el-space>
                     </div>
                 </el-space>
+                <!-- 回复内容 -->
                 <div>
-                    <v-md-preview :text="item.content" class="px18"></v-md-preview>
-                <div v-if=" item.replied_content "
-                class="p-10 whitespace-nowrap overflow-hidden overflow-ellipsis bg-gray-200 rounded-lg px18">
-                    {{ item.replied_content }}
-                </div>
+                    <v-md-preview :text="replies.content" class="px18"></v-md-preview>
+                    <div v-if="replies.replied_content"
+                        class="p-10 whitespace-nowrap overflow-hidden overflow-ellipsis bg-gray-200 rounded-lg px18">
+                        {{ replies.replied_content }}
+                    </div>
                 </div>
                 <el-button class="ml50" @click="showReply = true">回复</el-button>
                 <el-button class="ml50" v-if="showReply" @click="showReply = false">取消</el-button>

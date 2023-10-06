@@ -25,7 +25,7 @@
             </el-col>
 
 
-            <el-col :span="18">
+            <el-col :span="16">
                 <div class=" rounded-15 bg-#fff p30">
                     <!-- 文章标题 -->
                     <div class="text-center text-42 font-500">{{ data?.title }}</div>
@@ -46,10 +46,10 @@
                     </div>
                     <v-md-preview :text="data?.content" @copy-code-success="handleCopyCodeSuccess"></v-md-preview>
                     <!-- 点赞 -->
-                    <div
+                    <!-- <div
                         class=" mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
                         <div class="i-grommet-icons:like"></div>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="rounded-15 bg-#fff pt20 pb80 px30 mt25">
                     <!-- 发布评论 -->
@@ -58,6 +58,7 @@
                     <PostCommentsFather v-for="item, index in commentList" :key="index" class="" :commentInfo="item" />
                 </div>
             </el-col>
+
             <el-col :span="6">
                 <el-affix :offset="90">
                     <div class="w-full">
@@ -70,16 +71,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ElMessage } from 'element-plus'
-import { dayjs } from 'element-plus'
-import type { } from 'element-plus'
+import { ElMessage, dayjs } from 'element-plus'
 import { getPostsById, IPostDetail } from "~/api/post"
 import { IComment, getComments } from "~/api/comment"
 import { IResponse, IListData } from "~/api/http";
 
 // const router = useRouter()
 const route = useRoute()
-
 const sug: string = route.params.id as string
 
 const data = ref<IPostDetail>();

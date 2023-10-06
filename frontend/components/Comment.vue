@@ -6,17 +6,15 @@
         </div>
         <el-divider class="important:mt24" />
         <div class="text-14 px20 " v-for="item in dataList">
-            <el-space direction="vertical" alignment="start">
-                <el-text truncated class="dark_text_white w350">
-                    {{ item.name }}：{{ item.content }}
-                </el-text>
-                <nuxt-link :to='"/post/" + item.post_id' class="hover:bg-green-200">
-                    <el-space class="c-#000/40 dark_text_white">
-                        <div class="i-grommet-icons:article"></div>
-                        <div>{{ item.post_title }}</div>
-                    </el-space>
-                </nuxt-link>
-            </el-space>
+            <el-text truncated class="dark_text_white">
+                {{ item.name }}：{{ item.content }}
+            </el-text>
+            <nuxt-link :to='"/post/" + item.post_id' class="hover:bg-green-200 block mt8">
+                <el-space class="c-#000/40 dark_text_white">
+                    <div class="i-grommet-icons:article"></div>
+                    <div>{{ item.post_title }}</div>
+                </el-space>
+            </nuxt-link>
             <el-divider class="important:my10" />
         </div>
     </div>

@@ -1,6 +1,12 @@
 <template>
     <div>
         <div class="py15">
+            <div class="text-30 mb20 ml10">分类</div>
+            <my-tag v-for="tag in homeStore.menuList" :key="tag.name" @click="router.push(tag.route)">
+                {{ tag.name }}
+            </my-tag>
+        </div>
+        <div class="py15">
             <div class="text-30 mb20 ml10">标签</div>
             <my-tag v-for="tag in homeStore.menuList" :key="tag.name" @click="router.push(tag.route)">
                 {{ tag.name }}
@@ -29,7 +35,7 @@ const rq = ref({
     pageNo: 1,
     pageSize: 5,
     sortField: '',
-    sortOrder:'',
+    sortOrder: '',
     search: '',
     category: '',
     tags: []
@@ -37,7 +43,7 @@ const rq = ref({
 const postInfos = async () => {
     try {
         let postRes: any = await getPosts(rq)
-        let res : IResponse<IPageData<IPost>> = postRes.data.value
+        let res: IResponse<IPageData<IPost>> = postRes.data.value
         dataList.value = res.data?.list || []
     } catch (error) {
         console.log(error);

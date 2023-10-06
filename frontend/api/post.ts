@@ -21,16 +21,16 @@ const getLatestPosts = () => {
 };
 
 export type PageRequest = {
-    pageNo : number;
+    pageNo: number;
     pageSize: number;
-    sortFiled?: string;
+    sortField?: string;
     sortOrder?: string;
     search?: string;
     category?: string;
     tags?: string[];
 }
 
-const getPosts = (pq : PageRequest) => {
+const getPosts = (pq: PageRequest) => {
     return httpRequest.get(prefix + "", pq)
 };
 
@@ -54,10 +54,10 @@ export interface IPostDetail {
     word_count: number;
     update_time: number;
     is_liked: boolean;
-  }
-  
+}
 
-const getPostsById = (sug : string) => {
+
+const getPostsById = (sug: string) => {
     return httpRequest.get(prefix + "/" + sug)
 };
 
