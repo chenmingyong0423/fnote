@@ -43,8 +43,15 @@ import { applyForFriend, FriendReq } from '~/api/friend'
 import { IResponse } from "~/api/http";
 
 const ruleFormRef = ref<FormInstance>()
-const req = ref<FriendReq>()
+const req = ref<FriendReq>({
+    name: '',
+    url: '',
+    logo: '',
+    description: '',
+    email: ''
+})
 
+// 表单校验
 const rules = reactive<FormRules<FriendReq>>({
     name: [
         { required: true, message: 'Please input name', trigger: 'blur' },
@@ -63,6 +70,7 @@ const rules = reactive<FormRules<FriendReq>>({
         { pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" }
     ]
 })
+
 const applyforFriendFunc = async () => {
     try {
         let cmtsRes: any = await applyForFriend(req)

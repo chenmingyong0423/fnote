@@ -14,7 +14,7 @@
             <el-row :gutter="20">
                 <el-col :span="17">
                     <div>
-                        <Content v-for="item in dataList" :postData="item">
+                        <Content v-for="item in dataList" :postData="item" :key="item.sug">
                         </Content>
                     </div>
                 </el-col>
@@ -39,7 +39,7 @@ const dataList = ref([] as IPost[]);
 const postInfos = async () => {
     try {
         let postRes: any = await getLatestPosts()
-        let res : IResponse<IListData<IPost>> = postRes.data.value
+        let res: IResponse<IListData<IPost>> = postRes.data.value
         dataList.value = res.data?.list || []
     } catch (error) {
         console.log(error);
@@ -47,10 +47,6 @@ const postInfos = async () => {
 };
 postInfos()
 
-onMounted(() => {
-
-
-})
 definePageMeta({
     layout: "home"
 })

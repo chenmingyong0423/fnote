@@ -21,8 +21,8 @@
         </div> -->
         <div>
             <el-space>
-                <el-avatar :src="picture" :size="36"
-                    class="mx30 cursor-pointer hover:rotate-360 ease-out duration-1000" @click="router.push('/')" />
+                <el-avatar :src="picture" :size="36" class="mx30 cursor-pointer hover:rotate-360 ease-out duration-1000"
+                    @click="router.push('/')" />
                 <div class="flex">
                     <div class="menu_item" @click="router.push('/')" :class="route.path === '/' ? 'active' : ''">
                         首页
@@ -106,7 +106,7 @@ import { IResponse, IListData } from "../api/http";
 const menus = async () => {
     try {
         let postRes: any = await getMenus()
-        let res : IResponse<IListData<IMenu>> = postRes.data.value
+        let res: IResponse<IListData<IMenu>> = postRes.data.value
         homeStore.menuList = res.data?.list || []
     } catch (error) {
         console.log(error);
