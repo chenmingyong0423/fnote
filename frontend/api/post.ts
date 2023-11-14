@@ -16,9 +16,8 @@ export interface IPost {
 }
 const prefix = "/posts"
 
-const getLatestPosts = () => {
-    return httpRequest.get(prefix + "/latest")
-};
+export const getLatestPosts = () => httpRequest.get(prefix + "/latest")
+
 
 export type PageRequest = {
     pageNo: number;
@@ -30,9 +29,8 @@ export type PageRequest = {
     tags?: string[];
 }
 
-const getPosts = (pq: PageRequest) => {
-    return httpRequest.get(prefix + "", pq)
-};
+export const getPosts = (pq: PageRequest) => httpRequest.get(prefix + "", pq)
+
 
 
 export interface IPostDetail {
@@ -57,12 +55,6 @@ export interface IPostDetail {
 }
 
 
-const getPostsById = (sug: string) => {
-    return httpRequest.get(prefix + "/" + sug)
-};
+export const getPostsById = (sug: string) => httpRequest.get(prefix + "/" + sug)
 
-export {
-    getLatestPosts,
-    getPosts,
-    getPostsById
-}
+

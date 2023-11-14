@@ -8,6 +8,7 @@
         <div class="text-14 px20 " v-for="item in dataList">
             <el-text truncated class="dark_text_white">
                 {{ item.name }}：{{ item.content }}
+
             </el-text>
             <nuxt-link :to='"/post/" + item.post_id' class="hover:bg-green-200 block mt8">
                 <el-space class="c-#000/40 dark_text_white">

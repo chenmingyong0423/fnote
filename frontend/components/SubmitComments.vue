@@ -2,12 +2,12 @@
     <div>
         <el-form ref="ruleFormRef" :model="req" class="mt30" :rules="rules">
             <el-row :gutter="50">
-                <el-col :span="12">
+                <el-col :span="12" class="lt-lg:important:pr-10">
                     <el-form-item label="昵称" prop="nickName">
                         <el-input v-model="req.name" placeholder="请输入昵称" clearable />
                     </el-form-item>
                 </el-col>
-                <el-col :span="12">
+                <el-col :span="12" class="lt-lg:important:pl-10">
                     <el-form-item label="邮箱" prop="email">
                         <el-input v-model="req.email" placeholder="请输入邮箱地址(用于接收通知)" clearable />
                     </el-form-item>

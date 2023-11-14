@@ -1,8 +1,8 @@
 <template>
     <div class="bg-#F0F2F5 dark_bg_black pt100 pb30 px25">
-        <el-row :gutter="40">
+        <el-row :gutter="40" class="lt-lg:important:display-block">
 
-            <el-col :span="2">
+            <el-col :span="2" class="lt-lg:important:display-none">
                 <el-affix :offset="350">
                     <div class=" text-center">
                         <el-space direction="vertical" :size="25">
@@ -25,12 +25,12 @@
             </el-col>
 
 
-            <el-col :span="16">
+            <el-col :span="16" class="lt-lg:important:max-w-100%">
                 <div class=" rounded-15 bg-#fff p30">
                     <!-- 文章标题 -->
                     <div class="text-center text-42 font-500">{{ data?.title }}</div>
                     <!-- 作者信息 -->
-                    <div class="text-center text-16 c-#999/80 my20 ">
+                    <div class="text-center text-16 c-#999/80 my20 lt-lg:text-14">
                         <el-space :size="4">
                             <div>{{ data?.author }}</div>
                             <div>
@@ -40,8 +40,8 @@
                             <div>阅读 </div>
                             <div>{{ data?.visit_count }}</div>
                             <div>·</div>
-                            <div>全文字数 </div>
-                            <div>{{ data?.word_count }}</div>
+                            <div class="lt-lg-display-none">全文字数 </div>
+                            <div class="lt-lg-display-none">{{ data?.word_count }}</div>
                         </el-space>
                     </div>
                     <v-md-preview :text="data?.content" @copy-code-success="handleCopyCodeSuccess"></v-md-preview>
@@ -59,7 +59,7 @@
                 </div>
             </el-col>
 
-            <el-col :span="6">
+            <el-col :span="6" class="lt-lg:important:display-none">
                 <el-affix :offset="90">
                     <div class="w-full">
                         <Anchor :text="data?.content"></Anchor>

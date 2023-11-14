@@ -17,7 +17,7 @@ export default defineNuxtConfig({
       { 'c_title_blue': 'text-#1890ff' },
       { 'c_text_black': 'text-#111' },
       { 'c_text_white': 'text-#fff' },
-      { 'menu_item': 'px18 py15 text-14 hover:bg-#000/20 active:bg-#000/40 c-#fff cursor-pointer' },
+      { 'menu_item': 'px18 py15 text-14 hover:bg-#000/20 active:bg-#000/40 c-#000 cursor-pointer' },
     ],
     rules: [
       ['footer_shadow', { 'box-shadow': ' 0 0 10px rgba(0, 0, 0, .5)' }]
@@ -33,6 +33,7 @@ export default defineNuxtConfig({
   },
   elementPlus: {
     /** Options */
+    injectionID: { prefix: 1024, current: 0 }
   },
   css: [
     '@/styles/main.css'
