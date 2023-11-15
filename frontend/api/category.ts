@@ -7,10 +7,6 @@ export interface IMenu {
 
 const prefix = "/categories"
 
-const getMenus = () => {
-    return httpRequest.get(prefix + "/menus")
-};
+export const getMenus = () => httpRequest.get(prefix + "/menus")
 
-export {
-    getMenus
-}
+
