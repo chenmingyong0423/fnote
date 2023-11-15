@@ -2,12 +2,12 @@
     <div>
         <el-form ref="ruleFormRef" :model="req" class="mt30" :rules="rules">
             <el-row :gutter="50">
-                <el-col :span="12">
+                <el-col :span="12" class="lt-lg:important:pr-10">
                     <el-form-item label="昵称" prop="nickName">
                         <el-input v-model="req.name" placeholder="请输入昵称" clearable />
                     </el-form-item>
                 </el-col>
-                <el-col :span="12">
+                <el-col :span="12" class="lt-lg:important:pl-10">
                     <el-form-item label="邮箱" prop="email">
                         <el-input v-model="req.email" placeholder="请输入邮箱地址(用于接收通知)" clearable />
                     </el-form-item>
@@ -15,6 +15,12 @@
             </el-row>
 
             <el-form-item prop="content">
+                <!-- <el-input :autosize="{ minRows: 2, maxRows: 4 }" type="textarea" show-word-limit :maxlength="30" clearable
+                    v-model="form.content" placeholder="请输入评论内容，支持markdown格式" v-if="!review" />
+               
+                <div class="bg-#e5e5e5 w-full rounded-8" v-if="review">
+                    <v-md-preview :text="form.content"></v-md-preview>
+                </div> -->
                 <el-input show-word-limit :maxlength="30" clearable type="textarea" v-model="req.content"
                     placeholder="请输入评论内容，支持markdown格式" />
             </el-form-item>
@@ -22,6 +28,8 @@
                 <div class="w-full text-center">
                     <el-button type="primary" @click="onSubmit">提交评论</el-button>
                     <el-button @click="resetForm(ruleFormRef)">清空</el-button>
+                    <el-button v-if="!review" @click="review = true">预览</el-button>
+                    <el-button v-if="review" @click="review = false">编辑</el-button>
                 </div>
             </el-form-item>
         </el-form>
@@ -35,8 +43,15 @@ import { applyForFriend, FriendReq } from '~/api/friend'
 import { IResponse } from "~/api/http";
 
 const ruleFormRef = ref<FormInstance>()
-const req = ref<FriendReq>({})
+const req = ref<FriendReq>({
+    name: '',
+    url: '',
+    logo: '',
+    description: '',
+    email: ''
+})
 
+// 表单校验
 const rules = reactive<FormRules<FriendReq>>({
     name: [
         { required: true, message: 'Please input name', trigger: 'blur' },
@@ -55,6 +70,7 @@ const rules = reactive<FormRules<FriendReq>>({
         { pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" }
     ]
 })
+
 const applyforFriendFunc = async () => {
     try {
         let cmtsRes: any = await applyForFriend(req)
