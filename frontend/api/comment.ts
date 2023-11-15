@@ -10,9 +10,8 @@ export interface ILatestComment {
 
 const prefix = "/comments"
 
-const getLatestComments = () => {
-    return httpRequest.get(prefix + "/latest")
-};
+export const getLatestComments = () => httpRequest.get(prefix + "/latest")
+
 
 export interface IReply {
     id: string;
@@ -33,11 +32,6 @@ export interface IComment {
     replies: IReply[];
 }
 
-const getComments = (sug: string) => {
-    return httpRequest.get(prefix + "/sug/" + sug)
-}
+export const getComments = (sug: string) => httpRequest.get(prefix + "/sug/" + sug)
 
-export {
-    getLatestComments,
-    getComments
-}
+
