@@ -8,7 +8,7 @@ export default defineNuxtConfig({
   unocss: {
     uno: true, // enabled `@unocss/preset-uno`
     icons: true, // enabled `@unocss/preset-icons`
-    attributify: true, // enabled `@unocss/preset-attributify`,
+    attributify: false, // enabled `@unocss/preset-attributify`,
     // core options
     shortcuts: [
       { 'dark_bg_black': 'dark:bg-#000' },
