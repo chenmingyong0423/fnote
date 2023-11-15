@@ -35,37 +35,36 @@
  -->
 <template>
     <div>
-
         <!-- 展示评论 -->
-        <div>
 
+        <div>
+            <!-- 一级评论 -->
+            <el-divider class="important:my24"></el-divider>
             <div>
-                <!-- 一级评论 -->
-                <el-divider class="important:my24"></el-divider>
-                <div>
-                    <el-space :size="8" alignment="flex-start">
-                        <el-avatar :size="36" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
-                        <div>
-                            <el-space :size="0">
-                                <div class="ml8">
-                                    {{ commentInfo.username }}
-                                </div>
-                                <div class="ml8">
-                                    发表于
-                                </div>
-                                <div class="ml4">
-                                    {{ formatTimestamp(commentInfo.comment_time) }}
-                                </div>
-                            </el-space>
-                        </div>
-                    </el-space>
-                    <v-md-preview :text="commentInfo.content" class="px18"></v-md-preview>
-                    <el-button class="ml50" @click="showReply = true">回复</el-button>
-                    <el-button class="ml50" v-if="showReply" @click="showReply = false">取消</el-button>
-                    <SubmitComments v-if="showReply" />
-                    <!-- 二级评论 -->
-                    <PostCommentsSon :replies="commentInfo.replies" />
-                </div>
+
+                <el-space :size="8" alignment="flex-start">
+                    <el-avatar :size="36" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
+                    <div>
+                        <el-space :size="0">
+                            <div class="ml8">
+                                {{ commentInfo.username }}
+                            </div>
+                            <div class="ml8">
+                                发表于
+                            </div>
+                            <div class="ml4">
+                                {{ formatTimestamp(commentInfo.comment_time) }}
+                            </div>
+                        </el-space>
+                    </div>
+                </el-space>
+
+                <v-md-preview :text="commentInfo.content" class="px18"></v-md-preview>
+                <el-button class="ml50" @click="showReply = true">回复</el-button>
+                <el-button class="ml50" v-if="showReply" @click="showReply = false">取消</el-button>
+                <SubmitComments v-if="showReply" />
+                <!-- 二级评论 -->
+                <PostCommentsSon :replies="item" v-for="item in commentInfo.replies" :key="commentInfo.replies.id" />
             </div>
         </div>
     </div>

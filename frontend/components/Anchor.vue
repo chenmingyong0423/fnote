@@ -57,7 +57,7 @@ const rollTo = (anchor, index) => {
     // 页面跳转
     if (heading) {
         scrollTo({
-            top: heading.offsetTop,
+            top: heading.offsetTop + 50,
             behavior: 'smooth'
         })
     }
@@ -66,12 +66,6 @@ const rollTo = (anchor, index) => {
 }
 
 // markdown-页面滚动。
-const scroll = () => {
-    // 监听屏幕滚动时防抖（在规定的时间内触发的事件，只执行最后一次，降低性能开销）
-    return () => {
-        throttle(jump, 100)
-    }
-}
 const jump = () => {
     let scrollTop = window.pageYOffset
     // console.log(window.pageYOffset)
