@@ -18,6 +18,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/builder/update"
+
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
@@ -61,16 +66,17 @@ var _ IPostDao = (*PostDao)(nil)
 
 func NewPostDao(db *mongo.Database) *PostDao {
 	return &PostDao{
-		coll: db.Collection("posts"),
+		coll: mongox.NewCollection[Post](db.Collection("posts")),
 	}
 }
 
 type PostDao struct {
-	coll *mongo.Collection
+	coll *mongox.Collection[Post]
 }
 
 func (d *PostDao) IncreaseFieldById(ctx context.Context, id string, field string) error {
-	result, err := d.coll.UpdateByID(ctx, id, bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: field, Value: 1}}}})
+	// bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: field, Value: 1}}}}
+	result, err := d.coll.Updater().Filter(bsonx.Id(id)).Updates(update.BsonBuilder().Inc(bsonx.M(field, 1)).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to increase the %s of post, id=%s", field, id)
 	}
@@ -81,10 +87,10 @@ func (d *PostDao) IncreaseFieldById(ctx context.Context, id string, field string
 }
 
 func (d *PostDao) DeleteLike(ctx context.Context, id string, ip string) error {
-	result, err := d.coll.UpdateByID(ctx, id, bson.D{
-		bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "likes", Value: ip}}},
-		bson.E{Key: "$inc", Value: bson.D{bson.E{Key: "like_count", Value: -1}}},
-	})
+	result, err := d.coll.Updater().
+		Filter(bsonx.Id(id)).
+		Updates(update.BsonBuilder().Pull(bsonx.M("likes", ip)).Inc(bsonx.M("like_count", -1)).Build()).
+		UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to delete a like, id=%s, ip=%s", id, ip)
 	}
@@ -95,10 +101,10 @@ func (d *PostDao) DeleteLike(ctx context.Context, id string, ip string) error {
 }
 
 func (d *PostDao) AddLike(ctx context.Context, id string, ip string) error {
-	result, err := d.coll.UpdateByID(ctx, id, bson.D{
-		bson.E{Key: "$push", Value: bson.D{bson.E{Key: "likes", Value: ip}}},
-		bson.E{Key: "$inc", Value: bson.D{bson.E{Key: "like_count", Value: 1}}},
-	})
+	result, err := d.coll.Updater().
+		Filter(bsonx.Id(id)).
+		Updates(update.BsonBuilder().Push(bsonx.M("likes", ip)).Inc(bsonx.M("like_count", 1)).Build()).
+		UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to add a like, id=%s, ip=%s", id, ip)
 	}
@@ -109,52 +115,39 @@ func (d *PostDao) AddLike(ctx context.Context, id string, ip string) error {
 }
 
 func (d *PostDao) FindByIdAndIp(ctx context.Context, id string, ip string) (*Post, error) {
-	post := new(Post)
-	err := d.coll.FindOne(ctx, bson.D{bson.E{Key: "_id", Value: id}, bson.E{Key: "likes", Value: ip}}).Decode(post)
+	// bson.D{bson.E{Key: "_id", Value: id}, bson.E{Key: "likes", Value: ip}}
+	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add(bsonx.KV("likes", ip)).Build()).FindOne(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fails to find the documents from %s, id=%s, ip=%s", d.coll.Name(), id, ip)
+		return nil, errors.Wrapf(err, "fails to find the documents from post, id=%s, ip=%s", id, ip)
 	}
 	return post, nil
 }
 
 func (d *PostDao) GetPunishedPostById(ctx context.Context, id string) (*Post, error) {
-	post := new(Post)
-	err := d.coll.FindOne(ctx, bson.M{"_id": id, "status": domain.PostStatusPunished}).Decode(post)
+	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add(bsonx.KV("status", domain.PostStatusPunished)).Build()).FindOne(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fails to find the document from %s, id=%s", d.coll.Name(), id)
+		return nil, errors.Wrapf(err, "fails to find the document from post, id=%s", id)
 	}
 	return post, nil
 }
 
 func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error) {
-	cnt, err := d.coll.CountDocuments(ctx, con)
+	cnt, err := d.coll.Finder().Filter(con).Count(ctx)
 	if err != nil {
-		return nil, 0, errors.Wrapf(err, "fails to find the count of documents from %s, con=%v", d.coll.Name(), con)
+		return nil, 0, errors.Wrapf(err, "fails to find the count of documents from post, con=%v", con)
 	}
-	cursor, err := d.coll.Find(ctx, con, findOptions)
+	posts, err := d.coll.Finder().Filter(con).Options(findOptions).Find(ctx)
 	if err != nil {
-		return nil, 0, errors.Wrapf(err, "fails to find the documents from %s, con=%v, findOptions=%v", d.coll.Name(), con, findOptions)
-	}
-	defer cursor.Close(ctx)
-	posts := make([]*Post, 5)
-	err = cursor.All(ctx, &posts)
-	if err != nil {
-		return nil, 0, errors.Wrap(err, "fails to decode the result")
+		return nil, 0, errors.Wrapf(err, "fails to find the documents from post, con=%v, findOptions=%v", con, findOptions)
 	}
 	return posts, cnt, nil
 }
 
 func (d *PostDao) GetLatest5Posts(ctx context.Context) ([]*Post, error) {
-	findOptions := options.Find().SetSort(bson.M{"create_time": -1}).SetLimit(5)
-	cursor, err := d.coll.Find(ctx, bson.M{"status": domain.PostStatusPunished}, findOptions)
+	findOptions := options.Find().SetSort(bsonx.M("create_time", -1)).SetLimit(5)
+	posts, err := d.coll.Finder().Filter(bsonx.M("status", domain.PostStatusPunished)).Options(findOptions).Find(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fails to find the documents from %s, findOptions=%v", d.coll.Name(), findOptions)
-	}
-	defer cursor.Close(ctx)
-	posts := make([]*Post, 5)
-	err = cursor.All(ctx, &posts)
-	if err != nil {
-		return nil, errors.Wrap(err, "fails to decode the result")
+		return nil, errors.Wrapf(err, "fails to find the documents from post, findOptions=%v", findOptions)
 	}
 	return posts, nil
 }
