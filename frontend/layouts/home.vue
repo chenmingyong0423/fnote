@@ -9,7 +9,8 @@
         </div>
         <MyFooter />
         <!-- </el-scrollbar> -->
-        <el-backtop :right="100" :bottom="100" />
+        <el-backtop :right="100" :bottom="100" class="lt-lg:important:right-20 lt-lg:important:bottom-50" />
+        <!-- <SearchDialog /> -->
     </div>
 </template>
 <script lang="ts" setup>

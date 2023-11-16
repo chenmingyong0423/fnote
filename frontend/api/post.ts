@@ -16,23 +16,21 @@ export interface IPost {
 }
 const prefix = "/posts"
 
-const getLatestPosts = () => {
-    return httpRequest.get(prefix + "/latest")
-};
+export const getLatestPosts = () => httpRequest.get(prefix + "/latest")
+
 
 export type PageRequest = {
-    pageNo : number;
+    pageNo: number;
     pageSize: number;
-    sortFiled?: string;
+    sortField?: string;
     sortOrder?: string;
     search?: string;
     category?: string;
     tags?: string[];
 }
 
-const getPosts = (pq : PageRequest) => {
-    return httpRequest.get(prefix + "", pq)
-};
+export const getPosts = (pq: PageRequest) => httpRequest.get(prefix + "", pq)
+
 
 
 export interface IPostDetail {
@@ -54,15 +52,9 @@ export interface IPostDetail {
     word_count: number;
     update_time: number;
     is_liked: boolean;
-  }
-  
-
-const getPostsById = (sug : string) => {
-    return httpRequest.get(prefix + "/" + sug)
-};
-
-export {
-    getLatestPosts,
-    getPosts,
-    getPostsById
 }
+
+
+export const getPostsById = (sug: string) => httpRequest.get(prefix + "/" + sug)
+
+

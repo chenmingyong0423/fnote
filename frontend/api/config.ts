@@ -13,10 +13,6 @@ export interface IWebmaster {
 }
 const prefix = "/configs"
 
-const getWebMaster = () => {
-    return httpRequest.get(prefix + "/webmaster")
-};
+export const getWebMaster = () => httpRequest.get(prefix + "/webmaster")
 
-export {
-    getWebMaster
-}
+

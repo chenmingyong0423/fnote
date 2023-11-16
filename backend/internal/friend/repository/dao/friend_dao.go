@@ -17,9 +17,11 @@ package dao
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -46,43 +48,37 @@ var _ IFriendDao = (*FriendDao)(nil)
 
 func NewFriendDao(db *mongo.Database) *FriendDao {
 	return &FriendDao{
-		coll: db.Collection("friends"),
+		coll: mongox.NewCollection[Friend](db.Collection("friends")),
 	}
 }
 
 type FriendDao struct {
-	coll *mongo.Collection
+	coll *mongox.Collection[Friend]
 }
 
 func (d *FriendDao) FindByUrl(ctx context.Context, url string) (*Friend, error) {
-	friend := new(Friend)
-	if err := d.coll.FindOne(ctx, bson.M{"url": url}).Decode(friend); err != nil {
-		return nil, errors.Wrapf(err, "fails to find the document from %s, url=%s", d.coll.Name(), url)
+	friend, err := d.coll.Finder().Filter(bsonx.M("url", url)).FindOne(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fails to find the document from friends, url=%s", url)
 	}
 	return friend, nil
 }
 
 func (d *FriendDao) Add(ctx context.Context, friend Friend) error {
-	result, err := d.coll.InsertOne(ctx, friend)
+	result, err := d.coll.Creator().InsertOne(ctx, friend)
 	if err != nil {
-		return errors.Wrapf(err, "fails to insert into %s, friend=%v", d.coll.Name(), friend)
+		return errors.Wrapf(err, "fails to insert into friends, friend=%v", friend)
 	}
 	if result.InsertedID == nil {
-		return errors.Wrapf(err, "InsertedID=nil, fails to insert into %s, friend=%v", d.coll.Name(), friend)
+		return errors.Wrapf(err, "InsertedID=nil, fails to insert into friends, friend=%v", friend)
 	}
 	return nil
 }
 
 func (d *FriendDao) FindDisplaying(ctx context.Context) ([]*Friend, error) {
-	cursor, err := d.coll.Find(ctx, bson.M{"status": domain.FriendStatusShowing})
+	friends, err := d.coll.Finder().Filter(bsonx.M("status", domain.FriendStatusShowing)).Find(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fails to find the documents from %s", d.coll.Name())
-	}
-	defer cursor.Close(ctx)
-	friends := make([]*Friend, 0)
-	err = cursor.All(ctx, &friends)
-	if err != nil {
-		return nil, errors.Wrap(err, "fails to decode the result")
+		return nil, errors.Wrapf(err, "fails to find the documents from friends")
 	}
 	return friends, nil
 }

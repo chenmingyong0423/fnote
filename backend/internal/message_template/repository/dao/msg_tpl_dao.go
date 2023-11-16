@@ -17,8 +17,10 @@ package dao
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -42,18 +44,17 @@ type IMsgTplDao interface {
 var _ IMsgTplDao = (*MsgTplDao)(nil)
 
 func NewMsgTplDao(db *mongo.Database) *MsgTplDao {
-	return &MsgTplDao{coll: db.Collection("message_template")}
+	return &MsgTplDao{coll: mongox.NewCollection[MessageTemplate](db.Collection("message_template"))}
 }
 
 type MsgTplDao struct {
-	coll *mongo.Collection
+	coll *mongox.Collection[MessageTemplate]
 }
 
 func (d *MsgTplDao) FindMsgTplByName(ctx context.Context, name string, recipientType uint) (*MessageTemplate, error) {
-	msgTpl := new(MessageTemplate)
-	err := d.coll.FindOne(ctx, bson.D{bson.E{Key: "name", Value: name}, bson.E{Key: "active", Value: 1}, bson.E{Key: "recipient_type", Value: recipientType}}).Decode(msgTpl)
+	msgTpl, err := d.coll.Finder().Filter(bsonx.D(bsonx.KV("name", name), bsonx.KV("active", 1), bsonx.KV("recipient_type", recipientType))).FindOne(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Fails to find a docment from %s, name=%s, recipient_type=%d", d.coll.Name(), name, recipientType)
+		return nil, errors.Wrapf(err, "Fails to find a docment from message_template, name=%s, recipient_type=%d", name, recipientType)
 	}
 	return msgTpl, nil
 }

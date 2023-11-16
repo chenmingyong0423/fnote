@@ -3,10 +3,10 @@ import { IMenu } from "~/api/category"
 
 export const useHomeStore = defineStore("home", {
     state: () => ({
-        isBlackMode: false,
-        // myHeaderBg: 'bg-#000/20 backdrop-blur-20',
-        headerTextColor: '#fff',
-        menuList: [] as IMenu[],
+        searchVisible: false,//搜索弹窗状态
+        isBlackMode: false,//暗黑模式状态
+        menuList: [] as IMenu[],//菜单列表
+        classification: {} as IMenu | undefined,//当前分类信息
         masterInfo: {
             name: '',
             post_count: 0,
@@ -18,5 +18,11 @@ export const useHomeStore = defineStore("home", {
             website_icon: '',
             domain: 'localhost:8080'
         } as IWebmaster
-    })
+    }),
+    // 持久化存储
+    persist: process.client && {
+        storage: localStorage,//存储模式：localStorage || sessionStorage
+        paths: ['classification']//要存储的数据
+    }
+
 });
