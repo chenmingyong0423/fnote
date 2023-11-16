@@ -10,9 +10,8 @@ export interface IFriend {
 }
 const prefix = "/friends"
 
-const getFriends = () => {
-    return httpRequest.get(prefix + "")
-};
+export const getFriends = () => httpRequest.get(prefix + "")
+
 
 export type FriendReq = {
     name: string;
@@ -22,11 +21,6 @@ export type FriendReq = {
     email?: string;
 }
 
-const applyForFriend = (req: FriendReq) => {
-    return httpRequest.post(prefix + "", req)
-};
+export const applyForFriend = (req: FriendReq) => httpRequest.post(prefix + "", req)
 
-export {
-    getFriends,
-    applyForFriend
-}
+

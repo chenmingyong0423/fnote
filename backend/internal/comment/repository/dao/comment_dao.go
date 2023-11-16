@@ -18,10 +18,12 @@ import (
 	"context"
 	"fmt"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
+	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
+	"github.com/chenmingyong0423/go-mongox/builder/update"
+	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -99,115 +101,130 @@ type ICommentDao interface {
 	FindCommentById(ctx context.Context, cmtId string) (*Comment, error)
 	AddCommentReply(ctx context.Context, cmtId string, commentReply CommentReply) error
 	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error)
-	FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus uint) ([]Comment, error)
+	FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus uint) ([]*Comment, error)
 }
 
 func NewCommentDao(db *mongo.Database) *CommentDao {
 	return &CommentDao{
-		coll: db.Collection("comment"),
+		coll: mongox.NewCollection[Comment](db.Collection("comment")),
 	}
 }
 
 var _ ICommentDao = (*CommentDao)(nil)
 
 type CommentDao struct {
-	coll *mongo.Collection
+	coll *mongox.Collection[Comment]
 }
 
-func (d *CommentDao) FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus uint) ([]Comment, error) {
-	result := make([]Comment, 0, 4)
-	con := bson.D{bson.E{Key: "post_info.post_id", Value: postId}, bson.E{Key: "status", Value: cmtStatus}}
-	cursor, err := d.coll.Find(ctx, con)
+func (d *CommentDao) FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus uint) ([]*Comment, error) {
+	cond := bsonx.D(bsonx.KV("post_info.post_id", postId), bsonx.KV("status", cmtStatus))
+	result, err := d.coll.Finder().Filter(cond).Find(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Fails to find the docs from %s, condition=%v", d.coll.Name(), con)
-	}
-	defer cursor.Close(ctx)
-	if err := cursor.All(ctx, &result); err != nil {
-		return nil, errors.Wrapf(err, "Fails to cursor.All, cursor=%v", cursor)
+		return nil, errors.Wrapf(err, "Fails to find the docs from comment, condition=%v", cond)
 	}
 	return result, nil
 }
 
 func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error) {
-	pipeline := mongo.Pipeline{
-		{primitive.E{Key: "$match", Value: bson.M{"status": CommentStatusApproved}}},
-		{primitive.E{Key: "$project", Value: bson.M{
-			"combined": bson.M{
-				"$concatArrays": []any{
-					[]bson.M{{"post_info": "$post_info", "name": "$user_info.name", "content": "$content", "create_time": "$create_time"}},
-					//"$replies",
-					bson.M{
-						"$map": bson.M{
-							"input": bson.M{
-								"$filter": bson.M{
-									"input": "$replies",
-									"as":    "replyItem",
-									"cond":  bson.M{"$eq": []interface{}{"$$replyItem.status", CommentStatusApproved}},
-								},
-							},
-							"as": "reply",
-							"in": bson.M{
-								"post_info":   "$post_info",
-								"name":        "$$reply.user_info.name",
-								"content":     "$$reply.content",
-								"create_time": "$$reply.create_time",
-							},
-						},
+	pipeline := aggregation.StageBsonBuilder().
+		Match(bsonx.M("status", CommentStatusApproved)).
+		Project(bsonx.M("combined", aggregation.BsonBuilder().ConcatArrays(
+			bsonx.A(
+				bsonx.D(bsonx.KV("post_info", "$post_info"), bsonx.KV("name", "$user_info.name"), bsonx.KV("content", "$content"), bsonx.KV("create_time", "$create_time")),
+			),
+			aggregation.BsonBuilder().Map(
+				aggregation.BsonBuilder().Filter(
+					"$replies",
+					aggregation.BsonBuilder().Eq("$$replyItem.status", CommentStatusApproved).Build(),
+					&types.FilterOptions{
+						As: "replyItem",
 					},
-				},
-			},
-		}}},
-		{primitive.E{Key: "$unwind", Value: "$combined"}},
-		{primitive.E{Key: "$replaceRoot", Value: bson.M{"newRoot": "$combined"}}},
-		{primitive.E{Key: "$sort", Value: bson.M{"create_time": -1}}},
-		{primitive.E{Key: "$limit", Value: cnt}},
-	}
+				).Build(),
+				"reply",
+				bsonx.D(bsonx.KV("post_info", "$post_info"), bsonx.KV("name", "$$reply.user_info.name"), bsonx.KV("content", "$$reply.content"), bsonx.KV("create_time", "$$reply.create_time")),
+			).Build(),
+		).Build())).
+		Unwind("$combined", nil).
+		ReplaceWith("$combined").
+		Sort(bsonx.M("create_time", -1)).
+		Limit(int64(cnt)).
+		Build()
+	//pipeline := mongo.Pipeline{
+	//	{primitive.E{Key: "$match", Value: bson.M{"status": CommentStatusApproved}}},
+	//	{primitive.E{Key: "$project", Value: bson.M{
+	//		"combined": bson.M{
+	//			"$concatArrays": []any{
+	//				bson.A{bson.M{"post_info": "$post_info", "name": "$user_info.name", "content": "$content", "create_time": "$create_time"}},
+	//				//"$replies",
+	//				bson.M{
+	//					"$map": bson.M{
+	//						"input": bson.M{
+	//							"$filter": bson.M{
+	//								"input": "$replies",
+	//								"as":    "replyItem",
+	//								"cond":  bson.M{"$eq": []interface{}{"$$replyItem.status", CommentStatusApproved}},
+	//							},
+	//						},
+	//						"as": "reply",
+	//						"in": bson.M{
+	//							"post_info":   "$post_info",
+	//							"name":        "$$reply.user_info.name",
+	//							"content":     "$$reply.content",
+	//							"create_time": "$$reply.create_time",
+	//						},
+	//					},
+	//				},
+	//			},
+	//		},
+	//	}}},
+	//	{primitive.E{Key: "$unwind", Value: "$combined"}},
+	//	{primitive.E{Key: "$replaceRoot", Value: bson.M{"newRoot": "$combined"}}},
+	//	{primitive.E{Key: "$sort", Value: bson.M{"create_time": -1}}},
+	//	{primitive.E{Key: "$limit", Value: cnt}},
+	//}
+
+	var results []LatestComment
+
 	// 执行聚合查询
-	cursor, err := d.coll.Aggregate(ctx, pipeline)
+	err := d.coll.Aggregator().Pipeline(pipeline).AggregateWithCallback(ctx, func(ctx context.Context, cursor *mongo.Cursor) error {
+		// 解析并输出结果
+		return cursor.All(ctx, &results)
+	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "Fails to execute aggregation operation, pipeline=%v", pipeline)
 	}
-	defer cursor.Close(ctx)
 
-	// 解析并输出结果
-	var results []LatestComment
-	if err = cursor.All(ctx, &results); err != nil {
-		return nil, errors.Wrapf(err, "Fails to cursor.All, cursor=%v", cursor)
-	}
 	return results, nil
 }
 
 func (d *CommentDao) AddCommentReply(ctx context.Context, cmtId string, commentReply CommentReply) error {
 	// 构建查询条件
-	filter := bson.M{"_id": cmtId}
-
+	filter := bsonx.Id(cmtId)
 	// 构建更新操作
-	update := bson.M{
-		"$push": bson.M{"replies": commentReply},
-	}
-	result, err := d.coll.UpdateOne(ctx, filter, update)
+	updates := update.BsonBuilder().Push(bsonx.M("replies", commentReply)).Build()
+
+	result, err := d.coll.Updater().Filter(filter).Updates(updates).UpdateOne(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fails to update one from %s, filter=%v, update=%v", d.coll.Name(), filter, update)
+		return errors.Wrapf(err, "fails to update one from comment, filter=%v, update=%v", filter, updates)
 	}
 	if result.ModifiedCount == 0 {
-		return fmt.Errorf("modifiedCount = 0, fails to update one from %s, filter=%v, update=%v", d.coll.Name(), filter, update)
+		return fmt.Errorf("modifiedCount = 0, fails to update one from comment, filter=%v, update=%v", filter, updates)
 	}
 	return nil
 }
 
 func (d *CommentDao) FindCommentById(ctx context.Context, cmtId string) (*Comment, error) {
-	comment := new(Comment)
-	err := d.coll.FindOne(ctx, bson.D{bson.E{Key: "_id", Value: cmtId}, bson.E{Key: "status", Value: CommentStatusApproved}}).Decode(comment)
+	comment, err := d.coll.Finder().Filter(bsonx.D(bsonx.KV("_id", cmtId), bsonx.KV("status", CommentStatusApproved))).FindOne(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fails to find the document from %s, cmtId=%s", d.coll.Name(), cmtId)
+		return nil, errors.Wrapf(err, "fails to find the document from comment, cmtId=%s", cmtId)
 	}
 	return comment, nil
 }
 
 func (d *CommentDao) AddComment(ctx context.Context, comment Comment) (string, error) {
-	result, err := d.coll.InsertOne(ctx, comment)
+	result, err := d.coll.Creator().InsertOne(ctx, comment)
 	if err != nil {
-		return "", errors.Wrapf(err, "fails to insert into %s, comment=%v", d.coll.Name(), comment)
+		return "", errors.Wrapf(err, "fails to insert into comment, comment=%v", comment)
 	}
 	return result.InsertedID.(string), nil
 }

@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mongo:
+    container_name: fnote-mongo
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: fnote
+      MONGO_INITDB_ROOT_PASSWORD: fnote
+      MONGO_INITDB_DATABASE: fnote
+      MONGO_USERNAME: fnote-user
+      MONGO_PASSWORD: fnote-password
+    volumes:
+      - /fnote/mongo_data:/data/db
+      - ./script/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
+      - ./script/mongo-data-init.sh:/docker-entrypoint-initdb.d/mongo-data-init.sh
+    ports:
+      - "27017:27017"
+    command:
+      - --auth
+  backend:
+    container_name: fnote-backend
+    build: ./backend
+    image: fnote-backend:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    volumes:
+      - /fnote/logs:/fnote/logs
+      - /fnote/static:/fnote/static
