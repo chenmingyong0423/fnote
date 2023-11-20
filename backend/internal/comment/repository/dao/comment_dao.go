@@ -18,10 +18,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/chenmingyong0423/go-mongox/builder/update"
+
 	"github.com/chenmingyong0423/go-mongox"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
-	"github.com/chenmingyong0423/go-mongox/builder/update"
 	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -132,17 +133,17 @@ func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]
 			bsonx.A(
 				bsonx.D(bsonx.KV("post_info", "$post_info"), bsonx.KV("name", "$user_info.name"), bsonx.KV("content", "$content"), bsonx.KV("create_time", "$create_time")),
 			),
-			aggregation.BsonBuilder().Map(
-				aggregation.BsonBuilder().Filter(
+			aggregation.Map(
+				aggregation.Filter(
 					"$replies",
 					aggregation.BsonBuilder().Eq("$$replyItem.status", CommentStatusApproved).Build(),
 					&types.FilterOptions{
 						As: "replyItem",
 					},
-				).Build(),
+				),
 				"reply",
 				bsonx.D(bsonx.KV("post_info", "$post_info"), bsonx.KV("name", "$$reply.user_info.name"), bsonx.KV("content", "$$reply.content"), bsonx.KV("create_time", "$$reply.create_time")),
-			).Build(),
+			),
 		).Build())).
 		Unwind("$combined", nil).
 		ReplaceWith("$combined").
@@ -201,7 +202,7 @@ func (d *CommentDao) AddCommentReply(ctx context.Context, cmtId string, commentR
 	// 构建查询条件
 	filter := bsonx.Id(cmtId)
 	// 构建更新操作
-	updates := update.BsonBuilder().Push(bsonx.M("replies", commentReply)).Build()
+	updates := update.Push(bsonx.M("replies", commentReply))
 
 	result, err := d.coll.Updater().Filter(filter).Updates(updates).UpdateOne(ctx)
 	if err != nil {

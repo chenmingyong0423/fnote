@@ -76,7 +76,7 @@ type PostDao struct {
 
 func (d *PostDao) IncreaseFieldById(ctx context.Context, id string, field string) error {
 	// bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: field, Value: 1}}}}
-	result, err := d.coll.Updater().Filter(bsonx.Id(id)).Updates(update.BsonBuilder().Inc(bsonx.M(field, 1)).Build()).UpdateOne(ctx)
+	result, err := d.coll.Updater().Filter(bsonx.Id(id)).Updates(update.Inc(bsonx.M(field, 1))).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to increase the %s of post, id=%s", field, id)
 	}

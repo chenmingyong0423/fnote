@@ -54,7 +54,7 @@ type ConfigDao struct {
 
 func (d *ConfigDao) Increase(ctx context.Context, field string) error {
 	field = fmt.Sprintf("props.%s", field)
-	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", "webmaster")).Updates(update.BsonBuilder().Inc(bsonx.M(field, 1)).Build()).UpdateOne(ctx)
+	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", "webmaster")).Updates(update.Inc(bsonx.M(field, 1))).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to increase %s", field)
 	}
