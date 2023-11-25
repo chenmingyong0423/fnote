@@ -18,6 +18,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+
 	"github.com/chenmingyong0423/go-mongox"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/update"
@@ -38,6 +40,7 @@ type Config struct {
 type IConfigDao interface {
 	FindByTyp(ctx context.Context, typ string) (*Config, error)
 	Increase(ctx context.Context, field string) error
+	GetByTypes(ctx context.Context, types ...string) ([]*Config, error)
 }
 
 func NewConfigDao(db *mongo.Database) *ConfigDao {
@@ -50,6 +53,14 @@ var _ IConfigDao = (*ConfigDao)(nil)
 
 type ConfigDao struct {
 	coll *mongox.Collection[Config]
+}
+
+func (d *ConfigDao) GetByTypes(ctx context.Context, types ...string) ([]*Config, error) {
+	configs, err := d.coll.Finder().Filter(query.In("typ", types...)).Find(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fails to find configs by types, types=%v", types)
+	}
+	return configs, nil
 }
 
 func (d *ConfigDao) Increase(ctx context.Context, field string) error {

@@ -35,12 +35,33 @@ func (h *ConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/configs")
 	// 获取站长信息
 	routerGroup.GET("/webmaster", api.Wrap(h.GetWebmasterInfo))
+	// 获取首页的配置信息
+	routerGroup.GET("/index", api.Wrap(h.GetIndexConfig))
 }
 
-func (c *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) (*domain.WebMasterConfigVO, error) {
-	webMasterConfig, err := c.serv.GetWebmasterInfo(ctx, "webmaster")
+func (h *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) (*domain.WebMasterConfigVO, error) {
+	webMasterConfig, err := h.serv.GetWebmasterInfo(ctx, "webmaster")
 	if err != nil {
 		return nil, err
 	}
-	return &domain.WebMasterConfigVO{Name: webMasterConfig.Name, PostCount: webMasterConfig.PostCount, CategoryCount: webMasterConfig.CategoryCount, WebsiteViews: webMasterConfig.WebsiteViews, WebsiteLiveTime: webMasterConfig.WebsiteLiveTime, Profile: webMasterConfig.Profile, Picture: webMasterConfig.Picture, WebsiteIcon: webMasterConfig.WebsiteIcon, Domain: webMasterConfig.Domain, Records: webMasterConfig.Records}, nil
+	return h.toWebMasterConfigVO(webMasterConfig), nil
+}
+
+func (h *ConfigHandler) GetIndexConfig(ctx *gin.Context) (*domain.IndexConfigVO, error) {
+	config, err := h.serv.GetIndexConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &domain.IndexConfigVO{
+		WebMasterConfig: *h.toWebMasterConfigVO(&config.WebMasterConfig),
+		NoticeConfigVO:  *h.toNoticeConfigVO(&config.NoticeConfig),
+	}, nil
+}
+
+func (h *ConfigHandler) toWebMasterConfigVO(webMasterCfg *domain.WebMasterConfig) *domain.WebMasterConfigVO {
+	return &domain.WebMasterConfigVO{Name: webMasterCfg.Name, PostCount: webMasterCfg.PostCount, CategoryCount: webMasterCfg.CategoryCount, WebsiteViews: webMasterCfg.WebsiteViews, WebsiteLiveTime: webMasterCfg.WebsiteLiveTime, Profile: webMasterCfg.Profile, Picture: webMasterCfg.Picture, WebsiteIcon: webMasterCfg.WebsiteIcon, Domain: webMasterCfg.Domain, Records: webMasterCfg.Records}
+}
+
+func (h *ConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) *domain.NoticeConfigVO {
+	return &domain.NoticeConfigVO{Content: noticeCfg.Content}
 }
