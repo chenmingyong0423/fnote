@@ -28,6 +28,7 @@ type IConfigService interface {
 	GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error)
 	IncreaseWebsiteViews(ctx context.Context) error
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
+	GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error)
 }
 
 func NewConfigService(repo repository.IConfigRepository) *ConfigService {
@@ -40,6 +41,34 @@ var _ IConfigService = (*ConfigService)(nil)
 
 type ConfigService struct {
 	repo repository.IConfigRepository
+}
+
+func (s *ConfigService) GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error) {
+	configs, err := s.repo.GetConfigByTypes(ctx, "webmaster", "notice")
+	if err != nil {
+		return nil, err
+	}
+	cfg := &domain.IndexConfig{}
+	for _, config := range configs {
+		if config.Typ == "webmaster" {
+			wmCfg := domain.WebMasterConfig{}
+			err = s.anyToStruct(config.Props, &wmCfg)
+			if err != nil {
+				return nil, err
+			}
+			cfg.WebMasterConfig = wmCfg
+		} else if config.Typ == "notice" {
+			noticeCfg := domain.NoticeConfig{}
+			err = s.anyToStruct(config.Props, &noticeCfg)
+			if err != nil {
+				return nil, err
+			}
+			if noticeCfg.Enabled {
+				cfg.NoticeConfig = noticeCfg
+			}
+		}
+	}
+	return cfg, nil
 }
 
 func (s *ConfigService) GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error) {
