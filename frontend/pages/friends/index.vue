@@ -1,19 +1,21 @@
 <template>
     <div class="pt100 pb50 mx20">
-        <div class="max-w-1280 mx-auto  rounded-23 bg-#fff p30" v-if="dataList.length > 0">
+
+        <!-- 友链 -->
+        <div class="max-w-1280 mx-auto  rounded-23 bg-#fff p30 dark_bg_gray dark_text_white" v-if="dataList.length > 0">
             <div class="text-26 font-600 ">
                 友链
             </div>
             <el-row :gutter="20" class="lt-lg:important:display-block">
                 <el-col :span="8" v-for="item in dataList" :key="item.name" class="lt-lg:important:max-w-100%">
                     <a :href="item.url" target="blank"
-                        class="block  b-2 b-blue b-solid p20 h100 rounded-20 text-16 mt30 cursor-pointer hover:b-lightblue  hover:bg-#e5e5e5/30 active:bg-#e5e5e5 group">
+                        class="dark_bg_black  block  b-2 b-blue b-solid p20 h100 rounded-20 text-16 mt30 cursor-pointer hover:b-lightblue  hover:bg-#e5e5e5/30 hover:dark:bg-#e5e5e5/10 active:bg-#e5e5e5 group">
                         <el-space alignment="flex-start" :size="0">
                             <el-avatar :src="item.logo" :size="50" class="mr15" />
                             <div>
                                 <el-space direction="vertical" alignment="flex-start">
-                                    <div class="text-#000 group-active:text-#fff">{{ item.name }}</div>
-                                    <div class="text-#000/50 group-active:text-#fff">
+                                    <div class="text-#000 dark_text_white group-active:text-#fff">{{ item.name }}</div>
+                                    <div class="text-#000/50 dark_text_white group-active:text-#fff">
                                         {{ item.description }}
                                     </div>
                                 </el-space>
@@ -24,7 +26,8 @@
 
             </el-row>
         </div>
-        <div class="max-w-1280 mx-auto  rounded-23 bg-#fff p30 mt30">
+        <!-- 留言交友 -->
+        <div class="max-w-1280 mx-auto  rounded-23 bg-#fff p30 mt30 dark_bg_gray dark_text_white">
             <div class="text-26 font-600 ">
                 留言交友
             </div>
