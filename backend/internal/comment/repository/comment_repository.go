@@ -133,7 +133,7 @@ func (r *CommentRepository) AddComment(ctx context.Context, comment domain.Comme
 	})
 }
 
-func (r *CommentRepository) toDomainComment(comments []dao.Comment) []domain.CommentWithReplies {
+func (r *CommentRepository) toDomainComment(comments []*dao.Comment) []domain.CommentWithReplies {
 	result := make([]domain.CommentWithReplies, 0, len(comments))
 	for _, comment := range comments {
 		replies := make([]domain.CommentReply, 0, len(comment.Replies))

@@ -21,9 +21,9 @@ import (
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/internal/post/repository/dao"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -91,25 +91,24 @@ func (r *PostRepository) GetPunishedPostById(ctx context.Context, id string) (*d
 }
 
 func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition domain.PostsQueryCondition) ([]*domain.Post, int64, error) {
-	con := bson.D{}
+	condBuider := query.BsonBuilder()
 	if postsQueryCondition.Category != nil && *postsQueryCondition.Category != "" {
-		con = append(con, bson.E{Key: "category", Value: *postsQueryCondition.Category})
+		condBuider.Add(bsonx.KV("category", *postsQueryCondition.Category))
 	}
 	if postsQueryCondition.Tags != nil {
-		con = append(con, bson.E{Key: "tags", Value: bson.D{bson.E{Key: "$in", Value: postsQueryCondition.Tags}}})
+		condBuider.InString("tags", postsQueryCondition.Tags...)
 	}
 	if postsQueryCondition.Search != nil && *postsQueryCondition.Search != "" {
-		con = append(con, bson.E{Key: "title", Value: primitive.Regex{
-			Pattern: fmt.Sprintf(".*%s.*", strings.TrimSpace(*postsQueryCondition.Search)),
-		}})
+		condBuider.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(*postsQueryCondition.Search)), "i")
 	}
+	con := condBuider.Build()
 
 	findOptions := options.Find()
 	findOptions.SetSkip(postsQueryCondition.Skip).SetLimit(postsQueryCondition.Size)
 	if postsQueryCondition.Sorting.Filed != nil && postsQueryCondition.Sorting.Order != nil {
-		findOptions.SetSort(bson.M{*postsQueryCondition.Sorting.Filed: orderConvertToInt(*postsQueryCondition.Sorting.Order)})
+		findOptions.SetSort(bsonx.M(*postsQueryCondition.Sorting.Filed, orderConvertToInt(*postsQueryCondition.Sorting.Order)))
 	} else {
-		findOptions.SetSort(bson.M{"create_time": -1})
+		findOptions.SetSort(bsonx.M("priority", -1))
 	}
 
 	posts, cnt, err := r.dao.QueryPostsPage(ctx, con, findOptions)

@@ -17,6 +17,8 @@ package repository
 import (
 	"context"
 
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+
 	"github.com/chenmingyong0423/fnote/backend/internal/config/repository/dao"
 	"github.com/pkg/errors"
 )
@@ -24,6 +26,7 @@ import (
 type IConfigRepository interface {
 	FindByTyp(ctx context.Context, typ string) (any, error)
 	Increase(ctx context.Context, field string) error
+	GetConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error)
 }
 
 func NewConfigRepository(dao dao.IConfigDao) *ConfigRepository {
@@ -38,6 +41,14 @@ type ConfigRepository struct {
 	dao dao.IConfigDao
 }
 
+func (r *ConfigRepository) GetConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error) {
+	configs, err := r.dao.GetByTypes(ctx, types...)
+	if err != nil {
+		return nil, err
+	}
+	return r.toConfigs(configs), nil
+}
+
 func (r *ConfigRepository) Increase(ctx context.Context, field string) error {
 	return r.dao.Increase(ctx, field)
 }
@@ -48,4 +59,12 @@ func (r *ConfigRepository) FindByTyp(ctx context.Context, typ string) (any, erro
 		return nil, errors.WithMessage(err, "r.dao.FindByTyp failed")
 	}
 	return config.Props, nil
+}
+
+func (r *ConfigRepository) toConfigs(configs []*dao.Config) []domain.Config {
+	result := make([]domain.Config, len(configs))
+	for i, config := range configs {
+		result[i] = domain.Config{Typ: config.Typ, Props: config.Props}
+	}
+	return result
 }

@@ -18,8 +18,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+
+	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/builder/update"
+
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -35,23 +40,32 @@ type Config struct {
 type IConfigDao interface {
 	FindByTyp(ctx context.Context, typ string) (*Config, error)
 	Increase(ctx context.Context, field string) error
+	GetByTypes(ctx context.Context, types ...string) ([]*Config, error)
 }
 
 func NewConfigDao(db *mongo.Database) *ConfigDao {
 	return &ConfigDao{
-		coll: db.Collection("configs"),
+		coll: mongox.NewCollection[Config](db.Collection("configs")),
 	}
 }
 
 var _ IConfigDao = (*ConfigDao)(nil)
 
 type ConfigDao struct {
-	coll *mongo.Collection
+	coll *mongox.Collection[Config]
+}
+
+func (d *ConfigDao) GetByTypes(ctx context.Context, types ...string) ([]*Config, error) {
+	configs, err := d.coll.Finder().Filter(query.In("typ", types...)).Find(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fails to find configs by types, types=%v", types)
+	}
+	return configs, nil
 }
 
 func (d *ConfigDao) Increase(ctx context.Context, field string) error {
 	field = fmt.Sprintf("props.%s", field)
-	updateResult, err := d.coll.UpdateOne(ctx, bson.D{bson.E{Key: "typ", Value: "webmaster"}}, bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: field, Value: 1}}}})
+	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", "webmaster")).Updates(update.Inc(bsonx.M(field, 1))).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to increase %s", field)
 	}
@@ -62,10 +76,9 @@ func (d *ConfigDao) Increase(ctx context.Context, field string) error {
 }
 
 func (d *ConfigDao) FindByTyp(ctx context.Context, typ string) (*Config, error) {
-	c := &Config{}
-	err := d.coll.FindOne(ctx, bson.M{"typ": typ}).Decode(c)
+	config, err := d.coll.Finder().Filter(bsonx.M("typ", typ)).FindOne(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Find %s failed, typ=%s", d.coll.Name(), typ)
+		return nil, errors.Wrapf(err, "Find config failed, typ=%s", typ)
 	}
-	return c, nil
+	return config, nil
 }
