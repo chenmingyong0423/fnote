@@ -44,22 +44,23 @@
 
                 <el-space :size="8" alignment="flex-start">
                     <el-avatar :size="36" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
-                    <div>
-                        <el-space :size="0">
-                            <div class="ml8">
-                                {{ commentInfo.username }}
-                            </div>
-                            <div class="ml8">
-                                发表于
-                            </div>
-                            <div class="ml4">
-                                {{ formatTimestamp(commentInfo.comment_time) }}
-                            </div>
-                        </el-space>
+                    <div class="text-14">
+                        <!-- <el-space :size="0"> -->
+                        <span class="mx5 lt-lg:text-16">
+                            {{ commentInfo.username }}
+                        </span>
+                        <div class="display-none lt-lg:display-block lt-lg:my2" />
+                        <span class="lt-lg:ml5">
+                            发表于
+                        </span>
+                        <span class="ml4">
+                            {{ formatTimestamp(commentInfo.comment_time) }}
+                        </span>
+                        <!-- </el-space> -->
                     </div>
                 </el-space>
 
-                <v-md-preview :text="commentInfo.content" class="px18"></v-md-preview>
+                <v-md-preview :text="commentInfo.content" class="px18 mt20"></v-md-preview>
                 <el-button class="ml50" @click="showReply = true">回复</el-button>
                 <el-button class="ml50" v-if="showReply" @click="showReply = false">取消</el-button>
                 <SubmitComments v-if="showReply" />

@@ -14,10 +14,10 @@ export const getFriends = () => httpRequest.get(prefix + "")
 
 
 export type FriendReq = {
-    name: string;
-    url: string;
-    logo: string;
-    description: string;
+    name?: string;
+    url?: string;
+    logo?: string;
+    description?: string;
     email?: string;
 }
 
