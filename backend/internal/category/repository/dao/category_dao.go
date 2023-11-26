@@ -17,6 +17,8 @@ package dao
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox"
+
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -32,7 +34,7 @@ type Category struct {
 }
 
 type ICategoryDao interface {
-	GetAll(ctx context.Context) ([]Category, error)
+	GetAll(ctx context.Context) ([]*Category, error)
 	GetCategoryByName(ctx context.Context, name string) (*Category, error)
 }
 
@@ -40,32 +42,26 @@ var _ ICategoryDao = (*CategoryDao)(nil)
 
 func NewCategoryDao(db *mongo.Database) *CategoryDao {
 	return &CategoryDao{
-		coll: db.Collection("categories"),
+		coll: mongox.NewCollection[Category](db.Collection("categories")),
 	}
 }
 
 type CategoryDao struct {
-	coll *mongo.Collection
+	coll *mongox.Collection[Category]
 }
 
 func (d *CategoryDao) GetCategoryByName(ctx context.Context, name string) (*Category, error) {
-	category := new(Category)
-	err := d.coll.FindOne(ctx, bson.M{"name": name}).Decode(category)
+	category, err := d.coll.Finder().Filter(bson.M{"name": name}).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Find a category failed, [name=%s]", name)
 	}
 	return category, nil
 }
 
-func (d *CategoryDao) GetAll(ctx context.Context) ([]Category, error) {
-	result := make([]Category, 0)
-	cursor, err := d.coll.Find(ctx, bson.M{})
+func (d *CategoryDao) GetAll(ctx context.Context) ([]*Category, error) {
+	result, err := d.coll.Finder().Find(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "Find all categories failed failed")
-	}
-	defer cursor.Close(ctx)
-	if err = cursor.All(ctx, &result); err != nil {
-		return nil, errors.Wrap(err, "cursor.Decode failed")
 	}
 	return result, nil
 }

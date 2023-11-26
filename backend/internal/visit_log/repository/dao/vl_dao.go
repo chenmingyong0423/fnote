@@ -17,6 +17,8 @@ package dao
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox"
+
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -38,20 +40,20 @@ type IVisitLogDao interface {
 var _ IVisitLogDao = (*VisitLogDao)(nil)
 
 type VisitLogDao struct {
-	coll *mongo.Collection
+	coll *mongox.Collection[VisitHistory]
 }
 
 func (d *VisitLogDao) Add(ctx context.Context, visitHistory VisitHistory) error {
-	result, err := d.coll.InsertOne(ctx, visitHistory)
+	result, err := d.coll.Creator().InsertOne(ctx, visitHistory)
 	if err != nil {
-		return errors.Wrapf(err, "fails to insert info %s, visitHistory=%v", d.coll.Name(), visitHistory)
+		return errors.Wrapf(err, "fails to insert info visit_logs, visitHistory=%v", visitHistory)
 	}
 	if result == nil {
-		return errors.Wrapf(err, "result=nil, fails to insert info %s, visitHistory=%v", d.coll.Name(), visitHistory)
+		return errors.Wrapf(err, "result=nil, fails to insert info visit_logs, visitHistory=%v", visitHistory)
 	}
 	return nil
 }
 
 func NewVisitLogDao(db *mongo.Database) *VisitLogDao {
-	return &VisitLogDao{coll: db.Collection("visit_logs")}
+	return &VisitLogDao{coll: mongox.NewCollection[VisitHistory](db.Collection("visit_logs"))}
 }
