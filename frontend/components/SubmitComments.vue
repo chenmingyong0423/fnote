@@ -1,10 +1,10 @@
 <template>
-    <div>
+    <div class="">
         <el-form ref="ruleFormRef" :model="req" class="mt30" :rules="rules">
             <el-row :gutter="50">
                 <el-col :span="12" class="lt-lg:important:pr-10">
-                    <el-form-item label="昵称" prop="nickName">
-                        <el-input v-model="req.name" placeholder="请输入昵称" clearable />
+                    <el-form-item label="昵称" prop="name">
+                        <el-input v-model="req.name" placeholder="请输入昵称" />
                     </el-form-item>
                 </el-col>
                 <el-col :span="12" class="lt-lg:important:pl-10">
@@ -14,14 +14,14 @@
                 </el-col>
             </el-row>
 
-            <el-form-item prop="content">
+            <el-form-item prop="description">
                 <!-- <el-input :autosize="{ minRows: 2, maxRows: 4 }" type="textarea" show-word-limit :maxlength="30" clearable
                     v-model="form.content" placeholder="请输入评论内容，支持markdown格式" v-if="!review" />
                
                 <div class="bg-#e5e5e5 w-full rounded-8" v-if="review">
                     <v-md-preview :text="form.content"></v-md-preview>
                 </div> -->
-                <el-input show-word-limit :maxlength="30" clearable type="textarea" v-model="req.content"
+                <el-input show-word-limit :maxlength="30" clearable v-model="req.description"
                     placeholder="请输入评论内容，支持markdown格式" />
             </el-form-item>
             <el-form-item>
@@ -41,7 +41,7 @@
 import type { FormInstance, FormRules } from 'element-plus'
 import { applyForFriend, FriendReq } from '~/api/friend'
 import { IResponse } from "~/api/http";
-
+const review = ref<boolean>(false) //控制编辑和预览状态
 const ruleFormRef = ref<FormInstance>()
 const req = ref<FriendReq>({
     name: '',
@@ -50,6 +50,8 @@ const req = ref<FriendReq>({
     description: '',
     email: ''
 })
+
+
 
 // 表单校验
 const rules = reactive<FormRules<FriendReq>>({
@@ -83,7 +85,7 @@ const applyforFriendFunc = async () => {
     }
 };
 
-const onSubmit = async (formEl: FormInstance | undefined) => {
+const onSubmit = async (formEl: FormInstance | null) => {
     if (!formEl) return
     await formEl.validate((valid, fields) => {
         if (valid) {

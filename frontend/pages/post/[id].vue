@@ -1,22 +1,22 @@
 <template>
     <div class="bg-#F0F2F5 dark_bg_black pt100 pb30 px25">
         <el-row :gutter="40" class="lt-lg:important:display-block">
-
+            <!-- 评论点赞 -->
             <el-col :span="2" class="lt-lg:important:display-none">
                 <el-affix :offset="350">
                     <div class=" text-center">
                         <el-space direction="vertical" :size="25">
                             <!-- 点赞 -->
                             <div
-                                class="bg-#fff drop-shadow-lg mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
+                                class="bg-#fff dark_text_white dark_bg_gray drop-shadow-lg mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
                                 <div class="i-grommet-icons:like"></div>
                             </div>
                             <div
-                                class="bg-#fff drop-shadow-lg mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
+                                class="bg-#fff dark_text_white dark_bg_gray drop-shadow-lg mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
                                 <div class="i-grommet-icons:share-rounded"></div>
                             </div>
                             <div
-                                class="bg-#fff drop-shadow-lg mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
+                                class="bg-#fff dark_text_white dark_bg_gray drop-shadow-lg mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
                                 <div class="i-grommet-icons:tooltip"></div>
                             </div>
                         </el-space>
@@ -24,13 +24,15 @@
                 </el-affix>
             </el-col>
 
-
+            <!-- 文章内容 -->
             <el-col :span="16" class="lt-lg:important:max-w-100%">
-                <div class=" rounded-15 bg-#fff p30">
+
+                <!-- 内容 -->
+                <div class=" rounded-15 bg-#fff p30 lt-lg:px15 dark_bg_gray">
                     <!-- 文章标题 -->
-                    <div class="text-center text-42 font-500">{{ data?.title }}</div>
+                    <div class="text-center text-42 font-500 dark_text_white">{{ data?.title }}</div>
                     <!-- 作者信息 -->
-                    <div class="text-center text-16 c-#999/80 my20 lt-lg:text-14">
+                    <div class=" text-center text-16 c-#999/80 my20 lt-lg:text-14">
                         <el-space :size="4">
                             <div>{{ data?.author }}</div>
                             <div>
@@ -44,14 +46,17 @@
                             <div class="lt-lg-display-none">{{ data?.word_count }}</div>
                         </el-space>
                     </div>
-                    <v-md-preview :text="data?.content" @copy-code-success="handleCopyCodeSuccess"></v-md-preview>
+                    <v-md-preview :text="data?.content" @copy-code-success="handleCopyCodeSuccess"
+                        class="dark_text_white lt-lg:important:p0"></v-md-preview>
                     <!-- 点赞 -->
                     <!-- <div
-                        class=" mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50% hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
+                        class=" mx-auto cursor-pointer text-22 w45 h45 flex justify-center items-center rounded-50%
+                        hover:bg-#e5e5e5 active:bg-#999 active:c-#fff">
                         <div class="i-grommet-icons:like"></div>
-                    </div> -->
+                </div> -->
                 </div>
-                <div class="rounded-15 bg-#fff pt20 pb80 px30 mt25">
+                <!-- 评论区 -->
+                <div class="rounded-15 bg-#fff pt20 pb80 px30 lt-lg:px15 mt25 dark_bg_gray ">
                     <!-- 发布评论 -->
                     <SubmitComments />
                     <div class="text-16">{{ 0 + ' 评论' }}</div>
@@ -59,6 +64,7 @@
                 </div>
             </el-col>
 
+            <!-- 目录 -->
             <el-col :span="6" class="lt-lg:important:display-none">
                 <el-affix :offset="90">
                     <div class="w-full">
@@ -118,4 +124,8 @@ definePageMeta({
 })
 </script>
 
-<style scoped></style>
+<style scoped>
+:global(.github-markdown-body) {
+    padding: 0;
+}
+</style>

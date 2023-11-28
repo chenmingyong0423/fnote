@@ -1,13 +1,13 @@
 <template>
     <div>
         <div class="py15">
-            <div class="text-30 mb20 ml10">分类</div>
+            <div class="text-30 mb20 ml10 dark_text_white">分类</div>
             <my-tag v-for="tag in homeStore.menuList" :key="tag.name" @click="router.push(tag.route)">
                 {{ tag.name }}
             </my-tag>
         </div>
 
-        <div class="mt40 bg-#e5e5e5/40 p20 rounded-10" v-if="dataList.length > 0">
+        <div class="mt40 bg-#e5e5e5/40 p20 rounded-10 dark_bg_black dark_text_white" v-if="dataList.length > 0">
             <div class="text-30 mb20 ml10">我的文章</div>
             <div v-for="item in dataList ">
                 <Content @click="router.push(`post/${item.sug}`)" :postData="item"></Content>
