@@ -16,7 +16,8 @@ export const useHomeStore = defineStore("home", {
             profile: '',
             picture: '',
             website_icon: '',
-            domain: 'localhost:8080'
+            domain: 'localhost:8080',
+            records:[],
         } as IWebmaster
     }),
     // 持久化存储

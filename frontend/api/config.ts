@@ -10,6 +10,7 @@ export interface IWebmaster {
     picture: string;
     website_icon: string;
     domain: string;
+    records: string[];
 }
 const prefix = "/configs"
 
