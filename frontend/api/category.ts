@@ -5,7 +5,7 @@ export interface IMenu {
     route: string;
 }
 
-const prefix = "/categories"
+const prefix = ""
 
 export const getMenus = () => httpRequest.get(prefix + "/menus")
 
