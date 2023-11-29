@@ -1,6 +1,6 @@
 <template>
     <div ref="myHeader"
-        class="bg-#fff/20  backdrop-blur-20 fixed top-0 w-full z-99 flex justify-between items-center   dark_bg_gray duration-200 ease-linear">
+        class="bg-#fff  backdrop-blur-20 fixed top-0 w-full z-99 flex justify-between items-center   dark_bg_gray duration-200 ease-linear">
 
         <div>
             <el-space>
@@ -18,7 +18,8 @@
                         文章列表
                     </div>
                     <div class="menu_item lt-lg:display-none" @click="router.push(item.route)"
-                        v-for="item in homeStore.menuList" :class="route.path === item.route ? 'active' : ''">
+                        v-for="item in homeStore.menuList" :key="item.route"
+                        :class="route.path === item.route ? 'active' : ''">
                         {{ item.name }}
                     </div>
                     <div class="menu_item lt-lg:display-none" @click="router.push('/friends')"
@@ -38,7 +39,7 @@
                                     <el-dropdown-item @click="router.push('/category')">
                                         文章列表
                                     </el-dropdown-item>
-                                    <el-dropdown-item v-for="item in homeStore.menuList" @click="router.push(item.route)">
+                                    <el-dropdown-item :key="item.route" v-for="item in homeStore.menuList" @click="router.push(item.route)">
                                         {{ item.name }}
                                     </el-dropdown-item>
                                     <el-dropdown-item @click="router.push('/friends')">
