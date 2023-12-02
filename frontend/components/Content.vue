@@ -53,7 +53,7 @@
         <!-- hover标签 -->
         <div
             class="absolute top-15 right--100 p5 rounded-3 c_text_white bg-blue text-13 group-hover:right-10 ease-linear duration-150">
-            {{ postData.tags[0] }}
+            {{ postData.category }}
         </div>
     </div>
 </template>
@@ -63,7 +63,6 @@
 import { dayjs } from 'element-plus'
 const props = defineProps(['postData'])
 const router = useRouter()
-
 </script>
 
 <style scoped></style>

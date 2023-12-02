@@ -3,7 +3,7 @@
         <div ref="myDom">
             <MyHeader />
         </div>
-        <!-- <el-scrollbar max-height="100vh" @scroll="headerScroll"> -->
+        <!-- <el-scrollbar max-height="100vh" @scroll="headerScroll" /> -->
         <div class="bg-#F0F2F5 dark_bg_black">
             <slot></slot>
         </div>
