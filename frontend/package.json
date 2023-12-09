@@ -21,6 +21,7 @@
     "@kangc/v-md-editor": "^2.3.17",
     "@pinia/nuxt": "^0.4.11",
     "@unocss/preset-icons": "^0.55.0",
+    "ant-design-vue": "4.0.7",
     "element-plus": "^2.3.9",
     "highlight.js": "^11.8.0",
     "pinia-plugin-persistedstate": "^3.2.0",

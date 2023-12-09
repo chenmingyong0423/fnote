@@ -12,11 +12,17 @@ import '@kangc/v-md-editor/lib/plugins/copy-code/copy-code.css';
 // 代码行高亮
 import createHighlightLinesPlugin from '@kangc/v-md-editor/lib/plugins/highlight-lines/index';
 import '@kangc/v-md-editor/lib/plugins/highlight-lines/highlight-lines.css';
-VMdPreview.use(githubTheme, {
-    Hljs: hljs,
-}).use(createLineNumbertPlugin()).use(createCopyCodePlugin()).use(createHighlightLinesPlugin())
 export default defineNuxtPlugin((nuxtApp) => {
-    nuxtApp.vueApp.use(VMdPreview)
+    if (process.client) {
+        VMdPreview.use(githubTheme, { Hljs: hljs })
+                  .use(createLineNumbertPlugin())
+                  .use(createCopyCodePlugin())
+                  .use(createHighlightLinesPlugin());
+    
+        nuxtApp.vueApp.use(VMdPreview);
+      }
 })
+
+
 
 
