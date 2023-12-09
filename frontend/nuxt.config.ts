@@ -37,5 +37,8 @@ export default defineNuxtConfig({
   },
   css: [
     '@/styles/main.css'
-  ]
+  ],
+  plugins: [
+    '~/plugins/v-md-editor.client.js'
+  ],
 })
