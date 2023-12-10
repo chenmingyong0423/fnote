@@ -13,7 +13,8 @@
     "@nuxt/devtools": "latest",
     "@types/node": "^18.17.3",
     "@unocss/nuxt": "^0.55.1",
-    "nuxt": "^3.6.5"
+    "nuxt": "^3.6.5",
+    "unplugin-vue-components": "^0.26.0"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
