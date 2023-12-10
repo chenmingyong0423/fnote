@@ -1,4 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import Components from 'unplugin-vue-components/vite';
+import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
+
 export default defineNuxtConfig({
   modules: [
     '@unocss/nuxt',
@@ -24,13 +27,6 @@ export default defineNuxtConfig({
     ],
     safelist: [],
   },
-  pinia: {
-    autoImports: [
-      // 自动引入 `defineStore(), storeToRefs()`
-      "defineStore",
-      "storeToRefs"
-    ],
-  },
   elementPlus: {
     /** Options */
     injectionID: { prefix: 1024, current: 0 }
@@ -39,6 +35,19 @@ export default defineNuxtConfig({
     '@/styles/main.css'
   ],
   plugins: [
-    '~/plugins/v-md-editor.client.js'
+    '~/plugins/v-md-editor.client.js',
+    '~/plugins/pinia.js',
   ],
+  // Vite 配置
+  vite: {
+    plugins: [
+      Components({
+        resolvers: [
+          AntDesignVueResolver({
+            importStyle: false, // css in js
+          }),
+        ],
+      }),
+    ],
+  },
 })

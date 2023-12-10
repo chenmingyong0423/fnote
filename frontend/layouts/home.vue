@@ -35,9 +35,6 @@ const info = useHomeStore()
 const webMaster = async () => {
   try {
     let postRes: any = await getWebMaster()
-    if (postRes.status !== 200) {
-      throw new Error(`Unexpected status code: ${postRes.status}`);
-    }
     let res: IResponse<IWebmaster> = postRes.data.value
     if (res && res.data) {
       info.masterInfo = res.data
