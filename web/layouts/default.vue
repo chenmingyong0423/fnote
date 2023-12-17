@@ -4,8 +4,49 @@
       <Header/>
     </div>
     <!-- <el-scrollbar max-height="100vh" @scroll="headerScroll" /> -->
-    <div class="bg-#F0F2F5 dark_bg_black">
+    <div class="bg-#F0F2F5 dark_text_white dark:bg-black pt100">
       <slot></slot>
     </div>
   </div>
 </template>
+<script lang="ts" setup>
+import {useHomeStore} from '~/store/home';
+import {getWebMaster} from "~/server/api/config"
+import type {IWebmasterInfo} from "~/server/api/config"
+import type {IResponse} from "~/server/api/http";
+import {onMounted} from "vue";
+
+const info = useHomeStore()
+onMounted(() => {
+  let isBlackMode = localStorage.getItem("isBlackMode")
+  if (isBlackMode === '') {
+    localStorage.setItem("isBlackMode", info.isBlackMode.toString())
+  } else {
+    info.isBlackMode = isBlackMode === 'true'
+  }
+})
+
+const webMaster = async () => {
+  try {
+    let postRes: any = await getWebMaster()
+    let res: IResponse<IWebmasterInfo> = postRes.data.value
+    if (res && res.data) {
+      info.master_info = res.data.web_master_config
+      // const newLink = document.createElement('link');
+      // newLink.rel = 'icon';
+      // newLink.type = 'image/x-icon';
+      // newLink.href = info.masterInfo.website_icon;
+      // const oldLink = document.querySelector("link[rel*='icon']");
+
+      // if (oldLink) {
+      //     document.head.removeChild(oldLink);
+      // }
+      // document.head.appendChild(newLink);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+webMaster()
+
+</script>
