@@ -20,8 +20,9 @@
 # Go workspace file
 go.work
 
-.idea/c*
+.idea/
 backend/.idea
+frontend/.idea
 
 frontend/node_modules
 
@@ -37,5 +38,5 @@ frontend/.nuxt
 frontend/dist
 
 */.DS_Store
-
+.DS_Store
 

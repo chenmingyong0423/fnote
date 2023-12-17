@@ -1,8 +1,10 @@
 <template>
     <div class="bg-#F0F2F5 dark_bg_black pt100 pb30 px25">
-        <div class=" rounded-15 bg-#fff p30">
+
+        <!-- 内容 -->
+        <div class=" rounded-15 bg-#fff dark_bg_gray p30">
             <!-- 文章标题 -->
-            <div class="text-center text-42 font-500">{{ data?.title }}</div>
+            <div class="text-center text-42 font-500 dark_text_white">{{ data?.title }}</div>
             <!-- 作者信息 -->
             <div class="text-center text-16 c-#999/80 my20 lt-lg:text-14">
                 <el-space :size="4">
@@ -18,10 +20,11 @@
                     <div class="lt-lg-display-none">{{ data?.word_count }}</div>
                 </el-space>
             </div>
-            <v-md-preview :text="data?.content" @copy-code-success="handleCopyCodeSuccess"></v-md-preview>
+            <v-md-preview :text="data?.content" @copy-code-success="handleCopyCodeSuccess"
+                class="dark_text_white"></v-md-preview>
         </div>
-        <div class="rounded-15 bg-#fff pt20 pb80 px30 mt25">
-            <!-- 发布评论 -->
+        <!-- 发布评论 -->
+        <div class="rounded-15 bg-#fff dark_bg_gray pt20 pb80 px30 mt25">
             <SubmitComments />
             <div class="text-16">{{ 0 + ' 评论' }}</div>
             <PostCommentsFather v-for="item, index in commentList" :key="index" class="" :commentInfo="item" />
@@ -57,7 +60,7 @@ const commentList = ref<IComment[]>([])
 
 const comments = async () => {
     try {
-        let cmtsRes: any = await getComments(sug)
+        let cmtsRes: any = await getComments("about-me")
         let res: IResponse<IListData<IComment>> = cmtsRes.data.value
         commentList.value = res.data?.list || []
     } catch (error) {

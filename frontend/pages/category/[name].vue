@@ -1,11 +1,12 @@
 <template>
     <div>
         <div class="py15">
-            <div class="text-30 mb20 ml10">分类:{{ homeStore.classification ? homeStore.classification?.name : '未知' }}</div>
+            <div class="text-30 mb20 ml10 dark_text_white">分类:{{ homeStore.classification ? homeStore.classification?.name :
+                '未知' }}</div>
         </div>
 
         <div class="py15">
-            <div class="text-30 mb20 ml10">
+            <div class="text-30 mb20 ml10 dark_text_white">
                 标签:
                 <el-space>
                     <my-tag :show-close-btn="true" @click="popTags(tag)" v-for="tag, index in activeTags" :key="index">
@@ -20,7 +21,7 @@
             </el-space>
         </div>
 
-        <div class="bg-#e5e5e5/40 p20 rounded-10" v-if="dataList.length > 0">
+        <div class="bg-#e5e5e5/40 dark_bg_black p20 rounded-10" v-if="dataList.length > 0">
             <div v-for="item, index in dataList" :key="index">
                 <Content @click="router.push(`/post/${item.sug}`)" :postData="item"></Content>
                 <!-- <el-divider /> -->
@@ -76,12 +77,16 @@ const getTags = async () => {
 getTags()
 postInfos()
 
+// 通过监视数据变化发送http请求查找列表
 watch(activeTags.value, (newValue) => {
-    console.log(newValue);
-    rq.value.tags = activeTags.value
+    console.log('新数据:', newValue, activeTags.value);
+    if (activeTags.value.length > 0)
+        rq.value.tags = activeTags.value
+    else
+        rq.value.tags = [`${homeStore.classification ? homeStore.classification!.name : null}`]
     postInfos()
 })
-// 数据穿梭
+// 数据穿梭=>浅拷贝
 const sendData = (data: string, originList: string[], TargetData: string[]) => {
     const index = originList.findIndex((item) => data === item)
     console.log(index);

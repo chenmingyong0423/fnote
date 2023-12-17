@@ -1,6 +1,6 @@
 <template>
     <div ref="myHeader"
-        class="bg-#fff/20  backdrop-blur-20 fixed top-0 w-full z-99 flex justify-between items-center  dark_bg_gray duration-200 ease-linear">
+        class="bg-#fff  backdrop-blur-20 fixed top-0 w-full z-99 flex justify-between items-center   dark_bg_gray duration-200 ease-linear">
 
         <div>
             <el-space>
@@ -18,7 +18,8 @@
                         文章列表
                     </div>
                     <div class="menu_item lt-lg:display-none" @click="router.push(item.route)"
-                        v-for="item in homeStore.menuList" :class="route.path === item.route ? 'active' : ''">
+                        v-for="item in homeStore.menuList" :key="item.route"
+                        :class="route.path === item.route ? 'active' : ''">
                         {{ item.name }}
                     </div>
                     <div class="menu_item lt-lg:display-none" @click="router.push('/friends')"
@@ -32,13 +33,13 @@
                     <!-- 移动端下拉菜单 -->
                     <div class="menu_item display-none lt-lg:display-block">
                         <el-dropdown trigger="click" size="large">
-                            <div class="i-grommet-icons:more text-24 c-#000" />
+                            <div class="i-grommet-icons:more text-24 c_text_black dark_text_white" />
                             <template #dropdown>
                                 <el-dropdown-menu>
                                     <el-dropdown-item @click="router.push('/category')">
                                         文章列表
                                     </el-dropdown-item>
-                                    <el-dropdown-item v-for="item in homeStore.menuList" @click="router.push(item.route)">
+                                    <el-dropdown-item :key="item.route" v-for="item in homeStore.menuList" @click="router.push(item.route)">
                                         {{ item.name }}
                                     </el-dropdown-item>
                                     <el-dropdown-item @click="router.push('/friends')">
@@ -58,7 +59,7 @@
             <el-space :size="15">
                 <el-switch size="large" v-model="homeStore.isBlackMode" :active-action-icon="Moon"
                     :inactive-action-icon="Sunny" inactive-color="rgba(0,0,0,0.2)" active-color="#000"
-                    lt-lg:important:display-none />
+                    class="lt-lg:important:display-none" />
                 <div @click="homeStore.searchVisible = true"
                     class=" bg-#1890ff rounded-50% py6 px6 dark_bg_black cursor-pointer hover:bg-#4EA6F9 active:bg-#C7C7C8">
                     <div class="i-grommet-icons:search text-24 c-#fff " />

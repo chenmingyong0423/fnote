@@ -1,4 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import Components from 'unplugin-vue-components/vite';
+import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
+
 export default defineNuxtConfig({
   modules: [
     '@unocss/nuxt',
@@ -17,19 +20,12 @@ export default defineNuxtConfig({
       { 'c_title_blue': 'text-#1890ff' },
       { 'c_text_black': 'text-#111' },
       { 'c_text_white': 'text-#fff' },
-      { 'menu_item': 'px18 py15 text-14 hover:bg-#000/20 active:bg-#000/40 c-#000 cursor-pointer' },
+      { 'menu_item': 'px18 py15 text-14 dark:text-#fff hover:bg-#000/20 active:bg-#000/40 c-#000 cursor-pointer' },
     ],
     rules: [
       ['footer_shadow', { 'box-shadow': ' 0 0 10px rgba(0, 0, 0, .5)' }]
     ],
     safelist: [],
-  },
-  pinia: {
-    autoImports: [
-      // 自动引入 `defineStore(), storeToRefs()`
-      "defineStore",
-      "storeToRefs"
-    ],
   },
   elementPlus: {
     /** Options */
@@ -37,5 +33,21 @@ export default defineNuxtConfig({
   },
   css: [
     '@/styles/main.css'
-  ]
+  ],
+  plugins: [
+    '~/plugins/v-md-editor.client.js',
+    '~/plugins/pinia.js',
+  ],
+  // Vite 配置
+  vite: {
+    plugins: [
+      Components({
+        resolvers: [
+          AntDesignVueResolver({
+            importStyle: false, // css in js
+          }),
+        ],
+      }),
+    ],
+  },
 })
