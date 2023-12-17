@@ -3,25 +3,11 @@
         class="footer_shadow flex flex-col justify-evenly items-center text-16 h120 dark_bg_gray dark_text_white shadow-xl">
         <div>
             Copyright © {{ year }} - Designed by
-            <a class="decoration-none text-#939393" href="github.com/chenmingyong0423/fnote">Fnote</a>
+            <a class="decoration-none text-#000 font-bold hover:underline" href="github.com/chenmingyong0423/fnote">Fnote</a>
         </div>
         <div class="flex items-center lt-lg:flex-col">
-            <a href="https://beian.miit.gov.cn/" target="_blank" class="decoration-none text-#939393">
-                琼ICP备2023002354号
-            </a>
-
-
-            <span class="mx5 lt-lg:display-none">-</span>
-
-            <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=44030602007624"
-                class="decoration-none lt-lg:mt5">
-                <img src="https://chenmingyong.cn/assets/%E5%A4%87%E6%A1%88%E5%9B%BE%E6%A0%87-a20583c8.png"
-                    style="float: left;">
-                <span class="text-#939393">
-                    粤公安网备44030602007624号
-                </span>
-            </a>
-
+            <span v-for="(item, index) in recoreds" :key="index"  v-html="item" >
+            </span>
         </div>
         <div>
         </div>
@@ -36,6 +22,8 @@ const homeStore = useHomeStore()
 const date = new Date(homeStore.masterInfo.website_live_time)
 const year = date.getFullYear()
 const time = ref("本站已运行：")
+
+const recoreds = homeStore.masterInfo.records
 
 // 更新网站运营时间
 setInterval(() => {

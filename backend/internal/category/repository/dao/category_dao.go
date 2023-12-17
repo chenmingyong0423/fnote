@@ -18,6 +18,8 @@ import (
 	"context"
 
 	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,6 +31,7 @@ type Category struct {
 	Name       string   `bson:"name"`
 	Route      string   `bson:"route"`
 	Tags       []string `bson:"tags"`
+	Sort       int64    `bson:"sort"`
 	CreateTime int64    `bson:"create_time"`
 	UpdateTime int64    `bson:"update_time"`
 }
@@ -59,7 +62,7 @@ func (d *CategoryDao) GetCategoryByName(ctx context.Context, name string) (*Cate
 }
 
 func (d *CategoryDao) GetAll(ctx context.Context) ([]*Category, error) {
-	result, err := d.coll.Finder().Find(ctx)
+	result, err := d.coll.Finder().Options(options.Find().SetSort(bsonx.M("sort", 1))).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "Find all categories failed failed")
 	}

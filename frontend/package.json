@@ -13,16 +13,19 @@
     "@nuxt/devtools": "latest",
     "@types/node": "^18.17.3",
     "@unocss/nuxt": "^0.55.1",
-    "nuxt": "^3.6.5"
+    "nuxt": "^3.6.5",
+    "unplugin-vue-components": "^0.26.0"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
     "@element-plus/nuxt": "^1.0.5",
     "@kangc/v-md-editor": "^2.3.17",
-    "@pinia/nuxt": "^0.4.11",
+    "@pinia/nuxt": "^0.5.1",
     "@unocss/preset-icons": "^0.55.0",
+    "ant-design-vue": "4.0.7",
     "element-plus": "^2.3.9",
     "highlight.js": "^11.8.0",
+    "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.0",
     "prismjs": "^1.29.0",
     "typeit": "^8.7.1"

@@ -32,7 +32,7 @@
 <script lang="ts" setup>
 import { getLatestPosts, IPost } from "~/api/post"
 import { IResponse, IListData } from "~/api/http";
-
+import 'element-plus/theme-chalk/dark/css-vars.css'
 const dataList = ref<IPost[]>([]);
 const postInfos = async () => {
     try {

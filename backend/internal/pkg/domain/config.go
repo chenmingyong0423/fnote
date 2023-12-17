@@ -14,6 +14,25 @@
 
 package domain
 
+type Config struct {
+	Id         string
+	Props      any
+	Typ        string
+	CreateTime int64
+	UpdateTime int64
+}
+
+// IndexConfigVO 首页信息
+type IndexConfigVO struct {
+	WebMasterConfig WebMasterConfigVO `json:"web_master_config"`
+	NoticeConfigVO  NoticeConfigVO    `json:"notice_config"`
+}
+
+type IndexConfig struct {
+	WebMasterConfig WebMasterConfig
+	NoticeConfig    NoticeConfig
+}
+
 // WebMasterConfig 站长信息
 type WebMasterConfig struct {
 	Name            string   `bson:"name" json:"name"`
@@ -26,6 +45,16 @@ type WebMasterConfig struct {
 	WebsiteIcon     string   `bson:"websiteIcon" json:"websiteIcon"`
 	Domain          string   `bson:"domain" json:"domain"`
 	Records         []string `bson:"records" json:"records"`
+}
+
+// NoticeConfig 公告配置
+type NoticeConfig struct {
+	Content string `bson:"content" json:"content"`
+	Enabled bool   `bson:"enabled" json:"enabled"`
+}
+
+type NoticeConfigVO struct {
+	Content string `json:"content"`
 }
 
 type WebMasterConfigVO struct {
