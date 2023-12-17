@@ -4,8 +4,11 @@
       <Header/>
     </div>
     <!-- <el-scrollbar max-height="100vh" @scroll="headerScroll" /> -->
-    <div class="bg-#F0F2F5 dark_text_white dark:bg-black pt100">
+    <div class="bg-#F0F2F5 dark:text dark:bg-black pt500">
       <slot></slot>
+    </div>
+    <div>
+      <Footer/>
     </div>
   </div>
 </template>
@@ -20,9 +23,9 @@ const info = useHomeStore()
 onMounted(() => {
   let isBlackMode = localStorage.getItem("isBlackMode")
   if (isBlackMode === '') {
-    localStorage.setItem("isBlackMode", info.isBlackMode.toString())
+    localStorage.setItem("isBlackMode", info.is_black_mode.toString())
   } else {
-    info.isBlackMode = isBlackMode === 'true'
+    info.is_black_mode = isBlackMode === 'true'
   }
 })
 

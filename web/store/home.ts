@@ -5,7 +5,7 @@ import {defineStore} from 'pinia'
 export const useHomeStore = defineStore("home", {
     state: () => ({
         searchVisible: false,//搜索弹窗状态
-        isBlackMode: false,//暗黑模式状态
+        is_black_mode: false,//暗黑模式状态
         menuList: [] as IMenu[],//菜单列表
         classification: {} as IMenu | undefined,//当前分类信息
         master_info: {
