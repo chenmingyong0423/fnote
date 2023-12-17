@@ -1,24 +1,23 @@
 <template>
   <div
-      class="bg-#fff  backdrop-blur-20 fixed top-0 dark_text_gray w-full z-99 flex justify-between items-center p-1 dark_bg_gray duration-200 ease-linear">
+      class="bg-#fff  backdrop-blur-20 fixed top-0 dark:text-dtc w-full z-99 flex justify-between items-center p-1 dark_bg_gray duration-200 ease-linear">
     <div>
       <a-avatar :size="50" :src="picture"
                 class="mx5 cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"></a-avatar>
     </div>
-    <div class="bg-transparent">
-      <a-menu v-model:selectedKeys="current" mode="horizontal" @click="menuItemChanged" :items="items"
-              class="dark_text_gray bg-transparent"/>
+    <div class="bg_transparent">
+      <a-menu v-model:selectedKeys="current"  mode="horizontal" @click="menuItemChanged" :items="items"
+              class="dark:text-dtc bg_transparent" />
     </div>
     <div class="ml-auto pr-5">
       <a-space>
         暗黑模式
-        <a-switch v-model:checked="homeStore.isBlackMode" checked-children="开" un-checked-children="关"/>
+        <a-switch v-model:checked="homeStore.is_black_mode" checked-children="开" un-checked-children="关" class="dark_bg_gray dark:border-1 dark:border-solid dark:border-#3c3f44 dark:hover:bg-transparent! dark:hover:border-#6a6e6c"/>
+        <a-tooltip title="search">
+          <a-button shape="circle" :icon="h(SearchOutlined as string)" class="dark:text-dtc bg_transparent"/>
+        </a-tooltip>
         <div
-            class=" bg-#1890ff rounded-50% py2 px2 dark_bg_black cursor-pointer hover:bg-#4EA6F9 active:bg-#C7C7C8">
-          <div class="i-grommet-icons:search text-5 c-#fff "/>
-        </div>
-        <div
-            class="i-grommet-icons:github text-10 dark_text_white cursor-pointer hover:bg-#999 active:bg-#e5e5e5 lt-lg:display-none"/>
+            class="i-grommet-icons:github text-35 dark_text_white cursor-pointer hover:bg-#999 active:bg-#e5e5e5 lt-lg:display-none"/>
       </a-space>
     </div>
   </div>
@@ -26,7 +25,7 @@
 
 <script lang="ts" setup>
 import {h, ref, onMounted} from 'vue';
-import {FileMarkdownOutlined, HomeOutlined, TeamOutlined, UserOutlined, FileWordOutlined} from "@ant-design/icons-vue";
+import {FileMarkdownOutlined, HomeOutlined, TeamOutlined, UserOutlined, FileWordOutlined,SearchOutlined} from "@ant-design/icons-vue";
 import type {MenuProps, ItemType} from "ant-design-vue";
 import {getMenus} from "~/server/api/category"
 import type {IMenu} from "~/server/api/category"
@@ -40,7 +39,7 @@ const current = ref<string[]>([route.path])
 const items = ref<MenuProps['items']>([]);
 const homeStore = useHomeStore()
 
-const isBlackMode = computed(() => homeStore.isBlackMode)
+const isBlackMode = computed(() => homeStore.is_black_mode)
 const picture = ref<string>(homeStore.master_info.picture)
 const menus = async () => {
   try {
@@ -103,3 +102,6 @@ watch(isBlackMode, (newValue) => {
     document.querySelector('html')!.classList.remove("dark");
 })
 </script>
+
+<style scoped>
+</style>
