@@ -29,7 +29,7 @@ import {getMenus} from "~/server/api/category"
 import type {IMenu} from "~/server/api/category"
 import type {IResponse, IListData} from "~/server/api/http";
 import {useHomeStore} from '~/store/home';
-import Menu from "~/components/menu.vue";
+import Menu from "~/components/Menu.vue";
 
 const router = useRouter()
 const homeStore = useHomeStore()
