@@ -6,37 +6,32 @@
                 class="mx5 cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"></a-avatar>
     </div>
     <div class="bg_transparent">
-      <a-menu v-model:selectedKeys="current"  mode="horizontal" @click="menuItemChanged" :items="items"
-              class="dark:text-dtc bg_transparent" />
+<!--      <a-menu v-model:selectedKeys="current"  mode="horizontal" @click="menuItemChanged" :items="items"-->
+<!--              class="dark:text-dtc bg_transparent" />-->
+      <Menu :items="homeStore.menuList"></Menu>
     </div>
     <div class="ml-auto pr-5">
       <a-space>
-        暗黑模式
-        <a-switch v-model:checked="homeStore.is_black_mode" checked-children="开" un-checked-children="关" class="dark_bg_gray dark:border-1 dark:border-solid dark:border-#3c3f44 dark:hover:bg-transparent! dark:hover:border-#6a6e6c"/>
-        <a-tooltip title="search">
-          <a-button shape="circle" :icon="h(SearchOutlined as string)" class="dark:text-dtc bg_transparent"/>
-        </a-tooltip>
+        <div class="i-ph-sun-dim-duotone dark:i-ph-moon-stars-fill cursor-pointer text-10 text-#86909c dark:text-dtc dark:hover:text-white" @click="homeStore.is_black_mode = !homeStore.is_black_mode"></div>
+        <div class="i-ph-list-magnifying-glass-duotone cursor-pointer dark:text-dtc text-10 text-#86909c dark:hover:text-white"></div>
+
         <div
-            class="i-grommet-icons:github text-35 dark_text_white cursor-pointer hover:bg-#999 active:bg-#e5e5e5 lt-lg:display-none"/>
+            class="i-grommet-icons:github text-12 dark:text-dtc cursor-pointer dark:hover:text-white active:bg-#e5e5e5 lt-lg:display-none"/>
       </a-space>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {h, ref, onMounted} from 'vue';
-import {FileMarkdownOutlined, HomeOutlined, TeamOutlined, UserOutlined, FileWordOutlined,SearchOutlined} from "@ant-design/icons-vue";
+import {h, ref, onMounted, reactive} from 'vue';
 import type {MenuProps, ItemType} from "ant-design-vue";
 import {getMenus} from "~/server/api/category"
 import type {IMenu} from "~/server/api/category"
 import type {IResponse, IListData} from "~/server/api/http";
 import {useHomeStore} from '~/store/home';
+import Menu from "~/components/menu.vue";
 
-const route = useRoute()
 const router = useRouter()
-
-const current = ref<string[]>([route.path])
-const items = ref<MenuProps['items']>([]);
 const homeStore = useHomeStore()
 
 const isBlackMode = computed(() => homeStore.is_black_mode)
@@ -55,44 +50,6 @@ menus()
 const menuItemChanged = (item: ItemType) => {
   router.push(item?.key as string)
 }
-
-onMounted(() => {
-  items.value?.push({
-        key: '/index',
-        icon: () => h(HomeOutlined),
-        label: '首页',
-        title: '首页',
-      },
-      {
-        key: '/list',
-        icon: () => h(FileMarkdownOutlined),
-        label: '文章列表',
-        title: '文章列表',
-      },
-      {
-        key: '/friend',
-        icon: () => h(TeamOutlined),
-        label: '友链',
-        title: '友链',
-      },
-      {
-        key: '/about-me',
-        icon: () => h(UserOutlined),
-        label: '关于我',
-        title: '关于我',
-      }
-  )
-  let i = ref<number>(2)
-  homeStore.menuList.forEach((item: IMenu) => {
-    items.value?.splice(i.value, 0, {
-      key: item.route,
-      icon: () => h(FileWordOutlined),
-      label: item.name,
-      title: item.name,
-    })
-    i.value++
-  })
-})
 
 watch(isBlackMode, (newValue) => {
   localStorage.setItem("isBlackMode", newValue.toString())

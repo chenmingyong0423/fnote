@@ -24,8 +24,7 @@ export default defineNuxtConfig({
         rules: [
             ['footer_shadow', {'box-shadow': ' 0 0 10px rgba(0, 0, 0, .5)'}],
             ['bg_transparent', {'background-color': 'transparent'}],
-            ['border_color_white', {'border-color': '#fff'}],
-            ['border_color_gray', {'border-color': '#86909c'}],
+            ['border_bottom_blue', {'border-bottom': '2px solid #007fff'}],
         ],
         theme: {
             colors: {
