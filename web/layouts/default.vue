@@ -4,7 +4,7 @@
       <Header/>
     </div>
     <!-- <el-scrollbar max-height="100vh" @scroll="headerScroll" /> -->
-    <div class="bg-#F0F2F5 dark:text dark:bg-black pt500">
+    <div class="bg-#F0F2F5 dark:text dark:bg-black pt220">
       <slot></slot>
     </div>
     <div>
