@@ -5,6 +5,7 @@ export default defineNuxtConfig({
         '@ant-design-vue/nuxt',
         '@unocss/nuxt',
         "@pinia/nuxt",
+        'dayjs-nuxt',
     ],
     antd: {},
     unocss: {

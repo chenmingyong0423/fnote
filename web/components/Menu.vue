@@ -30,10 +30,6 @@ const props = defineProps({
     default: () => [],
     required: true,
   },
-  current: {
-    type: String,
-    default: () => "/index",
-  },
 })
 </script>
 
