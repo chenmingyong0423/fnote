@@ -1,7 +1,7 @@
 <template>
   <div>
     <div ref="myDom">
-      <Header/>
+      <Header class="slide-down"/>
     </div>
     <!-- <el-scrollbar max-height="100vh" @scroll="headerScroll" /> -->
     <div class="bg-#F0F2F5 dark:text dark:bg-black pt-25 p-5">
@@ -17,9 +17,11 @@ import {useHomeStore} from '~/store/home';
 import {getWebMaster} from "~/server/api/config"
 import type {IWebmasterInfo} from "~/server/api/config"
 import type {IResponse} from "~/server/api/http";
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
 
 const info = useHomeStore()
+const myDom = ref()
+
 onMounted(() => {
   let isBlackMode = localStorage.getItem("isBlackMode")
   if (isBlackMode === '') {
@@ -51,5 +53,20 @@ const webMaster = async () => {
   }
 };
 webMaster()
-
 </script>
+
+<style scoped>
+@keyframes slideDown {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.slide-down {
+  animation: slideDown 1s ease;
+  animation-iteration-count: 1;
+}
+</style>
