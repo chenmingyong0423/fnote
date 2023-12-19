@@ -1,10 +1,10 @@
 <template>
   <div class="flex">
-    <div class="w-7/10">
+    <div class="w-69% mr-1%">
       <PostListItem :posts="posts"></PostListItem>
     </div>
-    <div class="w-3/10">
-      right
+    <div class="w-30%">
+      <Profile></Profile>
     </div>
   </div>
 </template>

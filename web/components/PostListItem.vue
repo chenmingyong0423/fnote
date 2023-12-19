@@ -17,7 +17,7 @@
           {{ item.title }}
         </div>
         <div class="flex-grow h-100 line-clamp-4">
-          <p class="line-height-loose"> {{ item.summary}} </p>
+          <p class="line-height-loose text-gray-5"> {{ item.summary}} </p>
         </div>
         <div class="flex gap-x-3 mt-2 h-20">
           <div class="flex gap-x-1 items-center"><span class="i-ph-eye"></span><span>{{ item.visit_count }}</span></div>
