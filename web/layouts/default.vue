@@ -5,7 +5,9 @@
     </div>
     <!-- <el-scrollbar max-height="100vh" @scroll="headerScroll" /> -->
     <div class="bg-#F0F2F5 dark:text dark:bg-black pt-25 p-5">
-      <slot></slot>
+      <div class="slide-up">
+        <slot></slot>
+      </div>
     </div>
     <div>
       <Footer/>
@@ -67,6 +69,20 @@ webMaster()
 
 .slide-down {
   animation: slideDown 1s ease;
+  animation-iteration-count: 1;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(+100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease;
   animation-iteration-count: 1;
 }
 </style>
