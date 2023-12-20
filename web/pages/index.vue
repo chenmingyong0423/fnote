@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-90% m-auto">
+  <div class="flex w-90% m-auto h-auto">
     <div class="w-69% mr-1% flex flex-col">
       <Notice></Notice>
       <PostListItem :posts="posts"></PostListItem>
@@ -14,6 +14,7 @@
 import {getLatestPosts} from "~/server/api/post"
 import type {IPost} from "~/server/api/post"
 import type {IResponse, IListData} from "~/server/api/http";
+import {onMounted, ref} from "vue";
 
 const posts = ref<IPost[]>([]);
 const postInfos = async () => {
