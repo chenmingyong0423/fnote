@@ -49,12 +49,16 @@ type WebMasterConfig struct {
 
 // NoticeConfig 公告配置
 type NoticeConfig struct {
-	Content string `bson:"content" json:"content"`
-	Enabled bool   `bson:"enabled" json:"enabled"`
+	Title       string `bson:"title"`
+	Content     string `bson:"content"`
+	Enabled     bool   `bson:"enabled"`
+	PublishTime int64  `bson:"publish_time"`
 }
 
 type NoticeConfigVO struct {
-	Content string `json:"content"`
+	Title       string `json:"title" `
+	Content     string `json:"content"`
+	PublishTime int64  `json:"publish_time"`
 }
 
 type WebMasterConfigVO struct {
