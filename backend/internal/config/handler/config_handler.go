@@ -33,8 +33,6 @@ type ConfigHandler struct {
 
 func (h *ConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/configs")
-	// 获取站长信息
-	routerGroup.GET("/webmaster", api.Wrap(h.GetWebmasterInfo))
 	// 获取首页的配置信息
 	routerGroup.GET("/index", api.Wrap(h.GetIndexConfig))
 }
@@ -63,5 +61,5 @@ func (h *ConfigHandler) toWebMasterConfigVO(webMasterCfg *domain.WebMasterConfig
 }
 
 func (h *ConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) *domain.NoticeConfigVO {
-	return &domain.NoticeConfigVO{Content: noticeCfg.Content}
+	return &domain.NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, PublishTime: noticeCfg.PublishTime}
 }
