@@ -1,6 +1,7 @@
 <template>
-  <div class="flex">
-    <div class="w-69% mr-1%">
+  <div class="flex w-90% m-auto">
+    <div class="w-69% mr-1% flex flex-col">
+      <Notice></Notice>
       <PostListItem :posts="posts"></PostListItem>
     </div>
     <div class="w-30%">

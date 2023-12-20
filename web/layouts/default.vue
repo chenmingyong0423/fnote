@@ -39,6 +39,7 @@ const webMaster = async () => {
     let res: IResponse<IWebmasterInfo> = postRes.data.value
     if (res && res.data) {
       info.master_info = res.data.web_master_config
+      info.notice_info = res.data.notice_config
       // const newLink = document.createElement('link');
       // newLink.rel = 'icon';
       // newLink.type = 'image/x-icon';
