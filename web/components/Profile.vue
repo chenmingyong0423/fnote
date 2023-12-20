@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center justify-center bg-#fff p-10 b-rounded-4 dark:text-dtc dark_bg_gray">
+  <div class="flex flex-col items-center justify-center bg-#fff p-10 b-rounded-4 cursor-pointer dark:text-dtc dark_bg_gray ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--2 hover:bg-gray-1 dark:hover:bg-#fff/20">
     <div class="avatar">
       <img :src="homeStore.master_info.picture"
            alt=""

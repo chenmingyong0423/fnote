@@ -19,7 +19,9 @@ export interface IWebMaster {
 }
 
 export interface INotice {
+    title: string;
     content: string;
+    publish_time: number;
 }
 const prefix = "/configs"
 
