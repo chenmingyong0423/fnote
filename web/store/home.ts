@@ -20,7 +20,7 @@ export const useHomeStore = defineStore("home", {
             domain: "",
             records: [],
         } as IWebMaster,
-        notice_config: {
+        notice_info: {
             content: ""
         } as INotice
     }),
