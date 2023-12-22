@@ -15,7 +15,7 @@ export default defineNuxtConfig({
         // core options
         shortcuts: [
             {'dark_bg_black': 'dark:bg-#000'},
-            {'dark_bg_gray': 'dark:bg-#202020'},
+            {'dark_bg_gray': 'dark:bg-#1a191c'},
             {'dark_text_white': 'dark:c-#fff'},
             {'c_title_blue': 'text-#1890ff'},
             {'c_text_black': 'text-#111'},
