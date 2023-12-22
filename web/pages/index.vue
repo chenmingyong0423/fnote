@@ -4,8 +4,9 @@
       <Notice></Notice>
       <PostListItem :posts="posts"></PostListItem>
     </div>
-    <div class="w-30%">
-      <Profile></Profile>
+    <div class="flex flex-col w-30%">
+      <Profile class="mb-5"></Profile>
+      <IndexComment></IndexComment>
     </div>
   </div>
 </template>
