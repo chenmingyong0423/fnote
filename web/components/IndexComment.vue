@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col  bg-white bg-#fff p-5 b-rounded-4">
+  <div class="flex flex-col  bg-white bg-#fff p-5 b-rounded-4 dark_bg_gray dark:text-dtc">
     <div class="text-6 border-b-1 border-b-gray-2 border-b-solid p-x-1 p-y-2">最新评论</div>
     <div class="border-b-1 border-b-gray-2 border-b-solid p-b-2 p-2" v-for="(item, index) in comments" :key="index">
       <div class="flex h-15 my-2">
