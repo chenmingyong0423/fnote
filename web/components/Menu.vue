@@ -2,8 +2,8 @@
   <div>
     <ul class="list-none flex gap-x-10">
       <li class=" flex items-center gap-x-4 cursor-pointer p-2 hover:border_bottom_blue"
-          :class=" route.path === '/index' ? 'current' : route.path === '/' ? 'current' : '' "
-          @click="router.push('/index')">
+          :class=" route.path === '/' ? 'current' : '' "
+          @click="router.push('/')">
         <span class="i-ph-house"/> <span>主页</span></li>
       <li class=" flex items-center gap-x-4 cursor-pointer p-2 hover:border_bottom_blue" :class=" route.path === '/category' ? 'current' : '' "
           @click="router.push('/category')"><span class="i-ph-list"/> <span>文章列表</span></li>
