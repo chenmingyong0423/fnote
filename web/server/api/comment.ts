@@ -3,6 +3,7 @@ import httpRequest from "./http";
 export interface ILatestComment {
     post_id: string;
     post_title: string;
+    picture: string;
     name: string;
     content: string;
     create_time: number;
