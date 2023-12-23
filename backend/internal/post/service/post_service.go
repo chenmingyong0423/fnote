@@ -112,7 +112,7 @@ func (s *PostService) GetPunishedPostById(ctx context.Context, id string) (*doma
 
 func (s *PostService) GetPosts(ctx context.Context, pageRequest *domain.PostRequest) ([]*domain.Post, int64, error) {
 	return s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageRequest.PageSize, Skip: (pageRequest.PageNo - 1) * pageRequest.PageSize, Search: pageRequest.Search, Sorting: api.Sorting{
-		Filed: pageRequest.Sorting.Filed,
+		Field: pageRequest.Sorting.Field,
 		Order: pageRequest.Sorting.Order,
 	}, Category: pageRequest.Category, Tags: pageRequest.Tags})
 
