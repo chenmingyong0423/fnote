@@ -105,8 +105,8 @@ func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition
 
 	findOptions := options.Find()
 	findOptions.SetSkip(postsQueryCondition.Skip).SetLimit(postsQueryCondition.Size)
-	if postsQueryCondition.Sorting.Filed != nil && postsQueryCondition.Sorting.Order != nil {
-		findOptions.SetSort(bsonx.M(*postsQueryCondition.Sorting.Filed, orderConvertToInt(*postsQueryCondition.Sorting.Order)))
+	if postsQueryCondition.Sorting.Field != nil && postsQueryCondition.Sorting.Order != nil {
+		findOptions.SetSort(bsonx.M(*postsQueryCondition.Sorting.Field, orderConvertToInt(*postsQueryCondition.Sorting.Order)))
 	} else {
 		findOptions.SetSort(bsonx.M("priority", -1))
 	}
