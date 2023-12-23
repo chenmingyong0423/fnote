@@ -5,7 +5,7 @@
     </div>
     <!-- <el-scrollbar max-height="100vh" @scroll="headerScroll" /> -->
     <div class="bg-#F0F2F5 dark:text dark:bg-black pt-25 p-5">
-      <div class="slide-up">
+      <div class="slide-up w-90% m-auto">
         <slot></slot>
       </div>
     </div>

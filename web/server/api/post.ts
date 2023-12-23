@@ -14,9 +14,8 @@ export interface IPost {
     priority: number;
     create_time: number;
 }
-const prefix = "/posts"
 
-export const getLatestPosts = () => httpRequest.get(prefix + "/latest")
+const prefix = "/posts"
 
 
 export type PageRequest = {
@@ -30,7 +29,6 @@ export type PageRequest = {
 }
 
 export const getPosts = (pq: PageRequest) => httpRequest.get(prefix + "", pq)
-
 
 
 export interface IPostDetail {
