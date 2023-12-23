@@ -21,6 +21,7 @@ export default defineNuxtConfig({
             {'c_text_black': 'text-#111'},
             {'c_text_white': 'text-#fff'},
             {'menu_item': 'px18 py15 text-14 dark:text-#fff hover:bg-#000/20 active:bg-#000/40 c-#000 cursor-pointer'},
+            {'flex-center': 'flex items-center justify-center'},
         ],
         rules: [
             ['footer_shadow', {'box-shadow': ' 0 0 10px rgba(0, 0, 0, .5)'}],
