@@ -6,7 +6,7 @@
           @click="router.push('/')">
         <span class="i-ph-house"/> <span>主页</span></li>
       <li class=" flex items-center gap-x-4 cursor-pointer p-2 hover:border_bottom_blue" :class=" route.path === '/category' ? 'current' : '' "
-          @click="router.push('/categories')"><span class="i-ph-list"/> <span>文章列表</span></li>
+          @click="router.push('/categories')"><span class="i-ph-list"/> <span>文章导航</span></li>
       <li class="flex items-center gap-x-4 cursor-pointer p-2 hover:border_bottom_blue" v-for="(item, index) in props.items"
           :key="index" :class=" route.path === item.route ? 'current' : '' " @click="router.push(item.route)"><span
           class="i-ph-article-light"/> <span>{{ item.name }}</span></li>

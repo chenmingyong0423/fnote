@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <div class="dark:bg-#03080c">
     <div ref="myDom">
       <Header class="slide-down"/>
     </div>
     <!-- <el-scrollbar max-height="100vh" @scroll="headerScroll" /> -->
-    <div class="bg-#F0F2F5 dark:text dark:bg-black pt-25 p-5">
+    <div class="bg-#F0F2F5 dark:bg-#03080c pt-25 p-5">
       <div class="slide-up w-90% m-auto">
         <slot></slot>
       </div>

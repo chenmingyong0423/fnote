@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-        class="item group flex p-5 bg-#fff b-rounded-4 h-50 cursor-pointer ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--2 dark:text-dtc dark_bg_gray relative mb-5 hover:bg-gray-1 dark:hover:bg-#fff/20" v-for="(item, index) in props.posts" :key="index" @click="router.push('/posts/' + item.sug)">
+        class="item group flex p-5 bg-#fff b-rounded-4 h-50 cursor-pointer ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--2 dark:text-dtc dark_bg_gray relative mb-5" v-for="(item, index) in props.posts" :key="index" @click="router.push('/posts/' + item.sug)">
       <div
           class="flex justify-between gap-x-3 z-99 w-auto absolute top-3 left--100% group-hover:left-1% ease-linear duration-200">
         <span class="bg-#2db7f5 rounded-3 text-white py-0.2em px-0.8em">{{ item.category }}</span>

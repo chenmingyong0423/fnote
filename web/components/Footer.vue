@@ -1,6 +1,6 @@
 <template>
   <div
-      class="footer_shadow flex flex-col justify-evenly items-center p-10 dark_bg_gray dark:text-dtc shadow-xl">
+      class="footer_shadow flex flex-col justify-evenly items-center p-10 dark:text-dtc dark_bg_gray shadow-xl">
     <div>
       Copyright © {{ year }} - Designed by
       <a class="decoration-none text-#000 font-bold hover:underline dark_text_white" href="github.com/chenmingyong0423/fnote">Fnote</a>
