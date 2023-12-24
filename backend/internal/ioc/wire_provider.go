@@ -27,6 +27,9 @@ import (
 	repository3 "github.com/chenmingyong0423/fnote/backend/internal/config/repository"
 	dao3 "github.com/chenmingyong0423/fnote/backend/internal/config/repository/dao"
 	service3 "github.com/chenmingyong0423/fnote/backend/internal/config/service"
+	repository8 "github.com/chenmingyong0423/fnote/backend/internal/count_stats/repository"
+	dao8 "github.com/chenmingyong0423/fnote/backend/internal/count_stats/repository/dao"
+	service10 "github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
 	service7 "github.com/chenmingyong0423/fnote/backend/internal/email/service"
 	handler4 "github.com/chenmingyong0423/fnote/backend/internal/friend/hanlder"
 	repository4 "github.com/chenmingyong0423/fnote/backend/internal/friend/repository"
@@ -83,4 +86,9 @@ var (
 		wire.Bind(new(service9.IMsgTplService), new(*service9.MsgTplService)),
 		wire.Bind(new(repository7.IMsgTplRepository), new(*repository7.MsgTplRepository)),
 		wire.Bind(new(dao7.IMsgTplDao), new(*dao7.MsgTplDao)))
+
+	CountStatsProviders = wire.NewSet(service10.NewCountStatsService, repository8.NewCountStatsRepository, dao8.NewCountStatsDao,
+		wire.Bind(new(service10.ICountStatsService), new(*service10.CountStatsService)),
+		wire.Bind(new(repository8.ICountStatsRepository), new(*repository8.CountStatsRepository)),
+		wire.Bind(new(dao8.ICountStatsDao), new(*dao8.CountStatsDao)))
 )

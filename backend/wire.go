@@ -40,5 +40,6 @@ func initializeApp(cfgPath string) (*gin.Engine, error) {
 		ioc.EmailProviders,
 		ioc.MsgProviders,
 		ioc.MsgTplProviders,
+		ioc.CountStatsProviders,
 	))
 }
