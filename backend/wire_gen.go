@@ -10,34 +10,37 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/internal/category/handler"
 	"github.com/chenmingyong0423/fnote/backend/internal/category/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/category/repository/dao"
-	"github.com/chenmingyong0423/fnote/backend/internal/category/service"
+	service2 "github.com/chenmingyong0423/fnote/backend/internal/category/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/comment/hanlder"
-	repository2 "github.com/chenmingyong0423/fnote/backend/internal/comment/repository"
-	dao2 "github.com/chenmingyong0423/fnote/backend/internal/comment/repository/dao"
-	service2 "github.com/chenmingyong0423/fnote/backend/internal/comment/service"
+	repository3 "github.com/chenmingyong0423/fnote/backend/internal/comment/repository"
+	dao3 "github.com/chenmingyong0423/fnote/backend/internal/comment/repository/dao"
+	service3 "github.com/chenmingyong0423/fnote/backend/internal/comment/service"
 	handler2 "github.com/chenmingyong0423/fnote/backend/internal/config/handler"
-	repository3 "github.com/chenmingyong0423/fnote/backend/internal/config/repository"
-	dao3 "github.com/chenmingyong0423/fnote/backend/internal/config/repository/dao"
-	service3 "github.com/chenmingyong0423/fnote/backend/internal/config/service"
-	service5 "github.com/chenmingyong0423/fnote/backend/internal/email/service"
+	repository4 "github.com/chenmingyong0423/fnote/backend/internal/config/repository"
+	dao4 "github.com/chenmingyong0423/fnote/backend/internal/config/repository/dao"
+	service4 "github.com/chenmingyong0423/fnote/backend/internal/config/service"
+	repository2 "github.com/chenmingyong0423/fnote/backend/internal/count_stats/repository"
+	dao2 "github.com/chenmingyong0423/fnote/backend/internal/count_stats/repository/dao"
+	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
+	service6 "github.com/chenmingyong0423/fnote/backend/internal/email/service"
 	hanlder2 "github.com/chenmingyong0423/fnote/backend/internal/friend/hanlder"
-	repository6 "github.com/chenmingyong0423/fnote/backend/internal/friend/repository"
-	dao6 "github.com/chenmingyong0423/fnote/backend/internal/friend/repository/dao"
-	service8 "github.com/chenmingyong0423/fnote/backend/internal/friend/service"
+	repository7 "github.com/chenmingyong0423/fnote/backend/internal/friend/repository"
+	dao7 "github.com/chenmingyong0423/fnote/backend/internal/friend/repository/dao"
+	service9 "github.com/chenmingyong0423/fnote/backend/internal/friend/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/ioc"
-	service7 "github.com/chenmingyong0423/fnote/backend/internal/message/service"
+	service8 "github.com/chenmingyong0423/fnote/backend/internal/message/service"
 	handler5 "github.com/chenmingyong0423/fnote/backend/internal/message_template/handler"
-	repository5 "github.com/chenmingyong0423/fnote/backend/internal/message_template/repository"
-	dao5 "github.com/chenmingyong0423/fnote/backend/internal/message_template/repository/dao"
-	service6 "github.com/chenmingyong0423/fnote/backend/internal/message_template/service"
+	repository6 "github.com/chenmingyong0423/fnote/backend/internal/message_template/repository"
+	dao6 "github.com/chenmingyong0423/fnote/backend/internal/message_template/repository/dao"
+	service7 "github.com/chenmingyong0423/fnote/backend/internal/message_template/service"
 	handler3 "github.com/chenmingyong0423/fnote/backend/internal/post/handler"
-	repository4 "github.com/chenmingyong0423/fnote/backend/internal/post/repository"
-	dao4 "github.com/chenmingyong0423/fnote/backend/internal/post/repository/dao"
-	service4 "github.com/chenmingyong0423/fnote/backend/internal/post/service"
+	repository5 "github.com/chenmingyong0423/fnote/backend/internal/post/repository"
+	dao5 "github.com/chenmingyong0423/fnote/backend/internal/post/repository/dao"
+	service5 "github.com/chenmingyong0423/fnote/backend/internal/post/service"
 	handler4 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/handler"
-	repository7 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository"
-	dao7 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository/dao"
-	service9 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/service"
+	repository8 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository"
+	dao8 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository/dao"
+	service10 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -48,32 +51,35 @@ func initializeApp(cfgPath string) (*gin.Engine, error) {
 	database := ioc.NewMongoDB(config)
 	categoryDao := dao.NewCategoryDao(database)
 	categoryRepository := repository.NewCategoryRepository(categoryDao)
-	categoryService := service.NewCategoryService(categoryRepository)
+	countStatsDao := dao2.NewCountStatsDao(database)
+	countStatsRepository := repository2.NewCountStatsRepository(countStatsDao)
+	countStatsService := service.NewCountStatsService(countStatsRepository)
+	categoryService := service2.NewCategoryService(categoryRepository, countStatsService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
-	commentDao := dao2.NewCommentDao(database)
-	commentRepository := repository2.NewCommentRepository(commentDao)
-	commentService := service2.NewCommentService(commentRepository)
-	configDao := dao3.NewConfigDao(database)
-	configRepository := repository3.NewConfigRepository(configDao)
-	configService := service3.NewConfigService(configRepository)
-	postDao := dao4.NewPostDao(database)
-	postRepository := repository4.NewPostRepository(postDao)
-	postService := service4.NewPostService(postRepository)
-	emailService := service5.NewEmailService()
-	msgTplDao := dao5.NewMsgTplDao(database)
-	msgTplRepository := repository5.NewMsgTplRepository(msgTplDao)
-	msgTplService := service6.NewMsgTplService(msgTplRepository)
-	messageService := service7.NewMessageService(configService, emailService, msgTplService)
+	commentDao := dao3.NewCommentDao(database)
+	commentRepository := repository3.NewCommentRepository(commentDao)
+	commentService := service3.NewCommentService(commentRepository)
+	configDao := dao4.NewConfigDao(database)
+	configRepository := repository4.NewConfigRepository(configDao)
+	configService := service4.NewConfigService(configRepository)
+	postDao := dao5.NewPostDao(database)
+	postRepository := repository5.NewPostRepository(postDao)
+	postService := service5.NewPostService(postRepository)
+	emailService := service6.NewEmailService()
+	msgTplDao := dao6.NewMsgTplDao(database)
+	msgTplRepository := repository6.NewMsgTplRepository(msgTplDao)
+	msgTplService := service7.NewMsgTplService(msgTplRepository)
+	messageService := service8.NewMessageService(configService, emailService, msgTplService)
 	commentHandler := hanlder.NewCommentHandler(commentService, configService, postService, messageService)
 	configHandler := handler2.NewConfigHandler(configService)
-	friendDao := dao6.NewFriendDao(database)
-	friendRepository := repository6.NewFriendRepository(friendDao)
-	friendService := service8.NewFriendService(friendRepository)
+	friendDao := dao7.NewFriendDao(database)
+	friendRepository := repository7.NewFriendRepository(friendDao)
+	friendService := service9.NewFriendService(friendRepository)
 	friendHandler := hanlder2.NewFriendHandler(friendService, messageService, configService)
 	postHandler := handler3.NewPostHandler(postService)
-	visitLogDao := dao7.NewVisitLogDao(database)
-	visitLogRepository := repository7.NewVisitLogRepository(visitLogDao)
-	visitLogService := service9.NewVisitLogService(visitLogRepository)
+	visitLogDao := dao8.NewVisitLogDao(database)
+	visitLogRepository := repository8.NewVisitLogRepository(visitLogDao)
+	visitLogService := service10.NewVisitLogService(visitLogRepository)
 	visitLogHandler := handler4.NewVisitLogHandler(visitLogService, configService)
 	msgTplHandler := handler5.NewMsgTplHandler(msgTplService)
 	writer := ioc.InitLogger(config)

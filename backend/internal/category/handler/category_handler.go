@@ -17,9 +17,30 @@ package handler
 import (
 	"github.com/chenmingyong0423/fnote/backend/internal/category/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
 )
+
+type MenuVO struct {
+	Name  string `json:"name"`
+	Route string `json:"route"`
+}
+
+type CategoryAndTagWithCountVO struct {
+	Categories []CategoryWithCountVO `json:"categories"`
+	Tags       []TagWithCountVO      `json:"tags"`
+}
+
+type CategoryWithCountVO struct {
+	Name        string `json:"name"`
+	Route       string `json:"route"`
+	Description string `json:"description"`
+	Count       int64  `json:"count"`
+}
+
+type TagWithCountVO struct {
+	Name  string `json:"name"`
+	Count int64  `json:"count"`
+}
 
 func NewCategoryHandler(serv service.ICategoryService) *CategoryHandler {
 	return &CategoryHandler{
@@ -38,24 +59,46 @@ func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 	engine.GET("/menus", api.Wrap(h.GetMenus))
 }
 
-func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) (listVO api.ListVO[domain.SearchCategoryVO], err error) {
-	categories, err := h.serv.GetCategoriesAndTags(ctx)
+func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) (VO CategoryAndTagWithCountVO, err error) {
+	categoryAndTagWithCount, err := h.serv.GetCategoriesAndTags(ctx)
 	if err != nil {
 		return
 	}
-	listVO.List = make([]domain.SearchCategoryVO, 0, len(categories))
-	for _, category := range categories {
-		listVO.List = append(listVO.List, domain.SearchCategoryVO{CategoryName: category.CategoryName, Tags: category.Tags})
-	}
+	VO.Categories = func() []CategoryWithCountVO {
+		result := make([]CategoryWithCountVO, len(categoryAndTagWithCount.Categories))
+		for i, category := range categoryAndTagWithCount.Categories {
+			result[i] = CategoryWithCountVO{
+				Name:        category.Name,
+				Route:       category.Route,
+				Description: category.Description,
+				Count:       category.Count,
+			}
+		}
+		return result
+	}()
+	VO.Tags = func() []TagWithCountVO {
+		result := make([]TagWithCountVO, len(categoryAndTagWithCount.Tags))
+		for i, tag := range categoryAndTagWithCount.Tags {
+			result[i] = TagWithCountVO{
+				Name:  tag.Name,
+				Count: tag.Count,
+			}
+		}
+		return result
+	}()
 	return
 }
 
-func (h *CategoryHandler) GetMenus(ctx *gin.Context) (listVO api.ListVO[domain.MenuVO], err error) {
-	menuVO, err := h.serv.GetMenus(ctx)
+func (h *CategoryHandler) GetMenus(ctx *gin.Context) (listVO api.ListVO[MenuVO], err error) {
+	menus, err := h.serv.GetMenus(ctx)
 	if err != nil {
 		return
 	}
-	listVO.List = menuVO
+	menuVOs := make([]MenuVO, len(menus))
+	for i, menu := range menus {
+		menuVOs[i] = MenuVO{Name: menu.Name, Route: menu.Route}
+	}
+	listVO.List = menuVOs
 	return
 }
 

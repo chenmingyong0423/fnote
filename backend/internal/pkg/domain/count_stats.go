@@ -14,27 +14,18 @@
 
 package domain
 
-type Category struct {
-	Id          string   `json:"id"`
-	Name        string   `json:"name"`
-	Route       string   `json:"route"`
-	Description string   `json:"description"`
-	Tags        []string `json:"tags"`
-}
+type CountStatsType string
 
-type CategoryAndTagWithCount struct {
-	Categories []CategoryWithCount
-	Tags       []TagWithCount `json:"tags"`
-}
+const (
+	// CountStatsTypePostCountInCategory 分类下的文章数量
+	CountStatsTypePostCountInCategory CountStatsType = "PostCountInCategory"
+	// CountStatsTypePostCountInTag 标签下的文章数量
+	CountStatsTypePostCountInTag CountStatsType = "PostCountInTag"
+)
 
-type CategoryWithCount struct {
-	Name        string `json:"name"`
-	Route       string `json:"route"`
-	Description string `json:"description"`
-	Count       int64  `json:"count"`
-}
-
-type TagWithCount struct {
-	Name  string `json:"name"`
-	Count int64  `json:"count"`
+type CountStats struct {
+	Id          string
+	Type        string
+	ReferenceId string
+	Count       int64
 }

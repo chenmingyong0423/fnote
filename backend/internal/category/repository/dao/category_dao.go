@@ -27,13 +27,14 @@ import (
 )
 
 type Category struct {
-	Id         string   `bson:"_id"`
-	Name       string   `bson:"name"`
-	Route      string   `bson:"route"`
-	Tags       []string `bson:"tags"`
-	Sort       int64    `bson:"sort"`
-	CreateTime int64    `bson:"create_time"`
-	UpdateTime int64    `bson:"update_time"`
+	Id          string   `bson:"_id"`
+	Name        string   `bson:"name"`
+	Route       string   `bson:"route"`
+	Description string   `bson:"description"`
+	Tags        []string `bson:"tags"`
+	Sort        int64    `bson:"sort"`
+	CreateTime  int64    `bson:"create_time"`
+	UpdateTime  int64    `bson:"update_time"`
 }
 
 type ICategoryDao interface {

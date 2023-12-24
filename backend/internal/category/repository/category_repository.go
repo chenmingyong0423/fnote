@@ -24,7 +24,7 @@ import (
 
 type ICategoryRepository interface {
 	GetAll(ctx context.Context) ([]domain.Category, error)
-	GetTagsByName(ctx context.Context, name string) (domain.Tags, error)
+	GetTagsByName(ctx context.Context, name string) ([]string, error)
 }
 
 var _ ICategoryRepository = (*CategoryRepository)(nil)
@@ -39,7 +39,7 @@ type CategoryRepository struct {
 	dao dao.ICategoryDao
 }
 
-func (r *CategoryRepository) GetTagsByName(ctx context.Context, name string) (domain.Tags, error) {
+func (r *CategoryRepository) GetTagsByName(ctx context.Context, name string) ([]string, error) {
 	category, err := r.dao.GetCategoryByName(ctx, name)
 	if err != nil {
 		return nil, errors.WithMessage(err, "r.dao.GetCategoryByName failed")
@@ -54,7 +54,7 @@ func (r *CategoryRepository) GetAll(ctx context.Context) ([]domain.Category, err
 	}
 	result := make([]domain.Category, 0, len(categories))
 	for _, category := range categories {
-		result = append(result, domain.Category{Menu: domain.Menu{CategoryName: domain.CategoryName(category.Name), Route: category.Route}, Tags: category.Tags})
+		result = append(result, domain.Category{Id: category.Id, Name: category.Name, Route: category.Route, Description: category.Description, Tags: category.Tags})
 	}
 	return result, nil
 }
