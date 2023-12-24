@@ -20,10 +20,10 @@
       </li>
 
       <li class="w-[32px] h-[32px] cursor-pointer hover:bg-gray-1 flex-center"
-          v-for="page in pagesToShow"
-          :key="page"
+          v-for="(page, index) in pagesToShow"
           :class="{ 'border-solid border-#1e80ff border-1 b-rounded-2': page === currentPage }"
           @click="changePage(page)"
+          :key="index"
       >
         {{ page }}
       </li>
@@ -46,8 +46,10 @@
         &gt
       </li>
       <li>
-        <select class="w-[95px] h-[35px] p-x-2 p-y-1 b-rounded-2 border-gray-3" v-model="itemsPerPage"
+        <select class="w-[95px] h-[35px] p-x-2 p-y-1 b-rounded-2 border-gray-3" v-model="perPageSize"
                 @change="changeItemsPerPage">
+          <option :value="1">1 条/页</option>
+          <option :value="5">5 条/页</option>
           <option :value="10">10 条/页</option>
           <option :value="20">20 条/页</option>
           <option :value="50">50 条/页</option>
@@ -58,13 +60,12 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, computed, watch, defineProps, defineEmits} from 'vue';
 
 const leftPointer = ref("...");
 const rightPointer = ref("...");
 
 const props = defineProps({
-  totalItems: {
+  total: {
     type: Number,
     required: true
   },
@@ -72,25 +73,27 @@ const props = defineProps({
     type: Number,
     default: 1
   },
-  maxPageNumbers: {
+  perPageCount: {
     type: Number,
-    default: 5
-  }
+    default: 10
+  },
 });
-
 const emit = defineEmits(['pageChanged', 'perPageChanged']);
 
 const currentPage = ref(props.currentPage);
-const itemsPerPage = ref(10);
-const totalPages = computed(() => Math.ceil(props.totalItems / itemsPerPage.value));
+const perPageSize = ref(props.perPageCount);
+// 最大显示多少个页码
+const maxPageNumbers = ref(5);
+const total = ref(props.total)
+const totalPages = computed(() => Math.ceil(total.value / perPageSize.value));
 
 const pagesToShow = computed(() => {
   let pages = [];
-  let start = Math.max(currentPage.value - Math.floor(props.maxPageNumbers / 2), 1);
-  let end = Math.min(start + props.maxPageNumbers - 1, totalPages.value);
+  let start = Math.max(currentPage.value - Math.floor(maxPageNumbers.value / 2), 1);
+  let end = Math.min(start + maxPageNumbers.value - 1, totalPages.value);
 
-  if (totalPages.value > props.maxPageNumbers && end === totalPages.value) {
-    start = end - props.maxPageNumbers + 1;
+  if (totalPages.value > maxPageNumbers.value && end === totalPages.value) {
+    start = end - maxPageNumbers.value + 1;
   }
 
   for (let i = start; i <= end; i++) {
@@ -99,8 +102,13 @@ const pagesToShow = computed(() => {
   return pages;
 });
 
-watch(() => props.totalItems, () => {
+watch(() => props.total, () => {
   currentPage.value = 1;
+  total.value = props.total
+});
+
+watch(pagesToShow, (newValue, oldValue) => {
+  console.log(newValue);
 });
 
 const changePage = (page: number) => {
@@ -111,11 +119,12 @@ const changePage = (page: number) => {
   }
   if (page != currentPage.value) {
     currentPage.value = page;
-    emit('pageChanged', {currentPage: page, itemsPerPage: itemsPerPage.value});
+    emit('pageChanged', page, perPageSize.value);
   }
 };
 
 const changeItemsPerPage = () => {
-  emit('perPageChanged', itemsPerPage.value);
+  currentPage.value = 1
+  emit('perPageChanged', perPageSize.value);
 };
 </script>

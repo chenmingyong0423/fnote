@@ -2,6 +2,7 @@
     margin: 0;
     padding: 0;
 }
+
 html {
     font-size: 14px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
@@ -9,3 +10,7 @@ html {
     'Noto Color Emoji';
 }
 
+a {
+    color: inherit; /* 去除默认蓝色 */
+    text-decoration: none; /* 去除下划线 */
+}
