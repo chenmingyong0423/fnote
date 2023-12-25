@@ -2,7 +2,7 @@
   <div class="flex m-auto h-auto">
     <div class="w-69% mr-1% flex flex-col">
       <Notice></Notice>
-      <PostListItem :posts="posts"></PostListItem>
+      <PostListSquareItem :posts="posts"></PostListSquareItem>
     </div>
     <div class="flex flex-col w-30%">
       <Profile class="mb-5"></Profile>
