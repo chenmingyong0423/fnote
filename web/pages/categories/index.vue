@@ -29,9 +29,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-import type {IResponse} from "~/server/api/http";
-import type {ICategoryAndTags, ICategory, ITag} from '~/server/api/category'
-import {getCategoriesAndTags} from '~/server/api/category'
+import type {IResponse} from "~/api/http";
+import type {ICategoryAndTags, ICategory, ITag} from '~/api/category'
+import {getCategoriesAndTags} from '~/api/category'
 
 let categories = ref<ICategory[]>([]);
 let tags = ref<ITag[]>([]);
@@ -47,7 +47,6 @@ const categoryAndTags = async () => {
   }
 };
 categoryAndTags()
-
 </script>
 
 <style scoped>

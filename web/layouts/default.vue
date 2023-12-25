@@ -16,11 +16,11 @@
 </template>
 <script lang="ts" setup>
 import {useHomeStore} from '~/store/home';
-import {getWebMaster} from "~/server/api/config"
-import type {IWebmasterInfo} from "~/server/api/config"
-import type {IListData, IResponse} from "~/server/api/http";
+import {getWebMaster} from "~/api/config"
+import type {IWebmasterInfo} from "~/api/config"
+import type {IListData, IResponse} from "~/api/http";
 import {onMounted, ref} from "vue";
-import {getMenus, type IMenu} from "~/server/api/category";
+import {getMenus, type IMenu} from "~/api/category";
 
 const info = useHomeStore()
 const myDom = ref()

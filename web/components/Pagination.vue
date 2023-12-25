@@ -1,5 +1,5 @@
 <template>
-  <div class="flex bg-white items-center gap-x-4 p-2 b-rounded-2 w-full">
+  <div class="flex bg-white items-center gap-x-4 p-2 b-rounded-2 w-full dark:text-dtc dark_bg_gray">
     <div class="list-none flex gap-x-5 m-auto">
       <NuxtLink class="w-[32px] h-[32px] flex-center"
                 :class="{'text-gray-3 select-none' : currentPage == 1, 'cursor-pointer hover:bg-gray-1': currentPage != 1}"
@@ -50,17 +50,15 @@
       >
         &gt
       </NuxtLink>
-      <NuxtLink>
-        <select class="w-[95px] h-[35px] p-x-2 p-y-1 b-rounded-2 border-gray-3" v-model="perPageSize"
-                @change="changeItemsPerPage"
-        >
-          <option :value="1">1 条/页</option>
-          <option :value="5">5 条/页</option>
-          <option :value="10">10 条/页</option>
-          <option :value="20">20 条/页</option>
-          <option :value="50">50 条/页</option>
+      <div>
+        <select class="w-[95px] h-[35px] p-x-2 p-y-1 b-rounded-2 border-gray-3 dark:text-dtc dark_bg_gray " v-model="perPageSize" @change="changeItemsPerPage">
+          <option class="dark:bg-black" :value="1">1 条/页</option>
+          <option class="dark:bg-black" :value="5">5 条/页</option>
+          <option class="dark:bg-black" :value="10">10 条/页</option>
+          <option class="dark:bg-black" :value="20">20 条/页</option>
+          <option class="dark:bg-black" :value="50">50 条/页</option>
         </select>
-      </NuxtLink>
+      </div>
     </div>
   </div>
 </template>
@@ -77,7 +75,7 @@ const props = defineProps({
   },
   currentPage: {
     type: Number,
-    default: 1
+    default: 2
   },
   perPageCount: {
     type: Number,
@@ -88,7 +86,6 @@ const props = defineProps({
     required: true
   },
 });
-const emit = defineEmits(['pageChanged', 'perPageChanged']);
 
 const route = props.route
 const currentPage = ref(props.currentPage);
@@ -114,20 +111,15 @@ const pagesToShow = computed(() => {
 });
 
 watch(() => props.total, () => {
-  currentPage.value = 1;
-  total.value = props.total
+  if (props.total != total.value) {
+    total.value = props.total
+  }
 });
 
-const changePage = (page: number) => {
-  if (page < 1) {
-    page = 1;
-  } else if (page > totalPages.value) {
-    page = totalPages.value;
-  }
-  if (page != currentPage.value) {
-    currentPage.value = page;
-    emit('pageChanged', page, perPageSize.value);
-  }
+const router = useRouter()
+
+const changeItemsPerPage = () => {
+  router.push(route + 1 + '?pageSize=' + perPageSize.value)
 };
 
 const calculatePages = (page: number): number => {
@@ -137,10 +129,5 @@ const calculatePages = (page: number): number => {
     return totalPages.value;
   }
   return page
-};
-
-const changeItemsPerPage = () => {
-  currentPage.value = 1
-  emit('perPageChanged', perPageSize.value);
 };
 </script>

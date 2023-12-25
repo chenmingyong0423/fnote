@@ -12,9 +12,9 @@
 </template>
 
 <script lang="ts" setup>
-import {getLatestPosts} from "~/server/api/post"
-import type {IPost} from "~/server/api/post"
-import type {IResponse, IListData} from "~/server/api/http";
+import {getLatestPosts} from "~/api/post"
+import type {IPost} from "~/api/post"
+import type {IResponse, IListData} from "~/api/http";
 let posts = ref<IPost[]>([]);
 
 const postInfos = async () => {
