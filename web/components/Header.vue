@@ -23,9 +23,6 @@
 
 <script lang="ts" setup>
 import {ref, onMounted} from 'vue';
-import {getMenus} from "~/server/api/category"
-import type {IMenu} from "~/server/api/category"
-import type {IResponse, IListData} from "~/server/api/http";
 import {useHomeStore} from '~/store/home';
 import Menu from "~/components/Menu.vue";
 
@@ -33,16 +30,7 @@ const homeStore = useHomeStore()
 
 const isBlackMode = computed(() => homeStore.is_black_mode)
 const picture = ref<string>(homeStore.master_info.picture)
-const menus = async () => {
-  try {
-    let postRes: any = await getMenus()
-    let res: IResponse<IListData<IMenu>> = postRes.data.value
-    homeStore.menuList = res.data?.list || []
-  } catch (error) {
-    console.log(error);
-  }
-};
-menus()
+
 
 watch(isBlackMode, (newValue) => {
   localStorage.setItem("isBlackMode", newValue.toString())

@@ -18,11 +18,13 @@
 import {useHomeStore} from '~/store/home';
 import {getWebMaster} from "~/server/api/config"
 import type {IWebmasterInfo} from "~/server/api/config"
-import type {IResponse} from "~/server/api/http";
+import type {IListData, IResponse} from "~/server/api/http";
 import {onMounted, ref} from "vue";
+import {getMenus, type IMenu} from "~/server/api/category";
 
 const info = useHomeStore()
 const myDom = ref()
+const homeStore = useHomeStore()
 
 onMounted(() => {
   let isBlackMode = localStorage.getItem("isBlackMode")
@@ -56,6 +58,17 @@ const webMaster = async () => {
   }
 };
 webMaster()
+
+const menus = async () => {
+  try {
+    let postRes: any = await getMenus()
+    let res: IResponse<IListData<IMenu>> = postRes.data.value
+    homeStore.menuList = res.data?.list || []
+  } catch (error) {
+    console.log(error);
+  }
+};
+menus()
 </script>
 
 <style scoped>
