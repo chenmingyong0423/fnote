@@ -26,6 +26,7 @@ export default defineNuxtConfig({
             {'menu_item': 'px18 py15 text-14 dark:text-#fff hover:bg-#000/20 active:bg-#000/40 c-#000 cursor-pointer'},
             {'flex-center': 'flex items-center justify-center'},
             {'custom_cursor_flow': 'hover:drop-shadow-xl hover:translate-y--2 duration-100'},
+            {'custom_icon': 'hover:text-blue duration-100'},
         ],
         rules: [
             ['footer_shadow', {'box-shadow': ' 0 0 10px rgba(0, 0, 0, .5)'}],

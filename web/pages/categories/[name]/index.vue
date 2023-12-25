@@ -1,9 +1,17 @@
 <template>
-  <div class="flex flex-col">
-    <PostListItem :posts="posts"></PostListItem>
-    <Pagination :currentPage="req.pageNo" :total="totalPosts" :perPageCount='req.pageSize'
-                :route="path +'/page/'"></Pagination>
+  <div class="flex">
+    <div class="w-69% mr-1% flex flex-col">
+      <div class="flex flex-col">
+        <PostListItem :posts="posts"></PostListItem>
+        <Pagination :currentPage="req.pageNo" :total="totalPosts" :perPageCount='req.pageSize'
+                    :route="path +'/page/'"></Pagination>
+      </div>
+    </div>
+    <div class="flex flex-col w-30%">
+      <Profile class="mb-5"></Profile>
+    </div>
   </div>
+
 </template>
 
 
