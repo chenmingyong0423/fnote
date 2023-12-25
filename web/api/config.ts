@@ -3,6 +3,18 @@ import httpRequest from "./http";
 export interface IWebmasterInfo {
     web_master_config: IWebMaster,
     notice_config: INotice,
+    social_info_config: ISocialInfo,
+}
+
+export interface ISocialInfo {
+    social_info_list: ISocialInfoItem[];
+}
+
+export interface ISocialInfoItem {
+    social_name: string;
+    social_value: string;
+    css_class: string;
+    is_link: boolean;
 }
 
 export interface IWebMaster {

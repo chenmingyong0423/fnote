@@ -1,5 +1,8 @@
 <template>
-  <div class="flex flex-col items-center justify-center bg-#fff p-10 b-rounded-4 cursor-pointer dark:text-dtc dark_bg_gray ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--2">
+  <div
+      class="flex flex-col items-center justify-center bg-#fff p-10 b-rounded-4 cursor-pointer dark:text-dtc dark_bg_gray ease-linear duration-100 custom_shadow hover:translate-y--2"
+  @mouseleave="isTooltipVisible=false"
+  >
     <div class="avatar">
       <img :src="homeStore.master_info.picture"
            alt=""
@@ -24,18 +27,13 @@
         <span class="">浏览量</span>
       </div>
     </div>
-    <div class="flex items-center justify-center gap-x-3 text-gray-5 text-6 border-t-1 border-t-gray-2 border-t-solid p-t-5 w-full">
-      <span class="i-fa6-brands:bilibili custom_icon " ></span>
-      <span class="i-fa6-brands:facebook custom_icon"></span>
-      <span class="i-fa6-brands:qq custom_icon"></span>
-      <span class="i-fa6-brands:github custom_icon"></span>
-      <span class="i-fa6-brands:square-git custom_icon"></span>
-      <span class="i-fa6-brands:weibo custom_icon"></span>
-      <span class="i-fa6-brands:weixin custom_icon"></span>
-      <span class="i-fa6-brands:x-twitter custom_icon"></span>
-      <span class="i-fa6-brands:youtube custom_icon"></span>
-      <span class="i-fa6-brands:zhihu custom_icon"></span>
-      <span class="i-fa6-brands:internet-explorer custom_icon"></span>
+    <div
+        class="flex items-center justify-center gap-x-3 text-gray-5 text-6 border-t-1 border-t-gray-2 border-t-solid p-t-5 w-full">
+      <template v-for="(icon, index) in homeStore.social_info_list" :key="index">
+        <a v-if="icon.is_link" :class="get(icon.css_class)" class="custom_icon text-6" :title="icon.social_name" :href="icon.social_value" target="_blank"></a>
+        <span v-else :class="get(icon.css_class)" class="custom_icon text-6" :title="icon.social_name" @click="showTooltip(icon.social_name + ': ' +icon.social_value)"></span>
+      </template>
+      <ToolTip :content="tooltipContent" :visible="isTooltipVisible" @tooltipVisibleChanged="tooltipVisibleChanged"/>
     </div>
   </div>
 </template>
@@ -44,8 +42,46 @@
 
 import {useHomeStore} from "~/store/home";
 
-const homeStore = useHomeStore()
+const isTooltipVisible = ref(false);
+const tooltipContent = ref('');
 
+const showTooltip = (content: string) => {
+  tooltipContent.value = content;
+  isTooltipVisible.value = true;
+}
+
+const tooltipVisibleChanged = (visible: boolean) => {
+  isTooltipVisible.value = visible;
+}
+
+const homeStore = useHomeStore()
+const get = (icon: string): string => {
+  switch (icon) {
+    case "i-fa6-brands:x-twitter":
+      return "i-fa6-brands:x-twitter"
+    case "i-fa6-brands:facebook":
+      return "i-fa6-brands:facebook"
+    case "i-fa6-brands:instagram":
+      return "i-fa6-brands:instagram"
+    case "i-fa6-brands:youtube":
+      return "i-fa6-brands:youtube"
+    case "i-fa6-brands:bilibili":
+      return "i-fa6-brands:bilibili"
+    case "i-fa6-brands:qq":
+      return "i-fa6-brands:qq"
+    case "i-fa6-brands:github":
+      return "i-fa6-brands:github"
+    case "i-fa6-brands:square-git":
+      return "i-fa6-brands:square-git"
+    case "i-fa6-brands:weixin":
+      return "i-fa6-brands:weixin"
+    case "i-fa6-brands:zhihu":
+      return "i-fa6-brands:zhihu"
+    case "fa6-brands:internet-explorer":
+      return "fa6-brands:internet-explorer"
+  }
+  return ""
+}
 </script>
 
 <style scoped>
