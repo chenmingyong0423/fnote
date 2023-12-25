@@ -28,9 +28,9 @@
   </div>
 </template>
 <script setup lang="ts">
-import {getLatestComments} from "~/server/api/comment"
-import type {ILatestComment,} from "~/server/api/comment"
-import type {IResponse, IListData} from "~/server/api/http";
+import {getLatestComments} from "~/api/comment"
+import type {ILatestComment,} from "~/api/comment"
+import type {IResponse, IListData} from "~/api/http";
 
 const router = useRouter()
 const comments = ref([] as ILatestComment[]);

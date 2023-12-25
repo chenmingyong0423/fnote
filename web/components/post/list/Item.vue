@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import type {PropType} from "vue";
-import type {IPost} from "~/server/api/post";
+import type {IPost} from "~/api/post";
 
 const props = defineProps({
   posts: {

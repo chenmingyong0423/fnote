@@ -8,22 +8,23 @@
 
 
 <script lang="ts" setup>
-import {getPosts} from "~/server/api/post"
-import type {PageRequest} from "~/server/api/post"
-import type {IPost} from "~/server/api/post"
-import type {IResponse, IPageData} from "~/server/api/http";
+import {getPosts} from "~/api/post"
+import type {PageRequest} from "~/api/post"
+import type {IPost} from "~/api/post"
+import type {IResponse, IPageData} from "~/api/http";
 import {useHomeStore} from '~/store/home';
-import type {IMenu} from "~/server/api/category";
+import type {IMenu} from "~/api/category";
 
 const homeStore = useHomeStore()
 const route = useRoute()
 const path = route.path
+const pageSize :number = Number(route.query.pageSize) || 5
+
 let name = homeStore.menuList.find((item: IMenu) => item.route == path)?.name
-console.log(123)
 let posts = ref<IPost[]>([]);
 let req = ref<PageRequest>({
   pageNo: 1,
-  pageSize: 5,
+  pageSize: pageSize,
   sortField: "create_time",
   sortOrder: "desc",
   category: name,

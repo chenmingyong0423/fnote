@@ -1,5 +1,5 @@
-import type {IWebmasterInfo, IWebMaster, INotice} from "@/server/api/config"
-import type {IMenu} from "@/server/api/category"
+import type {IWebmasterInfo, IWebMaster, INotice} from "@/api/config"
+import type {IMenu} from "@/api/category"
 import {defineStore} from 'pinia'
 
 export const useHomeStore = defineStore("home", {
