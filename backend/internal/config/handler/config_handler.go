@@ -21,6 +21,43 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// IndexConfigVO 首页信息
+type IndexConfigVO struct {
+	WebMasterConfig    WebMasterConfigVO  `json:"web_master_config"`
+	NoticeConfigVO     NoticeConfigVO     `json:"notice_config"`
+	SocialInfoConfigVO SocialInfoConfigVO `json:"social_info_config"`
+}
+
+type NoticeConfigVO struct {
+	Title       string `json:"title" `
+	Content     string `json:"content"`
+	PublishTime int64  `json:"publish_time"`
+}
+
+type WebMasterConfigVO struct {
+	Name            string   `json:"name"`
+	PostCount       uint     `json:"post_count"`
+	CategoryCount   uint     `json:"category_count"`
+	WebsiteViews    uint     `json:"website_views"`
+	WebsiteLiveTime int64    `json:"website_live_time"`
+	Profile         string   `json:"profile"`
+	Picture         string   `json:"picture"`
+	WebsiteIcon     string   `json:"website_icon"`
+	Domain          string   `json:"domain"`
+	Records         []string `json:"records"`
+}
+
+type SocialInfoConfigVO struct {
+	SocialInfoList []SocialInfoVO `json:"social_info_list"`
+}
+
+type SocialInfoVO struct {
+	SocialName  string `json:"social_name"`
+	SocialValue string `json:"social_value"`
+	CssClass    string `json:"css_class"`
+	IsLink      bool   `json:"is_link"`
+}
+
 func NewConfigHandler(serv service.IConfigService) *ConfigHandler {
 	return &ConfigHandler{
 		serv: serv,
@@ -37,7 +74,7 @@ func (h *ConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup.GET("/index", api.Wrap(h.GetIndexConfig))
 }
 
-func (h *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) (*domain.WebMasterConfigVO, error) {
+func (h *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) (*WebMasterConfigVO, error) {
 	webMasterConfig, err := h.serv.GetWebmasterInfo(ctx, "webmaster")
 	if err != nil {
 		return nil, err
@@ -45,21 +82,30 @@ func (h *ConfigHandler) GetWebmasterInfo(ctx *gin.Context) (*domain.WebMasterCon
 	return h.toWebMasterConfigVO(webMasterConfig), nil
 }
 
-func (h *ConfigHandler) GetIndexConfig(ctx *gin.Context) (*domain.IndexConfigVO, error) {
+func (h *ConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO, error) {
 	config, err := h.serv.GetIndexConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &domain.IndexConfigVO{
-		WebMasterConfig: *h.toWebMasterConfigVO(&config.WebMasterConfig),
-		NoticeConfigVO:  *h.toNoticeConfigVO(&config.NoticeConfig),
+	return &IndexConfigVO{
+		WebMasterConfig:    *h.toWebMasterConfigVO(&config.WebMasterConfig),
+		NoticeConfigVO:     *h.toNoticeConfigVO(&config.NoticeConfig),
+		SocialInfoConfigVO: *h.toSocialInfoConfigVO(&config.SocialInfoConfig),
 	}, nil
 }
 
-func (h *ConfigHandler) toWebMasterConfigVO(webMasterCfg *domain.WebMasterConfig) *domain.WebMasterConfigVO {
-	return &domain.WebMasterConfigVO{Name: webMasterCfg.Name, PostCount: webMasterCfg.PostCount, CategoryCount: webMasterCfg.CategoryCount, WebsiteViews: webMasterCfg.WebsiteViews, WebsiteLiveTime: webMasterCfg.WebsiteLiveTime, Profile: webMasterCfg.Profile, Picture: webMasterCfg.Picture, WebsiteIcon: webMasterCfg.WebsiteIcon, Domain: webMasterCfg.Domain, Records: webMasterCfg.Records}
+func (h *ConfigHandler) toWebMasterConfigVO(webMasterCfg *domain.WebMasterConfig) *WebMasterConfigVO {
+	return &WebMasterConfigVO{Name: webMasterCfg.Name, PostCount: webMasterCfg.PostCount, CategoryCount: webMasterCfg.CategoryCount, WebsiteViews: webMasterCfg.WebsiteViews, WebsiteLiveTime: webMasterCfg.WebsiteLiveTime, Profile: webMasterCfg.Profile, Picture: webMasterCfg.Picture, WebsiteIcon: webMasterCfg.WebsiteIcon, Domain: webMasterCfg.Domain, Records: webMasterCfg.Records}
 }
 
-func (h *ConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) *domain.NoticeConfigVO {
-	return &domain.NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, PublishTime: noticeCfg.PublishTime}
+func (h *ConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) *NoticeConfigVO {
+	return &NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, PublishTime: noticeCfg.PublishTime}
+}
+
+func (h *ConfigHandler) toSocialInfoConfigVO(socialINfoConfig *domain.SocialInfoConfig) *SocialInfoConfigVO {
+	socialInfoVOList := make([]SocialInfoVO, len(socialINfoConfig.SocialInfoList))
+	for i, socialInfo := range socialINfoConfig.SocialInfoList {
+		socialInfoVOList[i] = SocialInfoVO{SocialName: socialInfo.SocialName, SocialValue: socialInfo.SocialValue, CssClass: socialInfo.CssClass, IsLink: socialInfo.IsLink}
+	}
+	return &SocialInfoConfigVO{SocialInfoList: socialInfoVOList}
 }
