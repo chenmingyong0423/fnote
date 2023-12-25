@@ -29,6 +29,7 @@ export type PageRequest = {
 }
 
 export const getPosts = (pq: PageRequest) => httpRequest.get(prefix + "", pq)
+export const getLatestPosts = () => httpRequest.get(prefix + "/latest")
 
 
 export interface IPostDetail {
