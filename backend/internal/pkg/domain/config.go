@@ -22,15 +22,10 @@ type Config struct {
 	UpdateTime int64
 }
 
-// IndexConfigVO 首页信息
-type IndexConfigVO struct {
-	WebMasterConfig WebMasterConfigVO `json:"web_master_config"`
-	NoticeConfigVO  NoticeConfigVO    `json:"notice_config"`
-}
-
 type IndexConfig struct {
-	WebMasterConfig WebMasterConfig
-	NoticeConfig    NoticeConfig
+	WebMasterConfig  WebMasterConfig
+	NoticeConfig     NoticeConfig
+	SocialInfoConfig SocialInfoConfig
 }
 
 // WebMasterConfig 站长信息
@@ -55,25 +50,6 @@ type NoticeConfig struct {
 	PublishTime int64  `bson:"publish_time"`
 }
 
-type NoticeConfigVO struct {
-	Title       string `json:"title" `
-	Content     string `json:"content"`
-	PublishTime int64  `json:"publish_time"`
-}
-
-type WebMasterConfigVO struct {
-	Name            string   `json:"name"`
-	PostCount       uint     `json:"post_count"`
-	CategoryCount   uint     `json:"category_count"`
-	WebsiteViews    uint     `json:"website_views"`
-	WebsiteLiveTime int64    `json:"website_live_time"`
-	Profile         string   `json:"profile"`
-	Picture         string   `json:"picture"`
-	WebsiteIcon     string   `json:"website_icon"`
-	Domain          string   `json:"domain"`
-	Records         []string `json:"records"`
-}
-
 type SwitchConfig struct {
 	Status bool `bson:"status" json:"status"`
 }
@@ -84,4 +60,15 @@ type EmailConfig struct {
 	Account  string `bson:"account"`
 	Password string `bson:"password"`
 	Email    string `bson:"email"`
+}
+
+type SocialInfoConfig struct {
+	SocialInfoList []SocialInfo `bson:"social_info_list" json:"social_info_list"`
+}
+
+type SocialInfo struct {
+	SocialName  string `bson:"social_name" json:"social_name"`
+	SocialValue string `bson:"social_value" json:"social_value"`
+	CssClass    string `bson:"css_class" json:"css_class"`
+	IsLink      bool   `bson:"is_link" json:"is_link"`
 }

@@ -44,7 +44,7 @@ type ConfigService struct {
 }
 
 func (s *ConfigService) GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error) {
-	configs, err := s.repo.GetConfigByTypes(ctx, "webmaster", "notice")
+	configs, err := s.repo.GetConfigByTypes(ctx, "webmaster", "notice", "social")
 	if err != nil {
 		return nil, err
 	}
@@ -66,6 +66,13 @@ func (s *ConfigService) GetIndexConfig(ctx context.Context) (*domain.IndexConfig
 			if noticeCfg.Enabled {
 				cfg.NoticeConfig = noticeCfg
 			}
+		} else if config.Typ == "social" {
+			socialInfoConfig := domain.SocialInfoConfig{}
+			err = s.anyToStruct(config.Props, &socialInfoConfig)
+			if err != nil {
+				return nil, err
+			}
+			cfg.SocialInfoConfig = socialInfoConfig
 		}
 	}
 	return cfg, nil
