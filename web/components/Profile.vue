@@ -10,7 +10,7 @@
       <span class="text-gray-5 mb-2">{{ homeStore.master_info.profile }}</span>
     </div>
     <div
-        class="flex items-center justify-between border-t w-full text-gray-5 border-t-1 border-t-gray-2 border-t-solid p-t-5">
+        class="flex items-center justify-between border-t w-full text-gray-5 border-t-1 border-t-gray-2 border-t-solid p-t-5 mb-5">
       <div class="flex flex-col items-center justify-center w-33%">
         <span class="mb-1">{{ homeStore.master_info.post_count }}</span>
         <span class="">文章</span>
@@ -23,6 +23,19 @@
         <span class="mb-1">{{ homeStore.master_info.website_views }}</span>
         <span class="">浏览量</span>
       </div>
+    </div>
+    <div class="flex items-center justify-center gap-x-3 text-gray-5 text-6 border-t-1 border-t-gray-2 border-t-solid p-t-5 w-full">
+      <span class="i-fa6-brands:bilibili custom_icon " ></span>
+      <span class="i-fa6-brands:facebook custom_icon"></span>
+      <span class="i-fa6-brands:qq custom_icon"></span>
+      <span class="i-fa6-brands:github custom_icon"></span>
+      <span class="i-fa6-brands:square-git custom_icon"></span>
+      <span class="i-fa6-brands:weibo custom_icon"></span>
+      <span class="i-fa6-brands:weixin custom_icon"></span>
+      <span class="i-fa6-brands:x-twitter custom_icon"></span>
+      <span class="i-fa6-brands:youtube custom_icon"></span>
+      <span class="i-fa6-brands:zhihu custom_icon"></span>
+      <span class="i-fa6-brands:internet-explorer custom_icon"></span>
     </div>
   </div>
 </template>
