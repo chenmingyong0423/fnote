@@ -1,12 +1,19 @@
 <template>
   <div class="flex flex-wrap justify-between">
     <NuxtLink
-        class="item group flex flex-col items-center p-5 bg-#fff b-rounded-4 w-150 h-110 cursor-pointer ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--2 dark:text-dtc dark_bg_gray mb-5"
+        class="item group flex flex-col items-center p-5 bg-#fff b-rounded-4 w-45% h-100 cursor-pointer duration-100 custom_shadow dark:text-dtc dark_bg_gray mb-5"
         v-for="(item, index) in props.posts" :key="index" :to="'/posts/' + item.sug">
       <div class="h-2/3 overflow-hidden relative w-full">
-        <img class="object-contain w-full h-full"
+        <img class="object-contain w-full h-full group-hover:scale-110 duration-500"
              :src="item.cover_img"
              :alt="item.title"/>
+        <div
+            class="flex justify-between gap-x-3 z-99 w-auto absolute top-3 ease-linear duration-200">
+          <span class="bg-#2db7f5 rounded-3 text-white py-0.2em px-0.8em">{{ item.category }}</span>
+          <span class="bg-orange rounded-3 text-white py-0.2em px-0.8em" v-for="(tag, idx) in item.tags" :key="idx">{{
+              tag
+            }}</span>
+        </div>
       </div>
       <div class="h-1/3 overflow-hidden relative w-full flex flex-col">
         <div class="mb-2 text-10 h-15 truncate">
@@ -47,28 +54,5 @@ const props = defineProps({
 </script>
 
 <style scoped>
-.line-clamp-4 {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3; /* 可以调整这个数值来设置行数 */
-  overflow: hidden;
-}
 
-.item::before {
-  content: '';
-  position: absolute;
-  width: 99%;
-  transform: scaleX(0);
-  height: 2px;
-  bottom: 0;
-  left: 0.5%;
-  background-color: #0087ca;
-  transform-origin: bottom;
-  transition: transform 0.3s ease-out;
-}
-
-.item:hover::before {
-  transform: scaleX(1);
-  transform-origin: right left;
-}
 </style>

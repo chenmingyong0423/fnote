@@ -1,4 +1,4 @@
-import type {IWebmasterInfo, IWebMaster, INotice} from "@/api/config"
+import type {ISocialInfoItem, IWebMaster, INotice} from "@/api/config"
 import type {IMenu} from "@/api/category"
 import {defineStore} from 'pinia'
 
@@ -22,7 +22,8 @@ export const useHomeStore = defineStore("home", {
         } as IWebMaster,
         notice_info: {
             content: ""
-        } as INotice
+        } as INotice,
+        social_info_list: [] as ISocialInfoItem[],
     }),
     // 持久化存储
     persist: process.client && {

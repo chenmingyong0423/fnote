@@ -16,6 +16,7 @@ export default defineNuxtConfig({
         shortcuts: [
             {'dark_bg_black': 'dark:bg-#03080c'},
             {'dark_bg_gray': 'dark:bg-#207191/10 dark:border-solid dark:border-#1e2227 dark:border-1'},
+            {'dark_bg_full_black': 'dark:bg-#000/90 dark:border-solid dark:border-#1e2227 dark:border-1'},
             {'dark_border': 'border-solid border-#1e2227 border-1'},
             {'dark_text_white': 'dark:c-#fff'},
             {'light_border': 'border-1 border-gray-2 border-solid'},
@@ -27,6 +28,7 @@ export default defineNuxtConfig({
             {'flex-center': 'flex items-center justify-center'},
             {'custom_cursor_flow': 'hover:drop-shadow-xl hover:translate-y--2 duration-100'},
             {'custom_icon': 'hover:text-blue duration-100'},
+            {'custom_shadow': 'hover:shadow-2xl dark:shadow-white duration-100'},
         ],
         rules: [
             ['footer_shadow', {'box-shadow': ' 0 0 10px rgba(0, 0, 0, .5)'}],

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div @click="visible = true" class="flex items-center dark:text-dtc dark_bg_gray h-15 bg-#fff mb-5 b-rounded-4 cursor-pointer p-x-5 ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--2 hover:bg-gray-1 dark:hover:bg-#fff/20">
+    <div @click="visible = true" class="flex items-center dark:text-dtc dark_bg_gray h-15 bg-#fff mb-5 b-rounded-4 cursor-pointer p-x-5 ease-linear duration-100 custom_shadow hover:translate-y--2">
       <div class="-i-ph-speaker-high-duotone w-10 h-10 text-orange"></div>
       <div ref="marqueeContainer" class="ml-5 font-bold overflow-hidden whitespace-nowrap w-full"
            @mouseenter="stopMarquee"
@@ -13,8 +13,8 @@
       </div>
     </div>
     <!-- 模态框 -->
-    <div v-if="visible" class="fixed z-999 inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
-      <div class="bg-white p-6 rounded shadow-lg max-w-md min-w-400px dark:text-dtc dark_bg_gray">
+    <div v-if="visible" class="fixed z-999 inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 custom_shadow">
+      <div class="bg-white p-6 rounded shadow-lg max-w-md min-w-400px dark:text-dtc dark_bg_full_black">
         <div class="text-right text-sm text-gray-500 mb-4">
           发布时间: {{ $dayjs(homeStore.notice_info.publish_time).format('YYYY-MM-DD HH:mm:ss') }}
         </div>
