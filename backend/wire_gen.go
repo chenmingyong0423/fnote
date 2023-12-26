@@ -37,6 +37,10 @@ import (
 	repository5 "github.com/chenmingyong0423/fnote/backend/internal/post/repository"
 	dao5 "github.com/chenmingyong0423/fnote/backend/internal/post/repository/dao"
 	service5 "github.com/chenmingyong0423/fnote/backend/internal/post/service"
+	handler6 "github.com/chenmingyong0423/fnote/backend/internal/tag/handler"
+	repository9 "github.com/chenmingyong0423/fnote/backend/internal/tag/repository"
+	dao9 "github.com/chenmingyong0423/fnote/backend/internal/tag/repository/dao"
+	service11 "github.com/chenmingyong0423/fnote/backend/internal/tag/service"
 	handler4 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/handler"
 	repository8 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository"
 	dao8 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository/dao"
@@ -82,10 +86,14 @@ func initializeApp(cfgPath string) (*gin.Engine, error) {
 	visitLogService := service10.NewVisitLogService(visitLogRepository)
 	visitLogHandler := handler4.NewVisitLogHandler(visitLogService, configService)
 	msgTplHandler := handler5.NewMsgTplHandler(msgTplService)
+	tagDao := dao9.NewTagDao(database)
+	tagRepository := repository9.NewTagRepository(tagDao)
+	tagService := service11.NewTagService(tagRepository, countStatsService)
+	tagHandler := handler6.NewTagHandler(tagService)
 	writer := ioc.InitLogger(config)
 	v := ioc.InitMiddlewares(config, writer)
 	validators := ioc.InitGinValidators()
-	engine, err := ioc.NewGinEngine(categoryHandler, commentHandler, configHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, v, validators)
+	engine, err := ioc.NewGinEngine(categoryHandler, commentHandler, configHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, v, validators)
 	if err != nil {
 		return nil, err
 	}

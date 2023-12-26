@@ -17,20 +17,17 @@ package service
 import (
 	"context"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
-	"github.com/chenmingyong0423/gkit/slice"
-	"golang.org/x/sync/errgroup"
-
 	"github.com/chenmingyong0423/fnote/backend/internal/category/repository"
+	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+	"github.com/chenmingyong0423/gkit/slice"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ICategoryService interface {
-	GetCategoriesAndTags(ctx context.Context) (domain.CategoryAndTagWithCount, error)
+	GetCategories(ctx context.Context) ([]domain.CategoryWithCount, error)
 	GetMenus(ctx context.Context) ([]domain.Category, error)
-	GetTagsByName(ctx context.Context, name string) ([]string, error)
 }
 
 var _ ICategoryService = (*CategoryService)(nil)
@@ -47,10 +44,6 @@ type CategoryService struct {
 	repo              repository.ICategoryRepository
 }
 
-func (s *CategoryService) GetTagsByName(ctx context.Context, name string) ([]string, error) {
-	return s.repo.GetTagsByName(ctx, name)
-}
-
 func (s *CategoryService) GetMenus(ctx context.Context) (menuVO []domain.Category, err error) {
 	categories, err := s.repo.GetAll(ctx)
 	if err != nil && !errors.Is(err, mongo.ErrNilDocument) {
@@ -59,13 +52,13 @@ func (s *CategoryService) GetMenus(ctx context.Context) (menuVO []domain.Categor
 	return categories, nil
 }
 
-func (s *CategoryService) GetCategoriesAndTags(ctx context.Context) (domain.CategoryAndTagWithCount, error) {
+func (s *CategoryService) GetCategories(ctx context.Context) ([]domain.CategoryWithCount, error) {
 	categories, err := s.repo.GetAll(ctx)
 	if err != nil && !errors.Is(err, mongo.ErrNilDocument) {
-		return domain.CategoryAndTagWithCount{}, err
+		return nil, err
 	}
 	if len(categories) == 0 {
-		return domain.CategoryAndTagWithCount{}, nil
+		return nil, nil
 	}
 	// 将所有分类的 id 转换为 string 数组
 	ids := slice.Map[domain.Category, string](categories, func(_ int, s domain.Category) string {
@@ -74,41 +67,11 @@ func (s *CategoryService) GetCategoriesAndTags(ctx context.Context) (domain.Cate
 	categoryMap := slice.IndexStructsByKey[domain.Category, string](categories, func(category domain.Category) string {
 		return category.Id
 	})
-	// 获取所有分类下的标签
-	tags := slice.CombineAndDeduplicateNestedSlices[domain.Category, string](categories, func(_ int, s domain.Category) []string {
-		return s.Tags
-	})
 
-	categoryCounts := make([]domain.CountStats, 0, len(ids))
-	tagCounts := make([]domain.CountStats, 0, len(tags))
-	group := &errgroup.Group{}
-	group.Go(func() error {
-		categoryCounts, err = s.countStatsService.GetByReferenceIdAndType(ctx, ids, domain.CountStatsTypePostCountInCategory)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	group.Go(func() error {
-		if len(tags) > 0 {
-			tagCounts, err = s.countStatsService.GetByReferenceIdAndType(ctx, tags, domain.CountStatsTypePostCountInTag)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-	err = group.Wait()
+	categoryCounts, err := s.countStatsService.GetByReferenceIdAndType(ctx, ids, domain.CountStatsTypePostCountInCategory)
 	if err != nil {
-		return domain.CategoryAndTagWithCount{}, err
+		return nil, err
 	}
-
-	tagWithCounts := slice.Map[domain.CountStats, domain.TagWithCount](tagCounts, func(idx int, s domain.CountStats) domain.TagWithCount {
-		return domain.TagWithCount{
-			Name:  s.ReferenceId,
-			Count: s.Count,
-		}
-	})
 
 	categoryWithCounts := slice.Map[domain.CountStats, domain.CategoryWithCount](categoryCounts, func(idx int, s domain.CountStats) domain.CategoryWithCount {
 		return domain.CategoryWithCount{
@@ -119,8 +82,5 @@ func (s *CategoryService) GetCategoriesAndTags(ctx context.Context) (domain.Cate
 		}
 	})
 
-	return domain.CategoryAndTagWithCount{
-		Categories: categoryWithCounts,
-		Tags:       tagWithCounts,
-	}, nil
+	return categoryWithCounts, nil
 }

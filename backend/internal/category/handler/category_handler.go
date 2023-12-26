@@ -25,21 +25,11 @@ type MenuVO struct {
 	Route string `json:"route"`
 }
 
-type CategoryAndTagWithCountVO struct {
-	Categories []CategoryWithCountVO `json:"categories"`
-	Tags       []TagWithCountVO      `json:"tags"`
-}
-
 type CategoryWithCountVO struct {
 	Name        string `json:"name"`
 	Route       string `json:"route"`
 	Description string `json:"description"`
 	Count       int64  `json:"count"`
-}
-
-type TagWithCountVO struct {
-	Name  string `json:"name"`
-	Count int64  `json:"count"`
 }
 
 func NewCategoryHandler(serv service.ICategoryService) *CategoryHandler {
@@ -54,38 +44,25 @@ type CategoryHandler struct {
 
 func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/categories")
-	group.GET("", api.Wrap(h.GetCategoriesAndTags))
-	group.GET("/:name/tags", api.Wrap(h.GetTagsByName))
+	group.GET("", api.Wrap(h.GetCategories))
 	engine.GET("/menus", api.Wrap(h.GetMenus))
 }
 
-func (h *CategoryHandler) GetCategoriesAndTags(ctx *gin.Context) (VO CategoryAndTagWithCountVO, err error) {
-	categoryAndTagWithCount, err := h.serv.GetCategoriesAndTags(ctx)
+func (h *CategoryHandler) GetCategories(ctx *gin.Context) (listVO api.ListVO[CategoryWithCountVO], err error) {
+	categoriesWithCount, err := h.serv.GetCategories(ctx)
 	if err != nil {
 		return
 	}
-	VO.Categories = func() []CategoryWithCountVO {
-		result := make([]CategoryWithCountVO, len(categoryAndTagWithCount.Categories))
-		for i, category := range categoryAndTagWithCount.Categories {
-			result[i] = CategoryWithCountVO{
-				Name:        category.Name,
-				Route:       category.Route,
-				Description: category.Description,
-				Count:       category.Count,
-			}
+	result := make([]CategoryWithCountVO, len(categoriesWithCount))
+	for i, category := range categoriesWithCount {
+		result[i] = CategoryWithCountVO{
+			Name:        category.Name,
+			Route:       category.Route,
+			Description: category.Description,
+			Count:       category.Count,
 		}
-		return result
-	}()
-	VO.Tags = func() []TagWithCountVO {
-		result := make([]TagWithCountVO, len(categoryAndTagWithCount.Tags))
-		for i, tag := range categoryAndTagWithCount.Tags {
-			result[i] = TagWithCountVO{
-				Name:  tag.Name,
-				Count: tag.Count,
-			}
-		}
-		return result
-	}()
+	}
+	listVO.List = result
 	return
 }
 
@@ -99,15 +76,5 @@ func (h *CategoryHandler) GetMenus(ctx *gin.Context) (listVO api.ListVO[MenuVO],
 		menuVOs[i] = MenuVO{Name: menu.Name, Route: menu.Route}
 	}
 	listVO.List = menuVOs
-	return
-}
-
-func (h *CategoryHandler) GetTagsByName(ctx *gin.Context) (listVO api.ListVO[string], err error) {
-	name := ctx.Param("name")
-	tags, err := h.serv.GetTagsByName(ctx, name)
-	if err != nil {
-		return
-	}
-	listVO.List = append(listVO.List, tags...)
 	return
 }

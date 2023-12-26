@@ -18,17 +18,17 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/internal/{{.UnderlineName}}/repository"
 )
 
-type I{{.DomainName}}Service interface {
 
+type I{{.DomainName}}Service interface {
 }
+
+var _ I{{.DomainName}}Service = (*{{.DomainName}}Service)(nil)
 
 func New{{.DomainName}}Service(repo repository.I{{.DomainName}}Repository) *{{.DomainName}}Service {
 	return &{{.DomainName}}Service{
 		repo: repo,
 	}
 }
-
-var _ I{{.DomainName}}Service = (*{{.DomainName}}Service)(nil)
 
 type {{.DomainName}}Service struct {
 	repo repository.I{{.DomainName}}Repository

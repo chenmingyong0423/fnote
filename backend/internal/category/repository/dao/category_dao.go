@@ -22,24 +22,22 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Category struct {
-	Id          string   `bson:"_id"`
-	Name        string   `bson:"name"`
-	Route       string   `bson:"route"`
-	Description string   `bson:"description"`
-	Tags        []string `bson:"tags"`
-	Sort        int64    `bson:"sort"`
-	CreateTime  int64    `bson:"create_time"`
-	UpdateTime  int64    `bson:"update_time"`
+	Id          string `bson:"_id"`
+	Name        string `bson:"name"`
+	Route       string `bson:"route"`
+	Description string `bson:"description"`
+	Sort        int64  `bson:"sort"`
+	Disabled    bool   `bson:"disabled"`
+	CreateTime  int64  `bson:"create_time"`
+	UpdateTime  int64  `bson:"update_time"`
 }
 
 type ICategoryDao interface {
 	GetAll(ctx context.Context) ([]*Category, error)
-	GetCategoryByName(ctx context.Context, name string) (*Category, error)
 }
 
 var _ ICategoryDao = (*CategoryDao)(nil)
@@ -54,16 +52,8 @@ type CategoryDao struct {
 	coll *mongox.Collection[Category]
 }
 
-func (d *CategoryDao) GetCategoryByName(ctx context.Context, name string) (*Category, error) {
-	category, err := d.coll.Finder().Filter(bson.M{"name": name}).FindOne(ctx)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Find a category failed, [name=%s]", name)
-	}
-	return category, nil
-}
-
 func (d *CategoryDao) GetAll(ctx context.Context) ([]*Category, error) {
-	result, err := d.coll.Finder().Options(options.Find().SetSort(bsonx.M("sort", 1))).Find(ctx)
+	result, err := d.coll.Finder().Filter(bsonx.M("disabled", true)).Options(options.Find().SetSort(bsonx.M("sort", 1))).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "Find all categories failed failed")
 	}
