@@ -35,7 +35,7 @@ let req = ref<PageRequest>({
   pageSize: pageSize,
   sortField: "create_time",
   sortOrder: "desc",
-  category: name,
+  categories: [name],
 } as PageRequest)
 
 const totalPosts = ref<Number>(0)
