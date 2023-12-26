@@ -96,7 +96,7 @@ func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition
 		condBuider.Add(bsonx.KV("category", *postsQueryCondition.Category))
 	}
 	if postsQueryCondition.Tags != nil {
-		condBuider.InString("tags", postsQueryCondition.Tags...)
+		condBuider.InString("tag", postsQueryCondition.Tags...)
 	}
 	if postsQueryCondition.Search != nil && *postsQueryCondition.Search != "" {
 		condBuider.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(*postsQueryCondition.Search)), "i")

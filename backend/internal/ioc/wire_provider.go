@@ -44,6 +44,10 @@ import (
 	repository5 "github.com/chenmingyong0423/fnote/backend/internal/post/repository"
 	dao5 "github.com/chenmingyong0423/fnote/backend/internal/post/repository/dao"
 	service5 "github.com/chenmingyong0423/fnote/backend/internal/post/service"
+	handler8 "github.com/chenmingyong0423/fnote/backend/internal/tag/handler"
+	repository9 "github.com/chenmingyong0423/fnote/backend/internal/tag/repository"
+	dao9 "github.com/chenmingyong0423/fnote/backend/internal/tag/repository/dao"
+	service11 "github.com/chenmingyong0423/fnote/backend/internal/tag/service"
 	handler6 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/handler"
 	repository6 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository"
 	dao6 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository/dao"
@@ -91,4 +95,10 @@ var (
 		wire.Bind(new(service10.ICountStatsService), new(*service10.CountStatsService)),
 		wire.Bind(new(repository8.ICountStatsRepository), new(*repository8.CountStatsRepository)),
 		wire.Bind(new(dao8.ICountStatsDao), new(*dao8.CountStatsDao)))
+
+	TagProviders = wire.NewSet(handler8.NewTagHandler, service11.NewTagService, repository9.NewTagRepository, dao9.NewTagDao,
+		wire.Bind(new(service11.ITagService), new(*service11.TagService)),
+		wire.Bind(new(repository9.ITagRepository), new(*repository9.TagRepository)),
+		wire.Bind(new(dao9.ITagDao), new(*dao9.TagDao)),
+	)
 )

@@ -28,7 +28,7 @@ type I{{.DomainName}}Dao interface {
 var _ I{{.DomainName}}Dao = (*{{.DomainName}}Dao)(nil)
 
 func New{{.DomainName}}Dao(db *mongo.Database) *{{.DomainName}}Dao {
-	return &{{.DomainName}}Dao{coll: mongox.NewCollection[{{.DomainName}}](db.Collection("{{.UnderlineName}}"))}
+	return &{{.DomainName}}Dao{coll: mongox.NewCollection[{{.DomainName}}](db.Collection("{{.TableName}}"))}
 }
 
 type {{.DomainName}}Dao struct {

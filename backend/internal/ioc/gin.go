@@ -15,6 +15,7 @@
 package ioc
 
 import (
+	handler2 "github.com/chenmingyong0423/fnote/backend/internal/tag/handler"
 	"io"
 	"log/slog"
 	"slices"
@@ -38,7 +39,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *cfgHandler.ConfigHandler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, middleware []gin.HandlerFunc, validators Validators) (*gin.Engine, error) {
+func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *cfgHandler.ConfigHandler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, middleware []gin.HandlerFunc, validators Validators) (*gin.Engine, error) {
 	engine := gin.Default()
 
 	// 参数校验器注册
@@ -63,6 +64,7 @@ func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.Com
 		postHdr.RegisterGinRoutes(engine)
 		vlHdr.RegisterGinRoutes(engine)
 		msgTplHandler.RegisterGinRoutes(engine)
+		tagsHandler.RegisterGinRoutes(engine)
 	}
 	return engine, nil
 }

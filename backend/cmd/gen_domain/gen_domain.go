@@ -26,6 +26,7 @@ import (
 var (
 	domain    = flag.String("domain", "", "the name of domain, e.g. MessageTemplate, must be camel case")
 	outputDir = flag.String("output", "", "the output directory, e.g. internal/message_template")
+	tableName = flag.String("table_name", "", "the table name, e.g. message_template")
 
 	//go:embed templates/handler.tmpl
 	handler embed.FS
@@ -43,6 +44,7 @@ var (
 type GenDomain struct {
 	DomainName    string
 	UnderlineName string
+	TableName     string
 }
 
 func main() {
@@ -58,6 +60,11 @@ func main() {
 	if outputDir == nil || *outputDir == "" {
 		outputDir = new(string)
 		*outputDir = "internal/" + gen.UnderlineName
+	}
+
+	if tableName == nil || *tableName == "" {
+		tableName = new(string)
+		*tableName = gen.UnderlineName
 	}
 
 	err := executeTemplate(handler, "templates/handler.tmpl", *outputDir+"/handler", fmt.Sprintf("/%s_handler.go", gen.UnderlineName), gen)
