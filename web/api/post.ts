@@ -23,7 +23,7 @@ export type PageRequest = {
     pageSize: number;
     sortField?: string;
     sortOrder?: string;
-    search?: string;
+    keyword?: string;
     categories?: string[];
     tags?: string[];
 }
