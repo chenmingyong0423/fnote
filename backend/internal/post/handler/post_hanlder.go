@@ -27,6 +27,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type SummaryPostVO struct {
+	Sug          string   `json:"sug"`
+	Author       string   `json:"author"`
+	Title        string   `json:"title"`
+	Summary      string   `json:"summary"`
+	CoverImg     string   `json:"cover_img"`
+	Categories   []string `json:"categories"`
+	Tags         []string `json:"tags"`
+	LikeCount    int      `json:"like_count"`
+	CommentCount int      `json:"comment_count"`
+	VisitCount   int      `json:"visit_count"`
+	Priority     int      `json:"priority"`
+	CreateTime   int64    `json:"create_time"`
+}
+
 func NewPostHandler(serv service.IPostService) *PostHandler {
 	return &PostHandler{
 		serv: serv,
@@ -39,15 +54,15 @@ type PostHandler struct {
 
 func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/posts")
-	group.GET("/latest", api.Wrap(h.GetHomePosts))
+	group.GET("/latest", api.Wrap(h.GetLatestPosts))
 	group.GET("", api.WrapWithBody(h.GetPosts))
 	group.GET("/:sug", api.Wrap(h.GetPostBySug))
 	group.POST("/:sug/likes", api.Wrap(h.AddLike))
 	group.DELETE("/:sug/likes", api.Wrap(h.DeleteLike))
 }
 
-func (h *PostHandler) GetHomePosts(ctx *gin.Context) (listVO api.ListVO[*domain.SummaryPostVO], err error) {
-	posts, err := h.serv.GetHomePosts(ctx)
+func (h *PostHandler) GetLatestPosts(ctx *gin.Context) (listVO api.ListVO[*SummaryPostVO], err error) {
+	posts, err := h.serv.GetLatestPosts(ctx)
 	if err != nil {
 		return
 	}
@@ -55,15 +70,28 @@ func (h *PostHandler) GetHomePosts(ctx *gin.Context) (listVO api.ListVO[*domain.
 	return
 }
 
-func (h *PostHandler) postsToPostVOs(posts []*domain.Post) []*domain.SummaryPostVO {
-	postVOs := make([]*domain.SummaryPostVO, 0, len(posts))
+func (h *PostHandler) postsToPostVOs(posts []*domain.Post) []*SummaryPostVO {
+	postVOs := make([]*SummaryPostVO, 0, len(posts))
 	for _, post := range posts {
-		postVOs = append(postVOs, &domain.SummaryPostVO{PrimaryPost: post.PrimaryPost})
+		postVOs = append(postVOs, &SummaryPostVO{
+			Sug:          post.PrimaryPost.Sug,
+			Author:       post.PrimaryPost.Author,
+			Title:        post.PrimaryPost.Title,
+			Summary:      post.PrimaryPost.Summary,
+			CoverImg:     post.PrimaryPost.CoverImg,
+			Categories:   post.PrimaryPost.Categories,
+			Tags:         post.PrimaryPost.Tags,
+			LikeCount:    post.PrimaryPost.LikeCount,
+			CommentCount: post.PrimaryPost.CommentCount,
+			VisitCount:   post.PrimaryPost.VisitCount,
+			Priority:     post.PrimaryPost.Priority,
+			CreateTime:   post.PrimaryPost.CreateTime,
+		})
 	}
 	return postVOs
 }
 
-func (h *PostHandler) GetPosts(ctx *gin.Context, req *domain.PostRequest) (pageVO api.PageVO[*domain.SummaryPostVO], err error) {
+func (h *PostHandler) GetPosts(ctx *gin.Context, req *domain.PostRequest) (pageVO api.PageVO[*SummaryPostVO], err error) {
 	req.ValidateAndSetDefault()
 	posts, cnt, err := h.serv.GetPosts(ctx, req)
 	if err != nil {
