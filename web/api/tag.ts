@@ -1,2 +1,11 @@
 import httpRequest from "./http";
-export const getTagList = (name: string) => httpRequest.get(`/categories/categories/${name}/tags`)
+
+// type TagsWithCountVO struct {
+// 	Name  string `json:"name"`
+// 	Count int64  `json:"count"`
+// }
+export interface ITagWithCount {
+    name:string;
+    count:number;
+}
+export const getTagList = () => httpRequest.get(`/tags`)
