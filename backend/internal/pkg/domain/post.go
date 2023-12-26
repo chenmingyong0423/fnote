@@ -24,24 +24,20 @@ type PostsQueryCondition struct {
 
 	api.Sorting
 
-	Category *string
-	Tags     []string
+	Categories []string
+	Tags       []string
 }
 
 type PostRequest struct {
 	api.PageRequest
-	Category *string  `form:"category"`
-	Tags     []string `form:"tags"`
+	Categories []string `form:"categories"`
+	Tags       []string `form:"tags"`
 }
 
 type DetailPostVO struct {
 	PrimaryPost
 	ExtraPost
 	IsLiked bool `json:"is_liked"`
-}
-
-type SummaryPostVO struct {
-	PrimaryPost
 }
 
 type Post struct {
@@ -65,7 +61,7 @@ type PrimaryPost struct {
 	Title        string   `json:"title"`
 	Summary      string   `json:"summary"`
 	CoverImg     string   `json:"cover_img"`
-	Category     string   `json:"category"`
+	Categories   []string `json:"category"`
 	Tags         []string `json:"tags"`
 	LikeCount    int      `json:"like_count"`
 	CommentCount int      `json:"comment_count"`

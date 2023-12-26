@@ -18,9 +18,10 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"github.com/chenmingyong0423/gkit/stringx"
 	"os"
 	"text/template"
+
+	"github.com/chenmingyong0423/gkit/stringx"
 )
 
 var (

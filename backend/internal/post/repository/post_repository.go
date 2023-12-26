@@ -91,17 +91,17 @@ func (r *PostRepository) GetPunishedPostById(ctx context.Context, id string) (*d
 }
 
 func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition domain.PostsQueryCondition) ([]*domain.Post, int64, error) {
-	condBuider := query.BsonBuilder()
-	if postsQueryCondition.Category != nil && *postsQueryCondition.Category != "" {
-		condBuider.Add(bsonx.KV("category", *postsQueryCondition.Category))
+	condBuilder := query.BsonBuilder()
+	if postsQueryCondition.Categories != nil && len(postsQueryCondition.Categories) > 0 {
+		condBuilder.InString("categories", postsQueryCondition.Categories...)
 	}
-	if postsQueryCondition.Tags != nil {
-		condBuider.InString("tag", postsQueryCondition.Tags...)
+	if postsQueryCondition.Tags != nil && len(postsQueryCondition.Tags) > 0 {
+		condBuilder.InString("tags", postsQueryCondition.Tags...)
 	}
 	if postsQueryCondition.Search != nil && *postsQueryCondition.Search != "" {
-		condBuider.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(*postsQueryCondition.Search)), "i")
+		condBuilder.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(*postsQueryCondition.Search)), "i")
 	}
-	con := condBuider.Build()
+	con := condBuilder.Build()
 
 	findOptions := options.Find()
 	findOptions.SetSkip(postsQueryCondition.Skip).SetLimit(postsQueryCondition.Size)
@@ -145,5 +145,5 @@ func (r *PostRepository) toDomainPosts(posts []*dao.Post) []*domain.Post {
 }
 
 func (r *PostRepository) daoPostToDomainPost(post *dao.Post) *domain.Post {
-	return &domain.Post{PrimaryPost: domain.PrimaryPost{Sug: post.Sug, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Category: post.Category, Tags: post.Tags, LikeCount: post.LikeCount, CommentCount: post.CommentCount, VisitCount: post.VisitCount, Priority: post.Priority, CreateTime: post.CreateTime}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, WordCount: post.WordCount, UpdateTime: post.UpdateTime}, IsCommentAllowed: post.IsCommentAllowed, Likes: post.Likes}
+	return &domain.Post{PrimaryPost: domain.PrimaryPost{Sug: post.Sug, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Categories: post.Categories, Tags: post.Tags, LikeCount: post.LikeCount, CommentCount: post.CommentCount, VisitCount: post.VisitCount, Priority: post.Priority, CreateTime: post.CreateTime}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, WordCount: post.WordCount, UpdateTime: post.UpdateTime}, IsCommentAllowed: post.IsCommentAllowed, Likes: post.Likes}
 }
