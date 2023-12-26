@@ -14,17 +14,15 @@
 
 package domain
 
-type Category struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	Route       string `json:"route"`
-	Description string `json:"description"`
-	Disabled    bool   `json:"disabled"`
+type Tag struct {
+	Id         string
+	Name       string
+	Disabled   bool
+	CreateTime int64
+	UpdateTime int64
 }
 
-type CategoryWithCount struct {
-	Name        string `json:"name"`
-	Route       string `json:"route"`
-	Description string `json:"description"`
-	Count       int64  `json:"count"`
+type TagWithCount struct {
+	Name  string
+	Count int64
 }
