@@ -38,7 +38,7 @@ type Post struct {
 	Content          string            `bson:"content"`
 	CoverImg         string            `bson:"cover_img"`
 	Category         string            `bson:"category"`
-	Tags             []string          `bson:"tags"`
+	Tags             []string          `bson:"tag"`
 	Status           domain.PostStatus `bson:"status"`
 	Likes            []string          `bson:"likes"`
 	LikeCount        int               `bson:"like_count"`

@@ -12,35 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build wireinject
-
-package main
+package handler
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/internal/ioc"
+	"github.com/chenmingyong0423/fnote/backend/internal/{{.UnderlineName}}/service"
 	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 )
 
-func initializeApp(cfgPath string) (*gin.Engine, error) {
-	panic(wire.Build(
-		ioc.InitConfig,
-		ioc.InitLogger,
-		ioc.NewMongoDB,
-		ioc.InitMiddlewares,
-		ioc.InitGinValidators,
-		ioc.NewGinEngine,
+func New{{.DomainName}}Handler(serv service.I{{.DomainName}}Service) *{{.DomainName}}Handler {
+	return &{{.DomainName}}Handler{
+		serv: serv,
+	}
+}
 
-		ioc.CategoryProviders,
-		ioc.CommentProviders,
-		ioc.ConfigProviders,
-		ioc.FriendProviders,
-		ioc.PostProviders,
-		ioc.VlProviders,
-		ioc.EmailProviders,
-		ioc.MsgProviders,
-		ioc.MsgTplProviders,
-		ioc.CountStatsProviders,
-		ioc.TagProviders,
-	))
+type {{.DomainName}}Handler struct {
+	serv service.I{{.DomainName}}Service
+}
+
+func (h *{{.DomainName}}Handler) RegisterGinRoutes(engine *gin.Engine) {
+
 }
