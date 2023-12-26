@@ -98,8 +98,8 @@ func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition
 	if postsQueryCondition.Tags != nil && len(postsQueryCondition.Tags) > 0 {
 		condBuilder.InString("tags", postsQueryCondition.Tags...)
 	}
-	if postsQueryCondition.Search != nil && *postsQueryCondition.Search != "" {
-		condBuilder.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(*postsQueryCondition.Search)), "i")
+	if postsQueryCondition.Keyword != nil && *postsQueryCondition.Keyword != "" {
+		condBuilder.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(*postsQueryCondition.Keyword)), "i")
 	}
 	con := condBuilder.Build()
 

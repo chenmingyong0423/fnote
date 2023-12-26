@@ -20,7 +20,7 @@ type PostsQueryCondition struct {
 	Size int64
 	Skip int64
 
-	Search *string
+	Keyword *string
 
 	api.Sorting
 

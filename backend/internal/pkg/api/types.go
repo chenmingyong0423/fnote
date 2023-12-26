@@ -53,7 +53,7 @@ type PageRequest struct {
 	// 排序字段
 	Sorting
 	// 搜索内容
-	Search *string `form:"search,omitempty"`
+	Keyword *string `form:"keyword,omitempty"`
 }
 
 func (p *PageRequest) ValidateAndSetDefault() {
