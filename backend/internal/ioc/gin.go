@@ -15,12 +15,13 @@
 package ioc
 
 import (
-	handler2 "github.com/chenmingyong0423/fnote/backend/internal/tag/handler"
 	"io"
 	"log/slog"
 	"slices"
 	"strings"
 	"time"
+
+	handler2 "github.com/chenmingyong0423/fnote/backend/internal/tag/handler"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/message_template/handler"
 	"github.com/chenmingyong0423/ginx/middlewares/id"

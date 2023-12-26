@@ -29,7 +29,7 @@ import (
 )
 
 type IPostService interface {
-	GetHomePosts(ctx context.Context) ([]*domain.Post, error)
+	GetLatestPosts(ctx context.Context) ([]*domain.Post, error)
 	GetPosts(ctx context.Context, pageRequest *domain.PostRequest) ([]*domain.Post, int64, error)
 	GetPunishedPostById(ctx context.Context, id string) (*domain.Post, error)
 	AddLike(ctx context.Context, id string, ip string) error
@@ -111,13 +111,13 @@ func (s *PostService) GetPunishedPostById(ctx context.Context, id string) (*doma
 }
 
 func (s *PostService) GetPosts(ctx context.Context, pageRequest *domain.PostRequest) ([]*domain.Post, int64, error) {
-	return s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageRequest.PageSize, Skip: (pageRequest.PageNo - 1) * pageRequest.PageSize, Search: pageRequest.Search, Sorting: api.Sorting{
+	return s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageRequest.PageSize, Skip: (pageRequest.PageNo - 1) * pageRequest.PageSize, Keyword: pageRequest.Keyword, Sorting: api.Sorting{
 		Field: pageRequest.Sorting.Field,
 		Order: pageRequest.Sorting.Order,
-	}, Category: pageRequest.Category, Tags: pageRequest.Tags})
+	}, Categories: pageRequest.Categories, Tags: pageRequest.Tags})
 
 }
 
-func (s *PostService) GetHomePosts(ctx context.Context) ([]*domain.Post, error) {
+func (s *PostService) GetLatestPosts(ctx context.Context) ([]*domain.Post, error) {
 	return s.repo.GetLatest5Posts(ctx)
 }
