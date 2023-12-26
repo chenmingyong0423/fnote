@@ -1,5 +1,5 @@
 <template>
-  <div class="flex bg-white items-center gap-x-4 p-2 b-rounded-2 w-full dark:text-dtc dark_bg_gray">
+  <div class="flex bg-white items-center gap-x-4 p-2 b-rounded-2 dark:text-dtc dark_bg_gray">
     <div class="list-none flex gap-x-5 m-auto">
       <NuxtLink class="w-[32px] h-[32px] flex-center"
                 :class="{'text-gray-3 select-none' : currentPage == 1, 'cursor-pointer hover:bg-gray-1': currentPage != 1}"
@@ -111,6 +111,7 @@ const pagesToShow = computed(() => {
 });
 
 watch(() => props.total, () => {
+  console.log(props.total)
   if (props.total != total.value) {
     total.value = props.total
   }

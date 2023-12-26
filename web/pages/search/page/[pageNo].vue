@@ -1,9 +1,19 @@
 <template>
-  <div class="flex flex-col">
-    <PostListItem :posts="posts"></PostListItem>
-    <Pagination :currentPage="req.pageNo" :total="totalPosts" :perPageCount='req.pageSize'
-                :route="'/categories/' + pathName + '/page/'"></Pagination>
+  <div class="flex">
+    <div class="w-69% mr-1% flex flex-col">
+      <div class="flex flex-col">
+        <SearchInput :keyword="keyword" class="mb-5" @search="search"></SearchInput>
+        <PostListItem :posts="posts"></PostListItem>
+        {{totalPosts}}
+        <Pagination :currentPage="req.pageNo" :total="totalPosts" :perPageCount='req.pageSize'
+                    :route="'/search/page/'"></Pagination>
+      </div>
+    </div>
+    <div class="flex flex-col w-30%">
+      <Profile class="mb-5"></Profile>
+    </div>
   </div>
+
 </template>
 
 
@@ -15,21 +25,23 @@ import type {IResponse, IPageData} from "~/api/http";
 import {useHomeStore} from '~/store/home';
 import type {IMenu} from "~/api/category";
 
-const homeStore = useHomeStore()
 const route = useRoute()
-const pathName = route.params.name
+const path = route.path
 const pageNo : number = +route.params.pageNo
-const pageSize :number = Number(route.query.pageSize) || 5
 
+const pageSize: number = Number(route.query.pageSize) || 5
+let keyword: string = String(route.query.keyword)
+if (keyword == 'undefined') {
+  keyword = ""
+}
 
-let name = homeStore.menuList.find((item: IMenu) => item.route == '/categories/' + pathName)?.name
 let posts = ref<IPost[]>([]);
 let req = ref<PageRequest>({
   pageNo: pageNo,
   pageSize: pageSize,
   sortField: "create_time",
   sortOrder: "desc",
-  categories: [name],
+  keyword: keyword,
 } as PageRequest)
 
 const totalPosts = ref<Number>(0)
@@ -40,12 +52,17 @@ const postInfos = async () => {
     let postRes: any = await getPosts(deepCopyReq)
     let res: IResponse<IPageData<IPost>> = postRes.data.value
     posts.value = res.data?.list || []
-    totalPosts.value = res.data?.totalCount || totalPosts.value
+    totalPosts.value = res.data?.totalCount || 0
   } catch (error) {
     console.log(error);
   }
 };
 postInfos()
+
+const search = (keyword: string) => {
+  req.value.keyword = keyword
+  postInfos()
+}
 
 // 创建一个计算属性来追踪 query 对象
 const routeQuery = computed(() => route.query);
