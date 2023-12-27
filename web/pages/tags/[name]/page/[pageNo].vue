@@ -4,7 +4,7 @@
       <div class="flex flex-col">
         <PostListItem :posts="posts"></PostListItem>
         <Pagination :currentPage="req.pageNo" :total="totalPosts" :perPageCount='req.pageSize'
-                    :route="`/categories/${routeParam}/page/`"></Pagination>
+                    :route="`/tags/${routeParam}/page/`"></Pagination>
       </div>
     </div>
     <div class="flex flex-col w-30%">
@@ -16,11 +16,11 @@
 
 <script lang="ts" setup>
 import {getPosts} from "~/api/post"
-import {getCategoryByRoute} from "~/api/category"
 import type {PageRequest} from "~/api/post"
 import type {IPost} from "~/api/post"
 import type {IResponse, IPageData} from "~/api/http";
 import type {ICategoryName} from "~/api/category";
+import {getTagByRoute} from "~/api/tag";
 
 const route = useRoute()
 const pageNo : number = +route.params.pageNo
@@ -40,10 +40,10 @@ const totalPosts = ref<Number>(0)
 
 const postInfos = async () => {
   try {
-    if (!req.value.categories || req.value.categories.length == 0) {
-      let categoryRes: any = await getCategoryByRoute(routeParam)
+    if (!req.value.tags || req.value.tags.length == 0) {
+      let categoryRes: any = await getTagByRoute(routeParam)
       let res: IResponse<ICategoryName> = categoryRes.data.value
-      req.value.categories = [res.data?.name || ""]
+      req.value.tags = [res.data?.name || ""]
     }
     const deepCopyReq = JSON.parse(JSON.stringify(req.value));
     let postRes: any = await getPosts(deepCopyReq)

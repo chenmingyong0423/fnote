@@ -6,7 +6,7 @@
         <NuxtLink
             class=" light_border p-5 w-90 h-40 b-rounded-4 dark_bg_gray dark:text-dtc cursor-pointer custom_cursor_flow"
             v-for="(c, index) in categories"
-            :key="index" :to="c.route">
+            :key="index" :to="'/categories/' + c.route">
           <div class="i-ph-columns-fill w-10 h-10 text-gray-5 p-y-1 "></div>
           <div class="text-8 font-bold p-y-1 dark_text_white">{{ c.name }}</div>
           <div class="p-y-1">{{ c.description }}</div>
@@ -25,7 +25,7 @@
             class="flex text-5 gap-x-2 b-rounded-4 border-solid border-gray-2 border-1 p-2 cursor-pointer custom_cursor_flow"
             v-for="(t, index) in tags"
             :key="index"
-            :to="t.route"
+            :to="'/tags/' + t.route"
         >
           <span># {{ t.name }}</span>
           <span>{{ t.count }}</span>

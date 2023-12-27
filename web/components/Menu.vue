@@ -11,7 +11,7 @@
                 to="/categories"><span class="i-ph-list"/> <span>文章导航</span></NuxtLink>
       <NuxtLink class="flex items-center gap-x-4 cursor-pointer p-2 hover:border_bottom_blue"
                 v-for="(item, index) in props.items"
-                :key="index" :class=" route.path === item.route || route.path.startsWith(item.route) ? 'current' : '' " :to="item.route"><span
+                :key="index" :class=" route.path === item.route || route.path.startsWith(`/categories/${item.route}`) ? 'current' : '' " :to="`/categories/${item.route}`"><span
           class="i-ph-article-light"/> <span>{{ item.name }}</span></NuxtLink>
       <NuxtLink class=" flex items-center gap-x-4 cursor-pointer p-2 hover:border_bottom_blue"
                 :class=" route.path === '/friend' ? 'current' : '' "
