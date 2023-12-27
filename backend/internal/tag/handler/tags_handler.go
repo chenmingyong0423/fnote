@@ -26,6 +26,10 @@ type TagsWithCountVO struct {
 	Count int64  `json:"count"`
 }
 
+type TagNameVO struct {
+	Name string `json:"name"`
+}
+
 func NewTagHandler(serv service.ITagService) *TagHandler {
 	return &TagHandler{
 		serv: serv,
@@ -39,6 +43,7 @@ type TagHandler struct {
 func (h *TagHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/tags")
 	group.GET("", api.Wrap(h.GetTags))
+	group.GET("/route/:route", api.Wrap(h.GetTagByRoute))
 }
 
 func (h *TagHandler) GetTags(ctx *gin.Context) (listVO api.ListVO[TagsWithCountVO], err error) {
@@ -55,4 +60,13 @@ func (h *TagHandler) GetTags(ctx *gin.Context) (listVO api.ListVO[TagsWithCountV
 		})
 	}
 	return listVO, nil
+}
+
+func (h *TagHandler) GetTagByRoute(ctx *gin.Context) (TagNameVO, error) {
+	route := ctx.Param("route")
+	tag, err := h.serv.GetTagByRoute(ctx, route)
+	if err != nil {
+		return TagNameVO{}, err
+	}
+	return TagNameVO{Name: tag.Name}, nil
 }
