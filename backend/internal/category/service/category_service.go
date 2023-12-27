@@ -28,6 +28,7 @@ import (
 type ICategoryService interface {
 	GetCategories(ctx context.Context) ([]domain.CategoryWithCount, error)
 	GetMenus(ctx context.Context) ([]domain.Category, error)
+	GetCategoryByRoute(ctx context.Context, route string) (domain.Category, error)
 }
 
 var _ ICategoryService = (*CategoryService)(nil)
@@ -42,6 +43,10 @@ func NewCategoryService(repo repository.ICategoryRepository, countStatsService s
 type CategoryService struct {
 	countStatsService service.ICountStatsService
 	repo              repository.ICategoryRepository
+}
+
+func (s *CategoryService) GetCategoryByRoute(ctx context.Context, route string) (domain.Category, error) {
+	return s.repo.GetCategoryByRoute(ctx, route)
 }
 
 func (s *CategoryService) GetMenus(ctx context.Context) (menuVO []domain.Category, err error) {

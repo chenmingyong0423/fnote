@@ -17,6 +17,7 @@ package domain
 type Tag struct {
 	Id         string
 	Name       string
+	Route      string
 	Disabled   bool
 	CreateTime int64
 	UpdateTime int64
@@ -24,5 +25,6 @@ type Tag struct {
 
 type TagWithCount struct {
 	Name  string
+	Route string
 	Count int64
 }
