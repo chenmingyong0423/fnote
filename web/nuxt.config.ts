@@ -51,5 +51,6 @@ export default defineNuxtConfig({
     plugins: [
         '~/plugins/pinia.js',
         '~/plugins/localStorage.client.ts',
+        '~/plugins/v-md-editor.client.js',
     ],
 })
