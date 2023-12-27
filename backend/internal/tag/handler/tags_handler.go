@@ -22,6 +22,7 @@ import (
 
 type TagsWithCountVO struct {
 	Name  string `json:"name"`
+	Route string `json:"route"`
 	Count int64  `json:"count"`
 }
 
@@ -49,6 +50,7 @@ func (h *TagHandler) GetTags(ctx *gin.Context) (listVO api.ListVO[TagsWithCountV
 	for _, tag := range tags {
 		listVO.List = append(listVO.List, TagsWithCountVO{
 			Name:  tag.Name,
+			Route: tag.Route,
 			Count: tag.Count,
 		})
 	}

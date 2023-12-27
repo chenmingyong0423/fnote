@@ -63,6 +63,7 @@ func (s *TagService) GetTags(ctx context.Context) ([]domain.TagWithCount, error)
 	tagWithCounts := slice.Map[domain.CountStats, domain.TagWithCount](tagCounts, func(_ int, s domain.CountStats) domain.TagWithCount {
 		return domain.TagWithCount{
 			Name:  tagMap[s.ReferenceId].Name,
+			Route: tagMap[s.ReferenceId].Route,
 			Count: s.Count,
 		}
 	})

@@ -25,6 +25,7 @@ import (
 type Tags struct {
 	Id         string `bson:"_id"`
 	Name       string `bson:"name"`
+	Route      string `bson:"route"`
 	Disabled   bool   `bson:"disabled"`
 	CreateTime int64  `bson:"create_time"`
 	UpdateTime int64  `bson:"update_time"`
