@@ -6,6 +6,7 @@ import httpRequest from "./http";
 // }
 export interface ITagWithCount {
     name:string;
+    route:string;
     count:number;
 }
 export const getTagList = () => httpRequest.get(`/tags`)

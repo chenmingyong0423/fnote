@@ -24,7 +24,9 @@
         <NuxtLink
             class="flex text-5 gap-x-2 b-rounded-4 border-solid border-gray-2 border-1 p-2 cursor-pointer custom_cursor_flow"
             v-for="(t, index) in tags"
-            :key="index">
+            :key="index"
+            :to="t.route"
+        >
           <span># {{ t.name }}</span>
           <span>{{ t.count }}</span>
         </NuxtLink>
