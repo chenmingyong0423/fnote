@@ -3,13 +3,13 @@
     <div class="list-none flex gap-x-5 m-auto">
       <NuxtLink class="w-[32px] h-[32px] flex-center"
                 :class="{'text-gray-3 select-none' : currentPage == 1, 'cursor-pointer hover:bg-gray-1': currentPage != 1}"
-                :to="route+ calculatePages(currentPage - 1) + '?pageSize=' + perPageSize"
+                :to="fullUrl(calculatePages(currentPage - 1))"
       >
         &lt
       </NuxtLink>
       <NuxtLink class="w-[32px] h-[32px] cursor-pointer hover:bg-gray-1 flex-center"
                 v-if="maxPageNumbers - currentPage <= 1"
-                :to="route+ 1 + '?pageSize=' + perPageSize"
+                :to="fullUrl(1)"
       >
         1
       </NuxtLink>
@@ -17,7 +17,7 @@
                 v-if="maxPageNumbers - currentPage <= 0"
                 @mouseover="leftPointer = '<<'"
                 @mouseleave="leftPointer = '...'"
-                :to="route + calculatePages(currentPage - maxPageNumbers) + '?pageSize=' + perPageSize"
+                :to="fullUrl(calculatePages(currentPage - maxPageNumbers))"
       >
         {{ leftPointer }}
       </NuxtLink>
@@ -26,7 +26,7 @@
                 v-for="(page, index) in pagesToShow"
                 :class="{ 'border-solid border-#1e80ff border-1 b-rounded-2': page === currentPage }"
                 :key="index"
-                :to="route + page + '?pageSize=' + perPageSize"
+                :to="fullUrl(page)"
       >
         {{ page }}
       </NuxtLink>
@@ -35,23 +35,24 @@
           v-if="totalPages > maxPageNumbers && !pagesToShow.includes(totalPages)"
           @mouseover="rightPointer = '>>'"
           @mouseleave="rightPointer = '...'"
-          :to="route + calculatePages(currentPage + maxPageNumbers) + '?pageSize=' + perPageSize"
+          :to="fullUrl(calculatePages(currentPage + maxPageNumbers) )"
       >
         {{ rightPointer }}
       </NuxtLink>
       <NuxtLink class="w-[32px] h-[32px] cursor-pointer hover:bg-gray-1 flex-center"
                 v-if="!pagesToShow.includes(totalPages)"
-                :to="route+ totalPages + '?pageSize=' + perPageSize"
+                :to="fullUrl(totalPages)"
       >{{ totalPages }}
       </NuxtLink>
       <NuxtLink class="w-[32px] h-[32px] flex-center"
                 :class="{'text-gray-3 select-none' : currentPage == totalPages, 'cursor-pointer hover:bg-gray-1': currentPage != totalPages}"
-                :to="route+ calculatePages(currentPage + 1) + '?pageSize=' + perPageSize"
+                :to="fullUrl( calculatePages(currentPage + 1) )"
       >
         &gt
       </NuxtLink>
       <div>
-        <select class="w-[95px] h-[35px] p-x-2 p-y-1 b-rounded-2 border-gray-3 dark:text-dtc dark_bg_gray " v-model="perPageSize" @change="changeItemsPerPage">
+        <select class="w-[95px] h-[35px] p-x-2 p-y-1 b-rounded-2 border-gray-3 dark:text-dtc dark_bg_gray "
+                v-model="perPageSize" @change="changeItemsPerPage">
           <option class="dark:bg-black" :value="1">1 条/页</option>
           <option class="dark:bg-black" :value="5">5 条/页</option>
           <option class="dark:bg-black" :value="10">10 条/页</option>
@@ -85,15 +86,19 @@ const props = defineProps({
     type: String,
     required: true
   },
+  extraParams: {
+    type: Object,
+    default: () => ({})
+  }
 });
 
-const route = props.route
 const currentPage = ref(props.currentPage);
 const perPageSize = ref(props.perPageCount);
 // 最大显示多少个页码
 const maxPageNumbers = ref(5);
 const total = ref(props.total)
 const totalPages = computed(() => Math.ceil(total.value / perPageSize.value));
+const isFirst = ref(true);
 
 const pagesToShow = computed(() => {
   let pages = [];
@@ -111,8 +116,12 @@ const pagesToShow = computed(() => {
 });
 
 watch(() => props.total, () => {
-  console.log(props.total)
   if (props.total != total.value) {
+    if (!isFirst.value) {
+      currentPage.value = 1
+    } else {
+      isFirst.value = false
+    }
     total.value = props.total
   }
 });
@@ -120,7 +129,7 @@ watch(() => props.total, () => {
 const router = useRouter()
 
 const changeItemsPerPage = () => {
-  router.push(route + 1 + '?pageSize=' + perPageSize.value)
+  router.push(fullUrl(1))
 };
 
 const calculatePages = (page: number): number => {
@@ -131,4 +140,12 @@ const calculatePages = (page: number): number => {
   }
   return page
 };
+
+const fullUrl = (pageNo: number) => {
+  const params = new URLSearchParams({
+    pageSize: String(perPageSize.value),
+    ...props.extraParams,
+  }).toString();
+  return `${props.route}${pageNo}?${params}`
+}
 </script>

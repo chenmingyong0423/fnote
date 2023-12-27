@@ -2,11 +2,10 @@
   <div class="flex">
     <div class="w-69% mr-1% flex flex-col">
       <div class="flex flex-col">
-        <SearchInput :keyword="keyword" class="mb-5" @search="search"></SearchInput>
+        <SearchInput :keyword="keyword" class="mb-5"></SearchInput>
         <PostListItem :posts="posts"></PostListItem>
-        {{totalPosts}}
         <Pagination :currentPage="req.pageNo" :total="totalPosts" :perPageCount='req.pageSize'
-                    :route="'/search/page/'"></Pagination>
+                    :route="'/search/page/'" :extraParams="{keyword: req.keyword}"></Pagination>
       </div>
     </div>
     <div class="flex flex-col w-30%">
@@ -26,13 +25,12 @@ import {useHomeStore} from '~/store/home';
 import type {IMenu} from "~/api/category";
 
 const route = useRoute()
-const path = route.path
 const pageNo : number = +route.params.pageNo
 
 const pageSize: number = Number(route.query.pageSize) || 5
-let keyword: string = String(route.query.keyword)
-if (keyword == 'undefined') {
-  keyword = ""
+let keyword = ref<string>(String(route.query.keyword))
+if (keyword.value == 'undefined') {
+  keyword.value = ""
 }
 
 let posts = ref<IPost[]>([]);
@@ -41,7 +39,7 @@ let req = ref<PageRequest>({
   pageSize: pageSize,
   sortField: "create_time",
   sortOrder: "desc",
-  keyword: keyword,
+  keyword: keyword.value,
 } as PageRequest)
 
 const totalPosts = ref<Number>(0)
@@ -58,11 +56,6 @@ const postInfos = async () => {
   }
 };
 postInfos()
-
-const search = (keyword: string) => {
-  req.value.keyword = keyword
-  postInfos()
-}
 
 // 创建一个计算属性来追踪 query 对象
 const routeQuery = computed(() => route.query);

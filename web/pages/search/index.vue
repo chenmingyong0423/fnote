@@ -4,9 +4,8 @@
       <div class="flex flex-col">
         <SearchInput :keyword="keyword" class="mb-5" @search="search"></SearchInput>
         <PostListItem :posts="posts"></PostListItem>
-        {{totalPosts}}
         <Pagination :currentPage="req.pageNo" :total="totalPosts" :perPageCount='req.pageSize'
-                    :route="path +'/page/'"></Pagination>
+                    :route="path +'/page/'" :extraParams="{keyword: req.keyword}"></Pagination>
       </div>
     </div>
     <div class="flex flex-col w-30%">
@@ -28,9 +27,9 @@ import type {IMenu} from "~/api/category";
 const route = useRoute()
 const path = route.path
 const pageSize: number = Number(route.query.pageSize) || 5
-let keyword: string = String(route.query.keyword)
-if (keyword == 'undefined') {
-  keyword = ""
+let keyword = ref<string>(String(route.query.keyword))
+if (keyword.value == 'undefined') {
+  keyword.value = ""
 }
 
 let posts = ref<IPost[]>([]);
@@ -39,7 +38,7 @@ let req = ref<PageRequest>({
   pageSize: pageSize,
   sortField: "create_time",
   sortOrder: "desc",
-  keyword: keyword,
+  keyword: keyword.value,
 } as PageRequest)
 
 const totalPosts = ref<Number>(0)
@@ -57,8 +56,11 @@ const postInfos = async () => {
 };
 postInfos()
 
-const search = (keyword: string) => {
-  req.value.keyword = keyword
+// 创建一个计算属性来追踪 query 对象
+const routeQuery = computed(() => route.query);
+
+watch(() => routeQuery, (newQuery, oldQuery) => {
+  req.value.keyword = String(route.query.keyword)
   postInfos()
-}
+}, { deep: true });
 </script>
