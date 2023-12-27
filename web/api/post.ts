@@ -38,7 +38,7 @@ export interface IPostDetail {
     title: string;
     summary: string;
     cover_img: string;
-    category: string;
+    category: string[];
     tags: string[];
     like_count: number;
     comment_count: number;
@@ -54,6 +54,6 @@ export interface IPostDetail {
 }
 
 
-export const getPostsById = (sug: string) => httpRequest.get(prefix + "/" + sug)
+export const getPostsById = (id: string) => httpRequest.get(`${prefix}/${id}`)
 
 

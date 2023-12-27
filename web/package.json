@@ -22,9 +22,11 @@
   "dependencies": {
     "@iconify-json/fa6-brands": "^1.1.18",
     "@iconify-json/ph": "^1.1.9",
+    "@kangc/v-md-editor": "^2.3.18",
     "@pinia/nuxt": "^0.5.1",
     "@types/node": "^20.10.4",
     "@unocss/nuxt": "^0.58.0",
+    "highlight.js": "^11.9.0",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1"
   }
