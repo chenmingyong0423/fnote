@@ -49,6 +49,7 @@ func (r *TagRepository) toDomainTags(tags []*dao.Tags) []domain.Tag {
 		domainTags = append(domainTags, domain.Tag{
 			Id:         tag.Id,
 			Name:       tag.Name,
+			Route:      tag.Route,
 			Disabled:   tag.Disabled,
 			CreateTime: tag.CreateTime,
 			UpdateTime: tag.UpdateTime,
