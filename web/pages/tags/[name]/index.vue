@@ -4,33 +4,33 @@
       <div class="flex flex-col">
         <PostListItem :posts="posts"></PostListItem>
         <Pagination :currentPage="req.pageNo" :total="totalPosts" :perPageCount='req.pageSize'
-                    :route="`/categories/${routeParam}/page/`"></Pagination>
+                    :route="`/tags/${routeParam}/page/`"></Pagination>
       </div>
     </div>
     <div class="flex flex-col w-30%">
       <Profile class="mb-5"></Profile>
     </div>
   </div>
+
 </template>
 
 
 <script lang="ts" setup>
 import {getPosts} from "~/api/post"
-import {getCategoryByRoute} from "~/api/category"
+import {getTagByRoute} from "~/api/tag"
 import type {PageRequest} from "~/api/post"
 import type {IPost} from "~/api/post"
 import type {IResponse, IPageData} from "~/api/http";
-import type {ICategoryName} from "~/api/category";
+import type {ITagName} from "~/api/tag";
 
 const route = useRoute()
-const pageNo : number = +route.params.pageNo
 const pageSize :number = Number(route.query.pageSize) || 5
 const routeParam : string = String(route.params.name)
 
 
 let posts = ref<IPost[]>([]);
 let req = ref<PageRequest>({
-  pageNo: pageNo,
+  pageNo: 1,
   pageSize: pageSize,
   sortField: "create_time",
   sortOrder: "desc",
@@ -40,10 +40,10 @@ const totalPosts = ref<Number>(0)
 
 const postInfos = async () => {
   try {
-    if (!req.value.categories || req.value.categories.length == 0) {
-      let categoryRes: any = await getCategoryByRoute(routeParam)
-      let res: IResponse<ICategoryName> = categoryRes.data.value
-      req.value.categories = [res.data?.name || ""]
+    if (!req.value.tags || req.value.tags.length == 0) {
+      let categoryRes: any = await getTagByRoute(routeParam)
+      let res: IResponse<ITagName> = categoryRes.data.value
+      req.value.tags = [res.data?.name || ""]
     }
     const deepCopyReq = JSON.parse(JSON.stringify(req.value));
     let postRes: any = await getPosts(deepCopyReq)
@@ -55,15 +55,4 @@ const postInfos = async () => {
   }
 };
 postInfos()
-
-// 创建一个计算属性来追踪 query 对象
-const routeQuery = computed(() => route.query);
-
-watch(() => routeQuery, (newQuery, oldQuery) => {
-  const pageSize :number = Number(route.query.pageSize) || -1
-  if (pageSize != req.value.pageSize && pageSize != -1){
-    req.value.pageSize = pageSize
-    postInfos()
-  }
-}, { deep: true });
 </script>

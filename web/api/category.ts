@@ -12,10 +12,15 @@ export interface ICategoryWithCount {
     count: number;
 }
 
+export interface ICategoryName {
+    name: string;
+}
 
 const prefix = ""
 
 export const getMenus = () => httpRequest.get(prefix + "/menus")
 export const getCategoriesAndTags = () => httpRequest.get(prefix + "/categories")
+
+export const getCategoryByRoute = (route: string) => httpRequest.get(prefix + `/categories/route/${route}`)
 
 
