@@ -17,6 +17,8 @@ package dao
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+
 	"github.com/chenmingyong0423/go-mongox"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -38,6 +40,7 @@ type Category struct {
 
 type ICategoryDao interface {
 	GetAll(ctx context.Context) ([]*Category, error)
+	GetByRoute(ctx context.Context, route string) (*Category, error)
 }
 
 var _ ICategoryDao = (*CategoryDao)(nil)
@@ -50,6 +53,14 @@ func NewCategoryDao(db *mongo.Database) *CategoryDao {
 
 type CategoryDao struct {
 	coll *mongox.Collection[Category]
+}
+
+func (d *CategoryDao) GetByRoute(ctx context.Context, route string) (*Category, error) {
+	category, err := d.coll.Finder().Filter(query.Eq("route", route)).FindOne(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return category, nil
 }
 
 func (d *CategoryDao) GetAll(ctx context.Context) ([]*Category, error) {

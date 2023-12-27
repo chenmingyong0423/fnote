@@ -25,6 +25,7 @@ import (
 type Tags struct {
 	Id         string `bson:"_id"`
 	Name       string `bson:"name"`
+	Route      string `bson:"route"`
 	Disabled   bool   `bson:"disabled"`
 	CreateTime int64  `bson:"create_time"`
 	UpdateTime int64  `bson:"update_time"`
@@ -32,6 +33,7 @@ type Tags struct {
 
 type ITagDao interface {
 	GetTags(ctx context.Context) ([]*Tags, error)
+	GetByRoute(ctx context.Context, route string) (*Tags, error)
 }
 
 var _ ITagDao = (*TagDao)(nil)
@@ -42,6 +44,10 @@ func NewTagDao(db *mongo.Database) *TagDao {
 
 type TagDao struct {
 	coll *mongox.Collection[Tags]
+}
+
+func (d *TagDao) GetByRoute(ctx context.Context, route string) (*Tags, error) {
+	return d.coll.Finder().Filter(query.Eq("route", route)).FindOne(ctx)
 }
 
 func (d *TagDao) GetTags(ctx context.Context) ([]*Tags, error) {
