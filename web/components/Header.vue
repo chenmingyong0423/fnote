@@ -12,9 +12,10 @@
       <div
           class="i-ph-sun-dim-duotone dark:i-ph-moon-stars-fill cursor-pointer text-10 text-#86909c dark:text-dtc dark:hover:text-white"
           @click="homeStore.is_black_mode = !homeStore.is_black_mode"></div>
-      <div
-          class="i-ph-list-magnifying-glass-duotone cursor-pointer dark:text-dtc text-10 text-#86909c dark:hover:text-white"></div>
-
+      <NuxtLink
+          class="i-ph-list-magnifying-glass-duotone cursor-pointer dark:text-dtc text-10 text-#86909c dark:hover:text-white"
+          to="/search?keyword=">
+      </NuxtLink>
       <div
           class="i-grommet-icons:github text-12 dark:text-dtc cursor-pointer dark:hover:text-white active:bg-#e5e5e5 lt-lg:display-none"/>
     </div>
