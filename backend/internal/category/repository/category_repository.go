@@ -23,6 +23,7 @@ import (
 
 type ICategoryRepository interface {
 	GetAll(ctx context.Context) ([]domain.Category, error)
+	GetCategoryByRoute(ctx context.Context, route string) (domain.Category, error)
 }
 
 var _ ICategoryRepository = (*CategoryRepository)(nil)
@@ -37,6 +38,18 @@ type CategoryRepository struct {
 	dao dao.ICategoryDao
 }
 
+func (r *CategoryRepository) GetCategoryByRoute(ctx context.Context, route string) (domain.Category, error) {
+	category, err := r.dao.GetByRoute(ctx, route)
+	if err != nil {
+		return domain.Category{}, err
+	}
+	return r.toDomainCategory(category), nil
+}
+
+func (r *CategoryRepository) toDomainCategory(category *dao.Category) domain.Category {
+	return domain.Category{Id: category.Id, Name: category.Name, Route: category.Route, Description: category.Description}
+}
+
 func (r *CategoryRepository) GetAll(ctx context.Context) ([]domain.Category, error) {
 	categories, err := r.dao.GetAll(ctx)
 	if err != nil {
@@ -44,7 +57,7 @@ func (r *CategoryRepository) GetAll(ctx context.Context) ([]domain.Category, err
 	}
 	result := make([]domain.Category, 0, len(categories))
 	for _, category := range categories {
-		result = append(result, domain.Category{Id: category.Id, Name: category.Name, Route: category.Route, Description: category.Description})
+		result = append(result, r.toDomainCategory(category))
 	}
 	return result, nil
 }

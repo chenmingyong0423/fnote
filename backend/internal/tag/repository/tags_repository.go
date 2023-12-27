@@ -23,6 +23,7 @@ import (
 
 type ITagRepository interface {
 	GetTags(ctx context.Context) ([]domain.Tag, error)
+	GetTagByRoute(ctx context.Context, route string) (domain.Tag, error)
 }
 
 var _ ITagRepository = (*TagRepository)(nil)
@@ -33,6 +34,25 @@ func NewTagRepository(dao dao.ITagDao) *TagRepository {
 
 type TagRepository struct {
 	dao dao.ITagDao
+}
+
+func (r *TagRepository) GetTagByRoute(ctx context.Context, route string) (domain.Tag, error) {
+	tag, err := r.dao.GetByRoute(ctx, route)
+	if err != nil {
+		return domain.Tag{}, err
+	}
+	return r.toDomainTag(tag), nil
+}
+
+func (r *TagRepository) toDomainTag(tag *dao.Tags) domain.Tag {
+	return domain.Tag{
+		Id:         tag.Id,
+		Name:       tag.Name,
+		Route:      tag.Route,
+		Disabled:   tag.Disabled,
+		CreateTime: tag.CreateTime,
+		UpdateTime: tag.UpdateTime,
+	}
 }
 
 func (r *TagRepository) GetTags(ctx context.Context) ([]domain.Tag, error) {
@@ -46,14 +66,7 @@ func (r *TagRepository) GetTags(ctx context.Context) ([]domain.Tag, error) {
 func (r *TagRepository) toDomainTags(tags []*dao.Tags) []domain.Tag {
 	var domainTags []domain.Tag
 	for _, tag := range tags {
-		domainTags = append(domainTags, domain.Tag{
-			Id:         tag.Id,
-			Name:       tag.Name,
-			Route:      tag.Route,
-			Disabled:   tag.Disabled,
-			CreateTime: tag.CreateTime,
-			UpdateTime: tag.UpdateTime,
-		})
+		domainTags = append(domainTags, r.toDomainTag(tag))
 	}
 	return domainTags
 }

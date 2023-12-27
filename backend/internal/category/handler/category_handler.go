@@ -32,6 +32,10 @@ type CategoryWithCountVO struct {
 	Count       int64  `json:"count"`
 }
 
+type CategoryNameVO struct {
+	Name string `json:"name"`
+}
+
 func NewCategoryHandler(serv service.ICategoryService) *CategoryHandler {
 	return &CategoryHandler{
 		serv: serv,
@@ -45,6 +49,7 @@ type CategoryHandler struct {
 func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/categories")
 	group.GET("", api.Wrap(h.GetCategories))
+	group.GET("/route/:route", api.Wrap(h.GetCategoryByRoute))
 	engine.GET("/menus", api.Wrap(h.GetMenus))
 }
 
@@ -77,4 +82,13 @@ func (h *CategoryHandler) GetMenus(ctx *gin.Context) (listVO api.ListVO[MenuVO],
 	}
 	listVO.List = menuVOs
 	return
+}
+
+func (h *CategoryHandler) GetCategoryByRoute(ctx *gin.Context) (CategoryNameVO, error) {
+	route := ctx.Param("route")
+	category, err := h.serv.GetCategoryByRoute(ctx, route)
+	if err != nil {
+		return CategoryNameVO{}, err
+	}
+	return CategoryNameVO{Name: category.Name}, nil
 }

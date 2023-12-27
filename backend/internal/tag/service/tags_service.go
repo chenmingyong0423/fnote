@@ -30,15 +30,20 @@ func NewTagService(repo repository.ITagRepository, countStatsService service.ICo
 	}
 }
 
-var _ ITagService = (*TagService)(nil)
-
 type ITagService interface {
 	GetTags(ctx context.Context) ([]domain.TagWithCount, error)
+	GetTagByRoute(ctx context.Context, route string) (domain.Tag, error)
 }
+
+var _ ITagService = (*TagService)(nil)
 
 type TagService struct {
 	repo              repository.ITagRepository
 	countStatsService service.ICountStatsService
+}
+
+func (s *TagService) GetTagByRoute(ctx context.Context, route string) (domain.Tag, error) {
+	return s.repo.GetTagByRoute(ctx, route)
 }
 
 func (s *TagService) GetTags(ctx context.Context) ([]domain.TagWithCount, error) {
