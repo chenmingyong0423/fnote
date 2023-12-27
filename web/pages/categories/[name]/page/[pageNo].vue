@@ -29,7 +29,7 @@ let req = ref<PageRequest>({
   pageSize: pageSize,
   sortField: "create_time",
   sortOrder: "desc",
-  category: name,
+  categories: [name],
 } as PageRequest)
 
 const totalPosts = ref<Number>(0)
@@ -51,7 +51,6 @@ postInfos()
 const routeQuery = computed(() => route.query);
 
 watch(() => routeQuery, (newQuery, oldQuery) => {
-  console.log('查询参数变化了:', newQuery);
   const pageSize :number = Number(route.query.pageSize) || -1
   if (pageSize != req.value.pageSize && pageSize != -1){
     req.value.pageSize = pageSize

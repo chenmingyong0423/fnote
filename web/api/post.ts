@@ -6,7 +6,7 @@ export interface IPost {
     title: string;
     summary: string;
     cover_img: string;
-    category: string;
+    categories: string[];
     tags: string[];
     like_count: number;
     comment_count: number;
@@ -23,8 +23,8 @@ export type PageRequest = {
     pageSize: number;
     sortField?: string;
     sortOrder?: string;
-    search?: string;
-    category?: string;
+    keyword?: string;
+    categories?: string[];
     tags?: string[];
 }
 
