@@ -15,9 +15,6 @@ export interface IPost {
     create_time: number;
 }
 
-const prefix = "/posts"
-
-
 export type PageRequest = {
     pageNo: number;
     pageSize: number;
@@ -27,10 +24,6 @@ export type PageRequest = {
     categories?: string[];
     tags?: string[];
 }
-
-export const getPosts = (pq: PageRequest) => httpRequest.get(prefix + "", pq)
-export const getLatestPosts = () => httpRequest.get(prefix + "/latest")
-
 
 export interface IPostDetail {
     sug: string;
@@ -53,7 +46,9 @@ export interface IPostDetail {
     is_liked: boolean;
 }
 
-
+const prefix = "/posts"
 export const getPostsById = (id: string) => httpRequest.get(`${prefix}/${id}`)
-
+export const getPosts = (pq: PageRequest) => httpRequest.get(prefix + "", pq)
+export const getLatestPosts = () => httpRequest.get(prefix + "/latest")
+export const likePost = (id: string) => httpRequest.post(`${prefix}/${id}/likes`, null)
 

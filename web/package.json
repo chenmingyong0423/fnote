@@ -20,6 +20,7 @@
     "vue-router": "^4.2.5"
   },
   "dependencies": {
+    "@iconify-json/bi": "^1.1.22",
     "@iconify-json/fa6-brands": "^1.1.18",
     "@iconify-json/ph": "^1.1.9",
     "@kangc/v-md-editor": "^2.3.18",
@@ -29,6 +30,7 @@
     "highlight.js": "^11.9.0",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
-    "prismjs": "^1.29.0"
+    "prismjs": "^1.29.0",
+    "qrcodejs2-fixes": "^0.0.2"
   }
 }

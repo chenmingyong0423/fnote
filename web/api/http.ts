@@ -16,6 +16,11 @@ export interface IListData<T> {
     list: T[];
 }
 
+export interface IBaseResponse {
+    code: number;
+    message: string;
+}
+
 export interface IResponse<T> {
     code: number;
     data?: T;

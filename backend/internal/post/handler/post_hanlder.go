@@ -56,9 +56,9 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/posts")
 	group.GET("/latest", api.Wrap(h.GetLatestPosts))
 	group.GET("", api.WrapWithBody(h.GetPosts))
-	group.GET("/:sug", api.Wrap(h.GetPostBySug))
-	group.POST("/:sug/likes", api.Wrap(h.AddLike))
-	group.DELETE("/:sug/likes", api.Wrap(h.DeleteLike))
+	group.GET("/:id", api.Wrap(h.GetPostBySug))
+	group.POST("/:id/likes", api.Wrap(h.AddLike))
+	group.DELETE("/:id/likes", api.Wrap(h.DeleteLike))
 }
 
 func (h *PostHandler) GetLatestPosts(ctx *gin.Context) (listVO api.ListVO[*SummaryPostVO], err error) {
@@ -104,7 +104,7 @@ func (h *PostHandler) GetPosts(ctx *gin.Context, req *domain.PostRequest) (pageV
 }
 
 func (h *PostHandler) GetPostBySug(ctx *gin.Context) (vo *domain.DetailPostVO, err error) {
-	sug := ctx.Param("sug")
+	sug := ctx.Param("id")
 	post, err := h.serv.GetPunishedPostById(ctx, sug)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -122,7 +122,7 @@ func (h *PostHandler) AddLike(ctx *gin.Context) (r any, err error) {
 	if ip == "" {
 		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
-	sug := ctx.Param("sug")
+	sug := ctx.Param("id")
 	return r, h.serv.AddLike(ctx, sug, ip)
 }
 
@@ -131,6 +131,6 @@ func (h *PostHandler) DeleteLike(ctx *gin.Context) (r any, err error) {
 	if ip == "" {
 		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
-	sug := ctx.Param("sug")
+	sug := ctx.Param("id")
 	return r, h.serv.DeleteLike(ctx, sug, ip)
 }
