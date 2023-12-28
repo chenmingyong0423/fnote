@@ -1,7 +1,7 @@
 <template>
   <div>
     <NuxtLink
-        class="item group flex p-5 bg-#fff b-rounded-4 h-50 cursor-pointer ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--2 dark:text-dtc dark_bg_gray mb-5"
+        class="slide-up item group flex p-5 bg-#fff b-rounded-4 h-50 cursor-pointer ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--2 dark:text-dtc dark_bg_gray mb-5"
         v-for="(item, index) in props.posts" :key="index" :to="'/posts/' + item.sug">
       <div class="w-1/3 overflow-hidden relative">
         <img class="object-contain max-w-full h-full"
@@ -78,5 +78,19 @@ const props = defineProps({
 .item:hover::before {
   transform: scaleX(1);
   transform-origin: right left;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(+100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease;
+  animation-iteration-count: 1;
 }
 </style>

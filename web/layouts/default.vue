@@ -12,6 +12,9 @@
     <div>
       <Footer/>
     </div>
+    <div>
+      <div ref="scrollToTop" class="i-ph:arrow-circle-up text-gray dark:text-#207191/50 w-15 h-15 fixed bottom-[20px] right-[20px] cursor-pointer" style="display: none;" @click="handleScrollToTop"></div>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -29,9 +32,9 @@ const homeStore = useHomeStore()
 onMounted(() => {
   let isBlackMode = localStorage.getItem("isBlackMode")
   if (isBlackMode === '') {
-    localStorage.setItem("isBlackMode", info.is_black_mode.toString())
+    localStorage.setItem("isBlackMode", info.isBlackMode.toString())
   } else {
-    info.is_black_mode = isBlackMode === 'true'
+    info.isBlackMode = isBlackMode === 'true'
   }
 })
 
@@ -70,6 +73,30 @@ const menus = async () => {
   }
 };
 menus()
+
+const scrollToTop = ref()
+
+const scrollEvent = () => {
+  if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 20) {
+    scrollToTop.value.style.display = "block";
+  } else {
+    scrollToTop.value.style.display = "none";
+  }
+}
+const handleScrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  });
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', scrollEvent)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', scrollEvent)
+})
 </script>
 
 <style scoped>
