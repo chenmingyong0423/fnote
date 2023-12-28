@@ -7,7 +7,7 @@
         @click="click(anchor)"
         :key="index"
     >
-      <a style="cursor: pointer" class="p-l-6" :class="{'anchor_border': anchor.lineIndex == lineIndex}">{{ anchor.title }}</a>
+      <a style="cursor: pointer" class="p-l-6" :class="{'anchor_border text-5 text-#1e80ff font-bold': anchor.lineIndex == lineIndex}">{{ anchor.title }}</a>
     </div>
   </div>
 </template>
