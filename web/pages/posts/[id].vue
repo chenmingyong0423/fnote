@@ -25,7 +25,7 @@
       </div>
     </div>
     <div class="w-63% ml-1% mr-1%">
-      <div class="bg-white mb-5 b-rounded-4 dark:text-dtc dark_bg_full_black">
+      <div class="bg-white mb-5 b-rounded-4 dark:text-dtc dark_bg_gray">
         <!--  文章标题  -->
         <div class="text-10 font-bold text-center p-1">{{ post?.title }}</div>
         <!--  文章 meta  -->
@@ -36,8 +36,10 @@
         </div>
         <!--  文章内容  -->
         <div class="text-4" ref="previewRef">
-          <v-md-preview :text="post?.content" @copy-code-success="handleCopyCodeSuccess"
-                        class="dark:text-dtc dark_bg_full_black lt-lg:important:p0" @change="generateAnchors"></v-md-preview>
+          <client-only>
+            <v-md-preview :text="post?.content" @copy-code-success="handleCopyCodeSuccess"
+                          class="lt-lg:important:p0" :class="{'dark': isBlackMode}" @change="generateAnchors"></v-md-preview>
+          </client-only>
         </div>
       </div>
       <!-- 版权声明 -->
@@ -56,7 +58,8 @@
     <div class="flex flex-col w-30%">
       <Profile class="mb-5"></Profile>
       <div ref="anchor">
-        <Anchor :htmlContent="htmlContent" :lineIndex="lineIndex" @handleAnchorClick="handleAnchorClick" class="dark:text-dtc dark_bg_full_black"></Anchor>
+        <Anchor :htmlContent="htmlContent" :lineIndex="lineIndex" @handleAnchorClick="handleAnchorClick"
+                class="dark:text-dtc dark_bg_gray"></Anchor>
       </div>
     </div>
   </div>
@@ -68,8 +71,11 @@ import type {IPostDetail} from "~/api/post";
 import type {IResponse} from "~/api/http";
 import {onMounted, ref} from "vue";
 import {useHomeStore} from '~/store/home';
-
+import VMdPreview from "@kangc/v-md-editor/lib/preview";
 const info = useHomeStore()
+
+const isBlackMode = computed(() => info.isBlackMode)
+
 const domain = info.master_info.domain;
 const route = useRoute()
 const id: string = String(route.params.id)
@@ -115,7 +121,6 @@ const isScrolling = ref(false)
 
 const subscribeTitleFocus = () => {
   if (isScrolling.value) return
-  console.log(isScrolling.value)
   // 获取当前滚动位置
   const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
   const preview = previewRef.value;
@@ -172,3 +177,48 @@ const handleAnchorClick = (newLineIndex: string) => {
   }
 };
 </script>
+
+<style scoped>
+ .dark /deep/ .v-md-pre-wrapper {
+  background-color: rgba(10, 0, 0, 0.1) !important;
+}
+   .dark /deep/ .v-md-pre-wrapper {
+     background-color: rgba(10, 0, 0, 0.1) !important;
+   }
+
+   .dark /deep/ code {
+     color: white !important;
+   }
+
+   .dark /deep/ .line-numbers-mode:after {
+     background-color: rgba(10, 0, 0, 0.1) !important;
+     border: 0 !important;
+   }
+
+   /* 根据需要定制不同代码语言或元素的样式 */
+   .dark /deep/ .hljs-keyword, .hljs-selector-tag, .hljs-literal {
+     color: #ff7b72 !important;
+   }
+
+   .dark /deep/ .hljs-string {
+     color: #a5d6ff !important;
+   }
+
+   .dark /deep/ .hljs-title {
+     color: #a5d6ff !important;
+   }
+
+   .dark /deep/ .hljs-type {
+     color: #cc880a !important;
+   }
+
+   .dark  /deep/ .github-markdown-body table tr {
+     background-color: rgba(10, 0, 0, 0.1) !important;
+
+   }
+
+   .dark /deep/ .github-markdown-body blockquote {
+     border-color: #334a61 !important;
+   }
+
+</style>

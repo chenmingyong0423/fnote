@@ -11,7 +11,7 @@
     <div class="ml-auto pr-5 flex gap-x-4">
       <div
           class="i-ph-sun-dim-duotone dark:i-ph-moon-stars-fill cursor-pointer text-10 text-#86909c dark:text-dtc dark:hover:text-white"
-          @click="homeStore.is_black_mode = !homeStore.is_black_mode"></div>
+          @click="homeStore.isBlackMode = !homeStore.isBlackMode"></div>
       <NuxtLink
           class="i-ph-list-magnifying-glass-duotone cursor-pointer dark:text-dtc text-10 text-#86909c dark:hover:text-white"
           to="/search?keyword=">
@@ -29,16 +29,18 @@ import Menu from "~/components/Menu.vue";
 
 const homeStore = useHomeStore()
 
-const isBlackMode = computed(() => homeStore.is_black_mode)
+const isBlackMode = computed(() => homeStore.isBlackMode)
 const picture = ref<string>(homeStore.master_info.picture)
 
 
 watch(isBlackMode, (newValue) => {
   localStorage.setItem("isBlackMode", newValue.toString())
-  if (newValue)
+  if (newValue) {
+
     document.querySelector('html')!.classList.add("dark");
-  else
+  } else {
     document.querySelector('html')!.classList.remove("dark");
+  }
 })
 
 const header = ref()

@@ -6,6 +6,7 @@
         :style="{ padding: `10px 0 10px ${anchor.indent * 20}px` }"
         @click="click(anchor)"
         :key="index"
+        class="cursor-pointer"
     >
       <a style="cursor: pointer" class="p-l-6" :class="{'anchor_border text-5 text-#1e80ff font-bold': anchor.lineIndex == lineIndex}">{{ anchor.title }}</a>
     </div>

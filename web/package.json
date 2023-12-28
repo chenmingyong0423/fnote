@@ -28,6 +28,7 @@
     "@unocss/nuxt": "^0.58.0",
     "highlight.js": "^11.9.0",
     "pinia": "^2.1.7",
-    "pinia-plugin-persistedstate": "^3.2.1"
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "prismjs": "^1.29.0"
   }
 }
