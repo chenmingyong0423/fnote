@@ -14,7 +14,11 @@ import createHighlightLinesPlugin from '@kangc/v-md-editor/lib/plugins/highlight
 import '@kangc/v-md-editor/lib/plugins/highlight-lines/highlight-lines.css';
 export default defineNuxtPlugin((nuxtApp) => {
     if (process.client) {
-        VMdPreview.use(githubTheme, { Hljs: hljs })
+        VMdPreview.use(githubTheme, { Hljs: hljs, class: "dark:text-dtc dark_bg_full_black",
+            extend(md) {
+                md.set
+            },
+        })
             .use(createLineNumberPlugin())
             .use(createCopyCodePreview())
             .use(createHighlightLinesPlugin());

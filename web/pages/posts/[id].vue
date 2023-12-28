@@ -1,31 +1,31 @@
 <template>
   <div class="flex w-full">
-    <div class="mt-10 w-10%">
-      <div class="flex flex-col gap-y-3 items-center fixed">
+    <div class="mt-10 w-5%">
+      <div class="flex flex-col gap-y-3 items-center fixed ">
         <div
-            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200">
+            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_full_black">
           <span
               class="i-ph:thumbs-up w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400"></span>
         </div>
         <div
-            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200">
+            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_full_black">
         <span
             class="i-ph-chats-duotone w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400"></span>
         </div>
         <div
-            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200">
+            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_full_black">
         <span
             class="i-ph:share-fat-light w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400"></span>
         </div>
         <div
-            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200">
+            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_full_black">
            <span
                class="w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400 text-5 text-center">赏</span>
         </div>
       </div>
     </div>
-    <div class="w-58% ml-1% mr-1%">
-      <div class="bg-white mb-5 b-rounded-4">
+    <div class="w-63% ml-1% mr-1%">
+      <div class="bg-white mb-5 b-rounded-4 dark:text-dtc dark_bg_full_black">
         <!--  文章标题  -->
         <div class="text-10 font-bold text-center p-1">{{ post?.title }}</div>
         <!--  文章 meta  -->
@@ -37,11 +37,11 @@
         <!--  文章内容  -->
         <div class="text-4" ref="previewRef">
           <v-md-preview :text="post?.content" @copy-code-success="handleCopyCodeSuccess"
-                        class="dark_text_white lt-lg:important:p0" @change="generateAnchors"></v-md-preview>
+                        class="dark:text-dtc dark_bg_full_black lt-lg:important:p0" @change="generateAnchors"></v-md-preview>
         </div>
       </div>
       <!-- 版权声明 -->
-      <div class="copyright b-rounded-4 bg-white p-8">
+      <div class="copyright b-rounded-4 bg-white p-8 dark:text-dtc dark_bg_full_black">
         <p class="mb-5"><span style="color: rgb(14, 136, 235);font-weight: bold;">本文链接：</span><a
             class="text-#00bd7e hover:bg-#00bd7e33"
             :href="`${domain}/${id}`" target="_blank">{{ `${domain}/posts/${id}` }}</a></p>
@@ -56,7 +56,7 @@
     <div class="flex flex-col w-30%">
       <Profile class="mb-5"></Profile>
       <div ref="anchor">
-        <Anchor :htmlContent="htmlContent" :lineIndex="lineIndex" @handleAnchorClick="handleAnchorClick"></Anchor>
+        <Anchor :htmlContent="htmlContent" :lineIndex="lineIndex" @handleAnchorClick="handleAnchorClick" class="dark:text-dtc dark_bg_full_black"></Anchor>
       </div>
     </div>
   </div>
