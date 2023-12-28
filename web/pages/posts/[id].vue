@@ -3,22 +3,22 @@
     <div class="mt-10 w-5%">
       <div class="flex flex-col gap-y-3 items-center fixed ">
         <div
-            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_full_black">
+            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_gray">
           <span
               class="i-ph:thumbs-up w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400"></span>
         </div>
         <div
-            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_full_black">
+            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_gray">
         <span
             class="i-ph-chats-duotone w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400"></span>
         </div>
         <div
-            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_full_black">
+            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_gray">
         <span
             class="i-ph:share-fat-light w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400"></span>
         </div>
         <div
-            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_full_black">
+            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_gray">
            <span
                class="w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400 text-5 text-center">赏</span>
         </div>
@@ -43,7 +43,7 @@
         </div>
       </div>
       <!-- 版权声明 -->
-      <div class="copyright b-rounded-4 bg-white p-8 dark:text-dtc dark_bg_full_black">
+      <div class="copyright b-rounded-4 bg-white p-8 dark:text-dtc dark_bg_gray">
         <p class="mb-5"><span style="color: rgb(14, 136, 235);font-weight: bold;">本文链接：</span><a
             class="text-#00bd7e hover:bg-#00bd7e33"
             :href="`${domain}/${id}`" target="_blank">{{ `${domain}/posts/${id}` }}</a></p>
