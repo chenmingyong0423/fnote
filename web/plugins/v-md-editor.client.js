@@ -7,7 +7,7 @@ import createLineNumberPlugin from '@kangc/v-md-editor/lib/plugins/line-number/i
 // highlightjs
 import hljs from 'highlight.js';
 // 代码复制
-import createCopyCodePlugin from '@kangc/v-md-editor/lib/plugins/copy-code/index';
+import createCopyCodePreview from '@kangc/v-md-editor/lib/plugins/copy-code/preview';
 import '@kangc/v-md-editor/lib/plugins/copy-code/copy-code.css';
 // 代码行高亮
 import createHighlightLinesPlugin from '@kangc/v-md-editor/lib/plugins/highlight-lines/index';
@@ -16,7 +16,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     if (process.client) {
         VMdPreview.use(githubTheme, { Hljs: hljs })
             .use(createLineNumberPlugin())
-            .use(createCopyCodePlugin())
+            .use(createCopyCodePreview())
             .use(createHighlightLinesPlugin());
 
         nuxtApp.vueApp.use(VMdPreview);

@@ -21,6 +21,7 @@ export default defineNuxtConfig({
             {'dark_text_white': 'dark:c-#fff'},
             {'light_border': 'border-1 border-gray-2 border-solid'},
             {'light_border_bottom': 'border-b-1 border-b-gray-2 border-b-solid'},
+            {'anchor_border': 'border-l-2 border-l-#1e80ff border-l-solid'},
             {'c_title_blue': 'text-#1890ff'},
             {'c_text_black': 'text-#111'},
             {'c_text_white': 'text-#fff'},
