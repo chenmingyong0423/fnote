@@ -1,4 +1,4 @@
-import {UseFetchOptions, useFetch} from "nuxt/app";
+import {type UseFetchOptions, useFetch} from "nuxt/app";
 
 type Methods = "GET" | "POST" | "DELETE" | "PUT";
 
