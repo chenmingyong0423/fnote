@@ -13,7 +13,7 @@
       <Footer/>
     </div>
     <div>
-      <div ref="scrollToTop" class="i-ph:arrow-circle-up text-gray dark:text-#207191/50 w-15 h-15 fixed bottom-[20px] right-[20px] cursor-pointer" style="display: none;" @click="handleScrollToTop"></div>
+      <div ref="scrollToTop" class="i-ph:arrow-circle-up text-gray dark:text-dtc w-15 h-15 fixed bottom-[100px] right-[20px] cursor-pointer" style="display: none;" @click="handleScrollToTop"></div>
     </div>
   </div>
 </template>
