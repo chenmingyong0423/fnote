@@ -2,12 +2,10 @@
 export default defineNuxtConfig({
     devtools: {enabled: true},
     modules: [
-        '@ant-design-vue/nuxt',
         '@unocss/nuxt',
         "@pinia/nuxt",
         'dayjs-nuxt',
     ],
-    antd: {},
     unocss: {
         uno: true, // enabled `@unocss/preset-uno`
         icons: true, // enabled `@unocss/preset-icons`
@@ -16,6 +14,7 @@ export default defineNuxtConfig({
         shortcuts: [
             {'dark_bg_black': 'dark:bg-#03080c'},
             {'dark_bg_gray': 'dark:bg-#207191/10 dark:border-solid dark:border-#1e2227 dark:border-1'},
+            {'dark_bg_half_gray': 'dark:bg-#207191/50 dark:border-solid dark:border-#1e2227 dark:border-1'},
             {'dark_bg_full_black': 'dark:bg-#000/90 dark:border-solid dark:border-#1e2227 dark:border-1'},
             {'dark_border': 'border-solid border-#1e2227 border-1'},
             {'dark_text_white': 'dark:c-#fff'},
@@ -53,5 +52,6 @@ export default defineNuxtConfig({
         '~/plugins/pinia.js',
         '~/plugins/localStorage.client.ts',
         '~/plugins/v-md-editor.client.js',
+        '~/plugins/qrcode.client.ts',
     ],
 })

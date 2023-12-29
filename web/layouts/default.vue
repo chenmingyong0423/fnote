@@ -1,5 +1,6 @@
 <template>
   <div class="dark:bg-#03080c">
+    <MyToast></MyToast>
     <div ref="myDom">
       <Header class="slide-down"/>
     </div>
@@ -22,7 +23,6 @@ import {useHomeStore} from '~/store/home';
 import {getWebMaster} from "~/api/config"
 import type {IWebmasterInfo} from "~/api/config"
 import type {IListData, IResponse} from "~/api/http";
-import {onMounted, ref} from "vue";
 import {getMenus, type IMenu} from "~/api/category";
 
 const info = useHomeStore()
