@@ -9,7 +9,7 @@
               class="i-ph:thumbs-up w-8 h-8 duration-400"
               :class="{'group-hover:scale-120 group-hover:text-white text-gray': !post?.is_liked, 'text-#1e80ff': post?.is_liked}"></span>
           <span
-              class="absolute translate-x-11/10 -translate-y-11/10 -translate-y-1/2 bg-#1e80ff text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
+              class="absolute translate-x-11/10 -translate-y-2/3 bg-#1e80ff text-white text-xs rounded-full w-8 h-8 flex items-center justify-center">
               {{ post?.like_count }}
           </span>
         </div>
@@ -19,7 +19,7 @@
           <span
               class="i-ph-chats-duotone w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400"></span>
           <span
-              class="absolute transform translate-x-11/10 -translate-y-11/10 bg-#1e80ff text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
+              class="absolute transform translate-x-11/10 -translate-y-2/3 bg-#1e80ff text-white text-xs rounded-full w-8 h-8 flex items-center justify-center">
               {{ post?.comment_count }}
           </span>
         </div>
@@ -27,17 +27,32 @@
             class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_gray relative">
           <span
               class="i-ph:share-fat-light w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400"></span>
-          <div class="share w-80% hidden absolute transform translate-x-8/6 -translate-y--1/4 group-hover:block">
+          <div
+              class="share w-80% hidden absolute transform translate-x-8/6 -translate-y--1/4 group-hover:block shadow-2xl shadow-gray">
             <div
-                class=" flex flex-col gap-y-3  bg-white text-white text-xs b-rounded-4 w-80% items-center justify-center p-x-1 p-y-2">
-              <span class="i-bi:wechat w-6 h-6 text-green"></span>
+                class="slide-right-animation dark:text-dtc dark_bg_half_gray flex flex-col gap-y-3  bg-white text-white text-xs b-rounded-4 w-150% items-center justify-center p-x-1 p-y-2 shadow-2xl shadow-black/10">
+              <div class="relative w-8 h-8 group" @mouseenter="qrcodeShow = true" @mouseleave="qrcodeShow= false">
+                <div class="i-bi:wechat w-full h-full text-green"></div>
+                <div
+                    class="qrcodeDiv absolute  left-210% top--120% w-[160px] h-[170px] p-5 bg-white b-rounded-4  duration-200 tilt-animation dark:text-dtc dark_bg_half_gray"
+                    :class="{'block': qrcodeShow, 'hidden ': !qrcodeShow}">
+                  <div class="flex flex-col items-center align-center gap-y-3">
+                    <QrcodeVue :value="`https://${domain}${path}`" :size="150" level="M"/>
+                    <p class="text-black text-4">微信扫一扫</p>
+                  </div>
+                </div>
+
+              </div>
               <hr class="w-50% border-gray-1 b-rounded-4">
-              <a class="i-bi:tencent-qq w-6 h-6 text-black"
-                 :href="`https://connect.qq.com/widget/shareqq/index.html?url=${domain}${path}&title=${post?.title}&pics=${post?.cover_img}`" target="_blank"></a>
+              <a class="i-bi:tencent-qq w-8 h-8 text-black"
+                 :href="`https://connect.qq.com/widget/shareqq/index.html?url=${domain}${path}&title=${post?.title}&pics=${post?.cover_img}`"
+                 target="_blank"></a>
               <hr class="w-50% border-gray-1 b-rounded-4">
-              <a class="i-bi:sina-weibo w-6 h-6 text-red" :href="`https://service.weibo.com/share/share.php?sharesource=weibo&title=${post?.title}，原文链接：${domain}${path}&pic=${post?.cover_img}`" target="_blank"></a>
+              <a class="i-bi:sina-weibo w-8 h-8 text-red"
+                 :href="`https://service.weibo.com/share/share.php?sharesource=weibo&title=${post?.title}，原文链接：${domain}${path}&pic=${post?.cover_img}`"
+                 target="_blank"></a>
               <hr class="w-50% border-gray-1 b-rounded-4">
-              <span class="i-bi:link-45deg w-6 h-6 text-black"></span>
+              <span class="i-bi:link-45deg w-8 h-8 text-black" @click="copyLink"></span>
             </div>
           </div>
         </div>
@@ -45,12 +60,6 @@
             class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_gray">
            <span
                class="w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400 text-5 text-center">赏</span>
-        </div>
-        <div>
-          <div ref="qrCodeEl">
-
-          </div>
-          <p @click="generateQRCode">扫一扫</p>
         </div>
       </div>
     </div>
@@ -236,50 +245,20 @@ const scrollToCommentArea = () => {
     top: comment.value.offsetTop - 60,
     behavior: 'smooth',
   });
-}
+};
 
 // 二维码
-const qrCodeEl = ref();
+const qrcodeShow = ref(false)
 
-onMounted(() => {
-  if(process.client) {
-    // if (qrCodeEl.value) {
-    //   console.log(1234)
-    //   import('qrcodejs2-fixes').then(QRCode => {
-    //     new QRCode(qrCodeEl.value, {
-    //       text: `${domain}/posts/${id}`,
-    //       width: 100,
-    //       height: 100,
-    //       colorDark: "#000000",
-    //       colorLight: "#ffffff",
-    //       correctLevel: QRCode.default.CorrectLevel.H
-    //     });
-    //   })
-    // }
-  }
-})
 
-const generateQRCode = () => {
-  console.log(1)
-  // if (process.client) {
-  //   console.log(2)
-  //   console.log(qrCodeEl.value)
-  //   if (qrCodeEl.value) {
-  //     console.log(3)
-  //     import('qrcodejs2-fixes').then(QRCode => {
-  //       new QRCode(qrCodeEl.value, {
-  //         text: `${domain}/posts/${id}`,
-  //         width: 100,
-  //         height: 100,
-  //         colorDark: "#000000",
-  //         colorLight: "#ffffff",
-  //         correctLevel: QRCode.CorrectLevel.H
-  //       });
-  //     })
-  //   }
-  // }
+import { useAlertStore } from '~/store/toast';
+
+const alertStore = useAlertStore();
+
+const copyLink = async () => {
+  await navigator.clipboard.writeText(`https://${domain}${path}`);
+  alertStore.showToast('复制成功！', 2000);
 }
-
 </script>
 
 <style scoped>
@@ -338,4 +317,48 @@ const generateQRCode = () => {
   transform: translateY(-50%);
 }
 
+.qrcodeDiv::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 25%;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent #b7bbc4 transparent transparent;
+  transform: translateY(-50%);
+}
+
+
+@keyframes tilt {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+}
+
+.tilt-animation {
+  animation: tilt 0.5s ease-in-out;
+}
+
+
+@keyframes slideRight {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.slide-right-animation {
+  animation: slideRight 0.3s ease-out;
+}
 </style>
