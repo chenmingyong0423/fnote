@@ -59,14 +59,13 @@
             class="relative group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_gray">
            <span
                class="w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400 text-5 text-center">赏</span>
-          <div class="pay slide-right-animation dark_bg_full_black w-[320px] h-[160px] hidden absolute bg-gray-1 b-rounded-4 left-117% top--28% group-hover:block custom_shadow_all p-2">
+          <div class="pay slide-right-4-reword-animation dark_bg_full_black w-[320px] h-[160px] hidden absolute bg-gray-1 b-rounded-4 left-117% top--28% group-hover:block custom_shadow_all p-2">
             <div
                 class="flex align-center items-center justify-center center">
               <img src="https://chenmingyong.cn/assets/wx-6662873b.jpg" width="150" height="150" alt="微信二维码">
               <img src="https://chenmingyong.cn/assets/wx-6662873b.jpg" width="150" height="150" alt="支付宝二维码">
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -358,7 +357,7 @@ const copyLink = async () => {
 
 @keyframes slideRight {
   from {
-    transform: translateX(-100%);
+    transform: translateX(-30%);
   }
   to {
     transform: translateX(0);
@@ -367,6 +366,19 @@ const copyLink = async () => {
 
 .slide-right-animation {
   animation: slideRight 0.3s ease-out;
+}
+
+@keyframes slideRight4Reword {
+  from {
+    transform: translateX(-10%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.slide-right-4-reword-animation {
+  animation: slideRight4Reword 0.3s ease-out;
 }
 
 .pay:before{
