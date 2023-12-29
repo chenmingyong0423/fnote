@@ -102,7 +102,7 @@
       </div>
       <!-- 评论区 -->
       <div ref="comment">
-        <Comment  class="mt-5 b-rounded-4 p-2 "></Comment>
+        <CommentPost  class="mt-5 b-rounded-4 p-2 "></CommentPost>
       </div>
     </div>
     <div class="flex flex-col w-30%">

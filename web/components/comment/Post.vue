@@ -1,7 +1,10 @@
 <template>
-  <div class="bg-white">
-    <div class="h-[50px] line-height-[50px] pl-3 custom_bottom_border_gray mb-2">
-      2 评论
+  <div class="bg-white p-2">
+    <div class="h-[50px] line-height-[50px] pl-3 custom_bottom_border_gray mb-2 flex items-center gap-x-1">
+      <span class="i-ph-chats-duotone text-2xl block text-black"></span> <span class="text-2xl">评论</span>
+    </div>
+    <div class="mb-2 custom_bottom_border_gray p-1">
+      <CommentForm class="m-auto"></CommentForm>
     </div>
     <div class="flex">
       <div class="w-8% min-h-[180px] ml-1% flex justify-center">
@@ -20,7 +23,7 @@
           ></v-md-preview>
         </div>
         <div>
-          <div class="w-15 h-8 custom_border_gray text-center line-height-8 b-rounded-2 cursor-pointer hover:bg-gray-1">回复</div>
+          <Button name="回复" class="hover:bg-gray-1"></Button>
         </div>
       </div>
     </div>
@@ -28,11 +31,14 @@
 </template>
 
 <script setup lang="ts">
-
 import {useHomeStore} from "~/store/home";
-const info = useHomeStore()
 
+const info = useHomeStore()
 const isBlackMode = computed(() => info.isBlackMode)
+
+ // const props
+
+
 </script>
 
 <style scoped>
