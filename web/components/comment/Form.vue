@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div class="p-y-2">
     <div>
       <textarea v-if="!isPreview" rows="10"
-                class="w-full custom_border_gray bg-#F9F9F9 outline-none focus:custom_border_1E80FF b-rounded-2 p-2 box-border mb-3"
+                class="w-full custom_border_gray bg-#F9F9F9 outline-none focus:custom_border_1E80FF b-rounded-2 p-2 box-border mb-3 dark:text-dtc dark_bg_gray"
                 v-model="commentReq.content" maxlength="200"></textarea>
       <div v-else>
         <div class="font-bold flex items-center gap-x-2">
@@ -27,7 +27,7 @@
         </div>
         <div class="w-30% relative">
           <input type="text" placeholder="* 昵称" v-model="commentReq.username"
-                 class="w-full outline-none custom_border_gray bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border"
+                 class="w-full outline-none custom_border_gray bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
                  @focusin="showUsernameTip=true"
                  @focusout="showUsernameTip=false">
           <span
@@ -36,7 +36,7 @@
         </div>
         <div class="w-30% relative">
           <input type="text" placeholder="* 邮箱" v-model="commentReq.email"
-                 class="w-full outline-none custom_border_gray bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border"
+                 class="w-full outline-none custom_border_gray bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
                  @focusin="showEmailTip=true"
                  @focusout="calculateMD54Email">
           <span
@@ -44,8 +44,8 @@
               v-if="showEmailTip">用于接收通知。</span>
         </div>
         <div class="w-30% relative">
-          <input type="text" placeholder="个人站点" v-model="commentReq.website"
-                 class="w-full outline-none custom_border_gray bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border"
+          <input type="text" placeholder="个人站点，以 http:// 或 https:// 开头" v-model="commentReq.website"
+                 class="w-full outline-none custom_border_gray bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
                  @focusin="showWebsiteTip=true"
                  @focusout="showWebsiteTip=false">
           <span
@@ -54,6 +54,7 @@
         </div>
       </div>
       <div class="flex justify-end gap-x-2">
+        <Button name="清空" class="bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200" @click="clearReq"></Button>
         <Button :name="isPreview ? '编辑' : '预览'" class="bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"
                 @click="isPreview = !isPreview"></Button>
         <Button name="提交" class="bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200" @click="submit"></Button>
@@ -65,12 +66,21 @@
 import {useHomeStore} from "~/store/home";
 import type {ICommentRequest} from "~/api/comment";
 import CryptoJS from 'crypto-js'
+import {useAlertStore} from "~/store/toast";
+
+const props = defineProps({
+  commentId: {
+    type: String,
+    default: '',
+    required: false
+  }
+})
 
 const showUsernameTip = ref(false)
 const showEmailTip = ref(false)
 const showWebsiteTip = ref(false)
 const pic = ref<string>('')
-
+const commentId = ref<string>(props.commentId)
 
 const commentReq = ref<ICommentRequest>({
   postId: "",
@@ -83,27 +93,57 @@ const info = useHomeStore()
 const isBlackMode = computed(() => info.isBlackMode)
 const isPreview = ref(false)
 
+const toast = useAlertStore();
+
 const emit = defineEmits(['submit']);
+
+import {isValidEmail} from "~/utils/email";
+
 const submit = () => {
   if (commentReq.value.content === "") {
-    alert("评论内容不能为空")
+    toast.showToast('评论内容不能为空！', 1000);
     return
   } else if (commentReq.value.username === "") {
-    alert("昵称不能为空")
+    toast.showToast('昵称不能为空！', 1000);
     return
   } else if (commentReq.value.email === "") {
-    alert("邮箱不能为空")
+    toast.showToast('邮箱不能为空！', 1000);
     return
   }
+  if (!commentReq.value.website?.startsWith(`http://`) && !commentReq.value.website?.startsWith(`https://`)) {
+    toast.showToast('个人站点格式不正确！', 1000);
+    return
+  }
+  if (!isValidEmail(commentReq.value.email)) {
+    toast.showToast('邮箱格式不正确！', 1000);
+    return
+  }
+
   const deepCopyReq: ICommentRequest = JSON.parse(JSON.stringify(commentReq.value));
-  emit("submit", deepCopyReq)
+  emit("submit", deepCopyReq, commentId.value)
 }
+
+
+
+
+const clearReq = () => {
+  commentReq.value = {
+    postId: "",
+    username: "",
+    email: "",
+    website: "",
+    content: "",
+  }
+}
+
+defineExpose({
+  clearReq
+});
 
 const calculateMD54Email = () => {
   showEmailTip.value = false
   console.log(commentReq.value.email)
   if (commentReq.value.email !== "") {
-    console.log(123)
     pic.value = "https://1.gravatar.com/avatar/" + CryptoJS.MD5(commentReq.value.email.trim().toLowerCase()).toString()
   } else {
     pic.value = ''

@@ -19,6 +19,8 @@ export interface IReply {
     comment_id: string;
     content: string;
     name: string;
+    email: string;
+    website?: string;
     reply_to_id: string;
     reply_to: string;
     reply_time: number;
@@ -29,9 +31,12 @@ export interface IComment {
     id: string;
     content: string;
     username: string;
+    email: string;
+    website?: string;
     comment_time: number;
     replies: IReply[];
 }
+export const getComments = (id: string) => httpRequest.get(`${prefix}/id/${id}`)
 
 export interface ICommentRequest {
     postId: string;
@@ -41,7 +46,15 @@ export interface ICommentRequest {
     content: string;
 }
 
+export const submitComment = (comment: ICommentRequest) => httpRequest.post(`${prefix}`, comment)
 
-export const getComments = (sug: string) => httpRequest.get(prefix + "/sug/" + sug)
+export interface ICommentReplyRequest {
+    postId: string;
+    replyToId?: string;
+    username: string;
+    email: string;
+    website?: string;
+    content: string;
+}
 
-
+export const submitCommentReply = (commentId: string, comment: ICommentReplyRequest) => httpRequest.post(`${prefix}/${commentId}/replies`, comment)

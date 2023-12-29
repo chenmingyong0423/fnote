@@ -59,7 +59,8 @@
             class="relative group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_gray">
            <span
                class="w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400 text-5 text-center">赏</span>
-          <div class="pay slide-right-4-reword-animation dark_bg_full_black w-[320px] h-[160px] hidden absolute bg-gray-1 b-rounded-4 left-117% top--28% group-hover:block custom_shadow_all p-2">
+          <div
+              class="pay slide-right-4-reword-animation dark_bg_full_black w-[320px] h-[160px] hidden absolute bg-gray-1 b-rounded-4 left-117% top--28% group-hover:block custom_shadow_all p-2">
             <div
                 class="flex align-center items-center justify-center center">
               <img src="https://chenmingyong.cn/assets/wx-6662873b.jpg" width="150" height="150" alt="微信二维码">
@@ -102,7 +103,8 @@
       </div>
       <!-- 评论区 -->
       <div ref="comment">
-        <CommentPost  class="mt-5 b-rounded-4 p-2 "></CommentPost>
+        <CommentPost ref="commentPost" :comments="comments" :author="author" class="mt-5 b-rounded-4 p-2 dark:text-dtc dark_bg_gray"
+                     @submit="submit" @submitReply="submitReply" @submitReply2Reply="submitReply2Reply"></CommentPost>
       </div>
     </div>
     <div class="flex flex-col w-30%">
@@ -117,7 +119,7 @@
 
 <script lang="ts" setup>
 import {type IPostDetail, getPostsById, likePost} from "~/api/post";
-import type {IResponse, IBaseResponse} from "~/api/http";
+import type {IResponse, IBaseResponse, IPageData} from "~/api/http";
 import {onMounted, ref} from "vue";
 import {useHomeStore} from '~/store/home';
 import VMdPreview from "@kangc/v-md-editor/lib/preview";
@@ -131,11 +133,13 @@ const route = useRoute()
 const path: string = route.path
 const id: string = String(route.params.id)
 const post = ref<IPostDetail>()
+const author = ref<string>("")
 const getPostDetail = async () => {
   try {
     let postRes: any = await getPostsById(id)
     let res: IResponse<IPostDetail> = postRes.data.value
     post.value = res.data
+    author.value = post.value?.author || ""
   } catch (error) {
     console.log(error);
   }
@@ -258,12 +262,126 @@ const qrcodeShow = ref(false)
 
 
 import {useAlertStore} from '~/store/toast';
+import {
+  getComments,
+  type IComment,
+  type ICommentReplyRequest,
+  type ICommentRequest,
+  submitComment, submitCommentReply
+} from "~/api/comment";
 
-const alertStore = useAlertStore();
+const toast = useAlertStore();
 
 const copyLink = async () => {
   await navigator.clipboard.writeText(`https://${domain}${path}`);
-  alertStore.showToast('复制成功！', 2000);
+  toast.showToast('复制成功！', 2000);
+}
+
+const comments = ref<IComment[]>([])
+const initComments = async () => {
+  try {
+    let commentRes: any = await getComments(id)
+    let res: IResponse<IPageData<IComment>> = commentRes.data.value
+    if (res.code !== 200) {
+      toast.showToast(res.message, 2000);
+      return
+    }
+    comments.value = res.data?.list || []
+  } catch (error: any) {
+    toast.showToast(error.toString(), 2000);
+  }
+}
+
+initComments()
+
+const submit = async (req: ICommentRequest) => {
+  try {
+    req.postId = id
+    let commentRes: any = await submitComment(req)
+    if (commentRes.data.value === null) {
+      if (commentRes.error.value.statusCode == 403) {
+        toast.showToast("评论模块暂未开放！", 2000);
+      } else {
+        toast.showToast(commentRes.error.value.statusMessage, 2000);
+      }
+      return
+    }
+    let res: IBaseResponse = commentRes.data.value
+    if (res.code !== 200) {
+      toast.showToast(res.message, 2000);
+      return
+    }
+    toast.showToast("提交评论成功，待站长审核通过后将会通过邮件告知。", 3000);
+    clearCommentReq()
+  } catch (error: any) {
+    toast.showToast(error.toString(), 2000);
+  }
+}
+
+const submitReply = async (req: ICommentReplyRequest, commentId: string) => {
+  try {
+    req.postId = id
+    let commentRes: any = await submitCommentReply(commentId, req)
+    if (commentRes.data.value === null) {
+      if (commentRes.error.value.statusCode == 403) {
+        toast.showToast("评论模块暂未开放！", 2000);
+      } else {
+        toast.showToast(commentRes.error.value.statusMessage, 2000);
+      }
+      return
+    }
+    let res: IBaseResponse = commentRes.data.value
+    if (res.code !== 200) {
+      toast.showToast(res.message, 2000);
+      return
+    }
+    toast.showToast("提交评论成功，待站长审核通过后将会通过邮件告知。", 3000);
+    clearCommentReplyReq()
+  } catch (error: any) {
+    toast.showToast(error.toString(), 2000);
+  }
+}
+
+const commentPost = ref()
+const clearCommentReq = () => {
+  if (commentPost.value) {
+    commentPost.value.clearReq()
+  }
+}
+const clearCommentReplyReq = () => {
+  if (commentPost.value) {
+    commentPost.value.clearReplyReq()
+  }
+}
+
+const submitReply2Reply = async (req: ICommentReplyRequest, commentId: string) => {
+  try {
+    req.postId = id
+    let commentRes: any = await submitCommentReply(commentId, req)
+    if (commentRes.data.value === null) {
+      if (commentRes.error.value.statusCode == 403) {
+        toast.showToast("评论模块暂未开放！", 2000);
+      } else {
+        toast.showToast(commentRes.error.value.statusMessage, 2000);
+      }
+      return
+    }
+    let res: IBaseResponse = commentRes.data.value
+    if (res.code !== 200) {
+      toast.showToast(res.message, 2000);
+      return
+    }
+    toast.showToast("提交评论成功，待站长审核通过后将会通过邮件告知。", 3000);
+    clearReply2ReplyReq()
+  } catch (error: any) {
+    toast.showToast(error.toString(), 2000);
+  }
+}
+
+const clearReply2ReplyReq = () => {
+  if (commentPost.value) {
+    commentPost.value.clearReply2ReplyReq()
+  }
 }
 </script>
 
@@ -381,7 +499,7 @@ const copyLink = async () => {
   animation: slideRight4Reword 0.3s ease-out;
 }
 
-.pay:before{
+.pay:before {
   content: '';
   position: absolute;
   left: -20px;
