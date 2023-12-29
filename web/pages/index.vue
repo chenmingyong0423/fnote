@@ -6,7 +6,7 @@
     </div>
     <div class="flex flex-col w-30%">
       <Profile class="mb-5"></Profile>
-      <IndexComment></IndexComment>
+      <CommentHome></CommentHome>
     </div>
   </div>
 </template>

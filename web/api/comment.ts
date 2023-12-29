@@ -33,6 +33,15 @@ export interface IComment {
     replies: IReply[];
 }
 
+export interface ICommentRequest {
+    postId: string;
+    username: string;
+    email: string;
+    website?: string;
+    content: string;
+}
+
+
 export const getComments = (sug: string) => httpRequest.get(prefix + "/sug/" + sug)
 
 
