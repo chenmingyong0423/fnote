@@ -5,17 +5,17 @@
       <div class="flex h-15 my-2">
         <div>
           <img :src="item.picture" alt=""
-               class="w-15 h-15 border-rounded-50%  cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"
+               class="w-12 h-12 border-rounded-50%  cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"
                v-if="item.picture">
-          <div class="i-ph-user-circle-duotone w-15 h-15 border-rounded-50%  lt-lg:mr0 text-gray-4" v-else></div>
+          <div class="i-ph-user-circle-duotone w-12 h-12 border-rounded-50%  lt-lg:mr0 text-gray-4" v-else></div>
         </div>
-        <div class="flex flex-col justify-center items-start ml-3">
+        <div class="flex flex-col  items-start ml-3">
           <span class="text-5">{{ item.name }}</span>
-          <span class="text-gray-5">{{ $dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss') }}</span>
+          <span class="text-gray-5 text-3">{{ $dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss') }}</span>
         </div>
       </div>
       <div class="">
-        <div class="p-y-2 truncate">
+        <div class="p-y-1 truncate">
           {{ item.content }}
         </div>
         <div class="flex gap-2 items-center text-gray-5 p-y-1 cursor-pointer hover:bg-green-1 dark:hover:bg-#fff/20 duration-100"

@@ -28,6 +28,8 @@ export default defineNuxtConfig({
             {'custom_cursor_flow': 'hover:drop-shadow-xl hover:translate-y--2 duration-100'},
             {'custom_icon': 'hover:text-blue duration-100'},
             {'custom_shadow': 'hover:shadow-2xl dark:shadow-white duration-100'},
+            {'custom_bottom_border_gray': 'border-b-1 border-b-gray-2 border-b-solid'},
+            {'custom_border_gray': 'border-1 border-gray-2 border-solid'},
         ],
         rules: [
             ['footer_shadow', {'box-shadow': ' 0 0 10px rgba(0, 0, 0, .5)'}],
