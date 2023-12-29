@@ -14,7 +14,6 @@ export default defineNuxtConfig({
         shortcuts: [
             {'dark_bg_black': 'dark:bg-#03080c'},
             {'dark_bg_gray': 'dark:bg-#207191/10 dark:border-solid dark:border-#1e2227 dark:border-1'},
-            {'dark_bg_half_gray': 'dark:bg-#207191/50 dark:border-solid dark:border-#1e2227 dark:border-1'},
             {'dark_bg_full_black': 'dark:bg-#000/90 dark:border-solid dark:border-#1e2227 dark:border-1'},
             {'dark_border': 'border-solid border-#1e2227 border-1'},
             {'dark_text_white': 'dark:c-#fff'},
@@ -34,14 +33,13 @@ export default defineNuxtConfig({
             ['footer_shadow', {'box-shadow': ' 0 0 10px rgba(0, 0, 0, .5)'}],
             ['bg_transparent', {'background-color': 'transparent'}],
             ['border_bottom_blue', {'border-bottom': '2px solid #007fff'}],
+            ['custom_shadow_all', {'box-shadow': '0 0 10px rgba(0, 0, 0, 0.5)'}],
         ],
         theme: {
             colors: {
                 'dtc': 'hsla(0,0%,100%,0.7)', //
             },
-            hovers:{
-
-            }
+            hovers: {}
         },
         safelist: [],
     },

@@ -28,23 +28,22 @@
           <span
               class="i-ph:share-fat-light w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400"></span>
           <div
-              class="share w-80% hidden absolute transform translate-x-8/6 -translate-y--1/4 group-hover:block shadow-2xl shadow-gray">
+              class="share w-80% hidden absolute left-117% top--40% group-hover:block">
             <div
-                class="slide-right-animation dark:text-dtc dark_bg_half_gray flex flex-col gap-y-3  bg-white text-white text-xs b-rounded-4 w-150% items-center justify-center p-x-1 p-y-2 shadow-2xl shadow-black/10">
+                class="slide-right-animation dark:text-dtc dark_bg_full_black flex flex-col gap-y-3  bg-white text-white text-xs custom_shadow_all b-rounded-4 w-150% items-center justify-center p-x-1 p-y-2 shadow-2xl shadow-black/10">
               <div class="relative w-8 h-8 group" @mouseenter="qrcodeShow = true" @mouseleave="qrcodeShow= false">
                 <div class="i-bi:wechat w-full h-full text-green"></div>
                 <div
-                    class="qrcodeDiv absolute  left-210% top--120% w-[160px] h-[170px] p-5 bg-white b-rounded-4  duration-200 tilt-animation dark:text-dtc dark_bg_half_gray"
+                    class="qrcodeDiv absolute  left-214% top--120% w-[160px] h-[170px] p-5 bg-white b-rounded-4  duration-200 tilt-animation dark:text-dtc dark_bg_full_black"
                     :class="{'block': qrcodeShow, 'hidden ': !qrcodeShow}">
                   <div class="flex flex-col items-center align-center gap-y-3">
                     <QrcodeVue :value="`https://${domain}${path}`" :size="150" level="M"/>
                     <p class="text-black text-4">微信扫一扫</p>
                   </div>
                 </div>
-
               </div>
               <hr class="w-50% border-gray-1 b-rounded-4">
-              <a class="i-bi:tencent-qq w-8 h-8 text-black"
+              <a class="i-bi:tencent-qq w-8 h-8 text-black dark:text-orange"
                  :href="`https://connect.qq.com/widget/shareqq/index.html?url=${domain}${path}&title=${post?.title}&pics=${post?.cover_img}`"
                  target="_blank"></a>
               <hr class="w-50% border-gray-1 b-rounded-4">
@@ -52,14 +51,22 @@
                  :href="`https://service.weibo.com/share/share.php?sharesource=weibo&title=${post?.title}，原文链接：${domain}${path}&pic=${post?.cover_img}`"
                  target="_blank"></a>
               <hr class="w-50% border-gray-1 b-rounded-4">
-              <span class="i-bi:link-45deg w-8 h-8 text-black" @click="copyLink"></span>
+              <span class="i-bi:link-45deg w-8 h-8 text-black dark:text-white" @click="copyLink"></span>
             </div>
           </div>
         </div>
         <div
-            class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_gray">
+            class="relative group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer hover-bg-#1e80ff duration-200 dark:text-dtc dark_bg_gray">
            <span
                class="w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400 text-5 text-center">赏</span>
+          <div class="pay slide-right-animation dark_bg_full_black w-[320px] h-[160px] hidden absolute bg-gray-1 b-rounded-4 left-117% top--28% group-hover:block custom_shadow_all p-2">
+            <div
+                class="flex align-center items-center justify-center center">
+              <img src="https://chenmingyong.cn/assets/wx-6662873b.jpg" width="150" height="150" alt="微信二维码">
+              <img src="https://chenmingyong.cn/assets/wx-6662873b.jpg" width="150" height="150" alt="支付宝二维码">
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -251,7 +258,7 @@ const scrollToCommentArea = () => {
 const qrcodeShow = ref(false)
 
 
-import { useAlertStore } from '~/store/toast';
+import {useAlertStore} from '~/store/toast';
 
 const alertStore = useAlertStore();
 
@@ -360,5 +367,16 @@ const copyLink = async () => {
 
 .slide-right-animation {
   animation: slideRight 0.3s ease-out;
+}
+
+.pay:before{
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 25%;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent #b7bbc4 transparent transparent;
+  transform: translateY(-50%);
 }
 </style>
