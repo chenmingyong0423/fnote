@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/vo"
 
@@ -58,7 +59,7 @@ type CommentRequest struct {
 
 func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/comments")
-	group.GET("/sug/:sug", api.Wrap(h.GetCommentsByPostId))
+	group.GET("/id/:id", api.Wrap(h.GetCommentsByPostId))
 	group.POST("", api.WrapWithBody(h.AddComment))
 	group.POST("/:commentId/replies", api.WrapWithBody(h.AddCommentReply))
 	group.GET("/latest", api.Wrap(h.GetLatestCommentAndReply))
@@ -68,6 +69,9 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo ap
 	ip := ctx.ClientIP()
 	if ip == "" {
 		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
+	}
+	if !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
+		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
 	}
 	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "comment")
 	if err != nil {
@@ -129,6 +133,9 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (vo
 	ip := ctx.ClientIP()
 	if ip == "" {
 		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
+	}
+	if !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
+		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
 	}
 	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "comment")
 	if err != nil {
@@ -193,7 +200,7 @@ func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) (result api.
 }
 
 func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (listVO api.ListVO[vo.PostCommentVO], err error) {
-	postId := ctx.Param("sug")
+	postId := ctx.Param("id")
 	comments, err := h.serv.FindCommentsByPostId(ctx, postId)
 	if err != nil {
 		return
@@ -210,6 +217,8 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (listVO api.ListV
 				CommentId: comment.Id,
 				Content:   reply.Content,
 				Name:      reply.UserInfo.Name,
+				Email:     reply.UserInfo.Email,
+				Website:   reply.UserInfo.Website,
 				ReplyToId: reply.ReplyToId,
 				ReplyTo:   reply.RepliedUserInfo.Name,
 				ReplyTime: reply.CreateTime,
@@ -219,6 +228,8 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (listVO api.ListV
 			Id:          comment.Id,
 			Content:     comment.Content,
 			Name:        comment.UserInfo.Name,
+			Email:       comment.UserInfo.Email,
+			Website:     comment.UserInfo.Website,
 			CommentTime: comment.CreateTime,
 			Replies:     replies,
 		})
