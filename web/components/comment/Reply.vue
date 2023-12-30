@@ -1,6 +1,6 @@
 <template>
   <div class="flex mb-5" v-for="(rpy, index) in replies" :key="index">
-    <div class="w-8% min-h-[180px] ml-1% flex justify-center">
+    <div class="w-8% min-h-[100px] ml-1% flex justify-center">
       <img :src="generateAvatar(rpy.email)" alt=""
            class="w-12 h-12 border-rounded-50%  cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"
            v-if="rpy.email != ''">
