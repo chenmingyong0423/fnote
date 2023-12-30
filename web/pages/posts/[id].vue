@@ -1,6 +1,6 @@
 <template>
   <div class="flex w-full">
-    <div class="mt-10 w-5%">
+    <div class="mt-10 w-5% lt-md:hidden">
       <div class="flex flex-col gap-y-3 items-center fixed ">
         <div
             class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white  p-2 cursor-pointer duration-200 dark:text-dtc dark_bg_gray relative"
@@ -69,7 +69,7 @@
         </div>
       </div>
     </div>
-    <div class="w-63% ml-1% mr-1%">
+    <div class="w-63% ml-1% mr-1% lt-md:w-100% lt-md:mx-0%">
       <div class="bg-white mb-5 b-rounded-4 dark:text-dtc dark_bg_gray">
         <!--  文章标题  -->
         <div class="text-10 font-bold text-center p-1">{{ post?.title }}</div>
@@ -86,6 +86,19 @@
                           class="lt-lg:important:p0" :class="{'dark': isBlackMode}"
                           @change="generateAnchors"></v-md-preview>
           </client-only>
+        </div>
+      </div>
+      <div class="mb-5">
+        <div
+            class="m-auto flex items-center justify-center align-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer duration-200 dark:text-dtc dark_bg_gray relative"
+            :class="{' hover:bg-#1e80ff': !post?.is_liked}" @click="like">
+          <span
+              class="i-ph:thumbs-up w-8 h-8 duration-400"
+              :class="{'text-gray': !post?.is_liked, 'text-#1e80ff': post?.is_liked}"></span>
+          <span
+              class="absolute translate-x-11/10 -translate-y-2/3 bg-#1e80ff text-white text-xs rounded-full w-8 h-8 flex items-center justify-center">
+              {{ post?.like_count }}
+          </span>
         </div>
       </div>
       <!-- 版权声明 -->
@@ -106,7 +119,7 @@
                      @submit="submit" @submitReply="submitReply" @submitReply2Reply="submitReply2Reply"></CommentPost>
       </div>
     </div>
-    <div class="flex flex-col w-30%">
+    <div class="flex flex-col w-30% lt-md:hidden">
       <Profile class="mb-5"></Profile>
       <div ref="anchor">
         <Anchor :htmlContent="htmlContent" :lineIndex="lineIndex" @handleAnchorClick="handleAnchorClick"

@@ -27,6 +27,3 @@ const closeModal = () => {
 };
 
 </script>
-
-<style>
-</style>

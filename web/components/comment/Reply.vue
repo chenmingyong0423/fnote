@@ -1,23 +1,27 @@
 <template>
   <div class="flex mb-5" v-for="(rpy, index) in replies" :key="index">
-    <div class="w-8% min-h-[100px] ml-1% flex justify-center">
+    <div class="w-8% min-h-[100px]  flex justify-center lt-md:w-15%">
       <img :src="generateAvatar(rpy.email)" alt=""
            class="w-12 h-12 border-rounded-50%  cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"
            v-if="rpy.email != ''">
       <div class="i-ph-user-circle-duotone w-12 h-12 border-rounded-50%  lt-lg:mr0 text-gray-4" v-else></div>
     </div>
-    <div class="w-91% flex flex-col ">
-      <div class="text-gray-4 h-[55px] line-height-[35px] flex gap-x-2">
-        <a v-if="rpy.website !== ''" :href="rpy.website" target="_blank" class="text-#1E80FF">{{
-            rpy.name === props.author ? `${rpy.name}[作者]` : rpy.name
-          }}</a>
-        <span v-else class="text-#1E80FF">{{
-            rpy.name === props.author ? `${rpy.name}[作者]` : rpy.name
-          }}</span>
-        <span>回复</span>
-        <span class="text-#1E80FF">{{rpy.reply_to === props.author ? `${rpy.reply_to}[作者]` : rpy.reply_to}}</span>
-        <span> 发表于 {{ $dayjs(rpy.reply_time * 1000).format('YYYY-MM-DD HH:mm:ss') }}</span>
-        <Button name="回复" class="hover:bg-gray-1 ml-auto" @click="activeCommentIndex = rpy.id"></Button>
+    <div class="w-91% ml-1% flex flex-col lt-md:w-84%">
+      <div class="text-gray-4 h-[55px] line-height-[35px] flex gap-x-2 lt-md:line-height-[25px]">
+        <div class="flex gap-x-2 lt-md:flex-col">
+          <div class="flex gap-x-2 lt-md:gap-x-1">
+            <a v-if="rpy.website !== ''" :href="rpy.website" target="_blank" class="text-#1E80FF lt-md:truncate">{{
+                rpy.name === props.author ? `${rpy.name}[作者]` : rpy.name
+              }}</a>
+            <span v-else class="text-#1E80FF lt-md:truncate">{{
+                rpy.name === props.author ? `${rpy.name}[作者]` : rpy.name
+              }}</span>
+            <span>回复</span>
+            <span class="text-#1E80FF lt-md:truncate">{{rpy.reply_to === props.author ? `${rpy.reply_to}[作者]` : rpy.reply_to}}</span>
+          </div>
+          <span> 发表于 {{ $dayjs(rpy.reply_time * 1000).format('YYYY-MM-DD HH:mm:ss') }}</span>
+        </div>
+        <Button name="回复" class="w-15 h-8 line-height-8 hover:bg-gray-1 ml-auto" @click="activeCommentIndex = rpy.id"></Button>
       </div>
       <div>
         <v-md-preview :text="rpy.content"
@@ -30,7 +34,7 @@
       <div v-if="activeCommentIndex === rpy.id">
         <CommentForm class="m-auto" @submit="submitReply" ref="commentReplyForm" :commentId="rpy.id"
         ></CommentForm>
-        <Button name="取消" class="hover:bg-gray-1 m-auto" @click="activeCommentIndex = ''"></Button>
+        <Button name="取消" class="w-15 h-8 line-height-8 hover:bg-gray-1 m-auto" @click="activeCommentIndex = ''"></Button>
       </div>
     </div>
   </div>

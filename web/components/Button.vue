@@ -1,5 +1,5 @@
 <template>
-  <div class="w-15 h-8 custom_border_gray text-center line-height-8 b-rounded-2 cursor-pointer">
+  <div class="custom_border_gray text-center b-rounded-2 cursor-pointer select-none">
     {{ props.name }}
   </div>
 </template>

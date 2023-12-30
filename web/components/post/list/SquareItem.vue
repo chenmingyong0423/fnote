@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-wrap justify-between">
     <NuxtLink
-        class="item group flex flex-col items-center p-5 bg-#fff b-rounded-4 w-45% h-100 cursor-pointer duration-100 custom_shadow dark:text-dtc dark_bg_gray mb-5"
+        class="item group flex flex-col items-center p-5 bg-#fff b-rounded-4 w-45% lt-md:w-99% h-100 cursor-pointer duration-100 custom_shadow dark:text-dtc dark_bg_gray mb-5"
         v-for="(item, index) in props.posts" :key="index" :to="'/posts/' + item.sug">
       <div class="h-2/3 overflow-hidden relative w-full">
         <img class="object-contain w-full h-full group-hover:scale-110 duration-500"

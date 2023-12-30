@@ -19,13 +19,13 @@
       <div class="h-10 text-center line-height-10">
         个人信息
       </div>
-      <div class="flex justify-between items-center w-full mb-3">
+      <div class="flex justify-between items-center w-full mb-3 lt-md:flex-col lt-md:gap-y-2 lt-md:justify-center">
         <div class="w-5%">
           <img v-if="pic != ''" :src="pic" alt=""
-               class="w-auto h-12 border-rounded-50%  cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0">
-          <div class="i-ph-user-circle-duotone w-auto h-12 border-rounded-50%  lt-lg:mr0 text-gray-4" v-else></div>
+               class="w-auto h-12 border-rounded-50%  cursor-pointer hover:rotate-360 ease-out duration-1000">
+          <div class="i-ph-user-circle-duotone w-auto h-12 border-rounded-50% text-gray-4" v-else></div>
         </div>
-        <div class="w-30% relative">
+        <div class="w-30% relative lt-md:w-100%">
           <input type="text" placeholder="* 昵称" v-model="commentReq.username"
                  class="w-full outline-none custom_border_gray bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
                  @focusin="showUsernameTip=true"
@@ -34,7 +34,7 @@
               class="popup-text absolute bg-#555 left-25% bottom-125% text-white p-2 b-rounded-2 h-[20px] animated-fadeIn"
               v-if="showUsernameTip">您的昵称？</span>
         </div>
-        <div class="w-30% relative">
+        <div class="w-30% relative lt-md:w-100%">
           <input type="text" placeholder="* 邮箱" v-model="commentReq.email"
                  class="w-full outline-none custom_border_gray bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
                  @focusin="showEmailTip=true"
@@ -43,7 +43,7 @@
               class="popup-text absolute bg-#555 left-25% bottom-125% text-white p-2 b-rounded-2 h-[20px] animated-fadeIn"
               v-if="showEmailTip">用于接收通知。</span>
         </div>
-        <div class="w-30% relative">
+        <div class="w-30% relative lt-md:w-100%">
           <input type="text" placeholder="个人站点，以 http:// 或 https:// 开头" v-model="commentReq.website"
                  class="w-full outline-none custom_border_gray bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
                  @focusin="showWebsiteTip=true"
@@ -53,11 +53,11 @@
               v-if="showWebsiteTip">不许打广告哟！</span>
         </div>
       </div>
-      <div class="flex justify-end gap-x-2">
-        <Button name="清空" class="bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200" @click="clearReq"></Button>
-        <Button :name="isPreview ? '编辑' : '预览'" class="bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"
+      <div class="flex gap-x-2 justify-center">
+        <Button name="清空" class="w-15 h-8 line-height-8 bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200" @click="clearReq"></Button>
+        <Button :name="isPreview ? '编辑' : '预览'" class="w-15 h-8 line-height-8 bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"
                 @click="isPreview = !isPreview"></Button>
-        <Button name="提交" class="bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200" @click="submit"></Button>
+        <Button name="提交" class="w-15 h-8 line-height-8 bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200" @click="submit"></Button>
       </div>
     </div>
   </div>

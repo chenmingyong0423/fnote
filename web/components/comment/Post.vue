@@ -7,22 +7,24 @@
       <CommentForm class="m-auto" @submit="submit" ref="commentForm"></CommentForm>
     </div>
     <div class="flex mb-5" v-for="(comment, index) in props.comments" :key="index">
-      <div class="w-8% min-h-[180px] ml-1% flex justify-center">
+      <div class="w-8% min-h-[180px]  flex justify-center lt-md:w-15%">
         <img :src="generateAvatar(comment.email)" alt=""
              class="w-12 h-12 border-rounded-50%  cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"
              v-if="comment.email != ''">
         <div class="i-ph-user-circle-duotone w-12 h-12 border-rounded-50%  lt-lg:mr0 text-gray-4" v-else></div>
       </div>
-      <div class="w-91% flex flex-col ">
-        <div class="text-gray-4 h-[55px] line-height-[35px] flex gap-x-2">
-          <a v-if="comment.website !== ''" :href="comment.website" target="_blank" class="text-#1E80FF">{{
-              comment.username === props.author ? `${comment.username}[作者]` : comment.username
-            }}</a>
-          <span v-else class="text-#1E80FF">{{
-              comment.username === props.author ? `${comment.username}[作者]` : comment.username
-            }}</span>
-          <span> 发表于 {{ $dayjs(comment.comment_time * 1000).format('YYYY-MM-DD HH:mm:ss') }}</span>
-          <Button name="回复" class="hover:bg-gray-1 ml-auto" @click="activeCommentIndex = comment.id"></Button>
+      <div class="w-91% ml-1% flex flex-col lt-md:w-84%">
+        <div class="text-gray-4 h-[55px] line-height-[35px] flex gap-x-2 lt-md:line-height-[25px]">
+          <div class="flex gap-x-2 lt-md:flex-col">
+            <a v-if="comment.website !== ''" :href="comment.website" target="_blank" class="text-#1E80FF">{{
+                comment.username === props.author ? `${comment.username}[作者]` : comment.username
+              }}</a>
+            <span v-else class="text-#1E80FF">{{
+                comment.username === props.author ? `${comment.username}[作者]` : comment.username
+              }}</span>
+            <span> 发表于 {{ $dayjs(comment.comment_time * 1000).format('YYYY-MM-DD HH:mm:ss') }}</span>
+          </div>
+          <Button name="回复" class="w-15 h-8 line-height-8 hover:bg-gray-1 ml-auto" @click="activeCommentIndex = comment.id"></Button>
         </div>
         <div>
           <v-md-preview :text="comment.content"
@@ -35,7 +37,7 @@
         <div v-if="activeCommentIndex === comment.id">
           <CommentForm class="m-auto" @submit="submitReply" ref="commentReplyForm" :commentId="comment.id"
                        ></CommentForm>
-          <Button name="取消" class="hover:bg-gray-1 m-auto" @click="activeCommentIndex = ''"></Button>
+          <Button name="取消" class="w-15 h-8 line-height-8 hover:bg-gray-1 m-auto" @click="activeCommentIndex = ''"></Button>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="list-none flex gap-x-10">
+    <div class="list-none flex gap-x-10 lt-md:flex-col lt-md:gap-y-4 lt-md:p-x-5">
       <NuxtLink class=" flex items-center gap-x-4 cursor-pointer p-2 hover:border_bottom_blue"
                 :class=" route.path === '/' ? 'current' : '' "
                 to="/">
