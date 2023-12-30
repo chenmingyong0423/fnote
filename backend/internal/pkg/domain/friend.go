@@ -30,7 +30,6 @@ type FriendVO struct {
 	Url         string `json:"url"`
 	Logo        string `json:"logo"`
 	Description string `json:"description"`
-	Priority    int    `json:"priority"`
 }
 
 // 0 hiding，1 pending，2 showing

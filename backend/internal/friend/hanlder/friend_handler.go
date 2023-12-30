@@ -59,6 +59,7 @@ func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[domain.F
 	listVO.List = h.toFriendVOs(friends)
 	return
 }
+
 func (h *FriendHandler) toFriendVOs(friends []domain.Friend) []domain.FriendVO {
 	result := make([]domain.FriendVO, 0, len(friends))
 	for _, friend := range friends {
@@ -72,7 +73,6 @@ func (h *FriendHandler) toFriendVO(friend domain.Friend) domain.FriendVO {
 		Url:         friend.Url,
 		Logo:        friend.Logo,
 		Description: friend.Description,
-		Priority:    friend.Priority,
 	}
 }
 
@@ -80,7 +80,7 @@ type FriendRequest struct {
 	Name        string `json:"name" binding:"required"`
 	Url         string `json:"url" binding:"required"`
 	Logo        string `json:"logo" binding:"required"`
-	Description string `json:"description" binding:"required,max=20"`
+	Description string `json:"description" binding:"required,max=30"`
 	Email       string `json:"email"`
 }
 
