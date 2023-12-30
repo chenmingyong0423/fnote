@@ -7,13 +7,15 @@
       <div class="i-ph-user-circle-duotone w-12 h-12 border-rounded-50%  lt-lg:mr0 text-gray-4" v-else></div>
     </div>
     <div class="w-91% flex flex-col ">
-      <div class="text-gray-4 h-[55px] line-height-[35px] flex">
+      <div class="text-gray-4 h-[55px] line-height-[35px] flex gap-x-2">
         <a v-if="rpy.website !== ''" :href="rpy.website" target="_blank" class="text-#1E80FF">{{
             rpy.name === props.author ? `${rpy.name}[作者]` : rpy.name
           }}</a>
         <span v-else class="text-#1E80FF">{{
             rpy.name === props.author ? `${rpy.name}[作者]` : rpy.name
           }}</span>
+        <span>回复</span>
+        <span class="text-#1E80FF">{{rpy.reply_to === props.author ? `${rpy.reply_to}[作者]` : rpy.reply_to}}</span>
         <span> 发表于 {{ $dayjs(rpy.reply_time * 1000).format('YYYY-MM-DD HH:mm:ss') }}</span>
         <Button name="回复" class="hover:bg-gray-1 ml-auto" @click="activeCommentIndex = rpy.id"></Button>
       </div>
