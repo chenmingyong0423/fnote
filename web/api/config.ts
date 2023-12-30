@@ -4,6 +4,7 @@ export interface IWebmasterInfo {
     web_master_config: IWebMaster,
     notice_config: INotice,
     social_info_config: ISocialInfo,
+    pay_info_config: IPayInfo[],
 }
 
 export interface ISocialInfo {
@@ -35,6 +36,12 @@ export interface INotice {
     content: string;
     publish_time: number;
 }
+
+export interface IPayInfo {
+    name: string;
+    image: string;
+}
+
 const prefix = "/configs"
 
 export const getWebMaster = () => httpRequest.get(prefix + "/index")
