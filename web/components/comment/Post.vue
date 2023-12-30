@@ -14,7 +14,7 @@
         <div class="i-ph-user-circle-duotone w-12 h-12 border-rounded-50%  lt-lg:mr0 text-gray-4" v-else></div>
       </div>
       <div class="w-91% flex flex-col ">
-        <div class="text-gray-4 h-[55px] line-height-[35px] flex">
+        <div class="text-gray-4 h-[55px] line-height-[35px] flex gap-x-2">
           <a v-if="comment.website !== ''" :href="comment.website" target="_blank" class="text-#1E80FF">{{
               comment.username === props.author ? `${comment.username}[作者]` : comment.username
             }}</a>
