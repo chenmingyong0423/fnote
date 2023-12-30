@@ -60,11 +60,10 @@
            <span
                class="w-8 h-8 text-gray group-hover:scale-120 group-hover:text-white duration-400 text-5 text-center">赏</span>
           <div
-              class="pay slide-right-4-reword-animation dark_bg_full_black w-[320px] h-[160px] hidden absolute bg-gray-1 b-rounded-4 left-117% top--28% group-hover:block custom_shadow_all p-2">
+              class="pay slide-right-4-reword-animation dark_bg_full_black w-[640px] h-[320px] hidden absolute bg-gray-1 b-rounded-4 left-117% top--28% group-hover:block custom_shadow_all p-2">
             <div
-                class="flex align-center items-center justify-center center">
-              <img src="https://chenmingyong.cn/assets/wx-6662873b.jpg" width="150" height="150" alt="微信二维码">
-              <img src="https://chenmingyong.cn/assets/wx-6662873b.jpg" width="150" height="150" alt="支付宝二维码">
+                class="flex align-center items-center justify-center center gap-x-5">
+              <img :src="code.image" width="300" height="300" :alt="code.name" v-for="(code, index) in payList" :key="index">
             </div>
           </div>
         </div>
@@ -134,6 +133,8 @@ const path: string = route.path
 const id: string = String(route.params.id)
 const post = ref<IPostDetail>()
 const author = ref<string>("")
+const payList = ref<IPayInfo[]>(info.pay_info || [])
+
 const getPostDetail = async () => {
   try {
     let postRes: any = await getPostsById(id)
@@ -269,6 +270,7 @@ import {
   type ICommentRequest,
   submitComment, submitCommentReply
 } from "~/api/comment";
+import type {IPayInfo} from "~/api/config";
 
 const toast = useAlertStore();
 
@@ -503,7 +505,7 @@ const clearReply2ReplyReq = () => {
   content: '';
   position: absolute;
   left: -20px;
-  top: 25%;
+  top: 10%;
   border-width: 10px;
   border-style: solid;
   border-color: transparent #b7bbc4 transparent transparent;

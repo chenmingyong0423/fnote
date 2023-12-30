@@ -26,6 +26,12 @@ type IndexConfigVO struct {
 	WebMasterConfig    WebMasterConfigVO  `json:"web_master_config"`
 	NoticeConfigVO     NoticeConfigVO     `json:"notice_config"`
 	SocialInfoConfigVO SocialInfoConfigVO `json:"social_info_config"`
+	PayInfoConfigVO    []PayInfoConfigVO  `json:"pay_info_config"`
+}
+
+type PayInfoConfigVO struct {
+	Name  string `json:"name"`
+	Image string `json:"image"`
 }
 
 type NoticeConfigVO struct {
@@ -91,6 +97,7 @@ func (h *ConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO, error)
 		WebMasterConfig:    *h.toWebMasterConfigVO(&config.WebMasterConfig),
 		NoticeConfigVO:     *h.toNoticeConfigVO(&config.NoticeConfig),
 		SocialInfoConfigVO: *h.toSocialInfoConfigVO(&config.SocialInfoConfig),
+		PayInfoConfigVO:    h.toPayInfoConfigVO(config.PayInfoConfig),
 	}, nil
 }
 
@@ -108,4 +115,15 @@ func (h *ConfigHandler) toSocialInfoConfigVO(socialINfoConfig *domain.SocialInfo
 		socialInfoVOList[i] = SocialInfoVO{SocialName: socialInfo.SocialName, SocialValue: socialInfo.SocialValue, CssClass: socialInfo.CssClass, IsLink: socialInfo.IsLink}
 	}
 	return &SocialInfoConfigVO{SocialInfoList: socialInfoVOList}
+}
+
+func (h *ConfigHandler) toPayInfoConfigVO(config []domain.PayInfoConfigElem) []PayInfoConfigVO {
+	result := make([]PayInfoConfigVO, len(config))
+	for i, payInfoConfig := range config {
+		result[i] = PayInfoConfigVO{
+			Name:  payInfoConfig.Name,
+			Image: payInfoConfig.Image,
+		}
+	}
+	return result
 }

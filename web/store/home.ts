@@ -1,4 +1,4 @@
-import type {ISocialInfoItem, IWebMaster, INotice} from "@/api/config"
+import type {ISocialInfoItem, IWebMaster, INotice, IPayInfo} from "@/api/config"
 import type {IMenu} from "@/api/category"
 import {defineStore} from 'pinia'
 
@@ -22,6 +22,7 @@ export const useHomeStore = defineStore("home", {
         notice_info: {
             content: ""
         } as INotice,
+        pay_info: [] as IPayInfo[],
         social_info_list: [] as ISocialInfoItem[],
         isBlackMode: false,
     }),

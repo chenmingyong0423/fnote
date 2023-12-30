@@ -46,6 +46,7 @@ const webMaster = async () => {
       info.master_info = res.data.web_master_config
       info.notice_info = res.data.notice_config
       info.social_info_list = res.data.social_info_config.social_info_list
+      info.pay_info = res.data.pay_info_config
       // const newLink = document.createElement('link');
       // newLink.rel = 'icon';
       // newLink.type = 'image/x-icon';
