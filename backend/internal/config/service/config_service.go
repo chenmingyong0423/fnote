@@ -54,7 +54,7 @@ func (s *ConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPos
 }
 
 func (s *ConfigService) GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error) {
-	configs, err := s.repo.GetConfigByTypes(ctx, "webmaster", "notice", "social")
+	configs, err := s.repo.GetConfigByTypes(ctx, "webmaster", "notice", "social", "pay")
 	if err != nil {
 		return nil, err
 	}
@@ -83,6 +83,13 @@ func (s *ConfigService) GetIndexConfig(ctx context.Context) (*domain.IndexConfig
 				return nil, err
 			}
 			cfg.SocialInfoConfig = socialInfoConfig
+		} else if config.Typ == "pay" {
+			payInfoConfig := domain.PayInfoConfig{List: make([]domain.PayInfoConfigElem, 0)}
+			err = s.anyToStruct(config.Props, &payInfoConfig)
+			if err != nil {
+				return nil, err
+			}
+			cfg.PayInfoConfig = payInfoConfig.List
 		}
 	}
 	return cfg, nil
