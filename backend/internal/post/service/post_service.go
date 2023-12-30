@@ -29,7 +29,7 @@ import (
 )
 
 type IPostService interface {
-	GetLatestPosts(ctx context.Context) ([]*domain.Post, error)
+	GetLatestPosts(ctx context.Context, count int64) ([]*domain.Post, error)
 	GetPosts(ctx context.Context, pageRequest *domain.PostRequest) ([]*domain.Post, int64, error)
 	GetPunishedPostById(ctx context.Context, id string) (*domain.Post, error)
 	AddLike(ctx context.Context, id string, ip string) error
@@ -118,6 +118,6 @@ func (s *PostService) GetPosts(ctx context.Context, pageRequest *domain.PostRequ
 
 }
 
-func (s *PostService) GetLatestPosts(ctx context.Context) ([]*domain.Post, error) {
-	return s.repo.GetLatest5Posts(ctx)
+func (s *PostService) GetLatestPosts(ctx context.Context, count int64) ([]*domain.Post, error) {
+	return s.repo.GetLatest5Posts(ctx, count)
 }

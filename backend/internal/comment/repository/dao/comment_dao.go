@@ -118,7 +118,7 @@ type CommentDao struct {
 }
 
 func (d *CommentDao) FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus uint) ([]*Comment, error) {
-	cond := bsonx.D(bsonx.KV("post_info.post_id", postId), bsonx.KV("status", cmtStatus))
+	cond := bsonx.D(bsonx.E("post_info.post_id", postId), bsonx.E("status", cmtStatus))
 	result, err := d.coll.Finder().Filter(cond).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Fails to find the docs from comment, condition=%v", cond)
@@ -131,7 +131,7 @@ func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]
 		Match(bsonx.M("status", CommentStatusApproved)).
 		Project(bsonx.M("combined", aggregation.BsonBuilder().ConcatArrays(
 			bsonx.A(
-				bsonx.D(bsonx.KV("post_info", "$post_info"), bsonx.KV("name", "$user_info.name"), bsonx.KV("content", "$content"), bsonx.KV("create_time", "$create_time")),
+				bsonx.D(bsonx.E("post_info", "$post_info"), bsonx.E("name", "$user_info.name"), bsonx.E("content", "$content"), bsonx.E("create_time", "$create_time")),
 			),
 			aggregation.Map(
 				aggregation.Filter(
@@ -142,7 +142,7 @@ func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]
 					},
 				),
 				"reply",
-				bsonx.D(bsonx.KV("post_info", "$post_info"), bsonx.KV("name", "$$reply.user_info.name"), bsonx.KV("content", "$$reply.content"), bsonx.KV("create_time", "$$reply.create_time")),
+				bsonx.D(bsonx.E("post_info", "$post_info"), bsonx.E("name", "$$reply.user_info.name"), bsonx.E("content", "$$reply.content"), bsonx.E("create_time", "$$reply.create_time")),
 			),
 		).Build())).
 		Unwind("$combined", nil).
@@ -215,7 +215,7 @@ func (d *CommentDao) AddCommentReply(ctx context.Context, cmtId string, commentR
 }
 
 func (d *CommentDao) FindCommentById(ctx context.Context, cmtId string) (*Comment, error) {
-	comment, err := d.coll.Finder().Filter(bsonx.D(bsonx.KV("_id", cmtId), bsonx.KV("status", CommentStatusApproved))).FindOne(ctx)
+	comment, err := d.coll.Finder().Filter(bsonx.D(bsonx.E("_id", cmtId), bsonx.E("status", CommentStatusApproved))).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the document from comment, cmtId=%s", cmtId)
 	}
