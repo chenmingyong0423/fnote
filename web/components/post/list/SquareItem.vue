@@ -9,6 +9,7 @@
              :alt="item.title"/>
         <div
             class="flex justify-between gap-x-3 z-99 w-auto absolute top-3 ease-linear duration-200">
+          <span class="bg-#22c55e rounded-3 text-white py-0.2em px-0.8em" v-if="item.sticky_weight == 1">↑置顶</span>
           <span class="bg-#2db7f5 rounded-3 text-white py-0.2em px-0.8em" v-for="(category, idx) in item.categories"
                 :key="idx">{{ category }}</span>
           <span class="bg-orange rounded-3 text-white py-0.2em px-0.8em" v-for="(tag, idx) in item.tags" :key="idx">{{
@@ -55,5 +56,4 @@ const props = defineProps({
 </script>
 
 <style scoped>
-
 </style>

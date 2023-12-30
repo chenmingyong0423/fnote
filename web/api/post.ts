@@ -11,7 +11,7 @@ export interface IPost {
     like_count: number;
     comment_count: number;
     visit_count: number;
-    priority: number;
+    sticky_weight: number;
     create_time: number;
 }
 
@@ -36,7 +36,7 @@ export interface IPostDetail {
     like_count: number;
     comment_count: number;
     visit_count: number;
-    priority: number;
+    sticky_weight: number;
     create_time: number;
     content: string;
     meta_description: string;
