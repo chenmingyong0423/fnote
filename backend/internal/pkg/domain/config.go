@@ -26,6 +26,16 @@ type IndexConfig struct {
 	WebMasterConfig  WebMasterConfig
 	NoticeConfig     NoticeConfig
 	SocialInfoConfig SocialInfoConfig
+	PayInfoConfig    []PayInfoConfigElem
+}
+
+type PayInfoConfigElem struct {
+	Name  string `bson:"name"`
+	Image string `bson:"image"`
+}
+
+type PayInfoConfig struct {
+	List []PayInfoConfigElem `bson:"list"`
 }
 
 // WebMasterConfig 站长信息
