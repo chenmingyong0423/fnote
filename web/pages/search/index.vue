@@ -2,7 +2,7 @@
   <div class="flex">
     <div class="w-69% mr-1% flex flex-col">
       <div class="flex flex-col">
-        <SearchInput :keyword="keyword" class="mb-5" @search="search"></SearchInput>
+        <SearchInput :keyword="keyword" class="mb-5"></SearchInput>
         <PostListItem :posts="posts"></PostListItem>
         <Pagination :currentPage="req.pageNo" :total="totalPosts" :perPageCount='req.pageSize'
                     :route="path +'/page/'" :extraParams="{keyword: req.keyword}"></Pagination>
