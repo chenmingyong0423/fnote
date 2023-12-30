@@ -4,9 +4,9 @@
       <div class="h-10 line-height-10 font-bold text-6 mb-5">
         友链
       </div>
-      <div class="flex flex-wrap gap-x-5 mb-5 ">
+      <div class="flex flex-wrap gap-x-4 mb-5 lt-md:flex-col">
         <a :href="friend.url"
-           class="flex mb-5 w-23% custom_border_gray h-[100px] p-2 b-rounded-4 custom_cursor_flow cursor-pointer dark:text-dtc dark_bg_gray custom_shadow"
+           class="flex mb-5 w-23% custom_border_gray h-[100px] p-2 b-rounded-4 custom_cursor_flow cursor-pointer dark:text-dtc dark_bg_gray custom_shadow lt-md:w-100%"
            v-for="(friend, index) in friends" :key="index">
           <div class="w-15% flex justify-center">
             <img :src="friend.logo" alt=""
@@ -30,23 +30,23 @@
       <div class="text-10 mb-5">
         留言互友
       </div>
-      <div class="flex flex-wrap gap-x-5 gap-y-2">
-        <div class="flex w-49%">
+      <div class="flex flex-wrap gap-x-5 gap-y-2 lt-md:flex-col">
+        <div class="flex w-49% lt-md:w-100%">
           <span class="light_border box-border w-[50px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray">*昵称</span>
           <input type="text" placeholder="请输入昵称" v-model="req.name"
                  class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray">
         </div>
-        <div class="flex w-49%">
+        <div class="flex w-49% lt-md:w-100%">
           <span class="light_border box-border w-[50px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray">邮箱</span>
           <input type="text" placeholder="请输入邮箱" v-model="req.email"
                  class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray">
         </div>
-        <div class="flex w-49%">
+        <div class="flex w-49% lt-md:w-100%">
           <span class="light_border box-border w-[100px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray">*头像链接</span>
           <input type="text" placeholder="请输入头像链接" v-model="req.logo"
                  class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray">
         </div>
-        <div class="flex w-49%">
+        <div class="flex w-49% lt-md:w-100%">
           <span class="light_border box-border w-[100px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray">*网站链接</span>
           <input type="text" placeholder="请输入网站链接" v-model="req.url"
                  class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray">
@@ -59,7 +59,7 @@
         </div>
       </div>
       <div>
-        <Button name="提交" class="m-auto bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200" @click="submit"></Button>
+        <Button name="提交" class="w-15 h-8 line-height-8  m-auto bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200" @click="submit"></Button>
       </div>
     </div>
 

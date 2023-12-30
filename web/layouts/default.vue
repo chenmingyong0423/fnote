@@ -1,12 +1,12 @@
 <template>
   <div class="dark:bg-#03080c">
+    <SmallMenu></SmallMenu>
     <MyToast></MyToast>
     <div ref="myDom">
       <Header class="slide-down"/>
     </div>
-    <!-- <el-scrollbar max-height="100vh" @scroll="headerScroll" /> -->
     <div class="bg-#F0F2F5 dark:bg-#03080c pt-25 p-5">
-      <div class="slide-up w-90% m-auto">
+      <div class="slide-up w-90% m-auto lt-md:w-99%">
         <slot></slot>
       </div>
     </div>
@@ -14,7 +14,9 @@
       <Footer/>
     </div>
     <div>
-      <div ref="scrollToTop" class="i-ph:arrow-circle-up text-gray dark:text-dtc w-15 h-15 fixed bottom-[100px] right-[20px] cursor-pointer" style="display: none;" @click="handleScrollToTop"></div>
+      <div ref="scrollToTop"
+           class="i-ph:caret-circle-up-fill text-#1e80ff dark:text-dtc w-15 h-15 fixed bottom-[100px] right-[20px] cursor-pointer"
+           style="display: none;" @click="handleScrollToTop"></div>
     </div>
   </div>
 </template>
@@ -24,10 +26,12 @@ import {getWebMaster} from "~/api/config"
 import type {IWebmasterInfo} from "~/api/config"
 import type {IListData, IResponse} from "~/api/http";
 import {getMenus, type IMenu} from "~/api/category";
+import SmallMenu from "~/components/SmallMenu.vue";
 
 const info = useHomeStore()
 const myDom = ref()
 const homeStore = useHomeStore()
+const smallScreenMenu = ref()
 
 onMounted(() => {
   let isBlackMode = localStorage.getItem("isBlackMode")
@@ -128,4 +132,5 @@ onBeforeUnmount(() => {
   animation: slideUp 0.5s ease;
   animation-iteration-count: 1;
 }
+
 </style>

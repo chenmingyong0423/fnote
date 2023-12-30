@@ -1,10 +1,13 @@
 <template>
   <div class="flex m-auto h-auto">
-    <div class="w-69% mr-1% flex flex-col">
+    <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
       <Notice></Notice>
       <PostListSquareItem :posts="posts"></PostListSquareItem>
+      <NuxtLink class="m-auto" to="/navigation">
+        <Button name="查看更多" class="w-30 h-10 line-height-10 bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"></Button>
+      </NuxtLink>
     </div>
-    <div class="flex flex-col w-30%">
+    <div class="flex flex-col w-30% lt-md:hidden">
       <Profile class="mb-5"></Profile>
       <CommentHome></CommentHome>
     </div>

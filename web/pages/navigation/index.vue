@@ -1,10 +1,10 @@
 <template>
-  <div class="text-black bg-white p-5 b-rounded-4 dark_bg_gray dark:text-dtc">
+  <div class="text-black bg-white p-5 b-rounded-4 dark_bg_gray dark:text-dtc ">
     <div class="mb-10">
       <div class="line-height-10 text-10 light_border_bottom p-b-5 dark_text_white">分类</div>
-      <div class="mt-5 flex items-center flex-wrap gap-x-10 gap-y-10">
+      <div class="mt-5 flex items-center flex-wrap gap-x-10 gap-y-10 lt-md:gap-x-5 lt-md:gap-y-2">
         <NuxtLink
-            class=" light_border p-5 w-90 h-40 b-rounded-4 dark_bg_gray dark:text-dtc cursor-pointer custom_cursor_flow custom_shadow"
+            class="light_border p-5 w-90 h-40 b-rounded-4 dark_bg_gray dark:text-dtc cursor-pointer custom_cursor_flow custom_shadow lt-md:w-36%"
             v-for="(c, index) in categories"
             :key="index" :to="'/categories/' + c.route">
           <div class="i-ph-columns-fill w-10 h-10 text-gray-5 p-y-1 "></div>
@@ -20,7 +20,7 @@
 
     <div>
       <div class="line-height-10 text-10 light_border_bottom p-b-5 dark_text_white">标签</div>
-      <div class="mt-5 flex items-center flex-wrap gap-x-10 gap-y-10">
+      <div class="mt-5 flex items-center flex-wrap gap-x-10 gap-y-10 lt-md:gap-3">
         <NuxtLink
             class="flex text-5 gap-x-2 b-rounded-4 border-solid border-gray-2 border-1 p-2 cursor-pointer custom_cursor_flow"
             v-for="(t, index) in tags"

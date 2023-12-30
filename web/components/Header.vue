@@ -1,11 +1,13 @@
 <template>
   <div ref="header"
-       class="bg-#fff backdrop-blur-20 fixed top-0 dark:text-dtc w-full z-99 flex justify-between items-center p-1 dark_bg_gray duration-200 ease-linear">
+       class="bg-#fff backdrop-blur-20 fixed top-0 dark:text-dtc w-full z-99 flex justify-between items-center p-1 dark_bg_gray duration-200 ease-linear max-h-[70px] select-none">
     <div>
-      <img :src="picture" alt=""
-           class="w-15 h-15 border-rounded-50% mx5 cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0">
+      <NuxtLink to="/">
+        <img :src="picture" alt=""
+             class="w-15 h-15 border-rounded-50% mx5 cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0 select-none">
+      </NuxtLink>
     </div>
-    <div class="bg_transparent">
+    <div class="bg_transparent  lt-md:hidden">
       <Menu :items="homeStore.menuList"></Menu>
     </div>
     <div class="ml-auto pr-5 flex gap-x-4">
@@ -17,7 +19,8 @@
           to="/search?keyword=">
       </NuxtLink>
       <div
-          class="i-grommet-icons:github text-12 dark:text-dtc cursor-pointer dark:hover:text-white active:bg-#e5e5e5 lt-lg:display-none"/>
+          class="i-grommet-icons:github text-12 dark:text-dtc cursor-pointer dark:hover:text-white active:bg-#e5e5e5  lt-md:hidden"/>
+      <div class="i-ph:list text-10 text-#86909c dark:text-dtc cursor-pointer dark:hover:text-white active:bg-#e5e5e5  md:hidden" @click="homeStore.showSmallScreenMenu = true"></div>
     </div>
   </div>
 </template>

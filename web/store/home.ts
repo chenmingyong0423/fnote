@@ -25,6 +25,7 @@ export const useHomeStore = defineStore("home", {
         pay_info: [] as IPayInfo[],
         social_info_list: [] as ISocialInfoItem[],
         isBlackMode: false,
+        showSmallScreenMenu: false,
     }),
     // 持久化存储
     persist: process.client && {

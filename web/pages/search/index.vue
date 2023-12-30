@@ -1,6 +1,6 @@
 <template>
   <div class="flex">
-    <div class="w-69% mr-1% flex flex-col">
+    <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
       <div class="flex flex-col">
         <SearchInput :keyword="keyword" class="mb-5"></SearchInput>
         <PostListItem :posts="posts"></PostListItem>
@@ -8,7 +8,7 @@
                     :route="path +'/page/'" :extraParams="{keyword: req.keyword}"></Pagination>
       </div>
     </div>
-    <div class="flex flex-col w-30%">
+    <div class="flex flex-col w-30% lt-md:hidden">
       <Profile class="mb-5"></Profile>
     </div>
   </div>

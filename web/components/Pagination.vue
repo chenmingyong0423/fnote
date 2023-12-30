@@ -1,6 +1,6 @@
 <template>
-  <div class="flex bg-white items-center gap-x-4 p-2 b-rounded-2 dark:text-dtc dark_bg_gray">
-    <div class="list-none flex gap-x-5 m-auto">
+  <div class="flex bg-white items-center p-2 b-rounded-2 dark:text-dtc dark_bg_gray lt-md:p-1">
+    <div class="list-none flex gap-x-5 m-auto lt-md:gap-x-1">
       <NuxtLink class="w-[32px] h-[32px] flex-center"
                 :class="{'text-gray-3 select-none' : currentPage == 1, 'cursor-pointer hover:bg-gray-1': currentPage != 1}"
                 :to="fullUrl(calculatePages(currentPage - 1))"
@@ -50,7 +50,7 @@
       >
         &gt
       </NuxtLink>
-      <div>
+      <div class="lt-md:hidden">
         <select class="w-[95px] h-[35px] p-x-2 p-y-1 b-rounded-2 border-gray-3 dark:text-dtc dark_bg_gray "
                 v-model="perPageSize" @change="changeItemsPerPage">
           <option class="dark:bg-black" :value="1">1 条/页</option>
@@ -95,7 +95,16 @@ const props = defineProps({
 const currentPage = ref(props.currentPage);
 const perPageSize = ref(props.perPageCount);
 // 最大显示多少个页码
-const maxPageNumbers = ref(5);
+const maxPageNumbers = ref(3);
+
+onMounted (() => {
+  if (window.innerWidth >= 768) {
+    maxPageNumbers.value = 5
+  } else {
+    perPageSize.value = 5
+  }
+})
+
 const total = ref(props.total)
 const totalPages = computed(() => Math.ceil(total.value / perPageSize.value));
 const isFirst = ref(true);
@@ -148,4 +157,5 @@ const fullUrl = (pageNo: number) => {
   }).toString();
   return `${props.route}${pageNo}?${params}`
 }
+
 </script>
