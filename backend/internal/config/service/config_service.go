@@ -29,7 +29,10 @@ type IConfigService interface {
 	IncreaseWebsiteViews(ctx context.Context) error
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
 	GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error)
+	GetFrontPostCount(ctx context.Context) (*domain.FrontPostCount, error)
 }
+
+var _ IConfigService = (*ConfigService)(nil)
 
 func NewConfigService(repo repository.IConfigRepository) *ConfigService {
 	return &ConfigService{
@@ -37,10 +40,17 @@ func NewConfigService(repo repository.IConfigRepository) *ConfigService {
 	}
 }
 
-var _ IConfigService = (*ConfigService)(nil)
-
 type ConfigService struct {
 	repo repository.IConfigRepository
+}
+
+func (s *ConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPostCount, error) {
+	cfg := &domain.FrontPostCount{}
+	err := s.getConfigAndConvertTo(ctx, "front-post-count", cfg)
+	if err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func (s *ConfigService) GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error) {

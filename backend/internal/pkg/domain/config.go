@@ -72,3 +72,7 @@ type SocialInfo struct {
 	CssClass    string `bson:"css_class" json:"css_class"`
 	IsLink      bool   `bson:"is_link" json:"is_link"`
 }
+
+type FrontPostCount struct {
+	Count int64 `bson:"count"`
+}

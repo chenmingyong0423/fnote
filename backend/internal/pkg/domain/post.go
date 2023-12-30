@@ -66,7 +66,7 @@ type PrimaryPost struct {
 	LikeCount    int      `json:"like_count"`
 	CommentCount int      `json:"comment_count"`
 	VisitCount   int      `json:"visit_count"`
-	Priority     int      `json:"priority"`
+	StickyWeight int      `json:"sticky_weight"`
 	CreateTime   int64    `json:"create_time"`
 }
 

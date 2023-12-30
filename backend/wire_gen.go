@@ -80,7 +80,7 @@ func initializeApp(cfgPath string) (*gin.Engine, error) {
 	friendRepository := repository7.NewFriendRepository(friendDao)
 	friendService := service9.NewFriendService(friendRepository)
 	friendHandler := hanlder2.NewFriendHandler(friendService, messageService, configService)
-	postHandler := handler3.NewPostHandler(postService)
+	postHandler := handler3.NewPostHandler(postService, configService)
 	visitLogDao := dao8.NewVisitLogDao(database)
 	visitLogRepository := repository8.NewVisitLogRepository(visitLogDao)
 	visitLogService := service10.NewVisitLogService(visitLogRepository)

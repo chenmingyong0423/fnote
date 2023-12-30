@@ -44,7 +44,7 @@ type Post struct {
 	LikeCount        int               `bson:"like_count"`
 	CommentCount     int               `bson:"comment_count"`
 	VisitCount       int               `bson:"visit_count"`
-	Priority         int               `bson:"priority"`
+	StickyWeight     int               `bson:"sticky_weight"`
 	MetaDescription  string            `bson:"meta_description"`
 	MetaKeywords     string            `bson:"meta_keywords"`
 	WordCount        int               `bson:"word_count"`
@@ -53,7 +53,7 @@ type Post struct {
 	UpdateTime       int64             `bson:"update_time"`
 }
 type IPostDao interface {
-	GetLatest5Posts(ctx context.Context) ([]*Post, error)
+	GetFrontPosts(ctx context.Context, count int64) ([]*Post, error)
 	QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error)
 	GetPunishedPostById(ctx context.Context, sug string) (*Post, error)
 	FindByIdAndIp(ctx context.Context, sug string, ip string) (*Post, error)
@@ -116,7 +116,7 @@ func (d *PostDao) AddLike(ctx context.Context, id string, ip string) error {
 
 func (d *PostDao) FindByIdAndIp(ctx context.Context, id string, ip string) (*Post, error) {
 	// bson.D{bson.E{Key: "_id", Value: id}, bson.E{Key: "likes", Value: ip}}
-	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add(bsonx.KV("likes", ip)).Build()).FindOne(ctx)
+	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add("likes", ip).Build()).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from post, id=%s, ip=%s", id, ip)
 	}
@@ -124,7 +124,7 @@ func (d *PostDao) FindByIdAndIp(ctx context.Context, id string, ip string) (*Pos
 }
 
 func (d *PostDao) GetPunishedPostById(ctx context.Context, id string) (*Post, error) {
-	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add(bsonx.KV("status", domain.PostStatusPunished)).Build()).FindOne(ctx)
+	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add("status", domain.PostStatusPunished).Build()).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the document from post, id=%s", id)
 	}
@@ -143,8 +143,8 @@ func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *o
 	return posts, cnt, nil
 }
 
-func (d *PostDao) GetLatest5Posts(ctx context.Context) ([]*Post, error) {
-	findOptions := options.Find().SetSort(bsonx.M("create_time", -1)).SetLimit(5)
+func (d *PostDao) GetFrontPosts(ctx context.Context, count int64) ([]*Post, error) {
+	findOptions := options.Find().SetSort(bsonx.D(bsonx.E("sticky_weight", -1), bsonx.E("create_time", -1))).SetLimit(count)
 	posts, err := d.coll.Finder().Filter(bsonx.M("status", domain.PostStatusPunished)).Options(findOptions).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from post, findOptions=%v", findOptions)

@@ -17,9 +17,9 @@ package dao
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox"
-	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/builder/query"
 
+	"github.com/chenmingyong0423/go-mongox"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -52,7 +52,9 @@ type MsgTplDao struct {
 }
 
 func (d *MsgTplDao) FindMsgTplByName(ctx context.Context, name string, recipientType uint) (*MessageTemplate, error) {
-	msgTpl, err := d.coll.Finder().Filter(bsonx.D(bsonx.KV("name", name), bsonx.KV("active", 1), bsonx.KV("recipient_type", recipientType))).FindOne(ctx)
+	msgTpl, err := d.coll.Finder().Filter(
+		query.BsonBuilder().Eq("name", name).Eq("active", 1).Eq("recipient_type", recipientType).Build(),
+	).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Fails to find a docment from message_template, name=%s, recipient_type=%d", name, recipientType)
 	}

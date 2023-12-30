@@ -18,6 +18,8 @@ import (
 	"net/http"
 	"slices"
 
+	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
+
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -38,18 +40,20 @@ type SummaryPostVO struct {
 	LikeCount    int      `json:"like_count"`
 	CommentCount int      `json:"comment_count"`
 	VisitCount   int      `json:"visit_count"`
-	Priority     int      `json:"priority"`
+	StickyWeight int      `json:"sticky_weight"`
 	CreateTime   int64    `json:"create_time"`
 }
 
-func NewPostHandler(serv service.IPostService) *PostHandler {
+func NewPostHandler(serv service.IPostService, cfgService configServ.IConfigService) *PostHandler {
 	return &PostHandler{
-		serv: serv,
+		serv:       serv,
+		cfgService: cfgService,
 	}
 }
 
 type PostHandler struct {
-	serv service.IPostService
+	serv       service.IPostService
+	cfgService configServ.IConfigService
 }
 
 func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
@@ -62,7 +66,11 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 }
 
 func (h *PostHandler) GetLatestPosts(ctx *gin.Context) (listVO api.ListVO[*SummaryPostVO], err error) {
-	posts, err := h.serv.GetLatestPosts(ctx)
+	countCfg, err := h.cfgService.GetFrontPostCount(ctx)
+	if err != nil {
+		return
+	}
+	posts, err := h.serv.GetLatestPosts(ctx, countCfg.Count)
 	if err != nil {
 		return
 	}
@@ -84,7 +92,7 @@ func (h *PostHandler) postsToPostVOs(posts []*domain.Post) []*SummaryPostVO {
 			LikeCount:    post.PrimaryPost.LikeCount,
 			CommentCount: post.PrimaryPost.CommentCount,
 			VisitCount:   post.PrimaryPost.VisitCount,
-			Priority:     post.PrimaryPost.Priority,
+			StickyWeight: post.PrimaryPost.StickyWeight,
 			CreateTime:   post.PrimaryPost.CreateTime,
 		})
 	}
