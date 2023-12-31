@@ -1,4 +1,4 @@
-import type {ISocialInfoItem, IWebMaster, INotice, IPayInfo} from "@/api/config"
+import type {ISocialInfoItem, IWebMaster, INotice, IPayInfo, SeoMetaConfigVO} from "@/api/config"
 import type {IMenu} from "@/api/category"
 import {defineStore} from 'pinia'
 
@@ -24,6 +24,11 @@ export const useHomeStore = defineStore("home", {
         } as INotice,
         pay_info: [] as IPayInfo[],
         social_info_list: [] as ISocialInfoItem[],
+        seo_meta_config: {
+            title: "fnote blog",
+            description: "fnote blog",
+            ogTitle: "fnote blog",
+        } as SeoMetaConfigVO,
         isBlackMode: false,
         showSmallScreenMenu: false,
     }),

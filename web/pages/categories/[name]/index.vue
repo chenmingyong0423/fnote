@@ -22,10 +22,11 @@ import type {PageRequest} from "~/api/post"
 import type {IPost} from "~/api/post"
 import type {IResponse, IPageData} from "~/api/http";
 import type {ICategoryName} from "~/api/category";
+import {useHomeStore} from "~/store/home";
 
 const route = useRoute()
 const pageSize: number = Number(route.query.pageSize) || 5
-const routeParam : string = String(route.params.name)
+const routeParam: string = String(route.params.name)
 
 let posts = ref<IPost[]>([]);
 let req = ref<PageRequest>({
@@ -37,12 +38,15 @@ let req = ref<PageRequest>({
 
 const totalPosts = ref<Number>(0)
 
+const title = ref<string>('')
+
 const postInfos = async () => {
   try {
     if (!req.value.categories || req.value.categories.length == 0) {
       let categoryRes: any = await getCategoryByRoute(routeParam)
       let res: IResponse<ICategoryName> = categoryRes.data.value
-      req.value.categories = [res.data?.name || ""]
+      title.value = res.data?.name || ""
+      req.value.categories = [title.value]
     }
     const deepCopyReq = JSON.parse(JSON.stringify(req.value));
     let postRes: any = await getPosts(deepCopyReq)
@@ -53,5 +57,22 @@ const postInfos = async () => {
     console.log(error);
   }
 };
-postInfos()
+await postInfos()
+
+const homeStore = useHomeStore()
+useHead({
+  title: `${title.value} - ${homeStore.seo_meta_config.title}`,
+  meta: [
+    {name: 'description', content: `${title.value}文章列表`},
+    { name: 'keywords', content: homeStore.seo_meta_config.keywords },
+    { name: 'author', 'content': homeStore.seo_meta_config.author },
+    { name: 'robots', 'content': homeStore.seo_meta_config.robots },
+  ]
+})
+useSeoMeta({
+  ogTitle: `${title.value} - ${homeStore.seo_meta_config.title}`,
+  ogDescription: `${title.value}文章列表`,
+  ogImage: '',
+  twitterCard: 'summary'
+})
 </script>

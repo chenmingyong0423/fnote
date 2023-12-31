@@ -40,19 +40,23 @@ import type {ICategoryWithCount} from '~/api/category'
 import type {ITagWithCount} from '~/api/tag'
 import {getTagList} from '~/api/tag'
 import {getCategoriesAndTags} from '~/api/category'
+import {useHomeStore} from "~/store/home";
 
 let categories = ref<ICategoryWithCount[]>([]);
+let ct = ref<string>('')
 
 const categoryAndTags = async () => {
   try {
     let httpRes: any = await getCategoriesAndTags()
     let res: IResponse<IListData<ICategoryWithCount>> = httpRes.data.value
     categories.value = res.data?.list || []
+    categories.value.forEach((item: ICategoryWithCount) => {
+      ct.value += item.name + '、'
+    })
   } catch (error) {
     console.log(error);
   }
 };
-categoryAndTags()
 
 let tags = ref<ITagWithCount[]>([]);
 const tagList = async () => {
@@ -60,11 +64,34 @@ const tagList = async () => {
     let httpRes: any = await getTagList()
     let res: IResponse<IListData<ITagWithCount>> = httpRes.data.value
     tags.value = res.data?.list || []
+    tags.value.forEach((item: ITagWithCount) => {
+      ct.value += item.name + '、'
+    })
   } catch (error) {
     console.log(error);
   }
 };
-tagList()
+
+
+const homeStore = useHomeStore()
+await categoryAndTags()
+await tagList()
+ct.value = ct.value.substring(0, ct.value.length - 1)
+useHead({
+  title: `文章分类和标签 - ${homeStore.seo_meta_config.title}`,
+  meta: [
+    { name: 'description', content: `所有的文章分类和标签，包括${ct.value}等不同主题。` },
+    { name: 'keywords', content: homeStore.seo_meta_config.keywords },
+    { name: 'author', 'content': homeStore.seo_meta_config.author },
+    { name: 'robots', 'content': homeStore.seo_meta_config.robots },
+  ]
+})
+useSeoMeta({
+  ogTitle: `文章分类和标签 - ${homeStore.seo_meta_config.title}`,
+  ogDescription: `所有的文章分类和标签，包括${ct.value}等不同主题。`,
+  ogImage: '',
+  twitterCard: 'summary'
+})
 </script>
 
 <style scoped>

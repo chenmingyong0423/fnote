@@ -22,6 +22,7 @@ import type {PageRequest} from "~/api/post"
 import type {IPost} from "~/api/post"
 import type {IResponse, IPageData} from "~/api/http";
 import type {ITagName} from "~/api/tag";
+import {useHomeStore} from "~/store/home";
 
 const route = useRoute()
 const pageSize :number = Number(route.query.pageSize) || 5
@@ -54,5 +55,22 @@ const postInfos = async () => {
     console.log(error);
   }
 };
-postInfos()
+await postInfos()
+
+const homeStore = useHomeStore()
+useHead({
+  title: `${routeParam} - ${homeStore.seo_meta_config.title}`,
+  meta: [
+    {name: 'description', content: `${routeParam}文章列表`},
+    { name: 'keywords', content: homeStore.seo_meta_config.keywords },
+    { name: 'author', 'content': homeStore.seo_meta_config.author },
+    { name: 'robots', 'content': homeStore.seo_meta_config.robots },
+  ]
+})
+useSeoMeta({
+  ogTitle: `${routeParam} - ${homeStore.seo_meta_config.title}`,
+  ogDescription: `${routeParam}文章列表`,
+  ogImage: '',
+  twitterCard: 'summary'
+})
 </script>

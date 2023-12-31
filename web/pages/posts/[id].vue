@@ -158,7 +158,7 @@ const getPostDetail = async () => {
     console.log(error);
   }
 };
-getPostDetail()
+await getPostDetail()
 
 const handleCopyCodeSuccess = () => {
   console.log("成功")
@@ -398,6 +398,28 @@ const clearReply2ReplyReq = () => {
     commentPost.value.clearReply2ReplyReq()
   }
 }
+
+const homeStore = useHomeStore()
+let description = post.value?.summary
+if (post.value?.meta_description) {
+  description = post.value?.meta_description
+}
+
+useHead({
+  title: `${post.value?.title} - ${homeStore.seo_meta_config.title}`,
+  meta: [
+    {name: 'description', content: description},
+    { name: 'keywords', content: homeStore.seo_meta_config.keywords },
+    { name: 'author', 'content': homeStore.seo_meta_config.author },
+    { name: 'robots', 'content': homeStore.seo_meta_config.robots },
+  ]
+})
+useSeoMeta({
+  ogTitle: `${post.value?.title} - ${homeStore.seo_meta_config.title}`,
+  ogDescription: description,
+  ogImage: '',
+  twitterCard: 'summary'
+})
 </script>
 
 <style scoped>

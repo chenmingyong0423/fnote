@@ -18,6 +18,7 @@
 import {getLatestPosts} from "~/api/post"
 import type {IPost} from "~/api/post"
 import type {IResponse, IListData} from "~/api/http";
+import {useHomeStore} from "~/store/home";
 let posts = ref<IPost[]>([]);
 
 const postInfos = async () => {
@@ -29,5 +30,24 @@ const postInfos = async () => {
     console.log(error);
   }
 };
-postInfos()
+await postInfos()
+
+const homeStore = useHomeStore()
+
+useHead({
+  title: homeStore.seo_meta_config.title,
+  meta: [
+    { name: 'description', content: homeStore.seo_meta_config.description },
+    { name: 'keywords', content: homeStore.seo_meta_config.keywords },
+    { name: 'author', 'content': homeStore.seo_meta_config.author },
+    { name: 'robots', 'content': homeStore.seo_meta_config.robots },
+  ]
+
+})
+useSeoMeta({
+  ogTitle: homeStore.seo_meta_config.title,
+  ogDescription: homeStore.seo_meta_config.description,
+  ogImage: '',
+  twitterCard: 'summary'
+})
 </script>
