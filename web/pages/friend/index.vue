@@ -32,34 +32,41 @@
       </div>
       <div class="flex flex-wrap gap-x-5 gap-y-2 lt-md:flex-col">
         <div class="flex w-49% lt-md:w-100%">
-          <span class="light_border box-border w-[50px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray">*昵称</span>
+          <span
+              class="light_border box-border w-[50px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray">*昵称</span>
           <input type="text" placeholder="请输入昵称" v-model="req.name"
                  class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray">
         </div>
         <div class="flex w-49% lt-md:w-100%">
-          <span class="light_border box-border w-[50px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray">邮箱</span>
+          <span
+              class="light_border box-border w-[50px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray">邮箱</span>
           <input type="text" placeholder="请输入邮箱" v-model="req.email"
                  class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray">
         </div>
         <div class="flex w-49% lt-md:w-100%">
-          <span class="light_border box-border w-[100px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray">*头像链接</span>
+          <span
+              class="light_border box-border w-[100px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray">*头像链接</span>
           <input type="text" placeholder="请输入头像链接" v-model="req.logo"
                  class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray">
         </div>
         <div class="flex w-49% lt-md:w-100%">
-          <span class="light_border box-border w-[100px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray">*网站链接</span>
+          <span
+              class="light_border box-border w-[100px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray">*网站链接</span>
           <input type="text" placeholder="请输入网站链接" v-model="req.url"
                  class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray">
         </div>
         <div class="w-100%">
-          <textarea  rows="5"
-                    class="w-full custom_border_gray bg-#F9F9F9 outline-none focus:custom_border_1E80FF b-rounded-2 p-2 box-border mb-3 dark:text-dtc dark_bg_gray" v-model="req.description"
-                     placeholder="*请输入个人简介（不能超出 30 字）"
+          <textarea rows="5"
+                    class="w-full custom_border_gray bg-#F9F9F9 outline-none focus:custom_border_1E80FF b-rounded-2 p-2 box-border mb-3 dark:text-dtc dark_bg_gray"
+                    v-model="req.description"
+                    placeholder="*请输入个人简介（不能超出 30 字）"
                     maxlength="200"></textarea>
         </div>
       </div>
       <div>
-        <Button name="提交" class="w-15 h-8 line-height-8  m-auto bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200" @click="submit"></Button>
+        <Button name="提交"
+                class="w-15 h-8 line-height-8  m-auto bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"
+                @click="submit"></Button>
       </div>
     </div>
 
@@ -85,10 +92,11 @@ const req = ref<FriendReq>({
   url: '',
   description: ''
 })
-
+const homeStore = useHomeStore()
+const apiDomain = homeStore.apiDomain;
 const getFriendList = async () => {
   try {
-    let httpRes: any = await getFriends()
+    let httpRes: any = await getFriends(apiDomain)
     if (httpRes.data.value === null) {
       toast.showToast(httpRes.error.value.statusMessage, 2000);
       return
@@ -130,13 +138,13 @@ const submit = async () => {
       }
     }
     const deepCopyReq: FriendReq = JSON.parse(JSON.stringify(req.value));
-    let httpRes: any = await applyForFriend(deepCopyReq)
+    let httpRes: any = await applyForFriend(apiDomain, deepCopyReq)
     if (httpRes.data.value === null) {
       if (httpRes.error.value.statusCode == 403) {
         toast.showToast("友链模块暂未开放！", 2000);
       } else if (httpRes.error.value.statusCode == 429) {
         toast.showToast("请勿重复提交！", 2000);
-      } else    {
+      } else {
         toast.showToast(httpRes.error.value.statusMessage, 2000);
       }
       return
@@ -159,14 +167,13 @@ const submit = async () => {
   }
 };
 
-const homeStore = useHomeStore()
 useHead({
   title: `友链 - ${homeStore.seo_meta_config.title}`,
   meta: [
     {name: 'description', content: "友链列表"},
-    { name: 'keywords', content: homeStore.seo_meta_config.keywords },
-    { name: 'author', 'content': homeStore.seo_meta_config.author },
-    { name: 'robots', 'content': homeStore.seo_meta_config.robots },
+    {name: 'keywords', content: homeStore.seo_meta_config.keywords},
+    {name: 'author', 'content': homeStore.seo_meta_config.author},
+    {name: 'robots', 'content': homeStore.seo_meta_config.robots},
   ]
 })
 useSeoMeta({

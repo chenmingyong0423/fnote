@@ -24,9 +24,9 @@ import {getTagByRoute} from "~/api/tag";
 import {useHomeStore} from "~/store/home";
 
 const route = useRoute()
-const pageNo : number = +route.params.pageNo
-const pageSize :number = Number(route.query.pageSize) || 5
-const routeParam : string = String(route.params.name)
+const pageNo: number = +route.params.pageNo
+const pageSize: number = Number(route.query.pageSize) || 5
+const routeParam: string = String(route.params.name)
 
 
 let posts = ref<IPost[]>([]);
@@ -38,16 +38,17 @@ let req = ref<PageRequest>({
 } as PageRequest)
 
 const totalPosts = ref<Number>(0)
-
+const homeStore = useHomeStore()
+const apiDomain = homeStore.apiDomain;
 const postInfos = async () => {
   try {
     if (!req.value.tags || req.value.tags.length == 0) {
-      let categoryRes: any = await getTagByRoute(routeParam)
+      let categoryRes: any = await getTagByRoute(apiDomain, routeParam)
       let res: IResponse<ICategoryName> = categoryRes.data.value
       req.value.tags = [res.data?.name || ""]
     }
     const deepCopyReq = JSON.parse(JSON.stringify(req.value));
-    let postRes: any = await getPosts(deepCopyReq)
+    let postRes: any = await getPosts(apiDomain, deepCopyReq)
     let res: IResponse<IPageData<IPost>> = postRes.data.value
     posts.value = res.data?.list || []
     totalPosts.value = res.data?.totalCount || totalPosts.value
@@ -58,14 +59,13 @@ const postInfos = async () => {
 
 await postInfos()
 
-const homeStore = useHomeStore()
 useHead({
   title: `${routeParam} - ${homeStore.seo_meta_config.title}`,
   meta: [
     {name: 'description', content: `${routeParam}文章列表`},
-    { name: 'keywords', content: homeStore.seo_meta_config.keywords },
-    { name: 'author', 'content': homeStore.seo_meta_config.author },
-    { name: 'robots', 'content': homeStore.seo_meta_config.robots },
+    {name: 'keywords', content: homeStore.seo_meta_config.keywords},
+    {name: 'author', 'content': homeStore.seo_meta_config.author},
+    {name: 'robots', 'content': homeStore.seo_meta_config.robots},
   ]
 })
 useSeoMeta({
@@ -79,10 +79,10 @@ useSeoMeta({
 const routeQuery = computed(() => route.query);
 
 watch(() => routeQuery, (newQuery, oldQuery) => {
-  const pageSize :number = Number(route.query.pageSize) || -1
-  if (pageSize != req.value.pageSize && pageSize != -1){
+  const pageSize: number = Number(route.query.pageSize) || -1
+  if (pageSize != req.value.pageSize && pageSize != -1) {
     req.value.pageSize = pageSize
     postInfos()
   }
-}, { deep: true });
+}, {deep: true});
 </script>

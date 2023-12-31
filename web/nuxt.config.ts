@@ -1,5 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+    runtimeConfig: {
+        public: {
+            // 使用命令行参数或默认值
+            apiDomain: process.argv.find(arg => arg.startsWith('--API_DOMAIN='))?.split('=')[1] || 'http://localhost:8080'
+        }
+    },
     devtools: {enabled: true},
     modules: [
         '@unocss/nuxt',

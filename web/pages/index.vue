@@ -4,7 +4,8 @@
       <Notice></Notice>
       <PostListSquareItem :posts="posts"></PostListSquareItem>
       <NuxtLink class="m-auto" to="/navigation">
-        <Button name="查看更多" class="w-30 h-10 line-height-10 bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"></Button>
+        <Button name="查看更多"
+                class="w-30 h-10 line-height-10 bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"></Button>
       </NuxtLink>
     </div>
     <div class="flex flex-col w-30% lt-md:hidden">
@@ -19,11 +20,14 @@ import {getLatestPosts} from "~/api/post"
 import type {IPost} from "~/api/post"
 import type {IResponse, IListData} from "~/api/http";
 import {useHomeStore} from "~/store/home";
+
+const homeStore = useHomeStore()
 let posts = ref<IPost[]>([]);
 
+const apiDomain = homeStore.apiDomain;
 const postInfos = async () => {
   try {
-    let postRes: any = await getLatestPosts()
+    let postRes: any = await getLatestPosts(apiDomain)
     let res: IResponse<IListData<IPost>> = postRes.data.value
     posts.value = res.data?.list || []
   } catch (error) {
@@ -32,15 +36,13 @@ const postInfos = async () => {
 };
 await postInfos()
 
-const homeStore = useHomeStore()
-
 useHead({
   title: homeStore.seo_meta_config.title,
   meta: [
-    { name: 'description', content: homeStore.seo_meta_config.description },
-    { name: 'keywords', content: homeStore.seo_meta_config.keywords },
-    { name: 'author', 'content': homeStore.seo_meta_config.author },
-    { name: 'robots', 'content': homeStore.seo_meta_config.robots },
+    {name: 'description', content: homeStore.seo_meta_config.description},
+    {name: 'keywords', content: homeStore.seo_meta_config.keywords},
+    {name: 'author', 'content': homeStore.seo_meta_config.author},
+    {name: 'robots', 'content': homeStore.seo_meta_config.robots},
   ]
 
 })

@@ -5,15 +5,15 @@ import httpRequest from "./http";
 // 	Count int64  `json:"count"`
 // }
 export interface ITagWithCount {
-    name:string;
-    route:string;
-    count:number;
+    name: string;
+    route: string;
+    count: number;
 }
 
 export interface ITagName {
     name: string;
 }
 
-const prefix = "/tags"
-export const getTagList = () => httpRequest.get(prefix)
-export const getTagByRoute = (route: string) => httpRequest.get(prefix + `/route/${route}`)
+const prefix = "tags"
+export const getTagList = (apiDomain: string) => httpRequest.get(`${apiDomain}/${prefix}`)
+export const getTagByRoute = (apiDomain: string, route: string) => httpRequest.get(`${apiDomain}/${prefix}/route/${route}`)

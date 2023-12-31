@@ -31,12 +31,14 @@
 import {getLatestComments} from "~/api/comment"
 import type {ILatestComment,} from "~/api/comment"
 import type {IResponse, IListData} from "~/api/http";
+import {useHomeStore} from "~/store/home";
 
+const homeStore = useHomeStore()
 const router = useRouter()
 const comments = ref([] as ILatestComment[]);
 const commentsInfos = async () => {
   try {
-    let postRes: any = await getLatestComments()
+    let postRes: any = await getLatestComments(homeStore.apiDomain)
     let res: IResponse<IListData<ILatestComment>> = postRes.data.value
     comments.value = res.data?.list || []
   } catch (error) {

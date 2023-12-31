@@ -44,10 +44,11 @@ import {useHomeStore} from "~/store/home";
 
 let categories = ref<ICategoryWithCount[]>([]);
 let ct = ref<string>('')
+const homeStore = useHomeStore()
 
 const categoryAndTags = async () => {
   try {
-    let httpRes: any = await getCategoriesAndTags()
+    let httpRes: any = await getCategoriesAndTags(homeStore.apiDomain)
     let res: IResponse<IListData<ICategoryWithCount>> = httpRes.data.value
     categories.value = res.data?.list || []
     categories.value.forEach((item: ICategoryWithCount) => {
@@ -61,7 +62,7 @@ const categoryAndTags = async () => {
 let tags = ref<ITagWithCount[]>([]);
 const tagList = async () => {
   try {
-    let httpRes: any = await getTagList()
+    let httpRes: any = await getTagList(homeStore.apiDomain)
     let res: IResponse<IListData<ITagWithCount>> = httpRes.data.value
     tags.value = res.data?.list || []
     tags.value.forEach((item: ITagWithCount) => {
@@ -73,17 +74,16 @@ const tagList = async () => {
 };
 
 
-const homeStore = useHomeStore()
 await categoryAndTags()
 await tagList()
 ct.value = ct.value.substring(0, ct.value.length - 1)
 useHead({
   title: `文章分类和标签 - ${homeStore.seo_meta_config.title}`,
   meta: [
-    { name: 'description', content: `所有的文章分类和标签，包括${ct.value}等不同主题。` },
-    { name: 'keywords', content: homeStore.seo_meta_config.keywords },
-    { name: 'author', 'content': homeStore.seo_meta_config.author },
-    { name: 'robots', 'content': homeStore.seo_meta_config.robots },
+    {name: 'description', content: `所有的文章分类和标签，包括${ct.value}等不同主题。`},
+    {name: 'keywords', content: homeStore.seo_meta_config.keywords},
+    {name: 'author', 'content': homeStore.seo_meta_config.author},
+    {name: 'robots', 'content': homeStore.seo_meta_config.robots},
   ]
 })
 useSeoMeta({
