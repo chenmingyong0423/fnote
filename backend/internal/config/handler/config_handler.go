@@ -27,6 +27,7 @@ type IndexConfigVO struct {
 	NoticeConfigVO     NoticeConfigVO     `json:"notice_config"`
 	SocialInfoConfigVO SocialInfoConfigVO `json:"social_info_config"`
 	PayInfoConfigVO    []PayInfoConfigVO  `json:"pay_info_config"`
+	SeoMetaConfigVO    SeoMetaConfigVO    `json:"seo_meta_config"`
 }
 
 type PayInfoConfigVO struct {
@@ -64,6 +65,18 @@ type SocialInfoVO struct {
 	IsLink      bool   `json:"is_link"`
 }
 
+type SeoMetaConfigVO struct {
+	Title                 string `json:"title"`
+	Description           string `json:"description"`
+	OgTitle               string `json:"ogTitle"`
+	OgImage               string `json:"ogImage"`
+	TwitterCard           string `json:"twitterCard"`
+	BaiduSiteVerification string `json:"baidu-site-verification"`
+	Keywords              string `json:"keywords"`
+	Author                string `json:"author"`
+	Robots                string `json:"robots"`
+}
+
 func NewConfigHandler(serv service.IConfigService) *ConfigHandler {
 	return &ConfigHandler{
 		serv: serv,
@@ -98,6 +111,7 @@ func (h *ConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO, error)
 		NoticeConfigVO:     *h.toNoticeConfigVO(&config.NoticeConfig),
 		SocialInfoConfigVO: *h.toSocialInfoConfigVO(&config.SocialInfoConfig),
 		PayInfoConfigVO:    h.toPayInfoConfigVO(config.PayInfoConfig),
+		SeoMetaConfigVO:    *h.toSeoMetaConfigVO(&config.SeoMetaConfig),
 	}, nil
 }
 
@@ -126,4 +140,18 @@ func (h *ConfigHandler) toPayInfoConfigVO(config []domain.PayInfoConfigElem) []P
 		}
 	}
 	return result
+}
+
+func (h *ConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *SeoMetaConfigVO {
+	return &SeoMetaConfigVO{
+		Title:                 config.Title,
+		Description:           config.Description,
+		OgTitle:               config.OgTitle,
+		OgImage:               config.OgImage,
+		TwitterCard:           config.TwitterCard,
+		BaiduSiteVerification: config.BaiduSiteVerification,
+		Keywords:              config.Keywords,
+		Author:                config.Author,
+		Robots:                config.Robots,
+	}
 }

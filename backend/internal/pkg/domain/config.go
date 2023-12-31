@@ -27,6 +27,7 @@ type IndexConfig struct {
 	NoticeConfig     NoticeConfig
 	SocialInfoConfig SocialInfoConfig
 	PayInfoConfig    []PayInfoConfigElem
+	SeoMetaConfig    SeoMetaConfig
 }
 
 type PayInfoConfigElem struct {
@@ -85,4 +86,16 @@ type SocialInfo struct {
 
 type FrontPostCount struct {
 	Count int64 `bson:"count"`
+}
+
+type SeoMetaConfig struct {
+	Title                 string `bson:"title"`
+	Description           string `bson:"description"`
+	OgTitle               string `bson:"ogTitle"`
+	OgImage               string `bson:"ogImage"`
+	TwitterCard           string `bson:"twitterCard"`
+	BaiduSiteVerification string `bson:"baidu-site-verification"`
+	Keywords              string `bson:"keywords"`
+	Author                string `bson:"author"`
+	Robots                string `bson:"robots"`
 }
