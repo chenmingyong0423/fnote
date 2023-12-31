@@ -18,8 +18,6 @@
           class="i-ph-list-magnifying-glass-duotone cursor-pointer dark:text-dtc text-10 text-#86909c dark:hover:text-white"
           to="/search?keyword=">
       </NuxtLink>
-      <div
-          class="i-grommet-icons:github text-12 dark:text-dtc cursor-pointer dark:hover:text-white active:bg-#e5e5e5  lt-md:hidden"/>
       <div class="i-ph:list text-10 text-#86909c dark:text-dtc cursor-pointer dark:hover:text-white active:bg-#e5e5e5  md:hidden" @click="homeStore.showSmallScreenMenu = true"></div>
     </div>
   </div>
