@@ -38,7 +38,7 @@ const router = useRouter()
 const comments = ref([] as ILatestComment[]);
 const commentsInfos = async () => {
   try {
-    let postRes: any = await getLatestComments(homeStore.apiDomain)
+    let postRes: any = await getLatestComments(homeStore.apiBaseUrl)
     let res: IResponse<IListData<ILatestComment>> = postRes.data.value
     comments.value = res.data?.list || []
   } catch (error) {

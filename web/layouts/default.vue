@@ -31,8 +31,8 @@ import SmallMenu from "~/components/SmallMenu.vue";
 const config = useRuntimeConfig()
 const myDom = ref()
 const homeStore = useHomeStore()
-const apiDomain = config.public.apiDomain
-homeStore.apiDomain = apiDomain
+const apiBaseUrl = config.public.apiBaseUrl
+homeStore.apiBaseUrl = apiBaseUrl
 onMounted(() => {
   let isBlackMode = localStorage.getItem("isBlackMode")
   if (isBlackMode === '') {
@@ -44,7 +44,7 @@ onMounted(() => {
 
 const webMaster = async () => {
   try {
-    let postRes: any = await getWebMaster(apiDomain)
+    let postRes: any = await getWebMaster(apiBaseUrl)
     let res: IResponse<IWebmasterInfo> = postRes.data.value
     if (res && res.data) {
       homeStore.master_info = res.data.web_master_config
@@ -71,7 +71,7 @@ webMaster()
 
 const menus = async () => {
   try {
-    let postRes: any = await getMenus(apiDomain)
+    let postRes: any = await getMenus(apiBaseUrl)
     let res: IResponse<IListData<IMenu>> = postRes.data.value
     homeStore.menuList = res.data?.list || []
   } catch (error) {

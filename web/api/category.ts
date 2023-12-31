@@ -18,9 +18,9 @@ export interface ICategoryName {
 
 const prefix = "categories"
 
-export const getMenus = (apiDomain: string) => httpRequest.get(`${apiDomain}/menus`)
-export const getCategoriesAndTags = (apiDomain: string) => httpRequest.get(`${apiDomain}/${prefix}`)
+export const getMenus = (apiBaseUrl: string) => httpRequest.get(`${apiBaseUrl}/menus`)
+export const getCategoriesAndTags = (apiBaseUrl: string) => httpRequest.get(`${apiBaseUrl}/${prefix}`)
 
-export const getCategoryByRoute = (apiDomain: string, route: string) => httpRequest.get(`${apiDomain}/${prefix}/route/${route}`)
+export const getCategoryByRoute = (apiBaseUrl: string, route: string) => httpRequest.get(`${apiBaseUrl}/${prefix}/route/${route}`)
 
 

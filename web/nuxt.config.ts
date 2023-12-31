@@ -1,17 +1,16 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-    runtimeConfig: {
-        public: {
-            // 使用命令行参数或默认值
-            apiDomain: process.argv.find(arg => arg.startsWith('--API_DOMAIN='))?.split('=')[1] || 'http://localhost:8080'
-        }
-    },
     devtools: {enabled: true},
     modules: [
         '@unocss/nuxt',
-        "@pinia/nuxt",
+        '@pinia/nuxt',
         'dayjs-nuxt',
     ],
+    runtimeConfig: {
+        public: {
+            apiBaseUrl: process.argv.find(arg => arg.startsWith('--API_BASE_URL='))?.split('=')[1] || 'http://localhost:8080'
+        }
+    },
     unocss: {
         uno: true, // enabled `@unocss/preset-uno`
         icons: true, // enabled `@unocss/preset-icons`

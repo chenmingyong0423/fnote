@@ -27,7 +27,7 @@ import type {IMenu} from "~/api/category";
 const route = useRoute()
 const pageNo: number = +route.params.pageNo
 const homeStore = useHomeStore()
-const apiDomain = homeStore.apiDomain;
+const apiBaseUrl = homeStore.apiBaseUrl;
 const pageSize: number = Number(route.query.pageSize) || 5
 let keyword = ref<string>(String(route.query.keyword))
 if (keyword.value == 'undefined') {
@@ -48,7 +48,7 @@ const totalPosts = ref<Number>(0)
 const postInfos = async () => {
   try {
     const deepCopyReq = JSON.parse(JSON.stringify(req.value));
-    let postRes: any = await getPosts(apiDomain, deepCopyReq)
+    let postRes: any = await getPosts(apiBaseUrl, deepCopyReq)
     let res: IResponse<IPageData<IPost>> = postRes.data.value
     posts.value = res.data?.list || []
     totalPosts.value = res.data?.totalCount || 0

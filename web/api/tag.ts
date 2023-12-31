@@ -15,5 +15,5 @@ export interface ITagName {
 }
 
 const prefix = "tags"
-export const getTagList = (apiDomain: string) => httpRequest.get(`${apiDomain}/${prefix}`)
-export const getTagByRoute = (apiDomain: string, route: string) => httpRequest.get(`${apiDomain}/${prefix}/route/${route}`)
+export const getTagList = (apiBaseUrl: string) => httpRequest.get(`${apiBaseUrl}/${prefix}`)
+export const getTagByRoute = (apiBaseUrl: string, route: string) => httpRequest.get(`${apiBaseUrl}/${prefix}/route/${route}`)
