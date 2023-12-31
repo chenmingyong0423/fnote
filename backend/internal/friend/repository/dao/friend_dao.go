@@ -17,6 +17,8 @@ package dao
 import (
 	"context"
 
+	"go.mongodb.org/mongo-driver/mongo/options"
+
 	"github.com/chenmingyong0423/go-mongox"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 
@@ -76,7 +78,7 @@ func (d *FriendDao) Add(ctx context.Context, friend Friend) error {
 }
 
 func (d *FriendDao) FindDisplaying(ctx context.Context) ([]*Friend, error) {
-	friends, err := d.coll.Finder().Filter(bsonx.M("status", domain.FriendStatusShowing)).Find(ctx)
+	friends, err := d.coll.Finder().Filter(bsonx.M("status", domain.FriendStatusShowing)).Options(options.Find().SetSort(bsonx.M("create_time", -1))).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from friends")
 	}
