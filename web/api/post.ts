@@ -48,8 +48,8 @@ export interface IPostDetail {
 }
 
 const prefix = "posts"
-export const getPostsById = (apiDomain: string, id: string) => httpRequest.get(`${apiDomain}/${prefix}/${id}`)
-export const getPosts = (apiDomain: string, pq: PageRequest) => httpRequest.get(`${apiDomain}/${prefix}`, pq)
-export const getLatestPosts = (apiDomain: string) => httpRequest.get(`${apiDomain}/${prefix}/latest`)
-export const likePost = (apiDomain: string, id: string) => httpRequest.post(`${apiDomain}/${prefix}/${id}/likes`, null)
+export const getPostsById = (apiBaseUrl: string, id: string) => httpRequest.get(`${apiBaseUrl}/${prefix}/${id}`)
+export const getPosts = (apiBaseUrl: string, pq: PageRequest) => httpRequest.get(`${apiBaseUrl}/${prefix}`, pq)
+export const getLatestPosts = (apiBaseUrl: string) => httpRequest.get(`${apiBaseUrl}/${prefix}/latest`)
+export const likePost = (apiBaseUrl: string, id: string) => httpRequest.post(`${apiBaseUrl}/${prefix}/${id}/likes`, null)
 

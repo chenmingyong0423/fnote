@@ -19,7 +19,7 @@ export type FriendReq = {
     email?: string;
 }
 
-export const getFriends = (apiDomain: string) => httpRequest.get(`${apiDomain}/${prefix}`)
-export const applyForFriend = (apiDomain: string, req: FriendReq) => httpRequest.post(`${apiDomain}/${prefix}`, req)
+export const getFriends = (apiBaseUrl: string) => httpRequest.get(`${apiBaseUrl}/${prefix}`)
+export const applyForFriend = (apiBaseUrl: string, req: FriendReq) => httpRequest.post(`${apiBaseUrl}/${prefix}`, req)
 
 

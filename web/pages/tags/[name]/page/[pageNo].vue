@@ -39,16 +39,16 @@ let req = ref<PageRequest>({
 
 const totalPosts = ref<Number>(0)
 const homeStore = useHomeStore()
-const apiDomain = homeStore.apiDomain;
+const apiBaseUrl = homeStore.apiBaseUrl;
 const postInfos = async () => {
   try {
     if (!req.value.tags || req.value.tags.length == 0) {
-      let categoryRes: any = await getTagByRoute(apiDomain, routeParam)
+      let categoryRes: any = await getTagByRoute(apiBaseUrl, routeParam)
       let res: IResponse<ICategoryName> = categoryRes.data.value
       req.value.tags = [res.data?.name || ""]
     }
     const deepCopyReq = JSON.parse(JSON.stringify(req.value));
-    let postRes: any = await getPosts(apiDomain, deepCopyReq)
+    let postRes: any = await getPosts(apiBaseUrl, deepCopyReq)
     let res: IResponse<IPageData<IPost>> = postRes.data.value
     posts.value = res.data?.list || []
     totalPosts.value = res.data?.totalCount || totalPosts.value

@@ -24,10 +24,10 @@ import {useHomeStore} from "~/store/home";
 const homeStore = useHomeStore()
 let posts = ref<IPost[]>([]);
 
-const apiDomain = homeStore.apiDomain;
+const apiBaseUrl = homeStore.apiBaseUrl;
 const postInfos = async () => {
   try {
-    let postRes: any = await getLatestPosts(apiDomain)
+    let postRes: any = await getLatestPosts(apiBaseUrl)
     let res: IResponse<IListData<IPost>> = postRes.data.value
     posts.value = res.data?.list || []
   } catch (error) {

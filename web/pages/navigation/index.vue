@@ -48,7 +48,7 @@ const homeStore = useHomeStore()
 
 const categoryAndTags = async () => {
   try {
-    let httpRes: any = await getCategoriesAndTags(homeStore.apiDomain)
+    let httpRes: any = await getCategoriesAndTags(homeStore.apiBaseUrl)
     let res: IResponse<IListData<ICategoryWithCount>> = httpRes.data.value
     categories.value = res.data?.list || []
     categories.value.forEach((item: ICategoryWithCount) => {
@@ -62,7 +62,7 @@ const categoryAndTags = async () => {
 let tags = ref<ITagWithCount[]>([]);
 const tagList = async () => {
   try {
-    let httpRes: any = await getTagList(homeStore.apiDomain)
+    let httpRes: any = await getTagList(homeStore.apiBaseUrl)
     let res: IResponse<IListData<ITagWithCount>> = httpRes.data.value
     tags.value = res.data?.list || []
     tags.value.forEach((item: ITagWithCount) => {
