@@ -7,7 +7,7 @@ db.auth('$MONGO_USERNAME', '$MONGO_PASSWORD');
 // ----------------------------
 db.getCollection("categories").drop();
 db.createCollection("categories");
-db.categories.createIndex({ "name": -1 });
+db.categories.createIndex({ "route": -1 });
 
 
 
@@ -17,7 +17,7 @@ db.categories.createIndex({ "name": -1 });
 db.getCollection("comment").drop();
 db.createCollection("comment");
 db.comment.createIndex({ "post_info.post_id": 1 });
-db.comment.createIndex({ "create_time": -1 });
+db.comment.createIndex({ "status": -1 });
 
 // ----------------------------
 // Collection structure for configs
@@ -80,7 +80,7 @@ db.getCollection("friends").createIndex({
 });
 // 创建 create_time 降序索引
 db.friends.createIndex({ "create_time": -1 });
-
+db.friends.createIndex({ "status": -1 });
 
 // ----------------------------
 // Collection structure for message_template
@@ -124,9 +124,9 @@ db.posts.createIndex({ "create_time": -1 });
 // 创建 create_time 升序索引
 db.posts.createIndex({ "create_time": 1 });
 // 创建 category 单字段索引
-db.posts.createIndex({ "category": 1 });
+db.posts.createIndex({ "categories": 1 });
 // 创建 category 和 tags 复合索引
-db.posts.createIndex({ "category": 1, "tags": 1 });
+db.posts.createIndex({ "tags": 1 });
 // 创建 title 文本索引
 db.posts.createIndex({ "title": "text" });
 
