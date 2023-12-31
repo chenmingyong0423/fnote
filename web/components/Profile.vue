@@ -1,7 +1,7 @@
 <template>
   <div
       class="flex flex-col items-center justify-center bg-#fff p-10 b-rounded-4 cursor-pointer dark:text-dtc md:dark_bg_gray ease-linear duration-100 custom_shadow hover:translate-y--2 lt-md:p-5 lt-md:bg_transparent"
-  @mouseleave="isTooltipVisible=false"
+      @mouseleave="isTooltipVisible=false"
   >
     <div class="avatar">
       <img :src="homeStore.master_info.picture"
@@ -30,10 +30,11 @@
     <div
         class="flex items-center justify-center gap-x-3 text-gray-5 text-6 border-t-1 border-t-gray-2 border-t-solid p-t-5 w-full lt-md:hidden">
       <template v-for="(icon, index) in homeStore.social_info_list" :key="index">
-        <a v-if="icon.is_link" :class="get(icon.css_class)" class="custom_icon text-6" :title="icon.social_name" :href="icon.social_value" target="_blank"></a>
-        <span v-else :class="get(icon.css_class)" class="custom_icon text-6" :title="icon.social_name" @click="showTooltip(icon.social_name + ': ' +icon.social_value)"></span>
+        <a v-if="icon.is_link" :class="get(icon.css_class)" class="custom_icon text-6" :title="icon.social_name"
+           :href="icon.social_value" target="_blank"></a>
+        <span v-else :class="get(icon.css_class)" class="custom_icon text-6" :title="icon.social_name"
+              @click="copyExternalLink(icon.social_name + ': ' +icon.social_value)"></span>
       </template>
-      <ToolTip :content="tooltipContent" :visible="isTooltipVisible" @tooltipVisibleChanged="tooltipVisibleChanged"/>
     </div>
   </div>
 </template>
@@ -43,11 +44,14 @@
 import {useHomeStore} from "~/store/home";
 
 const isTooltipVisible = ref(false);
-const tooltipContent = ref('');
 
-const showTooltip = (content: string) => {
-  tooltipContent.value = content;
-  isTooltipVisible.value = true;
+import {useAlertStore} from '~/store/toast';
+
+const toast = useAlertStore();
+
+const copyExternalLink = async (content: string) => {
+  await navigator.clipboard.writeText(content);
+  toast.showToast('复制成功！', 2000);
 }
 
 const tooltipVisibleChanged = (visible: boolean) => {
