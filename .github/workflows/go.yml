@@ -35,9 +35,9 @@ jobs:
         cd backend
         go mod download
     - name: Build
-      working-directory: ./backend
+      working-directory: ./server
       run: go build -v ./...
 
     - name: Test
-      working-directory: ./backend
+      working-directory: ./server
       run: go test -race -coverprofile=cover.out -v ./...
