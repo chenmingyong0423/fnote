@@ -1,7 +1,8 @@
 <template>
   <div class="bg-white p-2">
     <div class="h-[50px] line-height-[50px] pl-3 custom_bottom_border_gray mb-2 flex items-center gap-x-1">
-      <span class="i-ph-chats-duotone text-2xl block text-black dark:text-dtc"></span> <span class="text-2xl">评论</span>
+      <span class="i-ph-chats-duotone text-2xl block text-black dark:text-dtc"></span> <span
+        class="text-2xl">评论</span>
     </div>
     <div class="mb-2 custom_bottom_border_gray p-1">
       <CommentForm class="m-auto" @submit="submit" ref="commentForm"></CommentForm>
@@ -24,7 +25,8 @@
               }}</span>
             <span> 发表于 {{ $dayjs(comment.comment_time * 1000).format('YYYY-MM-DD HH:mm:ss') }}</span>
           </div>
-          <Button name="回复" class="w-15 h-8 line-height-8 hover:bg-gray-1 ml-auto" @click="activeCommentIndex = comment.id"></Button>
+          <Button name="回复" class="w-15 h-8 line-height-8 hover:bg-gray-1 ml-auto"
+                  @click="activeCommentIndex = comment.id"></Button>
         </div>
         <div>
           <v-md-preview :text="comment.content"
@@ -32,12 +34,14 @@
           ></v-md-preview>
         </div>
         <div>
-          <CommentReply :replies="comment.replies" :author="props.author" :commentId="comment.id" @submitReply2Reply="submitReply2Reply" ref="replyList"></CommentReply>
+          <CommentReply :replies="comment.replies" :author="props.author" :commentId="comment.id"
+                        @submitReply2Reply="submitReply2Reply" ref="replyList"></CommentReply>
         </div>
         <div v-if="activeCommentIndex === comment.id">
           <CommentForm class="m-auto" @submit="submitReply" ref="commentReplyForm" :commentId="comment.id"
-                       ></CommentForm>
-          <Button name="取消" class="w-15 h-8 line-height-8 hover:bg-gray-1 m-auto" @click="activeCommentIndex = ''"></Button>
+          ></CommentForm>
+          <Button name="取消" class="w-15 h-8 line-height-8 hover:bg-gray-1 m-auto"
+                  @click="activeCommentIndex = ''"></Button>
         </div>
       </div>
     </div>
@@ -81,7 +85,6 @@ const clearReplyReq = () => {
 }
 
 
-
 const generateAvatar = (email: string) => {
   return "https://1.gravatar.com/avatar/" + CryptoJS.MD5(email.trim().toLowerCase()).toString()
 }
@@ -95,7 +98,7 @@ const submit = (req: ICommentRequest, commentId: string) => {
 
 const activeCommentIndex = ref('')
 const submitReply = (req: ICommentRequest, commentId: string) => {
-  const req4Reply : ICommentReplyRequest= {
+  const req4Reply: ICommentReplyRequest = {
     ...req,
   }
   emit('submitReply', req4Reply, commentId)
@@ -120,7 +123,7 @@ defineExpose({
 </script>
 
 <style scoped>
-/deep/ .github-markdown-body {
+:deep(.github-markdown-body) {
   padding: 0;
 }
 </style>
