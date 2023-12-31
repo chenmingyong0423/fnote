@@ -31,7 +31,6 @@ import SmallMenu from "~/components/SmallMenu.vue";
 const info = useHomeStore()
 const myDom = ref()
 const homeStore = useHomeStore()
-const smallScreenMenu = ref()
 
 onMounted(() => {
   let isBlackMode = localStorage.getItem("isBlackMode")
@@ -51,6 +50,7 @@ const webMaster = async () => {
       info.notice_info = res.data.notice_config
       info.social_info_list = res.data.social_info_config.social_info_list
       info.pay_info = res.data.pay_info_config
+      info.seo_meta_config = res.data.seo_meta_config
       // const newLink = document.createElement('link');
       // newLink.rel = 'icon';
       // newLink.type = 'image/x-icon';

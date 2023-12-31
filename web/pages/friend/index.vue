@@ -72,6 +72,7 @@ import {type IFriend, type FriendReq, getFriends, applyForFriend} from "~/api/fr
 import {useAlertStore} from '~/store/toast';
 import type {IBaseResponse, IListData, IResponse} from "~/api/http";
 import {isValidEmail} from "~/utils/email";
+import {useHomeStore} from "~/store/home";
 
 const friends = ref<IFriend[]>([]);
 
@@ -157,4 +158,21 @@ const submit = async () => {
     toast.showToast(error.toString(), 2000);
   }
 };
+
+const homeStore = useHomeStore()
+useHead({
+  title: `友链 - ${homeStore.seo_meta_config.title}`,
+  meta: [
+    {name: 'description', content: "友链列表"},
+    { name: 'keywords', content: homeStore.seo_meta_config.keywords },
+    { name: 'author', 'content': homeStore.seo_meta_config.author },
+    { name: 'robots', 'content': homeStore.seo_meta_config.robots },
+  ]
+})
+useSeoMeta({
+  ogTitle: `友链 - ${homeStore.seo_meta_config.title}`,
+  ogDescription: "友链列表",
+  ogImage: '',
+  twitterCard: 'summary'
+})
 </script>

@@ -5,6 +5,7 @@ export interface IWebmasterInfo {
     notice_config: INotice,
     social_info_config: ISocialInfo,
     pay_info_config: IPayInfo[],
+    seo_meta_config: SeoMetaConfigVO,
 }
 
 export interface ISocialInfo {
@@ -40,6 +41,18 @@ export interface INotice {
 export interface IPayInfo {
     name: string;
     image: string;
+}
+
+export interface SeoMetaConfigVO {
+    title: string;
+    description: string;
+    ogTitle: string;
+    ogImage: string;
+    twitterCard: string;
+    baiduSiteVerification: string;
+    keywords: string;
+    author: string;
+    robots: string;
 }
 
 const prefix = "/configs"
