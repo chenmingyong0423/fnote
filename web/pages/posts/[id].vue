@@ -427,46 +427,46 @@ useSeoMeta({
 </script>
 
 <style scoped>
-.dark /deep/ .v-md-pre-wrapper {
+.dark :deep(.v-md-pre-wrapper) {
   background-color: rgba(10, 0, 0, 0.1) !important;
 }
 
-.dark /deep/ .v-md-pre-wrapper {
+.dark :deep(.v-md-pre-wrapper) {
   background-color: rgba(10, 0, 0, 0.1) !important;
 }
 
-.dark /deep/ code {
+.dark :deep(code) {
   color: white !important;
 }
 
-.dark /deep/ .line-numbers-mode:after {
+.dark :deep(.line-numbers-mode:after) {
   background-color: rgba(10, 0, 0, 0.1) !important;
   border: 0 !important;
 }
 
 /* 根据需要定制不同代码语言或元素的样式 */
-.dark /deep/ .hljs-keyword, .hljs-selector-tag, .hljs-literal {
+.dark :deep(.hljs-keyword, .hljs-selector-tag, .hljs-literal) {
   color: #ff7b72 !important;
 }
 
-.dark /deep/ .hljs-string {
+.dark :deep(.hljs-string) {
   color: #a5d6ff !important;
 }
 
-.dark /deep/ .hljs-title {
+.dark :deep(.hljs-title) {
   color: #a5d6ff !important;
 }
 
-.dark /deep/ .hljs-type {
+.dark :deep(.hljs-type) {
   color: #cc880a !important;
 }
 
-.dark /deep/ .github-markdown-body table tr {
+.dark :deep(.github-markdown-body table tr) {
   background-color: rgba(10, 0, 0, 0.1) !important;
 
 }
 
-.dark /deep/ .github-markdown-body blockquote {
+.dark :deep(.github-markdown-body blockquote) {
   border-color: #334a61 !important;
 }
 
