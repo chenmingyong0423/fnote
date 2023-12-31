@@ -30,4 +30,4 @@ jobs:
       working-directory: ./web
       run: |
         yarn install
-        yarn build
+        yarn run build
