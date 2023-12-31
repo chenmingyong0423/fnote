@@ -30,7 +30,8 @@ db.configs.createIndex({ "typ": 1 });
 // ----------------------------
 // Documents of configs
 // ----------------------------
-db.getCollection("configs").insert([ {
+// 网站信息
+db.getCollection("configs").insertOne({
     _id: "webmaster",
     typ: "webmaster",
     props: {
@@ -39,15 +40,34 @@ db.getCollection("configs").insert([ {
         categoryCount: 0,
         websiteViews: 0,
         websiteLiveTime: Date.now(),
-        profile: "hello, fnote",
-        picture: "",
-        websiteIcon: "",
+        profile: "请及时到后台修改网站的信息以及相关 seo 等配置，以便正常使用。",
+        picture: "/fnote_logo.png",
+        websiteIcon: "/fnote_logo.pne",
         domain: ""
     },
     create_time: Date.now(),
     update_time: Date.now()
-} ]);
-db.getCollection("configs").insert([ {
+});
+// seo 配置
+db.getCollection("configs").insertOne({
+    _id: "webmaster",
+    "typ": "seo meta",
+    "props": {
+        "title": "fnote",
+        "ogTitle": "fnote",
+        "description": "fnote",
+        "ogImage": "",
+        "twitterCard": "",
+        "baidu-site-verification": "",
+        "keywords": "fnote,blog,BLOG",
+        "author": "fnote",
+        "robots": "fnote,blog"
+    },
+    create_time: Date.now(),
+    update_time: Date.now()
+});
+// 评论开关配置
+db.getCollection("configs").insertOne({
     _id: "comment",
     typ: "comment",
     props: {
@@ -55,8 +75,9 @@ db.getCollection("configs").insert([ {
     },
     create_time: Date.now(),
     update_time: Date.now()
-} ]);
-db.getCollection("configs").insert([ {
+});
+// 友链开关配置
+db.getCollection("configs").insertOne({
     _id: "friend",
     typ: "friend",
     props: {
@@ -64,8 +85,80 @@ db.getCollection("configs").insert([ {
     },
     create_time: Date.now(),
     update_time: Date.now()
-} ]);
-
+});
+// 邮件配置
+db.getCollection("configs").insertOne({
+    _id: "emailConfig",
+    "typ": "emailConfig",
+    "props": {
+        "host": "",
+        "port": ,
+        "account": "",
+        "password": "",
+        "email": ""
+    },
+    create_time: Date.now(),
+    update_time: Date.now()
+});
+// 公告配置
+db.getCollection("configs").insertOne({
+    _id: "notice",
+    typ: "notice",
+    "props": {
+        "title": "暂无最新公告",
+        "content": "暂无最新公告",
+        "publish_time": Date.now(),
+        "enabled": true
+    },
+    create_time: Date.now(),
+    update_time: Date.now()
+});
+// 社交外链配置
+db.getCollection("configs").insertOne({
+    _id: "social",
+    typ: "social",
+    "props": {
+        "social_info_list": [
+            {
+                "social_name": "fnote",
+                "social_value": "https://github.com/chenmingyong0423/fnote",
+                "css_class": "i-bi:link-45deg",
+                "is_link": true
+            }
+        ]
+    },
+    create_time: Date.now(),
+    update_time: Date.now()
+});
+// 首页展示文章数量配置
+db.getCollection("configs").insertOne({
+    _id: "front-post-count",
+    typ: "front-post-count",
+    "props": {
+        "count": 6
+    },
+    create_time: Date.now(),
+    update_time: Date.now()
+});
+// 支付二维码配置
+db.getCollection("configs").insertOne({
+    _id: "pay",
+    typ: "pay",
+    "props": {
+        "list": [
+            {
+                "name": "支付宝收款码",
+                "image": "https://blog-1302954944.cos.ap-guangzhou.myqcloud.com/1695022533043.jpg"
+            },
+            {
+                "name": "微信收款码",
+                "image": "https://blog-1302954944.cos.ap-guangzhou.myqcloud.com/mm_facetoface_collect_qrcode_1702566807960.png"
+            }
+        ]
+    },
+    create_time: Date.now(),
+    update_time: Date.now()
+});
 
 // ----------------------------
 // Collection structure for friends
@@ -93,7 +186,7 @@ db.message_template.createIndex({ "name": 1 });
 // ----------------------------
 // Documents of message_template
 // ----------------------------
-db.getCollection("message_template").insert([ {
+db.getCollection("message_template").insertOne({
     _id: "friend",
     name: "friend",
     title: "友链申请通知",
@@ -102,8 +195,8 @@ db.getCollection("message_template").insert([ {
     update_time: Date.now(),
     active: 1,
     recipient_type: 0
-} ]);
-db.getCollection("message_template").insert([ {
+});
+db.getCollection("message_template").insertOne({
     _id: "comment",
     name: "comment",
     title: "文章评论通知",
@@ -112,7 +205,7 @@ db.getCollection("message_template").insert([ {
     update_time: Date.now(),
     recipient_type: 0,
     active: 1
-} ]);
+});
 
 // ----------------------------
 // Collection structure for posts
