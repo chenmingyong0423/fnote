@@ -81,8 +81,8 @@ const get = (icon: string): string => {
       return "i-fa6-brands:weixin"
     case "i-fa6-brands:zhihu":
       return "i-fa6-brands:zhihu"
-    case "fa6-brands:internet-explorer":
-      return "fa6-brands:internet-explorer"
+    case "i-bi:link-45deg":
+      return "i-bi:link-45deg"
   }
   return ""
 }
