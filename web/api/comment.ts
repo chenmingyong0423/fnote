@@ -9,11 +9,6 @@ export interface ILatestComment {
     create_time: number;
 }
 
-const prefix = "/comments"
-
-export const getLatestComments = () => httpRequest.get(prefix + "/latest")
-
-
 export interface IReply {
     id: string;
     comment_id: string;
@@ -36,7 +31,6 @@ export interface IComment {
     comment_time: number;
     replies: IReply[];
 }
-export const getComments = (id: string) => httpRequest.get(`${prefix}/id/${id}`)
 
 export interface ICommentRequest {
     postId: string;
@@ -46,7 +40,6 @@ export interface ICommentRequest {
     content: string;
 }
 
-export const submitComment = (comment: ICommentRequest) => httpRequest.post(`${prefix}`, comment)
 
 export interface ICommentReplyRequest {
     postId: string;
@@ -57,4 +50,13 @@ export interface ICommentReplyRequest {
     content: string;
 }
 
-export const submitCommentReply = (commentId: string, comment: ICommentReplyRequest) => httpRequest.post(`${prefix}/${commentId}/replies`, comment)
+const prefix = "comments"
+
+
+export const getLatestComments = (apiDomain: string) => httpRequest.get(`${apiDomain}/${prefix}/latest`)
+
+export const getComments = (apiDomain: string, id: string) => httpRequest.get(`${apiDomain}/${prefix}/id/${id}`)
+
+export const submitComment = (apiDomain: string, comment: ICommentRequest) => httpRequest.post(`${apiDomain}/${prefix}`, comment)
+
+export const submitCommentReply = (apiDomain: string, commentId: string, comment: ICommentReplyRequest) => httpRequest.post(`${apiDomain}/${prefix}/${commentId}/replies`, comment)

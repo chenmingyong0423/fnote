@@ -63,7 +63,8 @@
               class="pay slide-right-4-reword-animation dark_bg_full_black w-[640px] h-[320px] hidden absolute bg-gray-1 b-rounded-4 left-117% top--28% group-hover:block custom_shadow_all p-2">
             <div
                 class="flex align-center items-center justify-center center gap-x-5">
-              <img :src="code.image" width="300" height="300" :alt="code.name" v-for="(code, index) in payList" :key="index">
+              <img :src="code.image" width="300" height="300" :alt="code.name" v-for="(code, index) in payList"
+                   :key="index">
             </div>
           </div>
         </div>
@@ -101,7 +102,8 @@
       </div>
       <!-- 评论区 -->
       <div ref="comment">
-        <CommentPost ref="commentPost" :comments="comments" :author="author" class="mt-5 b-rounded-4 p-2 dark:text-dtc dark_bg_gray"
+        <CommentPost ref="commentPost" :comments="comments" :author="author"
+                     class="mt-5 b-rounded-4 p-2 dark:text-dtc dark_bg_gray"
                      @submit="submit" @submitReply="submitReply" @submitReply2Reply="submitReply2Reply"></CommentPost>
       </div>
     </div>
@@ -120,23 +122,22 @@ import {type IPostDetail, getPostsById, likePost} from "~/api/post";
 import type {IResponse, IBaseResponse, IPageData} from "~/api/http";
 import {onMounted, ref} from "vue";
 import {useHomeStore} from '~/store/home';
-import VMdPreview from "@kangc/v-md-editor/lib/preview";
 
-const info = useHomeStore()
+const homeStore = useHomeStore()
+const apiDomain = homeStore.apiDomain;
+const isBlackMode = computed(() => homeStore.isBlackMode)
 
-const isBlackMode = computed(() => info.isBlackMode)
-
-const domain = info.master_info.domain;
+const domain = homeStore.master_info.domain;
 const route = useRoute()
 const path: string = route.path
 const id: string = 'about-me'
 const post = ref<IPostDetail>()
 const author = ref<string>("")
-const payList = ref<IPayInfo[]>(info.pay_info || [])
+const payList = ref<IPayInfo[]>(homeStore.pay_info || [])
 
 const getPostDetail = async () => {
   try {
-    let postRes: any = await getPostsById(id)
+    let postRes: any = await getPostsById(apiDomain, id)
     let res: IResponse<IPostDetail> = postRes.data.value
     post.value = res.data
     author.value = post.value?.author || ""
@@ -236,7 +237,7 @@ const handleAnchorClick = (newLineIndex: string) => {
 const like = async () => {
   if (post.value?.is_liked) return
   try {
-    let likeRes: any = await likePost(id)
+    let likeRes: any = await likePost(apiDomain, id)
     let res: IBaseResponse = likeRes.data.value
     if (res?.code === 200) {
       post.value!.is_liked = true
@@ -281,7 +282,7 @@ const copyLink = async () => {
 const comments = ref<IComment[]>([])
 const initComments = async () => {
   try {
-    let commentRes: any = await getComments(id)
+    let commentRes: any = await getComments(apiDomain, id)
     let res: IResponse<IPageData<IComment>> = commentRes.data.value
     if (res.code !== 200) {
       toast.showToast(res.message, 2000);
@@ -298,7 +299,7 @@ initComments()
 const submit = async (req: ICommentRequest) => {
   try {
     req.postId = id
-    let commentRes: any = await submitComment(req)
+    let commentRes: any = await submitComment(apiDomain, req)
     if (commentRes.data.value === null) {
       if (commentRes.error.value.statusCode == 403) {
         toast.showToast("评论模块暂未开放！", 2000);
@@ -322,7 +323,7 @@ const submit = async (req: ICommentRequest) => {
 const submitReply = async (req: ICommentReplyRequest, commentId: string) => {
   try {
     req.postId = id
-    let commentRes: any = await submitCommentReply(commentId, req)
+    let commentRes: any = await submitCommentReply(apiDomain, commentId, req)
     if (commentRes.data.value === null) {
       if (commentRes.error.value.statusCode == 403) {
         toast.showToast("评论模块暂未开放！", 2000);
@@ -358,7 +359,7 @@ const clearCommentReplyReq = () => {
 const submitReply2Reply = async (req: ICommentReplyRequest, commentId: string) => {
   try {
     req.postId = id
-    let commentRes: any = await submitCommentReply(commentId, req)
+    let commentRes: any = await submitCommentReply(apiDomain, commentId, req)
     if (commentRes.data.value === null) {
       if (commentRes.error.value.statusCode == 403) {
         toast.showToast("评论模块暂未开放！", 2000);
@@ -379,7 +380,6 @@ const submitReply2Reply = async (req: ICommentReplyRequest, commentId: string) =
   }
 }
 
-const homeStore = useHomeStore()
 let description = post.value?.summary
 if (post.value?.meta_description) {
   description = post.value?.meta_description
@@ -394,9 +394,9 @@ useHead({
   title: `${post.value?.title} - ${homeStore.seo_meta_config.title}`,
   meta: [
     {name: 'description', content: description},
-    { name: 'keywords', content: homeStore.seo_meta_config.keywords },
-    { name: 'author', 'content': homeStore.seo_meta_config.author },
-    { name: 'robots', 'content': homeStore.seo_meta_config.robots },
+    {name: 'keywords', content: homeStore.seo_meta_config.keywords},
+    {name: 'author', 'content': homeStore.seo_meta_config.author},
+    {name: 'robots', 'content': homeStore.seo_meta_config.robots},
   ]
 })
 useSeoMeta({

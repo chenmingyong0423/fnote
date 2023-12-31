@@ -26,6 +26,8 @@ import type {IMenu} from "~/api/category";
 
 const route = useRoute()
 const path = route.path
+const homeStore = useHomeStore()
+const apiDomain = homeStore.apiDomain;
 const pageSize: number = Number(route.query.pageSize) || 5
 let keyword = ref<string>(String(route.query.keyword))
 if (keyword.value == 'undefined') {
@@ -46,7 +48,7 @@ const totalPosts = ref<Number>(0)
 const postInfos = async () => {
   try {
     const deepCopyReq = JSON.parse(JSON.stringify(req.value));
-    let postRes: any = await getPosts(deepCopyReq)
+    let postRes: any = await getPosts(apiDomain, deepCopyReq)
     let res: IResponse<IPageData<IPost>> = postRes.data.value
     posts.value = res.data?.list || []
     totalPosts.value = res.data?.totalCount || 0
@@ -59,22 +61,21 @@ await postInfos()
 // 创建一个计算属性来追踪 query 对象
 const routeQuery = computed(() => route.query);
 
-watch(() => routeQuery, async  (newQuery, oldQuery) => {
+watch(() => routeQuery, async (newQuery, oldQuery) => {
   req.value.keyword = String(route.query.keyword)
   keyword.value = String(route.query.keyword)
   await postInfos()
   seo()
-}, { deep: true });
+}, {deep: true});
 
-const homeStore = useHomeStore()
-const seo = ()=> {
+const seo = () => {
   useHead({
     title: `${keyword.value} - 搜索 - ${homeStore.seo_meta_config.title}`,
     meta: [
       {name: 'description', content: `${keyword.value} 搜索结果`},
-      { name: 'keywords', content: homeStore.seo_meta_config.keywords },
-      { name: 'author', 'content': homeStore.seo_meta_config.author },
-      { name: 'robots', 'content': homeStore.seo_meta_config.robots },
+      {name: 'keywords', content: homeStore.seo_meta_config.keywords},
+      {name: 'author', 'content': homeStore.seo_meta_config.author},
+      {name: 'robots', 'content': homeStore.seo_meta_config.robots},
     ]
   })
   useSeoMeta({

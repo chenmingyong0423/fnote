@@ -1,4 +1,5 @@
 import httpRequest from "./http";
+import * as domain from "domain";
 
 export interface IPost {
     sug: string;
@@ -46,9 +47,9 @@ export interface IPostDetail {
     is_liked: boolean;
 }
 
-const prefix = "/posts"
-export const getPostsById = (id: string) => httpRequest.get(`${prefix}/${id}`)
-export const getPosts = (pq: PageRequest) => httpRequest.get(prefix + "", pq)
-export const getLatestPosts = () => httpRequest.get(prefix + "/latest")
-export const likePost = (id: string) => httpRequest.post(`${prefix}/${id}/likes`, null)
+const prefix = "posts"
+export const getPostsById = (apiDomain: string, id: string) => httpRequest.get(`${apiDomain}/${prefix}/${id}`)
+export const getPosts = (apiDomain: string, pq: PageRequest) => httpRequest.get(`${apiDomain}/${prefix}`, pq)
+export const getLatestPosts = (apiDomain: string) => httpRequest.get(`${apiDomain}/${prefix}/latest`)
+export const likePost = (apiDomain: string, id: string) => httpRequest.post(`${apiDomain}/${prefix}/${id}/likes`, null)
 

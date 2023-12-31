@@ -28,29 +28,30 @@ import type {IListData, IResponse} from "~/api/http";
 import {getMenus, type IMenu} from "~/api/category";
 import SmallMenu from "~/components/SmallMenu.vue";
 
-const info = useHomeStore()
+const config = useRuntimeConfig()
 const myDom = ref()
 const homeStore = useHomeStore()
-
+const apiDomain = config.public.apiDomain
+homeStore.apiDomain = apiDomain
 onMounted(() => {
   let isBlackMode = localStorage.getItem("isBlackMode")
   if (isBlackMode === '') {
-    localStorage.setItem("isBlackMode", info.isBlackMode.toString())
+    localStorage.setItem("isBlackMode", homeStore.isBlackMode.toString())
   } else {
-    info.isBlackMode = isBlackMode === 'true'
+    homeStore.isBlackMode = isBlackMode === 'true'
   }
 })
 
 const webMaster = async () => {
   try {
-    let postRes: any = await getWebMaster()
+    let postRes: any = await getWebMaster(apiDomain)
     let res: IResponse<IWebmasterInfo> = postRes.data.value
     if (res && res.data) {
-      info.master_info = res.data.web_master_config
-      info.notice_info = res.data.notice_config
-      info.social_info_list = res.data.social_info_config.social_info_list
-      info.pay_info = res.data.pay_info_config
-      info.seo_meta_config = res.data.seo_meta_config
+      homeStore.master_info = res.data.web_master_config
+      homeStore.notice_info = res.data.notice_config
+      homeStore.social_info_list = res.data.social_info_config.social_info_list
+      homeStore.pay_info = res.data.pay_info_config
+      homeStore.seo_meta_config = res.data.seo_meta_config
       // const newLink = document.createElement('link');
       // newLink.rel = 'icon';
       // newLink.type = 'image/x-icon';
@@ -70,7 +71,7 @@ webMaster()
 
 const menus = async () => {
   try {
-    let postRes: any = await getMenus()
+    let postRes: any = await getMenus(apiDomain)
     let res: IResponse<IListData<IMenu>> = postRes.data.value
     homeStore.menuList = res.data?.list || []
   } catch (error) {
