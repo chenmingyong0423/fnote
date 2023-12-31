@@ -69,6 +69,9 @@ useHead({
     {name: 'keywords', content: homeStore.seo_meta_config.keywords},
     {name: 'author', 'content': homeStore.seo_meta_config.author},
     {name: 'robots', 'content': homeStore.seo_meta_config.robots},
+  ],
+  link: [
+    {rel: 'icon', type: 'image/x-icon', href: homeStore.master_info.website_icon},
   ]
 })
 useSeoMeta({
