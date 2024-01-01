@@ -18,8 +18,9 @@
         <div class="p-y-1 truncate">
           {{ item.content }}
         </div>
-        <div class="flex gap-2 items-center text-gray-5 p-y-1 cursor-pointer hover:bg-green-1 dark:hover:bg-#fff/20 duration-100"
-             @click="router.push('/posts/' + item.post_id)">
+        <div
+            class="flex gap-2 items-center text-gray-5 p-y-1 cursor-pointer hover:bg-green-1 dark:hover:bg-#fff/20 duration-100"
+            @click="router.push('/posts/' + item.post_id)">
           <span class="i-ph-notebook-light "></span>
           <span>{{ item.post_title }}</span>
         </div>
@@ -38,7 +39,7 @@ const router = useRouter()
 const comments = ref([] as ILatestComment[]);
 const commentsInfos = async () => {
   try {
-    let postRes: any = await getLatestComments(homeStore.apiBaseUrl)
+    let postRes: any = await getLatestComments()
     let res: IResponse<IListData<ILatestComment>> = postRes.data.value
     comments.value = res.data?.list || []
   } catch (error) {

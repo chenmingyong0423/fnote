@@ -31,7 +31,6 @@ export const useHomeStore = defineStore("home", {
         } as SeoMetaConfigVO,
         isBlackMode: false,
         showSmallScreenMenu: false,
-        apiBaseUrl: '',
     }),
     // 持久化存储
     persist: process.client && {

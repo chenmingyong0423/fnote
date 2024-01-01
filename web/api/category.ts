@@ -16,11 +16,10 @@ export interface ICategoryName {
     name: string;
 }
 
-const prefix = "categories"
+const prefix = "/categories"
 
-export const getMenus = (apiBaseUrl: string) => httpRequest.get(`${apiBaseUrl}/menus`)
-export const getCategoriesAndTags = (apiBaseUrl: string) => httpRequest.get(`${apiBaseUrl}/${prefix}`)
-
-export const getCategoryByRoute = (apiBaseUrl: string, route: string) => httpRequest.get(`${apiBaseUrl}/${prefix}/route/${route}`)
+export const getMenus = () => httpRequest.get(`/menus`)
+export const getCategoriesAndTags = () => httpRequest.get(prefix)
+export const getCategoryByRoute = (route: string) => httpRequest.get(`${prefix}/route/${route}`)
 
 

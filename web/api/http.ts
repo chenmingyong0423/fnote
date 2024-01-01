@@ -34,7 +34,7 @@ class HttpRequest {
     ) {
         return new Promise((resolve, reject) => {
             const newOptions: UseFetchOptions<T> = {
-                baseURL: url,
+                baseURL: '/api' + url,
                 method: method,
                 ...options,
             };
@@ -45,7 +45,7 @@ class HttpRequest {
             if (method === "POST" || method === "PUT") {
                 newOptions.body = data;
             }
-            useFetch(url, newOptions)
+            useFetch('/api' + url, newOptions)
                 .then((res) => {
                     resolve(res);
                 })

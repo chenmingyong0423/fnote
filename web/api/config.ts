@@ -55,8 +55,8 @@ export interface SeoMetaConfigVO {
     robots: string;
 }
 
-const prefix = "configs"
+const prefix = "/configs"
 
-export const getWebMaster = (apiBaseUrl: string) => httpRequest.get(`${apiBaseUrl}/${prefix}/index`)
+export const getWebMaster = () => httpRequest.get(`${prefix}/index`)
 
 

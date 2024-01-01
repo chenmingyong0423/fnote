@@ -28,11 +28,8 @@ import type {IListData, IResponse} from "~/api/http";
 import {getMenus, type IMenu} from "~/api/category";
 import SmallMenu from "~/components/SmallMenu.vue";
 
-const config = useRuntimeConfig()
 const myDom = ref()
 const homeStore = useHomeStore()
-const apiBaseUrl = config.public.apiBaseUrl
-homeStore.apiBaseUrl = apiBaseUrl
 onMounted(() => {
   let isBlackMode = localStorage.getItem("isBlackMode")
   if (isBlackMode === '') {
@@ -44,7 +41,7 @@ onMounted(() => {
 
 const webMaster = async () => {
   try {
-    let postRes: any = await getWebMaster(apiBaseUrl)
+    let postRes: any = await getWebMaster()
     let res: IResponse<IWebmasterInfo> = postRes.data.value
     if (res && res.data) {
       homeStore.master_info = res.data.web_master_config
@@ -71,7 +68,7 @@ webMaster()
 
 const menus = async () => {
   try {
-    let postRes: any = await getMenus(apiBaseUrl)
+    let postRes: any = await getMenus()
     let res: IResponse<IListData<IMenu>> = postRes.data.value
     homeStore.menuList = res.data?.list || []
   } catch (error) {

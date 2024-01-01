@@ -93,10 +93,9 @@ const req = ref<FriendReq>({
   description: ''
 })
 const homeStore = useHomeStore()
-const apiBaseUrl = homeStore.apiBaseUrl;
 const getFriendList = async () => {
   try {
-    let httpRes: any = await getFriends(apiBaseUrl)
+    let httpRes: any = await getFriends()
     if (httpRes.data.value === null) {
       toast.showToast(httpRes.error.value.statusMessage, 2000);
       return
@@ -138,7 +137,7 @@ const submit = async () => {
       }
     }
     const deepCopyReq: FriendReq = JSON.parse(JSON.stringify(req.value));
-    let httpRes: any = await applyForFriend(apiBaseUrl, deepCopyReq)
+    let httpRes: any = await applyForFriend(deepCopyReq)
     if (httpRes.data.value === null) {
       if (httpRes.error.value.statusCode == 403) {
         toast.showToast("友链模块暂未开放！", 2000);
