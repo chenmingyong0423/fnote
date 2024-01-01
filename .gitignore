@@ -21,21 +21,24 @@
 go.work
 
 .idea/
-backend/.idea
-frontend/.idea
+web/.idea
+server/.idea
+admin/.idea
 
-frontend/node_modules
+web/node_modules
+admin/node_modules
 
 *.log*
 
-frontend/.nuxt
+web/.nuxt
 
 .nitro
 .cache
 .output
 .env
 
-frontend/dist
+web/dist
+admin/dist
 
 */.DS_Store
 .DS_Store
