@@ -18,6 +18,12 @@ import (
 	"net/http"
 	"slices"
 
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/dto"
+
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/vo"
+
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/request"
+
 	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 
 	"github.com/pkg/errors"
@@ -63,6 +69,9 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group.GET("/:id", api.Wrap(h.GetPostBySug))
 	group.POST("/:id/likes", api.Wrap(h.AddLike))
 	group.DELETE("/:id/likes", api.Wrap(h.DeleteLike))
+
+	adminGroup := engine.Group("/admin/posts")
+	adminGroup.GET("", api.WrapWithBody(h.AdminGetPosts))
 }
 
 func (h *PostHandler) GetLatestPosts(ctx *gin.Context) (listVO api.ListVO[*SummaryPostVO], err error) {
@@ -82,7 +91,7 @@ func (h *PostHandler) postsToPostVOs(posts []*domain.Post) []*SummaryPostVO {
 	postVOs := make([]*SummaryPostVO, 0, len(posts))
 	for _, post := range posts {
 		postVOs = append(postVOs, &SummaryPostVO{
-			Sug:          post.PrimaryPost.Sug,
+			Sug:          post.PrimaryPost.Id,
 			Author:       post.PrimaryPost.Author,
 			Title:        post.PrimaryPost.Title,
 			Summary:      post.PrimaryPost.Summary,
@@ -141,4 +150,39 @@ func (h *PostHandler) DeleteLike(ctx *gin.Context) (r any, err error) {
 	}
 	sug := ctx.Param("id")
 	return r, h.serv.DeleteLike(ctx, sug, ip)
+}
+
+func (h *PostHandler) AdminGetPosts(ctx *gin.Context, req request.PageRequest) (pageVO vo.PageVO[vo.AdminPostVO], err error) {
+	posts, total, err := h.serv.AdminGetPosts(ctx, dto.PageDTO{
+		PageNo:   req.PageNo,
+		PageSize: req.PageSize,
+		Field:    req.Field,
+		Order:    req.Order,
+		Keyword:  req.Keyword,
+	})
+	if err != nil {
+		return vo.PageVO[vo.AdminPostVO]{}, err
+	}
+	pageVO.PageNo = req.PageNo
+	pageVO.PageSize = req.PageSize
+	pageVO.List = h.postsToAdminPost(posts)
+	pageVO.SetTotalCountAndCalculateTotalPages(total)
+	return
+}
+
+func (h *PostHandler) postsToAdminPost(posts []*domain.Post) []vo.AdminPostVO {
+	adminPostVOs := make([]vo.AdminPostVO, len(posts))
+	for i, post := range posts {
+		adminPostVOs[i] = vo.AdminPostVO{
+			Id:         post.Id,
+			CoverImg:   post.CoverImg,
+			Title:      post.Title,
+			Summary:    post.Summary,
+			Categories: post.Categories,
+			Tags:       post.Tags,
+			CreateTime: post.CreateTime,
+			UpdateTime: post.UpdateTime,
+		}
+	}
+	return adminPostVOs
 }

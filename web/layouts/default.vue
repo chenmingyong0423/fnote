@@ -24,9 +24,10 @@
 import {useHomeStore} from '~/store/home';
 import {getWebMaster} from "~/api/config"
 import type {IWebmasterInfo} from "~/api/config"
-import type {IListData, IResponse} from "~/api/http";
+import type {IBaseResponse, IListData, IResponse} from "~/api/http";
 import {getMenus, type IMenu} from "~/api/category";
 import SmallMenu from "~/components/SmallMenu.vue";
+import {collectVisitLog, type VisitLogRequest} from "~/api/statiscs";
 
 const myDom = ref()
 const homeStore = useHomeStore()
@@ -49,16 +50,6 @@ const webMaster = async () => {
       homeStore.social_info_list = res.data.social_info_config.social_info_list
       homeStore.pay_info = res.data.pay_info_config
       homeStore.seo_meta_config = res.data.seo_meta_config
-      // const newLink = document.createElement('link');
-      // newLink.rel = 'icon';
-      // newLink.type = 'image/x-icon';
-      // newLink.href = info.masterInfo.website_icon;
-      // const oldLink = document.querySelector("link[rel*='icon']");
-
-      // if (oldLink) {
-      //     document.head.removeChild(oldLink);
-      // }
-      // document.head.appendChild(newLink);
     }
   } catch (error) {
     console.log(error);
@@ -100,6 +91,18 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', scrollEvent)
 })
+
+const collect = async () => {
+  try {
+    const req = {
+      url: window.location.href
+    } as VisitLogRequest
+    await collectVisitLog(req)
+  } catch (error) {
+    console.log(error);
+  }
+}
+collect()
 </script>
 
 <style scoped>

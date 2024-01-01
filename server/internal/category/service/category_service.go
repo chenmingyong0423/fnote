@@ -20,6 +20,7 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/internal/category/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/gkit/slice"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -29,6 +30,11 @@ type ICategoryService interface {
 	GetCategories(ctx context.Context) ([]domain.CategoryWithCount, error)
 	GetMenus(ctx context.Context) ([]domain.Category, error)
 	GetCategoryByRoute(ctx context.Context, route string) (domain.Category, error)
+	AdminGetCategories(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error)
+	AdminCreateCategory(ctx context.Context, category domain.Category) error
+	ModifyCategoryDisabled(ctx context.Context, id string, disabled bool) error
+	ModifyCategory(ctx context.Context, id string, description string) error
+	DeleteCategory(ctx context.Context, id string) error
 }
 
 var _ ICategoryService = (*CategoryService)(nil)
@@ -43,6 +49,47 @@ func NewCategoryService(repo repository.ICategoryRepository, countStatsService s
 type CategoryService struct {
 	countStatsService service.ICountStatsService
 	repo              repository.ICategoryRepository
+}
+
+func (s *CategoryService) DeleteCategory(ctx context.Context, id string) error {
+	err := s.repo.DeleteCategory(ctx, id)
+	if err != nil {
+		return err
+	}
+	// 删除分类时，同时删除分类的统计数据
+	err = s.countStatsService.DeleteByReferenceId(ctx, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CategoryService) ModifyCategory(ctx context.Context, id string, description string) error {
+	return s.repo.ModifyCategory(ctx, id, description)
+}
+
+func (s *CategoryService) ModifyCategoryDisabled(ctx context.Context, id string, disabled bool) error {
+	return s.repo.ModifyCategoryDisabled(ctx, id, disabled)
+}
+
+func (s *CategoryService) AdminCreateCategory(ctx context.Context, category domain.Category) error {
+	id, err := s.repo.CreateCategory(ctx, category)
+	if err != nil {
+		return err
+	}
+	// 创建分类时，同时创建分类的统计数据
+	err = s.countStatsService.Create(ctx, domain.CountStats{
+		Type:        domain.CountStatsTypePostCountInCategory.ToString(),
+		ReferenceId: id,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CategoryService) AdminGetCategories(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error) {
+	return s.QueryCategoriesPage(ctx, pageDTO)
 }
 
 func (s *CategoryService) GetCategoryByRoute(ctx context.Context, route string) (domain.Category, error) {
@@ -88,4 +135,8 @@ func (s *CategoryService) GetCategories(ctx context.Context) ([]domain.CategoryW
 	})
 
 	return categoryWithCounts, nil
+}
+
+func (s *CategoryService) QueryCategoriesPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error) {
+	return s.repo.QueryCategoriesPage(ctx, pageDTO)
 }

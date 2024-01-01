@@ -16,6 +16,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
@@ -23,6 +24,8 @@ import (
 
 type ICountStatsRepository interface {
 	GetByReferenceIdAndType(ctx context.Context, referenceIds []string, countStatsType domain.CountStatsType) ([]domain.CountStats, error)
+	Create(ctx context.Context, countStats domain.CountStats) (string, error)
+	DeleteByReferenceId(ctx context.Context, referenceId string) error
 }
 
 var _ ICountStatsRepository = (*CountStatsRepository)(nil)
@@ -35,6 +38,20 @@ func NewCountStatsRepository(dao dao.ICountStatsDao) *CountStatsRepository {
 
 type CountStatsRepository struct {
 	dao dao.ICountStatsDao
+}
+
+func (r *CountStatsRepository) DeleteByReferenceId(ctx context.Context, referenceId string) error {
+	return r.dao.DeleteByReferenceId(ctx, referenceId)
+}
+
+func (r *CountStatsRepository) Create(ctx context.Context, countStats domain.CountStats) (string, error) {
+	unix := time.Now().Unix()
+	return r.dao.Create(ctx, dao.CountStats{
+		Type:        countStats.Type,
+		ReferenceId: countStats.ReferenceId,
+		CreateTime:  unix,
+		UpdateTime:  unix,
+	})
 }
 
 func (r *CountStatsRepository) GetByReferenceIdAndType(ctx context.Context, referenceIds []string, countStatsType domain.CountStatsType) ([]domain.CountStats, error) {
@@ -50,7 +67,7 @@ func (r *CountStatsRepository) toDomainCountStats(stats []*dao.CountStats) []dom
 	var countStats []domain.CountStats
 	for _, stat := range stats {
 		countStats = append(countStats, domain.CountStats{
-			Id:          stat.Id,
+			Id:          stat.Id.Hex(),
 			Type:        stat.Type,
 			ReferenceId: stat.ReferenceId,
 			Count:       stat.Count,

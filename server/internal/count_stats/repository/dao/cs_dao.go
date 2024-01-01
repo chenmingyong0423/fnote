@@ -17,6 +17,10 @@ package dao
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"github.com/chenmingyong0423/go-mongox"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/pkg/errors"
@@ -24,16 +28,18 @@ import (
 )
 
 type CountStats struct {
-	Id          string `bson:"_id"`
-	Type        string `bson:"type"`
-	ReferenceId string `bson:"reference_id"`
-	Count       int64  `bson:"count"`
-	CreateTime  int64  `bson:"create_time"`
-	UpdateTime  int64  `bson:"update_time"`
+	Id          primitive.ObjectID `bson:"_id,omitempty"`
+	Type        string             `bson:"type"`
+	ReferenceId string             `bson:"reference_id"`
+	Count       int64              `bson:"count"`
+	CreateTime  int64              `bson:"create_time"`
+	UpdateTime  int64              `bson:"update_time"`
 }
 
 type ICountStatsDao interface {
 	GetByReferenceIdAndType(ctx context.Context, referenceIds []string, statsType string) ([]*CountStats, error)
+	Create(ctx context.Context, countStats CountStats) (string, error)
+	DeleteByReferenceId(ctx context.Context, referenceId string) error
 }
 
 var _ ICountStatsDao = (*CountStatsDao)(nil)
@@ -46,6 +52,25 @@ func NewCountStatsDao(db *mongo.Database) *CountStatsDao {
 
 type CountStatsDao struct {
 	coll *mongox.Collection[CountStats]
+}
+
+func (d *CountStatsDao) DeleteByReferenceId(ctx context.Context, referenceId string) error {
+	deleteOne, err := d.coll.Deleter().Filter(bsonx.M("reference_id", referenceId)).DeleteOne(ctx)
+	if err != nil {
+		return err
+	}
+	if deleteOne.DeletedCount == 0 {
+		return errors.New("DeletedCount=0, delete count stats error")
+	}
+	return nil
+}
+
+func (d *CountStatsDao) Create(ctx context.Context, countStats CountStats) (string, error) {
+	oneResult, err := d.coll.Creator().InsertOne(ctx, countStats)
+	if err != nil {
+		return "", err
+	}
+	return oneResult.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
 func (d *CountStatsDao) GetByReferenceIdAndType(ctx context.Context, referenceIds []string, statsType string) ([]*CountStats, error) {
