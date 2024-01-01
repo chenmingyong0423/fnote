@@ -99,7 +99,7 @@ func (d *PostDao) IncreaseFieldById(ctx context.Context, id string, field string
 
 func (d *PostDao) DeleteLike(ctx context.Context, id string, ip string) error {
 	result, err := d.coll.Updater().
-		Filter(bsonx.Id(id)).
+		Filter(query.BsonBuilder().Id(id).Add("status", PostStatusPunished).Build()).
 		Updates(update.BsonBuilder().Pull(bsonx.M("likes", ip)).Inc(bsonx.M("like_count", -1)).Build()).
 		UpdateOne(ctx)
 	if err != nil {
@@ -113,7 +113,7 @@ func (d *PostDao) DeleteLike(ctx context.Context, id string, ip string) error {
 
 func (d *PostDao) AddLike(ctx context.Context, id string, ip string) error {
 	result, err := d.coll.Updater().
-		Filter(bsonx.Id(id)).
+		Filter(query.BsonBuilder().Id(id).Add("status", PostStatusPunished).Build()).
 		Updates(update.BsonBuilder().Push(bsonx.M("likes", ip)).Inc(bsonx.M("like_count", 1)).Build()).
 		UpdateOne(ctx)
 	if err != nil {
@@ -135,7 +135,7 @@ func (d *PostDao) FindByIdAndIp(ctx context.Context, id string, ip string) (*Pos
 }
 
 func (d *PostDao) GetPunishedPostById(ctx context.Context, id string) (*Post, error) {
-	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add("status", domain.PostStatusPunished).Build()).FindOne(ctx)
+	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add("status", PostStatusPunished).Build()).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the document from post, id=%s", id)
 	}
@@ -156,7 +156,7 @@ func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *o
 
 func (d *PostDao) GetFrontPosts(ctx context.Context, count int64) ([]*Post, error) {
 	findOptions := options.Find().SetSort(bsonx.D(bsonx.E("sticky_weight", -1), bsonx.E("create_time", -1))).SetLimit(count)
-	posts, err := d.coll.Finder().Filter(bsonx.M("status", domain.PostStatusPunished)).Options(findOptions).Find(ctx)
+	posts, err := d.coll.Finder().Filter(bsonx.M("status", PostStatusPunished)).Options(findOptions).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from post, findOptions=%v", findOptions)
 	}
