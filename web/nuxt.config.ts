@@ -6,9 +6,12 @@ export default defineNuxtConfig({
         '@pinia/nuxt',
         'dayjs-nuxt',
     ],
-    runtimeConfig: {
-        public: {
-            apiBaseUrl: process.argv.find(arg => arg.startsWith('--API_BASE_URL='))?.split('=')[1] || 'http://localhost:8080'
+    nitro: {
+        // 该配置用于服务端请求转发
+        routeRules: {
+            '/api/**': {
+                proxy: (process.argv.find(arg => arg.startsWith('--API_BASE_URL='))?.split('=')[1] || 'http://localhost:8080') + '/**'
+            }
         }
     },
     unocss: {

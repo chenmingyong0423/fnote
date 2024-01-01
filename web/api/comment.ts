@@ -50,13 +50,13 @@ export interface ICommentReplyRequest {
     content: string;
 }
 
-const prefix = "comments"
+const prefix = "/comments"
 
 
-export const getLatestComments = (apiBaseUrl: string) => httpRequest.get(`${apiBaseUrl}/${prefix}/latest`)
+export const getLatestComments = () => httpRequest.get(`${prefix}/latest`)
 
-export const getComments = (apiBaseUrl: string, id: string) => httpRequest.get(`${apiBaseUrl}/${prefix}/id/${id}`)
+export const getComments = (id: string) => httpRequest.get(`${prefix}/id/${id}`)
 
-export const submitComment = (apiBaseUrl: string, comment: ICommentRequest) => httpRequest.post(`${apiBaseUrl}/${prefix}`, comment)
+export const submitComment = (comment: ICommentRequest) => httpRequest.post(`${prefix}`, comment)
 
-export const submitCommentReply = (apiBaseUrl: string, commentId: string, comment: ICommentReplyRequest) => httpRequest.post(`${apiBaseUrl}/${prefix}/${commentId}/replies`, comment)
+export const submitCommentReply = (commentId: string, comment: ICommentReplyRequest) => httpRequest.post(`${prefix}/${commentId}/replies`, comment)

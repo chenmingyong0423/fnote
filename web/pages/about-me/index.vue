@@ -124,7 +124,6 @@ import {onMounted, ref} from "vue";
 import {useHomeStore} from '~/store/home';
 
 const homeStore = useHomeStore()
-const apiBaseUrl = homeStore.apiBaseUrl;
 const isBlackMode = computed(() => homeStore.isBlackMode)
 
 const domain = homeStore.master_info.domain;
@@ -137,7 +136,7 @@ const payList = ref<IPayInfo[]>(homeStore.pay_info || [])
 
 const getPostDetail = async () => {
   try {
-    let postRes: any = await getPostsById(apiBaseUrl, id)
+    let postRes: any = await getPostsById(id)
     let res: IResponse<IPostDetail> = postRes.data.value
     post.value = res.data
     author.value = post.value?.author || ""
@@ -237,7 +236,7 @@ const handleAnchorClick = (newLineIndex: string) => {
 const like = async () => {
   if (post.value?.is_liked) return
   try {
-    let likeRes: any = await likePost(apiBaseUrl, id)
+    let likeRes: any = await likePost(id)
     let res: IBaseResponse = likeRes.data.value
     if (res?.code === 200) {
       post.value!.is_liked = true
@@ -282,7 +281,7 @@ const copyLink = async () => {
 const comments = ref<IComment[]>([])
 const initComments = async () => {
   try {
-    let commentRes: any = await getComments(apiBaseUrl, id)
+    let commentRes: any = await getComments(id)
     let res: IResponse<IPageData<IComment>> = commentRes.data.value
     if (res.code !== 200) {
       toast.showToast(res.message, 2000);
@@ -299,7 +298,7 @@ initComments()
 const submit = async (req: ICommentRequest) => {
   try {
     req.postId = id
-    let commentRes: any = await submitComment(apiBaseUrl, req)
+    let commentRes: any = await submitComment(req)
     if (commentRes.data.value === null) {
       if (commentRes.error.value.statusCode == 403) {
         toast.showToast("评论模块暂未开放！", 2000);
@@ -323,7 +322,7 @@ const submit = async (req: ICommentRequest) => {
 const submitReply = async (req: ICommentReplyRequest, commentId: string) => {
   try {
     req.postId = id
-    let commentRes: any = await submitCommentReply(apiBaseUrl, commentId, req)
+    let commentRes: any = await submitCommentReply(commentId, req)
     if (commentRes.data.value === null) {
       if (commentRes.error.value.statusCode == 403) {
         toast.showToast("评论模块暂未开放！", 2000);
@@ -359,7 +358,7 @@ const clearCommentReplyReq = () => {
 const submitReply2Reply = async (req: ICommentReplyRequest, commentId: string) => {
   try {
     req.postId = id
-    let commentRes: any = await submitCommentReply(apiBaseUrl, commentId, req)
+    let commentRes: any = await submitCommentReply(commentId, req)
     if (commentRes.data.value === null) {
       if (commentRes.error.value.statusCode == 403) {
         toast.showToast("评论模块暂未开放！", 2000);
