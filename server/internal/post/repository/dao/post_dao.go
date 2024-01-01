@@ -30,8 +30,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type PostStatus uint
+
+const (
+	// PostStatusDraft 草稿
+	PostStatusDraft PostStatus = iota
+	// PostStatusPunished 已发布
+	PostStatusPunished
+	// PostStatusDeleted 已删除
+	PostStatusDeleted
+)
+
 type Post struct {
-	Sug              string            `bson:"_id"`
+	Id               string            `bson:"_id"`
 	Author           string            `bson:"author"`
 	Title            string            `bson:"title"`
 	Summary          string            `bson:"summary"`

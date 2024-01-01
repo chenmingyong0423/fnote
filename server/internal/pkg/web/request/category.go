@@ -1,4 +1,4 @@
-// Copyright 2023 chenmingyong0423
+// Copyright 2024 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,24 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package domain
+package request
 
-type CountStatsType string
-
-const (
-	// CountStatsTypePostCountInCategory 分类下的文章数量
-	CountStatsTypePostCountInCategory CountStatsType = "PostCountInCategory"
-	// CountStatsTypePostCountInTag 标签下的文章数量
-	CountStatsTypePostCountInTag CountStatsType = "PostCountInTag"
-)
-
-func (s CountStatsType) ToString() string {
-	return string(s)
+type CreateCategoryRequest struct {
+	Name        string `json:"name" validate:"required"`
+	Route       string `json:"route" validate:"required"`
+	Description string `json:"description"`
+	Disabled    bool   `json:"disabled"`
 }
 
-type CountStats struct {
-	Id          string
-	Type        string
-	ReferenceId string
-	Count       int64
+type CategoryDisabledRequest struct {
+	Disabled bool `json:"disabled"`
+}
+
+type UpdateCategoryRequest struct {
+	Description string `json:"description"`
 }

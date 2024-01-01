@@ -20,6 +20,8 @@ import (
 	"log/slog"
 	"sync"
 
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/dto"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
@@ -35,6 +37,7 @@ type IPostService interface {
 	AddLike(ctx context.Context, id string, ip string) error
 	DeleteLike(ctx context.Context, id string, ip string) error
 	IncreaseVisitCount(ctx context.Context, id string) error
+	AdminGetPosts(ctx context.Context, pageDTO dto.PageDTO) ([]*domain.Post, int64, error)
 }
 
 var _ IPostService = (*PostService)(nil)
@@ -48,6 +51,10 @@ func NewPostService(repo repository.IPostRepository) *PostService {
 type PostService struct {
 	repo  repository.IPostRepository
 	ipMap sync.Map
+}
+
+func (s *PostService) AdminGetPosts(ctx context.Context, pageDTO dto.PageDTO) ([]*domain.Post, int64, error) {
+	return s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageDTO.PageSize, Skip: (pageDTO.PageNo - 1) * pageDTO.PageSize, Keyword: &pageDTO.Keyword})
 }
 
 func (s *PostService) IncreaseVisitCount(ctx context.Context, id string) error {
@@ -101,7 +108,7 @@ func (s *PostService) GetPunishedPostById(ctx context.Context, id string) (*doma
 	}
 	// increase visits
 	go func() {
-		gErr := s.repo.IncreaseVisitCount(ctx, post.Sug)
+		gErr := s.repo.IncreaseVisitCount(ctx, post.Id)
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))

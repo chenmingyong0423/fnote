@@ -23,6 +23,8 @@ import (
 
 type ICountStatsService interface {
 	GetByReferenceIdAndType(ctx context.Context, referenceIds []string, countStatsType domain.CountStatsType) ([]domain.CountStats, error)
+	Create(ctx context.Context, countStats domain.CountStats) error
+	DeleteByReferenceId(ctx context.Context, referenceId string) error
 }
 
 var _ ICountStatsService = (*CountStatsService)(nil)
@@ -35,6 +37,18 @@ func NewCountStatsService(repo repository.ICountStatsRepository) *CountStatsServ
 
 type CountStatsService struct {
 	repo repository.ICountStatsRepository
+}
+
+func (s *CountStatsService) DeleteByReferenceId(ctx context.Context, referenceId string) error {
+	return s.repo.DeleteByReferenceId(ctx, referenceId)
+}
+
+func (s *CountStatsService) Create(ctx context.Context, countStats domain.CountStats) error {
+	_, err := s.repo.Create(ctx, countStats)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *CountStatsService) GetByReferenceIdAndType(ctx context.Context, referenceIds []string, countStatsType domain.CountStatsType) ([]domain.CountStats, error) {

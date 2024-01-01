@@ -56,7 +56,7 @@ type ExtraPost struct {
 }
 
 type PrimaryPost struct {
-	Sug          string   `json:"sug"`
+	Id           string   `json:"_id"`
 	Author       string   `json:"author"`
 	Title        string   `json:"title"`
 	Summary      string   `json:"summary"`

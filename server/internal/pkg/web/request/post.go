@@ -12,24 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package domain
-
-type CountStatsType string
-
-const (
-	// CountStatsTypePostCountInCategory 分类下的文章数量
-	CountStatsTypePostCountInCategory CountStatsType = "PostCountInCategory"
-	// CountStatsTypePostCountInTag 标签下的文章数量
-	CountStatsTypePostCountInTag CountStatsType = "PostCountInTag"
-)
-
-func (s CountStatsType) ToString() string {
-	return string(s)
-}
-
-type CountStats struct {
-	Id          string
-	Type        string
-	ReferenceId string
-	Count       int64
-}
+package request

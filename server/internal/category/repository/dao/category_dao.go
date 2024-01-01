@@ -17,6 +17,12 @@ package dao
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/builder/update"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"go.mongodb.org/mongo-driver/bson"
+
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
 	"github.com/chenmingyong0423/go-mongox"
@@ -28,19 +34,24 @@ import (
 )
 
 type Category struct {
-	Id          string `bson:"_id"`
-	Name        string `bson:"name"`
-	Route       string `bson:"route"`
-	Description string `bson:"description"`
-	Sort        int64  `bson:"sort"`
-	Disabled    bool   `bson:"disabled"`
-	CreateTime  int64  `bson:"create_time"`
-	UpdateTime  int64  `bson:"update_time"`
+	Id          primitive.ObjectID `bson:"_id,omitempty"`
+	Name        string             `bson:"name"`
+	Route       string             `bson:"route"`
+	Description string             `bson:"description"`
+	Sort        int64              `bson:"sort"`
+	Disabled    bool               `bson:"disabled"`
+	CreateTime  int64              `bson:"create_time"`
+	UpdateTime  int64              `bson:"update_time"`
 }
 
 type ICategoryDao interface {
 	GetAll(ctx context.Context) ([]*Category, error)
 	GetByRoute(ctx context.Context, route string) (*Category, error)
+	QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Category, int64, error)
+	Create(ctx context.Context, category *Category) (string, error)
+	ModifyDisabled(ctx context.Context, id primitive.ObjectID, disabled bool) error
+	ModifyCategory(ctx context.Context, id primitive.ObjectID, description string) error
+	DeleteById(ctx context.Context, id primitive.ObjectID) error
 }
 
 var _ ICategoryDao = (*CategoryDao)(nil)
@@ -53,6 +64,60 @@ func NewCategoryDao(db *mongo.Database) *CategoryDao {
 
 type CategoryDao struct {
 	coll *mongox.Collection[Category]
+}
+
+func (d *CategoryDao) DeleteById(ctx context.Context, id primitive.ObjectID) error {
+	deleteOne, err := d.coll.Deleter().Filter(bsonx.Id(id)).DeleteOne(ctx)
+	if err != nil {
+		return err
+	}
+	if deleteOne.DeletedCount == 0 {
+		return errors.New("DeletedCount=0, delete category error")
+	}
+	return nil
+}
+
+func (d *CategoryDao) ModifyCategory(ctx context.Context, id primitive.ObjectID, description string) error {
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.Set(bsonx.M("description", description))).UpdateOne(ctx)
+	if err != nil {
+		return err
+	}
+	if updateOne.ModifiedCount == 0 {
+		return errors.New("ModifiedCount=0, Modify description failed")
+	}
+	return nil
+}
+
+func (d *CategoryDao) ModifyDisabled(ctx context.Context, id primitive.ObjectID, disabled bool) error {
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.Set(bsonx.M("disabled", disabled))).UpdateOne(ctx)
+	if err != nil {
+		return err
+	}
+	if updateOne.ModifiedCount == 0 {
+		return errors.New("ModifiedCount=0, Modify disabled failed")
+	}
+	return nil
+}
+
+func (d *CategoryDao) Create(ctx context.Context, category *Category) (string, error) {
+	oneResult, err := d.coll.Creator().InsertOne(ctx, *category)
+	if err != nil {
+		return "", err
+	}
+	return oneResult.InsertedID.(primitive.ObjectID).Hex(), nil
+}
+
+func (d *CategoryDao) QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Category, int64, error) {
+	finder := d.coll.Finder()
+	count, err := finder.Filter(cond).Count(ctx)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "Count categories failed")
+	}
+	categories, err := finder.Filter(cond).Options(findOptions).Find(ctx)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "Find categories failed")
+	}
+	return categories, count, nil
 }
 
 func (d *CategoryDao) GetByRoute(ctx context.Context, route string) (*Category, error) {
