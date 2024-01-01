@@ -18,10 +18,12 @@ services:
       - "27017:27017"
     command:
       - --auth
-  backend:
-    container_name: fnote-backend
-    build: ./backend
-    image: fnote-backend:latest
+  server:
+    container_name: fnote-server
+    image: fnote/fnote-server:latest
+    build:
+      dockerfile: Dockerfile
+      context: ./server
     ports:
       - "8080:8080"
     depends_on:
@@ -29,3 +31,13 @@ services:
     volumes:
       - /fnote/logs:/fnote/logs
       - /fnote/static:/fnote/static
+  web:
+    container_name: fnote-web
+    image: fnote/fnote-web:latest
+    build: 
+      dockerfile: Dockerfile
+      context: ./web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
