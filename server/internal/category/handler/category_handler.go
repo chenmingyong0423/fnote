@@ -15,8 +15,9 @@
 package handler
 
 import (
-	"github.com/chenmingyong0423/gkit"
 	"net/http"
+
+	"github.com/chenmingyong0423/gkit"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/category/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
@@ -112,7 +113,7 @@ func (h *CategoryHandler) GetCategoryByRoute(ctx *gin.Context) (CategoryNameVO, 
 func (h *CategoryHandler) AdminGetCategories(ctx *gin.Context, req request.PageRequest) (pageVO vo.PageVO[vo.Category], err error) {
 	categories, total, err := h.serv.AdminGetCategories(ctx, dto.PageDTO{PageNo: req.PageNo, PageSize: req.PageSize, Field: req.Field, Order: req.Order, Keyword: req.Keyword})
 	if err != nil {
-		return vo.PageVO[vo.Category]{}, err
+		return
 	}
 	pageVO.PageNo = req.PageNo
 	pageVO.PageSize = req.PageSize
@@ -157,7 +158,7 @@ func (h *CategoryHandler) AdminCreateCategory(ctx *gin.Context, req request.Crea
 
 func (h *CategoryHandler) AdminModifyCategoryDisabled(ctx *gin.Context, req request.CategoryDisabledRequest) (any, error) {
 	id := ctx.Param("id")
-	return nil, h.serv.ModifyCategoryDisabled(ctx, id, req.Disabled)
+	return nil, h.serv.ModifyCategoryDisabled(ctx, id, gkit.GetValueOrDefault(req.Disabled))
 }
 
 func (h *CategoryHandler) AdminModifyCategory(ctx *gin.Context, req request.UpdateCategoryRequest) (any, error) {

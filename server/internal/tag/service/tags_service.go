@@ -16,11 +16,16 @@ package service
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/fnote/backend/internal/tag/repository"
 	"github.com/chenmingyong0423/gkit/slice"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func NewTagService(repo repository.ITagRepository, countStatsService service.ICountStatsService) *TagService {
@@ -33,6 +38,10 @@ func NewTagService(repo repository.ITagRepository, countStatsService service.ICo
 type ITagService interface {
 	GetTags(ctx context.Context) ([]domain.TagWithCount, error)
 	GetTagByRoute(ctx context.Context, route string) (domain.Tag, error)
+	AdminGetTags(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Tag, int64, error)
+	AdminCreateTag(ctx context.Context, tag domain.Tag) error
+	ModifyTagDisabled(ctx context.Context, id string, disabled bool) error
+	DeleteTag(ctx context.Context, id string) error
 }
 
 var _ ITagService = (*TagService)(nil)
@@ -40,6 +49,58 @@ var _ ITagService = (*TagService)(nil)
 type TagService struct {
 	repo              repository.ITagRepository
 	countStatsService service.ICountStatsService
+}
+
+func (s *TagService) DeleteTag(ctx context.Context, id string) error {
+	tag, err := s.repo.GetTagById(ctx, id)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return api.NewErrorResponseBody(http.StatusNotFound, "tag not found")
+		}
+		return err
+	}
+	err = s.repo.DeleteTagById(ctx, id)
+	if err != nil {
+		return err
+	}
+	// 删除分类时，同时删除分类的统计数据
+	err = s.countStatsService.DeleteByReferenceId(ctx, id)
+	if err != nil {
+		gErr := s.repo.RecoverTag(ctx, tag)
+		if gErr != nil {
+			return gErr
+		}
+		return err
+	}
+	return nil
+}
+
+func (s *TagService) ModifyTagDisabled(ctx context.Context, id string, disabled bool) error {
+	return s.repo.ModifyTagDisabled(ctx, id, disabled)
+}
+
+func (s *TagService) AdminCreateTag(ctx context.Context, tag domain.Tag) error {
+	id, err := s.repo.CreateTag(ctx, tag)
+	if err != nil {
+		return err
+	}
+	// 创建标签时，同时创建标签的统计数据
+	err = s.countStatsService.Create(ctx, domain.CountStats{
+		Type:        domain.CountStatsTypePostCountInTag.ToString(),
+		ReferenceId: id,
+	})
+	if err != nil {
+		gErr := s.DeleteTag(ctx, id)
+		if gErr != nil {
+			return gErr
+		}
+		return err
+	}
+	return nil
+}
+
+func (s *TagService) AdminGetTags(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Tag, int64, error) {
+	return s.QueryTagsPage(ctx, pageDTO)
 }
 
 func (s *TagService) GetTagByRoute(ctx context.Context, route string) (domain.Tag, error) {
@@ -73,4 +134,8 @@ func (s *TagService) GetTags(ctx context.Context) ([]domain.TagWithCount, error)
 		}
 	})
 	return tagWithCounts, nil
+}
+
+func (s *TagService) QueryTagsPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Tag, int64, error) {
+	return s.repo.QueryTagsPage(ctx, pageDTO)
 }

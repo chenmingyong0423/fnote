@@ -41,6 +41,8 @@ type ICategoryRepository interface {
 	DeleteCategory(ctx context.Context, id string) error
 	GetNavigations(ctx context.Context) ([]domain.Category, error)
 	ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error
+	GetCategoryById(ctx context.Context, id string) (domain.Category, error)
+	RecoverCategory(ctx context.Context, category domain.Category) error
 }
 
 var _ ICategoryRepository = (*CategoryRepository)(nil)
@@ -53,6 +55,32 @@ func NewCategoryRepository(dao dao.ICategoryDao) *CategoryRepository {
 
 type CategoryRepository struct {
 	dao dao.ICategoryDao
+}
+
+func (r *CategoryRepository) RecoverCategory(ctx context.Context, category domain.Category) error {
+	return r.dao.RecoverCategory(ctx, dao.Category{
+		Id:          primitive.ObjectID{},
+		Name:        category.Name,
+		Route:       category.Route,
+		Description: category.Description,
+		Sort:        category.Sort,
+		Disabled:    category.Disabled,
+		ShowInNav:   category.ShowInNav,
+		CreateTime:  category.CreateTime,
+		UpdateTime:  category.UpdateTime,
+	})
+}
+
+func (r *CategoryRepository) GetCategoryById(ctx context.Context, id string) (t domain.Category, err error) {
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return
+	}
+	tag, err := r.dao.GetById(ctx, objId)
+	if err != nil {
+		return
+	}
+	return r.toDomainCategory(tag), nil
 }
 
 func (r *CategoryRepository) ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error {
@@ -103,7 +131,7 @@ func (r *CategoryRepository) CreateCategory(ctx context.Context, category domain
 func (r *CategoryRepository) QueryCategoriesPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error) {
 	condBuilder := query.BsonBuilder()
 	if pageDTO.Keyword != "" {
-		condBuilder.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageDTO.Keyword)), "i")
+		condBuilder.RegexOptions("name", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageDTO.Keyword)), "i")
 	}
 	cond := condBuilder.Build()
 
@@ -135,7 +163,7 @@ func (r *CategoryRepository) GetCategoryByRoute(ctx context.Context, route strin
 }
 
 func (r *CategoryRepository) toDomainCategory(category *dao.Category) domain.Category {
-	return domain.Category{Id: category.Id.Hex(), Name: category.Name, Route: category.Route, Description: category.Description, Disabled: category.Disabled, ShowInNav: category.ShowInNav, CreateTime: category.CreateTime, UpdateTime: category.UpdateTime}
+	return domain.Category{Id: category.Id.Hex(), Name: category.Name, Route: category.Route, Description: category.Description, Disabled: category.Disabled, ShowInNav: category.ShowInNav, Sort: category.Sort, CreateTime: category.CreateTime, UpdateTime: category.UpdateTime}
 }
 
 func (r *CategoryRepository) GetAll(ctx context.Context) ([]domain.Category, error) {
