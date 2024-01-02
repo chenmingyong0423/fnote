@@ -81,7 +81,20 @@ const items = reactive([
         title: '标签列表'
       }
     ]
-  }
+  },
+  {
+    key: 'sub blog',
+    icon: () => h(PieChartOutlined),
+    label: '系统',
+    title: '系统',
+    children: [
+      {
+        key: '/setting',
+        label: '博客设置',
+        title: '博客设置'
+      }
+    ]
+  },
 ])
 watch(
   () => state.openKeys,
