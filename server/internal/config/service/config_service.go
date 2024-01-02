@@ -24,7 +24,7 @@ import (
 )
 
 type IConfigService interface {
-	GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfig, error)
+	GetWebSiteConfig(ctx context.Context, typ string) (*domain.WebSiteConfig, error)
 	GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error)
 	IncreaseWebsiteViews(ctx context.Context) error
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
@@ -72,19 +72,26 @@ func (s *ConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPos
 }
 
 func (s *ConfigService) GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error) {
-	configs, err := s.repo.GetConfigByTypes(ctx, "webmaster", "notice", "social", "pay", "seo meta")
+	configs, err := s.repo.GetConfigByTypes(ctx, "website", "owner", "notice", "social", "pay", "seo meta")
 	if err != nil {
 		return nil, err
 	}
 	cfg := &domain.IndexConfig{}
 	for _, config := range configs {
-		if config.Typ == "webmaster" {
-			wmCfg := domain.WebMasterConfig{}
-			err = s.anyToStruct(config.Props, &wmCfg)
+		if config.Typ == "website" {
+			wsc := domain.WebSiteConfig{}
+			err = s.anyToStruct(config.Props, &wsc)
 			if err != nil {
 				return nil, err
 			}
-			cfg.WebMasterConfig = wmCfg
+			cfg.WebSiteConfig = wsc
+		} else if config.Typ == "owner" {
+			oc := domain.OwnerConfig{}
+			err = s.anyToStruct(config.Props, &oc)
+			if err != nil {
+				return nil, err
+			}
+			cfg.OwnerConfig = oc
 		} else if config.Typ == "notice" {
 			noticeCfg := domain.NoticeConfig{}
 			err = s.anyToStruct(config.Props, &noticeCfg)
@@ -154,14 +161,14 @@ func (s *ConfigService) GetSwitchStatusByTyp(ctx context.Context, typ string) (*
 	return switchConfig, nil
 }
 
-func (s *ConfigService) GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfig, error) {
+func (s *ConfigService) GetWebSiteConfig(ctx context.Context, typ string) (*domain.WebSiteConfig, error) {
 	props, err := s.repo.FindByTyp(ctx, typ)
 	if err != nil {
 		return nil, errors.WithMessage(err, "s.repo.FindByTyp failed")
 	}
-	webMasterConfig := new(domain.WebMasterConfig)
-	err = s.anyToStruct(props, webMasterConfig)
-	return webMasterConfig, err
+	wsc := new(domain.WebSiteConfig)
+	err = s.anyToStruct(props, wsc)
+	return wsc, err
 }
 
 func (s *ConfigService) anyToStruct(props any, cfgInfos any) error {

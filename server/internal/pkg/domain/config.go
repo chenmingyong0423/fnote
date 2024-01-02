@@ -23,7 +23,8 @@ type Config struct {
 }
 
 type IndexConfig struct {
-	WebMasterConfig  WebMasterConfig
+	WebSiteConfig    WebSiteConfig
+	OwnerConfig      OwnerConfig
 	NoticeConfig     NoticeConfig
 	SocialInfoConfig SocialInfoConfig
 	PayInfoConfig    []PayInfoConfigElem
@@ -39,18 +40,31 @@ type PayInfoConfig struct {
 	List []PayInfoConfigElem `bson:"list"`
 }
 
-// WebMasterConfig 站长信息
-type WebMasterConfig struct {
-	Name            string   `bson:"name" json:"name"`
-	PostCount       uint     `bson:"postCount" json:"postCount"`
-	CategoryCount   uint     `bson:"categoryCount" json:"categoryCount"`
-	WebsiteViews    uint     `bson:"websiteViews" json:"websiteViews"`
-	WebsiteLiveTime int64    `bson:"websiteLiveTime" json:"websiteLiveTime"`
-	Profile         string   `bson:"profile" json:"profile"`
-	Picture         string   `bson:"picture" json:"picture"`
-	WebsiteIcon     string   `bson:"websiteIcon" json:"websiteIcon"`
-	Domain          string   `bson:"domain" json:"domain"`
-	Records         []string `bson:"records" json:"records"`
+// OwnerConfig 站长信息
+type OwnerConfig struct {
+	Name    string `bson:"name" json:"name"`
+	Profile string `bson:"profile" json:"profile"`
+	Picture string `bson:"picture" json:"picture"`
+}
+
+// WebSiteConfig 站点信息
+type WebSiteConfig struct {
+	// 站点名称
+	Name string `bson:"name"`
+	// 站点图标
+	Icon string `bson:"icon"`
+	// 文章数量
+	PostCount uint `bson:"postCount"`
+	// 分类数量
+	CategoryCount uint `bson:"categoryCount"`
+	// 访问量
+	ViewCount uint `bson:"viewCount"`
+	// 网站运行时间
+	LiveTime int64 `bson:"liveTime"`
+	// 域名
+	Domain string `bson:"domain"`
+	// 备案信息
+	Records []string `bson:"records"`
 }
 
 // NoticeConfig 公告配置
