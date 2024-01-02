@@ -54,8 +54,8 @@ import type {IComment, ICommentReplyRequest, ICommentRequest} from "~/api/commen
 import type {PropType} from "vue";
 import CryptoJS from 'crypto-js'
 
-const info = useHomeStore()
-const isBlackMode = computed(() => info.isBlackMode)
+const homeStore = useHomeStore()
+const isBlackMode = computed(() => homeStore.isBlackMode)
 
 const props = defineProps({
   comments: {
