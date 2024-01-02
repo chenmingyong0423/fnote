@@ -16,7 +16,11 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"net/http"
+
+	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/category/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
@@ -42,14 +46,16 @@ type ICategoryService interface {
 
 var _ ICategoryService = (*CategoryService)(nil)
 
-func NewCategoryService(repo repository.ICategoryRepository, countStatsService service.ICountStatsService) *CategoryService {
+func NewCategoryService(repo repository.ICategoryRepository, countStatsService service.ICountStatsService, configService configServ.IConfigService) *CategoryService {
 	return &CategoryService{
 		countStatsService: countStatsService,
+		configService:     configService,
 		repo:              repo,
 	}
 }
 
 type CategoryService struct {
+	configService     configServ.IConfigService
 	countStatsService service.ICountStatsService
 	repo              repository.ICategoryRepository
 }
@@ -79,6 +85,11 @@ func (s *CategoryService) DeleteCategory(ctx context.Context, id string) error {
 		}
 		return err
 	}
+	// 网站配置更新分类数量
+	gErr := s.configService.DecreaseCategoryCount(ctx)
+	if gErr != nil {
+		slog.WarnContext(ctx, fmt.Sprintf("decrease category count failed, %v", gErr))
+	}
 	return nil
 }
 
@@ -107,6 +118,13 @@ func (s *CategoryService) AdminCreateCategory(ctx context.Context, category doma
 		}
 		return err
 	}
+	go func() {
+		// 网站配置更新分类数量
+		gErr := s.configService.IncreaseCategoryCount(ctx)
+		if gErr != nil {
+			slog.WarnContext(ctx, fmt.Sprintf("increase category count failed, %v", gErr))
+		}
+	}()
 	return nil
 }
 

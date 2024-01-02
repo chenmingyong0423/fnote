@@ -30,6 +30,8 @@ type IConfigService interface {
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
 	GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error)
 	GetFrontPostCount(ctx context.Context) (*domain.FrontPostCount, error)
+	IncreaseCategoryCount(ctx context.Context) error
+	DecreaseCategoryCount(ctx context.Context) error
 }
 
 var _ IConfigService = (*ConfigService)(nil)
@@ -42,6 +44,22 @@ func NewConfigService(repo repository.IConfigRepository) *ConfigService {
 
 type ConfigService struct {
 	repo repository.IConfigRepository
+}
+
+func (s *ConfigService) DecreaseCategoryCount(ctx context.Context) error {
+	err := s.repo.Decrease(ctx, "categoryCount")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *ConfigService) IncreaseCategoryCount(ctx context.Context) error {
+	err := s.repo.Increase(ctx, "categoryCount")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *ConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPostCount, error) {
