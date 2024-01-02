@@ -16,6 +16,7 @@ package dao
 
 import (
 	"context"
+	"fmt"
 	"github.com/chenmingyong0423/go-mongox"
 
 	"github.com/chenmingyong0423/go-mongox/builder/update"
@@ -54,6 +55,7 @@ type ICategoryDao interface {
 	ModifyCategory(ctx context.Context, id primitive.ObjectID, description string) error
 	DeleteById(ctx context.Context, id primitive.ObjectID) error
 	GetByShowInNav(ctx context.Context) ([]*Category, error)
+	ModifyCategoryNavigation(ctx context.Context, id primitive.ObjectID, showInNav bool) error
 }
 
 var _ ICategoryDao = (*CategoryDao)(nil)
@@ -66,6 +68,17 @@ func NewCategoryDao(db *mongo.Database) *CategoryDao {
 
 type CategoryDao struct {
 	coll *mongox.Collection[Category]
+}
+
+func (d *CategoryDao) ModifyCategoryNavigation(ctx context.Context, id primitive.ObjectID, showInNav bool) error {
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.Set(bsonx.M("show_in_nav", showInNav))).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "Modify category navigation failed, id=%s, showInNav=%v", id, showInNav)
+	}
+	if updateOne.ModifiedCount == 0 {
+		return fmt.Errorf("ModifiedCount=0, Modify category navigation failed, id=%s, showInNav=%v", id, showInNav)
+	}
+	return nil
 }
 
 func (d *CategoryDao) GetByShowInNav(ctx context.Context) ([]*Category, error) {

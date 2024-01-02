@@ -15,9 +15,10 @@
 package request
 
 type CreateCategoryRequest struct {
-	Name        string `json:"name" validate:"required"`
-	Route       string `json:"route" validate:"required"`
+	Name        string `json:"name" binding:"required"`
+	Route       string `json:"route" binding:"required"`
 	Description string `json:"description"`
+	ShowInNav   bool   `json:"show_in_nav"`
 	Disabled    bool   `json:"disabled"`
 }
 
@@ -25,6 +26,10 @@ type CategoryDisabledRequest struct {
 	Disabled bool `json:"disabled"`
 }
 
+type CategoryNavRequest struct {
+	ShowInNav *bool `json:"show_in_nav" binding:"required"`
+}
+
 type UpdateCategoryRequest struct {
-	Description string `json:"description"`
+	Description string `json:"description" binding:"required"`
 }

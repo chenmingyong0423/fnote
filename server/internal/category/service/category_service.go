@@ -16,7 +16,6 @@ package service
 
 import (
 	"context"
-
 	"github.com/chenmingyong0423/fnote/backend/internal/category/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
@@ -35,6 +34,7 @@ type ICategoryService interface {
 	ModifyCategoryDisabled(ctx context.Context, id string, disabled bool) error
 	ModifyCategory(ctx context.Context, id string, description string) error
 	DeleteCategory(ctx context.Context, id string) error
+	ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error
 }
 
 var _ ICategoryService = (*CategoryService)(nil)
@@ -49,6 +49,10 @@ func NewCategoryService(repo repository.ICategoryRepository, countStatsService s
 type CategoryService struct {
 	countStatsService service.ICountStatsService
 	repo              repository.ICategoryRepository
+}
+
+func (s *CategoryService) ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error {
+	return s.repo.ModifyCategoryNavigation(ctx, id, showInNav)
 }
 
 func (s *CategoryService) DeleteCategory(ctx context.Context, id string) error {
