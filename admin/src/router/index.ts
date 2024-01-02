@@ -21,7 +21,7 @@ const router = createRouter({
     {
       path: '/setting',
       name: 'setting',
-      component: () => import('../views/Setting/SettingView.vue'),
+      component: () => import('../views/Setting/SettingView.vue')
     }
   ]
 })
