@@ -16,6 +16,7 @@ package dao
 
 import (
 	"context"
+	"github.com/chenmingyong0423/go-mongox"
 
 	"github.com/chenmingyong0423/go-mongox/builder/update"
 
@@ -25,7 +26,6 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
-	"github.com/chenmingyong0423/go-mongox"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -40,6 +40,7 @@ type Category struct {
 	Description string             `bson:"description"`
 	Sort        int64              `bson:"sort"`
 	Disabled    bool               `bson:"disabled"`
+	ShowInNav   bool               `bson:"show_in_nav"`
 	CreateTime  int64              `bson:"create_time"`
 	UpdateTime  int64              `bson:"update_time"`
 }
@@ -52,6 +53,7 @@ type ICategoryDao interface {
 	ModifyDisabled(ctx context.Context, id primitive.ObjectID, disabled bool) error
 	ModifyCategory(ctx context.Context, id primitive.ObjectID, description string) error
 	DeleteById(ctx context.Context, id primitive.ObjectID) error
+	GetByShowInNav(ctx context.Context) ([]*Category, error)
 }
 
 var _ ICategoryDao = (*CategoryDao)(nil)
@@ -64,6 +66,14 @@ func NewCategoryDao(db *mongo.Database) *CategoryDao {
 
 type CategoryDao struct {
 	coll *mongox.Collection[Category]
+}
+
+func (d *CategoryDao) GetByShowInNav(ctx context.Context) ([]*Category, error) {
+	categories, err := d.coll.Finder().Filter(query.BsonBuilder().Eq("show_in_nav", true).Eq("disabled", true).Build()).Find(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "Find categories failed")
+	}
+	return categories, nil
 }
 
 func (d *CategoryDao) DeleteById(ctx context.Context, id primitive.ObjectID) error {
