@@ -63,10 +63,10 @@ db.getCollection("configs").insertOne({
   "create_time": Math.floor(new Date().getTime() / 1000),
   "props": {
     "name": "fnote",
-    "postCount": 0,
-    "categoryCount": 0,
-    "viewCount": 0,
-    "liveTime": Math.floor(new Date().getTime() / 1000),
+    "post_count": 0,
+    "category_count": 0,
+    "view_count": 0,
+    "live_time": Math.floor(new Date().getTime() / 1000),
     "icon": "",
     "domain": "",
     "records": []

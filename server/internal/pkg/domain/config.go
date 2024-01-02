@@ -54,13 +54,13 @@ type WebSiteConfig struct {
 	// 站点图标
 	Icon string `bson:"icon"`
 	// 文章数量
-	PostCount uint `bson:"postCount"`
+	PostCount uint `bson:"post_count"`
 	// 分类数量
-	CategoryCount uint `bson:"categoryCount"`
+	CategoryCount uint `bson:"category_count"`
 	// 访问量
-	ViewCount uint `bson:"viewCount"`
+	ViewCount uint `bson:"view_count"`
 	// 网站运行时间
-	LiveTime int64 `bson:"liveTime"`
+	LiveTime int64 `bson:"live_time"`
 	// 域名
 	Domain string `bson:"domain"`
 	// 备案信息

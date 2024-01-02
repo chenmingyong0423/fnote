@@ -16,7 +16,6 @@ package service
 
 import (
 	"context"
-
 	"github.com/chenmingyong0423/fnote/backend/internal/config/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/pkg/errors"
@@ -32,6 +31,7 @@ type IConfigService interface {
 	GetFrontPostCount(ctx context.Context) (*domain.FrontPostCount, error)
 	IncreaseCategoryCount(ctx context.Context) error
 	DecreaseCategoryCount(ctx context.Context) error
+	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
 }
 
 var _ IConfigService = (*ConfigService)(nil)
@@ -44,6 +44,10 @@ func NewConfigService(repo repository.IConfigRepository) *ConfigService {
 
 type ConfigService struct {
 	repo repository.IConfigRepository
+}
+
+func (s *ConfigService) UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error {
+	return s.repo.UpdateWebSiteConfig(ctx, webSiteConfig)
 }
 
 func (s *ConfigService) DecreaseCategoryCount(ctx context.Context) error {

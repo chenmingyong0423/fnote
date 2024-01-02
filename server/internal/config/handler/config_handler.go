@@ -18,6 +18,7 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/request"
 	"github.com/gin-gonic/gin"
 )
 
@@ -107,6 +108,7 @@ func (h *ConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 
 	adminGroup := engine.Group("/admin/configs")
 	adminGroup.GET("/website", api.Wrap(h.AdminGetWebsiteConfig))
+	adminGroup.PUT("/website", api.WrapWithBody(h.AdminUpdateWebsiteConfig))
 }
 
 func (h *ConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO, error) {
@@ -188,4 +190,12 @@ func (h *ConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (WebsiteConfigVO
 		return WebsiteConfigVO{}, err
 	}
 	return *h.toWebsiteConfigVO(config), nil
+}
+
+func (h *ConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req request.UpdateWebsiteConfigReq) (any, error) {
+	return nil, h.serv.UpdateWebSiteConfig(ctx, domain.WebSiteConfig{
+		Name:     req.Name,
+		Icon:     req.Icon,
+		LiveTime: req.LiveTime,
+	})
 }

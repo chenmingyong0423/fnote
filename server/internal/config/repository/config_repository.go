@@ -16,8 +16,11 @@ package repository
 
 import (
 	"context"
-
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/builder/update"
+	"time"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/config/repository/dao"
 	"github.com/pkg/errors"
@@ -28,6 +31,7 @@ type IConfigRepository interface {
 	Increase(ctx context.Context, field string) error
 	GetConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error)
 	Decrease(ctx context.Context, field string) error
+	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
 }
 
 func NewConfigRepository(dao dao.IConfigDao) *ConfigRepository {
@@ -40,6 +44,14 @@ var _ IConfigRepository = (*ConfigRepository)(nil)
 
 type ConfigRepository struct {
 	dao dao.IConfigDao
+}
+
+func (r *ConfigRepository) UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "website"),
+		update.Set(bsonx.D(bsonx.E("props.name", webSiteConfig.Name), bsonx.E("props.icon", webSiteConfig.Icon), bsonx.E("props.live_time", webSiteConfig.LiveTime), bsonx.E("update_time", time.Now().Unix()))),
+	)
 }
 
 func (r *ConfigRepository) Decrease(ctx context.Context, field string) error {
