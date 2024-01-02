@@ -39,6 +39,7 @@ type ICategoryRepository interface {
 	ModifyCategoryDisabled(ctx context.Context, id string, disabled bool) error
 	ModifyCategory(ctx context.Context, id string, description string) error
 	DeleteCategory(ctx context.Context, id string) error
+	GetNavigations(ctx context.Context) ([]domain.Category, error)
 }
 
 var _ ICategoryRepository = (*CategoryRepository)(nil)
@@ -51,6 +52,14 @@ func NewCategoryRepository(dao dao.ICategoryDao) *CategoryRepository {
 
 type CategoryRepository struct {
 	dao dao.ICategoryDao
+}
+
+func (r *CategoryRepository) GetNavigations(ctx context.Context) ([]domain.Category, error) {
+	categories, err := r.dao.GetByShowInNav(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainCategories(categories), nil
 }
 
 func (r *CategoryRepository) DeleteCategory(ctx context.Context, id string) error {

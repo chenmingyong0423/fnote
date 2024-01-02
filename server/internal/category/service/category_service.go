@@ -97,7 +97,7 @@ func (s *CategoryService) GetCategoryByRoute(ctx context.Context, route string) 
 }
 
 func (s *CategoryService) GetMenus(ctx context.Context) (menuVO []domain.Category, err error) {
-	categories, err := s.repo.GetAll(ctx)
+	categories, err := s.repo.GetNavigations(ctx)
 	if err != nil && !errors.Is(err, mongo.ErrNilDocument) {
 		return nil, err
 	}
