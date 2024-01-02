@@ -20,6 +20,8 @@ type Category struct {
 	Route       string `json:"route"`
 	Description string `json:"description"`
 	Disabled    bool   `json:"disabled"`
+	ShowInNav   bool   `json:"show_in_nav"`
+	Sort        int64  `json:"sort"`
 	CreateTime  int64  `json:"create_time"`
 	UpdateTime  int64  `json:"update_time"`
 }

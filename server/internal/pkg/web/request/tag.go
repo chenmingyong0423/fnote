@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package vo
+package request
 
-type Category struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	Route       string `json:"route"`
-	Description string `json:"description"`
-	Disabled    bool   `json:"disabled"`
-	ShowInNav   bool   `json:"show_in_nav"`
-	CreateTime  int64  `json:"create_time"`
-	UpdateTime  int64  `json:"update_time"`
+type CreateTagRequest struct {
+	Name     string `json:"name" binding:"required"`
+	Route    string `json:"route" binding:"required"`
+	Disabled bool   `json:"disabled"`
+}
+
+type TagDisabledRequest struct {
+	Disabled *bool `json:"disabled" binding:"required"`
 }

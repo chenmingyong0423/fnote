@@ -16,7 +16,6 @@ package service
 
 import (
 	"context"
-
 	"github.com/chenmingyong0423/fnote/backend/internal/config/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/pkg/errors"
@@ -24,12 +23,15 @@ import (
 )
 
 type IConfigService interface {
-	GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfig, error)
+	GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error)
 	GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error)
 	IncreaseWebsiteViews(ctx context.Context) error
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
 	GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error)
 	GetFrontPostCount(ctx context.Context) (*domain.FrontPostCount, error)
+	IncreaseCategoryCount(ctx context.Context) error
+	DecreaseCategoryCount(ctx context.Context) error
+	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
 }
 
 var _ IConfigService = (*ConfigService)(nil)
@@ -44,6 +46,26 @@ type ConfigService struct {
 	repo repository.IConfigRepository
 }
 
+func (s *ConfigService) UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error {
+	return s.repo.UpdateWebSiteConfig(ctx, webSiteConfig)
+}
+
+func (s *ConfigService) DecreaseCategoryCount(ctx context.Context) error {
+	err := s.repo.Decrease(ctx, "categoryCount")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *ConfigService) IncreaseCategoryCount(ctx context.Context) error {
+	err := s.repo.Increase(ctx, "categoryCount")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *ConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPostCount, error) {
 	cfg := &domain.FrontPostCount{}
 	err := s.getConfigAndConvertTo(ctx, "front-post-count", cfg)
@@ -54,19 +76,26 @@ func (s *ConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPos
 }
 
 func (s *ConfigService) GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error) {
-	configs, err := s.repo.GetConfigByTypes(ctx, "webmaster", "notice", "social", "pay", "seo meta")
+	configs, err := s.repo.GetConfigByTypes(ctx, "website", "owner", "notice", "social", "pay", "seo meta")
 	if err != nil {
 		return nil, err
 	}
 	cfg := &domain.IndexConfig{}
 	for _, config := range configs {
-		if config.Typ == "webmaster" {
-			wmCfg := domain.WebMasterConfig{}
-			err = s.anyToStruct(config.Props, &wmCfg)
+		if config.Typ == "website" {
+			wsc := domain.WebSiteConfig{}
+			err = s.anyToStruct(config.Props, &wsc)
 			if err != nil {
 				return nil, err
 			}
-			cfg.WebMasterConfig = wmCfg
+			cfg.WebSiteConfig = wsc
+		} else if config.Typ == "owner" {
+			oc := domain.OwnerConfig{}
+			err = s.anyToStruct(config.Props, &oc)
+			if err != nil {
+				return nil, err
+			}
+			cfg.OwnerConfig = oc
 		} else if config.Typ == "notice" {
 			noticeCfg := domain.NoticeConfig{}
 			err = s.anyToStruct(config.Props, &noticeCfg)
@@ -136,14 +165,14 @@ func (s *ConfigService) GetSwitchStatusByTyp(ctx context.Context, typ string) (*
 	return switchConfig, nil
 }
 
-func (s *ConfigService) GetWebmasterInfo(ctx context.Context, typ string) (*domain.WebMasterConfig, error) {
-	props, err := s.repo.FindByTyp(ctx, typ)
+func (s *ConfigService) GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error) {
+	props, err := s.repo.FindByTyp(ctx, "website")
 	if err != nil {
 		return nil, errors.WithMessage(err, "s.repo.FindByTyp failed")
 	}
-	webMasterConfig := new(domain.WebMasterConfig)
-	err = s.anyToStruct(props, webMasterConfig)
-	return webMasterConfig, err
+	wsc := new(domain.WebSiteConfig)
+	err = s.anyToStruct(props, wsc)
+	return wsc, err
 }
 
 func (s *ConfigService) anyToStruct(props any, cfgInfos any) error {
