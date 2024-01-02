@@ -41,7 +41,10 @@ type IConfigDao interface {
 	FindByTyp(ctx context.Context, typ string) (*Config, error)
 	Increase(ctx context.Context, field string) error
 	GetByTypes(ctx context.Context, types ...string) ([]*Config, error)
+	Decrease(ctx context.Context, field string) error
 }
+
+var _ IConfigDao = (*ConfigDao)(nil)
 
 func NewConfigDao(db *mongo.Database) *ConfigDao {
 	return &ConfigDao{
@@ -49,10 +52,20 @@ func NewConfigDao(db *mongo.Database) *ConfigDao {
 	}
 }
 
-var _ IConfigDao = (*ConfigDao)(nil)
-
 type ConfigDao struct {
 	coll *mongox.Collection[Config]
+}
+
+func (d *ConfigDao) Decrease(ctx context.Context, field string) error {
+	field = fmt.Sprintf("props.%s", field)
+	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", "webmaster")).Updates(update.Inc(bsonx.M(field, -1))).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to increase %s", field)
+	}
+	if updateResult.ModifiedCount == 0 {
+		return fmt.Errorf("ModifiedCount=0, fails to increase %s", field)
+	}
+	return nil
 }
 
 func (d *ConfigDao) GetByTypes(ctx context.Context, types ...string) ([]*Config, error) {

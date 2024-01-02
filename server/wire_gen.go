@@ -10,15 +10,15 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/internal/category/handler"
 	"github.com/chenmingyong0423/fnote/backend/internal/category/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/category/repository/dao"
-	service2 "github.com/chenmingyong0423/fnote/backend/internal/category/service"
+	service3 "github.com/chenmingyong0423/fnote/backend/internal/category/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/comment/hanlder"
-	repository3 "github.com/chenmingyong0423/fnote/backend/internal/comment/repository"
-	dao3 "github.com/chenmingyong0423/fnote/backend/internal/comment/repository/dao"
-	service3 "github.com/chenmingyong0423/fnote/backend/internal/comment/service"
+	repository4 "github.com/chenmingyong0423/fnote/backend/internal/comment/repository"
+	dao4 "github.com/chenmingyong0423/fnote/backend/internal/comment/repository/dao"
+	service4 "github.com/chenmingyong0423/fnote/backend/internal/comment/service"
 	handler2 "github.com/chenmingyong0423/fnote/backend/internal/config/handler"
-	repository4 "github.com/chenmingyong0423/fnote/backend/internal/config/repository"
-	dao4 "github.com/chenmingyong0423/fnote/backend/internal/config/repository/dao"
-	service4 "github.com/chenmingyong0423/fnote/backend/internal/config/service"
+	repository3 "github.com/chenmingyong0423/fnote/backend/internal/config/repository"
+	dao3 "github.com/chenmingyong0423/fnote/backend/internal/config/repository/dao"
+	service2 "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	repository2 "github.com/chenmingyong0423/fnote/backend/internal/count_stats/repository"
 	dao2 "github.com/chenmingyong0423/fnote/backend/internal/count_stats/repository/dao"
 	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
@@ -58,14 +58,14 @@ func initializeApp(cfgPath string) (*gin.Engine, error) {
 	countStatsDao := dao2.NewCountStatsDao(database)
 	countStatsRepository := repository2.NewCountStatsRepository(countStatsDao)
 	countStatsService := service.NewCountStatsService(countStatsRepository)
-	categoryService := service2.NewCategoryService(categoryRepository, countStatsService)
+	configDao := dao3.NewConfigDao(database)
+	configRepository := repository3.NewConfigRepository(configDao)
+	configService := service2.NewConfigService(configRepository)
+	categoryService := service3.NewCategoryService(categoryRepository, countStatsService, configService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
-	commentDao := dao3.NewCommentDao(database)
-	commentRepository := repository3.NewCommentRepository(commentDao)
-	commentService := service3.NewCommentService(commentRepository)
-	configDao := dao4.NewConfigDao(database)
-	configRepository := repository4.NewConfigRepository(configDao)
-	configService := service4.NewConfigService(configRepository)
+	commentDao := dao4.NewCommentDao(database)
+	commentRepository := repository4.NewCommentRepository(commentDao)
+	commentService := service4.NewCommentService(commentRepository)
 	postDao := dao5.NewPostDao(database)
 	postRepository := repository5.NewPostRepository(postDao)
 	postService := service5.NewPostService(postRepository)

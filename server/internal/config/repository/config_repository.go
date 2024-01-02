@@ -27,6 +27,7 @@ type IConfigRepository interface {
 	FindByTyp(ctx context.Context, typ string) (any, error)
 	Increase(ctx context.Context, field string) error
 	GetConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error)
+	Decrease(ctx context.Context, field string) error
 }
 
 func NewConfigRepository(dao dao.IConfigDao) *ConfigRepository {
@@ -39,6 +40,10 @@ var _ IConfigRepository = (*ConfigRepository)(nil)
 
 type ConfigRepository struct {
 	dao dao.IConfigDao
+}
+
+func (r *ConfigRepository) Decrease(ctx context.Context, field string) error {
+	return r.dao.Decrease(ctx, field)
 }
 
 func (r *ConfigRepository) GetConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error) {
