@@ -20,13 +20,13 @@ import (
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 
-	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/internal/visit_log/service"
+	configServ "github.com/chenmingyong0423/fnote/backend/internal/website_config/service"
 	"github.com/gin-gonic/gin"
 )
 
-func NewVisitLogHandler(serv service.IVisitLogService, cfgServ configServ.IConfigService) *VisitLogHandler {
+func NewVisitLogHandler(serv service.IVisitLogService, cfgServ configServ.IWebsiteConfigService) *VisitLogHandler {
 	return &VisitLogHandler{
 		serv:    serv,
 		cfgServ: cfgServ,
@@ -35,7 +35,7 @@ func NewVisitLogHandler(serv service.IVisitLogService, cfgServ configServ.IConfi
 
 type VisitLogHandler struct {
 	serv    service.IVisitLogService
-	cfgServ configServ.IConfigService
+	cfgServ configServ.IWebsiteConfigService
 }
 
 func (h *VisitLogHandler) RegisterGinRoutes(engine *gin.Engine) {

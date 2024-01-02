@@ -21,6 +21,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/spf13/viper"
+
+	handler3 "github.com/chenmingyong0423/fnote/backend/internal/file/handler"
+
 	handler2 "github.com/chenmingyong0423/fnote/backend/internal/tag/handler"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/message_template/handler"
@@ -30,17 +34,17 @@ import (
 
 	ctgHandler "github.com/chenmingyong0423/fnote/backend/internal/category/handler"
 	commentHandler "github.com/chenmingyong0423/fnote/backend/internal/comment/hanlder"
-	cfgHandler "github.com/chenmingyong0423/fnote/backend/internal/config/handler"
 	friendHanlder "github.com/chenmingyong0423/fnote/backend/internal/friend/hanlder"
 	myValidator "github.com/chenmingyong0423/fnote/backend/internal/pkg/validator"
 	postHanlder "github.com/chenmingyong0423/fnote/backend/internal/post/handler"
 	vlHandler "github.com/chenmingyong0423/fnote/backend/internal/visit_log/handler"
+	cfgHandler "github.com/chenmingyong0423/fnote/backend/internal/website_config/handler"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *cfgHandler.ConfigHandler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, middleware []gin.HandlerFunc, validators Validators) (*gin.Engine, error) {
+func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *cfgHandler.WebsiteConfigHandler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, middleware []gin.HandlerFunc, validators Validators) (*gin.Engine, error) {
 	engine := gin.Default()
 
 	// 参数校验器注册
@@ -66,11 +70,12 @@ func NewGinEngine(ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.Com
 		vlHdr.RegisterGinRoutes(engine)
 		msgTplHandler.RegisterGinRoutes(engine)
 		tagsHandler.RegisterGinRoutes(engine)
+		fileHdr.RegisterGinRoutes(engine)
 	}
 	return engine, nil
 }
 
-func InitMiddlewares(cfg *Config, writer io.Writer) []gin.HandlerFunc {
+func InitMiddlewares(writer io.Writer) []gin.HandlerFunc {
 	return []gin.HandlerFunc{
 		gin.LoggerWithWriter(writer),
 		id.RequestId(),
@@ -87,19 +92,19 @@ func InitMiddlewares(cfg *Config, writer io.Writer) []gin.HandlerFunc {
 			default:
 				return slog.LevelInfo
 			}
-		}(cfg.Logger.Level))),
+		}(viper.GetString("logger.level")))),
 		cors.New(cors.Config{
 			AllowCredentials: true,
 			AllowOriginFunc: func(origin string) bool {
-				if slices.Contains(cfg.Gin.AllowedOrigins, "*") {
+				if slices.Contains(viper.GetStringSlice("gin.allowed_origins"), "*") {
 					return true
 				}
-				return slices.ContainsFunc(cfg.Gin.AllowedOrigins, func(s string) bool {
+				return slices.ContainsFunc(viper.GetStringSlice("gin.allowed_origins"), func(s string) bool {
 					return strings.Contains(origin, s)
 				})
 			},
-			AllowMethods: cfg.Gin.AllowedMethods,
-			AllowHeaders: cfg.Gin.AllowedHeaders,
+			AllowMethods: viper.GetStringSlice("gin.allowed_methods"),
+			AllowHeaders: viper.GetStringSlice("gin.allowed_headers"),
 			MaxAge:       12 * time.Hour,
 		}),
 	}

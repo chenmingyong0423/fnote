@@ -22,11 +22,11 @@ import (
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/builder/update"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/config/repository/dao"
+	"github.com/chenmingyong0423/fnote/backend/internal/website_config/repository/dao"
 	"github.com/pkg/errors"
 )
 
-type IConfigRepository interface {
+type IWebsiteConfigRepository interface {
 	FindByTyp(ctx context.Context, typ string) (any, error)
 	Increase(ctx context.Context, field string) error
 	GetConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error)
@@ -34,19 +34,19 @@ type IConfigRepository interface {
 	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
 }
 
-func NewConfigRepository(dao dao.IConfigDao) *ConfigRepository {
-	return &ConfigRepository{
+func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
+	return &WebsiteConfigRepository{
 		dao: dao,
 	}
 }
 
-var _ IConfigRepository = (*ConfigRepository)(nil)
+var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
-type ConfigRepository struct {
-	dao dao.IConfigDao
+type WebsiteConfigRepository struct {
+	dao dao.IWebsiteConfigDao
 }
 
-func (r *ConfigRepository) UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error {
+func (r *WebsiteConfigRepository) UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error {
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "website"),
@@ -54,11 +54,11 @@ func (r *ConfigRepository) UpdateWebSiteConfig(ctx context.Context, webSiteConfi
 	)
 }
 
-func (r *ConfigRepository) Decrease(ctx context.Context, field string) error {
+func (r *WebsiteConfigRepository) Decrease(ctx context.Context, field string) error {
 	return r.dao.Decrease(ctx, field)
 }
 
-func (r *ConfigRepository) GetConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error) {
+func (r *WebsiteConfigRepository) GetConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error) {
 	configs, err := r.dao.GetByTypes(ctx, types...)
 	if err != nil {
 		return nil, err
@@ -66,11 +66,11 @@ func (r *ConfigRepository) GetConfigByTypes(ctx context.Context, types ...string
 	return r.toConfigs(configs), nil
 }
 
-func (r *ConfigRepository) Increase(ctx context.Context, field string) error {
+func (r *WebsiteConfigRepository) Increase(ctx context.Context, field string) error {
 	return r.dao.Increase(ctx, field)
 }
 
-func (r *ConfigRepository) FindByTyp(ctx context.Context, typ string) (any, error) {
+func (r *WebsiteConfigRepository) FindByTyp(ctx context.Context, typ string) (any, error) {
 	config, err := r.dao.FindByTyp(ctx, typ)
 	if err != nil {
 		return nil, errors.WithMessage(err, "r.dao.FindByTyp failed")
@@ -78,7 +78,7 @@ func (r *ConfigRepository) FindByTyp(ctx context.Context, typ string) (any, erro
 	return config.Props, nil
 }
 
-func (r *ConfigRepository) toConfigs(configs []*dao.Config) []domain.Config {
+func (r *WebsiteConfigRepository) toConfigs(configs []*dao.WebsiteConfig) []domain.Config {
 	result := make([]domain.Config, len(configs))
 	for i, config := range configs {
 		result[i] = domain.Config{Typ: config.Typ, Props: config.Props}

@@ -30,8 +30,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Config defines for the MongoDB Collection "config"
-type Config struct {
+// WebsiteConfig defines for the MongoDB Collection "website_config"
+type WebsiteConfig struct {
 	Id         string `bson:"_id"`
 	Props      any    `bson:"props"`
 	Typ        string `bson:"typ"`
@@ -39,38 +39,38 @@ type Config struct {
 	UpdateTime int64  `bson:"update_time"`
 }
 
-type IConfigDao interface {
-	FindByTyp(ctx context.Context, typ string) (*Config, error)
+type IWebsiteConfigDao interface {
+	FindByTyp(ctx context.Context, typ string) (*WebsiteConfig, error)
 	Increase(ctx context.Context, field string) error
-	GetByTypes(ctx context.Context, types ...string) ([]*Config, error)
+	GetByTypes(ctx context.Context, types ...string) ([]*WebsiteConfig, error)
 	Decrease(ctx context.Context, field string) error
 	UpdateByConditionAndUpdates(ctx context.Context, cond bson.D, updates bson.D) error
 }
 
-var _ IConfigDao = (*ConfigDao)(nil)
+var _ IWebsiteConfigDao = (*WebsiteConfigDao)(nil)
 
-func NewConfigDao(db *mongo.Database) *ConfigDao {
-	return &ConfigDao{
-		coll: mongox.NewCollection[Config](db.Collection("configs")),
+func NewWebsiteConfigDao(db *mongo.Database) *WebsiteConfigDao {
+	return &WebsiteConfigDao{
+		coll: mongox.NewCollection[WebsiteConfig](db.Collection("configs")),
 	}
 }
 
-type ConfigDao struct {
-	coll *mongox.Collection[Config]
+type WebsiteConfigDao struct {
+	coll *mongox.Collection[WebsiteConfig]
 }
 
-func (d *ConfigDao) UpdateByConditionAndUpdates(ctx context.Context, cond bson.D, updates bson.D) error {
+func (d *WebsiteConfigDao) UpdateByConditionAndUpdates(ctx context.Context, cond bson.D, updates bson.D) error {
 	updateOne, err := d.coll.Updater().Filter(cond).Updates(updates).UpdateOne(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fails to update config, cond=%v, updates=%v", cond, updates)
+		return errors.Wrapf(err, "fails to update website_config, cond=%v, updates=%v", cond, updates)
 	}
 	if updateOne.ModifiedCount == 0 {
-		return fmt.Errorf("ModifiedCount=0, fails to update config, cond=%v, updates=%v", cond, updates)
+		return fmt.Errorf("ModifiedCount=0, fails to update website_config, cond=%v, updates=%v", cond, updates)
 	}
 	return nil
 }
 
-func (d *ConfigDao) Decrease(ctx context.Context, field string) error {
+func (d *WebsiteConfigDao) Decrease(ctx context.Context, field string) error {
 	field = fmt.Sprintf("props.%s", field)
 	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", "webmaster")).Updates(update.Inc(bsonx.M(field, -1))).UpdateOne(ctx)
 	if err != nil {
@@ -82,7 +82,7 @@ func (d *ConfigDao) Decrease(ctx context.Context, field string) error {
 	return nil
 }
 
-func (d *ConfigDao) GetByTypes(ctx context.Context, types ...string) ([]*Config, error) {
+func (d *WebsiteConfigDao) GetByTypes(ctx context.Context, types ...string) ([]*WebsiteConfig, error) {
 	configs, err := d.coll.Finder().Filter(query.In("typ", types...)).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find configs by types, types=%v", types)
@@ -90,7 +90,7 @@ func (d *ConfigDao) GetByTypes(ctx context.Context, types ...string) ([]*Config,
 	return configs, nil
 }
 
-func (d *ConfigDao) Increase(ctx context.Context, field string) error {
+func (d *WebsiteConfigDao) Increase(ctx context.Context, field string) error {
 	field = fmt.Sprintf("props.%s", field)
 	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", "webmaster")).Updates(update.Inc(bsonx.M(field, 1))).UpdateOne(ctx)
 	if err != nil {
@@ -102,10 +102,10 @@ func (d *ConfigDao) Increase(ctx context.Context, field string) error {
 	return nil
 }
 
-func (d *ConfigDao) FindByTyp(ctx context.Context, typ string) (*Config, error) {
+func (d *WebsiteConfigDao) FindByTyp(ctx context.Context, typ string) (*WebsiteConfig, error) {
 	config, err := d.coll.Finder().Filter(bsonx.M("typ", typ)).FindOne(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Find config failed, typ=%s", typ)
+		return nil, errors.Wrapf(err, "Find website_config failed, typ=%s", typ)
 	}
 	return config, nil
 }

@@ -56,6 +56,7 @@ func main() {
 	gen := GenDomain{
 		DomainName:    *domain,
 		UnderlineName: stringx.CamelToSnake(*domain),
+		TableName:     *tableName,
 	}
 
 	if outputDir == nil || *outputDir == "" {
@@ -66,6 +67,7 @@ func main() {
 	if tableName == nil || *tableName == "" {
 		tableName = new(string)
 		*tableName = gen.UnderlineName
+		gen.TableName = *tableName
 	}
 
 	err := executeTemplate(handler, "templates/handler.tmpl", *outputDir+"/handler", fmt.Sprintf("/%s_handler.go", gen.UnderlineName), gen)

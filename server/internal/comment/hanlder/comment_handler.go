@@ -23,17 +23,17 @@ import (
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/vo"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/comment/service"
-	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	msgService "github.com/chenmingyong0423/fnote/backend/internal/message/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	postServ "github.com/chenmingyong0423/fnote/backend/internal/post/service"
+	configServ "github.com/chenmingyong0423/fnote/backend/internal/website_config/service"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NewCommentHandler(serv service.ICommentService, cfgService configServ.IConfigService, postServ postServ.IPostService, msgServ msgService.IMessageService) *CommentHandler {
+func NewCommentHandler(serv service.ICommentService, cfgService configServ.IWebsiteConfigService, postServ postServ.IPostService, msgServ msgService.IMessageService) *CommentHandler {
 	return &CommentHandler{
 		serv:       serv,
 		cfgService: cfgService,
@@ -44,7 +44,7 @@ func NewCommentHandler(serv service.ICommentService, cfgService configServ.IConf
 
 type CommentHandler struct {
 	serv       service.ICommentService
-	cfgService configServ.IConfigService
+	cfgService configServ.IWebsiteConfigService
 	postServ   postServ.IPostService
 	msgServ    msgService.IMessageService
 }

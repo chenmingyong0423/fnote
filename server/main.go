@@ -15,17 +15,25 @@
 package main
 
 import (
+	"bytes"
 	"flag"
+	"os"
+
+	"github.com/spf13/viper"
 )
 
 var (
-	configPath = flag.String("config", "./config/fnote.yaml", "the path of config")
+	configPath = flag.String("website_config", "./config/fnote.yaml", "the path of website_config")
 	port       = flag.String("port", ":8080", "HTTP port")
 )
 
 func main() {
 	flag.Parse()
-	app, err := initializeApp(*configPath)
+	err := initViper(*configPath)
+	if err != nil {
+		panic(err)
+	}
+	app, err := initializeApp()
 	if err != nil {
 		panic(err)
 	}
@@ -33,4 +41,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func initViper(cfgPath string) error {
+	viper.SetConfigType("yaml")
+	readFile, err := os.ReadFile(cfgPath)
+	if err != nil {
+		return err
+	}
+	// 寻找配置文件并读取
+	err = viper.ReadConfig(bytes.NewReader(readFile))
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -21,8 +21,8 @@ import (
 	"regexp"
 	"strings"
 
-	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	msgService "github.com/chenmingyong0423/fnote/backend/internal/message/service"
+	configServ "github.com/chenmingyong0423/fnote/backend/internal/website_config/service"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/friend/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
@@ -30,7 +30,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewFriendHandler(serv service.IFriendService, msgServ msgService.IMessageService, cfgService configServ.IConfigService) *FriendHandler {
+func NewFriendHandler(serv service.IFriendService, msgServ msgService.IMessageService, cfgService configServ.IWebsiteConfigService) *FriendHandler {
 	return &FriendHandler{
 		serv:       serv,
 		msgServ:    msgServ,
@@ -42,7 +42,7 @@ func NewFriendHandler(serv service.IFriendService, msgServ msgService.IMessageSe
 type FriendHandler struct {
 	serv       service.IFriendService
 	msgServ    msgService.IMessageService
-	cfgService configServ.IConfigService
+	cfgService configServ.IWebsiteConfigService
 }
 
 func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {

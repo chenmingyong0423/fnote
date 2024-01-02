@@ -19,9 +19,9 @@ import (
 
 	"github.com/chenmingyong0423/fnote/backend/internal/message_template/service"
 
-	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	emailServ "github.com/chenmingyong0423/fnote/backend/internal/email/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+	configServ "github.com/chenmingyong0423/fnote/backend/internal/website_config/service"
 )
 
 type IMessageService interface {
@@ -33,7 +33,7 @@ var (
 	_ IMessageService = (*MessageService)(nil)
 )
 
-func NewMessageService(configServ configServ.IConfigService, emailServ emailServ.IEmailService, msgTplService service.IMsgTplService) *MessageService {
+func NewMessageService(configServ configServ.IWebsiteConfigService, emailServ emailServ.IEmailService, msgTplService service.IMsgTplService) *MessageService {
 	return &MessageService{
 		configServ:    configServ,
 		emailServ:     emailServ,
@@ -42,7 +42,7 @@ func NewMessageService(configServ configServ.IConfigService, emailServ emailServ
 }
 
 type MessageService struct {
-	configServ    configServ.IConfigService
+	configServ    configServ.IWebsiteConfigService
 	emailServ     emailServ.IEmailService
 	msgTplService service.IMsgTplService
 }

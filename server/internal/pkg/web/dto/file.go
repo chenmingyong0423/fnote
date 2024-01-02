@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package service
+package dto
 
-type IConfigService interface {
-}
-
-var _ IConfigService = (*ConfigService)(nil)
-
-type ConfigService struct {
+type FileDTO struct {
+	FileName string `json:"file_name"`
+	FileSize int64  `json:"file_size"`
+	Content  []byte `json:"content"`
+	FileType string `json:"file_type"`
+	FileExt  string `json:"file_ext"`
 }

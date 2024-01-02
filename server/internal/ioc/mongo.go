@@ -18,19 +18,21 @@ import (
 	"context"
 	"time"
 
+	"github.com/spf13/viper"
+
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func NewMongoDB(cfg *Config) *mongo.Database {
+func NewMongoDB() *mongo.Database {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.MongoDb.Uri).SetAuth(options.Credential{
-		Username:   cfg.MongoDb.Username,
-		Password:   cfg.MongoDb.Password,
-		AuthSource: cfg.MongoDb.AuthSource,
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(viper.GetString("mongodb.uri")).SetAuth(options.Credential{
+		Username:   viper.GetString("mongodb.username"),
+		Password:   viper.GetString("mongodb.password"),
+		AuthSource: viper.GetString("mongodb.auth_source"),
 	}).SetDirect(true))
 	if err != nil {
 		panic(err)
@@ -39,5 +41,5 @@ func NewMongoDB(cfg *Config) *mongo.Database {
 	if err != nil {
 		panic(err)
 	}
-	return client.Database(cfg.MongoDb.Database)
+	return client.Database(viper.GetString("mongodb.database"))
 }

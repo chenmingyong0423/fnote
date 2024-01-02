@@ -20,7 +20,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
+	configServ "github.com/chenmingyong0423/fnote/backend/internal/website_config/service"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/category/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
@@ -46,7 +46,7 @@ type ICategoryService interface {
 
 var _ ICategoryService = (*CategoryService)(nil)
 
-func NewCategoryService(repo repository.ICategoryRepository, countStatsService service.ICountStatsService, configService configServ.IConfigService) *CategoryService {
+func NewCategoryService(repo repository.ICategoryRepository, countStatsService service.ICountStatsService, configService configServ.IWebsiteConfigService) *CategoryService {
 	return &CategoryService{
 		countStatsService: countStatsService,
 		configService:     configService,
@@ -55,7 +55,7 @@ func NewCategoryService(repo repository.ICategoryRepository, countStatsService s
 }
 
 type CategoryService struct {
-	configService     configServ.IConfigService
+	configService     configServ.IWebsiteConfigService
 	countStatsService service.ICountStatsService
 	repo              repository.ICategoryRepository
 }
