@@ -20,13 +20,13 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/dto"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/backend/internal/post/repository"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/post/repository"
 	"github.com/pkg/errors"
 )
 

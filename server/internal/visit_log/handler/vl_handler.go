@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/backend/internal/visit_log/service"
-	configServ "github.com/chenmingyong0423/fnote/backend/internal/website_config/service"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
+	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/service"
 	"github.com/gin-gonic/gin"
 )
 

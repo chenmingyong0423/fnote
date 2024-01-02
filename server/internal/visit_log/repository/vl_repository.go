@@ -18,8 +18,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository/dao"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/visit_log/repository/dao"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )

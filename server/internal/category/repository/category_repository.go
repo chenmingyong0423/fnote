@@ -22,13 +22,13 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/dto"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/category/repository/dao"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/category/repository/dao"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 )
 
 type ICategoryRepository interface {

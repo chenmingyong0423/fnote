@@ -14,7 +14,7 @@
 
 package domain
 
-import "github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
+import "github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 
 type PostsQueryCondition struct {
 	Size int64

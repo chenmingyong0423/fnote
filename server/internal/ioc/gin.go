@@ -23,22 +23,22 @@ import (
 
 	"github.com/spf13/viper"
 
-	handler3 "github.com/chenmingyong0423/fnote/backend/internal/file/handler"
+	handler3 "github.com/chenmingyong0423/fnote/server/internal/file/handler"
 
-	handler2 "github.com/chenmingyong0423/fnote/backend/internal/tag/handler"
+	handler2 "github.com/chenmingyong0423/fnote/server/internal/tag/handler"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/message_template/handler"
+	"github.com/chenmingyong0423/fnote/server/internal/message_template/handler"
 	"github.com/chenmingyong0423/ginx/middlewares/id"
 	"github.com/chenmingyong0423/ginx/middlewares/log"
 	"github.com/gin-contrib/cors"
 
-	ctgHandler "github.com/chenmingyong0423/fnote/backend/internal/category/handler"
-	commentHandler "github.com/chenmingyong0423/fnote/backend/internal/comment/hanlder"
-	friendHanlder "github.com/chenmingyong0423/fnote/backend/internal/friend/hanlder"
-	myValidator "github.com/chenmingyong0423/fnote/backend/internal/pkg/validator"
-	postHanlder "github.com/chenmingyong0423/fnote/backend/internal/post/handler"
-	vlHandler "github.com/chenmingyong0423/fnote/backend/internal/visit_log/handler"
-	cfgHandler "github.com/chenmingyong0423/fnote/backend/internal/website_config/handler"
+	ctgHandler "github.com/chenmingyong0423/fnote/server/internal/category/handler"
+	commentHandler "github.com/chenmingyong0423/fnote/server/internal/comment/hanlder"
+	friendHanlder "github.com/chenmingyong0423/fnote/server/internal/friend/hanlder"
+	myValidator "github.com/chenmingyong0423/fnote/server/internal/pkg/validator"
+	postHanlder "github.com/chenmingyong0423/fnote/server/internal/post/handler"
+	vlHandler "github.com/chenmingyong0423/fnote/server/internal/visit_log/handler"
+	cfgHandler "github.com/chenmingyong0423/fnote/server/internal/website_config/handler"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"

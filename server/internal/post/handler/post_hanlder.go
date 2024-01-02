@@ -18,20 +18,20 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/dto"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/vo"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/request"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
 
-	configServ "github.com/chenmingyong0423/fnote/backend/internal/website_config/service"
+	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/service"
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/backend/internal/post/service"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/post/service"
 	"github.com/gin-gonic/gin"
 )
 

@@ -17,11 +17,11 @@ package service
 import (
 	"context"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/message_template/service"
+	"github.com/chenmingyong0423/fnote/server/internal/message_template/service"
 
-	emailServ "github.com/chenmingyong0423/fnote/backend/internal/email/service"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	configServ "github.com/chenmingyong0423/fnote/backend/internal/website_config/service"
+	emailServ "github.com/chenmingyong0423/fnote/server/internal/email/service"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/service"
 )
 
 type IMessageService interface {
