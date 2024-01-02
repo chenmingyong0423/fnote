@@ -28,6 +28,20 @@
           :width="200"
           :src="data.icon"
         />
+        <a-upload
+          v-if="editable"
+          v-model:file-list="fileList"
+          name="file"
+          action="http://localhost:8080/admin/files/upload"
+          @change="handleChange"
+          :before-upload="beforeUpload"
+          :maxCount="1"
+        >
+          <a-button>
+            <upload-outlined></upload-outlined>
+            Click to Upload
+          </a-button>
+        </a-upload>
       </a-descriptions-item>
     </a-descriptions>
     <div style="margin-top: 10px;">
@@ -47,6 +61,7 @@ import { ref } from 'vue'
 import dayjs from 'dayjs'
 import { type Dayjs } from 'dayjs'
 import { message } from 'ant-design-vue'
+import type { UploadChangeParam, UploadProps } from 'ant-design-vue';
 
 const editable = ref<boolean>(false)
 const liveTime = ref<Dayjs>()
@@ -103,4 +118,46 @@ const save = async () => {
     message.error('保存失败')
   }
 }
+
+// 文件操作
+const fileList = ref<UploadProps['fileList']>([]);
+
+const handleChange = (info: UploadChangeParam) => {
+  if (info.file.status === 'uploading') {
+    return;
+  }
+  console.log(info)
+  if (info.file.status === 'done') {
+    // Get this url from response in real world.
+    data.value.icon = info.file.response.data.url
+    console.log(data.value.icon)
+    message.success('上传成功');
+  }
+  if (info.file.status === 'error') {
+    message.error('upload error');
+  }
+};
+
+const beforeUpload = (file: UploadProps['fileList'][number]) => {
+  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+  if (!isJpgOrPng) {
+    message.error('You can only upload JPG file!');
+  }
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isLt2M) {
+    message.error('Image must smaller than 2MB!');
+  }
+  return isJpgOrPng && isLt2M;
+};
 </script>
+
+<style scoped>
+.upload-list-inline :deep(.ant-upload-list-item) {
+  float: left;
+  width: 200px;
+  margin-right: 8px;
+}
+.upload-list-inline [class*='-upload-list-rtl'] :deep(.ant-upload-list-item) {
+  float: right;
+}
+</style>
