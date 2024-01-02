@@ -23,7 +23,7 @@ import (
 )
 
 var (
-	configPath = flag.String("config", "./config/fnote.yaml", "the path of website_config")
+	configPath = flag.String("config", "./config/fnote.yaml", "the path of config")
 	port       = flag.String("port", ":8080", "HTTP port")
 )
 
