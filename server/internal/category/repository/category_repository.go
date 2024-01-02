@@ -40,6 +40,7 @@ type ICategoryRepository interface {
 	ModifyCategory(ctx context.Context, id string, description string) error
 	DeleteCategory(ctx context.Context, id string) error
 	GetNavigations(ctx context.Context) ([]domain.Category, error)
+	ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error
 }
 
 var _ ICategoryRepository = (*CategoryRepository)(nil)
@@ -52,6 +53,14 @@ func NewCategoryRepository(dao dao.ICategoryDao) *CategoryRepository {
 
 type CategoryRepository struct {
 	dao dao.ICategoryDao
+}
+
+func (r *CategoryRepository) ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	return r.dao.ModifyCategoryNavigation(ctx, objectID, showInNav)
 }
 
 func (r *CategoryRepository) GetNavigations(ctx context.Context) ([]domain.Category, error) {
@@ -88,7 +97,7 @@ func (r *CategoryRepository) ModifyCategoryDisabled(ctx context.Context, id stri
 
 func (r *CategoryRepository) CreateCategory(ctx context.Context, category domain.Category) (string, error) {
 	now := time.Now().Unix()
-	return r.dao.Create(ctx, &dao.Category{Name: category.Name, Route: category.Route, Description: category.Description, CreateTime: now, UpdateTime: now})
+	return r.dao.Create(ctx, &dao.Category{Name: category.Name, Route: category.Route, Description: category.Description, ShowInNav: category.ShowInNav, Disabled: category.Disabled, CreateTime: now, UpdateTime: now})
 }
 
 func (r *CategoryRepository) QueryCategoriesPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error) {
@@ -126,7 +135,7 @@ func (r *CategoryRepository) GetCategoryByRoute(ctx context.Context, route strin
 }
 
 func (r *CategoryRepository) toDomainCategory(category *dao.Category) domain.Category {
-	return domain.Category{Id: category.Id.Hex(), Name: category.Name, Route: category.Route, Description: category.Description, Disabled: category.Disabled, CreateTime: category.CreateTime, UpdateTime: category.UpdateTime}
+	return domain.Category{Id: category.Id.Hex(), Name: category.Name, Route: category.Route, Description: category.Description, Disabled: category.Disabled, ShowInNav: category.ShowInNav, CreateTime: category.CreateTime, UpdateTime: category.UpdateTime}
 }
 
 func (r *CategoryRepository) GetAll(ctx context.Context) ([]domain.Category, error) {

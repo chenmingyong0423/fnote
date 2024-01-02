@@ -15,6 +15,7 @@
 package handler
 
 import (
+	"github.com/chenmingyong0423/gkit"
 	"net/http"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/category/service"
@@ -65,6 +66,7 @@ func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/disabled/:id", api.WrapWithBody(h.AdminModifyCategoryDisabled))
 	adminGroup.PUT("/:id", api.WrapWithBody(h.AdminModifyCategory))
 	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteCategory))
+	adminGroup.PUT("/navigation/:id", api.WrapWithBody(h.AdminModifyCategoryNavigation))
 }
 
 func (h *CategoryHandler) GetCategories(ctx *gin.Context) (listVO api.ListVO[CategoryWithCountVO], err error) {
@@ -127,6 +129,7 @@ func (h *CategoryHandler) categoriesToVO(categories []domain.Category) []vo.Cate
 			Name:        category.Name,
 			Route:       category.Route,
 			Disabled:    category.Disabled,
+			ShowInNav:   category.ShowInNav,
 			Description: category.Description,
 			CreateTime:  category.CreateTime,
 			UpdateTime:  category.UpdateTime,
@@ -140,6 +143,7 @@ func (h *CategoryHandler) AdminCreateCategory(ctx *gin.Context, req request.Crea
 		Name:        req.Name,
 		Route:       req.Route,
 		Description: req.Description,
+		ShowInNav:   req.ShowInNav,
 		Disabled:    req.Disabled,
 	})
 	if err != nil {
@@ -164,4 +168,9 @@ func (h *CategoryHandler) AdminModifyCategory(ctx *gin.Context, req request.Upda
 func (h *CategoryHandler) AdminDeleteCategory(ctx *gin.Context) (any, error) {
 	id := ctx.Param("id")
 	return nil, h.serv.DeleteCategory(ctx, id)
+}
+
+func (h *CategoryHandler) AdminModifyCategoryNavigation(ctx *gin.Context, req request.CategoryNavRequest) (any, error) {
+	id := ctx.Param("id")
+	return nil, h.serv.ModifyCategoryNavigation(ctx, id, gkit.GetValueOrDefault(req.ShowInNav))
 }
