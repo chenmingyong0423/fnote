@@ -104,6 +104,9 @@ func (h *ConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/configs")
 	// 获取首页的配置信息
 	routerGroup.GET("/index", api.Wrap(h.GetIndexConfig))
+
+	adminGroup := engine.Group("/admin/configs")
+	adminGroup.GET("/website", api.Wrap(h.AdminGetWebsiteConfig))
 }
 
 func (h *ConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO, error) {
@@ -177,4 +180,12 @@ func (h *ConfigHandler) toOwnerConfigVO(ownerConfig *domain.OwnerConfig) *OwnerC
 		Profile: ownerConfig.Profile,
 		Picture: ownerConfig.Picture,
 	}
+}
+
+func (h *ConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (WebsiteConfigVO, error) {
+	config, err := h.serv.GetWebSiteConfig(ctx)
+	if err != nil {
+		return WebsiteConfigVO{}, err
+	}
+	return *h.toWebsiteConfigVO(config), nil
 }
