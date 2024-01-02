@@ -68,6 +68,19 @@ const items = reactive([
         title: '分类列表'
       }
     ]
+  },
+  {
+    key: 'sub tag',
+    icon: () => h(PieChartOutlined),
+    label: '标签管理',
+    title: '标签管理',
+    children: [
+      {
+        key: '/tag',
+        label: '标签列表',
+        title: '标签列表'
+      }
+    ]
   }
 ])
 watch(
