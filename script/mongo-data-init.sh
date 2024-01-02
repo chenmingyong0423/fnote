@@ -7,7 +7,6 @@ db.auth('$MONGO_USERNAME', '$MONGO_PASSWORD');
 // ----------------------------
 db.getCollection("categories").drop();
 db.createCollection("categories");
-db.categories.createIndex({ "route": -1 });
 db.getCollection("categories").createIndex({
     name: NumberInt("1")
 }, {
@@ -21,6 +20,23 @@ db.getCollection("categories").createIndex({
     name: "unique_route",
     unique: true
 });
+
+db.getCollection("tags").drop();
+db.createCollection("tags");
+db.getCollection("tags").createIndex({
+    name: NumberInt("1")
+}, {
+    name: "unique_name",
+    unique: true
+});
+
+db.getCollection("tags").createIndex({
+    route: NumberInt("1")
+}, {
+    name: "unique_route",
+    unique: true
+});
+
 
 
 // ----------------------------
