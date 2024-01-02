@@ -1,6 +1,6 @@
 FROM golang:alpine AS builder
 
-ENV APP_HOME /fnote/backend
+ENV APP_HOME /fnote/server
 WORKDIR "$APP_HOME"
 
 COPY . ./
@@ -11,8 +11,8 @@ RUN go build
 
 FROM alpine:latest
 
-COPY --from=builder /fnote/backend/backend /fnote/backend
-COPY --from=builder /fnote/backend/config/fnote.prod.yaml /fnote/config/fnote.prod.yaml
+COPY --from=builder /fnote/server/server /fnote/server
+COPY --from=builder /fnote/server/config/fnote.prod.yaml /fnote/config/fnote.prod.yaml
 
 WORKDIR /fnote
 
