@@ -28,6 +28,16 @@
             <a-textarea v-model:value="formState.description" />
           </a-form-item>
           <a-form-item
+            label="是否显示在导航栏上"
+            name="disabled"
+            class="collection-create-form_last-form-item"
+          >
+            <a-radio-group v-model:value="formState.show_in_nav">
+              <a-radio :value="true">true</a-radio>
+              <a-radio :value="false">false</a-radio>
+            </a-radio-group>
+          </a-form-item>
+          <a-form-item
             label="是否启用"
             name="disabled"
             class="collection-create-form_last-form-item"
@@ -56,8 +66,20 @@
             </div>
           </template>
 
+          <template v-if="column.dataIndex === 'create_time'">
+            {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
+          </template>
+
+          <template v-if="column.dataIndex === 'update_time'">
+            {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
+          </template>
+
           <template v-if="column.key === 'disabled'">
             <a-switch v-model:checked="record.disabled" @change="changeCategoryDisabled(record)" />
+          </template>
+
+          <template v-if="column.key === 'show_in_nav'">
+            <a-switch v-model:checked="record.show_in_nav" @change="changeCategoryNav(record)" />
           </template>
 
           <template v-else-if="column.dataIndex === 'operation'">
@@ -95,7 +117,7 @@ import type { IBaseResponse, IPageData, IResponse, PageRequest } from '@/interfa
 import type { CategoryRequest, ICategory } from '@/interfaces/Category'
 import { message } from 'ant-design-vue'
 import { cloneDeep } from 'lodash-es'
-
+import dayjs from 'dayjs'
 const columns = [
   {
     title: '名称',
@@ -118,13 +140,18 @@ const columns = [
     dataIndex: 'disabled'
   },
   {
+    title: '导航栏显示',
+    key: 'show_in_nav',
+    dataIndex: 'show_in_nav'
+  },
+  {
     title: '创建时间',
-    key: 'createTime',
+    key: 'create_time',
     dataIndex: 'create_time'
   },
   {
     title: '最后一次修改的时间',
-    key: 'updateTime',
+    key: 'update_time',
     dataIndex: 'update_time'
   },
   {
@@ -163,6 +190,7 @@ const formState = reactive<CategoryRequest>({
   name: '',
   route: '',
   description: '',
+  show_in_nav: false,
   disabled: false
 })
 
@@ -225,6 +253,23 @@ const changeCategoryDisabled = async (record: ICategory) => {
   } catch (error) {
     console.log(error)
     message.error('修改失败')
+  }
+  await getCategories()
+}
+
+const changeCategoryNav = async (record: ICategory) => {
+  try {
+    const response = await axios.put<IBaseResponse>(`/admin/categories/navigation/${record.id}`, {
+      show_in_nav: record.show_in_nav
+    })
+    if (response.data.code !== 200) {
+      message.error(response.data.message)
+      return
+    }
+    message.success('设置成功')
+  } catch (error) {
+    console.log(error)
+    message.error('设置失败')
   }
   await getCategories()
 }
