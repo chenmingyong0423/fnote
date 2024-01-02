@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/update"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
@@ -89,7 +88,7 @@ func (d *TagDao) GetById(ctx context.Context, id primitive.ObjectID) (*Tags, err
 }
 
 func (d *TagDao) ModifyDisabled(ctx context.Context, id primitive.ObjectID, disabled bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.Set(bsonx.D(bsonx.E("disabled", disabled), bsonx.E("update_time", time.Now().Unix())))).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().SetSimple("disabled", disabled).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}

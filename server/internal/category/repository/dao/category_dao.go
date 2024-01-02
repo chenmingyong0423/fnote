@@ -91,8 +91,7 @@ func (d *CategoryDao) GetById(ctx context.Context, id primitive.ObjectID) (*Cate
 }
 
 func (d *CategoryDao) ModifyCategoryNavigation(ctx context.Context, id primitive.ObjectID, showInNav bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.Set(bsonx.D(bsonx.E("show_in_nav", showInNav), bsonx.E("update_time", time.Now().Unix())))).UpdateOne(ctx)
-
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().SetSimple("show_in_nav", showInNav).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "Modify category navigation failed, id=%s, showInNav=%v", id, showInNav)
 	}
@@ -122,7 +121,7 @@ func (d *CategoryDao) DeleteById(ctx context.Context, id primitive.ObjectID) err
 }
 
 func (d *CategoryDao) ModifyCategory(ctx context.Context, id primitive.ObjectID, description string) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.Set(bsonx.D(bsonx.E("description", description), bsonx.E("update_time", time.Now().Unix())))).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().SetSimple("description", description).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}
@@ -133,7 +132,7 @@ func (d *CategoryDao) ModifyCategory(ctx context.Context, id primitive.ObjectID,
 }
 
 func (d *CategoryDao) ModifyDisabled(ctx context.Context, id primitive.ObjectID, disabled bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.Set(bsonx.D(bsonx.E("disabled", disabled), bsonx.E("update_time", time.Now().Unix())))).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().SetSimple("disabled", disabled).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}
