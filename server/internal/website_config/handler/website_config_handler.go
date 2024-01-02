@@ -109,6 +109,8 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin/configs")
 	adminGroup.GET("/website", api.Wrap(h.AdminGetWebsiteConfig))
 	adminGroup.PUT("/website", api.WrapWithBody(h.AdminUpdateWebsiteConfig))
+	adminGroup.GET("/owner", api.Wrap(h.AdminGetOwnerConfig))
+	adminGroup.PUT("/owner", api.WrapWithBody(h.AdminUpdateOwnerConfig))
 }
 
 func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO, error) {
@@ -197,5 +199,21 @@ func (h *WebsiteConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req re
 		Name:     req.Name,
 		Icon:     req.Icon,
 		LiveTime: req.LiveTime,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetOwnerConfig(ctx *gin.Context) (OwnerConfigVO, error) {
+	config, err := h.serv.GetOwnerConfig(ctx)
+	if err != nil {
+		return OwnerConfigVO{}, err
+	}
+	return *h.toOwnerConfigVO(&config), nil
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateOwnerConfig(ctx *gin.Context, req request.UpdateOwnerConfigReq) (any, error) {
+	return nil, h.serv.UpdateOwnerConfig(ctx, domain.OwnerConfig{
+		Name:    req.Name,
+		Profile: req.Profile,
+		Picture: req.Picture,
 	})
 }
