@@ -94,7 +94,7 @@ const items = reactive([
         title: '博客设置'
       }
     ]
-  },
+  }
 ])
 watch(
   () => state.openKeys,

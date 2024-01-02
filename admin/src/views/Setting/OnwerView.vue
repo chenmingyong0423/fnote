@@ -1,7 +1,7 @@
 <template>
   <div>
-    <a-descriptions title="站点信息" :column="1" bordered>
-      <a-descriptions-item label="站点名称">
+    <a-descriptions title="站长信息" :column="1" bordered>
+      <a-descriptions-item label="昵称">
         <div>
           <a-input v-if="editable" v-model:value="data.name" style="margin: -5px 0" />
           <template v-else>
@@ -9,16 +9,16 @@
           </template>
         </div>
       </a-descriptions-item>
-      <a-descriptions-item label="站点运行时间">
+      <a-descriptions-item label="个人简介">
         <div>
-          <a-date-picker v-if="editable" v-model:value="liveTime" @change="liveTimeChanged" />
+          <a-input v-if="editable" v-model:value="data.profile" style="margin: -5px 0" />
           <template v-else>
-            {{ dayjs.unix(data.live_time).format('YYYY-MM-DD') }}
+            {{ data.profile }}
           </template>
         </div>
       </a-descriptions-item>
-      <a-descriptions-item label="站点图标">
-        <a-image :width="200" :src="data.icon" />
+      <a-descriptions-item label="照片">
+        <a-image :width="200" :src="data.picture" />
         <a-upload
           v-if="editable"
           v-model:file-list="fileList"
@@ -47,59 +47,45 @@
 <script lang="ts" setup>
 import axios from '@/http/axios'
 import type { IResponse } from '@/interfaces/Common'
-import type { WebsiteConfig } from '@/interfaces/Config'
+import type { OwnerConfig } from '@/interfaces/Config'
 import { ref } from 'vue'
-import dayjs from 'dayjs'
-import { type Dayjs } from 'dayjs'
 import { message } from 'ant-design-vue'
 import type { UploadChangeParam, UploadProps } from 'ant-design-vue'
 
 const editable = ref<boolean>(false)
-const liveTime = ref<Dayjs>()
 
-const data = ref<WebsiteConfig>({
+const data = ref<OwnerConfig>({
   name: '',
-  icon: '',
-  post_count: 0,
-  category_count: 0,
-  view_count: 0,
-  live_time: 0,
-  domain: '',
-  records: []
+  profile: '',
+  picture: ''
 })
 
-const getWebsite = async () => {
+const getOwner = async () => {
   try {
-    const response = await axios.get<IResponse<WebsiteConfig>>('/admin/configs/website')
+    const response = await axios.get<IResponse<OwnerConfig>>('/admin/configs/owner')
     data.value = response.data.data || {}
-    liveTime.value = dayjs(data.value.live_time * 1000)
   } catch (error) {
     console.log(error)
-    message.error('获取站点信息失败')
+    message.error('获取站长信息失败')
   }
 }
-getWebsite()
-
-const liveTimeChanged = (date: Dayjs) => {
-  liveTime.value = date
-  data.value.live_time = Math.floor(date.valueOf() / 1000)
-}
+getOwner()
 
 const cancel = () => {
   editable.value = false
-  getWebsite()
+  getOwner()
 }
 
 const save = async () => {
   try {
-    const response = await axios.put<IResponse<WebsiteConfig>>('/admin/configs/website', {
+    const response = await axios.put<IResponse<OwnerConfig>>('/admin/configs/owner', {
       name: data.value.name,
-      live_time: data.value.live_time,
-      icon: data.value.icon
+      profile: data.value.profile,
+      picture: data.value.picture
     })
     if (response.data.code === 200) {
       message.success('保存成功')
-      await getWebsite()
+      await getOwner()
       editable.value = false
     } else {
       message.error(response.data.message)
@@ -120,8 +106,7 @@ const handleChange = (info: UploadChangeParam) => {
   console.log(info)
   if (info.file.status === 'done') {
     // Get this url from response in real world.
-    data.value.icon = info.file.response.data.url
-    console.log(data.value.icon)
+    data.value.picture = info.file.response.data.url
     message.success('上传成功')
   }
   if (info.file.status === 'error') {
