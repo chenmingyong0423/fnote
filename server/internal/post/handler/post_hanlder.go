@@ -24,7 +24,7 @@ import (
 
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/request"
 
-	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
+	configServ "github.com/chenmingyong0423/fnote/backend/internal/website_config/service"
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -50,7 +50,7 @@ type SummaryPostVO struct {
 	CreateTime   int64    `json:"create_time"`
 }
 
-func NewPostHandler(serv service.IPostService, cfgService configServ.IConfigService) *PostHandler {
+func NewPostHandler(serv service.IPostService, cfgService configServ.IWebsiteConfigService) *PostHandler {
 	return &PostHandler{
 		serv:       serv,
 		cfgService: cfgService,
@@ -59,7 +59,7 @@ func NewPostHandler(serv service.IPostService, cfgService configServ.IConfigServ
 
 type PostHandler struct {
 	serv       service.IPostService
-	cfgService configServ.IConfigService
+	cfgService configServ.IWebsiteConfigService
 }
 
 func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {

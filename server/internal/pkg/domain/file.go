@@ -12,12 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package service
+package domain
 
-type IConfigService interface {
+type File struct {
+	Id               string
+	FileId           string
+	FileName         string
+	OriginalFileName string
+	FileType         string
+	FileSize         int64
+	FilePath         string
+	Url              string
+	UsedIn           []FileUsage
+	CreateTime       int64
+	UpdateTime       int64
 }
 
-var _ IConfigService = (*ConfigService)(nil)
-
-type ConfigService struct {
+type FileUsage struct {
+	EntityId   string
+	EntityType string
 }

@@ -20,20 +20,22 @@ import (
 	"os"
 	"time"
 
+	"github.com/spf13/viper"
+
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func InitLogger(cfg *Config) io.Writer {
+func InitLogger() io.Writer {
 	writers := make([]io.Writer, 0, 2)
 	writers = append(writers, os.Stdout)
-	if cfg.Logger.Filename != "" {
+	if viper.GetString("logger.file_name") != "" {
 		writers = append(writers, &lumberjack.Logger{
-			Filename:   cfg.Logger.Filename,
-			MaxSize:    cfg.Logger.MaxSize,
-			MaxAge:     cfg.Logger.MaxAge,
-			MaxBackups: cfg.Logger.MaxBackups,
-			LocalTime:  cfg.Logger.LocalTime,
-			Compress:   cfg.Logger.Compress,
+			Filename:   viper.GetString("logger.file_name"),
+			MaxSize:    viper.GetInt("logger.max_size"),
+			MaxAge:     viper.GetInt("logger.max_age"),
+			MaxBackups: viper.GetInt("logger.max_backups"),
+			LocalTime:  viper.GetBool("logger.local_time"),
+			Compress:   viper.GetBool("logger.compress"),
 		})
 	}
 	multiWriter := io.MultiWriter(writers...)
@@ -41,7 +43,7 @@ func InitLogger(cfg *Config) io.Writer {
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.TimeKey {
 				t := a.Value.Any().(time.Time)
-				a.Value = slog.StringValue(t.Format(cfg.Logger.TimeFormat))
+				a.Value = slog.StringValue(t.Format(viper.GetString("logger.time_format")))
 			}
 			return a
 		},

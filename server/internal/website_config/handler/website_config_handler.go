@@ -15,10 +15,10 @@
 package handler
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/request"
+	"github.com/chenmingyong0423/fnote/backend/internal/website_config/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -91,17 +91,17 @@ type SeoMetaConfigVO struct {
 	Robots                string `json:"robots"`
 }
 
-func NewConfigHandler(serv service.IConfigService) *ConfigHandler {
-	return &ConfigHandler{
+func NewWebsiteConfigHandler(serv service.IWebsiteConfigService) *WebsiteConfigHandler {
+	return &WebsiteConfigHandler{
 		serv: serv,
 	}
 }
 
-type ConfigHandler struct {
-	serv service.IConfigService
+type WebsiteConfigHandler struct {
+	serv service.IWebsiteConfigService
 }
 
-func (h *ConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
+func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/configs")
 	// 获取首页的配置信息
 	routerGroup.GET("/index", api.Wrap(h.GetIndexConfig))
@@ -111,7 +111,7 @@ func (h *ConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/website", api.WrapWithBody(h.AdminUpdateWebsiteConfig))
 }
 
-func (h *ConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO, error) {
+func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO, error) {
 	config, err := h.serv.GetIndexConfig(ctx)
 	if err != nil {
 		return nil, err
@@ -126,7 +126,7 @@ func (h *ConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO, error)
 	}, nil
 }
 
-func (h *ConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebSiteConfig) *WebsiteConfigVO {
+func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebSiteConfig) *WebsiteConfigVO {
 	return &WebsiteConfigVO{
 		Name:          webMasterCfg.Name,
 		Icon:          webMasterCfg.Icon,
@@ -139,11 +139,11 @@ func (h *ConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebSiteConfig) *W
 	}
 }
 
-func (h *ConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) *NoticeConfigVO {
+func (h *WebsiteConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) *NoticeConfigVO {
 	return &NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, PublishTime: noticeCfg.PublishTime}
 }
 
-func (h *ConfigHandler) toSocialInfoConfigVO(socialINfoConfig *domain.SocialInfoConfig) *SocialInfoConfigVO {
+func (h *WebsiteConfigHandler) toSocialInfoConfigVO(socialINfoConfig *domain.SocialInfoConfig) *SocialInfoConfigVO {
 	socialInfoVOList := make([]SocialInfoVO, len(socialINfoConfig.SocialInfoList))
 	for i, socialInfo := range socialINfoConfig.SocialInfoList {
 		socialInfoVOList[i] = SocialInfoVO{SocialName: socialInfo.SocialName, SocialValue: socialInfo.SocialValue, CssClass: socialInfo.CssClass, IsLink: socialInfo.IsLink}
@@ -151,7 +151,7 @@ func (h *ConfigHandler) toSocialInfoConfigVO(socialINfoConfig *domain.SocialInfo
 	return &SocialInfoConfigVO{SocialInfoList: socialInfoVOList}
 }
 
-func (h *ConfigHandler) toPayInfoConfigVO(config []domain.PayInfoConfigElem) []PayInfoConfigVO {
+func (h *WebsiteConfigHandler) toPayInfoConfigVO(config []domain.PayInfoConfigElem) []PayInfoConfigVO {
 	result := make([]PayInfoConfigVO, len(config))
 	for i, payInfoConfig := range config {
 		result[i] = PayInfoConfigVO{
@@ -162,7 +162,7 @@ func (h *ConfigHandler) toPayInfoConfigVO(config []domain.PayInfoConfigElem) []P
 	return result
 }
 
-func (h *ConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *SeoMetaConfigVO {
+func (h *WebsiteConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *SeoMetaConfigVO {
 	return &SeoMetaConfigVO{
 		Title:                 config.Title,
 		Description:           config.Description,
@@ -176,7 +176,7 @@ func (h *ConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *SeoMeta
 	}
 }
 
-func (h *ConfigHandler) toOwnerConfigVO(ownerConfig *domain.OwnerConfig) *OwnerConfigVO {
+func (h *WebsiteConfigHandler) toOwnerConfigVO(ownerConfig *domain.OwnerConfig) *OwnerConfigVO {
 	return &OwnerConfigVO{
 		Name:    ownerConfig.Name,
 		Profile: ownerConfig.Profile,
@@ -184,7 +184,7 @@ func (h *ConfigHandler) toOwnerConfigVO(ownerConfig *domain.OwnerConfig) *OwnerC
 	}
 }
 
-func (h *ConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (WebsiteConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (WebsiteConfigVO, error) {
 	config, err := h.serv.GetWebSiteConfig(ctx)
 	if err != nil {
 		return WebsiteConfigVO{}, err
@@ -192,7 +192,7 @@ func (h *ConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (WebsiteConfigVO
 	return *h.toWebsiteConfigVO(config), nil
 }
 
-func (h *ConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req request.UpdateWebsiteConfigReq) (any, error) {
+func (h *WebsiteConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req request.UpdateWebsiteConfigReq) (any, error) {
 	return nil, h.serv.UpdateWebSiteConfig(ctx, domain.WebSiteConfig{
 		Name:     req.Name,
 		Icon:     req.Icon,

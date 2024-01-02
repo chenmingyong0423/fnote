@@ -22,9 +22,8 @@ import (
 	"github.com/google/wire"
 )
 
-func initializeApp(cfgPath string) (*gin.Engine, error) {
+func initializeApp() (*gin.Engine, error) {
 	panic(wire.Build(
-		ioc.InitConfig,
 		ioc.InitLogger,
 		ioc.NewMongoDB,
 		ioc.InitMiddlewares,
@@ -42,5 +41,6 @@ func initializeApp(cfgPath string) (*gin.Engine, error) {
 		ioc.MsgTplProviders,
 		ioc.CountStatsProviders,
 		ioc.TagProviders,
+		ioc.FileProviders,
 	))
 }

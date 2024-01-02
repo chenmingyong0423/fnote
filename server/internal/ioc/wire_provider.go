@@ -23,14 +23,14 @@ import (
 	repository2 "github.com/chenmingyong0423/fnote/backend/internal/comment/repository"
 	dao2 "github.com/chenmingyong0423/fnote/backend/internal/comment/repository/dao"
 	service2 "github.com/chenmingyong0423/fnote/backend/internal/comment/service"
-	handler3 "github.com/chenmingyong0423/fnote/backend/internal/config/handler"
-	repository3 "github.com/chenmingyong0423/fnote/backend/internal/config/repository"
-	dao3 "github.com/chenmingyong0423/fnote/backend/internal/config/repository/dao"
-	service3 "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 	repository8 "github.com/chenmingyong0423/fnote/backend/internal/count_stats/repository"
 	dao8 "github.com/chenmingyong0423/fnote/backend/internal/count_stats/repository/dao"
 	service10 "github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
 	service7 "github.com/chenmingyong0423/fnote/backend/internal/email/service"
+	handler9 "github.com/chenmingyong0423/fnote/backend/internal/file/handler"
+	repository10 "github.com/chenmingyong0423/fnote/backend/internal/file/repository"
+	dao10 "github.com/chenmingyong0423/fnote/backend/internal/file/repository/dao"
+	service12 "github.com/chenmingyong0423/fnote/backend/internal/file/service"
 	handler4 "github.com/chenmingyong0423/fnote/backend/internal/friend/hanlder"
 	repository4 "github.com/chenmingyong0423/fnote/backend/internal/friend/repository"
 	dao4 "github.com/chenmingyong0423/fnote/backend/internal/friend/repository/dao"
@@ -52,6 +52,10 @@ import (
 	repository6 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository"
 	dao6 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/repository/dao"
 	service6 "github.com/chenmingyong0423/fnote/backend/internal/visit_log/service"
+	handler3 "github.com/chenmingyong0423/fnote/backend/internal/website_config/handler"
+	repository3 "github.com/chenmingyong0423/fnote/backend/internal/website_config/repository"
+	dao3 "github.com/chenmingyong0423/fnote/backend/internal/website_config/repository/dao"
+	service3 "github.com/chenmingyong0423/fnote/backend/internal/website_config/service"
 	"github.com/google/wire"
 )
 
@@ -65,10 +69,10 @@ var (
 		wire.Bind(new(service2.ICommentService), new(*service2.CommentService)),
 		wire.Bind(new(repository2.ICommentRepository), new(*repository2.CommentRepository)),
 		wire.Bind(new(dao2.ICommentDao), new(*dao2.CommentDao)))
-	ConfigProviders = wire.NewSet(handler3.NewConfigHandler, service3.NewConfigService, repository3.NewConfigRepository, dao3.NewConfigDao,
-		wire.Bind(new(service3.IConfigService), new(*service3.ConfigService)),
-		wire.Bind(new(repository3.IConfigRepository), new(*repository3.ConfigRepository)),
-		wire.Bind(new(dao3.IConfigDao), new(*dao3.ConfigDao)))
+	ConfigProviders = wire.NewSet(handler3.NewWebsiteConfigHandler, service3.NewWebsiteConfigService, repository3.NewWebsiteConfigRepository, dao3.NewWebsiteConfigDao,
+		wire.Bind(new(service3.IWebsiteConfigService), new(*service3.WebsiteConfigService)),
+		wire.Bind(new(repository3.IWebsiteConfigRepository), new(*repository3.WebsiteConfigRepository)),
+		wire.Bind(new(dao3.IWebsiteConfigDao), new(*dao3.WebsiteConfigDao)))
 	FriendProviders = wire.NewSet(handler4.NewFriendHandler, service4.NewFriendService, repository4.NewFriendRepository, dao4.NewFriendDao,
 		wire.Bind(new(service4.IFriendService), new(*service4.FriendService)),
 		wire.Bind(new(repository4.IFriendRepository), new(*repository4.FriendRepository)),
@@ -100,5 +104,10 @@ var (
 		wire.Bind(new(service11.ITagService), new(*service11.TagService)),
 		wire.Bind(new(repository9.ITagRepository), new(*repository9.TagRepository)),
 		wire.Bind(new(dao9.ITagDao), new(*dao9.TagDao)),
+	)
+	FileProviders = wire.NewSet(handler9.NewFileHandler, service12.NewFileService, repository10.NewFileRepository, dao10.NewFileDao,
+		wire.Bind(new(service12.IFileService), new(*service12.FileService)),
+		wire.Bind(new(repository10.IFileRepository), new(*repository10.FileRepository)),
+		wire.Bind(new(dao10.IFileDao), new(*dao10.FileDao)),
 	)
 )
