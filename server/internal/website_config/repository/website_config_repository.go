@@ -29,9 +29,10 @@ import (
 type IWebsiteConfigRepository interface {
 	FindByTyp(ctx context.Context, typ string) (any, error)
 	Increase(ctx context.Context, field string) error
-	GetConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error)
+	FindConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error)
 	Decrease(ctx context.Context, field string) error
 	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
+	UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -46,6 +47,14 @@ type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
 }
 
+func (r *WebsiteConfigRepository) UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "owner"),
+		update.BsonBuilder().SetSimple("props.name", ownerConfig.Name).SetSimple("props.profile", ownerConfig.Profile).SetSimple("props.picture", ownerConfig.Picture).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
+}
+
 func (r *WebsiteConfigRepository) UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error {
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
@@ -58,7 +67,7 @@ func (r *WebsiteConfigRepository) Decrease(ctx context.Context, field string) er
 	return r.dao.Decrease(ctx, field)
 }
 
-func (r *WebsiteConfigRepository) GetConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error) {
+func (r *WebsiteConfigRepository) FindConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error) {
 	configs, err := r.dao.GetByTypes(ctx, types...)
 	if err != nil {
 		return nil, err

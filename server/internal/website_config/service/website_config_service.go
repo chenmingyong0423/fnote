@@ -33,6 +33,8 @@ type IWebsiteConfigService interface {
 	IncreaseCategoryCount(ctx context.Context) error
 	DecreaseCategoryCount(ctx context.Context) error
 	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
+	GetOwnerConfig(ctx context.Context) (domain.OwnerConfig, error)
+	UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -45,6 +47,22 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error {
+	return s.repo.UpdateOwnerConfig(ctx, ownerConfig)
+}
+
+func (s *WebsiteConfigService) GetOwnerConfig(ctx context.Context) (ownerCfg domain.OwnerConfig, err error) {
+	cfg, err := s.repo.FindByTyp(ctx, "owner")
+	if err != nil {
+		return
+	}
+	err = s.anyToStruct(cfg, &ownerCfg)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func (s *WebsiteConfigService) UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error {
@@ -77,7 +95,7 @@ func (s *WebsiteConfigService) GetFrontPostCount(ctx context.Context) (*domain.F
 }
 
 func (s *WebsiteConfigService) GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error) {
-	configs, err := s.repo.GetConfigByTypes(ctx, "website", "owner", "notice", "social", "pay", "seo meta")
+	configs, err := s.repo.FindConfigByTypes(ctx, "website", "owner", "notice", "social", "pay", "seo meta")
 	if err != nil {
 		return nil, err
 	}

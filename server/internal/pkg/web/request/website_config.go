@@ -19,3 +19,9 @@ type UpdateWebsiteConfigReq struct {
 	Icon     string `json:"icon" binding:"required"`
 	LiveTime int64  `json:"live_time" binding:"required"`
 }
+
+type UpdateOwnerConfigReq struct {
+	Name    string `json:"name" binding:"required"`
+	Profile string `json:"profile" binding:"required"`
+	Picture string `json:"picture" binding:"required"`
+}
