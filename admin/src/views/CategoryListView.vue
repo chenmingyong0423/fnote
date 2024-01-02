@@ -24,10 +24,7 @@
           >
             <a-input v-model:value="formState.route" />
           </a-form-item>
-          <a-form-item
-            name="description"
-            label="描述"
-          >
+          <a-form-item name="description" label="描述">
             <a-textarea v-model:value="formState.description" />
           </a-form-item>
           <a-form-item
@@ -65,15 +62,15 @@
 
           <template v-else-if="column.dataIndex === 'operation'">
             <div class="editable-row-operations">
-            <span v-if="editableData[record.id]">
-              <a-typography-link @click="save(record.id)">保存</a-typography-link>
-              <a-popconfirm title="确定取消？" @confirm="cancel(record.id)">
-                <a>取消</a>
-              </a-popconfirm>
-            </span>
-                <span v-else>
-              <a @click="edit(record.id)">编辑</a>
-            </span>
+              <span v-if="editableData[record.id]">
+                <a-typography-link @click="save(record.id)">保存</a-typography-link>
+                <a-popconfirm title="确定取消？" @confirm="cancel(record.id)">
+                  <a>取消</a>
+                </a-popconfirm>
+              </span>
+              <span v-else>
+                <a @click="edit(record.id)">编辑</a>
+              </span>
 
               <a-popconfirm
                 v-if="data.length"
@@ -83,7 +80,6 @@
                 <a>删除</a>
               </a-popconfirm>
             </div>
-
           </template>
         </template>
       </a-table>
@@ -146,7 +142,6 @@ const pageReq = ref<PageRequest>({
   sortOrder: 'desc'
 } as PageRequest)
 
-
 const getCategories = async () => {
   try {
     const response = await axios.get<IResponse<IPageData<ICategory>>>('/admin/categories', {
@@ -160,7 +155,6 @@ const getCategories = async () => {
 }
 
 getCategories()
-
 
 // 添加分类
 const formRef = ref<FormInstance>()
@@ -211,7 +205,7 @@ const addCategory = () => {
           message.error('添加失败')
         }
       })
-      .catch(info => {
+      .catch((info) => {
         console.log('Validate Failed:', info)
         message.warning('请检查表单是否填写正确')
       })
@@ -236,7 +230,7 @@ const changeCategoryDisabled = async (record: ICategory) => {
 }
 
 // 删除
-const deleteCategory =async (id: string) => {
+const deleteCategory = async (id: string) => {
   try {
     // 提交 body 参数 values
     const response = await axios.delete<IBaseResponse>(`/admin/categories/${id}`)
@@ -256,8 +250,8 @@ const deleteCategory =async (id: string) => {
 const editableData: UnwrapRef<Record<string, ICategory>> = reactive({})
 const edit = (id: string) => {
   console.log(123)
-  console.log(data.value.filter(item => id === item.id))
-  editableData[id] = cloneDeep(data.value.filter(item => id === item.id)[0])
+  console.log(data.value.filter((item) => id === item.id))
+  editableData[id] = cloneDeep(data.value.filter((item) => id === item.id)[0])
   console.log(editableData[id])
 }
 
@@ -265,7 +259,10 @@ const save = async (id: string) => {
   const editableDatum = editableData[id]
   try {
     // 提交 body 参数 values
-    const response = await axios.put<IBaseResponse>(`/admin/categories/${editableDatum.id}`, editableDatum)
+    const response = await axios.put<IBaseResponse>(
+      `/admin/categories/${editableDatum.id}`,
+      editableDatum
+    )
     if (response.data.code !== 200) {
       message.error(response.data.message)
       return
@@ -281,7 +278,6 @@ const save = async (id: string) => {
 const cancel = (key: string) => {
   delete editableData[key]
 }
-
 </script>
 
 <style scoped>
@@ -293,4 +289,3 @@ const cancel = (key: string) => {
   margin-right: 8px;
 }
 </style>
-

@@ -30,22 +30,18 @@
   </a-layout>
 </template>
 <script lang="ts" setup>
-import { ref } from 'vue';
-const collapsed = ref<boolean>(false);
+import { ref } from 'vue'
+const collapsed = ref<boolean>(false)
 import router from '@/router'
 
-import { reactive, watch, h } from 'vue';
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  PieChartOutlined,
-} from '@ant-design/icons-vue';
+import { reactive, watch, h } from 'vue'
+import { MenuFoldOutlined, MenuUnfoldOutlined, PieChartOutlined } from '@ant-design/icons-vue'
 const state = reactive({
   collapsed: false,
   selectedKeys: ['1'],
   openKeys: ['sub1'],
-  preOpenKeys: ['sub1'],
-});
+  preOpenKeys: ['sub1']
+})
 const items = reactive([
   {
     key: 'sub post',
@@ -56,9 +52,8 @@ const items = reactive([
       {
         key: '/post',
         label: '文章列表',
-        title: '文章列表',
-      },
-
+        title: '文章列表'
+      }
     ]
   },
   {
@@ -70,22 +65,21 @@ const items = reactive([
       {
         key: '/category',
         label: '分类列表',
-        title: '分类列表',
-      },
-
+        title: '分类列表'
+      }
     ]
-  },
-]);
+  }
+])
 watch(
   () => state.openKeys,
   (_val, oldVal) => {
-    state.preOpenKeys = oldVal;
-  },
-);
+    state.preOpenKeys = oldVal
+  }
+)
 const toggleCollapsed = () => {
-  state.collapsed = !state.collapsed;
-  state.openKeys = state.collapsed ? [] : state.preOpenKeys;
-};
+  state.collapsed = !state.collapsed
+  state.openKeys = state.collapsed ? [] : state.preOpenKeys
+}
 
 const itemClick = (item) => {
   router.push(item.key)

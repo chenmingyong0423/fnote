@@ -83,7 +83,7 @@ const columns = [
     title: '最后一次修改的时间',
     key: 'updateTime',
     dataIndex: 'updateTime'
-  },
+  }
 ]
 
 const data = [
@@ -95,7 +95,7 @@ const data = [
     categories: ['nice', 'developer'],
     tags: ['nice', 'developer'],
     createTime: 121123123312132,
-    updateTime: 121123123312132,
+    updateTime: 121123123312132
   },
   {
     key: '2',
@@ -105,7 +105,7 @@ const data = [
     categories: ['nice', 'developer'],
     tags: ['nice', 'developer'],
     createTime: 121123123312132,
-    updateTime: 121123123312132,
+    updateTime: 121123123312132
   },
   {
     key: '3',
@@ -115,7 +115,7 @@ const data = [
     categories: ['nice', 'developer'],
     tags: ['nice', 'developer'],
     createTime: 121123123312132,
-    updateTime: 121123123312132,
+    updateTime: 121123123312132
   },
   {
     key: '4',
@@ -125,7 +125,7 @@ const data = [
     categories: ['nice', 'developer'],
     tags: ['nice', 'developer'],
     createTime: 121123123312132,
-    updateTime: 121123123312132,
+    updateTime: 121123123312132
   },
   {
     key: '5',
@@ -135,8 +135,9 @@ const data = [
     categories: ['nice', 'developer'],
     tags: ['nice', 'developer'],
     createTime: 121123123312132,
-    updateTime: 121123123312132,
-  },{
+    updateTime: 121123123312132
+  },
+  {
     key: '6',
     coverImg: 'John Brown',
     title: 32,
@@ -144,32 +145,30 @@ const data = [
     categories: ['nice', 'developer'],
     tags: ['nice', 'developer'],
     createTime: 121123123312132,
-    updateTime: 121123123312132,
-  },
-
+    updateTime: 121123123312132
+  }
 ]
 
 const req = ref<PageRequest>({
   pageNo: 1,
   pageSize: 10,
-  sortField: "create_time",
-  sortOrder: "desc",
+  sortField: 'create_time',
+  sortOrder: 'desc'
 } as PageRequest)
 
-const posts = ref<IPost[]>([]);
+const posts = ref<IPost[]>([])
 
 const getPosts = async () => {
   try {
     const response = await axios.get<IResponse<IPost>>('/admin/posts', {
       params: req.value
-    });
-    posts.value = response.data.data?.list || [];
+    })
+    posts.value = response.data.data?.list || []
     console.log(posts.value)
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
-};
+}
 
-getPosts();
+getPosts()
 </script>
-
