@@ -16,11 +16,11 @@ package repository
 
 import (
 	"context"
+	"time"
+
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/builder/update"
-	"time"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/config/repository/dao"
 	"github.com/pkg/errors"
@@ -50,7 +50,7 @@ func (r *ConfigRepository) UpdateWebSiteConfig(ctx context.Context, webSiteConfi
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "website"),
-		update.Set(bsonx.D(bsonx.E("props.name", webSiteConfig.Name), bsonx.E("props.icon", webSiteConfig.Icon), bsonx.E("props.live_time", webSiteConfig.LiveTime), bsonx.E("update_time", time.Now().Unix()))),
+		update.BsonBuilder().SetSimple("props.name", webSiteConfig.Name).SetSimple("props.icon", webSiteConfig.Icon).SetSimple("props.live_time", webSiteConfig.LiveTime).SetSimple("update_time", time.Now().Unix()).Build(),
 	)
 }
 

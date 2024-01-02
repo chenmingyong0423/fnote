@@ -16,6 +16,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/chenmingyong0423/fnote/backend/internal/config/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/pkg/errors"
