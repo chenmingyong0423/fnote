@@ -18,10 +18,10 @@
 <script lang="ts" setup>
 import {useHomeStore} from '~/store/home';
 const homeStore = useHomeStore()
-const date = new Date(homeStore.master_info.website_live_time)
+const date = new Date(homeStore.website_info.live_time)
 const year = date.getFullYear()
 
-const records = homeStore.master_info.records
+const records = homeStore.website_info.records
 </script>
 
 <style scoped></style>

@@ -75,8 +75,8 @@ const replies = computed(() => {
 })
 
 
-const info = useHomeStore()
-const isBlackMode = computed(() => info.isBlackMode)
+const homeStore  = useHomeStore()
+const isBlackMode = computed(() => homeStore .isBlackMode)
 const generateAvatar = (email: string) => {
   return "https://1.gravatar.com/avatar/" + CryptoJS.MD5(email.trim().toLowerCase()).toString()
 }

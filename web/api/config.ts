@@ -1,11 +1,18 @@
 import httpRequest from "./http";
 
-export interface IWebmasterInfo {
-    web_master_config: IWebMaster,
+export interface IWebsiteInfo {
+    website_config: IWebsite,
+    owner_config: IOwner,
     notice_config: INotice,
     social_info_config: ISocialInfo,
     pay_info_config: IPayInfo[],
     seo_meta_config: SeoMetaConfigVO,
+}
+
+export interface IOwner {
+    name: string;
+    profile: string;
+    picture: string;
 }
 
 export interface ISocialInfo {
@@ -19,15 +26,13 @@ export interface ISocialInfoItem {
     is_link: boolean;
 }
 
-export interface IWebMaster {
+export interface IWebsite {
     name: string;
+    icon: string;
     post_count: number;
     category_count: number;
-    website_views: number;
-    website_live_time: number;
-    profile: string;
-    picture: string;
-    website_icon: string;
+    view_count: number;
+    live_time: number;
     domain: string;
     records: string[];
 }
@@ -57,6 +62,6 @@ export interface SeoMetaConfigVO {
 
 const prefix = "/configs"
 
-export const getWebMaster = () => httpRequest.get(`${prefix}/index`)
+export const getWebsiteInfo = () => httpRequest.get(`${prefix}/index`)
 
 

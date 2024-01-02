@@ -22,9 +22,8 @@
 </template>
 <script lang="ts" setup>
 import {useHomeStore} from '~/store/home';
-import {getWebMaster} from "~/api/config"
-import type {IWebmasterInfo} from "~/api/config"
-import type {IBaseResponse, IListData, IResponse} from "~/api/http";
+import {type IWebsiteInfo, getWebsiteInfo} from "~/api/config"
+import type {IListData, IResponse} from "~/api/http";
 import {getMenus, type IMenu} from "~/api/category";
 import SmallMenu from "~/components/SmallMenu.vue";
 import {collectVisitLog, type VisitLogRequest} from "~/api/statiscs";
@@ -42,10 +41,11 @@ onMounted(() => {
 
 const webMaster = async () => {
   try {
-    let postRes: any = await getWebMaster()
-    let res: IResponse<IWebmasterInfo> = postRes.data.value
+    let postRes: any = await getWebsiteInfo()
+    let res: IResponse<IWebsiteInfo> = postRes.data.value
     if (res && res.data) {
-      homeStore.master_info = res.data.web_master_config
+      homeStore.website_info = res.data.website_config
+      homeStore.owner_info = res.data.owner_config
       homeStore.notice_info = res.data.notice_config
       homeStore.social_info_list = res.data.social_info_config.social_info_list
       homeStore.pay_info = res.data.pay_info_config

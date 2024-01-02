@@ -5,7 +5,7 @@
         友链
       </div>
       <div class="flex flex-wrap gap-x-4 mb-5 lt-md:flex-col">
-        <a :href="friend.url"
+        <a :href="friend.url" target="_blank"
            class="flex mb-5 w-23% custom_border_gray h-[100px] p-2 b-rounded-4 custom_cursor_flow cursor-pointer dark:text-dtc dark_bg_gray custom_shadow lt-md:w-100%"
            v-for="(friend, index) in friends" :key="index">
           <div class="w-15% flex justify-center">
@@ -175,7 +175,7 @@ useHead({
     {name: 'robots', 'content': homeStore.seo_meta_config.robots},
   ],
   link: [
-    {rel: 'icon', type: 'image/x-icon', href: homeStore.master_info.website_icon},
+    {rel: 'icon', type: 'image/x-icon', href: homeStore.website_info.icon},
   ]
 })
 useSeoMeta({

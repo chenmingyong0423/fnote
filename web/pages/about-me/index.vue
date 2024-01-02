@@ -126,7 +126,7 @@ import {useHomeStore} from '~/store/home';
 const homeStore = useHomeStore()
 const isBlackMode = computed(() => homeStore.isBlackMode)
 
-const domain = homeStore.master_info.domain;
+const domain = homeStore.website_info.domain;
 const route = useRoute()
 const path: string = route.path
 const id: string = 'about-me'
@@ -398,7 +398,7 @@ useHead({
     {name: 'robots', 'content': homeStore.seo_meta_config.robots},
   ],
   link: [
-    {rel: 'icon', type: 'image/x-icon', href: homeStore.master_info.website_icon},
+    {rel: 'icon', type: 'image/x-icon', href: homeStore.website_info.icon},
   ]
 })
 useSeoMeta({

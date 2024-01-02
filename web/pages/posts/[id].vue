@@ -89,7 +89,7 @@
           </client-only>
         </div>
       </div>
-      <div class="mb-5">
+      <div class="mb-5 md:hidden">
         <div
             class="m-auto flex items-center justify-center align-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer duration-200 dark:text-dtc dark_bg_gray relative"
             :class="{' hover:bg-#1e80ff': !post?.is_liked}" @click="like">
@@ -141,7 +141,7 @@ import VMdPreview from "@kangc/v-md-editor/lib/preview";
 const homeStore = useHomeStore()
 const isBlackMode = computed(() => homeStore.isBlackMode)
 
-const domain = homeStore.master_info.domain;
+const domain = homeStore.website_info.domain;
 const route = useRoute()
 const path: string = route.path
 const id: string = String(route.params.id)
@@ -414,7 +414,7 @@ useHead({
     {name: 'robots', 'content': homeStore.seo_meta_config.robots},
   ],
   link: [
-    {rel: 'icon', type: 'image/x-icon', href: homeStore.master_info.website_icon},
+    {rel: 'icon', type: 'image/x-icon', href: homeStore.website_info.icon},
   ]
 })
 useSeoMeta({

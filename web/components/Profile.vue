@@ -4,26 +4,26 @@
       @mouseleave="isTooltipVisible=false"
   >
     <div class="avatar">
-      <img :src="homeStore.master_info.picture"
+      <img :src="homeStore.owner_info.picture"
            alt=""
            class="w-25 h-25 border-rounded-50% mx5 cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0">
     </div>
     <div class="introduction flex flex-col items-center justify-center p-5">
-      <span class="text-1.5em mb-2">{{ homeStore.master_info.name }}</span>
-      <span class="text-gray-5 mb-2">{{ homeStore.master_info.profile }}</span>
+      <span class="text-1.5em mb-2">{{ homeStore.owner_info.name }}</span>
+      <span class="text-gray-5 mb-2">{{ homeStore.owner_info.profile }}</span>
     </div>
     <div
         class="flex items-center justify-between border-t w-full text-gray-5 border-t-1 border-t-gray-2 border-t-solid p-t-5 mb-5">
       <div class="flex flex-col items-center justify-center w-33%">
-        <span class="mb-1">{{ homeStore.master_info.post_count }}</span>
+        <span class="mb-1">{{ homeStore.website_info.post_count }}</span>
         <span class="">文章</span>
       </div>
       <div class="flex flex-col items-center justify-center w-33% border-x-1 border-x-gray-2 border-x-solid">
-        <span class="mb-1">{{ homeStore.master_info.category_count }}</span>
+        <span class="mb-1">{{ homeStore.website_info.category_count }}</span>
         <span class="">分类</span>
       </div>
       <div class="flex flex-col items-center justify-center w-33%">
-        <span class="mb-1">{{ homeStore.master_info.website_views }}</span>
+        <span class="mb-1">{{ homeStore.website_info.view_count }}</span>
         <span class="">浏览量</span>
       </div>
     </div>
