@@ -12,24 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package request
+package vo
 
-type CreateCategoryRequest struct {
-	Name        string `json:"name" binding:"required"`
-	Route       string `json:"route" binding:"required"`
+type Tag struct {
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Route       string `json:"route"`
 	Description string `json:"description"`
-	ShowInNav   bool   `json:"show_in_nav"`
 	Disabled    bool   `json:"disabled"`
-}
-
-type CategoryDisabledRequest struct {
-	Disabled *bool `json:"disabled" binding:"required"`
-}
-
-type CategoryNavRequest struct {
-	ShowInNav *bool `json:"show_in_nav" binding:"required"`
-}
-
-type UpdateCategoryRequest struct {
-	Description string `json:"description" binding:"required"`
+	CreateTime  int64  `json:"create_time"`
+	UpdateTime  int64  `json:"update_time"`
 }

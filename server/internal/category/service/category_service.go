@@ -16,8 +16,11 @@ package service
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/chenmingyong0423/fnote/backend/internal/category/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/gkit/slice"
@@ -56,13 +59,24 @@ func (s *CategoryService) ModifyCategoryNavigation(ctx context.Context, id strin
 }
 
 func (s *CategoryService) DeleteCategory(ctx context.Context, id string) error {
-	err := s.repo.DeleteCategory(ctx, id)
+	category, err := s.repo.GetCategoryById(ctx, id)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return api.NewErrorResponseBody(http.StatusNotFound, "category not found")
+		}
+		return err
+	}
+	err = s.repo.DeleteCategory(ctx, id)
 	if err != nil {
 		return err
 	}
 	// 删除分类时，同时删除分类的统计数据
 	err = s.countStatsService.DeleteByReferenceId(ctx, id)
 	if err != nil {
+		gErr := s.repo.RecoverCategory(ctx, category)
+		if gErr != nil {
+			return gErr
+		}
 		return err
 	}
 	return nil
@@ -87,6 +101,10 @@ func (s *CategoryService) AdminCreateCategory(ctx context.Context, category doma
 		ReferenceId: id,
 	})
 	if err != nil {
+		gErr := s.DeleteCategory(ctx, id)
+		if gErr != nil {
+			return gErr
+		}
 		return err
 	}
 	return nil
