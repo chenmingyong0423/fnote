@@ -18,4 +18,4 @@ WORKDIR /fnote
 
 EXPOSE 8080
 
-ENTRYPOINT ["./backend", "--port", ":8080", "--config", "./config/fnote.prod.yaml"]
+ENTRYPOINT ["./server", "--port", ":8080", "--config", "./config/fnote.prod.yaml"]
