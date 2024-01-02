@@ -56,7 +56,7 @@ func (s *MessageService) sendEmail(ctx context.Context, msgTplName, contentType 
 	if err != nil {
 		return err
 	}
-	webNMasterCfg, err := s.configServ.GetWebmasterInfo(ctx, "webmaster")
+	webNMasterCfg, err := s.configServ.GetWebSiteConfig(ctx)
 	if err != nil {
 		return err
 	}

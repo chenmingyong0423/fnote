@@ -1,4 +1,4 @@
-// Copyright 2024 chenmingyong0423
+// Copyright 2023 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package vo
+package request
 
-type Category struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	Route       string `json:"route"`
-	Description string `json:"description"`
-	Disabled    bool   `json:"disabled"`
-	ShowInNav   bool   `json:"show_in_nav"`
-	CreateTime  int64  `json:"create_time"`
-	UpdateTime  int64  `json:"update_time"`
+type UpdateWebsiteConfigReq struct {
+	Name     string `json:"name" binding:"required"`
+	Icon     string `json:"icon" binding:"required"`
+	LiveTime int64  `json:"live_time" binding:"required"`
 }

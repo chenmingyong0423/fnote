@@ -16,9 +16,15 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
+	"net/http"
+
+	configServ "github.com/chenmingyong0423/fnote/backend/internal/config/service"
 
 	"github.com/chenmingyong0423/fnote/backend/internal/category/repository"
 	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/service"
+	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/gkit/slice"
@@ -35,31 +41,54 @@ type ICategoryService interface {
 	ModifyCategoryDisabled(ctx context.Context, id string, disabled bool) error
 	ModifyCategory(ctx context.Context, id string, description string) error
 	DeleteCategory(ctx context.Context, id string) error
+	ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error
 }
 
 var _ ICategoryService = (*CategoryService)(nil)
 
-func NewCategoryService(repo repository.ICategoryRepository, countStatsService service.ICountStatsService) *CategoryService {
+func NewCategoryService(repo repository.ICategoryRepository, countStatsService service.ICountStatsService, configService configServ.IConfigService) *CategoryService {
 	return &CategoryService{
 		countStatsService: countStatsService,
+		configService:     configService,
 		repo:              repo,
 	}
 }
 
 type CategoryService struct {
+	configService     configServ.IConfigService
 	countStatsService service.ICountStatsService
 	repo              repository.ICategoryRepository
 }
 
+func (s *CategoryService) ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error {
+	return s.repo.ModifyCategoryNavigation(ctx, id, showInNav)
+}
+
 func (s *CategoryService) DeleteCategory(ctx context.Context, id string) error {
-	err := s.repo.DeleteCategory(ctx, id)
+	category, err := s.repo.GetCategoryById(ctx, id)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return api.NewErrorResponseBody(http.StatusNotFound, "category not found")
+		}
+		return err
+	}
+	err = s.repo.DeleteCategory(ctx, id)
 	if err != nil {
 		return err
 	}
 	// 删除分类时，同时删除分类的统计数据
 	err = s.countStatsService.DeleteByReferenceId(ctx, id)
 	if err != nil {
+		gErr := s.repo.RecoverCategory(ctx, category)
+		if gErr != nil {
+			return gErr
+		}
 		return err
+	}
+	// 网站配置更新分类数量
+	gErr := s.configService.DecreaseCategoryCount(ctx)
+	if gErr != nil {
+		slog.WarnContext(ctx, fmt.Sprintf("decrease category count failed, %v", gErr))
 	}
 	return nil
 }
@@ -83,8 +112,19 @@ func (s *CategoryService) AdminCreateCategory(ctx context.Context, category doma
 		ReferenceId: id,
 	})
 	if err != nil {
+		gErr := s.DeleteCategory(ctx, id)
+		if gErr != nil {
+			return gErr
+		}
 		return err
 	}
+	go func() {
+		// 网站配置更新分类数量
+		gErr := s.configService.IncreaseCategoryCount(ctx)
+		if gErr != nil {
+			slog.WarnContext(ctx, fmt.Sprintf("increase category count failed, %v", gErr))
+		}
+	}()
 	return nil
 }
 
@@ -97,7 +137,7 @@ func (s *CategoryService) GetCategoryByRoute(ctx context.Context, route string) 
 }
 
 func (s *CategoryService) GetMenus(ctx context.Context) (menuVO []domain.Category, err error) {
-	categories, err := s.repo.GetAll(ctx)
+	categories, err := s.repo.GetNavigations(ctx)
 	if err != nil && !errors.Is(err, mongo.ErrNilDocument) {
 		return nil, err
 	}

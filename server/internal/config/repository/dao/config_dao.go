@@ -17,6 +17,7 @@ package dao
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
@@ -41,7 +42,11 @@ type IConfigDao interface {
 	FindByTyp(ctx context.Context, typ string) (*Config, error)
 	Increase(ctx context.Context, field string) error
 	GetByTypes(ctx context.Context, types ...string) ([]*Config, error)
+	Decrease(ctx context.Context, field string) error
+	UpdateByConditionAndUpdates(ctx context.Context, cond bson.D, updates bson.D) error
 }
+
+var _ IConfigDao = (*ConfigDao)(nil)
 
 func NewConfigDao(db *mongo.Database) *ConfigDao {
 	return &ConfigDao{
@@ -49,10 +54,31 @@ func NewConfigDao(db *mongo.Database) *ConfigDao {
 	}
 }
 
-var _ IConfigDao = (*ConfigDao)(nil)
-
 type ConfigDao struct {
 	coll *mongox.Collection[Config]
+}
+
+func (d *ConfigDao) UpdateByConditionAndUpdates(ctx context.Context, cond bson.D, updates bson.D) error {
+	updateOne, err := d.coll.Updater().Filter(cond).Updates(updates).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to update config, cond=%v, updates=%v", cond, updates)
+	}
+	if updateOne.ModifiedCount == 0 {
+		return fmt.Errorf("ModifiedCount=0, fails to update config, cond=%v, updates=%v", cond, updates)
+	}
+	return nil
+}
+
+func (d *ConfigDao) Decrease(ctx context.Context, field string) error {
+	field = fmt.Sprintf("props.%s", field)
+	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", "webmaster")).Updates(update.Inc(bsonx.M(field, -1))).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to increase %s", field)
+	}
+	if updateResult.ModifiedCount == 0 {
+		return fmt.Errorf("ModifiedCount=0, fails to increase %s", field)
+	}
+	return nil
 }
 
 func (d *ConfigDao) GetByTypes(ctx context.Context, types ...string) ([]*Config, error) {

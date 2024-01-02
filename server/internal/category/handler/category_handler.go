@@ -17,6 +17,8 @@ package handler
 import (
 	"net/http"
 
+	"github.com/chenmingyong0423/gkit"
+
 	"github.com/chenmingyong0423/fnote/backend/internal/category/service"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
@@ -65,6 +67,7 @@ func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/disabled/:id", api.WrapWithBody(h.AdminModifyCategoryDisabled))
 	adminGroup.PUT("/:id", api.WrapWithBody(h.AdminModifyCategory))
 	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteCategory))
+	adminGroup.PUT("/navigation/:id", api.WrapWithBody(h.AdminModifyCategoryNavigation))
 }
 
 func (h *CategoryHandler) GetCategories(ctx *gin.Context) (listVO api.ListVO[CategoryWithCountVO], err error) {
@@ -110,7 +113,7 @@ func (h *CategoryHandler) GetCategoryByRoute(ctx *gin.Context) (CategoryNameVO, 
 func (h *CategoryHandler) AdminGetCategories(ctx *gin.Context, req request.PageRequest) (pageVO vo.PageVO[vo.Category], err error) {
 	categories, total, err := h.serv.AdminGetCategories(ctx, dto.PageDTO{PageNo: req.PageNo, PageSize: req.PageSize, Field: req.Field, Order: req.Order, Keyword: req.Keyword})
 	if err != nil {
-		return vo.PageVO[vo.Category]{}, err
+		return
 	}
 	pageVO.PageNo = req.PageNo
 	pageVO.PageSize = req.PageSize
@@ -127,6 +130,7 @@ func (h *CategoryHandler) categoriesToVO(categories []domain.Category) []vo.Cate
 			Name:        category.Name,
 			Route:       category.Route,
 			Disabled:    category.Disabled,
+			ShowInNav:   category.ShowInNav,
 			Description: category.Description,
 			CreateTime:  category.CreateTime,
 			UpdateTime:  category.UpdateTime,
@@ -140,6 +144,7 @@ func (h *CategoryHandler) AdminCreateCategory(ctx *gin.Context, req request.Crea
 		Name:        req.Name,
 		Route:       req.Route,
 		Description: req.Description,
+		ShowInNav:   req.ShowInNav,
 		Disabled:    req.Disabled,
 	})
 	if err != nil {
@@ -153,7 +158,7 @@ func (h *CategoryHandler) AdminCreateCategory(ctx *gin.Context, req request.Crea
 
 func (h *CategoryHandler) AdminModifyCategoryDisabled(ctx *gin.Context, req request.CategoryDisabledRequest) (any, error) {
 	id := ctx.Param("id")
-	return nil, h.serv.ModifyCategoryDisabled(ctx, id, req.Disabled)
+	return nil, h.serv.ModifyCategoryDisabled(ctx, id, gkit.GetValueOrDefault(req.Disabled))
 }
 
 func (h *CategoryHandler) AdminModifyCategory(ctx *gin.Context, req request.UpdateCategoryRequest) (any, error) {
@@ -164,4 +169,9 @@ func (h *CategoryHandler) AdminModifyCategory(ctx *gin.Context, req request.Upda
 func (h *CategoryHandler) AdminDeleteCategory(ctx *gin.Context) (any, error) {
 	id := ctx.Param("id")
 	return nil, h.serv.DeleteCategory(ctx, id)
+}
+
+func (h *CategoryHandler) AdminModifyCategoryNavigation(ctx *gin.Context, req request.CategoryNavRequest) (any, error) {
+	id := ctx.Param("id")
+	return nil, h.serv.ModifyCategoryNavigation(ctx, id, gkit.GetValueOrDefault(req.ShowInNav))
 }
