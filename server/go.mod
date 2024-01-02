@@ -1,4 +1,4 @@
-module github.com/chenmingyong0423/fnote/backend
+module github.com/chenmingyong0423/fnote/server
 
 go 1.21.0
 
