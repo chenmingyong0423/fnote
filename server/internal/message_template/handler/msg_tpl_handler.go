@@ -15,7 +15,7 @@
 package handler
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/internal/message_template/service"
+	"github.com/chenmingyong0423/fnote/server/internal/message_template/service"
 	"github.com/gin-gonic/gin"
 )
 

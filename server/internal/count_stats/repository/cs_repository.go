@@ -18,8 +18,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/count_stats/repository/dao"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/count_stats/repository/dao"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 )
 
 type ICountStatsRepository interface {

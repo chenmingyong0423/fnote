@@ -17,12 +17,12 @@ package handler
 import (
 	"net/http"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/api"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/dto"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/request"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/web/vo"
-	"github.com/chenmingyong0423/fnote/backend/internal/tag/service"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
+	"github.com/chenmingyong0423/fnote/server/internal/tag/service"
 	"github.com/chenmingyong0423/gkit"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"

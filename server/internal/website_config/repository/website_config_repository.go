@@ -18,11 +18,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/builder/update"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/website_config/repository/dao"
+	"github.com/chenmingyong0423/fnote/server/internal/website_config/repository/dao"
 	"github.com/pkg/errors"
 )
 

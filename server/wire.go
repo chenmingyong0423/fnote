@@ -17,7 +17,7 @@
 package main
 
 import (
-	"github.com/chenmingyong0423/fnote/backend/internal/ioc"
+	"github.com/chenmingyong0423/fnote/server/internal/ioc"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )

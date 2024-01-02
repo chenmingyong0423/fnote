@@ -23,7 +23,7 @@ import (
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/builder/update"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

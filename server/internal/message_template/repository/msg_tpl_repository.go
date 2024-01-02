@@ -17,8 +17,8 @@ package repository
 import (
 	"context"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/message_template/repository/dao"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/message_template/repository/dao"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 )
 
 type IMsgTplRepository interface {

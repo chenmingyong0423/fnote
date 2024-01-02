@@ -17,8 +17,8 @@ package service
 import (
 	"context"
 
-	"github.com/chenmingyong0423/fnote/backend/internal/comment/repository"
-	"github.com/chenmingyong0423/fnote/backend/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/comment/repository"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/pkg/errors"
 )
 
