@@ -24,7 +24,7 @@ import (
 )
 
 type IConfigService interface {
-	GetWebSiteConfig(ctx context.Context, typ string) (*domain.WebSiteConfig, error)
+	GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error)
 	GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error)
 	IncreaseWebsiteViews(ctx context.Context) error
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
@@ -161,8 +161,8 @@ func (s *ConfigService) GetSwitchStatusByTyp(ctx context.Context, typ string) (*
 	return switchConfig, nil
 }
 
-func (s *ConfigService) GetWebSiteConfig(ctx context.Context, typ string) (*domain.WebSiteConfig, error) {
-	props, err := s.repo.FindByTyp(ctx, typ)
+func (s *ConfigService) GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error) {
+	props, err := s.repo.FindByTyp(ctx, "website")
 	if err != nil {
 		return nil, errors.WithMessage(err, "s.repo.FindByTyp failed")
 	}
