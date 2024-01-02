@@ -58,27 +58,38 @@ db.configs.createIndex({ "typ": 1 });
 // ----------------------------
 // Documents of configs
 // ----------------------------
-// 网站信息
+// 站点信息
 db.getCollection("configs").insertOne({
-    _id: "webmaster",
-    typ: "webmaster",
-    props: {
-        name: "fnote",
-        postCount: 0,
-        categoryCount: 0,
-        websiteViews: 0,
-        websiteLiveTime: Date.now(),
-        profile: "请及时到后台修改网站的信息以及相关 seo 等配置，以便正常使用。",
-        picture: "/fnote_logo.png",
-        websiteIcon: "/fnote_logo.pne",
-        domain: ""
-    },
-    create_time: Date.now(),
-    update_time: Date.now()
+  "create_time": Math.floor(new Date().getTime() / 1000),
+  "props": {
+    "name": "fnote",
+    "postCount": 0,
+    "categoryCount": 0,
+    "viewCount": 0,
+    "liveTime": Math.floor(new Date().getTime() / 1000),
+    "icon": "",
+    "domain": "",
+    "records": []
+  },
+  "typ": "website",
+  "update_time": Math.floor(new Date().getTime() / 1000)
 });
+// 站长信息
+db.getCollection("configs").insertOne(
+  {
+    "create_time": Math.floor(new Date().getTime() / 1000),
+    "props": {
+      "name": "fnote user",
+      "profile": "请及时前往后台修改站点和站长等相关配置，以便正常使用。",
+      "picture": ""
+    },
+    "typ": "owner",
+    "update_time": Math.floor(new Date().getTime() / 1000)
+  }
+)
+
 // seo 配置
 db.getCollection("configs").insertOne({
-    _id: "webmaster",
     "typ": "seo meta",
     "props": {
         "title": "fnote",
@@ -91,32 +102,29 @@ db.getCollection("configs").insertOne({
         "author": "fnote",
         "robots": "fnote,blog"
     },
-    create_time: Date.now(),
-    update_time: Date.now()
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000)
 });
 // 评论开关配置
 db.getCollection("configs").insertOne({
-    _id: "comment",
     typ: "comment",
     props: {
         status: true
     },
-    create_time: Date.now(),
-    update_time: Date.now()
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000)
 });
 // 友链开关配置
 db.getCollection("configs").insertOne({
-    _id: "friend",
     typ: "friend",
     props: {
         status: false
     },
-    create_time: Date.now(),
-    update_time: Date.now()
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000)
 });
 // 邮件配置
 db.getCollection("configs").insertOne({
-    _id: "emailConfig",
     "typ": "emailConfig",
     "props": {
         "host": "",
@@ -125,25 +133,23 @@ db.getCollection("configs").insertOne({
         "password": "",
         "email": ""
     },
-    create_time: Date.now(),
-    update_time: Date.now()
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000)
 });
 // 公告配置
 db.getCollection("configs").insertOne({
-    _id: "notice",
     typ: "notice",
     "props": {
         "title": "暂无最新公告",
         "content": "暂无最新公告",
-        "publish_time": Date.now(),
+        "publish_time": Math.floor(new Date().getTime() / 1000),
         "enabled": true
     },
-    create_time: Date.now(),
-    update_time: Date.now()
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000)
 });
 // 社交外链配置
 db.getCollection("configs").insertOne({
-    _id: "social",
     typ: "social",
     "props": {
         "social_info_list": [
@@ -155,37 +161,26 @@ db.getCollection("configs").insertOne({
             }
         ]
     },
-    create_time: Date.now(),
-    update_time: Date.now()
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000)
 });
 // 首页展示文章数量配置
 db.getCollection("configs").insertOne({
-    _id: "front-post-count",
     typ: "front-post-count",
     "props": {
         "count": 6
     },
-    create_time: Date.now(),
-    update_time: Date.now()
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000)
 });
 // 支付二维码配置
 db.getCollection("configs").insertOne({
-    _id: "pay",
     typ: "pay",
     "props": {
-        "list": [
-            {
-                "name": "支付宝收款码",
-                "image": "https://blog-1302954944.cos.ap-guangzhou.myqcloud.com/1695022533043.jpg"
-            },
-            {
-                "name": "微信收款码",
-                "image": "https://blog-1302954944.cos.ap-guangzhou.myqcloud.com/mm_facetoface_collect_qrcode_1702566807960.png"
-            }
-        ]
+        "list": []
     },
-    create_time: Date.now(),
-    update_time: Date.now()
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000)
 });
 
 // ----------------------------
@@ -209,28 +204,31 @@ db.friends.createIndex({ "status": -1 });
 db.getCollection("message_template").drop();
 db.createCollection("message_template");
 // 创建 name 升序索引
-db.message_template.createIndex({ "name": 1 });
+db.getCollection("message_template").createIndex({
+    name: NumberInt("1")
+}, {
+    name: "unique_name",
+    unique: true
+});
 
 // ----------------------------
 // Documents of message_template
 // ----------------------------
 db.getCollection("message_template").insertOne({
-    _id: "friend",
     name: "friend",
     title: "友链申请通知",
     content: "您好，您的网站有了新的友链申请，详情可前往后台查看。",
-    create_time: Date.now(),
-    update_time: Date.now(),
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000),
     active: 1,
     recipient_type: 0
 });
 db.getCollection("message_template").insertOne({
-    _id: "comment",
     name: "comment",
     title: "文章评论通知",
     content: "您好，您在文章有新的评论，详情请前往后台进行查看。",
-    create_time: Date.now(),
-    update_time: Date.now(),
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000),
     recipient_type: 0,
     active: 1
 });
