@@ -96,7 +96,6 @@ db.getCollection("configs").insertOne({
         "og_title": "fnote",
         "description": "fnote",
         "og_image": "",
-        "twitter_card": "summary",
         "baidu_site_verification": "",
         "keywords": "fnote,blog,BLOG",
         "author": "fnote",
