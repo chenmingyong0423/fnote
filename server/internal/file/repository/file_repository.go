@@ -1,0 +1,64 @@
+// Copyright 2024 chenmingyong0423
+
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+
+//     http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package repository
+
+import (
+	"context"
+	"encoding/hex"
+	"time"
+
+	"github.com/chenmingyong0423/fnote/server/internal/file/repository/dao"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+type IFileRepository interface {
+	Save(ctx context.Context, file *domain.File) error
+}
+
+var _ IFileRepository = (*FileRepository)(nil)
+
+func NewFileRepository(dao dao.IFileDao) *FileRepository {
+	return &FileRepository{dao: dao}
+}
+
+type FileRepository struct {
+	dao dao.IFileDao
+}
+
+func (r *FileRepository) Save(ctx context.Context, file *domain.File) error {
+	unix := time.Now().Unix()
+	fileId, err := hex.DecodeString(file.FileId)
+	if err != nil {
+		return err
+	}
+	_, err = r.dao.Save(ctx, &dao.File{
+		Id:               primitive.ObjectID{},
+		FileId:           fileId,
+		FileName:         file.FileName,
+		OriginalFileName: file.OriginalFileName,
+		FileType:         file.FileType,
+		FileSize:         file.FileSize,
+		FilePath:         file.FilePath,
+		Url:              file.Url,
+		UsedIn:           make([]dao.FileUsage, 0),
+		CreateTime:       unix,
+		UpdateTime:       unix,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
