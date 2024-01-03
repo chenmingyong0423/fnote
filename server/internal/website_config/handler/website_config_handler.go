@@ -18,77 +18,10 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/service"
 	"github.com/gin-gonic/gin"
 )
-
-// IndexConfigVO 首页信息
-type IndexConfigVO struct {
-	WebsiteConfig      WebsiteConfigVO    `json:"website_config"`
-	OwnerConfig        OwnerConfigVO      `json:"owner_config"`
-	NoticeConfigVO     NoticeConfigVO     `json:"notice_config"`
-	SocialInfoConfigVO SocialInfoConfigVO `json:"social_info_config"`
-	PayInfoConfigVO    []PayInfoConfigVO  `json:"pay_info_config"`
-	SeoMetaConfigVO    SeoMetaConfigVO    `json:"seo_meta_config"`
-}
-
-type OwnerConfigVO struct {
-	Name    string `json:"name"`
-	Profile string `json:"profile"`
-	Picture string `json:"picture"`
-}
-
-type PayInfoConfigVO struct {
-	Name  string `json:"name"`
-	Image string `json:"image"`
-}
-
-type NoticeConfigVO struct {
-	Title       string `json:"title" `
-	Content     string `json:"content"`
-	PublishTime int64  `json:"publish_time"`
-}
-
-type WebsiteConfigVO struct {
-	// 站点名称
-	Name string `json:"name"`
-	// 站点图标
-	Icon string `json:"icon"`
-	// 文章数量
-	PostCount uint `json:"post_count"`
-	// 分类数量
-	CategoryCount uint `json:"category_count"`
-	// 访问量
-	ViewCount uint `json:"view_count"`
-	// 网站运行时间
-	LiveTime int64 `json:"live_time"`
-	// 域名
-	Domain string `json:"domain"`
-	// 备案信息
-	Records []string `json:"records"`
-}
-
-type SocialInfoConfigVO struct {
-	SocialInfoList []SocialInfoVO `json:"social_info_list"`
-}
-
-type SocialInfoVO struct {
-	SocialName  string `json:"social_name"`
-	SocialValue string `json:"social_value"`
-	CssClass    string `json:"css_class"`
-	IsLink      bool   `json:"is_link"`
-}
-
-type SeoMetaConfigVO struct {
-	Title                 string `json:"title"`
-	Description           string `json:"description"`
-	OgTitle               string `json:"og_title"`
-	OgImage               string `json:"og_image"`
-	BaiduSiteVerification string `json:"baidu_site_verification"`
-	Keywords              string `json:"keywords"`
-	Author                string `json:"author"`
-	Robots                string `json:"robots"`
-}
 
 func NewWebsiteConfigHandler(serv service.IWebsiteConfigService) *WebsiteConfigHandler {
 	return &WebsiteConfigHandler{
@@ -114,12 +47,12 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/seo", api.WrapWithBody(h.AdminUpdateSeoConfig))
 }
 
-func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO, error) {
+func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfigVO, error) {
 	config, err := h.serv.GetIndexConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &IndexConfigVO{
+	return &vo.IndexConfigVO{
 		WebsiteConfig:      *h.toWebsiteConfigVO(&config.WebSiteConfig),
 		OwnerConfig:        *h.toOwnerConfigVO(&config.OwnerConfig),
 		NoticeConfigVO:     *h.toNoticeConfigVO(&config.NoticeConfig),
@@ -129,8 +62,8 @@ func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO,
 	}, nil
 }
 
-func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebSiteConfig) *WebsiteConfigVO {
-	return &WebsiteConfigVO{
+func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebSiteConfig) *vo.WebsiteConfigVO {
+	return &vo.WebsiteConfigVO{
 		Name:          webMasterCfg.Name,
 		Icon:          webMasterCfg.Icon,
 		PostCount:     webMasterCfg.PostCount,
@@ -142,22 +75,22 @@ func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebSiteCon
 	}
 }
 
-func (h *WebsiteConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) *NoticeConfigVO {
-	return &NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, PublishTime: noticeCfg.PublishTime}
+func (h *WebsiteConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) *vo.NoticeConfigVO {
+	return &vo.NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, PublishTime: noticeCfg.PublishTime}
 }
 
-func (h *WebsiteConfigHandler) toSocialInfoConfigVO(socialINfoConfig *domain.SocialInfoConfig) *SocialInfoConfigVO {
-	socialInfoVOList := make([]SocialInfoVO, len(socialINfoConfig.SocialInfoList))
+func (h *WebsiteConfigHandler) toSocialInfoConfigVO(socialINfoConfig *domain.SocialInfoConfig) *vo.SocialInfoConfigVO {
+	socialInfoVOList := make([]vo.SocialInfoVO, len(socialINfoConfig.SocialInfoList))
 	for i, socialInfo := range socialINfoConfig.SocialInfoList {
-		socialInfoVOList[i] = SocialInfoVO{SocialName: socialInfo.SocialName, SocialValue: socialInfo.SocialValue, CssClass: socialInfo.CssClass, IsLink: socialInfo.IsLink}
+		socialInfoVOList[i] = vo.SocialInfoVO{SocialName: socialInfo.SocialName, SocialValue: socialInfo.SocialValue, CssClass: socialInfo.CssClass, IsLink: socialInfo.IsLink}
 	}
-	return &SocialInfoConfigVO{SocialInfoList: socialInfoVOList}
+	return &vo.SocialInfoConfigVO{SocialInfoList: socialInfoVOList}
 }
 
-func (h *WebsiteConfigHandler) toPayInfoConfigVO(config []domain.PayInfoConfigElem) []PayInfoConfigVO {
-	result := make([]PayInfoConfigVO, len(config))
+func (h *WebsiteConfigHandler) toPayInfoConfigVO(config []domain.PayInfoConfigElem) []vo.PayInfoConfigVO {
+	result := make([]vo.PayInfoConfigVO, len(config))
 	for i, payInfoConfig := range config {
-		result[i] = PayInfoConfigVO{
+		result[i] = vo.PayInfoConfigVO{
 			Name:  payInfoConfig.Name,
 			Image: payInfoConfig.Image,
 		}
@@ -165,8 +98,8 @@ func (h *WebsiteConfigHandler) toPayInfoConfigVO(config []domain.PayInfoConfigEl
 	return result
 }
 
-func (h *WebsiteConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *SeoMetaConfigVO {
-	return &SeoMetaConfigVO{
+func (h *WebsiteConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *vo.SeoMetaConfigVO {
+	return &vo.SeoMetaConfigVO{
 		Title:                 config.Title,
 		Description:           config.Description,
 		OgTitle:               config.OgTitle,
@@ -178,18 +111,18 @@ func (h *WebsiteConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *
 	}
 }
 
-func (h *WebsiteConfigHandler) toOwnerConfigVO(ownerConfig *domain.OwnerConfig) *OwnerConfigVO {
-	return &OwnerConfigVO{
+func (h *WebsiteConfigHandler) toOwnerConfigVO(ownerConfig *domain.OwnerConfig) *vo.OwnerConfigVO {
+	return &vo.OwnerConfigVO{
 		Name:    ownerConfig.Name,
 		Profile: ownerConfig.Profile,
 		Picture: ownerConfig.Picture,
 	}
 }
 
-func (h *WebsiteConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (WebsiteConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (vo.WebsiteConfigVO, error) {
 	config, err := h.serv.GetWebSiteConfig(ctx)
 	if err != nil {
-		return WebsiteConfigVO{}, err
+		return vo.WebsiteConfigVO{}, err
 	}
 	return *h.toWebsiteConfigVO(config), nil
 }
@@ -202,10 +135,10 @@ func (h *WebsiteConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req re
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminGetOwnerConfig(ctx *gin.Context) (OwnerConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetOwnerConfig(ctx *gin.Context) (vo.OwnerConfigVO, error) {
 	config, err := h.serv.GetOwnerConfig(ctx)
 	if err != nil {
-		return OwnerConfigVO{}, err
+		return vo.OwnerConfigVO{}, err
 	}
 	return *h.toOwnerConfigVO(&config), nil
 }
@@ -218,10 +151,10 @@ func (h *WebsiteConfigHandler) AdminUpdateOwnerConfig(ctx *gin.Context, req requ
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminGetSeoConfig(ctx *gin.Context) (SeoMetaConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetSeoConfig(ctx *gin.Context) (vo.SeoMetaConfigVO, error) {
 	config, err := h.serv.GetSeoMetaConfig(ctx)
 	if err != nil {
-		return SeoMetaConfigVO{}, err
+		return vo.SeoMetaConfigVO{}, err
 	}
 	return *h.toSeoMetaConfigVO(config), nil
 }
