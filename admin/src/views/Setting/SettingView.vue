@@ -7,6 +7,9 @@
     <a-tab-pane key="friend" tab="友链配置"><FriendSwitchView /></a-tab-pane>
     <a-tab-pane key="email" tab="邮件配置"><EmailView /></a-tab-pane>
     <a-tab-pane key="notice" tab="公告配置"><NoticeView /></a-tab-pane>
+    <a-tab-pane key="front-post-count" tab="首页展示文章数量配置"
+      ><FrontPostCountView
+    /></a-tab-pane>
   </a-tabs>
 </template>
 <script lang="ts" setup>
@@ -18,5 +21,6 @@ import CommentSwitchView from '@/views/Setting/CommentSwitchView.vue'
 import FriendSwitchView from '@/views/Setting/FriendSwitchView.vue'
 import EmailView from '@/views/Setting/EmailView.vue'
 import NoticeView from '@/views/Setting/NoticeView.vue'
+import FrontPostCountView from '@/views/Setting/FrontPostCountView.vue'
 const activeKey = ref('basic')
 </script>

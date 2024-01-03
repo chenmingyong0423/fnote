@@ -11,12 +11,7 @@
       </a-descriptions-item>
       <a-descriptions-item label="内容">
         <div>
-          <a-input
-            v-if="editable"
-            v-model:value="data.content"
-            style="margin: -5px 0"
-            @change="portChanged"
-          />
+          <a-input v-if="editable" v-model:value="data.content" style="margin: -5px 0" />
           <template v-else>
             {{ data.content }}
           </template>
