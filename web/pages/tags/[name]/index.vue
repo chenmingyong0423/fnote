@@ -70,9 +70,9 @@ useHead({
   ]
 })
 useSeoMeta({
-  ogTitle: `${routeParam} - ${homeStore.seo_meta_config.title}`,
+  ogTitle: `${routeParam} - ${homeStore.seo_meta_config.og_title}`,
   ogDescription: `${routeParam}文章列表`,
-  ogImage: '',
+  ogImage: homeStore.seo_meta_config.og_image,
   twitterCard: 'summary'
 })
 </script>

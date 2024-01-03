@@ -81,9 +81,9 @@ const seo = () => {
     ]
   })
   useSeoMeta({
-    ogTitle: `${keyword.value} - 搜索 - ${homeStore.seo_meta_config.title}`,
+    ogTitle: `${keyword.value} - 搜索 - ${homeStore.seo_meta_config.og_title}`,
     ogDescription: `${keyword.value} 搜索结果`,
-    ogImage: '',
+    ogImage: homeStore.seo_meta_config.og_image,
     twitterCard: 'summary'
   })
 }

@@ -73,9 +73,9 @@ useHead({
   ]
 })
 useSeoMeta({
-  ogTitle: `${title.value} - ${homeStore.seo_meta_config.title}`,
+  ogTitle: `${title.value} - ${homeStore.seo_meta_config.og_title}`,
   ogDescription: `${title.value}文章列表`,
-  ogImage: '',
+  ogImage: homeStore.seo_meta_config.og_image,
   twitterCard: 'summary'
 })
 </script>

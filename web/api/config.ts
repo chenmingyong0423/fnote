@@ -51,10 +51,10 @@ export interface IPayInfo {
 export interface SeoMetaConfigVO {
     title: string;
     description: string;
-    ogTitle: string;
-    ogImage: string;
-    twitterCard: string;
-    baiduSiteVerification: string;
+    og_title: string;
+    og_image: string;
+    twitter_card: string;
+    baiduSite_verification: string;
     keywords: string;
     author: string;
     robots: string;

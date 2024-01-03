@@ -402,9 +402,9 @@ useHead({
   ]
 })
 useSeoMeta({
-  ogTitle: `${post.value?.title} - ${homeStore.seo_meta_config.title}`,
+  ogTitle: `${post.value?.title} - ${homeStore.seo_meta_config.og_title}`,
   ogDescription: description,
-  ogImage: '',
+  ogImage: homeStore.seo_meta_config.og_image,
   twitterCard: 'summary'
 })
 </script>
