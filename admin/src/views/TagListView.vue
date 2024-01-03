@@ -38,7 +38,7 @@
       </a-modal>
     </div>
     <div>
-      <a-table :columns="columns" :data-source="data">
+      <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'create_time'">
             {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
@@ -69,7 +69,7 @@
 <script lang="ts" setup>
 import axios from '@/http/axios'
 import originalAxios from 'axios'
-import { ref, reactive, toRaw, type UnwrapRef } from 'vue'
+import { ref, reactive, toRaw, type UnwrapRef, computed } from 'vue'
 import type { FormInstance } from 'ant-design-vue'
 import type { IBaseResponse, IPageData, IResponse, PageRequest } from '@/interfaces/Common'
 import { message } from 'ant-design-vue'
@@ -112,10 +112,18 @@ const data = ref<Tag[]>([])
 
 const pageReq = ref<PageRequest>({
   pageNo: 1,
-  pageSize: 10,
+  pageSize: 5,
   sortField: 'create_time',
   sortOrder: 'desc'
 } as PageRequest)
+
+const total = ref(0)
+
+const pagination = computed(() => ({
+  total: total.value,
+  current: pageReq.value.pageNo,
+  pageSize: pageReq.value.pageSize
+}))
 
 const getTags = async () => {
   try {
@@ -123,6 +131,7 @@ const getTags = async () => {
       params: pageReq.value
     })
     data.value = response.data.data?.list || []
+    total.value = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
@@ -231,6 +240,12 @@ const deleteTag = async (id: string) => {
     }
     message.error('删除失败')
   }
+}
+
+const change = (pg, filters, sorter, { currentDataSource }) => {
+  pageReq.value.pageNo = pg.current
+  pageReq.value.pageSize = pg.pageSize
+  getTags()
 }
 </script>
 
