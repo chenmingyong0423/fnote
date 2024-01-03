@@ -36,3 +36,7 @@ type UpdateSeoMetaConfigReq struct {
 	OgImage               string `json:"og_image"`
 	BaiduSiteVerification string `json:"baidu_site_verification"`
 }
+
+type UpdateCommentConfigReq struct {
+	EnableComment *bool `json:"enable_comment" binding:"required"`
+}

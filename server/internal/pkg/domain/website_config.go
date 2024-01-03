@@ -76,7 +76,11 @@ type NoticeConfig struct {
 }
 
 type SwitchConfig struct {
-	Status bool `bson:"status" json:"status"`
+	Enable bool `bson:"enable" json:"enable"`
+}
+
+type CommentConfig struct {
+	EnableComment bool `bson:"enable_comment" json:"enable"`
 }
 
 type EmailConfig struct {

@@ -34,6 +34,7 @@ type IWebsiteConfigRepository interface {
 	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
 	UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error
 	UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error
+	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -46,6 +47,14 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "comment"),
+		update.BsonBuilder().SetSimple("props.enable_comment", commentConfig.EnableComment).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
 }
 
 func (r *WebsiteConfigRepository) UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error {

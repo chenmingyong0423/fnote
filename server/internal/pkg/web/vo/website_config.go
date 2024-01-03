@@ -81,3 +81,7 @@ type SeoMetaConfigVO struct {
 	Author                string `json:"author"`
 	Robots                string `json:"robots"`
 }
+
+type CommentConfigVO struct {
+	EnableComment bool `json:"enable_comment"`
+}
