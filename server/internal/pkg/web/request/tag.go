@@ -15,11 +15,11 @@
 package request
 
 type CreateTagRequest struct {
-	Name     string `json:"name" binding:"required"`
-	Route    string `json:"route" binding:"required"`
-	Disabled bool   `json:"disabled"`
+	Name    string `json:"name" binding:"required"`
+	Route   string `json:"route" binding:"required"`
+	Enabled bool   `json:"enabled"`
 }
 
-type TagDisabledRequest struct {
-	Disabled *bool `json:"disabled" binding:"required"`
+type TagEnabledRequest struct {
+	Enabled *bool `json:"enabled" binding:"required"`
 }
