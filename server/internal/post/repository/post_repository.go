@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/post/repository/dao"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
@@ -37,6 +39,7 @@ type IPostRepository interface {
 	AddLike(ctx context.Context, id string, ip string) error
 	DeleteLike(ctx context.Context, id string, ip string) error
 	IncreaseCommentCount(ctx context.Context, id string) error
+	QueryAdminPostsPage(ctx context.Context, postsQueryDTO dto.PostsQueryDTO) ([]*domain.Post, int64, error)
 }
 
 var _ IPostRepository = (*PostRepository)(nil)
@@ -49,6 +52,28 @@ func NewPostRepository(dao dao.IPostDao) *PostRepository {
 
 type PostRepository struct {
 	dao dao.IPostDao
+}
+
+func (r *PostRepository) QueryAdminPostsPage(ctx context.Context, postsQueryDTO dto.PostsQueryDTO) ([]*domain.Post, int64, error) {
+	condBuilder := query.BsonBuilder()
+	if postsQueryDTO.Keyword != "" {
+		condBuilder.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(postsQueryDTO.Keyword)), "i")
+	}
+	con := condBuilder.Build()
+
+	findOptions := options.Find()
+	findOptions.SetSkip(postsQueryDTO.Skip).SetLimit(postsQueryDTO.Size)
+	if postsQueryDTO.Field != "" && postsQueryDTO.Order != "" {
+		findOptions.SetSort(bsonx.M(postsQueryDTO.Field, orderConvertToInt(postsQueryDTO.Order)))
+	} else {
+		findOptions.SetSort(bsonx.M("create_time", -1))
+	}
+
+	posts, cnt, err := r.dao.QueryPostsPage(ctx, con, findOptions)
+	if err != nil {
+		return nil, 0, err
+	}
+	return r.toDomainPosts(posts), cnt, nil
 }
 
 func (r *PostRepository) IncreaseCommentCount(ctx context.Context, id string) error {
@@ -108,7 +133,7 @@ func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition
 	if postsQueryCondition.Sorting.Field != nil && postsQueryCondition.Sorting.Order != nil {
 		findOptions.SetSort(bsonx.M(*postsQueryCondition.Sorting.Field, orderConvertToInt(*postsQueryCondition.Sorting.Order)))
 	} else {
-		findOptions.SetSort(bsonx.M("priority", -1))
+		findOptions.SetSort(bsonx.M("create_time", -1))
 	}
 
 	posts, cnt, err := r.dao.QueryPostsPage(ctx, con, findOptions)
