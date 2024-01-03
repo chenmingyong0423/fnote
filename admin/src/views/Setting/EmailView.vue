@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-descriptions title="seo meta" :column="1" bordered>
+    <a-descriptions title="邮件配置" :column="1" bordered>
       <a-descriptions-item label="host - 邮件服务器主机名">
         <div>
           <a-input v-if="editable" v-model:value="data.host" style="margin: -5px 0" />
@@ -58,8 +58,8 @@
 </template>
 <script lang="ts" setup>
 import axios from '@/http/axios'
-import type { IResponse } from '@/interfaces/Common'
-import type { EmailConfig, SeoConfig } from '@/interfaces/Config'
+import type { IBaseResponse, IResponse } from '@/interfaces/Common'
+import type { EmailConfig } from '@/interfaces/Config'
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
 
@@ -75,7 +75,7 @@ const data = ref<EmailConfig>({
 
 const getEmail = async () => {
   try {
-    const response = await axios.get<IResponse<SeoConfig>>('/admin/configs/email')
+    const response = await axios.get<IResponse<EmailConfig>>('/admin/configs/email')
     data.value = response.data.data || {}
   } catch (error) {
     console.log(error)
@@ -91,7 +91,7 @@ const cancel = () => {
 
 const save = async () => {
   try {
-    const response = await axios.put<IResponse<SeoConfig>>('/admin/configs/email', {
+    const response = await axios.put<IBaseResponse>('/admin/configs/email', {
       host: data.value.host,
       port: data.value.port,
       username: data.value.username,

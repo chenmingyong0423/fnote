@@ -6,6 +6,7 @@
     <a-tab-pane key="comment" tab="评论配置"><CommentSwitchView /></a-tab-pane>
     <a-tab-pane key="friend" tab="友链配置"><FriendSwitchView /></a-tab-pane>
     <a-tab-pane key="email" tab="邮件配置"><EmailView /></a-tab-pane>
+    <a-tab-pane key="notice" tab="公告配置"><NoticeView /></a-tab-pane>
   </a-tabs>
 </template>
 <script lang="ts" setup>
@@ -16,5 +17,6 @@ import SeoView from '@/views/Setting/SeoView.vue'
 import CommentSwitchView from '@/views/Setting/CommentSwitchView.vue'
 import FriendSwitchView from '@/views/Setting/FriendSwitchView.vue'
 import EmailView from '@/views/Setting/EmailView.vue'
+import NoticeView from '@/views/Setting/NoticeView.vue'
 const activeKey = ref('basic')
 </script>

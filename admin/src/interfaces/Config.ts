@@ -41,3 +41,10 @@ export interface EmailConfig {
   password: string
   email: string
 }
+
+export interface NoticeConfig {
+  title: string
+  content: string
+  enabled: boolean
+  publish_time: number
+}

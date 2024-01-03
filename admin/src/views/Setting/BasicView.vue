@@ -46,7 +46,7 @@
 </template>
 <script lang="ts" setup>
 import axios from '@/http/axios'
-import type { IResponse } from '@/interfaces/Common'
+import type { IBaseResponse, IResponse } from '@/interfaces/Common'
 import type { WebsiteConfig } from '@/interfaces/Config'
 import { ref } from 'vue'
 import dayjs from 'dayjs'
@@ -92,7 +92,7 @@ const cancel = () => {
 
 const save = async () => {
   try {
-    const response = await axios.put<IResponse<WebsiteConfig>>('/admin/configs/website', {
+    const response = await axios.put<IBaseResponse>('/admin/configs/website', {
       name: data.value.name,
       live_time: data.value.live_time,
       icon: data.value.icon

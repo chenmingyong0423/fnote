@@ -46,7 +46,7 @@
 </template>
 <script lang="ts" setup>
 import axios from '@/http/axios'
-import type { IResponse } from '@/interfaces/Common'
+import type { IBaseResponse, IResponse } from '@/interfaces/Common'
 import type { OwnerConfig } from '@/interfaces/Config'
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
@@ -78,7 +78,7 @@ const cancel = () => {
 
 const save = async () => {
   try {
-    const response = await axios.put<IResponse<OwnerConfig>>('/admin/configs/owner', {
+    const response = await axios.put<IBaseResponse>('/admin/configs/owner', {
       name: data.value.name,
       profile: data.value.profile,
       picture: data.value.picture
