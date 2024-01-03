@@ -51,7 +51,7 @@
       </a-modal>
     </div>
     <div>
-      <a-table :columns="columns" :data-source="data">
+      <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'description'">
             <div>
@@ -111,7 +111,7 @@
 <script lang="ts" setup>
 import axios from '@/http/axios'
 import originalAxios from 'axios'
-import { ref, reactive, toRaw, type UnwrapRef } from 'vue'
+import { ref, reactive, toRaw, type UnwrapRef, computed } from 'vue'
 import type { FormInstance } from 'ant-design-vue'
 import type { IBaseResponse, IPageData, IResponse, PageRequest } from '@/interfaces/Common'
 import type { CategoryRequest, ICategory } from '@/interfaces/Category'
@@ -164,10 +164,18 @@ const data = ref<ICategory[]>([])
 
 const pageReq = ref<PageRequest>({
   pageNo: 1,
-  pageSize: 10,
+  pageSize: 5,
   sortField: 'create_time',
   sortOrder: 'desc'
 } as PageRequest)
+
+const total = ref(0)
+
+const pagination = computed(() => ({
+  total: total.value,
+  current: pageReq.value.pageNo,
+  pageSize: pageReq.value.pageSize
+}))
 
 const getCategories = async () => {
   try {
@@ -175,7 +183,7 @@ const getCategories = async () => {
       params: pageReq.value
     })
     data.value = response.data.data?.list || []
-    console.log(data.value)
+    total.value = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
@@ -200,7 +208,6 @@ const addCategory = () => {
       .validateFields()
       .then(async (values) => {
         try {
-          console.log(values)
           // 提交 body 参数 values
           const response = await axios.post<IBaseResponse>('/admin/categories', formState)
           if (response.data.code !== 200) {
@@ -309,10 +316,7 @@ const deleteCategory = async (id: string) => {
 // 编辑
 const editableData: UnwrapRef<Record<string, ICategory>> = reactive({})
 const edit = (id: string) => {
-  console.log(123)
-  console.log(data.value.filter((item) => id === item.id))
   editableData[id] = cloneDeep(data.value.filter((item) => id === item.id)[0])
-  console.log(editableData[id])
 }
 
 const save = async (id: string) => {
@@ -337,6 +341,12 @@ const save = async (id: string) => {
 }
 const cancel = (key: string) => {
   delete editableData[key]
+}
+
+const change = (pg, filters, sorter, { currentDataSource }) => {
+  pageReq.value.pageNo = pg.current
+  pageReq.value.pageSize = pg.pageSize
+  getCategories()
 }
 </script>
 
