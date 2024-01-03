@@ -29,3 +29,7 @@ export interface SeoConfig {
 export interface CommentConfig {
   enable_comment: boolean
 }
+
+export interface FriendConfig {
+  enable_friend_commit: boolean
+}
