@@ -29,7 +29,7 @@
           </a-form-item>
           <a-form-item
             label="是否显示在导航栏上"
-            name="disabled"
+            name="show_in_nav"
             class="collection-create-form_last-form-item"
           >
             <a-radio-group v-model:value="formState.show_in_nav">
@@ -39,10 +39,10 @@
           </a-form-item>
           <a-form-item
             label="是否启用"
-            name="disabled"
+            name="enabled"
             class="collection-create-form_last-form-item"
           >
-            <a-radio-group v-model:value="formState.disabled">
+            <a-radio-group v-model:value="formState.enabled">
               <a-radio :value="true">true</a-radio>
               <a-radio :value="false">false</a-radio>
             </a-radio-group>
@@ -74,8 +74,8 @@
             {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
           </template>
 
-          <template v-if="column.key === 'disabled'">
-            <a-switch v-model:checked="record.disabled" @change="changeCategoryDisabled(record)" />
+          <template v-if="column.key === 'enabled'">
+            <a-switch v-model:checked="record.enabled" @change="changeCategoryEnabled(record)" />
           </template>
 
           <template v-if="column.key === 'show_in_nav'">
@@ -136,8 +136,8 @@ const columns = [
   },
   {
     title: '状态',
-    key: 'disabled',
-    dataIndex: 'disabled'
+    key: 'enabled',
+    dataIndex: 'enabled'
   },
   {
     title: '导航栏显示',
@@ -191,7 +191,7 @@ const formState = reactive<CategoryRequest>({
   route: '',
   description: '',
   show_in_nav: false,
-  disabled: false
+  enabled: false
 })
 
 const addCategory = () => {
@@ -240,10 +240,10 @@ const addCategory = () => {
   }
 }
 
-const changeCategoryDisabled = async (record: ICategory) => {
+const changeCategoryEnabled = async (record: ICategory) => {
   try {
-    const response = await axios.put<IBaseResponse>(`/admin/categories/disabled/${record.id}`, {
-      disabled: record.disabled
+    const response = await axios.put<IBaseResponse>(`/admin/categories/enabled/${record.id}`, {
+      enabled: record.enabled
     })
     if (response.data.code !== 200) {
       message.error(response.data.message)
