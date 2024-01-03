@@ -38,7 +38,7 @@ type ICategoryService interface {
 	GetCategoryByRoute(ctx context.Context, route string) (domain.Category, error)
 	AdminGetCategories(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error)
 	AdminCreateCategory(ctx context.Context, category domain.Category) error
-	ModifyCategoryDisabled(ctx context.Context, id string, disabled bool) error
+	ModifyCategoryEnabled(ctx context.Context, id string, enabled bool) error
 	ModifyCategory(ctx context.Context, id string, description string) error
 	DeleteCategory(ctx context.Context, id string) error
 	ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error
@@ -97,8 +97,8 @@ func (s *CategoryService) ModifyCategory(ctx context.Context, id string, descrip
 	return s.repo.ModifyCategory(ctx, id, description)
 }
 
-func (s *CategoryService) ModifyCategoryDisabled(ctx context.Context, id string, disabled bool) error {
-	return s.repo.ModifyCategoryDisabled(ctx, id, disabled)
+func (s *CategoryService) ModifyCategoryEnabled(ctx context.Context, id string, enabled bool) error {
+	return s.repo.ModifyCategoryEnabled(ctx, id, enabled)
 }
 
 func (s *CategoryService) AdminCreateCategory(ctx context.Context, category domain.Category) error {

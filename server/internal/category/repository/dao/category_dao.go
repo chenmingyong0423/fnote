@@ -42,7 +42,7 @@ type Category struct {
 	Route       string             `bson:"route"`
 	Description string             `bson:"description"`
 	Sort        int64              `bson:"sort"`
-	Disabled    bool               `bson:"disabled"`
+	Enabled     bool               `bson:"enabled"`
 	ShowInNav   bool               `bson:"show_in_nav"`
 	CreateTime  int64              `bson:"create_time"`
 	UpdateTime  int64              `bson:"update_time"`
@@ -53,7 +53,7 @@ type ICategoryDao interface {
 	GetByRoute(ctx context.Context, route string) (*Category, error)
 	QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Category, int64, error)
 	Create(ctx context.Context, category *Category) (string, error)
-	ModifyDisabled(ctx context.Context, id primitive.ObjectID, disabled bool) error
+	ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error
 	ModifyCategory(ctx context.Context, id primitive.ObjectID, description string) error
 	DeleteById(ctx context.Context, id primitive.ObjectID) error
 	GetByShowInNav(ctx context.Context) ([]*Category, error)
@@ -102,7 +102,7 @@ func (d *CategoryDao) ModifyCategoryNavigation(ctx context.Context, id primitive
 }
 
 func (d *CategoryDao) GetByShowInNav(ctx context.Context) ([]*Category, error) {
-	categories, err := d.coll.Finder().Filter(query.BsonBuilder().Eq("show_in_nav", true).Eq("disabled", true).Build()).Find(ctx)
+	categories, err := d.coll.Finder().Filter(query.BsonBuilder().Eq("show_in_nav", true).Eq("enabled", true).Build()).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "Find categories failed")
 	}
@@ -131,13 +131,13 @@ func (d *CategoryDao) ModifyCategory(ctx context.Context, id primitive.ObjectID,
 	return nil
 }
 
-func (d *CategoryDao) ModifyDisabled(ctx context.Context, id primitive.ObjectID, disabled bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().SetSimple("disabled", disabled).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+func (d *CategoryDao) ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error {
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().SetSimple("enabled", enabled).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}
 	if updateOne.ModifiedCount == 0 {
-		return errors.New("ModifiedCount=0, Modify disabled failed")
+		return errors.New("ModifiedCount=0, Modify enabled failed")
 	}
 	return nil
 }
@@ -172,7 +172,7 @@ func (d *CategoryDao) GetByRoute(ctx context.Context, route string) (*Category, 
 }
 
 func (d *CategoryDao) GetAll(ctx context.Context) ([]*Category, error) {
-	result, err := d.coll.Finder().Filter(bsonx.M("disabled", true)).Options(options.Find().SetSort(bsonx.M("sort", 1))).Find(ctx)
+	result, err := d.coll.Finder().Filter(bsonx.M("enabled", true)).Options(options.Find().SetSort(bsonx.M("sort", 1))).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "Find all categories failed failed")
 	}
