@@ -16,7 +16,6 @@ package service
 
 import (
 	"context"
-
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/repository"
 	"github.com/pkg/errors"
@@ -28,7 +27,7 @@ type IWebsiteConfigService interface {
 	IncreaseWebsiteViews(ctx context.Context) error
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
 	GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error)
-	GetFrontPostCount(ctx context.Context) (*domain.FrontPostCount, error)
+	GetFrontPostCount(ctx context.Context) (*domain.FrontPostCountConfig, error)
 	IncreaseCategoryCount(ctx context.Context) error
 	DecreaseCategoryCount(ctx context.Context) error
 	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
@@ -44,6 +43,8 @@ type IWebsiteConfigService interface {
 	GetNoticeConfig(ctx context.Context) (domain.NoticeConfig, error)
 	UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error
 	UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error
+	GetFrontPostCountConfig(ctx context.Context) (domain.FrontPostCountConfig, error)
+	UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -56,6 +57,19 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error {
+	return s.repo.UpdateFrontPostCountConfig(ctx, cfg)
+}
+
+func (s *WebsiteConfigService) GetFrontPostCountConfig(ctx context.Context) (domain.FrontPostCountConfig, error) {
+	cfg := domain.FrontPostCountConfig{}
+	err := s.getConfigAndConvertTo(ctx, "front-post-count", &cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func (s *WebsiteConfigService) UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error {
@@ -154,8 +168,8 @@ func (s *WebsiteConfigService) IncreaseCategoryCount(ctx context.Context) error 
 	return nil
 }
 
-func (s *WebsiteConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPostCount, error) {
-	cfg := &domain.FrontPostCount{}
+func (s *WebsiteConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPostCountConfig, error) {
+	cfg := &domain.FrontPostCountConfig{}
 	err := s.getConfigAndConvertTo(ctx, "front-post-count", cfg)
 	if err != nil {
 		return nil, err

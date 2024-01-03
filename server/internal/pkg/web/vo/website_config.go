@@ -98,3 +98,7 @@ type EmailConfigVO struct {
 	Password string `json:"password"`
 	Email    string `json:"email"`
 }
+
+type FrontPostCountConfigVO struct {
+	Count int64 `json:"count"`
+}
