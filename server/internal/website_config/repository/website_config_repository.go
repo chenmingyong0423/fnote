@@ -33,6 +33,7 @@ type IWebsiteConfigRepository interface {
 	Decrease(ctx context.Context, field string) error
 	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
 	UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error
+	UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -45,6 +46,24 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "seo meta"),
+		update.Set(map[string]any{
+			"props.title":                   cfg.Title,
+			"props.description":             cfg.Description,
+			"props.og_title":                cfg.OgTitle,
+			"props.og_image":                cfg.OgImage,
+			"props.baidu_site_verification": cfg.BaiduSiteVerification,
+			"props.keywords":                cfg.Keywords,
+			"props.author":                  cfg.Author,
+			"props.robots":                  cfg.Robots,
+			"update_time":                   time.Now().Unix(),
+		}),
+	)
 }
 
 func (r *WebsiteConfigRepository) UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error {

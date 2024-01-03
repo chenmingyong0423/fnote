@@ -16,7 +16,6 @@ package service
 
 import (
 	"context"
-
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/repository"
 	"github.com/pkg/errors"
@@ -35,6 +34,8 @@ type IWebsiteConfigService interface {
 	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
 	GetOwnerConfig(ctx context.Context) (domain.OwnerConfig, error)
 	UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error
+	GetSeoMetaConfig(ctx context.Context) (*domain.SeoMetaConfig, error)
+	UpdateSeoMetaConfig(ctx context.Context, seoCfg *domain.SeoMetaConfig) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -47,6 +48,19 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) UpdateSeoMetaConfig(ctx context.Context, seoCfg *domain.SeoMetaConfig) error {
+	return s.repo.UpdateSeoMetaConfig(ctx, seoCfg)
+}
+
+func (s *WebsiteConfigService) GetSeoMetaConfig(ctx context.Context) (*domain.SeoMetaConfig, error) {
+	cfg := &domain.SeoMetaConfig{}
+	err := s.getConfigAndConvertTo(ctx, "seo meta", cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func (s *WebsiteConfigService) UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error {
