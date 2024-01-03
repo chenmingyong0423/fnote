@@ -117,7 +117,7 @@ db.getCollection("configs").insertOne({
 db.getCollection("configs").insertOne({
     typ: "friend",
     props: {
-        enable_be_friend: false
+        enable_friend_commit: false
     },
     create_time: Math.floor(new Date().getTime() / 1000),
     update_time: Math.floor(new Date().getTime() / 1000)
