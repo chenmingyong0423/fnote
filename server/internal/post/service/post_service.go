@@ -54,7 +54,7 @@ type PostService struct {
 }
 
 func (s *PostService) AdminGetPosts(ctx context.Context, pageDTO dto.PageDTO) ([]*domain.Post, int64, error) {
-	return s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageDTO.PageSize, Skip: (pageDTO.PageNo - 1) * pageDTO.PageSize, Keyword: &pageDTO.Keyword})
+	return s.repo.QueryAdminPostsPage(ctx, dto.PostsQueryDTO{Size: pageDTO.PageSize, Skip: (pageDTO.PageNo - 1) * pageDTO.PageSize, Keyword: pageDTO.Keyword})
 }
 
 func (s *PostService) IncreaseVisitCount(ctx context.Context, id string) error {
