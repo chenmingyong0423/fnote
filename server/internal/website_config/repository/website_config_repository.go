@@ -37,6 +37,8 @@ type IWebsiteConfigRepository interface {
 	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
 	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
 	UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig) error
+	UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error
+	UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -49,6 +51,22 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "notice"),
+		update.BsonBuilder().SetSimple("props.enabled", enabled).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
+}
+
+func (r *WebsiteConfigRepository) UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "notice"),
+		update.BsonBuilder().SetSimple("props.title", noticeCfg.Title).SetSimple("props.content", noticeCfg.Content).SetSimple("props.publish_time", time.Now().Unix()).Build(),
+	)
 }
 
 func (r *WebsiteConfigRepository) UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig) error {

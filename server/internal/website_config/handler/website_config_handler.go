@@ -52,6 +52,10 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/friend", api.WrapWithBody(h.AdminUpdateFriendConfig))
 	adminGroup.GET("/email", api.Wrap(h.AdminGetEmailConfig))
 	adminGroup.PUT("/email", api.WrapWithBody(h.AdminUpdateEmailConfig))
+
+	adminGroup.GET("/notice", api.Wrap(h.AdminGetNoticeConfig))
+	adminGroup.PUT("/notice", api.WrapWithBody(h.AdminUpdateNoticeConfig))
+	adminGroup.PUT("/notice/enabled", api.WrapWithBody(h.AdminUpdateNoticeEnabled))
 }
 
 func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfigVO, error) {
@@ -83,7 +87,7 @@ func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebSiteCon
 }
 
 func (h *WebsiteConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) *vo.NoticeConfigVO {
-	return &vo.NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, PublishTime: noticeCfg.PublishTime}
+	return &vo.NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, Enabled: noticeCfg.Enabled, PublishTime: noticeCfg.PublishTime}
 }
 
 func (h *WebsiteConfigHandler) toSocialInfoConfigVO(socialINfoConfig *domain.SocialInfoConfig) *vo.SocialInfoConfigVO {
@@ -245,4 +249,23 @@ func (h *WebsiteConfigHandler) AdminUpdateEmailConfig(ctx *gin.Context, req requ
 		Password: req.Password,
 		Email:    req.Email,
 	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetNoticeConfig(ctx *gin.Context) (vo.NoticeConfigVO, error) {
+	config, err := h.serv.GetNoticeConfig(ctx)
+	if err != nil {
+		return vo.NoticeConfigVO{}, err
+	}
+	return *h.toNoticeConfigVO(&config), nil
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateNoticeConfig(ctx *gin.Context, req request.UpdateNoticeConfigReq) (any, error) {
+	return nil, h.serv.UpdateNoticeConfig(ctx, &domain.NoticeConfig{
+		Title:   req.Title,
+		Content: req.Content,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateNoticeEnabled(ctx *gin.Context, req request.UpdateNoticeConfigEnabledReq) (any, error) {
+	return nil, h.serv.UpdateNoticeConfigEnabled(ctx, gkit.GetValueOrDefault(req.Enabled))
 }
