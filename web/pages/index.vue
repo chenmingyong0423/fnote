@@ -48,9 +48,9 @@ useHead({
   ]
 })
 useSeoMeta({
-  ogTitle: homeStore.seo_meta_config.title,
+  ogTitle: homeStore.seo_meta_config.og_title,
   ogDescription: homeStore.seo_meta_config.description,
-  ogImage: '',
+  ogImage: homeStore.seo_meta_config.og_image,
   twitterCard: 'summary'
 })
 </script>

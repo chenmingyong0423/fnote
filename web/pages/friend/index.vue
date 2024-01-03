@@ -179,9 +179,9 @@ useHead({
   ]
 })
 useSeoMeta({
-  ogTitle: `友链 - ${homeStore.seo_meta_config.title}`,
+  ogTitle: `友链 - ${homeStore.seo_meta_config.og_title}`,
   ogDescription: "友链列表",
-  ogImage: '',
+  ogImage: homeStore.seo_meta_config.og_image,
   twitterCard: 'summary'
 })
 </script>

@@ -90,9 +90,9 @@ useHead({
   ]
 })
 useSeoMeta({
-  ogTitle: `文章分类和标签 - ${homeStore.seo_meta_config.title}`,
+  ogTitle: `文章分类和标签 - ${homeStore.seo_meta_config.og_title}`,
   ogDescription: `所有的文章分类和标签，包括${ct.value}等不同主题。`,
-  ogImage: '',
+  ogImage: homeStore.seo_meta_config.og_image,
   twitterCard: 'summary'
 })
 </script>

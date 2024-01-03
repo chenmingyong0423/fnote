@@ -30,7 +30,7 @@ export const useHomeStore = defineStore("home", {
         seo_meta_config: {
             title: "fnote blog",
             description: "fnote blog",
-            ogTitle: "fnote blog",
+            og_title: "fnote blog",
         } as SeoMetaConfigVO,
         isBlackMode: false,
         showSmallScreenMenu: false,
