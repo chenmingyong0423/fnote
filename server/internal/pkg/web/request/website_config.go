@@ -25,3 +25,14 @@ type UpdateOwnerConfigReq struct {
 	Profile string `json:"profile" binding:"required"`
 	Picture string `json:"picture" binding:"required"`
 }
+
+type UpdateSeoMetaConfigReq struct {
+	Title                 string `json:"title" binding:"required"`
+	Description           string `json:"description" binding:"required"`
+	OgTitle               string `json:"og_title" binding:"required"`
+	Keywords              string `json:"keywords" binding:"required"`
+	Author                string `json:"author" binding:"required"`
+	Robots                string `json:"robots" binding:"required"`
+	OgImage               string `json:"og_image"`
+	BaiduSiteVerification string `json:"baidu_site_verification"`
+}

@@ -110,6 +110,8 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/website", api.WrapWithBody(h.AdminUpdateWebsiteConfig))
 	adminGroup.GET("/owner", api.Wrap(h.AdminGetOwnerConfig))
 	adminGroup.PUT("/owner", api.WrapWithBody(h.AdminUpdateOwnerConfig))
+	adminGroup.GET("/seo", api.Wrap(h.AdminGetSeoConfig))
+	adminGroup.PUT("/seo", api.WrapWithBody(h.AdminUpdateSeoConfig))
 }
 
 func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO, error) {
@@ -213,5 +215,26 @@ func (h *WebsiteConfigHandler) AdminUpdateOwnerConfig(ctx *gin.Context, req requ
 		Name:    req.Name,
 		Profile: req.Profile,
 		Picture: req.Picture,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetSeoConfig(ctx *gin.Context) (SeoMetaConfigVO, error) {
+	config, err := h.serv.GetSeoMetaConfig(ctx)
+	if err != nil {
+		return SeoMetaConfigVO{}, err
+	}
+	return *h.toSeoMetaConfigVO(config), nil
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateSeoConfig(ctx *gin.Context, req request.UpdateSeoMetaConfigReq) (any, error) {
+	return nil, h.serv.UpdateSeoMetaConfig(ctx, &domain.SeoMetaConfig{
+		Title:                 req.Title,
+		Description:           req.Description,
+		OgTitle:               req.OgTitle,
+		OgImage:               req.OgImage,
+		BaiduSiteVerification: req.BaiduSiteVerification,
+		Keywords:              req.Keywords,
+		Author:                req.Author,
+		Robots:                req.Robots,
 	})
 }
