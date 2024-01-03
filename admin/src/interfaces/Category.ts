@@ -16,3 +16,9 @@ export interface CategoryRequest {
   enabled: boolean
   show_in_nav: boolean
 }
+
+export interface SelectCategory {
+  id: string
+  value: string
+  label: string
+}
