@@ -93,11 +93,11 @@ db.getCollection("configs").insertOne({
     "typ": "seo meta",
     "props": {
         "title": "fnote",
-        "ogTitle": "fnote",
+        "og_title": "fnote",
         "description": "fnote",
-        "ogImage": "",
-        "twitterCard": "",
-        "baidu-site-verification": "",
+        "og_image": "",
+        "twitter_card": "summary",
+        "baidu_site_verification": "",
         "keywords": "fnote,blog,BLOG",
         "author": "fnote",
         "robots": "fnote,blog"
