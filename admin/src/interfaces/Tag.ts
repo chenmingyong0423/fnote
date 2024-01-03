@@ -14,3 +14,9 @@ export interface TagRequest {
   description: string
   enabled: boolean
 }
+
+export interface SelectTag {
+  id: string
+  value: string
+  label: string
+}

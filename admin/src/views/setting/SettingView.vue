@@ -14,13 +14,13 @@
 </template>
 <script lang="ts" setup>
 import { ref } from 'vue'
-import BasicView from '@/views/Setting/BasicView.vue'
-import OwnerView from '@/views/Setting/OwnerView.vue'
-import SeoView from '@/views/Setting/SeoView.vue'
-import CommentSwitchView from '@/views/Setting/CommentSwitchView.vue'
-import FriendSwitchView from '@/views/Setting/FriendSwitchView.vue'
-import EmailView from '@/views/Setting/EmailView.vue'
-import NoticeView from '@/views/Setting/NoticeView.vue'
-import FrontPostCountView from '@/views/Setting/FrontPostCountView.vue'
+import BasicView from '@/views/setting/BasicView.vue'
+import OwnerView from '@/views/setting/OwnerView.vue'
+import SeoView from '@/views/setting/SeoView.vue'
+import CommentSwitchView from '@/views/setting/CommentSwitchView.vue'
+import FriendSwitchView from '@/views/setting/FriendSwitchView.vue'
+import EmailView from '@/views/setting/EmailView.vue'
+import NoticeView from '@/views/setting/NoticeView.vue'
+import FrontPostCountView from '@/views/setting/FrontPostCountView.vue'
 const activeKey = ref('basic')
 </script>

@@ -6,7 +6,12 @@ const router = createRouter({
     {
       path: '/post',
       name: 'post',
-      component: () => import('../views/PostListView.vue')
+      component: () => import('../views/post/PostListView.vue')
+    },
+    {
+      path: '/post/edit',
+      name: 'post-edit',
+      component: () => import('../views/post/PostEditView.vue')
     },
     {
       path: '/category',
@@ -21,7 +26,7 @@ const router = createRouter({
     {
       path: '/setting',
       name: 'setting',
-      component: () => import('../views/Setting/SettingView.vue')
+      component: () => import('@/views/setting/SettingView.vue')
     }
   ]
 })
