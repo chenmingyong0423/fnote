@@ -128,7 +128,7 @@ db.getCollection("configs").insertOne({
     "props": {
         "host": "",
         "port": ,
-        "account": "",
+        "username": "",
         "password": "",
         "email": ""
     },
