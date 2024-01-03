@@ -39,11 +39,11 @@ func NewEmailService() *EmailService {
 
 func (s *EmailService) SendEmail(ctx context.Context, email domain.Email) error {
 	m := gomail.NewMessage()
-	m.SetHeader("From", email.Account)
+	m.SetHeader("From", email.Username)
 	m.SetHeader("To", email.To...)
 	m.SetHeader("Subject", email.Subject)
 	m.SetBody(email.ContentType, email.Body)
-	dialer := gomail.NewDialer(email.Host, email.Port, email.Account, email.Password)
+	dialer := gomail.NewDialer(email.Host, email.Port, email.Username, email.Password)
 	err := dialer.DialAndSend(m)
 	if err != nil {
 		return errors.Wrap(err, "dialer.DialAndSend failed")

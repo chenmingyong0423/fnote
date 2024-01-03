@@ -70,7 +70,7 @@ func (s *MessageService) sendEmail(ctx context.Context, msgTplName, contentType 
 	return s.emailServ.SendEmail(ctx, domain.Email{
 		Host:        emailCfg.Host,
 		Port:        emailCfg.Port,
-		Account:     emailCfg.Account,
+		Username:    emailCfg.Username,
 		Password:    emailCfg.Password,
 		Name:        webNMasterCfg.Name,
 		To:          []string{email},

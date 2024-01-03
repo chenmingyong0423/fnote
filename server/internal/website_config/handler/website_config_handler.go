@@ -50,6 +50,8 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/comment", api.WrapWithBody(h.AdminUpdateCommentConfig))
 	adminGroup.GET("/friend", api.Wrap(h.AdminGetFriendConfig))
 	adminGroup.PUT("/friend", api.WrapWithBody(h.AdminUpdateFriendConfig))
+	adminGroup.GET("/email", api.Wrap(h.AdminGetEmailConfig))
+	adminGroup.PUT("/email", api.WrapWithBody(h.AdminUpdateEmailConfig))
 }
 
 func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfigVO, error) {
@@ -214,5 +216,33 @@ func (h *WebsiteConfigHandler) toFriendConfigVO(config domain.FriendConfig) vo.F
 func (h *WebsiteConfigHandler) AdminUpdateFriendConfig(ctx *gin.Context, req request.UpdateFriendConfigReq) (any, error) {
 	return nil, h.serv.UpdateFriendConfig(ctx, domain.FriendConfig{
 		EnableFriendCommit: gkit.GetValueOrDefault(req.EnableFriendCommit),
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetEmailConfig(ctx *gin.Context) (vo.EmailConfigVO, error) {
+	config, err := h.serv.GetEmailConfig(ctx)
+	if err != nil {
+		return vo.EmailConfigVO{}, err
+	}
+	return h.toEmailConfigVO(config), nil
+}
+
+func (h *WebsiteConfigHandler) toEmailConfigVO(config *domain.EmailConfig) vo.EmailConfigVO {
+	return vo.EmailConfigVO{
+		Host:     config.Host,
+		Port:     config.Port,
+		Username: config.Username,
+		Password: config.Password,
+		Email:    config.Email,
+	}
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateEmailConfig(ctx *gin.Context, req request.UpdateEmailConfigReq) (any, error) {
+	return nil, h.serv.UpdateEmailConfig(ctx, &domain.EmailConfig{
+		Host:     req.Host,
+		Port:     req.Port,
+		Username: req.Username,
+		Password: req.Password,
+		Email:    req.Email,
 	})
 }

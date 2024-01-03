@@ -19,7 +19,7 @@ type Email struct {
 	Host string
 	Port int
 	// 邮箱账号
-	Account string
+	Username string
 	// 密码
 	Password string
 	// 发件人

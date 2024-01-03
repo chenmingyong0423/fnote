@@ -36,6 +36,7 @@ type IWebsiteConfigRepository interface {
 	UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error
 	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
 	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
+	UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -48,6 +49,21 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "email"),
+		update.Set(map[string]any{
+			"props.host":     emailConfig.Host,
+			"props.port":     emailConfig.Port,
+			"props.username": emailConfig.Username,
+			"props.password": emailConfig.Password,
+			"props.email":    emailConfig.Email,
+			"update_time":    time.Now().Unix(),
+		}),
+	)
 }
 
 func (r *WebsiteConfigRepository) UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error {
