@@ -73,11 +73,11 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo ap
 	if !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
 		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
 	}
-	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "comment")
+	switchConfig, err := h.cfgService.GetCommentConfig(ctx)
 	if err != nil {
 		return
 	}
-	if !switchConfig.Status {
+	if !switchConfig.EnableComment {
 		return vo, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
 	post, err := h.postServ.GetPunishedPostById(ctx, req.PostId)
@@ -137,11 +137,11 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (vo
 	if !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
 		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
 	}
-	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "comment")
+	switchConfig, err := h.cfgService.GetCommentConfig(ctx)
 	if err != nil {
 		return
 	}
-	if !switchConfig.Status {
+	if !switchConfig.EnableComment {
 		return vo, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
 	post, err := h.postServ.GetPunishedPostById(ctx, req.PostId)

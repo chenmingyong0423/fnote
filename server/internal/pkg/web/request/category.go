@@ -19,11 +19,11 @@ type CreateCategoryRequest struct {
 	Route       string `json:"route" binding:"required"`
 	Description string `json:"description"`
 	ShowInNav   bool   `json:"show_in_nav"`
-	Disabled    bool   `json:"disabled"`
+	Enabled     bool   `json:"enabled"`
 }
 
-type CategoryDisabledRequest struct {
-	Disabled *bool `json:"disabled" binding:"required"`
+type CategoryEnabledRequest struct {
+	Enabled *bool `json:"enabled" binding:"required"`
 }
 
 type CategoryNavRequest struct {

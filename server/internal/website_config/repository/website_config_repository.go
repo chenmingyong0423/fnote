@@ -33,6 +33,13 @@ type IWebsiteConfigRepository interface {
 	Decrease(ctx context.Context, field string) error
 	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
 	UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error
+	UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error
+	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
+	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
+	UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig) error
+	UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error
+	UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error
+	UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -45,6 +52,79 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "front-post-count"),
+		update.BsonBuilder().SetSimple("props.count", cfg.Count).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
+}
+
+func (r *WebsiteConfigRepository) UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "notice"),
+		update.BsonBuilder().SetSimple("props.enabled", enabled).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
+}
+
+func (r *WebsiteConfigRepository) UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "notice"),
+		update.BsonBuilder().SetSimple("props.title", noticeCfg.Title).SetSimple("props.content", noticeCfg.Content).SetSimple("props.publish_time", time.Now().Unix()).Build(),
+	)
+}
+
+func (r *WebsiteConfigRepository) UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "email"),
+		update.Set(map[string]any{
+			"props.host":     emailConfig.Host,
+			"props.port":     emailConfig.Port,
+			"props.username": emailConfig.Username,
+			"props.password": emailConfig.Password,
+			"props.email":    emailConfig.Email,
+			"update_time":    time.Now().Unix(),
+		}),
+	)
+}
+
+func (r *WebsiteConfigRepository) UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "friend"),
+		update.BsonBuilder().SetSimple("props.enable_friend_commit", friendConfig.EnableFriendCommit).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
+}
+
+func (r *WebsiteConfigRepository) UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "comment"),
+		update.BsonBuilder().SetSimple("props.enable_comment", commentConfig.EnableComment).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
+}
+
+func (r *WebsiteConfigRepository) UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "seo meta"),
+		update.Set(map[string]any{
+			"props.title":                   cfg.Title,
+			"props.description":             cfg.Description,
+			"props.og_title":                cfg.OgTitle,
+			"props.og_image":                cfg.OgImage,
+			"props.baidu_site_verification": cfg.BaiduSiteVerification,
+			"props.keywords":                cfg.Keywords,
+			"props.author":                  cfg.Author,
+			"props.robots":                  cfg.Robots,
+			"update_time":                   time.Now().Unix(),
+		}),
+	)
 }
 
 func (r *WebsiteConfigRepository) UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error {

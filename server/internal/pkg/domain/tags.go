@@ -18,7 +18,7 @@ type Tag struct {
 	Id         string
 	Name       string
 	Route      string
-	Disabled   bool
+	Enabled    bool
 	CreateTime int64
 	UpdateTime int64
 }

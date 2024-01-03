@@ -36,7 +36,7 @@ type ICategoryRepository interface {
 	GetCategoryByRoute(ctx context.Context, route string) (domain.Category, error)
 	QueryCategoriesPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error)
 	CreateCategory(ctx context.Context, category domain.Category) (string, error)
-	ModifyCategoryDisabled(ctx context.Context, id string, disabled bool) error
+	ModifyCategoryEnabled(ctx context.Context, id string, enabled bool) error
 	ModifyCategory(ctx context.Context, id string, description string) error
 	DeleteCategory(ctx context.Context, id string) error
 	GetNavigations(ctx context.Context) ([]domain.Category, error)
@@ -64,7 +64,7 @@ func (r *CategoryRepository) RecoverCategory(ctx context.Context, category domai
 		Route:       category.Route,
 		Description: category.Description,
 		Sort:        category.Sort,
-		Disabled:    category.Disabled,
+		Enabled:     category.Enabled,
 		ShowInNav:   category.ShowInNav,
 		CreateTime:  category.CreateTime,
 		UpdateTime:  category.UpdateTime,
@@ -115,17 +115,17 @@ func (r *CategoryRepository) ModifyCategory(ctx context.Context, id string, desc
 	return r.dao.ModifyCategory(ctx, objectID, description)
 }
 
-func (r *CategoryRepository) ModifyCategoryDisabled(ctx context.Context, id string, disabled bool) error {
+func (r *CategoryRepository) ModifyCategoryEnabled(ctx context.Context, id string, enabled bool) error {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
-	return r.dao.ModifyDisabled(ctx, objectID, disabled)
+	return r.dao.ModifyEnabled(ctx, objectID, enabled)
 }
 
 func (r *CategoryRepository) CreateCategory(ctx context.Context, category domain.Category) (string, error) {
 	now := time.Now().Unix()
-	return r.dao.Create(ctx, &dao.Category{Name: category.Name, Route: category.Route, Description: category.Description, ShowInNav: category.ShowInNav, Disabled: category.Disabled, CreateTime: now, UpdateTime: now})
+	return r.dao.Create(ctx, &dao.Category{Name: category.Name, Route: category.Route, Description: category.Description, ShowInNav: category.ShowInNav, Enabled: category.Enabled, CreateTime: now, UpdateTime: now})
 }
 
 func (r *CategoryRepository) QueryCategoriesPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error) {
@@ -163,7 +163,7 @@ func (r *CategoryRepository) GetCategoryByRoute(ctx context.Context, route strin
 }
 
 func (r *CategoryRepository) toDomainCategory(category *dao.Category) domain.Category {
-	return domain.Category{Id: category.Id.Hex(), Name: category.Name, Route: category.Route, Description: category.Description, Disabled: category.Disabled, ShowInNav: category.ShowInNav, Sort: category.Sort, CreateTime: category.CreateTime, UpdateTime: category.UpdateTime}
+	return domain.Category{Id: category.Id.Hex(), Name: category.Name, Route: category.Route, Description: category.Description, Enabled: category.Enabled, ShowInNav: category.ShowInNav, Sort: category.Sort, CreateTime: category.CreateTime, UpdateTime: category.UpdateTime}
 }
 
 func (r *CategoryRepository) GetAll(ctx context.Context) ([]domain.Category, error) {

@@ -40,7 +40,7 @@ type ITagService interface {
 	GetTagByRoute(ctx context.Context, route string) (domain.Tag, error)
 	AdminGetTags(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Tag, int64, error)
 	AdminCreateTag(ctx context.Context, tag domain.Tag) error
-	ModifyTagDisabled(ctx context.Context, id string, disabled bool) error
+	ModifyTagEnabled(ctx context.Context, id string, enabled bool) error
 	DeleteTag(ctx context.Context, id string) error
 }
 
@@ -75,8 +75,8 @@ func (s *TagService) DeleteTag(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *TagService) ModifyTagDisabled(ctx context.Context, id string, disabled bool) error {
-	return s.repo.ModifyTagDisabled(ctx, id, disabled)
+func (s *TagService) ModifyTagEnabled(ctx context.Context, id string, enabled bool) error {
+	return s.repo.ModifyTagEnabled(ctx, id, enabled)
 }
 
 func (s *TagService) AdminCreateTag(ctx context.Context, tag domain.Tag) error {
