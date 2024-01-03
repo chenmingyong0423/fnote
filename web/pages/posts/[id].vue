@@ -420,7 +420,7 @@ useHead({
 useSeoMeta({
   ogTitle: `${post.value?.title} - ${homeStore.seo_meta_config.og_title}`,
   ogDescription: description,
-  ogImage: homeStore.seo_meta_config.og_image,
+  ogImage: post.value?.cover_img,
   twitterCard: 'summary'
 })
 </script>
