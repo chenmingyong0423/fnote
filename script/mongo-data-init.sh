@@ -124,7 +124,7 @@ db.getCollection("configs").insertOne({
 });
 // 邮件配置
 db.getCollection("configs").insertOne({
-    "typ": "emailConfig",
+    "typ": "email",
     "props": {
         "host": "",
         "port": 0,
