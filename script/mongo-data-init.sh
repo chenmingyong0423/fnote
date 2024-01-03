@@ -108,7 +108,7 @@ db.getCollection("configs").insertOne({
 db.getCollection("configs").insertOne({
     typ: "comment",
     props: {
-        status: true
+        enable_comment: true
     },
     create_time: Math.floor(new Date().getTime() / 1000),
     update_time: Math.floor(new Date().getTime() / 1000)
@@ -117,7 +117,7 @@ db.getCollection("configs").insertOne({
 db.getCollection("configs").insertOne({
     typ: "friend",
     props: {
-        status: false
+        enable_be_friend: false
     },
     create_time: Math.floor(new Date().getTime() / 1000),
     update_time: Math.floor(new Date().getTime() / 1000)
