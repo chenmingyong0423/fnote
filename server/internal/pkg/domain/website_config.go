@@ -105,10 +105,9 @@ type FrontPostCount struct {
 type SeoMetaConfig struct {
 	Title                 string `bson:"title"`
 	Description           string `bson:"description"`
-	OgTitle               string `bson:"ogTitle"`
-	OgImage               string `bson:"ogImage"`
-	TwitterCard           string `bson:"twitterCard"`
-	BaiduSiteVerification string `bson:"baidu-site-verification"`
+	OgTitle               string `bson:"og_title"`
+	OgImage               string `bson:"og_image"`
+	BaiduSiteVerification string `bson:"baidu_site_verification"`
 	Keywords              string `bson:"keywords"`
 	Author                string `bson:"author"`
 	Robots                string `bson:"robots"`

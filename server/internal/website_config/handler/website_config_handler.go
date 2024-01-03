@@ -82,10 +82,9 @@ type SocialInfoVO struct {
 type SeoMetaConfigVO struct {
 	Title                 string `json:"title"`
 	Description           string `json:"description"`
-	OgTitle               string `json:"ogTitle"`
-	OgImage               string `json:"ogImage"`
-	TwitterCard           string `json:"twitterCard"`
-	BaiduSiteVerification string `json:"baidu-site-verification"`
+	OgTitle               string `json:"og_title"`
+	OgImage               string `json:"og_image"`
+	BaiduSiteVerification string `json:"baidu_site_verification"`
 	Keywords              string `json:"keywords"`
 	Author                string `json:"author"`
 	Robots                string `json:"robots"`
@@ -170,7 +169,6 @@ func (h *WebsiteConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *
 		Description:           config.Description,
 		OgTitle:               config.OgTitle,
 		OgImage:               config.OgImage,
-		TwitterCard:           config.TwitterCard,
 		BaiduSiteVerification: config.BaiduSiteVerification,
 		Keywords:              config.Keywords,
 		Author:                config.Author,
