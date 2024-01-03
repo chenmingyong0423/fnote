@@ -14,3 +14,15 @@ export interface OwnerConfig {
   profile: string
   picture: string
 }
+
+
+export interface SeoConfig {
+  title: string
+  description: string
+  og_title: string
+  og_image: string
+  baidu_site_verification: string
+  keywords: string
+  author: string
+  robots: string
+}
