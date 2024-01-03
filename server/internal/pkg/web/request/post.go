@@ -13,3 +13,31 @@
 // limitations under the License.
 
 package request
+
+type PostReq struct {
+	Id               string          `json:"id"`
+	Author           string          `json:"author"`
+	Title            string          `json:"title"`
+	Summary          string          `json:"summary"`
+	Content          string          `json:"content"`
+	CoverImg         string          `json:"cover_img"`
+	Categories       []Category4Post `json:"categories"`
+	Tags             []Tag4Post      `json:"tags"`
+	StickyWeight     int             `json:"sticky_weight"`
+	Status           int             `json:"status"`
+	MetaDescription  string          `json:"meta_description"`
+	MetaKeywords     string          `json:"meta_keywords"`
+	WordCount        int             `json:"word_count"`
+	IsCommentAllowed bool            `json:"is_comment_allowed"`
+	ReferenceIds     []string        `json:"reference_ids"`
+}
+
+type Category4Post struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type Tag4Post struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}

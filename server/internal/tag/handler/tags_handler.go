@@ -55,6 +55,7 @@ func (h *TagHandler) RegisterGinRoutes(engine *gin.Engine) {
 
 	adminGroup := engine.Group("/admin/tags")
 	adminGroup.GET("", api.WrapWithBody(h.AdminGetTags))
+	adminGroup.GET("/select", api.Wrap(h.AdminGetSelectTags))
 	adminGroup.POST("", api.WrapWithBody(h.AdminCreateTag))
 	adminGroup.PUT("/enabled/:id", api.WrapWithBody(h.AdminModifyTagEnabled))
 	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteTag))
@@ -135,4 +136,25 @@ func (h *TagHandler) AdminModifyTagEnabled(ctx *gin.Context, req request.TagEnab
 func (h *TagHandler) AdminDeleteTag(ctx *gin.Context) (any, error) {
 	id := ctx.Param("id")
 	return nil, h.serv.DeleteTag(ctx, id)
+}
+
+func (h *TagHandler) AdminGetSelectTags(ctx *gin.Context) (api.ListVO[vo.SelectTag], error) {
+	tags, err := h.serv.GetSelectTags(ctx)
+	if err != nil {
+		return api.ListVO[vo.SelectTag]{}, err
+	}
+	list := h.tagsToSelectVO(tags)
+	return api.ListVO[vo.SelectTag]{List: list}, nil
+}
+
+func (h *TagHandler) tagsToSelectVO(tags []domain.Tag) []vo.SelectTag {
+	result := make([]vo.SelectTag, len(tags))
+	for i, tag := range tags {
+		result[i] = vo.SelectTag{
+			Id:    tag.Id,
+			Value: tag.Name,
+			Label: tag.Name,
+		}
+	}
+	return result
 }

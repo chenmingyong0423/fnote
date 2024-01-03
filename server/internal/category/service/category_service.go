@@ -42,6 +42,7 @@ type ICategoryService interface {
 	ModifyCategory(ctx context.Context, id string, description string) error
 	DeleteCategory(ctx context.Context, id string) error
 	ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error
+	AdminGetSelectCategories(ctx context.Context) ([]domain.Category, error)
 }
 
 var _ ICategoryService = (*CategoryService)(nil)
@@ -58,6 +59,10 @@ type CategoryService struct {
 	configService     configServ.IWebsiteConfigService
 	countStatsService service.ICountStatsService
 	repo              repository.ICategoryRepository
+}
+
+func (s *CategoryService) AdminGetSelectCategories(ctx context.Context) ([]domain.Category, error) {
+	return s.repo.GetSelectCategories(ctx)
 }
 
 func (s *CategoryService) ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error {

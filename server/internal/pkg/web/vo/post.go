@@ -26,12 +26,22 @@ package vo
 //  },
 
 type AdminPostVO struct {
-	Id         string   `json:"_id"`
-	CoverImg   string   `json:"coverImg"`
-	Title      string   `json:"title"`
-	Summary    string   `json:"summary"`
-	Categories []string `json:"categories"`
-	Tags       []string `json:"tags"`
-	CreateTime int64    `json:"createTime"`
-	UpdateTime int64    `json:"updateTime"`
+	Id         string          `json:"id"`
+	CoverImg   string          `json:"cover_img"`
+	Title      string          `json:"title"`
+	Summary    string          `json:"summary"`
+	Categories []Category4Post `json:"categories"`
+	Tags       []Tag4Post      `json:"tags"`
+	CreateTime int64           `json:"create_time"`
+	UpdateTime int64           `json:"update_time"`
+}
+
+type Category4Post struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type Tag4Post struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
 }

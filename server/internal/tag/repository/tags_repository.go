@@ -39,6 +39,7 @@ type ITagRepository interface {
 	GetTagById(ctx context.Context, id string) (domain.Tag, error)
 	DeleteTagById(ctx context.Context, id string) error
 	RecoverTag(ctx context.Context, tag domain.Tag) error
+	GetSelectTags(ctx context.Context) ([]domain.Tag, error)
 }
 
 var _ ITagRepository = (*TagRepository)(nil)
@@ -49,6 +50,14 @@ func NewTagRepository(dao dao.ITagDao) *TagRepository {
 
 type TagRepository struct {
 	dao dao.ITagDao
+}
+
+func (r *TagRepository) GetSelectTags(ctx context.Context) ([]domain.Tag, error) {
+	tags, err := r.dao.GetEnabled(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainTags(tags), nil
 }
 
 func (r *TagRepository) RecoverTag(ctx context.Context, tag domain.Tag) error {

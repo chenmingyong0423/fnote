@@ -42,6 +42,7 @@ type ITagService interface {
 	AdminCreateTag(ctx context.Context, tag domain.Tag) error
 	ModifyTagEnabled(ctx context.Context, id string, enabled bool) error
 	DeleteTag(ctx context.Context, id string) error
+	GetSelectTags(ctx context.Context) ([]domain.Tag, error)
 }
 
 var _ ITagService = (*TagService)(nil)
@@ -49,6 +50,10 @@ var _ ITagService = (*TagService)(nil)
 type TagService struct {
 	repo              repository.ITagRepository
 	countStatsService service.ICountStatsService
+}
+
+func (s *TagService) GetSelectTags(ctx context.Context) ([]domain.Tag, error) {
+	return s.repo.GetSelectTags(ctx)
 }
 
 func (s *TagService) DeleteTag(ctx context.Context, id string) error {

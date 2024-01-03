@@ -63,6 +63,7 @@ func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 
 	adminGroup := engine.Group("/admin/categories")
 	adminGroup.GET("", api.WrapWithBody(h.AdminGetCategories))
+	adminGroup.GET("/select", api.Wrap(h.AdminGetSelectCategories))
 	adminGroup.POST("", api.WrapWithBody(h.AdminCreateCategory))
 	adminGroup.PUT("/enabled/:id", api.WrapWithBody(h.AdminModifyCategoryEnabled))
 	adminGroup.PUT("/:id", api.WrapWithBody(h.AdminModifyCategory))
@@ -174,4 +175,21 @@ func (h *CategoryHandler) AdminDeleteCategory(ctx *gin.Context) (any, error) {
 func (h *CategoryHandler) AdminModifyCategoryNavigation(ctx *gin.Context, req request.CategoryNavRequest) (any, error) {
 	id := ctx.Param("id")
 	return nil, h.serv.ModifyCategoryNavigation(ctx, id, gkit.GetValueOrDefault(req.ShowInNav))
+}
+
+func (h *CategoryHandler) AdminGetSelectCategories(ctx *gin.Context) (api.ListVO[vo.SelectCategory], error) {
+	categories, err := h.serv.AdminGetSelectCategories(ctx)
+	if err != nil {
+		return api.ListVO[vo.SelectCategory]{}, err
+	}
+	list := h.categoriesToSelectVO(categories)
+	return api.ListVO[vo.SelectCategory]{List: list}, nil
+}
+
+func (h *CategoryHandler) categoriesToSelectVO(categories []domain.Category) []vo.SelectCategory {
+	result := make([]vo.SelectCategory, len(categories))
+	for i, category := range categories {
+		result[i] = vo.SelectCategory{Id: category.Id, Value: category.Name, Label: category.Name}
+	}
+	return result
 }

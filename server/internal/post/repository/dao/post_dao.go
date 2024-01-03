@@ -48,8 +48,8 @@ type Post struct {
 	Summary          string            `bson:"summary"`
 	Content          string            `bson:"content"`
 	CoverImg         string            `bson:"cover_img"`
-	Categories       []string          `bson:"categories"`
-	Tags             []string          `bson:"tags"`
+	Categories       []Category4Post   `bson:"categories"`
+	Tags             []Tag4Post        `bson:"tags"`
 	Status           domain.PostStatus `bson:"status"`
 	Likes            []string          `bson:"likes"`
 	LikeCount        int               `bson:"like_count"`
@@ -63,6 +63,17 @@ type Post struct {
 	CreateTime       int64             `bson:"create_time"`
 	UpdateTime       int64             `bson:"update_time"`
 }
+
+type Category4Post struct {
+	Id   string `bson:"id"`
+	Name string `bson:"name"`
+}
+
+type Tag4Post struct {
+	Id   string `bson:"id"`
+	Name string `bson:"name"`
+}
+
 type IPostDao interface {
 	GetFrontPosts(ctx context.Context, count int64) ([]*Post, error)
 	QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error)
@@ -71,6 +82,9 @@ type IPostDao interface {
 	AddLike(ctx context.Context, sug string, ip string) error
 	DeleteLike(ctx context.Context, sug string, ip string) error
 	IncreaseFieldById(ctx context.Context, id string, field string) error
+	AddPost(ctx context.Context, post *Post) error
+	DeleteById(ctx context.Context, id string) error
+	FindById(ctx context.Context, id string) (*Post, error)
 }
 
 var _ IPostDao = (*PostDao)(nil)
@@ -83,6 +97,33 @@ func NewPostDao(db *mongo.Database) *PostDao {
 
 type PostDao struct {
 	coll *mongox.Collection[Post]
+}
+
+func (d *PostDao) FindById(ctx context.Context, id string) (*Post, error) {
+	post, err := d.coll.Finder().Filter(query.Id(id)).FindOne(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fails to find the document from post, id=%s", id)
+	}
+	return post, nil
+}
+
+func (d *PostDao) DeleteById(ctx context.Context, id string) error {
+	result, err := d.coll.Deleter().Filter(query.Id(id)).DeleteOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to delete a post, id=%s", id)
+	}
+	if result.DeletedCount == 0 {
+		return fmt.Errorf("fails to delete a post, id=%s", id)
+	}
+	return nil
+}
+
+func (d *PostDao) AddPost(ctx context.Context, post *Post) error {
+	_, err := d.coll.Creator().InsertOne(ctx, *post)
+	if err != nil {
+		return errors.Wrapf(err, "fails to insert a post, post=%v", post)
+	}
+	return nil
 }
 
 func (d *PostDao) IncreaseFieldById(ctx context.Context, id string, field string) error {

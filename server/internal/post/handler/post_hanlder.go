@@ -18,6 +18,8 @@ import (
 	"net/http"
 	"slices"
 
+	"github.com/chenmingyong0423/gkit/slice"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
@@ -68,10 +70,12 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group.GET("", api.WrapWithBody(h.GetPosts))
 	group.GET("/:id", api.Wrap(h.GetPostBySug))
 	group.POST("/:id/likes", api.Wrap(h.AddLike))
-	group.DELETE("/:id/likes", api.Wrap(h.DeleteLike))
+	//group.DELETE("/:id/likes", api.Wrap(h.DeleteLike))
 
 	adminGroup := engine.Group("/admin/posts")
 	adminGroup.GET("", api.WrapWithBody(h.AdminGetPosts))
+	adminGroup.POST("", api.WrapWithBody(h.AddPost))
+	adminGroup.DELETE("/:id", api.Wrap(h.DeletePost))
 }
 
 func (h *PostHandler) GetLatestPosts(ctx *gin.Context) (listVO api.ListVO[*SummaryPostVO], err error) {
@@ -90,14 +94,20 @@ func (h *PostHandler) GetLatestPosts(ctx *gin.Context) (listVO api.ListVO[*Summa
 func (h *PostHandler) postsToPostVOs(posts []*domain.Post) []*SummaryPostVO {
 	postVOs := make([]*SummaryPostVO, 0, len(posts))
 	for _, post := range posts {
+		categories := slice.Map[domain.Category4Post, string](post.PrimaryPost.Categories, func(_ int, c domain.Category4Post) string {
+			return c.Name
+		})
+		tags := slice.Map[domain.Tag4Post, string](post.PrimaryPost.Tags, func(_ int, t domain.Tag4Post) string {
+			return t.Name
+		})
 		postVOs = append(postVOs, &SummaryPostVO{
 			Sug:          post.PrimaryPost.Id,
 			Author:       post.PrimaryPost.Author,
 			Title:        post.PrimaryPost.Title,
 			Summary:      post.PrimaryPost.Summary,
 			CoverImg:     post.PrimaryPost.CoverImg,
-			Categories:   post.PrimaryPost.Categories,
-			Tags:         post.PrimaryPost.Tags,
+			Categories:   categories,
+			Tags:         tags,
 			LikeCount:    post.PrimaryPost.LikeCount,
 			CommentCount: post.PrimaryPost.CommentCount,
 			VisitCount:   post.PrimaryPost.VisitCount,
@@ -173,16 +183,68 @@ func (h *PostHandler) AdminGetPosts(ctx *gin.Context, req request.PageRequest) (
 func (h *PostHandler) postsToAdminPost(posts []*domain.Post) []vo.AdminPostVO {
 	adminPostVOs := make([]vo.AdminPostVO, len(posts))
 	for i, post := range posts {
+		categories := slice.Map[domain.Category4Post, vo.Category4Post](post.PrimaryPost.Categories, func(_ int, c domain.Category4Post) vo.Category4Post {
+			return vo.Category4Post{
+				Id:   c.Id,
+				Name: c.Name,
+			}
+		})
+		tags := slice.Map[domain.Tag4Post, vo.Tag4Post](post.PrimaryPost.Tags, func(_ int, t domain.Tag4Post) vo.Tag4Post {
+			return vo.Tag4Post{
+				Id:   t.Id,
+				Name: t.Name,
+			}
+		})
 		adminPostVOs[i] = vo.AdminPostVO{
 			Id:         post.Id,
 			CoverImg:   post.CoverImg,
 			Title:      post.Title,
 			Summary:    post.Summary,
-			Categories: post.Categories,
-			Tags:       post.Tags,
+			Categories: categories,
+			Tags:       tags,
 			CreateTime: post.CreateTime,
 			UpdateTime: post.UpdateTime,
 		}
 	}
 	return adminPostVOs
+}
+
+func (h *PostHandler) AddPost(ctx *gin.Context, req request.PostReq) (any, error) {
+	categories := slice.Map[request.Category4Post, domain.Category4Post](req.Categories, func(_ int, c request.Category4Post) domain.Category4Post {
+		return domain.Category4Post{
+			Id:   c.Id,
+			Name: c.Name,
+		}
+	})
+	tags := slice.Map[request.Tag4Post, domain.Tag4Post](req.Tags, func(_ int, t request.Tag4Post) domain.Tag4Post {
+		return domain.Tag4Post{
+			Id:   t.Id,
+			Name: t.Name,
+		}
+	})
+	return nil, h.serv.AddPost(ctx, domain.Post{
+		PrimaryPost: domain.PrimaryPost{
+			Id:           req.Id,
+			Author:       req.Author,
+			Title:        req.Title,
+			Summary:      req.Summary,
+			CoverImg:     req.CoverImg,
+			Categories:   categories,
+			Tags:         tags,
+			StickyWeight: req.StickyWeight,
+		},
+		ExtraPost: domain.ExtraPost{
+			Content:          req.Content,
+			MetaDescription:  req.MetaDescription,
+			MetaKeywords:     req.MetaKeywords,
+			WordCount:        req.WordCount,
+			Status:           req.Status,
+			IsCommentAllowed: req.IsCommentAllowed,
+		},
+		IsCommentAllowed: req.IsCommentAllowed,
+	})
+}
+
+func (h *PostHandler) DeletePost(ctx *gin.Context) (any, error) {
+	return nil, h.serv.DeletePost(ctx, ctx.Param("id"))
 }

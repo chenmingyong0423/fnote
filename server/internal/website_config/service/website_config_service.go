@@ -46,6 +46,8 @@ type IWebsiteConfigService interface {
 	UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error
 	GetFrontPostCountConfig(ctx context.Context) (domain.FrontPostCountConfig, error)
 	UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error
+	IncreaseWebsitePostCount(ctx context.Context) error
+	DecreaseWebsitePostCount(ctx context.Context) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -58,6 +60,14 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) DecreaseWebsitePostCount(ctx context.Context) error {
+	return s.repo.Decrease(ctx, "post_count")
+}
+
+func (s *WebsiteConfigService) IncreaseWebsitePostCount(ctx context.Context) error {
+	return s.repo.Increase(ctx, "post_count")
 }
 
 func (s *WebsiteConfigService) UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error {
@@ -154,7 +164,7 @@ func (s *WebsiteConfigService) UpdateWebSiteConfig(ctx context.Context, webSiteC
 }
 
 func (s *WebsiteConfigService) DecreaseCategoryCount(ctx context.Context) error {
-	err := s.repo.Decrease(ctx, "categoryCount")
+	err := s.repo.Decrease(ctx, "category_count")
 	if err != nil {
 		return err
 	}
@@ -162,7 +172,7 @@ func (s *WebsiteConfigService) DecreaseCategoryCount(ctx context.Context) error 
 }
 
 func (s *WebsiteConfigService) IncreaseCategoryCount(ctx context.Context) error {
-	err := s.repo.Increase(ctx, "categoryCount")
+	err := s.repo.Increase(ctx, "category_count")
 	if err != nil {
 		return err
 	}
@@ -256,7 +266,7 @@ func (s *WebsiteConfigService) getConfigAndConvertTo(ctx context.Context, typ st
 }
 
 func (s *WebsiteConfigService) IncreaseWebsiteViews(ctx context.Context) error {
-	return s.repo.Increase(ctx, "websiteViews")
+	return s.repo.Increase(ctx, "view_count")
 }
 
 func (s *WebsiteConfigService) GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error) {
