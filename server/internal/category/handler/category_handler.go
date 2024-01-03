@@ -64,7 +64,7 @@ func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin/categories")
 	adminGroup.GET("", api.WrapWithBody(h.AdminGetCategories))
 	adminGroup.POST("", api.WrapWithBody(h.AdminCreateCategory))
-	adminGroup.PUT("/disabled/:id", api.WrapWithBody(h.AdminModifyCategoryDisabled))
+	adminGroup.PUT("/enabled/:id", api.WrapWithBody(h.AdminModifyCategoryEnabled))
 	adminGroup.PUT("/:id", api.WrapWithBody(h.AdminModifyCategory))
 	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteCategory))
 	adminGroup.PUT("/navigation/:id", api.WrapWithBody(h.AdminModifyCategoryNavigation))
@@ -129,7 +129,7 @@ func (h *CategoryHandler) categoriesToVO(categories []domain.Category) []vo.Cate
 			Id:          category.Id,
 			Name:        category.Name,
 			Route:       category.Route,
-			Disabled:    category.Disabled,
+			Enabled:     category.Enabled,
 			ShowInNav:   category.ShowInNav,
 			Description: category.Description,
 			CreateTime:  category.CreateTime,
@@ -145,7 +145,7 @@ func (h *CategoryHandler) AdminCreateCategory(ctx *gin.Context, req request.Crea
 		Route:       req.Route,
 		Description: req.Description,
 		ShowInNav:   req.ShowInNav,
-		Disabled:    req.Disabled,
+		Enabled:     req.Enabled,
 	})
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
@@ -156,9 +156,9 @@ func (h *CategoryHandler) AdminCreateCategory(ctx *gin.Context, req request.Crea
 	return nil, nil
 }
 
-func (h *CategoryHandler) AdminModifyCategoryDisabled(ctx *gin.Context, req request.CategoryDisabledRequest) (any, error) {
+func (h *CategoryHandler) AdminModifyCategoryEnabled(ctx *gin.Context, req request.CategoryEnabledRequest) (any, error) {
 	id := ctx.Param("id")
-	return nil, h.serv.ModifyCategoryDisabled(ctx, id, gkit.GetValueOrDefault(req.Disabled))
+	return nil, h.serv.ModifyCategoryEnabled(ctx, id, gkit.GetValueOrDefault(req.Enabled))
 }
 
 func (h *CategoryHandler) AdminModifyCategory(ctx *gin.Context, req request.UpdateCategoryRequest) (any, error) {

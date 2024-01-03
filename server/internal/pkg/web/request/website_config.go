@@ -25,3 +25,43 @@ type UpdateOwnerConfigReq struct {
 	Profile string `json:"profile" binding:"required"`
 	Picture string `json:"picture" binding:"required"`
 }
+
+type UpdateSeoMetaConfigReq struct {
+	Title                 string `json:"title" binding:"required"`
+	Description           string `json:"description" binding:"required"`
+	OgTitle               string `json:"og_title" binding:"required"`
+	Keywords              string `json:"keywords" binding:"required"`
+	Author                string `json:"author" binding:"required"`
+	Robots                string `json:"robots" binding:"required"`
+	OgImage               string `json:"og_image"`
+	BaiduSiteVerification string `json:"baidu_site_verification"`
+}
+
+type UpdateCommentConfigReq struct {
+	EnableComment *bool `json:"enable_comment" binding:"required"`
+}
+
+type UpdateFriendConfigReq struct {
+	EnableFriendCommit *bool `json:"enable_friend_commit" binding:"required"`
+}
+
+type UpdateEmailConfigReq struct {
+	Host     string `json:"host" binding:"required"`
+	Port     int    `json:"port" binding:"required"`
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+}
+
+type UpdateNoticeConfigReq struct {
+	Title   string `json:"title" binding:"required"`
+	Content string `json:"content" binding:"required"`
+}
+
+type UpdateNoticeConfigEnabledReq struct {
+	Enabled *bool `json:"enabled" binding:"required"`
+}
+
+type UpdateFPCConfigCountReq struct {
+	Count int64 `json:"count" binding:"required"`
+}

@@ -35,7 +35,7 @@ type ITagRepository interface {
 	GetTagByRoute(ctx context.Context, route string) (domain.Tag, error)
 	QueryTagsPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Tag, int64, error)
 	CreateTag(ctx context.Context, tag domain.Tag) (string, error)
-	ModifyTagDisabled(ctx context.Context, id string, disabled bool) error
+	ModifyTagEnabled(ctx context.Context, id string, enabled bool) error
 	GetTagById(ctx context.Context, id string) (domain.Tag, error)
 	DeleteTagById(ctx context.Context, id string) error
 	RecoverTag(ctx context.Context, tag domain.Tag) error
@@ -60,7 +60,7 @@ func (r *TagRepository) RecoverTag(ctx context.Context, tag domain.Tag) error {
 		Id:         id,
 		Name:       tag.Name,
 		Route:      tag.Route,
-		Disabled:   tag.Disabled,
+		Enabled:    tag.Enabled,
 		CreateTime: tag.CreateTime,
 		UpdateTime: tag.UpdateTime,
 	})
@@ -86,17 +86,17 @@ func (r *TagRepository) GetTagById(ctx context.Context, id string) (t domain.Tag
 	return r.toDomainTag(tag), nil
 }
 
-func (r *TagRepository) ModifyTagDisabled(ctx context.Context, id string, disabled bool) error {
+func (r *TagRepository) ModifyTagEnabled(ctx context.Context, id string, enabled bool) error {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
-	return r.dao.ModifyDisabled(ctx, objectID, disabled)
+	return r.dao.ModifyEnabled(ctx, objectID, enabled)
 }
 
 func (r *TagRepository) CreateTag(ctx context.Context, tag domain.Tag) (string, error) {
 	now := time.Now().Unix()
-	return r.dao.Create(ctx, &dao.Tags{Name: tag.Name, Route: tag.Route, Disabled: tag.Disabled, CreateTime: now, UpdateTime: now})
+	return r.dao.Create(ctx, &dao.Tags{Name: tag.Name, Route: tag.Route, Enabled: tag.Enabled, CreateTime: now, UpdateTime: now})
 
 }
 
@@ -131,7 +131,7 @@ func (r *TagRepository) toDomainTag(tag *dao.Tags) domain.Tag {
 		Id:         tag.Id.Hex(),
 		Name:       tag.Name,
 		Route:      tag.Route,
-		Disabled:   tag.Disabled,
+		Enabled:    tag.Enabled,
 		CreateTime: tag.CreateTime,
 		UpdateTime: tag.UpdateTime,
 	}

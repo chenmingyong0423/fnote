@@ -25,16 +25,27 @@ import (
 
 type IWebsiteConfigService interface {
 	GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error)
-	GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error)
 	IncreaseWebsiteViews(ctx context.Context) error
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
 	GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error)
-	GetFrontPostCount(ctx context.Context) (*domain.FrontPostCount, error)
+	GetFrontPostCount(ctx context.Context) (*domain.FrontPostCountConfig, error)
 	IncreaseCategoryCount(ctx context.Context) error
 	DecreaseCategoryCount(ctx context.Context) error
 	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
 	GetOwnerConfig(ctx context.Context) (domain.OwnerConfig, error)
 	UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error
+	GetSeoMetaConfig(ctx context.Context) (*domain.SeoMetaConfig, error)
+	UpdateSeoMetaConfig(ctx context.Context, seoCfg *domain.SeoMetaConfig) error
+	GetCommentConfig(ctx context.Context) (domain.CommentConfig, error)
+	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
+	GetFriendConfig(ctx context.Context) (domain.FriendConfig, error)
+	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
+	UpdateEmailConfig(ctx context.Context, emailCfg *domain.EmailConfig) error
+	GetNoticeConfig(ctx context.Context) (domain.NoticeConfig, error)
+	UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error
+	UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error
+	GetFrontPostCountConfig(ctx context.Context) (domain.FrontPostCountConfig, error)
+	UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -47,6 +58,79 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error {
+	return s.repo.UpdateFrontPostCountConfig(ctx, cfg)
+}
+
+func (s *WebsiteConfigService) GetFrontPostCountConfig(ctx context.Context) (domain.FrontPostCountConfig, error) {
+	cfg := domain.FrontPostCountConfig{}
+	err := s.getConfigAndConvertTo(ctx, "front-post-count", &cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
+}
+
+func (s *WebsiteConfigService) UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error {
+	return s.repo.UpdateNoticeConfigEnabled(ctx, enabled)
+}
+
+func (s *WebsiteConfigService) UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error {
+	return s.repo.UpdateNoticeConfig(ctx, noticeCfg)
+}
+
+func (s *WebsiteConfigService) GetNoticeConfig(ctx context.Context) (domain.NoticeConfig, error) {
+	cfg := domain.NoticeConfig{}
+	err := s.getConfigAndConvertTo(ctx, "notice", &cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
+}
+
+func (s *WebsiteConfigService) UpdateEmailConfig(ctx context.Context, emailCfg *domain.EmailConfig) error {
+	return s.repo.UpdateEmailConfig(ctx, emailCfg)
+}
+
+func (s *WebsiteConfigService) UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error {
+	return s.repo.UpdateFriendConfig(ctx, friendConfig)
+}
+
+func (s *WebsiteConfigService) GetFriendConfig(ctx context.Context) (domain.FriendConfig, error) {
+	cfg := domain.FriendConfig{}
+	err := s.getConfigAndConvertTo(ctx, "friend", &cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
+}
+
+func (s *WebsiteConfigService) UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error {
+	return s.repo.UpdateCommentConfig(ctx, commentConfig)
+}
+
+func (s *WebsiteConfigService) GetCommentConfig(ctx context.Context) (domain.CommentConfig, error) {
+	cfg := domain.CommentConfig{}
+	err := s.getConfigAndConvertTo(ctx, "comment", &cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
+}
+
+func (s *WebsiteConfigService) UpdateSeoMetaConfig(ctx context.Context, seoCfg *domain.SeoMetaConfig) error {
+	return s.repo.UpdateSeoMetaConfig(ctx, seoCfg)
+}
+
+func (s *WebsiteConfigService) GetSeoMetaConfig(ctx context.Context) (*domain.SeoMetaConfig, error) {
+	cfg := &domain.SeoMetaConfig{}
+	err := s.getConfigAndConvertTo(ctx, "seo meta", cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func (s *WebsiteConfigService) UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error {
@@ -85,8 +169,8 @@ func (s *WebsiteConfigService) IncreaseCategoryCount(ctx context.Context) error 
 	return nil
 }
 
-func (s *WebsiteConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPostCount, error) {
-	cfg := &domain.FrontPostCount{}
+func (s *WebsiteConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPostCountConfig, error) {
+	cfg := &domain.FrontPostCountConfig{}
 	err := s.getConfigAndConvertTo(ctx, "front-post-count", cfg)
 	if err != nil {
 		return nil, err
@@ -152,7 +236,7 @@ func (s *WebsiteConfigService) GetIndexConfig(ctx context.Context) (*domain.Inde
 
 func (s *WebsiteConfigService) GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error) {
 	emailConfig := new(domain.EmailConfig)
-	err := s.getConfigAndConvertTo(ctx, "emailConfig", emailConfig)
+	err := s.getConfigAndConvertTo(ctx, "email", emailConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -173,15 +257,6 @@ func (s *WebsiteConfigService) getConfigAndConvertTo(ctx context.Context, typ st
 
 func (s *WebsiteConfigService) IncreaseWebsiteViews(ctx context.Context) error {
 	return s.repo.Increase(ctx, "websiteViews")
-}
-
-func (s *WebsiteConfigService) GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error) {
-	switchConfig := new(domain.SwitchConfig)
-	err := s.getConfigAndConvertTo(ctx, typ, switchConfig)
-	if err != nil {
-		return nil, err
-	}
-	return switchConfig, nil
 }
 
 func (s *WebsiteConfigService) GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error) {

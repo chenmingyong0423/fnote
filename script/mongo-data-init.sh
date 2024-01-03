@@ -93,11 +93,10 @@ db.getCollection("configs").insertOne({
     "typ": "seo meta",
     "props": {
         "title": "fnote",
-        "ogTitle": "fnote",
+        "og_title": "fnote",
         "description": "fnote",
-        "ogImage": "",
-        "twitterCard": "",
-        "baidu-site-verification": "",
+        "og_image": "",
+        "baidu_site_verification": "",
         "keywords": "fnote,blog,BLOG",
         "author": "fnote",
         "robots": "fnote,blog"
@@ -109,7 +108,7 @@ db.getCollection("configs").insertOne({
 db.getCollection("configs").insertOne({
     typ: "comment",
     props: {
-        status: true
+        enable_comment: true
     },
     create_time: Math.floor(new Date().getTime() / 1000),
     update_time: Math.floor(new Date().getTime() / 1000)
@@ -118,18 +117,18 @@ db.getCollection("configs").insertOne({
 db.getCollection("configs").insertOne({
     typ: "friend",
     props: {
-        status: false
+        enable_friend_commit: false
     },
     create_time: Math.floor(new Date().getTime() / 1000),
     update_time: Math.floor(new Date().getTime() / 1000)
 });
 // 邮件配置
 db.getCollection("configs").insertOne({
-    "typ": "emailConfig",
+    "typ": "email",
     "props": {
         "host": "",
-        "port": ,
-        "account": "",
+        "port": 0,
+        "username": "",
         "password": "",
         "email": ""
     },

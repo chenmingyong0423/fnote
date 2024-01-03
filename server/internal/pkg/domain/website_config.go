@@ -76,13 +76,21 @@ type NoticeConfig struct {
 }
 
 type SwitchConfig struct {
-	Status bool `bson:"status" json:"status"`
+	Enable bool `bson:"enable" json:"enable"`
+}
+
+type CommentConfig struct {
+	EnableComment bool `bson:"enable_comment" json:"enable_comment"`
+}
+
+type FriendConfig struct {
+	EnableFriendCommit bool `bson:"enable_friend_commit" json:"enable_friend_commit"`
 }
 
 type EmailConfig struct {
 	Host     string `bson:"host"`
 	Port     int    `bson:"port"`
-	Account  string `bson:"account"`
+	Username string `bson:"username"`
 	Password string `bson:"password"`
 	Email    string `bson:"email"`
 }
@@ -98,17 +106,16 @@ type SocialInfo struct {
 	IsLink      bool   `bson:"is_link" json:"is_link"`
 }
 
-type FrontPostCount struct {
+type FrontPostCountConfig struct {
 	Count int64 `bson:"count"`
 }
 
 type SeoMetaConfig struct {
 	Title                 string `bson:"title"`
 	Description           string `bson:"description"`
-	OgTitle               string `bson:"ogTitle"`
-	OgImage               string `bson:"ogImage"`
-	TwitterCard           string `bson:"twitterCard"`
-	BaiduSiteVerification string `bson:"baidu-site-verification"`
+	OgTitle               string `bson:"og_title"`
+	OgImage               string `bson:"og_image"`
+	BaiduSiteVerification string `bson:"baidu_site_verification"`
 	Keywords              string `bson:"keywords"`
 	Author                string `bson:"author"`
 	Robots                string `bson:"robots"`

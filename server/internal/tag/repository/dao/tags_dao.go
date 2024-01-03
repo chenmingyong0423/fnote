@@ -34,7 +34,7 @@ type Tags struct {
 	Id         primitive.ObjectID `bson:"_id,omitempty"`
 	Name       string             `bson:"name"`
 	Route      string             `bson:"route"`
-	Disabled   bool               `bson:"disabled"`
+	Enabled    bool               `bson:"enabled"`
 	CreateTime int64              `bson:"create_time"`
 	UpdateTime int64              `bson:"update_time"`
 }
@@ -44,7 +44,7 @@ type ITagDao interface {
 	GetByRoute(ctx context.Context, route string) (*Tags, error)
 	QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Tags, int64, error)
 	Create(ctx context.Context, tag *Tags) (string, error)
-	ModifyDisabled(ctx context.Context, id primitive.ObjectID, disabled bool) error
+	ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error
 	GetById(ctx context.Context, id primitive.ObjectID) (*Tags, error)
 	DeleteById(ctx context.Context, id primitive.ObjectID) error
 	RecoverTag(ctx context.Context, tag Tags) error
@@ -87,13 +87,13 @@ func (d *TagDao) GetById(ctx context.Context, id primitive.ObjectID) (*Tags, err
 	return tag, nil
 }
 
-func (d *TagDao) ModifyDisabled(ctx context.Context, id primitive.ObjectID, disabled bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().SetSimple("disabled", disabled).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+func (d *TagDao) ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error {
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().SetSimple("enabled", enabled).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}
 	if updateOne.ModifiedCount == 0 {
-		return fmt.Errorf("ModifiedCount=0, Modify tag disabled failed, id: %s", id.Hex())
+		return fmt.Errorf("ModifiedCount=0, Modify tag enabled failed, id: %s", id.Hex())
 	}
 	return nil
 }
@@ -124,7 +124,7 @@ func (d *TagDao) GetByRoute(ctx context.Context, route string) (*Tags, error) {
 }
 
 func (d *TagDao) GetTags(ctx context.Context) ([]*Tags, error) {
-	tags, err := d.coll.Finder().Filter(query.Eq("disabled", true)).Find(ctx)
+	tags, err := d.coll.Finder().Filter(query.Eq("enabled", true)).Find(ctx)
 	if err != nil {
 		return nil, err
 	}

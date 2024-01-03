@@ -18,78 +18,11 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/service"
+	"github.com/chenmingyong0423/gkit"
 	"github.com/gin-gonic/gin"
 )
-
-// IndexConfigVO 首页信息
-type IndexConfigVO struct {
-	WebsiteConfig      WebsiteConfigVO    `json:"website_config"`
-	OwnerConfig        OwnerConfigVO      `json:"owner_config"`
-	NoticeConfigVO     NoticeConfigVO     `json:"notice_config"`
-	SocialInfoConfigVO SocialInfoConfigVO `json:"social_info_config"`
-	PayInfoConfigVO    []PayInfoConfigVO  `json:"pay_info_config"`
-	SeoMetaConfigVO    SeoMetaConfigVO    `json:"seo_meta_config"`
-}
-
-type OwnerConfigVO struct {
-	Name    string `json:"name"`
-	Profile string `json:"profile"`
-	Picture string `json:"picture"`
-}
-
-type PayInfoConfigVO struct {
-	Name  string `json:"name"`
-	Image string `json:"image"`
-}
-
-type NoticeConfigVO struct {
-	Title       string `json:"title" `
-	Content     string `json:"content"`
-	PublishTime int64  `json:"publish_time"`
-}
-
-type WebsiteConfigVO struct {
-	// 站点名称
-	Name string `json:"name"`
-	// 站点图标
-	Icon string `json:"icon"`
-	// 文章数量
-	PostCount uint `json:"post_count"`
-	// 分类数量
-	CategoryCount uint `json:"category_count"`
-	// 访问量
-	ViewCount uint `json:"view_count"`
-	// 网站运行时间
-	LiveTime int64 `json:"live_time"`
-	// 域名
-	Domain string `json:"domain"`
-	// 备案信息
-	Records []string `json:"records"`
-}
-
-type SocialInfoConfigVO struct {
-	SocialInfoList []SocialInfoVO `json:"social_info_list"`
-}
-
-type SocialInfoVO struct {
-	SocialName  string `json:"social_name"`
-	SocialValue string `json:"social_value"`
-	CssClass    string `json:"css_class"`
-	IsLink      bool   `json:"is_link"`
-}
-
-type SeoMetaConfigVO struct {
-	Title                 string `json:"title"`
-	Description           string `json:"description"`
-	OgTitle               string `json:"ogTitle"`
-	OgImage               string `json:"ogImage"`
-	TwitterCard           string `json:"twitterCard"`
-	BaiduSiteVerification string `json:"baidu-site-verification"`
-	Keywords              string `json:"keywords"`
-	Author                string `json:"author"`
-	Robots                string `json:"robots"`
-}
 
 func NewWebsiteConfigHandler(serv service.IWebsiteConfigService) *WebsiteConfigHandler {
 	return &WebsiteConfigHandler{
@@ -111,14 +44,29 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/website", api.WrapWithBody(h.AdminUpdateWebsiteConfig))
 	adminGroup.GET("/owner", api.Wrap(h.AdminGetOwnerConfig))
 	adminGroup.PUT("/owner", api.WrapWithBody(h.AdminUpdateOwnerConfig))
+	adminGroup.GET("/seo", api.Wrap(h.AdminGetSeoConfig))
+	adminGroup.PUT("/seo", api.WrapWithBody(h.AdminUpdateSeoConfig))
+	adminGroup.GET("/comment", api.Wrap(h.AdminGetCommentConfig))
+	adminGroup.PUT("/comment", api.WrapWithBody(h.AdminUpdateCommentConfig))
+	adminGroup.GET("/friend", api.Wrap(h.AdminGetFriendConfig))
+	adminGroup.PUT("/friend", api.WrapWithBody(h.AdminUpdateFriendConfig))
+	adminGroup.GET("/email", api.Wrap(h.AdminGetEmailConfig))
+	adminGroup.PUT("/email", api.WrapWithBody(h.AdminUpdateEmailConfig))
+
+	adminGroup.GET("/notice", api.Wrap(h.AdminGetNoticeConfig))
+	adminGroup.PUT("/notice", api.WrapWithBody(h.AdminUpdateNoticeConfig))
+	adminGroup.PUT("/notice/enabled", api.WrapWithBody(h.AdminUpdateNoticeEnabled))
+
+	adminGroup.GET("/front-post-count", api.Wrap(h.AdminGetFPCConfig))
+	adminGroup.PUT("/front-post-count", api.WrapWithBody(h.AdminUpdateFPCConfig))
 }
 
-func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO, error) {
+func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfigVO, error) {
 	config, err := h.serv.GetIndexConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &IndexConfigVO{
+	return &vo.IndexConfigVO{
 		WebsiteConfig:      *h.toWebsiteConfigVO(&config.WebSiteConfig),
 		OwnerConfig:        *h.toOwnerConfigVO(&config.OwnerConfig),
 		NoticeConfigVO:     *h.toNoticeConfigVO(&config.NoticeConfig),
@@ -128,8 +76,8 @@ func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*IndexConfigVO,
 	}, nil
 }
 
-func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebSiteConfig) *WebsiteConfigVO {
-	return &WebsiteConfigVO{
+func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebSiteConfig) *vo.WebsiteConfigVO {
+	return &vo.WebsiteConfigVO{
 		Name:          webMasterCfg.Name,
 		Icon:          webMasterCfg.Icon,
 		PostCount:     webMasterCfg.PostCount,
@@ -141,22 +89,22 @@ func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebSiteCon
 	}
 }
 
-func (h *WebsiteConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) *NoticeConfigVO {
-	return &NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, PublishTime: noticeCfg.PublishTime}
+func (h *WebsiteConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) *vo.NoticeConfigVO {
+	return &vo.NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, Enabled: noticeCfg.Enabled, PublishTime: noticeCfg.PublishTime}
 }
 
-func (h *WebsiteConfigHandler) toSocialInfoConfigVO(socialINfoConfig *domain.SocialInfoConfig) *SocialInfoConfigVO {
-	socialInfoVOList := make([]SocialInfoVO, len(socialINfoConfig.SocialInfoList))
+func (h *WebsiteConfigHandler) toSocialInfoConfigVO(socialINfoConfig *domain.SocialInfoConfig) *vo.SocialInfoConfigVO {
+	socialInfoVOList := make([]vo.SocialInfoVO, len(socialINfoConfig.SocialInfoList))
 	for i, socialInfo := range socialINfoConfig.SocialInfoList {
-		socialInfoVOList[i] = SocialInfoVO{SocialName: socialInfo.SocialName, SocialValue: socialInfo.SocialValue, CssClass: socialInfo.CssClass, IsLink: socialInfo.IsLink}
+		socialInfoVOList[i] = vo.SocialInfoVO{SocialName: socialInfo.SocialName, SocialValue: socialInfo.SocialValue, CssClass: socialInfo.CssClass, IsLink: socialInfo.IsLink}
 	}
-	return &SocialInfoConfigVO{SocialInfoList: socialInfoVOList}
+	return &vo.SocialInfoConfigVO{SocialInfoList: socialInfoVOList}
 }
 
-func (h *WebsiteConfigHandler) toPayInfoConfigVO(config []domain.PayInfoConfigElem) []PayInfoConfigVO {
-	result := make([]PayInfoConfigVO, len(config))
+func (h *WebsiteConfigHandler) toPayInfoConfigVO(config []domain.PayInfoConfigElem) []vo.PayInfoConfigVO {
+	result := make([]vo.PayInfoConfigVO, len(config))
 	for i, payInfoConfig := range config {
-		result[i] = PayInfoConfigVO{
+		result[i] = vo.PayInfoConfigVO{
 			Name:  payInfoConfig.Name,
 			Image: payInfoConfig.Image,
 		}
@@ -164,13 +112,12 @@ func (h *WebsiteConfigHandler) toPayInfoConfigVO(config []domain.PayInfoConfigEl
 	return result
 }
 
-func (h *WebsiteConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *SeoMetaConfigVO {
-	return &SeoMetaConfigVO{
+func (h *WebsiteConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *vo.SeoMetaConfigVO {
+	return &vo.SeoMetaConfigVO{
 		Title:                 config.Title,
 		Description:           config.Description,
 		OgTitle:               config.OgTitle,
 		OgImage:               config.OgImage,
-		TwitterCard:           config.TwitterCard,
 		BaiduSiteVerification: config.BaiduSiteVerification,
 		Keywords:              config.Keywords,
 		Author:                config.Author,
@@ -178,18 +125,18 @@ func (h *WebsiteConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *
 	}
 }
 
-func (h *WebsiteConfigHandler) toOwnerConfigVO(ownerConfig *domain.OwnerConfig) *OwnerConfigVO {
-	return &OwnerConfigVO{
+func (h *WebsiteConfigHandler) toOwnerConfigVO(ownerConfig *domain.OwnerConfig) *vo.OwnerConfigVO {
+	return &vo.OwnerConfigVO{
 		Name:    ownerConfig.Name,
 		Profile: ownerConfig.Profile,
 		Picture: ownerConfig.Picture,
 	}
 }
 
-func (h *WebsiteConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (WebsiteConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (vo.WebsiteConfigVO, error) {
 	config, err := h.serv.GetWebSiteConfig(ctx)
 	if err != nil {
-		return WebsiteConfigVO{}, err
+		return vo.WebsiteConfigVO{}, err
 	}
 	return *h.toWebsiteConfigVO(config), nil
 }
@@ -202,10 +149,10 @@ func (h *WebsiteConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req re
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminGetOwnerConfig(ctx *gin.Context) (OwnerConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetOwnerConfig(ctx *gin.Context) (vo.OwnerConfigVO, error) {
 	config, err := h.serv.GetOwnerConfig(ctx)
 	if err != nil {
-		return OwnerConfigVO{}, err
+		return vo.OwnerConfigVO{}, err
 	}
 	return *h.toOwnerConfigVO(&config), nil
 }
@@ -215,5 +162,133 @@ func (h *WebsiteConfigHandler) AdminUpdateOwnerConfig(ctx *gin.Context, req requ
 		Name:    req.Name,
 		Profile: req.Profile,
 		Picture: req.Picture,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetSeoConfig(ctx *gin.Context) (vo.SeoMetaConfigVO, error) {
+	config, err := h.serv.GetSeoMetaConfig(ctx)
+	if err != nil {
+		return vo.SeoMetaConfigVO{}, err
+	}
+	return *h.toSeoMetaConfigVO(config), nil
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateSeoConfig(ctx *gin.Context, req request.UpdateSeoMetaConfigReq) (any, error) {
+	return nil, h.serv.UpdateSeoMetaConfig(ctx, &domain.SeoMetaConfig{
+		Title:                 req.Title,
+		Description:           req.Description,
+		OgTitle:               req.OgTitle,
+		OgImage:               req.OgImage,
+		BaiduSiteVerification: req.BaiduSiteVerification,
+		Keywords:              req.Keywords,
+		Author:                req.Author,
+		Robots:                req.Robots,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetCommentConfig(ctx *gin.Context) (vo.CommentConfigVO, error) {
+	config, err := h.serv.GetCommentConfig(ctx)
+	if err != nil {
+		return vo.CommentConfigVO{}, err
+	}
+	return h.toCommentConfigVO(config), nil
+}
+
+func (h *WebsiteConfigHandler) toCommentConfigVO(config domain.CommentConfig) vo.CommentConfigVO {
+	return vo.CommentConfigVO{
+		EnableComment: config.EnableComment,
+	}
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateCommentConfig(ctx *gin.Context, req request.UpdateCommentConfigReq) (any, error) {
+	return nil, h.serv.UpdateCommentConfig(ctx, domain.CommentConfig{
+		EnableComment: gkit.GetValueOrDefault(req.EnableComment),
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetFriendConfig(ctx *gin.Context) (vo.FriendConfigVO, error) {
+	config, err := h.serv.GetFriendConfig(ctx)
+	if err != nil {
+		return vo.FriendConfigVO{}, err
+	}
+	return h.toFriendConfigVO(config), nil
+}
+
+func (h *WebsiteConfigHandler) toFriendConfigVO(config domain.FriendConfig) vo.FriendConfigVO {
+	return vo.FriendConfigVO{
+		EnableFriendCommit: config.EnableFriendCommit,
+	}
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateFriendConfig(ctx *gin.Context, req request.UpdateFriendConfigReq) (any, error) {
+	return nil, h.serv.UpdateFriendConfig(ctx, domain.FriendConfig{
+		EnableFriendCommit: gkit.GetValueOrDefault(req.EnableFriendCommit),
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetEmailConfig(ctx *gin.Context) (vo.EmailConfigVO, error) {
+	config, err := h.serv.GetEmailConfig(ctx)
+	if err != nil {
+		return vo.EmailConfigVO{}, err
+	}
+	return h.toEmailConfigVO(config), nil
+}
+
+func (h *WebsiteConfigHandler) toEmailConfigVO(config *domain.EmailConfig) vo.EmailConfigVO {
+	return vo.EmailConfigVO{
+		Host:     config.Host,
+		Port:     config.Port,
+		Username: config.Username,
+		Password: config.Password,
+		Email:    config.Email,
+	}
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateEmailConfig(ctx *gin.Context, req request.UpdateEmailConfigReq) (any, error) {
+	return nil, h.serv.UpdateEmailConfig(ctx, &domain.EmailConfig{
+		Host:     req.Host,
+		Port:     req.Port,
+		Username: req.Username,
+		Password: req.Password,
+		Email:    req.Email,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetNoticeConfig(ctx *gin.Context) (vo.NoticeConfigVO, error) {
+	config, err := h.serv.GetNoticeConfig(ctx)
+	if err != nil {
+		return vo.NoticeConfigVO{}, err
+	}
+	return *h.toNoticeConfigVO(&config), nil
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateNoticeConfig(ctx *gin.Context, req request.UpdateNoticeConfigReq) (any, error) {
+	return nil, h.serv.UpdateNoticeConfig(ctx, &domain.NoticeConfig{
+		Title:   req.Title,
+		Content: req.Content,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateNoticeEnabled(ctx *gin.Context, req request.UpdateNoticeConfigEnabledReq) (any, error) {
+	return nil, h.serv.UpdateNoticeConfigEnabled(ctx, gkit.GetValueOrDefault(req.Enabled))
+}
+
+func (h *WebsiteConfigHandler) AdminGetFPCConfig(ctx *gin.Context) (vo.FrontPostCountConfigVO, error) {
+	config, err := h.serv.GetFrontPostCountConfig(ctx)
+	if err != nil {
+		return vo.FrontPostCountConfigVO{}, err
+	}
+	return h.toFrontPostCountConfigVO(config), nil
+}
+
+func (h *WebsiteConfigHandler) toFrontPostCountConfigVO(config domain.FrontPostCountConfig) vo.FrontPostCountConfigVO {
+	return vo.FrontPostCountConfigVO{
+		Count: config.Count,
+	}
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateFPCConfig(ctx *gin.Context, req request.UpdateFPCConfigCountReq) (any, error) {
+	return nil, h.serv.UpdateFrontPostCountConfig(ctx, domain.FrontPostCountConfig{
+		Count: req.Count,
 	})
 }

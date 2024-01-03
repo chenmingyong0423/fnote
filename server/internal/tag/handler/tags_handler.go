@@ -56,7 +56,7 @@ func (h *TagHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin/tags")
 	adminGroup.GET("", api.WrapWithBody(h.AdminGetTags))
 	adminGroup.POST("", api.WrapWithBody(h.AdminCreateTag))
-	adminGroup.PUT("/disabled/:id", api.WrapWithBody(h.AdminModifyTagDisabled))
+	adminGroup.PUT("/enabled/:id", api.WrapWithBody(h.AdminModifyTagEnabled))
 	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteTag))
 }
 
@@ -104,7 +104,7 @@ func (h *TagHandler) tagsToVO(tags []domain.Tag) []vo.Tag {
 			Id:         tag.Id,
 			Name:       tag.Name,
 			Route:      tag.Route,
-			Disabled:   tag.Disabled,
+			Enabled:    tag.Enabled,
 			CreateTime: tag.CreateTime,
 			UpdateTime: tag.UpdateTime,
 		})
@@ -114,9 +114,9 @@ func (h *TagHandler) tagsToVO(tags []domain.Tag) []vo.Tag {
 
 func (h *TagHandler) AdminCreateTag(ctx *gin.Context, req request.CreateTagRequest) (any, error) {
 	err := h.serv.AdminCreateTag(ctx, domain.Tag{
-		Name:     req.Name,
-		Route:    req.Route,
-		Disabled: req.Disabled,
+		Name:    req.Name,
+		Route:   req.Route,
+		Enabled: req.Enabled,
 	})
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
@@ -127,9 +127,9 @@ func (h *TagHandler) AdminCreateTag(ctx *gin.Context, req request.CreateTagReque
 	return nil, nil
 }
 
-func (h *TagHandler) AdminModifyTagDisabled(ctx *gin.Context, req request.TagDisabledRequest) (any, error) {
+func (h *TagHandler) AdminModifyTagEnabled(ctx *gin.Context, req request.TagEnabledRequest) (any, error) {
 	id := ctx.Param("id")
-	return nil, h.serv.ModifyTagDisabled(ctx, id, gkit.GetValueOrDefault(req.Disabled))
+	return nil, h.serv.ModifyTagEnabled(ctx, id, gkit.GetValueOrDefault(req.Enabled))
 }
 
 func (h *TagHandler) AdminDeleteTag(ctx *gin.Context) (any, error) {
