@@ -1,14 +1,14 @@
 <template>
-  <div class="flex flex-col bg-white b-rounded-4">
+  <div ref="container" class="flex flex-col bg-white b-rounded-4 max-h-[700px] overflow-y-auto">
     <div class="line-height-6 text-6 light_border_bottom p-b-5 dark_text_white p-2 pl-4 pt-5">目录</div>
     <div
         v-for="(anchor, index) in titles"
-        :style="{ padding: `10px 0 10px ${anchor.indent * 20}px` }"
+        :style="{ padding: `10px 0 10px ${anchor.indent * 1}px` }"
         @click="click(anchor)"
         :key="index"
         class="cursor-pointer"
     >
-      <a style="cursor: pointer" class="p-l-6" :class="{'anchor_border text-5 text-#1e80ff font-bold': anchor.lineIndex == lineIndex}">{{ anchor.title }}</a>
+      <a style="cursor: pointer" class="p-l-6" :class="{'anchor_border text-5 text-#1e80ff font-bold active': anchor.lineIndex == lineIndex}">{{ anchor.title }}</a>
     </div>
   </div>
 </template>
@@ -18,6 +18,7 @@ const props = defineProps<{
   htmlContent: string;
   lineIndex: string;
 }>();
+const container = ref();
 
 const emit = defineEmits(['handleAnchorClick']);
 
@@ -68,6 +69,26 @@ watch(
       generateAnchors(newValue);
     },
     {immediate: true},
+);
+
+watch(
+    () => props.lineIndex,
+    async (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        await nextTick();
+        const activeElement = container.value.querySelector('.active');
+        if (activeElement) {
+          const elementPosition = activeElement.offsetTop - container.value.offsetTop;
+          // 判断元素是否超过当前 container 高度的一半
+          if (elementPosition > container.value.clientHeight / 2) {
+            container.value.scrollTop = elementPosition - container.value.clientHeight / 2;
+          } else {
+            container.value.scrollTop = 0;
+          }
+          // container.value.scrollTop = elementPosition - 20;
+        }
+      }
+    }
 );
 
 </script>

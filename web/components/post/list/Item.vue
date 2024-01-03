@@ -32,7 +32,7 @@
               item.comment_count
             }}</span></div>
           <div class="ml-auto flex gap-x-1 items-center"><span>{{
-              $dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss')
+              $dayjs(item.create_time * 1000).format('YYYY-MM-DD HH:mm:ss')
             }}</span></div>
         </div>
       </div>
