@@ -52,3 +52,12 @@ type UpdateEmailConfigReq struct {
 	Password string `json:"password" binding:"required"`
 	Email    string `json:"email" binding:"required"`
 }
+
+type UpdateNoticeConfigReq struct {
+	Title   string `json:"title" binding:"required"`
+	Content string `json:"content" binding:"required"`
+}
+
+type UpdateNoticeConfigEnabledReq struct {
+	Enabled *bool `json:"enabled" binding:"required"`
+}

@@ -41,6 +41,9 @@ type IWebsiteConfigService interface {
 	GetFriendConfig(ctx context.Context) (domain.FriendConfig, error)
 	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
 	UpdateEmailConfig(ctx context.Context, emailCfg *domain.EmailConfig) error
+	GetNoticeConfig(ctx context.Context) (domain.NoticeConfig, error)
+	UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error
+	UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -53,6 +56,23 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error {
+	return s.repo.UpdateNoticeConfigEnabled(ctx, enabled)
+}
+
+func (s *WebsiteConfigService) UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error {
+	return s.repo.UpdateNoticeConfig(ctx, noticeCfg)
+}
+
+func (s *WebsiteConfigService) GetNoticeConfig(ctx context.Context) (domain.NoticeConfig, error) {
+	cfg := domain.NoticeConfig{}
+	err := s.getConfigAndConvertTo(ctx, "notice", &cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func (s *WebsiteConfigService) UpdateEmailConfig(ctx context.Context, emailCfg *domain.EmailConfig) error {

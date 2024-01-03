@@ -39,6 +39,7 @@ type NoticeConfigVO struct {
 	Title       string `json:"title" `
 	Content     string `json:"content"`
 	PublishTime int64  `json:"publish_time"`
+	Enabled     bool   `json:"enabled"`
 }
 
 type WebsiteConfigVO struct {
