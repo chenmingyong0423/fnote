@@ -127,7 +127,7 @@ db.getCollection("configs").insertOne({
     "typ": "emailConfig",
     "props": {
         "host": "",
-        "port": ,
+        "port": 0,
         "username": "",
         "password": "",
         "email": ""
