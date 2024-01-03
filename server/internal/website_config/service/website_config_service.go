@@ -16,6 +16,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/repository"
 	"github.com/pkg/errors"
@@ -39,6 +40,7 @@ type IWebsiteConfigService interface {
 	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
 	GetFriendConfig(ctx context.Context) (domain.FriendConfig, error)
 	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
+	UpdateEmailConfig(ctx context.Context, emailCfg *domain.EmailConfig) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -51,6 +53,10 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) UpdateEmailConfig(ctx context.Context, emailCfg *domain.EmailConfig) error {
+	return s.repo.UpdateEmailConfig(ctx, emailCfg)
 }
 
 func (s *WebsiteConfigService) UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error {
@@ -195,7 +201,7 @@ func (s *WebsiteConfigService) GetIndexConfig(ctx context.Context) (*domain.Inde
 
 func (s *WebsiteConfigService) GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error) {
 	emailConfig := new(domain.EmailConfig)
-	err := s.getConfigAndConvertTo(ctx, "emailConfig", emailConfig)
+	err := s.getConfigAndConvertTo(ctx, "email", emailConfig)
 	if err != nil {
 		return nil, err
 	}

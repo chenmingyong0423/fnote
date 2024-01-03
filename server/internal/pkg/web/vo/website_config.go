@@ -89,3 +89,11 @@ type CommentConfigVO struct {
 type FriendConfigVO struct {
 	EnableFriendCommit bool `json:"enable_friend_commit"`
 }
+
+type EmailConfigVO struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+}

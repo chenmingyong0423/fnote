@@ -44,3 +44,11 @@ type UpdateCommentConfigReq struct {
 type UpdateFriendConfigReq struct {
 	EnableFriendCommit *bool `json:"enable_friend_commit" binding:"required"`
 }
+
+type UpdateEmailConfigReq struct {
+	Host     string `json:"host" binding:"required"`
+	Port     int    `json:"port" binding:"required"`
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+}

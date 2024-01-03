@@ -90,7 +90,7 @@ type FriendConfig struct {
 type EmailConfig struct {
 	Host     string `bson:"host"`
 	Port     int    `bson:"port"`
-	Account  string `bson:"account"`
+	Username string `bson:"username"`
 	Password string `bson:"password"`
 	Email    string `bson:"email"`
 }
