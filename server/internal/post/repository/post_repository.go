@@ -18,6 +18,9 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
+
+	"github.com/chenmingyong0423/gkit/slice"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 
@@ -40,6 +43,9 @@ type IPostRepository interface {
 	DeleteLike(ctx context.Context, id string, ip string) error
 	IncreaseCommentCount(ctx context.Context, id string) error
 	QueryAdminPostsPage(ctx context.Context, postsQueryDTO dto.PostsQueryDTO) ([]*domain.Post, int64, error)
+	AddPost(ctx context.Context, post domain.Post) error
+	DeletePost(ctx context.Context, id string) error
+	FindPostById(ctx context.Context, id string) (*domain.Post, error)
 }
 
 var _ IPostRepository = (*PostRepository)(nil)
@@ -52,6 +58,62 @@ func NewPostRepository(dao dao.IPostDao) *PostRepository {
 
 type PostRepository struct {
 	dao dao.IPostDao
+}
+
+func (r *PostRepository) FindPostById(ctx context.Context, id string) (*domain.Post, error) {
+	post, err := r.dao.FindById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return r.daoPostToDomainPost(post), nil
+}
+
+func (r *PostRepository) DeletePost(ctx context.Context, id string) error {
+	return r.dao.DeleteById(ctx, id)
+}
+
+func (r *PostRepository) AddPost(ctx context.Context, post domain.Post) error {
+	unix := time.Now().Unix()
+	categories := make([]dao.Category4Post, 0, len(post.Categories))
+	for _, category := range post.Categories {
+		categories = append(categories, dao.Category4Post{
+			Id:   category.Id,
+			Name: category.Name,
+		})
+	}
+	tags := make([]dao.Tag4Post, 0, len(post.Tags))
+	for _, tag := range post.Tags {
+		tags = append(tags, dao.Tag4Post{
+			Id:   tag.Id,
+			Name: tag.Name,
+		})
+	}
+	err := r.dao.AddPost(ctx, &dao.Post{
+		Id:               post.Id,
+		Author:           post.Author,
+		Title:            post.Title,
+		Summary:          post.Summary,
+		Content:          post.Content,
+		CoverImg:         post.CoverImg,
+		Categories:       categories,
+		Tags:             tags,
+		Status:           domain.PostStatus(post.Status),
+		Likes:            make([]string, 0),
+		LikeCount:        0,
+		CommentCount:     0,
+		VisitCount:       0,
+		StickyWeight:     post.StickyWeight,
+		MetaDescription:  post.MetaDescription,
+		MetaKeywords:     post.MetaKeywords,
+		WordCount:        0,
+		IsCommentAllowed: post.IsCommentAllowed,
+		CreateTime:       unix,
+		UpdateTime:       unix,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *PostRepository) QueryAdminPostsPage(ctx context.Context, postsQueryDTO dto.PostsQueryDTO) ([]*domain.Post, int64, error) {
@@ -118,10 +180,10 @@ func (r *PostRepository) GetPunishedPostById(ctx context.Context, id string) (*d
 func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition domain.PostsQueryCondition) ([]*domain.Post, int64, error) {
 	condBuilder := query.BsonBuilder().Eq("status", dao.PostStatusPunished)
 	if postsQueryCondition.Categories != nil && len(postsQueryCondition.Categories) > 0 {
-		condBuilder.InString("categories", postsQueryCondition.Categories...)
+		condBuilder.Eq("categories.name", postsQueryCondition.Categories[0])
 	}
 	if postsQueryCondition.Tags != nil && len(postsQueryCondition.Tags) > 0 {
-		condBuilder.InString("tags", postsQueryCondition.Tags...)
+		condBuilder.Eq("tags.name", postsQueryCondition.Tags[0])
 	}
 	if postsQueryCondition.Keyword != nil && *postsQueryCondition.Keyword != "" {
 		condBuilder.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(*postsQueryCondition.Keyword)), "i")
@@ -170,5 +232,17 @@ func (r *PostRepository) toDomainPosts(posts []*dao.Post) []*domain.Post {
 }
 
 func (r *PostRepository) daoPostToDomainPost(post *dao.Post) *domain.Post {
-	return &domain.Post{PrimaryPost: domain.PrimaryPost{Id: post.Id, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Categories: post.Categories, Tags: post.Tags, LikeCount: post.LikeCount, CommentCount: post.CommentCount, VisitCount: post.VisitCount, StickyWeight: post.StickyWeight, CreateTime: post.CreateTime}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, WordCount: post.WordCount, UpdateTime: post.UpdateTime}, IsCommentAllowed: post.IsCommentAllowed, Likes: post.Likes}
+	categories := slice.Map[dao.Category4Post, domain.Category4Post](post.Categories, func(_ int, c dao.Category4Post) domain.Category4Post {
+		return domain.Category4Post{
+			Id:   c.Id,
+			Name: c.Name,
+		}
+	})
+	tags := slice.Map[dao.Tag4Post, domain.Tag4Post](post.Tags, func(_ int, t dao.Tag4Post) domain.Tag4Post {
+		return domain.Tag4Post{
+			Id:   t.Id,
+			Name: t.Name,
+		}
+	})
+	return &domain.Post{PrimaryPost: domain.PrimaryPost{Id: post.Id, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Categories: categories, Tags: tags, LikeCount: post.LikeCount, CommentCount: post.CommentCount, VisitCount: post.VisitCount, StickyWeight: post.StickyWeight, CreateTime: post.CreateTime}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, WordCount: post.WordCount, UpdateTime: post.UpdateTime}, IsCommentAllowed: post.IsCommentAllowed, Likes: post.Likes}
 }

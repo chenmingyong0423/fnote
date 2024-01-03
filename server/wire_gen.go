@@ -75,7 +75,7 @@ func initializeApp() (*gin.Engine, error) {
 	commentService := service5.NewCommentService(commentRepository)
 	postDao := dao6.NewPostDao(database)
 	postRepository := repository6.NewPostRepository(postDao)
-	postService := service6.NewPostService(postRepository)
+	postService := service6.NewPostService(postRepository, websiteConfigService, countStatsService, fileService)
 	emailService := service7.NewEmailService()
 	msgTplDao := dao7.NewMsgTplDao(database)
 	msgTplRepository := repository7.NewMsgTplRepository(msgTplDao)

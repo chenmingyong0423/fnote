@@ -16,6 +16,14 @@ package dao
 
 import (
 	"context"
+	"fmt"
+	"time"
+
+	"github.com/pkg/errors"
+
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+
+	"github.com/chenmingyong0423/go-mongox/builder/update"
 
 	"github.com/chenmingyong0423/go-mongox"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -49,6 +57,8 @@ const (
 
 type IFileDao interface {
 	Save(ctx context.Context, file *File) (string, error)
+	PushIntoUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error
+	PullUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error
 }
 
 var _ IFileDao = (*FileDao)(nil)
@@ -59,6 +69,29 @@ func NewFileDao(db *mongo.Database) *FileDao {
 
 type FileDao struct {
 	coll *mongox.Collection[File]
+}
+
+func (d *FileDao) PullUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error {
+	updateOne, err := d.coll.Updater().Filter(bsonx.M("file_id", fileId)).Updates(update.BsonBuilder().Pull(bsonx.M("used_in", fileUsage)).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "pull used in error, file id: %s, file usage: %+v", fileId, fileUsage)
+	}
+	if updateOne.ModifiedCount == 0 {
+		return fmt.Errorf("pull used in error, file id: %s, file usage: %+v", fileId, fileUsage)
+	}
+	return nil
+
+}
+
+func (d *FileDao) PushIntoUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error {
+	updateOne, err := d.coll.Updater().Filter(bsonx.M("file_id", fileId)).Updates(update.BsonBuilder().Push(bsonx.M("used_in", fileUsage)).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "push into used in error, file id: %s, file usage: %+v", fileId, fileUsage)
+	}
+	if updateOne.ModifiedCount == 0 {
+		return fmt.Errorf("push into used in error, file id: %s, file usage: %+v", fileId, fileUsage)
+	}
+	return nil
 }
 
 func (d *FileDao) Save(ctx context.Context, file *File) (string, error) {

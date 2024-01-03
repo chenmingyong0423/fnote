@@ -24,3 +24,9 @@ type Category struct {
 	CreateTime  int64  `json:"create_time"`
 	UpdateTime  int64  `json:"update_time"`
 }
+
+type SelectCategory struct {
+	Id    string `json:"id"`
+	Value string `json:"value"`
+	Label string `json:"label"`
+}

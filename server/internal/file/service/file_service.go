@@ -29,6 +29,8 @@ import (
 
 type IFileService interface {
 	Upload(ctx context.Context, fileDTO dto.FileDTO) (*domain.File, error)
+	IndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error
+	DeleteIndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error
 }
 
 var _ IFileService = (*FileService)(nil)
@@ -41,6 +43,14 @@ func NewFileService(repo repository.IFileRepository) *FileService {
 
 type FileService struct {
 	repo repository.IFileRepository
+}
+
+func (s *FileService) DeleteIndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error {
+	return s.repo.PullUsedIn(ctx, fileId, entityId, entityType)
+}
+
+func (s *FileService) IndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error {
+	return s.repo.PushIntoUsedIn(ctx, fileId, entityId, entityType)
 }
 
 func (s *FileService) Upload(ctx context.Context, fileDTO dto.FileDTO) (*domain.File, error) {

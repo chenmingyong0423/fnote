@@ -26,6 +26,8 @@ import (
 
 type IFileRepository interface {
 	Save(ctx context.Context, file *domain.File) error
+	PushIntoUsedIn(ctx context.Context, fileId []byte, entityId string, entityType string) error
+	PullUsedIn(ctx context.Context, fileId []byte, entityId string, entityType string) error
 }
 
 var _ IFileRepository = (*FileRepository)(nil)
@@ -36,6 +38,20 @@ func NewFileRepository(dao dao.IFileDao) *FileRepository {
 
 type FileRepository struct {
 	dao dao.IFileDao
+}
+
+func (r *FileRepository) PullUsedIn(ctx context.Context, fileId []byte, entityId string, entityType string) error {
+	return r.dao.PullUsedIn(ctx, fileId, dao.FileUsage{
+		EntityId:   entityId,
+		EntityType: dao.EntityType(entityType),
+	})
+}
+
+func (r *FileRepository) PushIntoUsedIn(ctx context.Context, fileId []byte, entityId string, entityType string) error {
+	return r.dao.PushIntoUsedIn(ctx, fileId, dao.FileUsage{
+		EntityId:   entityId,
+		EntityType: dao.EntityType(entityType),
+	})
 }
 
 func (r *FileRepository) Save(ctx context.Context, file *domain.File) error {

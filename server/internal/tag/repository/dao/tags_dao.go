@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+
 	"github.com/chenmingyong0423/go-mongox/builder/update"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
@@ -48,6 +50,7 @@ type ITagDao interface {
 	GetById(ctx context.Context, id primitive.ObjectID) (*Tags, error)
 	DeleteById(ctx context.Context, id primitive.ObjectID) error
 	RecoverTag(ctx context.Context, tag Tags) error
+	GetEnabled(ctx context.Context) ([]*Tags, error)
 }
 
 var _ ITagDao = (*TagDao)(nil)
@@ -58,6 +61,14 @@ func NewTagDao(db *mongo.Database) *TagDao {
 
 type TagDao struct {
 	coll *mongox.Collection[Tags]
+}
+
+func (d *TagDao) GetEnabled(ctx context.Context) ([]*Tags, error) {
+	tags, err := d.coll.Finder().Filter(bsonx.M("enabled", true)).Find(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Get tags failed, enabled=true")
+	}
+	return tags, nil
 }
 
 func (d *TagDao) RecoverTag(ctx context.Context, tag Tags) error {

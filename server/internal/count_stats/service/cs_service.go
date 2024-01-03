@@ -25,6 +25,8 @@ type ICountStatsService interface {
 	GetByReferenceIdAndType(ctx context.Context, referenceIds []string, countStatsType domain.CountStatsType) ([]domain.CountStats, error)
 	Create(ctx context.Context, countStats domain.CountStats) error
 	DeleteByReferenceId(ctx context.Context, referenceId string) error
+	IncreaseByReferenceIds(ctx context.Context, ids []string) error
+	DecreaseByReferenceIds(ctx context.Context, ids []string) error
 }
 
 var _ ICountStatsService = (*CountStatsService)(nil)
@@ -37,6 +39,14 @@ func NewCountStatsService(repo repository.ICountStatsRepository) *CountStatsServ
 
 type CountStatsService struct {
 	repo repository.ICountStatsRepository
+}
+
+func (s *CountStatsService) DecreaseByReferenceIds(ctx context.Context, ids []string) error {
+	return s.repo.DecreaseByReferenceIds(ctx, ids)
+}
+
+func (s *CountStatsService) IncreaseByReferenceIds(ctx context.Context, ids []string) error {
+	return s.repo.IncreaseByReferenceIds(ctx, ids)
 }
 
 func (s *CountStatsService) DeleteByReferenceId(ctx context.Context, referenceId string) error {

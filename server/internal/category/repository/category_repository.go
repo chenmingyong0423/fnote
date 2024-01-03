@@ -43,6 +43,7 @@ type ICategoryRepository interface {
 	ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error
 	GetCategoryById(ctx context.Context, id string) (domain.Category, error)
 	RecoverCategory(ctx context.Context, category domain.Category) error
+	GetSelectCategories(ctx context.Context) ([]domain.Category, error)
 }
 
 var _ ICategoryRepository = (*CategoryRepository)(nil)
@@ -55,6 +56,14 @@ func NewCategoryRepository(dao dao.ICategoryDao) *CategoryRepository {
 
 type CategoryRepository struct {
 	dao dao.ICategoryDao
+}
+
+func (r *CategoryRepository) GetSelectCategories(ctx context.Context) ([]domain.Category, error) {
+	categories, err := r.dao.GetEnabled(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainCategories(categories), nil
 }
 
 func (r *CategoryRepository) RecoverCategory(ctx context.Context, category domain.Category) error {

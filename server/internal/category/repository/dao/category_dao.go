@@ -60,6 +60,7 @@ type ICategoryDao interface {
 	ModifyCategoryNavigation(ctx context.Context, id primitive.ObjectID, showInNav bool) error
 	GetById(ctx context.Context, id primitive.ObjectID) (*Category, error)
 	RecoverCategory(ctx context.Context, category Category) error
+	GetEnabled(ctx context.Context) ([]*Category, error)
 }
 
 var _ ICategoryDao = (*CategoryDao)(nil)
@@ -72,6 +73,14 @@ func NewCategoryDao(db *mongo.Database) *CategoryDao {
 
 type CategoryDao struct {
 	coll *mongox.Collection[Category]
+}
+
+func (d *CategoryDao) GetEnabled(ctx context.Context) ([]*Category, error) {
+	categories, err := d.coll.Finder().Filter(bsonx.M("enabled", true)).Find(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Find categories failed, enabled=true")
+	}
+	return categories, nil
 }
 
 func (d *CategoryDao) RecoverCategory(ctx context.Context, category Category) error {

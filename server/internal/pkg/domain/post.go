@@ -48,26 +48,38 @@ type Post struct {
 }
 
 type ExtraPost struct {
-	Content         string `json:"content"`
-	MetaDescription string `json:"meta_description"`
-	MetaKeywords    string `json:"meta_keywords"`
-	WordCount       int    `json:"word_count"`
-	UpdateTime      int64  `json:"update_time"`
+	Content          string `json:"content"`
+	MetaDescription  string `json:"meta_description"`
+	MetaKeywords     string `json:"meta_keywords"`
+	WordCount        int    `json:"word_count"`
+	UpdateTime       int64  `json:"update_time"`
+	Status           int    `json:"status"`
+	IsCommentAllowed bool   `json:"is_comment_allowed"`
 }
 
 type PrimaryPost struct {
-	Id           string   `json:"_id"`
-	Author       string   `json:"author"`
-	Title        string   `json:"title"`
-	Summary      string   `json:"summary"`
-	CoverImg     string   `json:"cover_img"`
-	Categories   []string `json:"category"`
-	Tags         []string `json:"tags"`
-	LikeCount    int      `json:"like_count"`
-	CommentCount int      `json:"comment_count"`
-	VisitCount   int      `json:"visit_count"`
-	StickyWeight int      `json:"sticky_weight"`
-	CreateTime   int64    `json:"create_time"`
+	Id           string          `json:"_id"`
+	Author       string          `json:"author"`
+	Title        string          `json:"title"`
+	Summary      string          `json:"summary"`
+	CoverImg     string          `json:"cover_img"`
+	Categories   []Category4Post `json:"category"`
+	Tags         []Tag4Post      `json:"tags"`
+	LikeCount    int             `json:"like_count"`
+	CommentCount int             `json:"comment_count"`
+	VisitCount   int             `json:"visit_count"`
+	StickyWeight int             `json:"sticky_weight"`
+	CreateTime   int64           `json:"create_time"`
+}
+
+type Category4Post struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type Tag4Post struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type PostStatus uint
