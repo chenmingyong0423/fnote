@@ -33,3 +33,11 @@ export interface CommentConfig {
 export interface FriendConfig {
   enable_friend_commit: boolean
 }
+
+export interface EmailConfig {
+  host: string
+  port: number
+  username: string
+  password: string
+  email: string
+}
