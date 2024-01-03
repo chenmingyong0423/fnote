@@ -95,7 +95,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any
 	if err != nil {
 		return nil, err
 	}
-	if !switchConfig.Status {
+	if !switchConfig.Enable {
 		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Friend module is close.")
 	}
 	err = h.serv.ApplyForFriend(ctx, domain.Friend{

@@ -20,6 +20,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/service"
+	"github.com/chenmingyong0423/gkit"
 	"github.com/gin-gonic/gin"
 )
 
@@ -45,6 +46,8 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/owner", api.WrapWithBody(h.AdminUpdateOwnerConfig))
 	adminGroup.GET("/seo", api.Wrap(h.AdminGetSeoConfig))
 	adminGroup.PUT("/seo", api.WrapWithBody(h.AdminUpdateSeoConfig))
+	adminGroup.GET("/comment", api.Wrap(h.AdminGetCommentConfig))
+	adminGroup.PUT("/comment", api.WrapWithBody(h.AdminUpdateCommentConfig))
 }
 
 func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfigVO, error) {
@@ -169,5 +172,25 @@ func (h *WebsiteConfigHandler) AdminUpdateSeoConfig(ctx *gin.Context, req reques
 		Keywords:              req.Keywords,
 		Author:                req.Author,
 		Robots:                req.Robots,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetCommentConfig(ctx *gin.Context) (vo.CommentConfigVO, error) {
+	config, err := h.serv.GetCommentConfig(ctx)
+	if err != nil {
+		return vo.CommentConfigVO{}, err
+	}
+	return h.toCommentConfigVO(config), nil
+}
+
+func (h *WebsiteConfigHandler) toCommentConfigVO(config domain.CommentConfig) vo.CommentConfigVO {
+	return vo.CommentConfigVO{
+		EnableComment: config.EnableComment,
+	}
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateCommentConfig(ctx *gin.Context, req request.UpdateCommentConfigReq) (any, error) {
+	return nil, h.serv.UpdateCommentConfig(ctx, domain.CommentConfig{
+		EnableComment: gkit.GetValueOrDefault(req.EnableComment),
 	})
 }

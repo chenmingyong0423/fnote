@@ -36,6 +36,8 @@ type IWebsiteConfigService interface {
 	UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error
 	GetSeoMetaConfig(ctx context.Context) (*domain.SeoMetaConfig, error)
 	UpdateSeoMetaConfig(ctx context.Context, seoCfg *domain.SeoMetaConfig) error
+	GetCommentConfig(ctx context.Context) (domain.CommentConfig, error)
+	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -48,6 +50,19 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error {
+	return s.repo.UpdateCommentConfig(ctx, commentConfig)
+}
+
+func (s *WebsiteConfigService) GetCommentConfig(ctx context.Context) (domain.CommentConfig, error) {
+	cfg := domain.CommentConfig{}
+	err := s.getConfigAndConvertTo(ctx, "comment", &cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func (s *WebsiteConfigService) UpdateSeoMetaConfig(ctx context.Context, seoCfg *domain.SeoMetaConfig) error {
