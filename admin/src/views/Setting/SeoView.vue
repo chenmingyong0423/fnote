@@ -90,7 +90,7 @@
 </template>
 <script lang="ts" setup>
 import axios from '@/http/axios'
-import type { IResponse } from '@/interfaces/Common'
+import type { IBaseResponse, IResponse } from '@/interfaces/Common'
 import type { SeoConfig } from '@/interfaces/Config'
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
@@ -127,7 +127,7 @@ const cancel = () => {
 
 const save = async () => {
   try {
-    const response = await axios.put<IResponse<SeoConfig>>('/admin/configs/seo', {
+    const response = await axios.put<IBaseResponse>('/admin/configs/seo', {
       title: data.value.title,
       description: data.value.description,
       og_title: data.value.og_title,

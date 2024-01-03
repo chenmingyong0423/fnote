@@ -12,7 +12,7 @@
 
 <script lang="ts" setup>
 import axios from '@/http/axios'
-import type { IResponse } from '@/interfaces/Common'
+import type { IBaseResponse, IResponse } from '@/interfaces/Common'
 import type { FriendConfig, OwnerConfig, SeoConfig } from '@/interfaces/Config'
 import { message } from 'ant-design-vue'
 import { ref } from 'vue'
@@ -34,7 +34,7 @@ getCommentConfig()
 
 const save = async () => {
   try {
-    const response = await axios.put<IResponse<SeoConfig>>('/admin/configs/friend', {
+    const response = await axios.put<IBaseResponse>('/admin/configs/friend', {
       enable_friend_commit: data.value.enable_friend_commit
     })
     if (response.data.code === 200) {
