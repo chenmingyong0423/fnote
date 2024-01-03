@@ -48,3 +48,7 @@ export interface NoticeConfig {
   enabled: boolean
   publish_time: number
 }
+
+export interface FrontPostCountConfig {
+  count: number
+}
