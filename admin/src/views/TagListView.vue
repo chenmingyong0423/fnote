@@ -26,10 +26,10 @@
           </a-form-item>
           <a-form-item
             label="是否启用"
-            name="disabled"
+            name="enabled"
             class="collection-create-form_last-form-item"
           >
-            <a-radio-group v-model:value="formState.disabled">
+            <a-radio-group v-model:value="formState.enabled">
               <a-radio :value="true">true</a-radio>
               <a-radio :value="false">false</a-radio>
             </a-radio-group>
@@ -48,8 +48,8 @@
             {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
           </template>
 
-          <template v-if="column.key === 'disabled'">
-            <a-switch v-model:checked="record.disabled" @change="changeTagDisabled(record)" />
+          <template v-if="column.key === 'enabled'">
+            <a-switch v-model:checked="record.enabled" @change="changeTagEnabled(record)" />
           </template>
 
           <template v-if="column.key === 'show_in_nav'">
@@ -89,8 +89,8 @@ const columns = [
   },
   {
     title: '状态',
-    key: 'disabled',
-    dataIndex: 'disabled'
+    key: 'enabled',
+    dataIndex: 'enabled'
   },
   {
     title: '创建时间',
@@ -136,7 +136,7 @@ const visible = ref(false)
 const formState = reactive<TagRequest>({
   name: '',
   route: '',
-  disabled: false
+  enabled: false
 })
 
 const addTag = () => {
@@ -184,10 +184,10 @@ const addTag = () => {
   }
 }
 
-const changeTagDisabled = async (record: Tag) => {
+const changeTagEnabled = async (record: Tag) => {
   try {
-    const response = await axios.put<IBaseResponse>(`/admin/tags/disabled/${record.id}`, {
-      disabled: record.disabled
+    const response = await axios.put<IBaseResponse>(`/admin/tags/enabled/${record.id}`, {
+      enabled: record.enabled
     })
     if (response.data.code !== 200) {
       message.error(response.data.message)
