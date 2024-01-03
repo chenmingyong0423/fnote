@@ -56,6 +56,9 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.GET("/notice", api.Wrap(h.AdminGetNoticeConfig))
 	adminGroup.PUT("/notice", api.WrapWithBody(h.AdminUpdateNoticeConfig))
 	adminGroup.PUT("/notice/enabled", api.WrapWithBody(h.AdminUpdateNoticeEnabled))
+
+	adminGroup.GET("/front-post-count", api.Wrap(h.AdminGetFPCConfig))
+	adminGroup.PUT("/front-post-count", api.WrapWithBody(h.AdminUpdateFPCConfig))
 }
 
 func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfigVO, error) {
@@ -268,4 +271,24 @@ func (h *WebsiteConfigHandler) AdminUpdateNoticeConfig(ctx *gin.Context, req req
 
 func (h *WebsiteConfigHandler) AdminUpdateNoticeEnabled(ctx *gin.Context, req request.UpdateNoticeConfigEnabledReq) (any, error) {
 	return nil, h.serv.UpdateNoticeConfigEnabled(ctx, gkit.GetValueOrDefault(req.Enabled))
+}
+
+func (h *WebsiteConfigHandler) AdminGetFPCConfig(ctx *gin.Context) (vo.FrontPostCountConfigVO, error) {
+	config, err := h.serv.GetFrontPostCountConfig(ctx)
+	if err != nil {
+		return vo.FrontPostCountConfigVO{}, err
+	}
+	return h.toFrontPostCountConfigVO(config), nil
+}
+
+func (h *WebsiteConfigHandler) toFrontPostCountConfigVO(config domain.FrontPostCountConfig) vo.FrontPostCountConfigVO {
+	return vo.FrontPostCountConfigVO{
+		Count: config.Count,
+	}
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateFPCConfig(ctx *gin.Context, req request.UpdateFPCConfigCountReq) (any, error) {
+	return nil, h.serv.UpdateFrontPostCountConfig(ctx, domain.FrontPostCountConfig{
+		Count: req.Count,
+	})
 }

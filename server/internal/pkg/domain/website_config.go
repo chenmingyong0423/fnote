@@ -106,7 +106,7 @@ type SocialInfo struct {
 	IsLink      bool   `bson:"is_link" json:"is_link"`
 }
 
-type FrontPostCount struct {
+type FrontPostCountConfig struct {
 	Count int64 `bson:"count"`
 }
 

@@ -61,3 +61,7 @@ type UpdateNoticeConfigReq struct {
 type UpdateNoticeConfigEnabledReq struct {
 	Enabled *bool `json:"enabled" binding:"required"`
 }
+
+type UpdateFPCConfigCountReq struct {
+	Count int64 `json:"count" binding:"required"`
+}
