@@ -48,6 +48,8 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/seo", api.WrapWithBody(h.AdminUpdateSeoConfig))
 	adminGroup.GET("/comment", api.Wrap(h.AdminGetCommentConfig))
 	adminGroup.PUT("/comment", api.WrapWithBody(h.AdminUpdateCommentConfig))
+	adminGroup.GET("/friend", api.Wrap(h.AdminGetFriendConfig))
+	adminGroup.PUT("/friend", api.WrapWithBody(h.AdminUpdateFriendConfig))
 }
 
 func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfigVO, error) {
@@ -192,5 +194,25 @@ func (h *WebsiteConfigHandler) toCommentConfigVO(config domain.CommentConfig) vo
 func (h *WebsiteConfigHandler) AdminUpdateCommentConfig(ctx *gin.Context, req request.UpdateCommentConfigReq) (any, error) {
 	return nil, h.serv.UpdateCommentConfig(ctx, domain.CommentConfig{
 		EnableComment: gkit.GetValueOrDefault(req.EnableComment),
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetFriendConfig(ctx *gin.Context) (vo.FriendConfigVO, error) {
+	config, err := h.serv.GetFriendConfig(ctx)
+	if err != nil {
+		return vo.FriendConfigVO{}, err
+	}
+	return h.toFriendConfigVO(config), nil
+}
+
+func (h *WebsiteConfigHandler) toFriendConfigVO(config domain.FriendConfig) vo.FriendConfigVO {
+	return vo.FriendConfigVO{
+		EnableFriendCommit: config.EnableFriendCommit,
+	}
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateFriendConfig(ctx *gin.Context, req request.UpdateFriendConfigReq) (any, error) {
+	return nil, h.serv.UpdateFriendConfig(ctx, domain.FriendConfig{
+		EnableFriendCommit: gkit.GetValueOrDefault(req.EnableFriendCommit),
 	})
 }

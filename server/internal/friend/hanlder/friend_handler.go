@@ -91,11 +91,11 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any
 			return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Email format is incorrect.")
 		}
 	}
-	switchConfig, err := h.cfgService.GetSwitchStatusByTyp(ctx, "friend")
+	switchConfig, err := h.cfgService.GetFriendConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if !switchConfig.Enable {
+	if !switchConfig.EnableFriendCommit {
 		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Friend module is close.")
 	}
 	err = h.serv.ApplyForFriend(ctx, domain.Friend{

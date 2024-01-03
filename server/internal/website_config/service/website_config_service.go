@@ -24,7 +24,6 @@ import (
 
 type IWebsiteConfigService interface {
 	GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error)
-	GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error)
 	IncreaseWebsiteViews(ctx context.Context) error
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
 	GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error)
@@ -38,6 +37,8 @@ type IWebsiteConfigService interface {
 	UpdateSeoMetaConfig(ctx context.Context, seoCfg *domain.SeoMetaConfig) error
 	GetCommentConfig(ctx context.Context) (domain.CommentConfig, error)
 	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
+	GetFriendConfig(ctx context.Context) (domain.FriendConfig, error)
+	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -50,6 +51,19 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error {
+	return s.repo.UpdateFriendConfig(ctx, friendConfig)
+}
+
+func (s *WebsiteConfigService) GetFriendConfig(ctx context.Context) (domain.FriendConfig, error) {
+	cfg := domain.FriendConfig{}
+	err := s.getConfigAndConvertTo(ctx, "friend", &cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func (s *WebsiteConfigService) UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error {
@@ -202,15 +216,6 @@ func (s *WebsiteConfigService) getConfigAndConvertTo(ctx context.Context, typ st
 
 func (s *WebsiteConfigService) IncreaseWebsiteViews(ctx context.Context) error {
 	return s.repo.Increase(ctx, "websiteViews")
-}
-
-func (s *WebsiteConfigService) GetSwitchStatusByTyp(ctx context.Context, typ string) (*domain.SwitchConfig, error) {
-	switchConfig := new(domain.SwitchConfig)
-	err := s.getConfigAndConvertTo(ctx, typ, switchConfig)
-	if err != nil {
-		return nil, err
-	}
-	return switchConfig, nil
 }
 
 func (s *WebsiteConfigService) GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error) {

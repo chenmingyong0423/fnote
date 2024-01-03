@@ -35,6 +35,7 @@ type IWebsiteConfigRepository interface {
 	UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error
 	UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error
 	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
+	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -47,6 +48,14 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "friend"),
+		update.BsonBuilder().SetSimple("props.enable_friend_commit", friendConfig.EnableFriendCommit).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
 }
 
 func (r *WebsiteConfigRepository) UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error {
