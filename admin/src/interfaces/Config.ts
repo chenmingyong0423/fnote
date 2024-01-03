@@ -15,7 +15,6 @@ export interface OwnerConfig {
   picture: string
 }
 
-
 export interface SeoConfig {
   title: string
   description: string
@@ -25,4 +24,8 @@ export interface SeoConfig {
   keywords: string
   author: string
   robots: string
+}
+
+export interface CommentConfig {
+  enable_comment: boolean
 }
