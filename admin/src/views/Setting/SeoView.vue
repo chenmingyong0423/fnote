@@ -51,7 +51,11 @@
       </a-descriptions-item>
       <a-descriptions-item label="baidu_site_verification - 百度站点验证">
         <div>
-          <a-input v-if="editable" v-model:value="data.baidu_site_verification" style="margin: -5px 0" />
+          <a-input
+            v-if="editable"
+            v-model:value="data.baidu_site_verification"
+            style="margin: -5px 0"
+          />
           <template v-else>
             {{ data.baidu_site_verification }}
           </template>
@@ -145,7 +149,6 @@ const save = async () => {
     message.error('保存失败')
   }
 }
-
 
 // 文件操作
 const fileList = ref<UploadProps['fileList']>([])
