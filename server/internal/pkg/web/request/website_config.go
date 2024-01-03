@@ -40,3 +40,7 @@ type UpdateSeoMetaConfigReq struct {
 type UpdateCommentConfigReq struct {
 	EnableComment *bool `json:"enable_comment" binding:"required"`
 }
+
+type UpdateFriendConfigReq struct {
+	EnableFriendCommit *bool `json:"enable_friend_commit" binding:"required"`
+}

@@ -85,3 +85,7 @@ type SeoMetaConfigVO struct {
 type CommentConfigVO struct {
 	EnableComment bool `json:"enable_comment"`
 }
+
+type FriendConfigVO struct {
+	EnableFriendCommit bool `json:"enable_friend_commit"`
+}

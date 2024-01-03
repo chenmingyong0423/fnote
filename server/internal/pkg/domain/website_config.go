@@ -80,7 +80,11 @@ type SwitchConfig struct {
 }
 
 type CommentConfig struct {
-	EnableComment bool `bson:"enable_comment" json:"enable"`
+	EnableComment bool `bson:"enable_comment" json:"enable_comment"`
+}
+
+type FriendConfig struct {
+	EnableFriendCommit bool `bson:"enable_friend_commit" json:"enable_friend_commit"`
 }
 
 type EmailConfig struct {
