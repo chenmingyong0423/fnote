@@ -22,7 +22,7 @@
           {{ item.title }}
         </div>
         <div class="flex-grow">
-          <p class="line-height-loose text-gray-5"> {{ item.summary }} </p>
+          <p class="line-height-loose text-gray-5 truncate"> {{ item.summary }} </p>
         </div>
         <div class="flex gap-x-3 h-10 mt-auto">
           <div class="flex gap-x-1 items-center"><span class="i-ph-eye"></span><span>{{ item.visit_count }}</span></div>
@@ -33,7 +33,7 @@
               item.comment_count
             }}</span></div>
           <div class="ml-auto flex gap-x-1 items-center"><span>{{
-              $dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss')
+              $dayjs(item.create_time * 1000).format('YYYY-MM-DD HH:mm:ss')
             }}</span></div>
         </div>
       </div>

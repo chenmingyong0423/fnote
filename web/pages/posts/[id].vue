@@ -77,7 +77,7 @@
         <!--  文章 meta  -->
         <div class="flex items-center gap-x-2 text-4 justify-center p-1 text-gray-4">
           <div>{{ post?.author }}</div>
-          <div>{{ $dayjs(post?.create_time).format('YYYY-MM-DD HH:mm:ss') }}</div>
+          <div>{{ $dayjs(post?.create_time * 1000).format('YYYY-MM-DD HH:mm:ss') }}</div>
           <div>阅读 {{ post?.visit_count }}</div>
         </div>
         <!--  文章内容  -->
@@ -106,7 +106,7 @@
       <div class="copyright b-rounded-4 bg-white p-8 dark:text-dtc dark_bg_gray">
         <p class="mb-5"><span style="color: rgb(14, 136, 235);font-weight: bold;">本文链接：</span><a
             class="text-#00bd7e hover:bg-#00bd7e33"
-            :href="`${domain}/${id}`" target="_blank">{{ `${domain}/posts/${id}` }}</a></p>
+            :href="link" target="_blank">{{ link }}</a></p>
         <p><span style="color: rgb(14, 136, 235);font-weight: bold;">版权声明：</span>本文由 <span
             style="color: rgb(14, 136, 235);">{{ post?.author }}</span> 原创发布，如需转载请遵循 <a
             class="text-#00bd7e hover:bg-#00bd7e33"
@@ -148,6 +148,8 @@ const id: string = String(route.params.id)
 const post = ref<IPostDetail>()
 const author = ref<string>("")
 const payList = ref<IPayInfo[]>(homeStore.pay_info || [])
+
+const link = ref("")
 
 const getPostDetail = async () => {
   try {
@@ -209,6 +211,7 @@ const subscribeTitleFocus = () => {
 onMounted(() => {
   window.addEventListener('scroll', anchorScroll)
   window.addEventListener('scroll', subscribeTitleFocus)
+  link.value = window.location.href
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', anchorScroll)
