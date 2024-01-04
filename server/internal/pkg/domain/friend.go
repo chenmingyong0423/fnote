@@ -21,8 +21,11 @@ type Friend struct {
 	Logo        string
 	Description string
 	Email       string
-	Status      FriendStatus
-	Priority    int
+	// hidden, displaying
+	Status     string
+	Priority   int
+	Ip         string
+	CreateTime int64
 }
 
 type FriendVO struct {
@@ -31,16 +34,3 @@ type FriendVO struct {
 	Logo        string `json:"logo"`
 	Description string `json:"description"`
 }
-
-// 0 hiding，1 pending，2 showing
-
-type FriendStatus uint
-
-const (
-	// FriendStatusPending 审核中
-	FriendStatusPending FriendStatus = iota
-	// FriendStatusShowing 展示
-	FriendStatusShowing
-	// FriendStatusHiding 隐藏
-	FriendStatusHiding
-)
