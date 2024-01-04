@@ -48,6 +48,8 @@ type IWebsiteConfigService interface {
 	UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error
 	IncreaseWebsitePostCount(ctx context.Context) error
 	DecreaseWebsitePostCount(ctx context.Context) error
+	AddRecordInWebsiteConfig(ctx context.Context, record string) error
+	DeleteRecordInWebsiteConfig(ctx context.Context, record string) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -60,6 +62,14 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) DeleteRecordInWebsiteConfig(ctx context.Context, record string) error {
+	return s.repo.DeleteRecordInWebsiteConfig(ctx, record)
+}
+
+func (s *WebsiteConfigService) AddRecordInWebsiteConfig(ctx context.Context, record string) error {
+	return s.repo.AddRecordInWebsiteConfig(ctx, record)
 }
 
 func (s *WebsiteConfigService) DecreaseWebsitePostCount(ctx context.Context) error {

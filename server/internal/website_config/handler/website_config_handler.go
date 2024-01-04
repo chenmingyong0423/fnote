@@ -22,6 +22,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/service"
 	"github.com/chenmingyong0423/gkit"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 )
 
 func NewWebsiteConfigHandler(serv service.IWebsiteConfigService) *WebsiteConfigHandler {
@@ -42,6 +43,8 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin/configs")
 	adminGroup.GET("/website", api.Wrap(h.AdminGetWebsiteConfig))
 	adminGroup.PUT("/website", api.WrapWithBody(h.AdminUpdateWebsiteConfig))
+	adminGroup.POST("/website/records", api.WrapWithBody(h.AdminAddRecordInWebsiteConfig))
+	adminGroup.DELETE("/website/records", api.Wrap(h.AdminDeleteRecordInWebsiteConfig))
 	adminGroup.GET("/owner", api.Wrap(h.AdminGetOwnerConfig))
 	adminGroup.PUT("/owner", api.WrapWithBody(h.AdminUpdateOwnerConfig))
 	adminGroup.GET("/seo", api.Wrap(h.AdminGetSeoConfig))
@@ -291,4 +294,16 @@ func (h *WebsiteConfigHandler) AdminUpdateFPCConfig(ctx *gin.Context, req reques
 	return nil, h.serv.UpdateFrontPostCountConfig(ctx, domain.FrontPostCountConfig{
 		Count: req.Count,
 	})
+}
+
+func (h *WebsiteConfigHandler) AdminAddRecordInWebsiteConfig(ctx *gin.Context, req request.AddRecordInWebsiteConfig) (any, error) {
+	return nil, h.serv.AddRecordInWebsiteConfig(ctx, req.Record)
+}
+
+func (h *WebsiteConfigHandler) AdminDeleteRecordInWebsiteConfig(ctx *gin.Context) (any, error) {
+	record := ctx.Query("record")
+	if record == "" {
+		return nil, errors.New("record is empty")
+	}
+	return nil, h.serv.DeleteRecordInWebsiteConfig(ctx, record)
 }

@@ -18,6 +18,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/builder/update"
@@ -40,6 +42,8 @@ type IWebsiteConfigRepository interface {
 	UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error
 	UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error
 	UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error
+	AddRecordInWebsiteConfig(ctx context.Context, record string) error
+	DeleteRecordInWebsiteConfig(ctx context.Context, record string) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -52,6 +56,22 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) DeleteRecordInWebsiteConfig(ctx context.Context, record string) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "website"),
+		update.BsonBuilder().Pull(bsonx.M("props.records", record)).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
+}
+
+func (r *WebsiteConfigRepository) AddRecordInWebsiteConfig(ctx context.Context, record string) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "website"),
+		update.BsonBuilder().Push(bsonx.M("props.records", record)).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
 }
 
 func (r *WebsiteConfigRepository) UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error {
