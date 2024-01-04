@@ -1,6 +1,6 @@
 <template>
   <a-button type="primary" @click="router.push('/post/edit')">发布文章</a-button>
-  <a-table :columns="columns" :data-source="posts">
+  <a-table :columns="columns" :data-source="posts" :pagination="pagination" @change="change">
     <template #headerCell="{ column }">
       <template v-if="column.key === 'name'">
         <span>
@@ -53,7 +53,7 @@
 <script lang="ts" setup>
 import { SmileOutlined } from '@ant-design/icons-vue'
 import axios from '@/http/axios'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { IPost, PageRequest } from '@/interfaces/Post'
 import type { IBaseResponse, IPageData, IResponse } from '@/interfaces/Common'
 import router from '@/router'
@@ -167,12 +167,26 @@ const data = [
 
 const req = ref<PageRequest>({
   pageNo: 1,
-  pageSize: 10,
+  pageSize: 5,
   sortField: 'create_time',
   sortOrder: 'desc'
 } as PageRequest)
 
 const posts = ref<IPost[]>([])
+
+const total = ref(0)
+
+const pagination = computed(() => ({
+  total: total.value,
+  current: req.value.pageNo,
+  pageSize: req.value.pageSize
+}))
+
+const change = (pg, filters, sorter, { currentDataSource }) => {
+  req.value.pageNo = pg.current
+  req.value.pageSize = pg.pageSize
+  getPosts()
+}
 
 const getPosts = async () => {
   try {
@@ -180,6 +194,7 @@ const getPosts = async () => {
       params: req.value
     })
     posts.value = response.data.data?.list || []
+    total.value = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
