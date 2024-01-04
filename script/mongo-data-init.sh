@@ -151,14 +151,7 @@ db.getCollection("configs").insertOne({
 db.getCollection("configs").insertOne({
     typ: "social",
     "props": {
-        "social_info_list": [
-            {
-                "social_name": "fnote",
-                "social_value": "https://github.com/chenmingyong0423/fnote",
-                "css_class": "i-bi:link-45deg",
-                "is_link": true
-            }
-        ]
+        "social_info_list": []
     },
     create_time: Math.floor(new Date().getTime() / 1000),
     update_time: Math.floor(new Date().getTime() / 1000)
