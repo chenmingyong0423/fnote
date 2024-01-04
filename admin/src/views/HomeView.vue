@@ -83,6 +83,19 @@ const items = reactive([
     ]
   },
   {
+    key: 'sub friend',
+    icon: () => h(PieChartOutlined),
+    label: '友链管理',
+    title: '友链管理',
+    children: [
+      {
+        key: '/friend',
+        label: '友链列表',
+        title: '友链列表'
+      }
+    ]
+  },
+  {
     key: 'sub blog',
     icon: () => h(PieChartOutlined),
     label: '系统',

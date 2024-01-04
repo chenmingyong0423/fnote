@@ -24,6 +24,11 @@ const router = createRouter({
       component: () => import('../views/TagListView.vue')
     },
     {
+      path: '/friend',
+      name: 'friend',
+      component: () => import('@/views/friend/FriendView.vue')
+    },
+    {
       path: '/setting',
       name: 'setting',
       component: () => import('@/views/setting/SettingView.vue')
