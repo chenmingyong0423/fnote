@@ -16,6 +16,12 @@ package dao
 
 import (
 	"context"
+	"fmt"
+	"time"
+
+	"github.com/chenmingyong0423/go-mongox/builder/update"
+
+	"go.mongodb.org/mongo-driver/bson"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -50,6 +56,11 @@ type IFriendDao interface {
 	FindDisplaying(ctx context.Context) ([]*Friend, error)
 	Add(ctx context.Context, friend Friend) error
 	FindByUrl(ctx context.Context, url string) (*Friend, error)
+	QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Friend, int64, error)
+	UpdateById(ctx context.Context, objectID primitive.ObjectID, friend Friend) error
+	DeleteById(ctx context.Context, objectID primitive.ObjectID) error
+	FindById(ctx context.Context, objectID primitive.ObjectID) (*Friend, error)
+	UpdateAccept(ctx context.Context, objectID primitive.ObjectID) error
 }
 
 var _ IFriendDao = (*FriendDao)(nil)
@@ -62,6 +73,61 @@ func NewFriendDao(db *mongo.Database) *FriendDao {
 
 type FriendDao struct {
 	coll *mongox.Collection[Friend]
+}
+
+func (d *FriendDao) UpdateAccept(ctx context.Context, objectID primitive.ObjectID) error {
+	updateOne, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.BsonBuilder().SetSimple("accepted", true).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to update the document from friends, id=%s", objectID.Hex())
+	}
+	if updateOne.ModifiedCount == 0 {
+		return fmt.Errorf("fails to update the document from friends, id=%s", objectID.Hex())
+	}
+	return nil
+}
+
+func (d *FriendDao) FindById(ctx context.Context, objectID primitive.ObjectID) (*Friend, error) {
+	friend, err := d.coll.Finder().Filter(query.Id(objectID)).FindOne(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fails to find the document from friends, id=%s", objectID.Hex())
+	}
+	return friend, nil
+}
+
+func (d *FriendDao) DeleteById(ctx context.Context, objectID primitive.ObjectID) error {
+	deleteOne, err := d.coll.Deleter().Filter(query.Id(objectID)).DeleteOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to delete the document from friends, id=%s", objectID.Hex())
+	}
+	if deleteOne.DeletedCount == 0 {
+		return fmt.Errorf("fails to delete the document from friends, id=%s", objectID.Hex())
+	}
+	return nil
+}
+
+func (d *FriendDao) UpdateById(ctx context.Context, objectID primitive.ObjectID, friend Friend) error {
+	updateOne, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(
+		update.BsonBuilder().SetSimple("name", friend.Name).SetSimple("logo", friend.Logo).SetSimple("description", friend.Description).SetSimple("show", friend.Show).SetSimple("update_time", time.Now().Unix()).Build(),
+	).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to update the document from friends, id=%s, friend=%v", objectID.Hex(), friend)
+	}
+	if updateOne.ModifiedCount == 0 {
+		return fmt.Errorf("fails to update the document from friends, id=%s, friend=%v", objectID.Hex(), friend)
+	}
+	return nil
+}
+
+func (d *FriendDao) QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Friend, int64, error) {
+	count, err := d.coll.Finder().Filter(cond).Count(ctx)
+	if err != nil {
+		return nil, 0, errors.Wrapf(err, "fails to count the documents from friends, cond=%v", cond)
+	}
+	friends, err := d.coll.Finder().Filter(cond).Options(findOptions).Find(ctx)
+	if err != nil {
+		return nil, 0, errors.Wrapf(err, "fails to find the documents from friends, cond=%v, findOptions=%v", cond, findOptions)
+	}
+	return friends, count, nil
 }
 
 func (d *FriendDao) FindByUrl(ctx context.Context, url string) (*Friend, error) {

@@ -21,6 +21,14 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/chenmingyong0423/gkit"
+
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
+
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
+
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
+
 	msgService "github.com/chenmingyong0423/fnote/server/internal/message/service"
 	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/service"
 
@@ -49,9 +57,15 @@ func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/friends")
 	group.GET("", api.Wrap(h.GetFriends))
 	group.POST("", api.WrapWithBody(h.ApplyForFriend))
+
+	adminGroup := engine.Group("/admin/friends")
+	adminGroup.GET("", api.WrapWithBody(h.AdminGetFriends))
+	adminGroup.PUT("/:id", api.WrapWithBody(h.AdminUpdateFriend))
+	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteFriend))
+	adminGroup.PUT("/:id/accept", api.Wrap(h.AdminAcceptFriend))
 }
 
-func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[domain.FriendVO], err error) {
+func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[vo.FriendVO], err error) {
 	friends, err := h.serv.GetFriends(ctx)
 	if err != nil {
 		return
@@ -60,15 +74,15 @@ func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[domain.F
 	return
 }
 
-func (h *FriendHandler) toFriendVOs(friends []domain.Friend) []domain.FriendVO {
-	result := make([]domain.FriendVO, 0, len(friends))
+func (h *FriendHandler) toFriendVOs(friends []domain.Friend) []vo.FriendVO {
+	result := make([]vo.FriendVO, 0, len(friends))
 	for _, friend := range friends {
 		result = append(result, h.toFriendVO(friend))
 	}
 	return result
 }
-func (h *FriendHandler) toFriendVO(friend domain.Friend) domain.FriendVO {
-	return domain.FriendVO{
+func (h *FriendHandler) toFriendVO(friend domain.Friend) vo.FriendVO {
+	return vo.FriendVO{
 		Name:        friend.Name,
 		Url:         friend.Url,
 		Logo:        friend.Logo,
@@ -104,6 +118,8 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any
 		Logo:        req.Logo,
 		Description: req.Description,
 		Email:       req.Email,
+		Show:        false,
+		Accepted:    false,
 		Ip:          ctx.ClientIP(),
 	})
 	if err != nil {
@@ -123,4 +139,58 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any
 	}()
 
 	return nil, nil
+}
+
+func (h *FriendHandler) AdminGetFriends(ctx *gin.Context, req request.PageRequest) (pageVO vo.PageVO[vo.AdminFriendVO], err error) {
+	friends, total, err := h.serv.AdminGetFriends(ctx, dto.PageDTO{
+		PageNo:   req.PageNo,
+		PageSize: req.PageSize,
+		Field:    req.Field,
+		Order:    req.Order,
+		Keyword:  req.Keyword,
+	})
+	if err != nil {
+		return
+	}
+	pageVO.PageNo = req.PageNo
+	pageVO.PageSize = req.PageSize
+	pageVO.List = h.friendToAdminVO(friends)
+	pageVO.SetTotalCountAndCalculateTotalPages(total)
+	return
+}
+
+func (h *FriendHandler) friendToAdminVO(friends []domain.Friend) []vo.AdminFriendVO {
+	result := make([]vo.AdminFriendVO, 0, len(friends))
+	for _, friend := range friends {
+		result = append(result, vo.AdminFriendVO{
+			Id:          friend.Id,
+			Name:        friend.Name,
+			Url:         friend.Url,
+			Logo:        friend.Logo,
+			Description: friend.Description,
+			Show:        friend.Show,
+			Accepted:    friend.Accepted,
+			CreateTime:  friend.CreateTime,
+		})
+	}
+	return result
+}
+
+func (h *FriendHandler) AdminUpdateFriend(ctx *gin.Context, req request.FriendReq) (any, error) {
+	return nil, h.serv.AdminUpdateFriend(ctx, domain.Friend{
+		Id:          ctx.Param("id"),
+		Name:        req.Name,
+		Logo:        req.Logo,
+		Description: req.Description,
+		Show:        gkit.GetValueOrDefault(req.Show),
+	})
+}
+
+func (h *FriendHandler) AdminDeleteFriend(ctx *gin.Context) (any, error) {
+	id := ctx.Param("id")
+	return nil, h.serv.AdminDeleteFriend(ctx, id)
+}
+
+func (h *FriendHandler) AdminAcceptFriend(ctx *gin.Context) (any, error) {
+	return nil, h.serv.AdminAcceptFriend(ctx, ctx.Param("id"))
 }
