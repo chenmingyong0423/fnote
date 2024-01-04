@@ -3,7 +3,8 @@
     <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
       <div class="flex flex-col">
         <SearchInput :keyword="keyword" class="mb-5"></SearchInput>
-        <PostListItem :posts="posts"></PostListItem>
+        <PostListItem :posts="posts" class="lt-md:hidden"></PostListItem>
+        <PostListSquareItem :posts="posts" class="md:hidden"></PostListSquareItem>
         <Pagination :currentPage="req.pageNo" :total="totalPosts" :perPageCount='req.pageSize'
                     :route="'/search/page/'" :extraParams="{keyword: req.keyword}"></Pagination>
       </div>

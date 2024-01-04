@@ -8,7 +8,7 @@
              :src="item.cover_img"
              :alt="item.title"/>
         <div
-            class="flex justify-between gap-x-3 z-99 w-auto absolute top-3 left--100% group-hover:left-1% ease-linear duration-200">
+            class="flex justify-between gap-x-3 z-99 w-auto absolute top-3 left--100% group-hover:left-1% ease-linear duration-200 lt-md:left-0">
           <span class="bg-#2db7f5 rounded-3 text-white py-0.2em px-0.8em" v-for="(category, idx) in item.categories"
                 :key="idx">{{ category }}</span>
           <span class="bg-orange rounded-3 text-white py-0.2em px-0.8em" v-for="(tag, idx) in item.tags" :key="idx">{{

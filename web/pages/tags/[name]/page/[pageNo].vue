@@ -1,13 +1,14 @@
 <template>
   <div class="flex">
-    <div class="w-69% mr-1% flex flex-col">
+    <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
       <div class="flex flex-col">
-        <PostListItem :posts="posts"></PostListItem>
+        <PostListItem :posts="posts" class="lt-md:hidden"></PostListItem>
+        <PostListSquareItem :posts="posts" class="md:hidden"></PostListSquareItem>
         <Pagination :currentPage="req.pageNo" :total="totalPosts" :perPageCount='req.pageSize'
                     :route="`/tags/${routeParam}/page/`"></Pagination>
       </div>
     </div>
-    <div class="flex flex-col w-30%">
+    <div class="flex flex-col w-30% lt-md:hidden">
       <Profile class="mb-5"></Profile>
     </div>
   </div>
