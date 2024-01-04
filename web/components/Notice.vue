@@ -6,7 +6,7 @@
            @mouseenter="stopMarquee"
            @mouseleave="startMarquee" ><span
           ref="marqueeContent"
-          class="inline-block"> [{{ $dayjs(homeStore.notice_info.publish_time).format('YYYY-MM-DD HH:mm:ss')}}] {{homeStore.notice_info.title }}</span>
+          class="inline-block"> [{{ $dayjs(homeStore.notice_info.publish_time * 1000).format('YYYY-MM-DD HH:mm:ss')}}] {{homeStore.notice_info.title }}</span>
         <span
             ref="marqueeContent2"
             class="inline-block m-l-5" v-show="showTheSecondMarquee">{{ homeStore.notice_info.title }}</span>
@@ -16,7 +16,7 @@
     <div v-if="visible" class="fixed z-999 inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 custom_shadow">
       <div class="bg-white p-6 rounded shadow-lg max-w-md min-w-400px dark:text-dtc dark_bg_full_black">
         <div class="text-right text-sm text-gray-500 mb-4">
-          发布时间: {{ $dayjs(homeStore.notice_info.publish_time).format('YYYY-MM-DD HH:mm:ss') }}
+          发布时间: {{ $dayjs(homeStore.notice_info.publish_time * 1000).format('YYYY-MM-DD HH:mm:ss') }}
         </div>
         <span @click="closeModal" class="float-right text-xl cursor-pointer">&times;</span>
         <h2 class="text-xl font-bold mb-4">{{ homeStore.notice_info.title }}</h2>
