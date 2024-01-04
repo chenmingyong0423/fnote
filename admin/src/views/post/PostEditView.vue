@@ -2,8 +2,8 @@
   <div>
     <div class="flex h-15 items-center">
       <a-input v-model:value="postReq.title" addon-before="标题" class="w-59%" />
-      <a-input v-model:value="postReq.author" addon-before="作者" class="w-30%  ml-1%" />
-      <a-button type="primary" @click="visible=true" class="w-9% ml-1%">发布</a-button>
+      <a-input v-model:value="postReq.author" addon-before="作者" class="w-30% ml-1%" />
+      <a-button type="primary" @click="visible = true" class="w-9% ml-1%">发布</a-button>
       <a-modal
         v-model:open="visible"
         title="文章元数据"
@@ -26,11 +26,11 @@
           >
             {{ postReq.author }}
           </a-form-item>
-          <a-form-item
-            name="id"
-            label="自定义 id"
-          >
-            <a-input v-model:value="postReq.id" placeholder="与文章关联的英文的 id 有助于 seo 优化" />
+          <a-form-item name="id" label="自定义 id">
+            <a-input
+              v-model:value="postReq.id"
+              placeholder="与文章关联的英文的 id 有助于 seo 优化"
+            />
           </a-form-item>
           <a-form-item
             name="tempCategories"
@@ -62,7 +62,7 @@
             name="cover_img"
             label="封面"
             :rules="[{ required: true, message: '请选择封面' }]"
-          ><a-input v-model:value="postReq.cover_img" placeholder="请输入封面路径"/>
+            ><a-input v-model:value="postReq.cover_img" placeholder="请输入封面路径" />
             <a-upload
               v-model:file-list="fileList"
               name="file"
@@ -118,23 +118,26 @@
           >
             <a-textarea v-model:value="postReq.summary" placeholder="请输入摘要" allow-clear />
           </a-form-item>
-          <a-form-item
-            name="meta_description"
-            label="seo description"
-          >
-            <a-textarea v-model:value="postReq.meta_description" placeholder="请输入描述" allow-clear />
+          <a-form-item name="meta_description" label="seo description">
+            <a-textarea
+              v-model:value="postReq.meta_description"
+              placeholder="请输入描述"
+              allow-clear
+            />
           </a-form-item>
-          <a-form-item
-            name="meta_keywords"
-            label="seo keywords"
-          >
+          <a-form-item name="meta_keywords" label="seo keywords">
             <a-input v-model:value="postReq.meta_keywords" placeholder="请输入关键字" />
           </a-form-item>
         </a-form>
       </a-modal>
     </div>
     <div>
-      <v-md-editor v-model="postReq.content" height="800px" :disabled-menus="[]" @upload-image="handleUploadImage"></v-md-editor>
+      <v-md-editor
+        v-model="postReq.content"
+        height="800px"
+        :disabled-menus="[]"
+        @upload-image="handleUploadImage"
+      ></v-md-editor>
     </div>
   </div>
 </template>
@@ -142,7 +145,13 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import type { PostRequest } from '@/interfaces/Post'
-import { type FormInstance, message, type SelectProps, type UploadChangeParam, type UploadProps } from 'ant-design-vue'
+import {
+  type FormInstance,
+  message,
+  type SelectProps,
+  type UploadChangeParam,
+  type UploadProps
+} from 'ant-design-vue'
 import axios from '@/http/axios'
 import type { IBaseResponse, IListData, IResponse } from '@/interfaces/Common'
 import type { SelectCategory } from '@/interfaces/Category'
@@ -238,7 +247,9 @@ const submit = () => {
 
 const getCategories = async () => {
   try {
-    const response = await axios.get<IResponse<IListData<SelectCategory>>>('/admin/categories/select')
+    const response = await axios.get<IResponse<IListData<SelectCategory>>>(
+      '/admin/categories/select'
+    )
     response.data.data?.list.forEach((item) => {
       categories.value?.push(item)
     })
@@ -261,7 +272,6 @@ const getTags = async () => {
 }
 
 getTags()
-
 
 // 封面上传
 function getBase64(img: Blob, callback: (base64Url: string) => void) {
@@ -307,7 +317,7 @@ const beforeUpload = (file: UploadProps['fileList'][number]) => {
 }
 
 // md 图片上传
-const  handleUploadImage = async (event, insertImage, files) => {
+const handleUploadImage = async (event, insertImage, files) => {
   console.log(files)
   try {
     const formData = new FormData()
@@ -324,7 +334,7 @@ const  handleUploadImage = async (event, insertImage, files) => {
     }
     insertImage({
       url: response.data.data.url,
-      desc: response.data.data.file_name,
+      desc: response.data.data.file_name
       // width: 'auto',
       // height: 'auto',
     })

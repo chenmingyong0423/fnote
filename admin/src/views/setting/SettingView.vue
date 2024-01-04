@@ -10,6 +10,7 @@
     <a-tab-pane key="front-post-count" tab="首页展示文章数量配置"
       ><FrontPostCountView
     /></a-tab-pane>
+    <a-tab-pane key="records" tab="备案信息"><RecordView /></a-tab-pane>
   </a-tabs>
 </template>
 <script lang="ts" setup>
@@ -22,5 +23,6 @@ import FriendSwitchView from '@/views/setting/FriendSwitchView.vue'
 import EmailView from '@/views/setting/EmailView.vue'
 import NoticeView from '@/views/setting/NoticeView.vue'
 import FrontPostCountView from '@/views/setting/FrontPostCountView.vue'
+import RecordView from '@/views/setting/RecordView.vue'
 const activeKey = ref('basic')
 </script>
