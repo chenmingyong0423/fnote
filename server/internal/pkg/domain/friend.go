@@ -21,11 +21,10 @@ type Friend struct {
 	Logo        string
 	Description string
 	Email       string
-	// hidden, displaying
-	Status     string
-	Priority   int
-	Ip         string
-	CreateTime int64
+	Show        bool
+	Priority    int
+	Ip          string
+	CreateTime  int64
 }
 
 type FriendVO struct {

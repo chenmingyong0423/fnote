@@ -58,7 +58,7 @@ func (r *FriendRepository) Add(ctx context.Context, friend domain.Friend) error 
 		Logo:        friend.Logo,
 		Description: friend.Description,
 		Email:       friend.Email,
-		Status:      dao.FriendStatusHidden,
+		Show:        false,
 		Ip:          friend.Ip,
 		Accepted:    false,
 		CreateTime:  unix,
@@ -93,7 +93,7 @@ func (r *FriendRepository) toDomainFriend(friend *dao.Friend) domain.Friend {
 		Url:         friend.Url,
 		Logo:        friend.Logo,
 		Description: friend.Description,
-		Status:      friend.Status,
+		Show:        friend.Show,
 		Priority:    friend.Priority,
 	}
 }
