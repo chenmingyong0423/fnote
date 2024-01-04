@@ -76,7 +76,7 @@ type FriendDao struct {
 }
 
 func (d *FriendDao) UpdateAccept(ctx context.Context, objectID primitive.ObjectID) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.BsonBuilder().SetSimple("accepted", true).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.BsonBuilder().SetSimple("accepted", true).SetSimple("show", true).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the document from friends, id=%s", objectID.Hex())
 	}
