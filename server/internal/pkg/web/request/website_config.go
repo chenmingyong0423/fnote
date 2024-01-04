@@ -65,3 +65,7 @@ type UpdateNoticeConfigEnabledReq struct {
 type UpdateFPCConfigCountReq struct {
 	Count int64 `json:"count" binding:"required"`
 }
+
+type AddRecordInWebsiteConfig struct {
+	Record string `json:"record" binding:"required"`
+}
