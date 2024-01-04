@@ -30,11 +30,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-const (
-	FriendStatusDisplaying = "displaying"
-	FriendStatusHidden     = "hidden"
-)
-
 type Friend struct {
 	Id          primitive.ObjectID `bson:"_id,omitempty"`
 	Name        string             `bson:"name"`
@@ -42,10 +37,9 @@ type Friend struct {
 	Logo        string             `bson:"logo"`
 	Description string             `bson:"description"`
 	Email       string             `bson:"email"`
-	// hidden, displaying
-	Status   string `bson:"status"`
-	Priority int    `bson:"priority"`
-	Ip       string `bson:"ip"`
+	Show        bool               `bson:"show"`
+	Priority    int                `bson:"priority"`
+	Ip          string             `bson:"ip"`
 	// 表示是否已经通过审核
 	Accepted   bool  `bson:"accepted"`
 	CreateTime int64 `bson:"create_time"`
@@ -90,7 +84,7 @@ func (d *FriendDao) Add(ctx context.Context, friend Friend) error {
 }
 
 func (d *FriendDao) FindDisplaying(ctx context.Context) ([]*Friend, error) {
-	friends, err := d.coll.Finder().Filter(query.BsonBuilder().Eq("status", FriendStatusDisplaying).Eq("accepted", true).Build()).Options(options.Find().SetSort(bsonx.M("create_time", -1))).Find(ctx)
+	friends, err := d.coll.Finder().Filter(query.BsonBuilder().Eq("show", true).Eq("accepted", true).Build()).Options(options.Find().SetSort(bsonx.M("create_time", -1))).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from friends")
 	}
