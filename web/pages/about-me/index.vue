@@ -1,6 +1,6 @@
 <template>
   <div class="flex w-full">
-    <div class="mt-10 w-5% lt-md:hidden">
+    <div class="mt-10 w-5% lt-md:hidden" v-if="existPost">
       <div class="flex flex-col gap-y-3 items-center fixed ">
         <div
             class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white  p-2 cursor-pointer duration-200 dark:text-dtc dark_bg_gray relative"
@@ -87,7 +87,7 @@
           </client-only>
         </div>
       </div>
-      <div>
+      <div v-if="existPost">
         <div
             class="m-auto flex items-center justify-center align-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer duration-200 dark:text-dtc dark_bg_gray relative"
             :class="{' hover:bg-#1e80ff': !post?.is_liked}" @click="like">
@@ -101,7 +101,7 @@
         </div>
       </div>
       <!-- 评论区 -->
-      <div ref="comment">
+      <div ref="comment" v-if="existPost">
         <CommentPost ref="commentPost" :comments="comments" :author="author"
                      class="mt-5 b-rounded-4 p-2 dark:text-dtc dark_bg_gray"
                      @submit="submit" @submitReply="submitReply" @submitReply2Reply="submitReply2Reply"></CommentPost>
@@ -109,7 +109,7 @@
     </div>
     <div class="flex flex-col w-30% lt-md:hidden">
       <Profile class="mb-5"></Profile>
-      <div ref="anchor">
+      <div ref="anchor" v-if="existPost">
         <Anchor :htmlContent="htmlContent" :lineIndex="lineIndex" @handleAnchorClick="handleAnchorClick"
                 class="dark:text-dtc dark_bg_gray"></Anchor>
       </div>
@@ -130,15 +130,38 @@ const domain = homeStore.website_info.domain;
 const route = useRoute()
 const path: string = route.path
 const id: string = 'about-me'
-const post = ref<IPostDetail>()
+const post = ref<IPostDetail>({
+  sug: '',
+  author: '',
+  title: '关于我',
+  summary: '',
+  cover_img: '',
+  category: [],
+  tags: [],
+  like_count: 0,
+  comment_count: 0,
+  visit_count: 0,
+  sticky_weight: 0,
+  create_time: 0,
+  content: '暂无介绍。',
+  meta_description: '',
+  meta_keywords: '',
+  word_count: 0,
+  update_time: 0,
+  is_liked: false
+})
 const author = ref<string>("")
 const payList = ref<IPayInfo[]>(homeStore.pay_info || [])
-
+const existPost = ref<boolean>(false)
 const getPostDetail = async () => {
   try {
     let postRes: any = await getPostsById(id)
     let res: IResponse<IPostDetail> = postRes.data.value
-    post.value = res.data
+    if (res.code !== 200) {
+      return
+    }
+    existPost.value = true
+    post.value = res.data!
     author.value = post.value?.author || ""
   } catch (error) {
     console.log(error);
