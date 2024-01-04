@@ -100,6 +100,7 @@ type SocialInfoConfig struct {
 }
 
 type SocialInfo struct {
+	Id          []byte `bson:"id"`
 	SocialName  string `bson:"social_name" json:"social_name"`
 	SocialValue string `bson:"social_value" json:"social_value"`
 	CssClass    string `bson:"css_class" json:"css_class"`

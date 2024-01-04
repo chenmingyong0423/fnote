@@ -55,6 +55,10 @@ type IWebsiteConfigService interface {
 	GetPayConfig(ctx context.Context) (domain.PayInfoConfig, error)
 	AddPayInfo(ctx *gin.Context, payInfoConfigElem domain.PayInfoConfigElem) error
 	DeletePayInfo(ctx context.Context, payInfoConfigElem domain.PayInfoConfigElem) error
+	GetSocialConfig(ctx context.Context) (domain.SocialInfoConfig, error)
+	AddSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
+	UpdateSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
+	DeleteSocialInfo(ctx context.Context, id []byte) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -67,6 +71,27 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) DeleteSocialInfo(ctx context.Context, id []byte) error {
+	return s.repo.DeleteSocialInfo(ctx, id)
+}
+
+func (s *WebsiteConfigService) UpdateSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error {
+	return s.repo.UpdateSocialInfo(ctx, socialInfo)
+}
+
+func (s *WebsiteConfigService) AddSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error {
+	return s.repo.AddSocialInfo(ctx, socialInfo)
+}
+
+func (s *WebsiteConfigService) GetSocialConfig(ctx context.Context) (domain.SocialInfoConfig, error) {
+	cfg := domain.SocialInfoConfig{}
+	err := s.getConfigAndConvertTo(ctx, "social", &cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func (s *WebsiteConfigService) DeletePayInfo(ctx context.Context, payInfoConfigElem domain.PayInfoConfigElem) error {
