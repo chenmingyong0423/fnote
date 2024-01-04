@@ -20,7 +20,6 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/friend/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -52,17 +51,18 @@ func (r *FriendRepository) FindByUrl(ctx context.Context, url string) (friend do
 }
 
 func (r *FriendRepository) Add(ctx context.Context, friend domain.Friend) error {
-	now := time.Now()
+	unix := time.Now().Unix()
 	err := r.dao.Add(ctx, dao.Friend{
-		Id:          uuid.NewString(),
 		Name:        friend.Name,
 		Url:         friend.Url,
 		Logo:        friend.Logo,
 		Description: friend.Description,
 		Email:       friend.Email,
-		Status:      domain.FriendStatusPending,
-		CreateTime:  now.Unix(),
-		UpdateTime:  now.Unix(),
+		Status:      dao.FriendStatusHidden,
+		Ip:          friend.Ip,
+		Accepted:    false,
+		CreateTime:  unix,
+		UpdateTime:  unix,
 	})
 	if err != nil {
 		return errors.WithMessage(err, "r.dao.Add failed")
@@ -88,7 +88,7 @@ func (r *FriendRepository) toDomainFriends(friends []*dao.Friend) []domain.Frien
 
 func (r *FriendRepository) toDomainFriend(friend *dao.Friend) domain.Friend {
 	return domain.Friend{
-		Id:          friend.Id,
+		Id:          friend.Id.Hex(),
 		Name:        friend.Name,
 		Url:         friend.Url,
 		Logo:        friend.Logo,

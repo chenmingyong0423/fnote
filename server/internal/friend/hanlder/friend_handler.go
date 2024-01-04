@@ -104,6 +104,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any
 		Logo:        req.Logo,
 		Description: req.Description,
 		Email:       req.Email,
+		Ip:          ctx.ClientIP(),
 	})
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key error") {
