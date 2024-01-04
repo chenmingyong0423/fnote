@@ -11,6 +11,7 @@
       ><FrontPostCountView
     /></a-tab-pane>
     <a-tab-pane key="pay" tab="支付二维码配置"><RecordView /></a-tab-pane>
+    <a-tab-pane key="social" tab="社交信息配置"><SocialView /></a-tab-pane>
   </a-tabs>
 </template>
 <script lang="ts" setup>
@@ -24,5 +25,6 @@ import EmailView from '@/views/setting/EmailView.vue'
 import NoticeView from '@/views/setting/NoticeView.vue'
 import FrontPostCountView from '@/views/setting/FrontPostCountView.vue'
 import RecordView from '@/views/setting/PayView.vue'
+import SocialView from '@/views/setting/SocialView.vue'
 const activeKey = ref('basic')
 </script>
