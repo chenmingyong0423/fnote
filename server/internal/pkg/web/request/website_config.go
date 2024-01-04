@@ -69,3 +69,8 @@ type UpdateFPCConfigCountReq struct {
 type AddRecordInWebsiteConfig struct {
 	Record string `json:"record" binding:"required"`
 }
+
+type AddPayInfoRequest struct {
+	Name  string `json:"name" binding:"required"`
+	Image string `json:"image" binding:"required"`
+}

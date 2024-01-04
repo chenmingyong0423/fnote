@@ -18,6 +18,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
@@ -44,6 +46,8 @@ type IWebsiteConfigRepository interface {
 	UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error
 	AddRecordInWebsiteConfig(ctx context.Context, record string) error
 	DeleteRecordInWebsiteConfig(ctx context.Context, record string) error
+	PushPayInfo(ctx *gin.Context, payInfoConfigElem domain.PayInfoConfigElem) error
+	DeletePayInfo(ctx context.Context, payInfoConfigElem domain.PayInfoConfigElem) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -56,6 +60,22 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) DeletePayInfo(ctx context.Context, payInfoConfigElem domain.PayInfoConfigElem) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "pay"),
+		update.BsonBuilder().Pull(bsonx.M("props.list", payInfoConfigElem)).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
+}
+
+func (r *WebsiteConfigRepository) PushPayInfo(ctx *gin.Context, payInfoConfigElem domain.PayInfoConfigElem) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "pay"),
+		update.BsonBuilder().Push(bsonx.M("props.list", payInfoConfigElem)).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
 }
 
 func (r *WebsiteConfigRepository) DeleteRecordInWebsiteConfig(ctx context.Context, record string) error {
