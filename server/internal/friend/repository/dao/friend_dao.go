@@ -150,7 +150,7 @@ func (d *FriendDao) Add(ctx context.Context, friend Friend) error {
 }
 
 func (d *FriendDao) FindDisplaying(ctx context.Context) ([]*Friend, error) {
-	friends, err := d.coll.Finder().Filter(query.BsonBuilder().Eq("show", true).Eq("accepted", true).Build()).Options(options.Find().SetSort(bsonx.M("create_time", -1))).Find(ctx)
+	friends, err := d.coll.Finder().Filter(query.BsonBuilder().Eq("show", true).Eq("accepted", true).Build()).Options(options.Find().SetSort(bsonx.M("create_time", 1))).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from friends")
 	}
