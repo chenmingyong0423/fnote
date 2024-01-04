@@ -17,6 +17,8 @@ package service
 import (
 	"context"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/repository"
 	"github.com/pkg/errors"
@@ -50,6 +52,9 @@ type IWebsiteConfigService interface {
 	DecreaseWebsitePostCount(ctx context.Context) error
 	AddRecordInWebsiteConfig(ctx context.Context, record string) error
 	DeleteRecordInWebsiteConfig(ctx context.Context, record string) error
+	GetPayConfig(ctx context.Context) (domain.PayInfoConfig, error)
+	AddPayInfo(ctx *gin.Context, payInfoConfigElem domain.PayInfoConfigElem) error
+	DeletePayInfo(ctx context.Context, payInfoConfigElem domain.PayInfoConfigElem) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -62,6 +67,23 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) DeletePayInfo(ctx context.Context, payInfoConfigElem domain.PayInfoConfigElem) error {
+	return s.repo.DeletePayInfo(ctx, payInfoConfigElem)
+}
+
+func (s *WebsiteConfigService) AddPayInfo(ctx *gin.Context, payInfoConfigElem domain.PayInfoConfigElem) error {
+	return s.repo.PushPayInfo(ctx, payInfoConfigElem)
+}
+
+func (s *WebsiteConfigService) GetPayConfig(ctx context.Context) (domain.PayInfoConfig, error) {
+	cfg := domain.PayInfoConfig{List: make([]domain.PayInfoConfigElem, 0)}
+	err := s.getConfigAndConvertTo(ctx, "pay", &cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func (s *WebsiteConfigService) DeleteRecordInWebsiteConfig(ctx context.Context, record string) error {

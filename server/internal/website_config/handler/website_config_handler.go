@@ -62,6 +62,9 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 
 	adminGroup.GET("/front-post-count", api.Wrap(h.AdminGetFPCConfig))
 	adminGroup.PUT("/front-post-count", api.WrapWithBody(h.AdminUpdateFPCConfig))
+	adminGroup.GET("/pay", api.Wrap(h.AdminGetPayConfig))
+	adminGroup.POST("/pay", api.WrapWithBody(h.AdminAddPayInfo))
+	adminGroup.DELETE("/pay/:name", api.Wrap(h.AdminDeletePayInfo))
 }
 
 func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfigVO, error) {
@@ -306,4 +309,35 @@ func (h *WebsiteConfigHandler) AdminDeleteRecordInWebsiteConfig(ctx *gin.Context
 		return nil, errors.New("record is empty")
 	}
 	return nil, h.serv.DeleteRecordInWebsiteConfig(ctx, record)
+}
+
+func (h *WebsiteConfigHandler) AdminGetPayConfig(ctx *gin.Context) (vo api.ListVO[vo.PayInfoConfigVO], err error) {
+	config, err := h.serv.GetPayConfig(ctx)
+	if err != nil {
+		return
+	}
+	vo.List = h.toPayInfoConfigVO(config.List)
+	return
+}
+
+func (h *WebsiteConfigHandler) AdminAddPayInfo(ctx *gin.Context, req request.AddPayInfoRequest) (any, error) {
+	return nil, h.serv.AddPayInfo(ctx, domain.PayInfoConfigElem{
+		Name:  req.Name,
+		Image: req.Image,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminDeletePayInfo(ctx *gin.Context) (any, error) {
+	name := ctx.Param("name")
+	if name == "" {
+		return nil, errors.New("name is empty")
+	}
+	image := ctx.Query("image")
+	if image == "" {
+		return nil, errors.New("image is empty")
+	}
+	return nil, h.serv.DeletePayInfo(ctx, domain.PayInfoConfigElem{
+		Name:  name,
+		Image: image,
+	})
 }
