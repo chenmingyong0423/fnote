@@ -13,6 +13,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@iconify-json/bi": "^1.1.22",
     "@kangc/v-md-editor": "^2.3.18",
     "ant-design-vue": "^4.0.8",
     "axios": "^1.6.3",

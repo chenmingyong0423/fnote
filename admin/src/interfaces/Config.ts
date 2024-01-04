@@ -62,3 +62,18 @@ export interface PayConfigRequest {
   name: string
   image: string
 }
+
+export interface SocialConfig {
+  id: string
+  social_name: string
+  social_value: string
+  css_class: string
+  is_link: boolean
+}
+
+export interface SocialConfigReq {
+  social_name: string
+  social_value: string
+  css_class: string
+  is_link: boolean
+}
