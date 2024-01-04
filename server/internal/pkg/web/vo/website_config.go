@@ -72,6 +72,11 @@ type SocialInfoVO struct {
 	IsLink      bool   `json:"is_link"`
 }
 
+type AdminSocialInfoVO struct {
+	Id string `json:"id"`
+	SocialInfoVO
+}
+
 type SeoMetaConfigVO struct {
 	Title                 string `json:"title"`
 	Description           string `json:"description"`

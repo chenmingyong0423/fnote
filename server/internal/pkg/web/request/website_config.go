@@ -74,3 +74,10 @@ type AddPayInfoRequest struct {
 	Name  string `json:"name" binding:"required"`
 	Image string `json:"image" binding:"required"`
 }
+
+type SocialInfoReq struct {
+	SocialName  string `json:"social_name"`
+	SocialValue string `json:"social_value"`
+	CssClass    string `json:"css_class"`
+	IsLink      bool   `json:"is_link"`
+}

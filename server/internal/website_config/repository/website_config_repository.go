@@ -16,7 +16,10 @@ package repository
 
 import (
 	"context"
+	"encoding/hex"
 	"time"
+
+	"github.com/chenmingyong0423/gkit/uuidx"
 
 	"github.com/gin-gonic/gin"
 
@@ -48,6 +51,9 @@ type IWebsiteConfigRepository interface {
 	DeleteRecordInWebsiteConfig(ctx context.Context, record string) error
 	PushPayInfo(ctx *gin.Context, payInfoConfigElem domain.PayInfoConfigElem) error
 	DeletePayInfo(ctx context.Context, payInfoConfigElem domain.PayInfoConfigElem) error
+	AddSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
+	UpdateSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
+	DeleteSocialInfo(ctx context.Context, id []byte) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -60,6 +66,40 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) DeleteSocialInfo(ctx context.Context, id []byte) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "social"),
+		update.BsonBuilder().Pull(bsonx.M("props.social_info_list", bsonx.M("id", id))).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
+}
+
+func (r *WebsiteConfigRepository) UpdateSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error {
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.BsonBuilder().Eq("typ", "social").ElemMatch("props.social_info_list", bsonx.M("id", socialInfo.Id)).Build(),
+		update.Set(map[string]any{
+			"props.social_info_list.$.social_name":  socialInfo.SocialName,
+			"props.social_info_list.$.social_value": socialInfo.SocialValue,
+			"props.social_info_list.$.css_class":    socialInfo.CssClass,
+			"props.social_info_list.$.is_link":      socialInfo.IsLink,
+		}),
+	)
+}
+
+func (r *WebsiteConfigRepository) AddSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error {
+	id, err := hex.DecodeString(uuidx.RearrangeUUID4())
+	if err != nil {
+		return err
+	}
+	socialInfo.Id = id
+	return r.dao.UpdateByConditionAndUpdates(
+		ctx,
+		query.Eq("typ", "social"),
+		update.BsonBuilder().Push(bsonx.M("props.social_info_list", socialInfo)).SetSimple("update_time", time.Now().Unix()).Build(),
+	)
 }
 
 func (r *WebsiteConfigRepository) DeletePayInfo(ctx context.Context, payInfoConfigElem domain.PayInfoConfigElem) error {

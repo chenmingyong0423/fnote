@@ -15,6 +15,8 @@
 package handler
 
 import (
+	"encoding/hex"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
@@ -65,6 +67,11 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.GET("/pay", api.Wrap(h.AdminGetPayConfig))
 	adminGroup.POST("/pay", api.WrapWithBody(h.AdminAddPayInfo))
 	adminGroup.DELETE("/pay/:name", api.Wrap(h.AdminDeletePayInfo))
+	adminGroup.GET("/social", api.Wrap(h.AdminGetSocialConfig))
+	adminGroup.POST("/social", api.WrapWithBody(h.AdminAddSocialConfig))
+	adminGroup.PUT("/social/:id", api.WrapWithBody(h.AdminUpdateSocialConfig))
+	adminGroup.DELETE("/social/:id", api.Wrap(h.AdminDeleteSocialConfig))
+
 }
 
 func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfigVO, error) {
@@ -340,4 +347,62 @@ func (h *WebsiteConfigHandler) AdminDeletePayInfo(ctx *gin.Context) (any, error)
 		Name:  name,
 		Image: image,
 	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetSocialConfig(ctx *gin.Context) (vo api.ListVO[vo.AdminSocialInfoVO], err error) {
+	socialConfig, err := h.serv.GetSocialConfig(ctx)
+	if err != nil {
+		return
+	}
+	vo.List = h.toAdminSocialInfoVO(socialConfig.SocialInfoList)
+	return
+}
+
+func (h *WebsiteConfigHandler) toAdminSocialInfoVO(list []domain.SocialInfo) []vo.AdminSocialInfoVO {
+	result := make([]vo.AdminSocialInfoVO, len(list))
+	for i, socialInfo := range list {
+		result[i] = vo.AdminSocialInfoVO{
+			Id: hex.EncodeToString(socialInfo.Id),
+			SocialInfoVO: vo.SocialInfoVO{
+				SocialName:  socialInfo.SocialName,
+				SocialValue: socialInfo.SocialValue,
+				CssClass:    socialInfo.CssClass,
+				IsLink:      socialInfo.IsLink,
+			},
+		}
+	}
+	return result
+}
+
+func (h *WebsiteConfigHandler) AdminAddSocialConfig(ctx *gin.Context, req request.SocialInfoReq) (any, error) {
+	return nil, h.serv.AddSocialInfo(ctx, domain.SocialInfo{
+		SocialName:  req.SocialName,
+		SocialValue: req.SocialValue,
+		CssClass:    req.CssClass,
+		IsLink:      req.IsLink,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateSocialConfig(ctx *gin.Context, req request.SocialInfoReq) (any, error) {
+	sid := ctx.Param("id")
+	id, err := hex.DecodeString(sid)
+	if err != nil {
+		return nil, err
+	}
+	return nil, h.serv.UpdateSocialInfo(ctx, domain.SocialInfo{
+		Id:          id,
+		SocialName:  req.SocialName,
+		SocialValue: req.SocialValue,
+		CssClass:    req.CssClass,
+		IsLink:      req.IsLink,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminDeleteSocialConfig(ctx *gin.Context) (any, error) {
+	sid := ctx.Param("id")
+	id, err := hex.DecodeString(sid)
+	if err != nil {
+		return nil, err
+	}
+	return nil, h.serv.DeleteSocialInfo(ctx, id)
 }
