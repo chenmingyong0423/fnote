@@ -42,6 +42,22 @@
         <a-button type="primary" @click="save">保存</a-button>
       </div>
     </div>
+    <div class="text-4 font-bold my-2">备案信息</div>
+    <div class="flex flex-col">
+      <div class="flex">
+        <a-input v-model:value="record"></a-input> <a-button @click="pushRecord">添加</a-button>
+      </div>
+      <div
+        class="flex p-3 border-b-1 border-b-solid border-b-gray-2"
+        v-for="(item, index) in data.records"
+        :key="index"
+      >
+        <div v-html="item"></div>
+        <a-popconfirm class="ml-auto" title="确定取消？" @confirm="pullRecord(item)">
+          <a-button type="primary" danger>删除</a-button>
+        </a-popconfirm>
+      </div>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -139,6 +155,47 @@ const beforeUpload = (file: UploadProps['fileList'][number]) => {
     message.error('Image must smaller than 2MB!')
   }
   return isJpgOrPng && isLt2M
+}
+
+const record = ref<string>('')
+
+const pushRecord = async () => {
+  if (record.value === '') {
+    message.warning('请输入备案信息')
+    return
+  }
+  try {
+    const response = await axios.post<IBaseResponse>('/admin/configs/website/records', {
+      record: record.value
+    })
+    if (response.data.code === 200) {
+      message.success('添加成功')
+      await getWebsite()
+      record.value = ''
+    } else {
+      message.error(response.data.message)
+    }
+  } catch (error) {
+    console.log(error)
+    message.error('添加失败')
+  }
+}
+
+const pullRecord = async (item: string) => {
+  try {
+    const response = await axios.delete<IBaseResponse>(
+      `/admin/configs/website/records?record=${item}`
+    )
+    if (response.data.code === 200) {
+      message.success('删除成功')
+      await getWebsite()
+    } else {
+      message.error(response.data.message)
+    }
+  } catch (error) {
+    console.log(error)
+    message.error('删除失败')
+  }
 }
 </script>
 

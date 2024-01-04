@@ -12,10 +12,7 @@
 
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'cover_img'">
-        <a-image
-          :width="200"
-          :src="record.cover_img"
-        />
+        <a-image :width="200" :src="record.cover_img" />
       </template>
       <template v-else-if="column.key === 'categories'">
         <span>

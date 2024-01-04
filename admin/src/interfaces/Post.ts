@@ -19,8 +19,6 @@ export interface Tag4Post {
   name: string
 }
 
-
-
 export type PageRequest = {
   pageNo: number
   pageSize: number
@@ -42,7 +40,7 @@ export interface PostRequest {
   tempCategories: string[]
   tags: Tag4Post[]
   tempTags: string[]
-  status: number;
+  status: number
   sticky_weight: number
   meta_description: string
   meta_keywords: string
