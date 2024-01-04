@@ -62,7 +62,7 @@
             name="cover_img"
             label="封面"
             :rules="[{ required: true, message: '请选择封面' }]"
-          >
+          ><a-input v-model:value="postReq.cover_img" placeholder="请输入封面路径"/>
             <a-upload
               v-model:file-list="fileList"
               name="file"
@@ -134,7 +134,7 @@
       </a-modal>
     </div>
     <div>
-      <v-md-editor v-model="postReq.content" height="800px"></v-md-editor>
+      <v-md-editor v-model="postReq.content" height="800px" :disabled-menus="[]" @upload-image="handleUploadImage"></v-md-editor>
     </div>
   </div>
 </template>
@@ -147,6 +147,7 @@ import axios from '@/http/axios'
 import type { IBaseResponse, IListData, IResponse } from '@/interfaces/Common'
 import type { SelectCategory } from '@/interfaces/Category'
 import type { SelectTag } from '@/interfaces/Tag'
+import type { File } from '@/interfaces/File'
 
 const imageUrl = ref<string>('')
 
@@ -303,5 +304,32 @@ const beforeUpload = (file: UploadProps['fileList'][number]) => {
     message.error('Image must smaller than 2MB!')
   }
   return isJpgOrPng && isLt2M
+}
+
+// md 图片上传
+const  handleUploadImage = async (event, insertImage, files) => {
+  console.log(files)
+  try {
+    const formData = new FormData()
+    formData.append('file', files[0])
+
+    const response = await axios.post<IResponse<File>>('/admin/files/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    if (response.data.code !== 200) {
+      message.error(response.data.message)
+      return
+    }
+    insertImage({
+      url: response.data.data.url,
+      desc: response.data.data.file_name,
+      // width: 'auto',
+      // height: 'auto',
+    })
+  } catch (error) {
+    console.log(error)
+  }
 }
 </script>
