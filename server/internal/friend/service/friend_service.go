@@ -16,15 +16,24 @@ package service
 
 import (
 	"context"
+	"net/http"
+
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/chenmingyong0423/fnote/server/internal/friend/repository"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/pkg/errors"
 )
 
 type IFriendService interface {
 	GetFriends(ctx context.Context) ([]domain.Friend, error)
 	ApplyForFriend(ctx context.Context, friend domain.Friend) error
+	AdminGetFriends(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Friend, int64, error)
+	AdminUpdateFriend(ctx context.Context, friend domain.Friend) error
+	AdminDeleteFriend(ctx context.Context, id string) error
+	AdminAcceptFriend(ctx context.Context, id string) error
 }
 
 var _ IFriendService = (*FriendService)(nil)
@@ -37,6 +46,51 @@ func NewFriendService(repo repository.IFriendRepository) *FriendService {
 
 type FriendService struct {
 	repo repository.IFriendRepository
+}
+
+func (s *FriendService) AdminAcceptFriend(ctx context.Context, id string) error {
+	friend, err := s.repo.FindById(ctx, id)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return api.NewErrorResponseBody(http.StatusNotFound, "friend not found")
+		}
+		return err
+	}
+	if friend.Accepted {
+		return api.NewErrorResponseBody(http.StatusBadRequest, "friend already accepted")
+	}
+	err = s.repo.UpdateFriendAccept(ctx, id)
+	if err != nil {
+		return err
+	}
+	// 邮件通知 todo
+	return nil
+}
+
+func (s *FriendService) AdminDeleteFriend(ctx context.Context, id string) error {
+	_, err := s.repo.FindById(ctx, id)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return api.NewErrorResponseBody(http.StatusNotFound, "friend not found")
+		}
+		return errors.WithMessage(err, "s.repo.FindById failed")
+	}
+	return s.repo.DeleteById(ctx, id)
+}
+
+func (s *FriendService) AdminUpdateFriend(ctx context.Context, friend domain.Friend) error {
+	_, err := s.repo.FindById(ctx, friend.Id)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return api.NewErrorResponseBody(http.StatusNotFound, "friend not found")
+		}
+		return errors.WithMessage(err, "s.repo.FindById failed")
+	}
+	return s.repo.UpdateById(ctx, friend)
+}
+
+func (s *FriendService) AdminGetFriends(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Friend, int64, error) {
+	return s.repo.FindAll(ctx, pageDTO)
 }
 
 func (s *FriendService) ApplyForFriend(ctx context.Context, friend domain.Friend) error {

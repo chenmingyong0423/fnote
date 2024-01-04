@@ -23,13 +23,7 @@ type Friend struct {
 	Email       string
 	Show        bool
 	Priority    int
+	Accepted    bool
 	Ip          string
 	CreateTime  int64
-}
-
-type FriendVO struct {
-	Name        string `json:"name"`
-	Url         string `json:"url"`
-	Logo        string `json:"logo"`
-	Description string `json:"description"`
 }

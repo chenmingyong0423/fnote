@@ -16,7 +16,16 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/chenmingyong0423/fnote/server/internal/friend/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
@@ -27,6 +36,11 @@ type IFriendRepository interface {
 	FindDisplaying(ctx context.Context) ([]domain.Friend, error)
 	Add(ctx context.Context, friend domain.Friend) error
 	FindByUrl(ctx context.Context, url string) (domain.Friend, error)
+	FindAll(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Friend, int64, error)
+	UpdateById(ctx context.Context, friend domain.Friend) error
+	DeleteById(ctx context.Context, id string) error
+	FindById(ctx context.Context, id string) (domain.Friend, error)
+	UpdateFriendAccept(ctx context.Context, id string) error
 }
 
 var _ IFriendRepository = (*FriendRepository)(nil)
@@ -39,6 +53,65 @@ func NewFriendRepository(dao dao.IFriendDao) *FriendRepository {
 
 type FriendRepository struct {
 	dao dao.IFriendDao
+}
+
+func (r *FriendRepository) UpdateFriendAccept(ctx context.Context, id string) error {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	return r.dao.UpdateAccept(ctx, objectID)
+}
+
+func (r *FriendRepository) FindById(ctx context.Context, id string) (domain.Friend, error) {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return domain.Friend{}, err
+	}
+	friend, err := r.dao.FindById(ctx, objectID)
+	if err != nil {
+		return domain.Friend{}, err
+	}
+	return r.toDomainFriend(friend), nil
+}
+
+func (r *FriendRepository) DeleteById(ctx context.Context, id string) error {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	return r.dao.DeleteById(ctx, objectID)
+}
+
+func (r *FriendRepository) UpdateById(ctx context.Context, friend domain.Friend) error {
+	id, err := primitive.ObjectIDFromHex(friend.Id)
+	if err != nil {
+		return err
+	}
+	return r.dao.UpdateById(ctx, id, dao.Friend{
+		Name:        friend.Name,
+		Logo:        friend.Logo,
+		Description: friend.Description,
+		Show:        friend.Show,
+	})
+}
+
+func (r *FriendRepository) FindAll(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Friend, int64, error) {
+	condBuilder := query.BsonBuilder()
+	if pageDTO.Keyword != "" {
+		condBuilder.RegexOptions("name", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageDTO.Keyword)), "i")
+	}
+	cond := condBuilder.Build()
+
+	findOptions := options.Find()
+	findOptions.SetSkip((pageDTO.PageNo - 1) * pageDTO.PageSize).SetLimit(pageDTO.PageSize)
+	if pageDTO.Field != "" && pageDTO.Order != "" {
+		findOptions.SetSort(bsonx.M(pageDTO.Field, pageDTO.OrderConvertToInt()))
+	} else {
+		findOptions.SetSort(bsonx.M("create_time", -1))
+	}
+	friends, total, err := r.dao.QuerySkipAndSetLimit(ctx, cond, findOptions)
+	return r.toDomainFriends(friends), total, err
 }
 
 func (r *FriendRepository) FindByUrl(ctx context.Context, url string) (friend domain.Friend, err error) {
@@ -58,9 +131,9 @@ func (r *FriendRepository) Add(ctx context.Context, friend domain.Friend) error 
 		Logo:        friend.Logo,
 		Description: friend.Description,
 		Email:       friend.Email,
-		Show:        false,
+		Show:        friend.Show,
 		Ip:          friend.Ip,
-		Accepted:    false,
+		Accepted:    friend.Accepted,
 		CreateTime:  unix,
 		UpdateTime:  unix,
 	})
@@ -94,6 +167,10 @@ func (r *FriendRepository) toDomainFriend(friend *dao.Friend) domain.Friend {
 		Logo:        friend.Logo,
 		Description: friend.Description,
 		Show:        friend.Show,
+		Accepted:    friend.Accepted,
 		Priority:    friend.Priority,
+		Email:       friend.Email,
+		Ip:          friend.Ip,
+		CreateTime:  friend.CreateTime,
 	}
 }
