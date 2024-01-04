@@ -52,3 +52,13 @@ export interface NoticeConfig {
 export interface FrontPostCountConfig {
   count: number
 }
+
+export interface PayConfig {
+  name: string
+  image: string
+}
+
+export interface PayConfigRequest {
+  name: string
+  image: string
+}

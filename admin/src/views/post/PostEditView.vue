@@ -177,8 +177,7 @@ const postReq = reactive<PostRequest>({
   meta_description: '',
   meta_keywords: '',
   is_comment_allowed: true,
-  status: 0,
-  reference_ids: []
+  status: 0
 })
 
 const categories = ref<SelectProps['options']>([])
