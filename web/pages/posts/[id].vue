@@ -63,7 +63,7 @@
               class="pay slide-right-4-reword-animation dark_bg_full_black h-[320px] hidden absolute bg-gray-1 b-rounded-4 left-117% top--28% group-hover:block custom_shadow_all p-4">
             <div
                 class="flex align-center items-center justify-center center gap-x-5">
-              <img :src="'https://chenmingyong.cn/'+code.image" width="300" height="300" :alt="code.name" v-for="(code, index) in payList"
+              <img :src="code.image" width="300" height="300" :alt="code.name" v-for="(code, index) in payList"
                    :key="index">
             </div>
           </div>
