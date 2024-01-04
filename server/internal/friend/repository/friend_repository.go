@@ -108,7 +108,7 @@ func (r *FriendRepository) FindAll(ctx context.Context, pageDTO dto.PageDTO) ([]
 	if pageDTO.Field != "" && pageDTO.Order != "" {
 		findOptions.SetSort(bsonx.M(pageDTO.Field, pageDTO.OrderConvertToInt()))
 	} else {
-		findOptions.SetSort(bsonx.M("create_time", -1))
+		findOptions.SetSort(bsonx.M("create_time", 1))
 	}
 	friends, total, err := r.dao.QuerySkipAndSetLimit(ctx, cond, findOptions)
 	return r.toDomainFriends(friends), total, err
