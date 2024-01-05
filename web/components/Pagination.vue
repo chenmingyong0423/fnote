@@ -15,7 +15,7 @@
       </NuxtLink>
       <NuxtLink
         class="w-[32px] h-[32px] cursor-pointer hover:bg-gray-1 flex-center"
-        v-if="maxPageNumbers - currentPage <= 1"
+        v-if="maxPageNumbers - currentPage <= 1 && !pagesToShow.includes(1)"
         :to="fullUrl(1)"
       >
         1
