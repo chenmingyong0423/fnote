@@ -5,6 +5,7 @@
       v-for="(item, index) in props.posts"
       :key="index"
       :to="'/posts/' + item.sug"
+      :title="item.title"
     >
       <div class="w-1/3 overflow-hidden relative">
         <img
@@ -30,7 +31,7 @@
         </div>
       </div>
       <div class="w-2/3 flex flex-col">
-        <div class="mb-2 text-10 h-50 truncate">
+        <div class="mb-2 text-6 h-50">
           {{ item.title }}
         </div>
         <div class="flex-grow h-100 line-clamp-4">
