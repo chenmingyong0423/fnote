@@ -1,10 +1,11 @@
 <template>
   <div class="flex flex-wrap justify-between">
     <NuxtLink
-      class="item group flex flex-col items-center box-border p-5 bg-#fff b-rounded-4 w-45% lt-md:w-100% h-100 cursor-pointer duration-100 custom_shadow dark:text-dtc dark_bg_gray mb-5"
+      class="item group flex flex-col items-center box-border p-5 bg-#fff b-rounded-4 w-49% lt-md:w-100% h-100 cursor-pointer duration-100 custom_shadow dark:text-dtc dark_bg_gray mb-5"
       v-for="(item, index) in props.posts"
       :key="index"
       :to="'/posts/' + item.sug"
+      :title="item.title"
     >
       <div class="h-2/3 overflow-hidden relative w-full">
         <img
@@ -35,7 +36,7 @@
         </div>
       </div>
       <div class="h-1/3 overflow-hidden relative w-full flex flex-col">
-        <div class="mb-2 text-10 h-15 truncate">
+        <div class="mb-2 text-6 h-15">
           {{ item.title }}
         </div>
         <div class="flex-grow">
