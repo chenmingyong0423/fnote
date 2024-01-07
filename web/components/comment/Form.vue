@@ -153,6 +153,7 @@ const submit = () => {
     return;
   }
   if (
+    commentReq.value.website !== "" &&
     !commentReq.value.website?.startsWith(`http://`) &&
     !commentReq.value.website?.startsWith(`https://`)
   ) {
