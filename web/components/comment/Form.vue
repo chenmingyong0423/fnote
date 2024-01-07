@@ -179,6 +179,7 @@ const clearReq = () => {
     website: "",
     content: "",
   };
+  isPreview.value = false
 };
 
 defineExpose({

@@ -141,6 +141,7 @@ const commentReplyForm = ref();
 const clearReplyReq = () => {
   if (commentReplyForm.value) {
     commentReplyForm.value[0].clearReq();
+    activeCommentIndex.value = ""
   }
 };
 

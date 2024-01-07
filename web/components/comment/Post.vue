@@ -129,7 +129,6 @@ const props = defineProps({
 const commentForm = ref();
 
 const clearReq = () => {
-  console.log(commentForm.value);
   if (commentForm.value) {
     commentForm.value.clearReq();
   }
@@ -139,6 +138,7 @@ const commentReplyForm = ref();
 const clearReplyReq = () => {
   if (commentReplyForm.value) {
     commentReplyForm.value[0].clearReq();
+    activeCommentIndex.value = "";
   }
 };
 
