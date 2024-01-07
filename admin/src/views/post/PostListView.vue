@@ -11,6 +11,9 @@
     </template>
 
     <template #bodyCell="{ column, record }">
+      <template v-if="column.key === 'id'">
+        {{`https://chenmingyong.cn/posts/${record.id}`}}
+      </template>
       <template v-if="column.key === 'cover_img'">
         <a-image :width="200" :src="record.cover_img" />
       </template>
@@ -56,6 +59,7 @@ import type { IBaseResponse, IPageData, IResponse } from '@/interfaces/Common'
 import router from '@/router'
 import dayjs from 'dayjs'
 import { message } from 'ant-design-vue'
+import { template } from 'lodash-es'
 
 const columns = [
   {
@@ -67,6 +71,11 @@ const columns = [
     title: '标题',
     dataIndex: 'title',
     key: 'title'
+  },
+  {
+    title: 'url',
+    dataIndex: 'id',
+    key: 'id'
   },
   {
     title: '摘要',
