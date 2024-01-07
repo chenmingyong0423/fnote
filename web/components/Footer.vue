@@ -7,6 +7,7 @@
       <a
         class="decoration-none text-#000 font-bold hover:underline dark_text_white"
         href="https://github.com/chenmingyong0423/fnote"
+        target="_blank"
         >Fnote</a
       >
     </div>
