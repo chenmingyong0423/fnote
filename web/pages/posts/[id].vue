@@ -57,11 +57,7 @@
                   :class="{ block: qrcodeShow, 'hidden ': !qrcodeShow }"
                 >
                   <div class="flex flex-col items-center align-center gap-y-3">
-                    <QrcodeVue
-                      :value="link"
-                      :size="150"
-                      level="M"
-                    />
+                    <QrcodeVue :value="link" :size="150" level="M" />
                     <p class="text-black text-4 dark:text-white">微信扫一扫</p>
                   </div>
                 </div>
