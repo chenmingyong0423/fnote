@@ -33,7 +33,6 @@ export interface IWebsite {
   category_count: number;
   view_count: number;
   live_time: number;
-  domain: string;
   records: string[];
 }
 

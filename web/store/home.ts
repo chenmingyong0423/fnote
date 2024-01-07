@@ -21,7 +21,6 @@ export const useHomeStore = defineStore("home", {
       category_count: 0,
       view_count: 0,
       live_time: 0,
-      domain: "",
       records: [],
     } as IWebsite,
     owner_info: {
