@@ -181,7 +181,7 @@ db.getCollection("configs").insertOne({
 db.getCollection("friends").drop();
 db.createCollection("friends");
 db.friends.createIndex({ status: 1, create_time: 1 })
-db.friends.createIndex({ url: 1, status: 1 })
+db.friends.createIndex({ url: 1})
 
 // ----------------------------
 // Collection structure for message_template
