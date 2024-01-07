@@ -128,7 +128,7 @@ func (d *PostDao) AddPost(ctx context.Context, post *Post) error {
 
 func (d *PostDao) IncreaseFieldById(ctx context.Context, id string, field string) error {
 	// bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: field, Value: 1}}}}
-	result, err := d.coll.Updater().Filter(bsonx.Id(id)).Updates(update.Inc(bsonx.M(field, 1))).UpdateOne(ctx)
+	result, err := d.coll.Updater().Filter(bsonx.Id(id)).Updates(update.Inc(field, 1)).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to increase the %s of post, id=%s", field, id)
 	}
@@ -141,7 +141,7 @@ func (d *PostDao) IncreaseFieldById(ctx context.Context, id string, field string
 func (d *PostDao) DeleteLike(ctx context.Context, id string, ip string) error {
 	result, err := d.coll.Updater().
 		Filter(query.BsonBuilder().Id(id).Add("status", PostStatusPunished).Build()).
-		Updates(update.BsonBuilder().Pull(bsonx.M("likes", ip)).Inc(bsonx.M("like_count", -1)).Build()).
+		Updates(update.BsonBuilder().Pull("likes", ip).Inc("like_count", -1).Build()).
 		UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to delete a like, id=%s, ip=%s", id, ip)
@@ -155,7 +155,7 @@ func (d *PostDao) DeleteLike(ctx context.Context, id string, ip string) error {
 func (d *PostDao) AddLike(ctx context.Context, id string, ip string) error {
 	result, err := d.coll.Updater().
 		Filter(query.BsonBuilder().Id(id).Add("status", PostStatusPunished).Build()).
-		Updates(update.BsonBuilder().Push(bsonx.M("likes", ip)).Inc(bsonx.M("like_count", 1)).Build()).
+		Updates(update.BsonBuilder().Push("likes", ip).Inc("like_count", 1).Build()).
 		UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to add a like, id=%s, ip=%s", id, ip)
@@ -188,7 +188,7 @@ func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *o
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "fails to find the count of documents from post, con=%v", con)
 	}
-	posts, err := d.coll.Finder().Filter(con).Options(findOptions).Find(ctx)
+	posts, err := d.coll.Finder().Filter(con).Find(ctx, findOptions)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "fails to find the documents from post, con=%v, findOptions=%v", con, findOptions)
 	}
@@ -197,7 +197,7 @@ func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *o
 
 func (d *PostDao) GetFrontPosts(ctx context.Context, count int64) ([]*Post, error) {
 	findOptions := options.Find().SetSort(bsonx.D(bsonx.E("sticky_weight", -1), bsonx.E("create_time", -1))).SetLimit(count)
-	posts, err := d.coll.Finder().Filter(bsonx.M("status", PostStatusPunished)).Options(findOptions).Find(ctx)
+	posts, err := d.coll.Finder().Filter(bsonx.M("status", PostStatusPunished)).Find(ctx, findOptions)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from post, findOptions=%v", findOptions)
 	}

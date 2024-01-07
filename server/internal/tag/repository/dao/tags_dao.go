@@ -99,7 +99,7 @@ func (d *TagDao) GetById(ctx context.Context, id primitive.ObjectID) (*Tags, err
 }
 
 func (d *TagDao) ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().SetSimple("enabled", enabled).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("enabled", enabled).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (d *TagDao) QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOpti
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "Count tags failed, cond: %+v", cond)
 	}
-	categories, err := finder.Filter(cond).Options(findOptions).Find(ctx)
+	categories, err := finder.Filter(cond).Find(ctx, findOptions)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "Query tags failed, cond: %+v, findOptions: %+v", cond, findOptions)
 	}

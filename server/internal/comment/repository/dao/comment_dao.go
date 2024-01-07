@@ -129,27 +129,18 @@ func (d *CommentDao) FindCommentsByPostIdAndCmtStatus(ctx context.Context, postI
 func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error) {
 	pipeline := aggregation.StageBsonBuilder().
 		Match(bsonx.M("status", CommentStatusApproved)).
-		Project(bsonx.M("combined", aggregation.BsonBuilder().ConcatArrays(
-			bsonx.A(
-				bsonx.D(bsonx.E("post_info", "$post_info"), bsonx.E("name", "$user_info.name"), bsonx.E("content", "$content"), bsonx.E("create_time", "$create_time")),
-			),
-			aggregation.Map(
-				aggregation.Filter(
-					"$replies",
-					aggregation.BsonBuilder().Eq("$$replyItem.status", CommentStatusApproved).Build(),
-					&types.FilterOptions{
-						As: "replyItem",
-					},
-				),
+		Project(aggregation.ConcatArrays("combined", []any{
+			bsonx.A(bsonx.NewD().Add("post_info", "$post_info").Add("name", "$user_info.name").Add("content", "$content").Add("create_time", "$create_time")),
+			aggregation.MapWithoutKey(
+				aggregation.FilterWithoutKey("$replies", aggregation.EqWithoutKey("$$replyItem.status", CommentStatusApproved), &types.FilterOptions{As: "replyItem"}),
 				"reply",
-				bsonx.D(bsonx.E("post_info", "$post_info"), bsonx.E("name", "$$reply.user_info.name"), bsonx.E("content", "$$reply.content"), bsonx.E("create_time", "$$reply.create_time")),
+				bsonx.NewD().Add("post_info", "$post_info").Add("name", "$$reply.user_info.name").Add("content", "$$reply.content").Add("create_time", "$$reply.create_time"),
 			),
-		).Build())).
+		})).
 		Unwind("$combined", nil).
 		ReplaceWith("$combined").
 		Sort(bsonx.M("create_time", -1)).
-		Limit(int64(cnt)).
-		Build()
+		Limit(int64(cnt)).Build()
 	//pipeline := mongo.Pipeline{
 	//	{primitive.E{Key: "$match", Value: bson.M{"status": CommentStatusApproved}}},
 	//	{primitive.E{Key: "$project", Value: bson.M{
@@ -202,7 +193,7 @@ func (d *CommentDao) AddCommentReply(ctx context.Context, cmtId string, commentR
 	// 构建查询条件
 	filter := bsonx.Id(cmtId)
 	// 构建更新操作
-	updates := update.Push(bsonx.M("replies", commentReply))
+	updates := update.Push("replies", commentReply)
 
 	result, err := d.coll.Updater().Filter(filter).Updates(updates).UpdateOne(ctx)
 	if err != nil {
