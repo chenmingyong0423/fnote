@@ -180,15 +180,8 @@ db.getCollection("configs").insertOne({
 // ----------------------------
 db.getCollection("friends").drop();
 db.createCollection("friends");
-db.getCollection("friends").createIndex({
-    url: NumberInt("1")
-}, {
-    name: "url_1",
-    unique: true
-});
-// 创建 create_time 降序索引
-db.friends.createIndex({ "create_time": -1 });
-db.friends.createIndex({ "status": -1 });
+db.friends.createIndex({ status: 1, create_time: 1 })
+db.friends.createIndex({ url: 1, status: 1 })
 
 // ----------------------------
 // Collection structure for message_template
