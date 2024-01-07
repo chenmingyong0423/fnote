@@ -61,7 +61,7 @@ type CountStatsDao struct {
 
 func (d *CountStatsDao) DecreaseByReferenceIds(ctx context.Context, ids []string) error {
 	manyResult, err := d.coll.Updater().Filter(query.In[string]("reference_id", ids...)).Updates(
-		update.Inc(bsonx.M("count", -1)),
+		update.Inc("count", -1),
 	).UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "decrease count stats error, ids=%v", ids)
@@ -74,7 +74,7 @@ func (d *CountStatsDao) DecreaseByReferenceIds(ctx context.Context, ids []string
 
 func (d *CountStatsDao) IncreaseByReferenceIds(ctx context.Context, ids []string) error {
 	manyResult, err := d.coll.Updater().Filter(query.In[string]("reference_id", ids...)).Updates(
-		update.Inc(bsonx.M("count", 1)),
+		update.Inc("count", 1),
 	).UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "increase count stats error, ids=%v", ids)

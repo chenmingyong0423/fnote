@@ -76,7 +76,7 @@ type FriendDao struct {
 }
 
 func (d *FriendDao) UpdateAccept(ctx context.Context, objectID primitive.ObjectID) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.BsonBuilder().SetSimple("accepted", true).SetSimple("show", true).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.BsonBuilder().Set("accepted", true).Set("show", true).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the document from friends, id=%s", objectID.Hex())
 	}
@@ -107,7 +107,7 @@ func (d *FriendDao) DeleteById(ctx context.Context, objectID primitive.ObjectID)
 
 func (d *FriendDao) UpdateById(ctx context.Context, objectID primitive.ObjectID, friend Friend) error {
 	updateOne, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(
-		update.BsonBuilder().SetSimple("name", friend.Name).SetSimple("logo", friend.Logo).SetSimple("description", friend.Description).SetSimple("show", friend.Show).SetSimple("update_time", time.Now().Unix()).Build(),
+		update.BsonBuilder().Set("name", friend.Name).Set("logo", friend.Logo).Set("description", friend.Description).Set("show", friend.Show).Set("update_time", time.Now().Unix()).Build(),
 	).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the document from friends, id=%s, friend=%v", objectID.Hex(), friend)
@@ -123,7 +123,7 @@ func (d *FriendDao) QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findO
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "fails to count the documents from friends, cond=%v", cond)
 	}
-	friends, err := d.coll.Finder().Filter(cond).Options(findOptions).Find(ctx)
+	friends, err := d.coll.Finder().Filter(cond).Find(ctx, findOptions)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "fails to find the documents from friends, cond=%v, findOptions=%v", cond, findOptions)
 	}
@@ -150,7 +150,7 @@ func (d *FriendDao) Add(ctx context.Context, friend Friend) error {
 }
 
 func (d *FriendDao) FindDisplaying(ctx context.Context) ([]*Friend, error) {
-	friends, err := d.coll.Finder().Filter(query.BsonBuilder().Eq("show", true).Eq("accepted", true).Build()).Options(options.Find().SetSort(bsonx.M("create_time", 1))).Find(ctx)
+	friends, err := d.coll.Finder().Filter(query.BsonBuilder().Eq("show", true).Eq("accepted", true).Build()).Find(ctx, options.Find().SetSort(bsonx.M("create_time", 1)))
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from friends")
 	}

@@ -72,7 +72,7 @@ func (d *WebsiteConfigDao) UpdateByConditionAndUpdates(ctx context.Context, cond
 
 func (d *WebsiteConfigDao) Decrease(ctx context.Context, field string) error {
 	field = fmt.Sprintf("props.%s", field)
-	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", "website")).Updates(update.Inc(bsonx.M(field, -1))).UpdateOne(ctx)
+	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", "website")).Updates(update.Inc(field, -1)).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to increase %s", field)
 	}
@@ -92,7 +92,7 @@ func (d *WebsiteConfigDao) GetByTypes(ctx context.Context, types ...string) ([]*
 
 func (d *WebsiteConfigDao) Increase(ctx context.Context, field string) error {
 	field = fmt.Sprintf("props.%s", field)
-	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", "website")).Updates(update.Inc(bsonx.M(field, 1))).UpdateOne(ctx)
+	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", "website")).Updates(update.Inc(field, 1)).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to increase %s", field)
 	}

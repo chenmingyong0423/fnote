@@ -100,7 +100,7 @@ func (d *CategoryDao) GetById(ctx context.Context, id primitive.ObjectID) (*Cate
 }
 
 func (d *CategoryDao) ModifyCategoryNavigation(ctx context.Context, id primitive.ObjectID, showInNav bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().SetSimple("show_in_nav", showInNav).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("show_in_nav", showInNav).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "Modify category navigation failed, id=%s, showInNav=%v", id, showInNav)
 	}
@@ -130,7 +130,7 @@ func (d *CategoryDao) DeleteById(ctx context.Context, id primitive.ObjectID) err
 }
 
 func (d *CategoryDao) ModifyCategory(ctx context.Context, id primitive.ObjectID, description string) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().SetSimple("description", description).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("description", description).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func (d *CategoryDao) ModifyCategory(ctx context.Context, id primitive.ObjectID,
 }
 
 func (d *CategoryDao) ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().SetSimple("enabled", enabled).SetSimple("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("enabled", enabled).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}
@@ -165,7 +165,7 @@ func (d *CategoryDao) QuerySkipAndSetLimit(ctx context.Context, cond bson.D, fin
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "Count categories failed")
 	}
-	categories, err := finder.Filter(cond).Options(findOptions).Find(ctx)
+	categories, err := finder.Filter(cond).Find(ctx, findOptions)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "Find categories failed")
 	}
@@ -181,7 +181,7 @@ func (d *CategoryDao) GetByRoute(ctx context.Context, route string) (*Category, 
 }
 
 func (d *CategoryDao) GetAll(ctx context.Context) ([]*Category, error) {
-	result, err := d.coll.Finder().Filter(bsonx.M("enabled", true)).Options(options.Find().SetSort(bsonx.M("sort", 1))).Find(ctx)
+	result, err := d.coll.Finder().Filter(bsonx.M("enabled", true)).Find(ctx, options.Find().SetSort(bsonx.M("sort", 1)))
 	if err != nil {
 		return nil, errors.Wrap(err, "Find all categories failed failed")
 	}
