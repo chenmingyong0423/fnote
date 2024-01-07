@@ -1,5 +1,4 @@
 import httpRequest from "./http";
-import * as domain from "domain";
 
 export interface IPost {
   sug: string;

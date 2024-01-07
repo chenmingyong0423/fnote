@@ -58,7 +58,7 @@
                 >
                   <div class="flex flex-col items-center align-center gap-y-3">
                     <QrcodeVue
-                      :value="`https://${domain}${path}`"
+                      :value="link"
                       :size="150"
                       level="M"
                     />
@@ -69,13 +69,13 @@
               <hr class="w-50% border-gray-1 b-rounded-4" />
               <a
                 class="i-bi:tencent-qq w-8 h-8 text-black dark:text-orange"
-                :href="`https://connect.qq.com/widget/shareqq/index.html?url=${domain}${path}&title=${post?.title}&pics=${post?.cover_img}`"
+                :href="`https://connect.qq.com/widget/shareqq/index.html?url=${link}&title=${post?.title}&pics=${post?.cover_img}`"
                 target="_blank"
               ></a>
               <hr class="w-50% border-gray-1 b-rounded-4" />
               <a
                 class="i-bi:sina-weibo w-8 h-8 text-red"
-                :href="`https://service.weibo.com/share/share.php?sharesource=weibo&title=${post?.title}，原文链接：${domain}${path}&pic=${post?.cover_img}`"
+                :href="`https://service.weibo.com/share/share.php?sharesource=weibo&title=${post?.title}，原文链接：${link}&pic=${post?.cover_img}`"
                 target="_blank"
               ></a>
               <hr class="w-50% border-gray-1 b-rounded-4" />
@@ -225,7 +225,6 @@ import VMdPreview from "@kangc/v-md-editor/lib/preview";
 const homeStore = useHomeStore();
 const isBlackMode = computed(() => homeStore.isBlackMode);
 
-const domain = homeStore.website_info.domain;
 const route = useRoute();
 const path: string = route.path;
 const id: string = String(route.params.id);
@@ -385,7 +384,7 @@ import type { IPayInfo } from "~/api/config";
 const toast = useAlertStore();
 
 const copyLink = async () => {
-  await navigator.clipboard.writeText(`https://${domain}${path}`);
+  await navigator.clipboard.writeText(link.value);
   toast.showToast("复制成功！", 2000);
 };
 
