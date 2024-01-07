@@ -92,7 +92,7 @@ func (r *FriendRepository) UpdateById(ctx context.Context, friend domain.Friend)
 		Name:        friend.Name,
 		Logo:        friend.Logo,
 		Description: friend.Description,
-		Show:        friend.Show,
+		Status:      dao.FriendStatus(friend.Status),
 	})
 }
 
@@ -131,9 +131,8 @@ func (r *FriendRepository) Add(ctx context.Context, friend domain.Friend) error 
 		Logo:        friend.Logo,
 		Description: friend.Description,
 		Email:       friend.Email,
-		Show:        friend.Show,
 		Ip:          friend.Ip,
-		Accepted:    friend.Accepted,
+		Status:      dao.FriendStatusPending,
 		CreateTime:  unix,
 		UpdateTime:  unix,
 	})
@@ -166,8 +165,7 @@ func (r *FriendRepository) toDomainFriend(friend *dao.Friend) domain.Friend {
 		Url:         friend.Url,
 		Logo:        friend.Logo,
 		Description: friend.Description,
-		Show:        friend.Show,
-		Accepted:    friend.Accepted,
+		Status:      int(friend.Status),
 		Priority:    friend.Priority,
 		Email:       friend.Email,
 		Ip:          friend.Ip,
