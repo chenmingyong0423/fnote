@@ -70,7 +70,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo ap
 	if ip == "" {
 		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
-	if !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
+	if req.Website != "" && !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
 		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
 	}
 	switchConfig, err := h.cfgService.GetCommentConfig(ctx)
@@ -134,7 +134,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (vo
 	if ip == "" {
 		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
-	if !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
+	if req.Website != "" && !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
 		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
 	}
 	switchConfig, err := h.cfgService.GetCommentConfig(ctx)
