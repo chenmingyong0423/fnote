@@ -130,13 +130,13 @@ func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]
 	pipeline := aggregation.StageBsonBuilder().
 		Match(bsonx.M("status", CommentStatusApproved)).
 		Project(aggregation.ConcatArrays("combined", []any{
-			bsonx.A(bsonx.NewD().Add("post_info", "$post_info").Add("name", "$user_info.name").Add("content", "$content").Add("create_time", "$create_time")),
+			bsonx.A(bsonx.NewD().Add("post_info", "$post_info").Add("name", "$user_info.name").Add("content", "$content").Add("create_time", "$create_time").Build()),
 			aggregation.MapWithoutKey(
 				aggregation.FilterWithoutKey("$replies", aggregation.EqWithoutKey("$$replyItem.status", CommentStatusApproved), &types.FilterOptions{As: "replyItem"}),
 				"reply",
-				bsonx.NewD().Add("post_info", "$post_info").Add("name", "$$reply.user_info.name").Add("content", "$$reply.content").Add("create_time", "$$reply.create_time"),
+				bsonx.NewD().Add("post_info", "$post_info").Add("name", "$$reply.user_info.name").Add("content", "$$reply.content").Add("create_time", "$$reply.create_time").Build(),
 			),
-		})).
+		}...)).
 		Unwind("$combined", nil).
 		ReplaceWith("$combined").
 		Sort(bsonx.M("create_time", -1)).

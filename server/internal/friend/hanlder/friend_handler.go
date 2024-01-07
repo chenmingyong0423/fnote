@@ -21,8 +21,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/chenmingyong0423/gkit"
-
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
@@ -118,8 +116,6 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any
 		Logo:        req.Logo,
 		Description: req.Description,
 		Email:       req.Email,
-		Show:        false,
-		Accepted:    false,
 		Ip:          ctx.ClientIP(),
 	})
 	if err != nil {
@@ -168,8 +164,7 @@ func (h *FriendHandler) friendToAdminVO(friends []domain.Friend) []vo.AdminFrien
 			Url:         friend.Url,
 			Logo:        friend.Logo,
 			Description: friend.Description,
-			Show:        friend.Show,
-			Accepted:    friend.Accepted,
+			Status:      friend.Status,
 			CreateTime:  friend.CreateTime,
 		})
 	}
@@ -182,7 +177,7 @@ func (h *FriendHandler) AdminUpdateFriend(ctx *gin.Context, req request.FriendRe
 		Name:        req.Name,
 		Logo:        req.Logo,
 		Description: req.Description,
-		Show:        gkit.GetValueOrDefault(req.Show),
+		Status:      req.Status,
 	})
 }
 

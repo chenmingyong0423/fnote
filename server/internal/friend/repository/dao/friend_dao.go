@@ -43,14 +43,25 @@ type Friend struct {
 	Logo        string             `bson:"logo"`
 	Description string             `bson:"description"`
 	Email       string             `bson:"email"`
-	Show        bool               `bson:"show"`
 	Priority    int                `bson:"priority"`
 	Ip          string             `bson:"ip"`
-	// 表示是否已经通过审核
-	Accepted   bool  `bson:"accepted"`
-	CreateTime int64 `bson:"create_time"`
-	UpdateTime int64 `bson:"update_time"`
+	Status      FriendStatus       `bson:"status"`
+	CreateTime  int64              `bson:"create_time"`
+	UpdateTime  int64              `bson:"update_time"`
 }
+
+type FriendStatus int
+
+const (
+	// FriendStatusPending 未审核
+	FriendStatusPending FriendStatus = iota
+	// FriendStatusApproved 审核通过
+	FriendStatusApproved
+	// FriendStatusHidden 隐藏
+	FriendStatusHidden
+	// FriendStatusRejected 审核不通过
+	FriendStatusRejected
+)
 
 type IFriendDao interface {
 	FindDisplaying(ctx context.Context) ([]*Friend, error)
@@ -76,7 +87,7 @@ type FriendDao struct {
 }
 
 func (d *FriendDao) UpdateAccept(ctx context.Context, objectID primitive.ObjectID) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.BsonBuilder().Set("accepted", true).Set("show", true).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.BsonBuilder().Id(objectID).Ne("status", FriendStatusApproved)).Updates(update.BsonBuilder().Set("accepted", true).Set("show", true).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the document from friends, id=%s", objectID.Hex())
 	}
@@ -107,7 +118,7 @@ func (d *FriendDao) DeleteById(ctx context.Context, objectID primitive.ObjectID)
 
 func (d *FriendDao) UpdateById(ctx context.Context, objectID primitive.ObjectID, friend Friend) error {
 	updateOne, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(
-		update.BsonBuilder().Set("name", friend.Name).Set("logo", friend.Logo).Set("description", friend.Description).Set("show", friend.Show).Set("update_time", time.Now().Unix()).Build(),
+		update.BsonBuilder().Set("name", friend.Name).Set("logo", friend.Logo).Set("description", friend.Description).Set("status", friend.Status).Set("update_time", time.Now().Unix()).Build(),
 	).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the document from friends, id=%s, friend=%v", objectID.Hex(), friend)

@@ -21,9 +21,8 @@ type Friend struct {
 	Logo        string
 	Description string
 	Email       string
-	Show        bool
 	Priority    int
-	Accepted    bool
+	Status      int
 	Ip          string
 	CreateTime  int64
 }

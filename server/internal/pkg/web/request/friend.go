@@ -18,5 +18,5 @@ type FriendReq struct {
 	Name        string `json:"name" binding:"required"`
 	Logo        string `json:"logo" binding:"required"`
 	Description string `json:"description" binding:"required"`
-	Show        *bool  `json:"show" binding:"required"`
+	Status      int    `json:"status" binding:"required"`
 }

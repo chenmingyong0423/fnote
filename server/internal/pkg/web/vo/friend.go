@@ -27,7 +27,6 @@ type AdminFriendVO struct {
 	Url         string `json:"url"`
 	Logo        string `json:"logo"`
 	Description string `json:"description"`
-	Show        bool   `json:"show"`
-	Accepted    bool   `json:"accepted"`
+	Status      int    `json:"status"`
 	CreateTime  int64  `json:"create_time"`
 }

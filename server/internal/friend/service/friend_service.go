@@ -56,7 +56,7 @@ func (s *FriendService) AdminAcceptFriend(ctx context.Context, id string) error 
 		}
 		return err
 	}
-	if friend.Accepted {
+	if friend.Status == 1 {
 		return api.NewErrorResponseBody(http.StatusBadRequest, "friend already accepted")
 	}
 	err = s.repo.UpdateFriendAccept(ctx, id)
