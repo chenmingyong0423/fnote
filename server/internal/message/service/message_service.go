@@ -67,7 +67,7 @@ func (s *MessageService) sendEmail(ctx context.Context, msgTplName, contentType 
 	if err != nil {
 		return err
 	}
-	if args != nil && len(args) > 0 {
+	if len(args) > 0 {
 		msgTpl.FormatContent(args...)
 	}
 	return s.emailServ.SendEmail(ctx, domain.Email{

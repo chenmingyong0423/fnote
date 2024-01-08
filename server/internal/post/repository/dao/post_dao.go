@@ -17,6 +17,7 @@ package dao
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/chenmingyong0423/go-mongox"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
@@ -85,6 +86,7 @@ type IPostDao interface {
 	AddPost(ctx context.Context, post *Post) error
 	DeleteById(ctx context.Context, id string) error
 	FindById(ctx context.Context, id string) (*Post, error)
+	DecreaseByField(ctx context.Context, id string, filedName string, cnt int) error
 }
 
 var _ IPostDao = (*PostDao)(nil)
@@ -97,6 +99,19 @@ func NewPostDao(db *mongo.Database) *PostDao {
 
 type PostDao struct {
 	coll *mongox.Collection[Post]
+}
+
+func (d *PostDao) DecreaseByField(ctx context.Context, id string, filedName string, cnt int) error {
+	filter := query.Id(id)
+	u := update.BsonBuilder().Inc(filedName, -cnt).Set("update_time", time.Now().Unix()).Build()
+	result, err := d.coll.Updater().Filter(filter).Updates(u).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to decrease the %s of post, id=%s, cnt=%d", filedName, id, cnt)
+	}
+	if result.ModifiedCount == 0 {
+		return fmt.Errorf("fails to decrease the %s of post, id=%s, cnt=%d", filedName, id, cnt)
+	}
+	return nil
 }
 
 func (d *PostDao) FindById(ctx context.Context, id string) (*Post, error) {
@@ -127,7 +142,6 @@ func (d *PostDao) AddPost(ctx context.Context, post *Post) error {
 }
 
 func (d *PostDao) IncreaseFieldById(ctx context.Context, id string, field string) error {
-	// bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: field, Value: 1}}}}
 	result, err := d.coll.Updater().Filter(bsonx.Id(id)).Updates(update.Inc(field, 1)).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to increase the %s of post, id=%s", field, id)
@@ -167,7 +181,6 @@ func (d *PostDao) AddLike(ctx context.Context, id string, ip string) error {
 }
 
 func (d *PostDao) FindByIdAndIp(ctx context.Context, id string, ip string) (*Post, error) {
-	// bson.D{bson.E{Key: "_id", Value: id}, bson.E{Key: "likes", Value: ip}}
 	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add("likes", ip).Build()).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from post, id=%s, ip=%s", id, ip)

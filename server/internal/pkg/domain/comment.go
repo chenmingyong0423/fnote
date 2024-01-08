@@ -35,7 +35,15 @@ type Comment struct {
 	Content string
 	// 用户信息
 	UserInfo   UserInfo
+	Status     CommentStatus
 	CreateTime int64
+}
+
+func (c *Comment) IsApproved() bool {
+	return c.Status == CommentStatusApproved
+}
+func (c *Comment) IsDisapproved() bool {
+	return c.Status == CommentStatusDisapproved
 }
 
 type CommentReply struct {
@@ -52,6 +60,19 @@ type CommentReply struct {
 	CreateTime      int64
 }
 
+type CommentReplyWithPostInfo struct {
+	CommentReply
+	PostInfo PostInfo
+}
+
+func (c *CommentReply) IsApproved() bool {
+	return c.Status == CommentStatusApproved
+}
+
+func (c *CommentReply) IsDisapproved() bool {
+	return c.Status == CommentStatusDisapproved
+}
+
 type UserInfo4Reply UserInfo
 
 type PostInfo struct {
@@ -59,6 +80,8 @@ type PostInfo struct {
 	PostId string
 	// 文章标题字段
 	PostTitle string
+	// 文章链接
+	PostUrl string
 }
 
 type UserInfo struct {
@@ -75,8 +98,10 @@ const (
 	CommentStatusPending CommentStatus = iota
 	// CommentStatusApproved 审核通过
 	CommentStatusApproved
-	// CommentStatusRejected 审核不通过
-	CommentStatusRejected
+	// CommentStatusHidden 隐藏
+	CommentStatusHidden
+	// CommentStatusDisapproved 审核不通过
+	CommentStatusDisapproved
 )
 
 type AdminComment struct {
@@ -87,5 +112,6 @@ type AdminComment struct {
 	UserInfo   UserInfo `json:"user_info"`
 	Fid        string   `json:"fid"`
 	Type       int      `json:"type"`
+	Status     int      `json:"status"`
 	CreateTime int64    `json:"create_time"`
 }

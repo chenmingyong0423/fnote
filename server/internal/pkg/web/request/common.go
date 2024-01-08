@@ -26,3 +26,7 @@ type PageRequest struct {
 	// 搜索内容
 	Keyword string `form:"keyword,omitempty"`
 }
+
+type LinkRequest struct {
+	Link string `form:"link" binding:"required"`
+}

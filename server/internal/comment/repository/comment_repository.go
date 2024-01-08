@@ -34,10 +34,17 @@ import (
 type ICommentRepository interface {
 	AddComment(ctx context.Context, comment domain.Comment) (string, error)
 	FindApprovedCommentById(ctx context.Context, cmtId string) (*domain.CommentWithReplies, error)
-	AddCommentReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) (string, error)
+	AddReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) (string, error)
 	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]domain.LatestComment, error)
 	FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus domain.CommentStatus) ([]domain.CommentWithReplies, error)
 	FindPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.AdminComment, int64, error)
+	FindCommentById(ctx context.Context, id string) (*domain.Comment, error)
+	UpdateCommentStatus(ctx context.Context, id string, commentStatus domain.CommentStatus) error
+	FindReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) (*domain.CommentReplyWithPostInfo, error)
+	UpdateCommentReplyStatus(ctx context.Context, commentId string, replyId string, commentStatus domain.CommentStatus) error
+	FindCommentWithRepliesById(ctx context.Context, id string) (*domain.CommentWithReplies, error)
+	DeleteCommentById(ctx context.Context, id string) error
+	DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error
 }
 
 func NewCommentRepository(dao dao.ICommentDao) *CommentRepository {
@@ -50,6 +57,57 @@ var _ ICommentRepository = (*CommentRepository)(nil)
 
 type CommentRepository struct {
 	dao dao.ICommentDao
+}
+
+func (r *CommentRepository) DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error {
+	return r.dao.DeleteReplyByCIdAndRId(ctx, commentId, replyId)
+}
+
+func (r *CommentRepository) DeleteCommentById(ctx context.Context, id string) error {
+	return r.dao.DeleteById(ctx, id)
+}
+
+func (r *CommentRepository) FindCommentWithRepliesById(ctx context.Context, id string) (*domain.CommentWithReplies, error) {
+	comment, err := r.dao.FindCommentWithRepliesById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainCommentWithReplies(comment), nil
+}
+
+func (r *CommentRepository) UpdateCommentReplyStatus(ctx context.Context, commentId string, replyId string, commentStatus domain.CommentStatus) error {
+	return r.dao.UpdateCommentReplyStatus(ctx, commentId, replyId, dao.CommentStatus(commentStatus))
+}
+
+func (r *CommentRepository) FindReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) (*domain.CommentReplyWithPostInfo, error) {
+	commentReply, err := r.dao.FindReplyByCIdAndRId(ctx, commentId, replyId)
+	if err != nil {
+		return nil, err
+	}
+	return &domain.CommentReplyWithPostInfo{
+		CommentReply: domain.CommentReply{
+			ReplyId:         commentReply.ReplyId,
+			Content:         commentReply.Content,
+			ReplyToId:       commentReply.ReplyToId,
+			UserInfo:        domain.UserInfo4Reply(commentReply.UserInfo),
+			RepliedUserInfo: domain.UserInfo4Reply(commentReply.RepliedUserInfo),
+			Status:          domain.CommentStatus(commentReply.Status),
+			CreateTime:      commentReply.CreateTime,
+		},
+		PostInfo: domain.PostInfo(commentReply.PostInfo),
+	}, nil
+}
+
+func (r *CommentRepository) UpdateCommentStatus(ctx context.Context, id string, commentStatus domain.CommentStatus) error {
+	return r.dao.UpdateCommentStatus(ctx, id, dao.CommentStatus(commentStatus))
+}
+
+func (r *CommentRepository) FindCommentById(ctx context.Context, id string) (*domain.Comment, error) {
+	comment, err := r.dao.FindCommentById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainComment(comment), nil
 }
 
 func (r *CommentRepository) FindPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.AdminComment, int64, error) {
@@ -75,7 +133,7 @@ func (r *CommentRepository) FindCommentsByPostIdAndCmtStatus(ctx context.Context
 	if err != nil {
 		return nil, err
 	}
-	return r.toDomainComment(comments), nil
+	return r.toDomainComments(comments), nil
 }
 
 func (r *CommentRepository) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]domain.LatestComment, error) {
@@ -96,10 +154,10 @@ func (r *CommentRepository) FineLatestCommentAndReply(ctx context.Context, cnt i
 	return result, nil
 }
 
-func (r *CommentRepository) AddCommentReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) (string, error) {
+func (r *CommentRepository) AddReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) (string, error) {
 	unix := time.Now().Unix()
 	id := uuid.NewString()
-	return id, r.dao.AddCommentReply(ctx, cmtId, dao.CommentReply{
+	return id, r.dao.AddCommentReply(ctx, cmtId, dao.Reply{
 		ReplyId:         id,
 		Content:         commentReply.Content,
 		ReplyToId:       commentReply.ReplyToId,
@@ -112,7 +170,7 @@ func (r *CommentRepository) AddCommentReply(ctx context.Context, cmtId string, c
 }
 
 func (r *CommentRepository) FindApprovedCommentById(ctx context.Context, cmtId string) (*domain.CommentWithReplies, error) {
-	comment, err := r.dao.FindCommentById(ctx, cmtId)
+	comment, err := r.dao.FindApprovedCommentById(ctx, cmtId)
 	if err != nil {
 		return nil, err
 	}
@@ -124,8 +182,7 @@ func (r *CommentRepository) FindApprovedCommentById(ctx context.Context, cmtId s
 			ReplyToId:       reply.ReplyToId,
 			UserInfo:        domain.UserInfo4Reply(reply.UserInfo),
 			RepliedUserInfo: domain.UserInfo4Reply(reply.RepliedUserInfo),
-
-			Status: domain.CommentStatus(reply.Status),
+			Status:          domain.CommentStatus(reply.Status),
 		})
 	}
 	return &domain.CommentWithReplies{
@@ -153,14 +210,14 @@ func (r *CommentRepository) AddComment(ctx context.Context, comment domain.Comme
 		PostInfo:   dao.PostInfo(comment.PostInfo),
 		Content:    comment.Content,
 		UserInfo:   dao.UserInfo4Comment(comment.UserInfo),
-		Replies:    make([]dao.CommentReply, 0),
+		Replies:    make([]dao.Reply, 0),
 		Status:     dao.CommentStatusPending,
 		CreateTime: unix,
 		UpdateTime: unix,
 	})
 }
 
-func (r *CommentRepository) toDomainComment(comments []*dao.Comment) []domain.CommentWithReplies {
+func (r *CommentRepository) toDomainComments(comments []*dao.Comment) []domain.CommentWithReplies {
 	result := make([]domain.CommentWithReplies, 0, len(comments))
 	for _, comment := range comments {
 		replies := make([]domain.CommentReply, 0, len(comment.Replies))
@@ -199,8 +256,46 @@ func (r *CommentRepository) toDomainAdminComments(friends []dao.AdminComment) []
 			UserInfo:   domain.UserInfo(friend.UserInfo),
 			Fid:        friend.Fid,
 			Type:       friend.Type,
+			Status:     int(friend.Status),
 			CreateTime: friend.CreateTime,
 		})
 	}
 	return result
+}
+
+func (r *CommentRepository) toDomainComment(comment *dao.Comment) *domain.Comment {
+	return &domain.Comment{
+		Id:         comment.Id,
+		PostInfo:   domain.PostInfo(comment.PostInfo),
+		Content:    comment.Content,
+		UserInfo:   domain.UserInfo(comment.UserInfo),
+		Status:     domain.CommentStatus(comment.Status),
+		CreateTime: comment.CreateTime,
+	}
+}
+
+func (r *CommentRepository) toDomainCommentWithReplies(comment *dao.Comment) *domain.CommentWithReplies {
+	replies := make([]domain.CommentReply, 0, len(comment.Replies))
+	for _, commentReply := range comment.Replies {
+		replies = append(replies, domain.CommentReply{
+			ReplyId:         commentReply.ReplyId,
+			Content:         commentReply.Content,
+			ReplyToId:       commentReply.ReplyToId,
+			UserInfo:        domain.UserInfo4Reply(commentReply.UserInfo),
+			RepliedUserInfo: domain.UserInfo4Reply(commentReply.RepliedUserInfo),
+			Status:          domain.CommentStatus(commentReply.Status),
+			CreateTime:      commentReply.CreateTime,
+		})
+	}
+	return &domain.CommentWithReplies{
+		Comment: domain.Comment{
+			Id:         comment.Id,
+			PostInfo:   domain.PostInfo(comment.PostInfo),
+			Content:    comment.Content,
+			UserInfo:   domain.UserInfo(comment.UserInfo),
+			Status:     domain.CommentStatus(comment.Status),
+			CreateTime: comment.CreateTime,
+		},
+		Replies: replies,
+	}
 }

@@ -74,6 +74,15 @@ func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 
 	adminGroup := engine.Group("/admin/comments")
 	adminGroup.GET("", api.WrapWithBody(h.AdminGetComments))
+	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteComment))
+	adminGroup.PUT("/:id/status", api.WrapWithBody(h.AdminUpdateCommentStatus))
+	adminGroup.PUT("/:id/approval", api.Wrap(h.AdminApproveComment))
+	adminGroup.PUT("/:id/disapproval", api.WrapWithBody(h.AdminDisapproveComment))
+
+	adminGroup.DELETE("/:id/replies/:rid", api.Wrap(h.AdminDeleteCommentReply))
+	adminGroup.PUT("/:id/replies/:rid/status", api.WrapWithBody(h.AdminUpdateReplyStatus))
+	adminGroup.PUT("/:id/replies/:rid/approval", api.Wrap(h.AdminApproveCommentReply))
+	adminGroup.PUT("/:id/replies/:rid/disapproval", api.WrapWithBody(h.AdminDisapproveCommentReply))
 }
 
 func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo api.IdVO, err error) {
@@ -102,6 +111,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo ap
 		PostInfo: domain.PostInfo{
 			PostId:    req.PostId,
 			PostTitle: post.Title,
+			PostUrl:   fmt.Sprintf("%s/posts/%s", ctx.Request.Host, req.PostId),
 		},
 		Content: req.Content,
 		UserInfo: domain.UserInfo{
@@ -165,7 +175,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (vo
 	if !post.IsCommentAllowed {
 		return vo, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
-	vo.Id, err = h.serv.AddCommentReply(ctx, commentId, req.PostId, domain.CommentReply{
+	vo.Id, err = h.serv.AddReply(ctx, commentId, req.PostId, domain.CommentReply{
 		Content:   req.Content,
 		ReplyToId: req.ReplyToId,
 		UserInfo: domain.UserInfo4Reply{
@@ -293,8 +303,194 @@ func (h *CommentHandler) toAdminCommentVO(friends []domain.AdminComment) []vo.Ad
 			UserInfo:   vo.AdminUserInfoVO(friend.UserInfo),
 			Fid:        friend.Fid,
 			Type:       friend.Type,
+			Status:     friend.Status,
 			CreateTime: friend.CreateTime,
 		})
 	}
 	return result
+}
+
+func (h *CommentHandler) AdminApproveComment(ctx *gin.Context) (any, error) {
+	commentId := ctx.Param("id")
+	comment, err := h.serv.FindCommentById(ctx, commentId)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, api.NewErrorResponseBody(http.StatusNotFound, "Comment not found.")
+		}
+		return nil, err
+	}
+	if comment.IsApproved() {
+		return "", api.NewErrorResponseBody(http.StatusBadRequest, "Comment has been approved.")
+	}
+	err = h.serv.AdminApproveComment(ctx, commentId)
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		// 通知用户评论已通过
+		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-approval", comment.UserInfo.Email, "text/plain", comment.PostInfo.PostUrl)
+		if gErr != nil {
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+	}()
+	return nil, nil
+}
+
+func (h *CommentHandler) AdminDisapproveComment(ctx *gin.Context, req request.DisapproveCommentRequest) (any, error) {
+	commentId := ctx.Param("id")
+	comment, err := h.serv.FindCommentById(ctx, commentId)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, api.NewErrorResponseBody(http.StatusNotFound, "Comment not found.")
+		}
+		return nil, err
+	}
+	if comment.IsDisapproved() {
+		return "", api.NewErrorResponseBody(http.StatusBadRequest, "Comment has been disapproved.")
+	}
+
+	err = h.serv.AdminDisapproveComment(ctx, commentId)
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		// 通知用户评论未通过
+		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-disapproval", comment.UserInfo.Email, "text/plain", comment.PostInfo.PostUrl, req.Reason)
+		if gErr != nil {
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+	}()
+	return nil, nil
+}
+
+func (h *CommentHandler) AdminApproveCommentReply(ctx *gin.Context) (any, error) {
+	commentId := ctx.Param("id")
+	replyId := ctx.Param("rid")
+	commentReplyWithPostInfo, err := h.serv.FindReplyByCIdAndRId(ctx, commentId, replyId)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, api.NewErrorResponseBody(http.StatusNotFound, "Comment reply not found.")
+		}
+		return nil, err
+	}
+	if commentReplyWithPostInfo.IsApproved() {
+		return "", api.NewErrorResponseBody(http.StatusBadRequest, "Comment reply has been approved.")
+	}
+	err = h.serv.AdminApproveCommentReply(ctx, commentId, replyId)
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		// 通知用户评论已通过
+		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-approval", commentReplyWithPostInfo.UserInfo.Email, "text/plain", commentReplyWithPostInfo.PostInfo.PostUrl)
+		if gErr != nil {
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+		// 通知被回复的用户接收到了回复
+		gErr = h.msgServ.SendEmailWithEmail(ctx, "user-comment-reply", commentReplyWithPostInfo.RepliedUserInfo.Email, "text/plain", commentReplyWithPostInfo.PostInfo.PostUrl)
+		if gErr != nil {
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+	}()
+	return nil, nil
+}
+
+func (h *CommentHandler) AdminDisapproveCommentReply(ctx *gin.Context, req request.DisapproveCommentRequest) (any, error) {
+	commentId := ctx.Param("id")
+	replyId := ctx.Param("rid")
+	commentReplyWithPostInfo, err := h.serv.FindReplyByCIdAndRId(ctx, commentId, replyId)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, api.NewErrorResponseBody(http.StatusNotFound, "Comment reply not found.")
+		}
+		return nil, err
+	}
+	if commentReplyWithPostInfo.IsDisapproved() {
+		return "", api.NewErrorResponseBody(http.StatusBadRequest, "Comment reply has been disapproved.")
+	}
+	err = h.serv.AdminDisapproveCommentReply(ctx, commentId, replyId)
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		// 通知用户评论未通过
+		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-disapproval", commentReplyWithPostInfo.UserInfo.Email, "text/plain", commentReplyWithPostInfo.PostInfo.PostUrl, req.Reason)
+		if gErr != nil {
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+	}()
+	return nil, nil
+}
+
+func (h *CommentHandler) AdminDeleteComment(ctx *gin.Context) (any, error) {
+	commentId := ctx.Param("id")
+	commentWithReplies, err := h.serv.FindCommentWithRepliesById(ctx, commentId)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, api.NewErrorResponseBody(http.StatusNotFound, "Comment not found.")
+		}
+		return nil, err
+	}
+	err = h.serv.DeleteCommentById(ctx, commentId)
+	if err != nil {
+		return nil, err
+	}
+	// 统计删除的评论数
+	go func() {
+		cnt := 1 + len(commentWithReplies.Replies)
+		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+		gErr := h.postServ.DecreaseCommentCount(ctx, commentWithReplies.PostInfo.PostId, cnt)
+		if gErr != nil {
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+	}()
+	return nil, nil
+}
+
+func (h *CommentHandler) AdminDeleteCommentReply(ctx *gin.Context) (any, error) {
+	commentId := ctx.Param("id")
+	replyId := ctx.Param("rid")
+	commentReplyWithPostInfo, err := h.serv.FindReplyByCIdAndRId(ctx, commentId, replyId)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, api.NewErrorResponseBody(http.StatusNotFound, "Comment reply not found.")
+		}
+		return nil, err
+	}
+	err = h.serv.DeleteReplyByCIdAndRId(ctx, commentId, replyId)
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+		gErr := h.postServ.DecreaseCommentCount(ctx, commentReplyWithPostInfo.PostInfo.PostId, 1)
+		if gErr != nil {
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+	}()
+	return nil, nil
+}
+
+func (h *CommentHandler) AdminUpdateCommentStatus(ctx *gin.Context, req request.CommentStatusRequest) (any, error) {
+	commentId := ctx.Param("id")
+	err := h.serv.UpdateCommentStatus(ctx, commentId, domain.CommentStatus(req.Status))
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (h *CommentHandler) AdminUpdateReplyStatus(ctx *gin.Context, req request.CommentStatusRequest) (any, error) {
+	commentId := ctx.Param("id")
+	replyId := ctx.Param("rid")
+	err := h.serv.UpdateCommentReplyStatus(ctx, commentId, replyId, domain.CommentStatus(req.Status))
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
 }
