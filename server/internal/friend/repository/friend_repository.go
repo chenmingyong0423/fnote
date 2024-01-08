@@ -41,6 +41,7 @@ type IFriendRepository interface {
 	DeleteById(ctx context.Context, id string) error
 	FindById(ctx context.Context, id string) (domain.Friend, error)
 	UpdateFriendApproved(ctx context.Context, id string) error
+	UpdateFriendRejected(ctx context.Context, id string) error
 }
 
 var _ IFriendRepository = (*FriendRepository)(nil)
@@ -53,6 +54,14 @@ func NewFriendRepository(dao dao.IFriendDao) *FriendRepository {
 
 type FriendRepository struct {
 	dao dao.IFriendDao
+}
+
+func (r *FriendRepository) UpdateFriendRejected(ctx context.Context, id string) error {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	return r.dao.UpdateRejected(ctx, objectID)
 }
 
 func (r *FriendRepository) UpdateFriendApproved(ctx context.Context, id string) error {

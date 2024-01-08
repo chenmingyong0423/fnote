@@ -14,8 +14,14 @@
 
 package domain
 
+import "fmt"
+
 type MessageTemplate struct {
 	Name    string
 	Title   string
 	Content string
+}
+
+func (mt *MessageTemplate) FormatContent(args ...any) {
+	mt.Content = fmt.Sprintf(mt.Content, args...)
 }
