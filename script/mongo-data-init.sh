@@ -205,15 +205,6 @@ db.getCollection("message_template").createIndex({
 // Documents of message_template
 // ----------------------------
 db.getCollection("message_template").insertOne({
-    name: "friend",
-    title: "友链申请通知",
-    content: "您好，您的网站有了新的友链申请，详情可前往后台查看。",
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000),
-    active: 1,
-    recipient_type: 0
-});
-db.getCollection("message_template").insertOne({
     name: "comment",
     title: "文章评论通知",
     content: "您好，您在文章有新的评论，详情请前往后台进行查看。",
@@ -221,6 +212,46 @@ db.getCollection("message_template").insertOne({
     update_time: Math.floor(new Date().getTime() / 1000),
     recipient_type: 0,
     active: 1
+});
+
+db.getCollection("message_template").insertOne({
+    name: "user-comment-approval",
+    title: "评论审核通过通知",
+    content: "您好，您在 %s 文章中发表的评论已通过审核。",
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000),
+    recipient_type: 0,
+    active: 1
+});
+
+db.getCollection("message_template").insertOne({
+    name: "user-comment-disapproval",
+    title: "评论被驳回通知",
+    content: "您好，您在 %s 文章中发表的评论未通过审核，原因：%s",
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000),
+    recipient_type: 0,
+    active: 1
+});
+
+db.getCollection("message_template").insertOne({
+    name: "user-comment-be-replied",
+    title: "评论被回复通知",
+    content: "您好，您在 %s 文章中发表的评论有新的回复。",
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000),
+    recipient_type: 0,
+    active: 1
+});
+
+db.getCollection("message_template").insertOne({
+    name: "friend",
+    title: "友链申请通知",
+    content: "您好，您的网站有了新的友链申请，详情可前往后台查看。",
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000),
+    active: 1,
+    recipient_type: 0
 });
 
 db.getCollection("message_template").insertOne({
