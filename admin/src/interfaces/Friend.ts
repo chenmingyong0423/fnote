@@ -4,8 +4,7 @@ export interface Friend {
   url: string
   logo: string
   description: string
-  show: boolean
-  accepted: boolean
+  status: number
   create_time: number
 }
 

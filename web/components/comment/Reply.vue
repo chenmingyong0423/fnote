@@ -2,10 +2,10 @@
   <div class="flex mb-5" v-for="(rpy, index) in replies" :key="index">
     <div class="w-8% min-h-[100px] flex justify-center lt-md:w-15%">
       <img
-        :src="generateAvatar(rpy.email)"
+        :src="rpy.picture"
         alt=""
         class="w-12 h-12 border-rounded-50% cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"
-        v-if="rpy.email != ''"
+        v-if="rpy.picture != ''"
       />
       <div
         class="i-ph-user-circle-duotone w-12 h-12 border-rounded-50% lt-lg:mr0 text-gray-4"
@@ -120,12 +120,6 @@ const replies = computed(() => {
 
 const homeStore = useHomeStore();
 const isBlackMode = computed(() => homeStore.isBlackMode);
-const generateAvatar = (email: string) => {
-  return (
-    "https://1.gravatar.com/avatar/" +
-    CryptoJS.MD5(email.trim().toLowerCase()).toString()
-  );
-};
 const emit = defineEmits(["submitReply2Reply"]);
 
 const activeCommentIndex = ref("");

@@ -23,16 +23,21 @@
           </template>
         </div>
       </template>
-      <template v-if="column.dataIndex === 'show'">
+      <template v-if="column.dataIndex === 'status'">
         <a-radio-group
           v-if="editableData[record.id]"
           v-model:value="editableData[record.id][column.dataIndex]"
         >
-          <a-radio :value="false">隐藏</a-radio>
-          <a-radio :value="true">展示</a-radio>
+          <a-radio :value="2">隐藏</a-radio>
+          <a-radio :value="1">展示</a-radio>
         </a-radio-group>
         <template v-else>
-          <a-tag color="success">{{ record.show ? '显示' : '隐藏' }}</a-tag>
+          <a-tag
+            :color="
+              record.status === 0 ? 'processing' : record.status === 1 ? 'success' : 'warning'
+            "
+            >{{ statusConvert(record.status) }}</a-tag
+          >
         </template>
       </template>
       <template v-if="column.dataIndex === 'create_time'">
@@ -41,9 +46,9 @@
       <template v-else-if="column.dataIndex === 'operation'">
         <div class="editable-row-operations">
           <a-popconfirm
-            v-if="data.length && !record.accepted"
+            v-if="data.length && record.status === 0"
             title="确认接受？"
-            @confirm="accept(record.id)"
+            @confirm="approved(record.id)"
           >
             <a>接受</a>
           </a-popconfirm>
@@ -99,8 +104,8 @@ const columns = [
   },
   {
     title: '状态',
-    key: 'show',
-    dataIndex: 'show'
+    key: 'status',
+    dataIndex: 'status'
   },
   {
     title: '提交时间',
@@ -162,10 +167,10 @@ const deleteInfo = async (id: string) => {
   }
 }
 
-const accept = async (id: string) => {
+const approved = async (id: string) => {
   try {
     // 提交 body 参数 values
-    const response = await axios.put<IBaseResponse>(`/admin/friends/${id}/accept`)
+    const response = await axios.put<IBaseResponse>(`/admin/friends/${id}/approval`)
     if (response.data.code !== 200) {
       message.error(response.data.message)
       return
@@ -203,6 +208,19 @@ const save = async (id: string) => {
 }
 const cancel = (key: string) => {
   delete editableData[key]
+}
+
+const statusConvert = (status: number) => {
+  switch (status) {
+    case 0:
+      return '未审核'
+    case 1:
+      return '显示'
+    case 2:
+      return '隐藏'
+    default:
+      return '审核不通过'
+  }
 }
 </script>
 
