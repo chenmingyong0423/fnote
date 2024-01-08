@@ -14,7 +14,7 @@ export interface IReply {
   comment_id: string;
   content: string;
   name: string;
-  email: string;
+  picture: string;
   website?: string;
   reply_to_id: string;
   reply_to: string;
@@ -26,7 +26,7 @@ export interface IComment {
   id: string;
   content: string;
   username: string;
-  email: string;
+  picture: string;
   website?: string;
   comment_time: number;
   replies: IReply[];
