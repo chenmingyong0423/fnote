@@ -14,6 +14,11 @@ const router = createRouter({
       component: () => import('../views/post/PostEditView.vue')
     },
     {
+      path: '/comment',
+      name: 'comment',
+      component: () => import('../views/comment/CommentView.vue')
+    },
+    {
       path: '/category',
       name: 'category',
       component: () => import('../views/CategoryListView.vue')

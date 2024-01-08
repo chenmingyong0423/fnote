@@ -2,7 +2,6 @@
   <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
     <template #bodyCell="{ column, text, record }">
       <template v-if="column.dataIndex === 'logo'">
-        {{ record.id }}
         <a-input
           v-if="editableData[record.id]"
           v-model:value="editableData[record.id][column.dataIndex]"

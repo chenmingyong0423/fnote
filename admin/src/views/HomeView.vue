@@ -57,6 +57,19 @@ const items = reactive([
     ]
   },
   {
+    key: 'sub comment',
+    icon: () => h(PieChartOutlined),
+    label: '评论管理',
+    title: '评论管理',
+    children: [
+      {
+        key: '/comment',
+        label: '评论列表',
+        title: '评论列表'
+      }
+    ]
+  },
+  {
     key: 'sub category',
     icon: () => h(PieChartOutlined),
     label: '分类管理',
