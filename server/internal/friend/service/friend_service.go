@@ -33,7 +33,7 @@ type IFriendService interface {
 	AdminGetFriends(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Friend, int64, error)
 	AdminUpdateFriend(ctx context.Context, friend domain.Friend) error
 	AdminDeleteFriend(ctx context.Context, id string) error
-	AdminAcceptFriend(ctx context.Context, id string) error
+	AdminApproveFriend(ctx context.Context, id string) error
 }
 
 var _ IFriendService = (*FriendService)(nil)
@@ -48,7 +48,7 @@ type FriendService struct {
 	repo repository.IFriendRepository
 }
 
-func (s *FriendService) AdminAcceptFriend(ctx context.Context, id string) error {
+func (s *FriendService) AdminApproveFriend(ctx context.Context, id string) error {
 	friend, err := s.repo.FindById(ctx, id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -56,10 +56,10 @@ func (s *FriendService) AdminAcceptFriend(ctx context.Context, id string) error 
 		}
 		return err
 	}
-	if friend.Status == 1 {
+	if friend.IsApproved() {
 		return api.NewErrorResponseBody(http.StatusBadRequest, "friend already accepted")
 	}
-	err = s.repo.UpdateFriendAccept(ctx, id)
+	err = s.repo.UpdateFriendApproved(ctx, id)
 	if err != nil {
 		return err
 	}

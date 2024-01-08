@@ -223,6 +223,26 @@ db.getCollection("message_template").insertOne({
     active: 1
 });
 
+db.getCollection("message_template").insertOne({
+    name: "friend-approval",
+    title: "友链申请通过通知",
+    content: "您好，您在 %s 网站里提交的友链申请已通过审核并展示在页面上。",
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000),
+    recipient_type: 1,
+    active: 1
+});
+
+db.getCollection("message_template").insertOne({
+    name: "friend-rejected",
+    title: "友链申请不通过通知",
+    content: "您好，您在 %s 网站里提交的友链申请未通过审核，原因：%s",
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000),
+    recipient_type: 1,
+    active: 1
+});
+
 // ----------------------------
 // Collection structure for posts
 // ----------------------------

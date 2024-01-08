@@ -26,3 +26,7 @@ type Friend struct {
 	Ip          string
 	CreateTime  int64
 }
+
+func (f Friend) IsApproved() bool {
+	return f.Status == 1 || f.Status == 2
+}

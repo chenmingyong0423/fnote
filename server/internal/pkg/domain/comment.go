@@ -18,6 +18,7 @@ type LatestComment struct {
 	PostInfo4Comment
 	Name       string
 	Content    string
+	Email      string
 	CreateTime int64
 }
 
