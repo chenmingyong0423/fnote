@@ -22,10 +22,10 @@
     >
       <div class="w-8% min-h-[180px] flex justify-center lt-md:w-15%">
         <img
-          :src="generateAvatar(comment.email)"
+          :src="comment.picture"
           alt=""
           class="w-12 h-12 border-rounded-50% cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"
-          v-if="comment.email != ''"
+          v-if="comment.picture != ''"
         />
         <div
           class="i-ph-user-circle-duotone w-12 h-12 border-rounded-50% lt-lg:mr0 text-gray-4"
@@ -140,13 +140,6 @@ const clearReplyReq = () => {
     commentReplyForm.value[0].clearReq();
     activeCommentIndex.value = "";
   }
-};
-
-const generateAvatar = (email: string) => {
-  return (
-    "https://1.gravatar.com/avatar/" +
-    CryptoJS.MD5(email.trim().toLowerCase()).toString()
-  );
 };
 
 const emit = defineEmits(["submit", "submitReply", "submitReply2Reply"]);
