@@ -36,3 +36,5 @@ mongodb:
   password: fnote-password
   auth_source: fnote
   database: fnote
+gravatar:
+  api: https://1.gravatar.com/avatar/
