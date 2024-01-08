@@ -191,13 +191,16 @@ func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) (result api.
 	}
 	lc := make([]vo.LatestCommentVO, 0, len(latestComments))
 	for _, latestComment := range latestComments {
-		hash := md5.Sum([]byte(strings.ToLower(latestComment.Email)))
-		picture := hex.EncodeToString(hash[:])
+		picture := ""
+		if latestComment.Email != "" {
+			hash := md5.Sum([]byte(strings.ToLower(latestComment.Email)))
+			picture = viper.GetString("gravatar.api") + hex.EncodeToString(hash[:])
+		}
 		lc = append(lc, vo.LatestCommentVO{
 			PostInfo4Comment: vo.PostInfo4Comment(latestComment.PostInfo4Comment),
 			Name:             latestComment.Name,
 			Content:          latestComment.Content,
-			Picture:          viper.GetString("gravatar.api") + picture,
+			Picture:          picture,
 			CreateTime:       latestComment.CreateTime,
 		})
 	}
@@ -218,23 +221,33 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (listVO api.ListV
 			if reply.Status != domain.CommentStatusApproved {
 				continue
 			}
+			picture := ""
+			if reply.UserInfo.Email != "" {
+				hash := md5.Sum([]byte(strings.ToLower(reply.UserInfo.Email)))
+				picture = viper.GetString("gravatar.api") + hex.EncodeToString(hash[:])
+			}
 			replies = append(replies, vo.PostCommentReplyVO{
 				Id:        reply.ReplyId,
 				CommentId: comment.Id,
 				Content:   reply.Content,
 				Name:      reply.UserInfo.Name,
-				Email:     reply.UserInfo.Email,
+				Picture:   picture,
 				Website:   reply.UserInfo.Website,
 				ReplyToId: reply.ReplyToId,
 				ReplyTo:   reply.RepliedUserInfo.Name,
 				ReplyTime: reply.CreateTime,
 			})
 		}
+		picture := ""
+		if comment.UserInfo.Email != "" {
+			hash := md5.Sum([]byte(strings.ToLower(comment.UserInfo.Email)))
+			picture = viper.GetString("gravatar.api") + hex.EncodeToString(hash[:])
+		}
 		pc = append(pc, vo.PostCommentVO{
 			Id:          comment.Id,
 			Content:     comment.Content,
 			Name:        comment.UserInfo.Name,
-			Email:       comment.UserInfo.Email,
+			Picture:     picture,
 			Website:     comment.UserInfo.Website,
 			CommentTime: comment.CreateTime,
 			Replies:     replies,
