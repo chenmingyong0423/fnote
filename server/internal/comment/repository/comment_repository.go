@@ -16,7 +16,14 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
+
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
@@ -30,6 +37,7 @@ type ICommentRepository interface {
 	AddCommentReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) (string, error)
 	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]domain.LatestComment, error)
 	FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus domain.CommentStatus) ([]domain.CommentWithReplies, error)
+	FindPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.AdminComment, int64, error)
 }
 
 func NewCommentRepository(dao dao.ICommentDao) *CommentRepository {
@@ -42,6 +50,24 @@ var _ ICommentRepository = (*CommentRepository)(nil)
 
 type CommentRepository struct {
 	dao dao.ICommentDao
+}
+
+func (r *CommentRepository) FindPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.AdminComment, int64, error) {
+	condBuilder := query.BsonBuilder()
+	if pageDTO.Keyword != "" {
+		condBuilder.RegexOptions("content", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageDTO.Keyword)), "i")
+	}
+	cond := condBuilder.Build()
+
+	findOptions := options.Find()
+	findOptions.SetSkip((pageDTO.PageNo - 1) * pageDTO.PageSize).SetLimit(pageDTO.PageSize)
+	if pageDTO.Field != "" && pageDTO.Order != "" {
+		findOptions.SetSort(bsonx.M(pageDTO.Field, pageDTO.OrderConvertToInt()))
+	} else {
+		findOptions.SetSort(bsonx.M("create_time", 1))
+	}
+	friends, total, err := r.dao.AggregationQuerySkipAndSetLimit(ctx, cond, findOptions)
+	return r.toDomainAdminComments(friends), total, err
 }
 
 func (r *CommentRepository) FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus domain.CommentStatus) ([]domain.CommentWithReplies, error) {
@@ -60,11 +86,11 @@ func (r *CommentRepository) FineLatestCommentAndReply(ctx context.Context, cnt i
 	result := make([]domain.LatestComment, 0, len(latestComments))
 	for _, latestComment := range latestComments {
 		result = append(result, domain.LatestComment{
-			PostInfo4Comment: domain.PostInfo4Comment(latestComment.PostInfo4Comment),
-			Name:             latestComment.Name,
-			Email:            latestComment.Email,
-			Content:          latestComment.Content,
-			CreateTime:       latestComment.CreateTime,
+			PostInfo:   domain.PostInfo(latestComment.PostInfo),
+			Name:       latestComment.Name,
+			Email:      latestComment.Email,
+			Content:    latestComment.Content,
+			CreateTime: latestComment.CreateTime,
 		})
 	}
 	return result, nil
@@ -104,12 +130,12 @@ func (r *CommentRepository) FindApprovedCommentById(ctx context.Context, cmtId s
 	}
 	return &domain.CommentWithReplies{
 		Comment: domain.Comment{
-			PostInfo: domain.PostInfo4Comment{
+			PostInfo: domain.PostInfo{
 				PostId:    comment.PostInfo.PostId,
 				PostTitle: comment.PostInfo.PostTitle,
 			},
 			Content: comment.Content,
-			UserInfo: domain.UserInfo4Comment{
+			UserInfo: domain.UserInfo{
 				Name:    comment.UserInfo.Name,
 				Email:   comment.UserInfo.Email,
 				Ip:      comment.UserInfo.Ip,
@@ -124,7 +150,7 @@ func (r *CommentRepository) AddComment(ctx context.Context, comment domain.Comme
 	unix := time.Now().Unix()
 	return r.dao.AddComment(ctx, dao.Comment{
 		Id:         uuid.NewString(),
-		PostInfo:   dao.PostInfo4Comment(comment.PostInfo),
+		PostInfo:   dao.PostInfo(comment.PostInfo),
 		Content:    comment.Content,
 		UserInfo:   dao.UserInfo4Comment(comment.UserInfo),
 		Replies:    make([]dao.CommentReply, 0),
@@ -152,12 +178,28 @@ func (r *CommentRepository) toDomainComment(comments []*dao.Comment) []domain.Co
 		result = append(result, domain.CommentWithReplies{
 			Comment: domain.Comment{
 				Id:         comment.Id,
-				PostInfo:   domain.PostInfo4Comment(comment.PostInfo),
+				PostInfo:   domain.PostInfo(comment.PostInfo),
 				Content:    comment.Content,
-				UserInfo:   domain.UserInfo4Comment(comment.UserInfo),
+				UserInfo:   domain.UserInfo(comment.UserInfo),
 				CreateTime: comment.CreateTime,
 			},
 			Replies: replies,
+		})
+	}
+	return result
+}
+
+func (r *CommentRepository) toDomainAdminComments(friends []dao.AdminComment) []domain.AdminComment {
+	result := make([]domain.AdminComment, 0, len(friends))
+	for _, friend := range friends {
+		result = append(result, domain.AdminComment{
+			Id:         friend.Id,
+			PostInfo:   domain.PostInfo(friend.PostInfo),
+			Content:    friend.Content,
+			UserInfo:   domain.UserInfo(friend.UserInfo),
+			Fid:        friend.Fid,
+			Type:       friend.Type,
+			CreateTime: friend.CreateTime,
 		})
 	}
 	return result

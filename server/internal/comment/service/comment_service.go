@@ -19,6 +19,7 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/repository"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/pkg/errors"
 )
 
@@ -27,6 +28,7 @@ type ICommentService interface {
 	AddCommentReply(ctx context.Context, cmtId string, postId string, commentReply domain.CommentReply) (string, error)
 	FineLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error)
 	FindCommentsByPostId(ctx context.Context, postId string) ([]domain.CommentWithReplies, error)
+	AdminGetComments(ctx context.Context, pageDTO dto.PageDTO) ([]domain.AdminComment, int64, error)
 }
 
 func NewCommentService(repo repository.ICommentRepository) *CommentService {
@@ -39,6 +41,10 @@ var _ ICommentService = (*CommentService)(nil)
 
 type CommentService struct {
 	repo repository.ICommentRepository
+}
+
+func (s *CommentService) AdminGetComments(ctx context.Context, pageDTO dto.PageDTO) ([]domain.AdminComment, int64, error) {
+	return s.repo.FindPage(ctx, pageDTO)
 }
 
 func (s *CommentService) FindCommentsByPostId(ctx context.Context, postId string) ([]domain.CommentWithReplies, error) {
