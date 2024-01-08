@@ -30,3 +30,7 @@ type Friend struct {
 func (f Friend) IsApproved() bool {
 	return f.Status == 1 || f.Status == 2
 }
+
+func (f Friend) IsRejected() bool {
+	return f.Status == 3
+}
