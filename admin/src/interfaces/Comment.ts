@@ -1,16 +1,17 @@
-export interface Comment{
-  id: string;
+export interface Comment {
+  id: string
   post_info: {
-    post_id: string;
-    post_title: string;
+    post_id: string
+    post_title: string
+    post_url: string
   }
-  content: string;
+  content: string
   user_info: {
-    username: string;
-    email: string;
-    website?: string;
-    ip: string;
+    username: string
+    email: string
+    website?: string
+    ip: string
   }
-  fid?: string;
-  type: number;
+  fid?: string
+  type: number
 }

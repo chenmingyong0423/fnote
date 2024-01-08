@@ -12,7 +12,7 @@
 
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'id'">
-        {{ `https://chenmingyong.cn/posts/${record.id}` }}
+        {{ `/${record.id}` }}
       </template>
       <template v-if="column.key === 'cover_img'">
         <a-image :width="200" :src="record.cover_img" />

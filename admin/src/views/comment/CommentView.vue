@@ -2,33 +2,51 @@
   <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
     <template #bodyCell="{ column, text, record }">
       <template v-if="column.dataIndex === 'post'">
-        <a :href="`${domain}/${record.post_info.post_id}`" target="_blank">{{record.post_info.post_title}}</a>
+        <a :href="record.post_info.post_url" target="_blank">{{ record.post_info.post_url }}</a>
       </template>
       <template v-if="column.dataIndex === 'type'">
         <a-tag color="success">{{ record.type == 0 ? '评论' : '回复' }}</a-tag>
       </template>
       <template v-if="column.dataIndex === 'replied_content'">
-       {{ record.replied_content }}
+        {{ record.replied_content }}
       </template>
       <template v-if="column.dataIndex === 'status'">
-          <a-tag
-            :color="
-              record.status === 0 ? 'processing' : record.status === 1 ? 'success' : 'warning'
-            "
-          >{{ statusConvert(record.status) }}</a-tag>
+        <a-tag
+          :color="record.status === 0 ? 'processing' : record.status === 1 ? 'success' : 'warning'"
+          >{{ statusConvert(record.status) }}</a-tag
+        >
       </template>
       <template v-if="column.dataIndex === 'create_time'">
         {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
         <div class="editable-row-operations">
-          <a-popconfirm v-if="data.length && record.status === 0" title="确认删除？" @confirm="approveComment(record)">
+          <a-popconfirm
+            v-if="data.length && record.status === 0"
+            title="确认通过？"
+            @confirm="approveComment(record)"
+          >
             <a>通过</a>
           </a-popconfirm>
-          <a-popconfirm v-if="data.length && record.status === 2" title="确认显示？" @confirm="updateStatus(record, 1)">
+          <a-popconfirm
+            v-if="data.length && record.status === 0"
+            title="确认驳回？"
+            @confirm="openDisapproveDialog(record)"
+          >
+            <a>驳回</a>
+          </a-popconfirm>
+          <a-popconfirm
+            v-if="data.length && record.status === 2"
+            title="确认显示？"
+            @confirm="updateStatus(record, 1)"
+          >
             <a>显示</a>
           </a-popconfirm>
-          <a-popconfirm v-if="data.length&& record.status === 1" title="确认隐藏？" @confirm="updateStatus(record, 2)">
+          <a-popconfirm
+            v-if="data.length && record.status === 1"
+            title="确认隐藏？"
+            @confirm="updateStatus(record, 2)"
+          >
             <a>隐藏</a>
           </a-popconfirm>
           <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteById(record)">
@@ -38,6 +56,9 @@
       </template>
     </template>
   </a-table>
+  <a-modal v-model:open="disapproveDialog" title="驳回原因" @ok="disapproveComment">
+    <a-input v-model:value="reason" placeholder="请输入审核不通过的原因。" />
+  </a-modal>
 </template>
 <script setup lang="ts">
 import dayjs from 'dayjs'
@@ -47,7 +68,7 @@ import axios from '@/http/axios'
 import type { Comment } from '@/interfaces/Comment'
 import { message } from 'ant-design-vue'
 
-const domain : string = window.location.host
+const domain: string = window.location.host
 
 const columns = [
   {
@@ -131,7 +152,7 @@ const approveComment = (record: Comment) => {
   if (record.type === 0) {
     approveCommentById(record.id)
   } else {
-    approveReplyById(record.fid, record.id)
+    approveReplyById(record.fid || '', record.id)
   }
 }
 
@@ -153,7 +174,6 @@ const approveCommentById = async (id: string) => {
 
 const approveReplyById = async (fid: string, id: string) => {
   try {
-    // 提交 body 参数 values
     const response = await axios.put<IBaseResponse>(`/admin/comments/${fid}/replies/${id}/approval`)
     if (response.data.code !== 200) {
       message.error(response.data.message)
@@ -164,6 +184,64 @@ const approveReplyById = async (fid: string, id: string) => {
   } catch (error) {
     console.log(error)
     message.error('审核失败')
+  }
+}
+
+const disapproveDialog = ref(false)
+const comment = ref<Comment>()
+const reason = ref('')
+
+const openDisapproveDialog = (record: Comment) => {
+  disapproveDialog.value = true
+  comment.value = record
+}
+const disapproveComment = () => {
+  if (comment.value?.type === 0) {
+    disapproveCommentById(comment.value.id!)
+  } else {
+    disapproveReplyById(comment.value?.fid || '', comment.value?.id!)
+  }
+}
+
+const disapproveCommentById = async (id: string) => {
+  try {
+    // 提交 body 参数 values
+    const response = await axios.put<IBaseResponse>(`/admin/comments/${id}/disapproval`, {
+      reason: reason.value
+    })
+    if (response.data.code !== 200) {
+      message.error(response.data.message)
+      return
+    }
+    message.success('驳回成功')
+    await get()
+    reason.value = ''
+    disapproveDialog.value = false
+  } catch (error) {
+    console.log(error)
+    message.error('驳回失败')
+  }
+}
+
+const disapproveReplyById = async (fid: string, id: string) => {
+  try {
+    const response = await axios.put<IBaseResponse>(
+      `/admin/comments/${fid}/replies/${id}/disapproval`,
+      {
+        reason: reason.value
+      }
+    )
+    if (response.data.code !== 200) {
+      message.error(response.data.message)
+      return
+    }
+    message.success('驳回成功')
+    await get()
+    reason.value = ''
+    disapproveDialog.value = false
+  } catch (error) {
+    console.log(error)
+    message.error('驳回失败')
   }
 }
 
@@ -211,8 +289,7 @@ const updateReplyStatusById = async (fid: string, id: string, status: number) =>
   }
 }
 
-
-const deleteById =  (record: Comment) => {
+const deleteById = (record: Comment) => {
   if (record.type === 0) {
     deleteCommentById(record.id)
   } else {
@@ -252,3 +329,9 @@ const deleteReplyById = async (fid: string, id: string) => {
   }
 }
 </script>
+
+<style scoped>
+.editable-row-operations a {
+  margin-right: 8px;
+}
+</style>
