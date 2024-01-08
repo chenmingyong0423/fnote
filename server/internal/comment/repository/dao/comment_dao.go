@@ -17,7 +17,10 @@ package dao
 import (
 	"context"
 	"fmt"
+
 	"github.com/chenmingyong0423/go-mongox"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/chenmingyong0423/go-mongox/builder/update"
 
@@ -31,7 +34,7 @@ import (
 type Comment struct {
 	Id string `bson:"_id"`
 	// 文章信息
-	PostInfo PostInfo4Comment `bson:"post_info"`
+	PostInfo PostInfo `bson:"post_info"`
 	// 评论的内容
 	Content string `bson:"content"`
 	// 用户信息
@@ -53,20 +56,24 @@ const (
 	CommentStatusPending CommentStatus = iota
 	// CommentStatusApproved 审核通过
 	CommentStatusApproved
+	// CommentStatusHidden 隐藏
+	CommentStatusHidden
 	// CommentStatusRejected 审核不通过
 	CommentStatusRejected
 )
 
-type UserInfo4Reply UserInfo4Comment
+type UserInfo4Reply UserInfo
 
-type UserInfo4Comment struct {
+type UserInfo4Comment UserInfo
+
+type UserInfo struct {
 	Name    string `bson:"name"`
 	Email   string `bson:"email"`
 	Ip      string `bson:"ip"`
 	Website string `bson:"website"`
 }
 
-type PostInfo4Comment struct {
+type PostInfo struct {
 	// 文章 ID
 	PostId string `bson:"post_id"`
 	// 文章标题字段
@@ -74,11 +81,11 @@ type PostInfo4Comment struct {
 }
 
 type LatestComment struct {
-	PostInfo4Comment `bson:"post_info"`
-	Name             string `bson:"name"`
-	Email            string `bson:email`
-	Content          string `bson:"content"`
-	CreateTime       int64  `bson:"create_time"`
+	PostInfo   `bson:"post_info"`
+	Name       string `bson:"name"`
+	Email      string `bson:"email"`
+	Content    string `bson:"content"`
+	CreateTime int64  `bson:"create_time"`
 }
 
 type CommentReply struct {
@@ -98,12 +105,25 @@ type CommentReply struct {
 	UpdateTime int64 `bson:"update_time"`
 }
 
+type AdminComment struct {
+	Id string `bson:"_id"`
+	// 评论的内容
+	PostInfo   PostInfo `bson:"post_info"`
+	Content    string   `bson:"content"`
+	UserInfo   UserInfo `bson:"user_info"`
+	Fid        string   `bson:"fid"`
+	Type       int      `bson:"type"`
+	CreateTime int64    `bson:"create_time"`
+}
+
 type ICommentDao interface {
 	AddComment(ctx context.Context, comment Comment) (string, error)
 	FindCommentById(ctx context.Context, cmtId string) (*Comment, error)
 	AddCommentReply(ctx context.Context, cmtId string, commentReply CommentReply) error
 	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error)
 	FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus uint) ([]*Comment, error)
+	AggregationQuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) (
+		[]AdminComment, int64, error)
 }
 
 func NewCommentDao(db *mongo.Database) *CommentDao {
@@ -116,6 +136,35 @@ var _ ICommentDao = (*CommentDao)(nil)
 
 type CommentDao struct {
 	coll *mongox.Collection[Comment]
+}
+
+func (d *CommentDao) AggregationQuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]AdminComment, int64, error) {
+	pipeline := aggregation.StageBsonBuilder().
+		Match(bson.D{}).
+		Project(aggregation.ConcatArrays("combined", []any{
+			bsonx.A(bsonx.NewD().Add("post_info", "$post_info").Add("user_info", "$user_info").Add("content", "$content").Add("create_time", "$create_time").Add("type", 0).Build()),
+			aggregation.MapWithoutKey(
+				"$replies",
+				"reply",
+				bsonx.NewD().Add("_id", "$$reply.reply_id").Add("fid", "$_id").Add("post_info", "$post_info").Add("user_info", "$$reply.user_info").Add("content", "$$reply.content").Add("create_time", "$$reply.create_time").Add("type", 1).Build(),
+			),
+		}...)).
+		Unwind("$combined", nil).
+		ReplaceWith("$combined").
+		Sort(bsonx.M("create_time", -1)).Build()
+
+	var results []AdminComment
+
+	// 执行聚合查询
+	err := d.coll.Aggregator().Pipeline(pipeline).AggregateWithCallback(ctx, func(ctx context.Context, cursor *mongo.Cursor) error {
+		// 解析并输出结果
+		return cursor.All(ctx, &results)
+	})
+	if err != nil {
+		return nil, 0, errors.Wrapf(err, "Fails to execute aggregation operation, pipeline=%v", pipeline)
+	}
+
+	return results, 0, nil
 }
 
 func (d *CommentDao) FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus uint) ([]*Comment, error) {

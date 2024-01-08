@@ -18,10 +18,13 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/spf13/viper"
 	"log/slog"
 	"net/http"
 	"strings"
+
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
+	"github.com/spf13/viper"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/vo"
 
@@ -62,10 +65,15 @@ type CommentRequest struct {
 
 func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/comments")
+	group.GET("/latest", api.Wrap(h.GetLatestCommentAndReply))
+	// 评论
 	group.GET("/id/:id", api.Wrap(h.GetCommentsByPostId))
 	group.POST("", api.WrapWithBody(h.AddComment))
+	// 评论回复
 	group.POST("/:commentId/replies", api.WrapWithBody(h.AddCommentReply))
-	group.GET("/latest", api.Wrap(h.GetLatestCommentAndReply))
+
+	adminGroup := engine.Group("/admin/comments")
+	adminGroup.GET("", api.WrapWithBody(h.AdminGetComments))
 }
 
 func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo api.IdVO, err error) {
@@ -91,12 +99,12 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo ap
 		return vo, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
 	vo.Id, err = h.serv.AddComment(ctx, domain.Comment{
-		PostInfo: domain.PostInfo4Comment{
+		PostInfo: domain.PostInfo{
 			PostId:    req.PostId,
 			PostTitle: post.Title,
 		},
 		Content: req.Content,
-		UserInfo: domain.UserInfo4Comment{
+		UserInfo: domain.UserInfo{
 			Name:    req.UserName,
 			Email:   req.Email,
 			Ip:      ip,
@@ -197,11 +205,11 @@ func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) (result api.
 			picture = viper.GetString("gravatar.api") + hex.EncodeToString(hash[:])
 		}
 		lc = append(lc, vo.LatestCommentVO{
-			PostInfo4Comment: vo.PostInfo4Comment(latestComment.PostInfo4Comment),
-			Name:             latestComment.Name,
-			Content:          latestComment.Content,
-			Picture:          picture,
-			CreateTime:       latestComment.CreateTime,
+			PostInfo:   vo.PostInfo(latestComment.PostInfo),
+			Name:       latestComment.Name,
+			Content:    latestComment.Content,
+			Picture:    picture,
+			CreateTime: latestComment.CreateTime,
 		})
 	}
 	result.List = lc
@@ -255,4 +263,38 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (listVO api.ListV
 	}
 	listVO.List = pc
 	return
+}
+
+func (h *CommentHandler) AdminGetComments(ctx *gin.Context, req request.PageRequest) (pageVO api.PageVO[vo.AdminCommentVO], err error) {
+	friends, total, err := h.serv.AdminGetComments(ctx, dto.PageDTO{
+		PageNo:   req.PageNo,
+		PageSize: req.PageSize,
+		Field:    req.Field,
+		Order:    req.Order,
+		Keyword:  req.Keyword,
+	})
+	if err != nil {
+		return
+	}
+	pageVO.PageNo = req.PageNo
+	pageVO.PageSize = req.PageSize
+	pageVO.List = h.toAdminCommentVO(friends)
+	pageVO.SetTotalCountAndCalculateTotalPages(total)
+	return
+}
+
+func (h *CommentHandler) toAdminCommentVO(friends []domain.AdminComment) []vo.AdminCommentVO {
+	result := make([]vo.AdminCommentVO, 0, len(friends))
+	for _, friend := range friends {
+		result = append(result, vo.AdminCommentVO{
+			Id:         friend.Id,
+			PostInfo:   vo.PostInfo(friend.PostInfo),
+			Content:    friend.Content,
+			UserInfo:   vo.AdminUserInfoVO(friend.UserInfo),
+			Fid:        friend.Fid,
+			Type:       friend.Type,
+			CreateTime: friend.CreateTime,
+		})
+	}
+	return result
 }
