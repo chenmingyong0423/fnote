@@ -52,6 +52,7 @@ type IPostService interface {
 	AdminGetPosts(ctx context.Context, pageDTO dto.PageDTO) ([]*domain.Post, int64, error)
 	AddPost(ctx context.Context, post domain.Post) error
 	DeletePost(ctx context.Context, id string) error
+	DecreaseCommentCount(ctx context.Context, postId string, cnt int) error
 }
 
 var _ IPostService = (*PostService)(nil)
@@ -71,6 +72,10 @@ type PostService struct {
 	countStats  service2.ICountStatsService
 	fileService service3.IFileService
 	ipMap       sync.Map
+}
+
+func (s *PostService) DecreaseCommentCount(ctx context.Context, postId string, cnt int) error {
+	return s.repo.DecreaseCommentCount(ctx, postId, cnt)
 }
 
 func (s *PostService) DeletePost(ctx context.Context, id string) error {

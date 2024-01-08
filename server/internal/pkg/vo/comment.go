@@ -27,6 +27,8 @@ type PostInfo struct {
 	PostId string `json:"post_id"`
 	// 文章标题字段
 	PostTitle string `json:"post_title"`
+	// 文章链接
+	PostUrl string `json:"post_url"`
 }
 
 type PostCommentVO struct {
@@ -66,6 +68,7 @@ type AdminCommentVO struct {
 	UserInfo   AdminUserInfoVO `json:"user_info"`
 	Fid        string          `json:"fid"`
 	Type       int             `json:"type"`
+	Status     int             `json:"status"`
 	CreateTime int64           `json:"create_time"`
 }
 

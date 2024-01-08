@@ -46,6 +46,7 @@ type IPostRepository interface {
 	AddPost(ctx context.Context, post domain.Post) error
 	DeletePost(ctx context.Context, id string) error
 	FindPostById(ctx context.Context, id string) (*domain.Post, error)
+	DecreaseCommentCount(ctx context.Context, postId string, cnt int) error
 }
 
 var _ IPostRepository = (*PostRepository)(nil)
@@ -58,6 +59,10 @@ func NewPostRepository(dao dao.IPostDao) *PostRepository {
 
 type PostRepository struct {
 	dao dao.IPostDao
+}
+
+func (r *PostRepository) DecreaseCommentCount(ctx context.Context, postId string, cnt int) error {
+	return r.dao.DecreaseByField(ctx, postId, "comment_count", cnt)
 }
 
 func (r *PostRepository) FindPostById(ctx context.Context, id string) (*domain.Post, error) {
