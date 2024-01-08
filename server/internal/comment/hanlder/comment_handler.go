@@ -15,7 +15,10 @@
 package hanlder
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
+	"github.com/spf13/viper"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -188,10 +191,13 @@ func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) (result api.
 	}
 	lc := make([]vo.LatestCommentVO, 0, len(latestComments))
 	for _, latestComment := range latestComments {
+		hash := md5.Sum([]byte(strings.ToLower(latestComment.Email)))
+		picture := hex.EncodeToString(hash[:])
 		lc = append(lc, vo.LatestCommentVO{
 			PostInfo4Comment: vo.PostInfo4Comment(latestComment.PostInfo4Comment),
 			Name:             latestComment.Name,
 			Content:          latestComment.Content,
+			Picture:          viper.GetString("gravatar.api") + picture,
 			CreateTime:       latestComment.CreateTime,
 		})
 	}

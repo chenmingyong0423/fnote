@@ -16,6 +16,7 @@ package vo
 
 type LatestCommentVO struct {
 	PostInfo4Comment
+	Picture    string `json:"picture"`
 	Name       string `json:"name"`
 	Content    string `json:"content"`
 	CreateTime int64  `json:"create_time"`
