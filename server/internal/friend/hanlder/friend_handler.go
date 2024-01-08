@@ -60,7 +60,8 @@ func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.GET("", api.WrapWithBody(h.AdminGetFriends))
 	adminGroup.PUT("/:id", api.WrapWithBody(h.AdminUpdateFriend))
 	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteFriend))
-	adminGroup.PUT("/:id/approval", api.Wrap(h.AdminApproveFriend))
+	adminGroup.PUT("/:id/approval", api.WrapWithBody(h.AdminApproveFriend))
+	adminGroup.PUT("/:id/rejection", api.WrapWithBody(h.AdminRejectFriend))
 }
 
 func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[vo.FriendVO], err error) {
@@ -186,6 +187,34 @@ func (h *FriendHandler) AdminDeleteFriend(ctx *gin.Context) (any, error) {
 	return nil, h.serv.AdminDeleteFriend(ctx, id)
 }
 
-func (h *FriendHandler) AdminApproveFriend(ctx *gin.Context) (any, error) {
-	return nil, h.serv.AdminApproveFriend(ctx, ctx.Param("id"))
+func (h *FriendHandler) AdminApproveFriend(ctx *gin.Context, req request.FriendApproveReq) (any, error) {
+	email, err := h.serv.AdminApproveFriend(ctx, ctx.Param("id"))
+	if err != nil {
+		return nil, err
+	}
+	// 发送邮件通知朋友
+	go func() {
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-approval", email, "text/plain", req.Host)
+		if gErr != nil {
+			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+	}()
+	return nil, nil
+}
+
+func (h *FriendHandler) AdminRejectFriend(ctx *gin.Context, req request.FriendRejectReq) (any, error) {
+	email, err := h.serv.AdminRejectFriend(ctx, ctx.Param("id"))
+	if err != nil {
+		return nil, err
+	}
+	// 发送邮件通知朋友
+	go func() {
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-rejection", email, "text/plain", req.Host, req.Reason)
+		if gErr != nil {
+			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+	}()
+	return nil, nil
 }

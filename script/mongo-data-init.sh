@@ -234,7 +234,7 @@ db.getCollection("message_template").insertOne({
 });
 
 db.getCollection("message_template").insertOne({
-    name: "friend-rejected",
+    name: "friend-rejection",
     title: "友链申请不通过通知",
     content: "您好，您在 %s 网站里提交的友链申请未通过审核，原因：%s",
     create_time: Math.floor(new Date().getTime() / 1000),

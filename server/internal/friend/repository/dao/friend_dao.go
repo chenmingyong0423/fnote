@@ -72,6 +72,7 @@ type IFriendDao interface {
 	DeleteById(ctx context.Context, objectID primitive.ObjectID) error
 	FindById(ctx context.Context, objectID primitive.ObjectID) (*Friend, error)
 	UpdateApproved(ctx context.Context, objectID primitive.ObjectID) error
+	UpdateRejected(ctx context.Context, id primitive.ObjectID) error
 }
 
 var _ IFriendDao = (*FriendDao)(nil)
@@ -86,8 +87,19 @@ type FriendDao struct {
 	coll *mongox.Collection[Friend]
 }
 
+func (d *FriendDao) UpdateRejected(ctx context.Context, id primitive.ObjectID) error {
+	updateOne, err := d.coll.Updater().Filter(query.BsonBuilder().Id(id).Ne("status", FriendStatusRejected).Build()).Updates(update.BsonBuilder().Set("status", FriendStatusRejected).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to update the document from friends, id=%s", id.Hex())
+	}
+	if updateOne.ModifiedCount == 0 {
+		return fmt.Errorf("fails to update the document from friends, id=%s", id.Hex())
+	}
+	return nil
+}
+
 func (d *FriendDao) UpdateApproved(ctx context.Context, objectID primitive.ObjectID) error {
-	updateOne, err := d.coll.Updater().Filter(query.BsonBuilder().Id(objectID).Ne("status", FriendStatusApproved)).Updates(update.BsonBuilder().Set("status", FriendStatusApproved).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.BsonBuilder().Id(objectID).Ne("status", FriendStatusApproved).Build()).Updates(update.BsonBuilder().Set("status", FriendStatusApproved).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the document from friends, id=%s", objectID.Hex())
 	}
