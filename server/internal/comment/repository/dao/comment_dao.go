@@ -17,10 +17,10 @@ package dao
 import (
 	"context"
 	"fmt"
+	"github.com/chenmingyong0423/go-mongox"
 
 	"github.com/chenmingyong0423/go-mongox/builder/update"
 
-	"github.com/chenmingyong0423/go-mongox"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
 	"github.com/chenmingyong0423/go-mongox/types"
@@ -76,6 +76,7 @@ type PostInfo4Comment struct {
 type LatestComment struct {
 	PostInfo4Comment `bson:"post_info"`
 	Name             string `bson:"name"`
+	Email            string `bson:email`
 	Content          string `bson:"content"`
 	CreateTime       int64  `bson:"create_time"`
 }
@@ -130,11 +131,11 @@ func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]
 	pipeline := aggregation.StageBsonBuilder().
 		Match(bsonx.M("status", CommentStatusApproved)).
 		Project(aggregation.ConcatArrays("combined", []any{
-			bsonx.A(bsonx.NewD().Add("post_info", "$post_info").Add("name", "$user_info.name").Add("content", "$content").Add("create_time", "$create_time").Build()),
+			bsonx.A(bsonx.NewD().Add("post_info", "$post_info").Add("name", "$user_info.name").Add("email", "$user_info.email").Add("content", "$content").Add("create_time", "$create_time").Build()),
 			aggregation.MapWithoutKey(
 				aggregation.FilterWithoutKey("$replies", aggregation.EqWithoutKey("$$replyItem.status", CommentStatusApproved), &types.FilterOptions{As: "replyItem"}),
 				"reply",
-				bsonx.NewD().Add("post_info", "$post_info").Add("name", "$$reply.user_info.name").Add("content", "$$reply.content").Add("create_time", "$$reply.create_time").Build(),
+				bsonx.NewD().Add("post_info", "$post_info").Add("name", "$$reply.user_info.name").Add("email", "$$reply.user_info.email").Add("content", "$$reply.content").Add("create_time", "$$reply.create_time").Build(),
 			),
 		}...)).
 		Unwind("$combined", nil).
@@ -146,7 +147,7 @@ func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]
 	//	{primitive.E{Key: "$project", Value: bson.M{
 	//		"combined": bson.M{
 	//			"$concatArrays": []any{
-	//				bson.A{bson.M{"post_info": "$post_info", "name": "$user_info.name", "content": "$content", "create_time": "$create_time"}},
+	//				bson.A{bson.M{"post_info": "$post_info", "name": "$user_info.name", "content": "$content", "create_time": "$create_time", "email": "$user_info.email"}},
 	//				//"$replies",
 	//				bson.M{
 	//					"$map": bson.M{
@@ -163,6 +164,7 @@ func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]
 	//							"name":        "$$reply.user_info.name",
 	//							"content":     "$$reply.content",
 	//							"create_time": "$$reply.create_time",
+	// 							"email": "$$reply.user_info.email",
 	//						},
 	//					},
 	//				},
