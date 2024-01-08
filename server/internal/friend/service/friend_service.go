@@ -33,7 +33,8 @@ type IFriendService interface {
 	AdminGetFriends(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Friend, int64, error)
 	AdminUpdateFriend(ctx context.Context, friend domain.Friend) error
 	AdminDeleteFriend(ctx context.Context, id string) error
-	AdminApproveFriend(ctx context.Context, id string) error
+	AdminApproveFriend(ctx context.Context, id string) (string, error)
+	AdminRejectFriend(ctx context.Context, id string) (string, error)
 }
 
 var _ IFriendService = (*FriendService)(nil)
@@ -48,23 +49,40 @@ type FriendService struct {
 	repo repository.IFriendRepository
 }
 
-func (s *FriendService) AdminApproveFriend(ctx context.Context, id string) error {
+func (s *FriendService) AdminRejectFriend(ctx context.Context, id string) (string, error) {
 	friend, err := s.repo.FindById(ctx, id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return api.NewErrorResponseBody(http.StatusNotFound, "friend not found")
+			return "", api.NewErrorResponseBody(http.StatusNotFound, "friend not found")
 		}
-		return err
+		return "", err
+	}
+	if friend.IsRejected() {
+		return "", api.NewErrorResponseBody(http.StatusBadRequest, "friend already rejected")
+	}
+	err = s.repo.UpdateFriendRejected(ctx, id)
+	if err != nil {
+		return "", err
+	}
+	return friend.Email, nil
+}
+
+func (s *FriendService) AdminApproveFriend(ctx context.Context, id string) (string, error) {
+	friend, err := s.repo.FindById(ctx, id)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return "", api.NewErrorResponseBody(http.StatusNotFound, "friend not found")
+		}
+		return "", err
 	}
 	if friend.IsApproved() {
-		return api.NewErrorResponseBody(http.StatusBadRequest, "friend already accepted")
+		return "", api.NewErrorResponseBody(http.StatusBadRequest, "friend already accepted")
 	}
 	err = s.repo.UpdateFriendApproved(ctx, id)
 	if err != nil {
-		return err
+		return "", err
 	}
-	// 邮件通知 todo
-	return nil
+	return friend.Email, nil
 }
 
 func (s *FriendService) AdminDeleteFriend(ctx context.Context, id string) error {
