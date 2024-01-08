@@ -2,6 +2,7 @@
   <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
     <template #bodyCell="{ column, text, record }">
       <template v-if="column.dataIndex === 'logo'">
+        {{ record.id }}
         <a-input
           v-if="editableData[record.id]"
           v-model:value="editableData[record.id][column.dataIndex]"
@@ -45,13 +46,29 @@
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
         <div class="editable-row-operations">
-          <a-popconfirm
-            v-if="data.length && record.status === 0"
-            title="确认接受？"
-            @confirm="approved(record.id)"
+          <a-modal
+            v-model:open="approvalDialog"
+            title="请输入博客地址，默认值为当前域名。"
+            @ok="approved"
           >
+            <a-input v-model:value="blogUrl" placeholder="请输入博客地址，默认值为当前域名。" />
+          </a-modal>
+
+          <span v-if="data.length && record.status === 0" @click="openApprovalDialog(record.id)">
             <a>接受</a>
-          </a-popconfirm>
+          </span>
+
+          <a-modal
+            v-model:open="rejectionDialog"
+            title="请输入博客地址，默认值为当前域名。"
+            @ok="rejected"
+          >
+            <a-input v-model:value="blogUrl" placeholder="请输入博客地址，默认值为当前域名。" />
+            <a-input v-model:value="reason" placeholder="请输入审核不通过的原因。" />
+          </a-modal>
+          <span v-if="data.length && record.status === 0" @click="openRejectionDialog(record.id)">
+            <a>拒绝</a>
+          </span>
 
           <span v-if="editableData[record.id]">
             <a-typography-link @click="save(record.id)">保存</a-typography-link>
@@ -133,6 +150,7 @@ const pagination = computed(() => ({
   current: pageReq.value.pageNo,
   pageSize: pageReq.value.pageSize
 }))
+
 const get = async () => {
   try {
     const response = await axios.get<IResponse<IPageData<Friend>>>('/admin/friends', {
@@ -167,19 +185,61 @@ const deleteInfo = async (id: string) => {
   }
 }
 
-const approved = async (id: string) => {
+const blogUrl = ref(window.location.host)
+const approvalDialog = ref(false)
+
+const updatedId = ref('')
+
+const openApprovalDialog = (id: string) => {
+  updatedId.value = id
+  approvalDialog.value = true
+}
+
+const approved = async () => {
   try {
     // 提交 body 参数 values
-    const response = await axios.put<IBaseResponse>(`/admin/friends/${id}/approval`)
+    const response = await axios.put<IBaseResponse>(`/admin/friends/${updatedId.value}/approval`, {
+      host: blogUrl.value
+    })
     if (response.data.code !== 200) {
       message.error(response.data.message)
       return
     }
     message.success('接受成功')
+    approvalDialog.value = false
+    updatedId.value = ''
     await get()
   } catch (error) {
     console.log(error)
     message.error('接受失败')
+  }
+}
+
+const openRejectionDialog = (id: string) => {
+  updatedId.value = id
+  rejectionDialog.value = true
+}
+
+const rejectionDialog = ref(false)
+const reason = ref('')
+const rejected = async () => {
+  try {
+    // 提交 body 参数 values
+    const response = await axios.put<IBaseResponse>(`/admin/friends/${updatedId.value}/rejection`, {
+      host: blogUrl.value,
+      reason: reason.value
+    })
+    if (response.data.code !== 200) {
+      message.error(response.data.message)
+      return
+    }
+    message.success('拒绝成功')
+    await get()
+    rejectionDialog.value = false
+    updatedId.value = ''
+  } catch (error) {
+    console.log(error)
+    message.error('拒绝失败')
   }
 }
 
