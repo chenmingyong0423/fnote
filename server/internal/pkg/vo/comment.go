@@ -15,14 +15,14 @@
 package vo
 
 type LatestCommentVO struct {
-	PostInfo4Comment
+	PostInfo
 	Picture    string `json:"picture"`
 	Name       string `json:"name"`
 	Content    string `json:"content"`
 	CreateTime int64  `json:"create_time"`
 }
 
-type PostInfo4Comment struct {
+type PostInfo struct {
 	// 文章 ID
 	PostId string `json:"post_id"`
 	// 文章标题字段
@@ -56,4 +56,24 @@ type PostCommentReplyVO struct {
 	ReplyTo string `json:"reply_to"`
 	// 回复时间
 	ReplyTime int64 `json:"reply_time"`
+}
+
+type AdminCommentVO struct {
+	Id string `json:"id"`
+	// 评论的内容
+	PostInfo   PostInfo        `json:"post_info"`
+	Content    string          `json:"content"`
+	UserInfo   AdminUserInfoVO `json:"user_info"`
+	Fid        string          `json:"fid"`
+	Type       int             `json:"type"`
+	CreateTime int64           `json:"create_time"`
+}
+
+type AdminUserInfoVO UserInfoVO
+
+type UserInfoVO struct {
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	Ip      string `json:"ip"`
+	Website string `json:"website"`
 }
