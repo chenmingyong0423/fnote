@@ -220,7 +220,7 @@ db.getCollection("message_template").insertOne({
     content: "您好，您在 %s 文章中发表的评论已通过审核。",
     create_time: Math.floor(new Date().getTime() / 1000),
     update_time: Math.floor(new Date().getTime() / 1000),
-    recipient_type: 0,
+    recipient_type: 1,
     active: 1
 });
 
@@ -230,17 +230,17 @@ db.getCollection("message_template").insertOne({
     content: "您好，您在 %s 文章中发表的评论未通过审核，原因：%s",
     create_time: Math.floor(new Date().getTime() / 1000),
     update_time: Math.floor(new Date().getTime() / 1000),
-    recipient_type: 0,
+    recipient_type: 1,
     active: 1
 });
 
 db.getCollection("message_template").insertOne({
-    name: "user-comment-be-replied",
+    name: "user-comment-reply",
     title: "评论被回复通知",
     content: "您好，您在 %s 文章中发表的评论有新的回复。",
     create_time: Math.floor(new Date().getTime() / 1000),
     update_time: Math.floor(new Date().getTime() / 1000),
-    recipient_type: 0,
+    recipient_type: 1,
     active: 1
 });
 
