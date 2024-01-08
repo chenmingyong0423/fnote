@@ -60,7 +60,7 @@ func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.GET("", api.WrapWithBody(h.AdminGetFriends))
 	adminGroup.PUT("/:id", api.WrapWithBody(h.AdminUpdateFriend))
 	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteFriend))
-	adminGroup.PUT("/:id/accept", api.Wrap(h.AdminAcceptFriend))
+	adminGroup.PUT("/:id/approval", api.Wrap(h.AdminApproveFriend))
 }
 
 func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[vo.FriendVO], err error) {
@@ -186,6 +186,6 @@ func (h *FriendHandler) AdminDeleteFriend(ctx *gin.Context) (any, error) {
 	return nil, h.serv.AdminDeleteFriend(ctx, id)
 }
 
-func (h *FriendHandler) AdminAcceptFriend(ctx *gin.Context) (any, error) {
-	return nil, h.serv.AdminAcceptFriend(ctx, ctx.Param("id"))
+func (h *FriendHandler) AdminApproveFriend(ctx *gin.Context) (any, error) {
+	return nil, h.serv.AdminApproveFriend(ctx, ctx.Param("id"))
 }

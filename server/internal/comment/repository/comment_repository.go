@@ -62,6 +62,7 @@ func (r *CommentRepository) FineLatestCommentAndReply(ctx context.Context, cnt i
 		result = append(result, domain.LatestComment{
 			PostInfo4Comment: domain.PostInfo4Comment(latestComment.PostInfo4Comment),
 			Name:             latestComment.Name,
+			Email:            latestComment.Email,
 			Content:          latestComment.Content,
 			CreateTime:       latestComment.CreateTime,
 		})

@@ -16,6 +16,7 @@ package vo
 
 type LatestCommentVO struct {
 	PostInfo4Comment
+	Picture    string `json:"picture"`
 	Name       string `json:"name"`
 	Content    string `json:"content"`
 	CreateTime int64  `json:"create_time"`
@@ -34,7 +35,7 @@ type PostCommentVO struct {
 	Content string `json:"content"`
 	// 评论的用户
 	Name        string               `json:"username"`
-	Email       string               `json:"email"`
+	Picture     string               `json:"picture"`
 	Website     string               `json:"website"`
 	CommentTime int64                `json:"comment_time"`
 	Replies     []PostCommentReplyVO `json:"replies,omitempty"`
@@ -47,7 +48,7 @@ type PostCommentReplyVO struct {
 	Content string `json:"content"`
 	// 回复的用户
 	Name    string `json:"name"`
-	Email   string `json:"email"`
+	Picture string `json:"picture"`
 	Website string `json:"website"`
 	// 被回复的回复 Id
 	ReplyToId string `json:"reply_to_id"`
