@@ -15,7 +15,7 @@
 package domain
 
 type LatestComment struct {
-	PostInfo4Comment
+	PostInfo
 	Name       string
 	Content    string
 	Email      string
@@ -30,11 +30,11 @@ type CommentWithReplies struct {
 type Comment struct {
 	Id string
 	// 文章信息
-	PostInfo PostInfo4Comment
+	PostInfo PostInfo
 	// 评论的内容
 	Content string
 	// 用户信息
-	UserInfo   UserInfo4Comment
+	UserInfo   UserInfo
 	CreateTime int64
 }
 
@@ -52,16 +52,16 @@ type CommentReply struct {
 	CreateTime      int64
 }
 
-type UserInfo4Reply UserInfo4Comment
+type UserInfo4Reply UserInfo
 
-type PostInfo4Comment struct {
+type PostInfo struct {
 	// 文章 ID
 	PostId string
 	// 文章标题字段
 	PostTitle string
 }
 
-type UserInfo4Comment struct {
+type UserInfo struct {
 	Name    string
 	Email   string
 	Ip      string
@@ -78,3 +78,14 @@ const (
 	// CommentStatusRejected 审核不通过
 	CommentStatusRejected
 )
+
+type AdminComment struct {
+	Id string `json:"_id"`
+	// 评论的内容
+	PostInfo   PostInfo `json:"post_info"`
+	Content    string   `json:"content"`
+	UserInfo   UserInfo `json:"user_info"`
+	Fid        string   `json:"fid"`
+	Type       int      `json:"type"`
+	CreateTime int64    `json:"create_time"`
+}
