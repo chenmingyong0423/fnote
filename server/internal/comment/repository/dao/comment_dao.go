@@ -145,7 +145,7 @@ type ICommentDao interface {
 
 func NewCommentDao(db *mongo.Database) *CommentDao {
 	return &CommentDao{
-		coll: mongox.NewCollection[Comment](db.Collection("comment")),
+		coll: mongox.NewCollection[Comment](db.Collection("comments")),
 	}
 }
 
