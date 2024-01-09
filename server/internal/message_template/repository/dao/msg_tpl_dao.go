@@ -44,7 +44,7 @@ type IMsgTplDao interface {
 var _ IMsgTplDao = (*MsgTplDao)(nil)
 
 func NewMsgTplDao(db *mongo.Database) *MsgTplDao {
-	return &MsgTplDao{coll: mongox.NewCollection[MessageTemplate](db.Collection("message_template"))}
+	return &MsgTplDao{coll: mongox.NewCollection[MessageTemplate](db.Collection("message_templates"))}
 }
 
 type MsgTplDao struct {
