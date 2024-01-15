@@ -134,7 +134,7 @@ func (r *FriendRepository) FindByUrl(ctx context.Context, url string) (friend do
 
 func (r *FriendRepository) Add(ctx context.Context, friend domain.Friend) error {
 	unix := time.Now().Unix()
-	err := r.dao.Add(ctx, dao.Friend{
+	err := r.dao.Add(ctx, &dao.Friend{
 		Name:        friend.Name,
 		Url:         friend.Url,
 		Logo:        friend.Logo,

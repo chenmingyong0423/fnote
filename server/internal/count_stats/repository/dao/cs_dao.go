@@ -41,7 +41,7 @@ type CountStats struct {
 
 type ICountStatsDao interface {
 	GetByReferenceIdAndType(ctx context.Context, referenceIds []string, statsType string) ([]*CountStats, error)
-	Create(ctx context.Context, countStats CountStats) (string, error)
+	Create(ctx context.Context, countStats *CountStats) (string, error)
 	DeleteByReferenceId(ctx context.Context, referenceId string) error
 	IncreaseByReferenceIds(ctx context.Context, ids []string) error
 	DecreaseByReferenceIds(ctx context.Context, ids []string) error
@@ -96,7 +96,7 @@ func (d *CountStatsDao) DeleteByReferenceId(ctx context.Context, referenceId str
 	return nil
 }
 
-func (d *CountStatsDao) Create(ctx context.Context, countStats CountStats) (string, error) {
+func (d *CountStatsDao) Create(ctx context.Context, countStats *CountStats) (string, error) {
 	oneResult, err := d.coll.Creator().InsertOne(ctx, countStats)
 	if err != nil {
 		return "", err

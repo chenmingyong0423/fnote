@@ -65,7 +65,7 @@ func (r *TagRepository) RecoverTag(ctx context.Context, tag domain.Tag) error {
 	if err != nil {
 		return err
 	}
-	return r.dao.RecoverTag(ctx, dao.Tags{
+	return r.dao.RecoverTag(ctx, &dao.Tags{
 		Id:         id,
 		Name:       tag.Name,
 		Route:      tag.Route,

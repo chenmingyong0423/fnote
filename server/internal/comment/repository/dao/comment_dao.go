@@ -128,7 +128,7 @@ type AdminComment struct {
 }
 
 type ICommentDao interface {
-	AddComment(ctx context.Context, comment Comment) (string, error)
+	AddComment(ctx context.Context, comment *Comment) (string, error)
 	FindApprovedCommentById(ctx context.Context, cmtId string) (*Comment, error)
 	AddCommentReply(ctx context.Context, cmtId string, commentReply Reply) error
 	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error)
@@ -363,7 +363,7 @@ func (d *CommentDao) FindApprovedCommentById(ctx context.Context, cmtId string) 
 	return comment, nil
 }
 
-func (d *CommentDao) AddComment(ctx context.Context, comment Comment) (string, error) {
+func (d *CommentDao) AddComment(ctx context.Context, comment *Comment) (string, error) {
 	result, err := d.coll.Creator().InsertOne(ctx, comment)
 	if err != nil {
 		return "", errors.Wrapf(err, "fails to insert into comment, comment=%v", comment)

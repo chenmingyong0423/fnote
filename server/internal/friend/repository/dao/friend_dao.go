@@ -65,7 +65,7 @@ const (
 
 type IFriendDao interface {
 	FindDisplaying(ctx context.Context) ([]*Friend, error)
-	Add(ctx context.Context, friend Friend) error
+	Add(ctx context.Context, friend *Friend) error
 	FindByUrl(ctx context.Context, url string) (*Friend, error)
 	QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Friend, int64, error)
 	UpdateById(ctx context.Context, objectID primitive.ObjectID, friend Friend) error
@@ -161,7 +161,7 @@ func (d *FriendDao) FindByUrl(ctx context.Context, url string) (*Friend, error) 
 	return friend, nil
 }
 
-func (d *FriendDao) Add(ctx context.Context, friend Friend) error {
+func (d *FriendDao) Add(ctx context.Context, friend *Friend) error {
 	result, err := d.coll.Creator().InsertOne(ctx, friend)
 	if err != nil {
 		return errors.Wrapf(err, "fails to insert into friends, friend=%v", friend)

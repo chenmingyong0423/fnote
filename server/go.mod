@@ -5,7 +5,7 @@ go 1.21.0
 require (
 	github.com/chenmingyong0423/ginx v0.0.2
 	github.com/chenmingyong0423/gkit v0.4.1
-	github.com/chenmingyong0423/go-mongox v0.9.1
+	github.com/chenmingyong0423/go-mongox v0.10.0
 	github.com/gin-contrib/cors v1.5.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.16.0
@@ -56,7 +56,7 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.7.0 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect

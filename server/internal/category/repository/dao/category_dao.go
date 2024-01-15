@@ -59,7 +59,7 @@ type ICategoryDao interface {
 	GetByShowInNav(ctx context.Context) ([]*Category, error)
 	ModifyCategoryNavigation(ctx context.Context, id primitive.ObjectID, showInNav bool) error
 	GetById(ctx context.Context, id primitive.ObjectID) (*Category, error)
-	RecoverCategory(ctx context.Context, category Category) error
+	RecoverCategory(ctx context.Context, category *Category) error
 	GetEnabled(ctx context.Context) ([]*Category, error)
 }
 
@@ -83,7 +83,7 @@ func (d *CategoryDao) GetEnabled(ctx context.Context) ([]*Category, error) {
 	return categories, nil
 }
 
-func (d *CategoryDao) RecoverCategory(ctx context.Context, category Category) error {
+func (d *CategoryDao) RecoverCategory(ctx context.Context, category *Category) error {
 	_, err := d.coll.Creator().InsertOne(ctx, category)
 	if err != nil {
 		return errors.Wrapf(err, "Recover category failed, category: %+v", category)
@@ -152,7 +152,7 @@ func (d *CategoryDao) ModifyEnabled(ctx context.Context, id primitive.ObjectID, 
 }
 
 func (d *CategoryDao) Create(ctx context.Context, category *Category) (string, error) {
-	oneResult, err := d.coll.Creator().InsertOne(ctx, *category)
+	oneResult, err := d.coll.Creator().InsertOne(ctx, category)
 	if err != nil {
 		return "", err
 	}

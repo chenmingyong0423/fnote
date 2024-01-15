@@ -8,6 +8,8 @@ github.com/chenmingyong0423/gkit v0.4.1 h1:MIzji9ROV7WKzg78PvN6tWHet2AePKmVjIj3E
 github.com/chenmingyong0423/gkit v0.4.1/go.mod h1:9MKV0/B3MiBCGf4fssogftFbNIGJk9a4ffm/o3+pkHw=
 github.com/chenmingyong0423/go-mongox v0.9.1 h1:92mffYqZeO/snyP0eBjERuxl1dmc5ScO+3aQ28yr6k8=
 github.com/chenmingyong0423/go-mongox v0.9.1/go.mod h1:JmYhO213VZzk/AZVpWE5d9cOEKPjCS8XJERirAeBoP8=
+github.com/chenmingyong0423/go-mongox v0.10.0 h1:QQ+uzp0T3CZUA1sT0eaAzLXv0IKmmsKI1WSSXEASAwc=
+github.com/chenmingyong0423/go-mongox v0.10.0/go.mod h1:JmYhO213VZzk/AZVpWE5d9cOEKPjCS8XJERirAeBoP8=
 github.com/chenzhuoyu/base64x v0.0.0-20211019084208-fb5309c8db06/go.mod h1:DH46F32mSOjUmXrMHnKwZdA8wcEefY7UVqBKYGjpdQY=
 github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311/go.mod h1:b583jCggY9gE99b6G5LEC39OIiVsWj+R97kbl5odCEk=
 github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d h1:77cEq6EriyTZ0g/qfRdp61a3Uu/AWrgIq2s0ClJV1g0=
@@ -150,6 +152,8 @@ golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5y
 golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
 golang.org/x/crypto v0.17.0 h1:r8bRNjWL3GshPW3gkd+RpvzWrZAwPS49OmTGZ/uhM4k=
 golang.org/x/crypto v0.17.0/go.mod h1:gCAAfMLgwOJRpTjQ2zCCt2OcSfYMTeZVSRtQlPC7Nq4=
+golang.org/x/crypto v0.18.0 h1:PGVlW0xEltQnzFZ55hkuX5+KLyrMYhHld1YHO4AKcdc=
+golang.org/x/crypto v0.18.0/go.mod h1:R0j02AL6hcrfOiy9T4ZYp/rcWeMxM3L6QYxlOuEG1mg=
 golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc h1:ao2WRsKSzW6KuUY9IWPwWahcHCgR0s52IfwutMfEbdM=
 golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc/go.mod h1:iRJReGqOEeBhDZGkGbynYwcHlctCvnjTYIamk7uXpHI=
 golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4/go.mod h1:jJ57K6gSWd91VN4djpZkiMVwK6gcyfeH4XE8wZrZaV4=

@@ -134,7 +134,7 @@ func (d *PostDao) DeleteById(ctx context.Context, id string) error {
 }
 
 func (d *PostDao) AddPost(ctx context.Context, post *Post) error {
-	_, err := d.coll.Creator().InsertOne(ctx, *post)
+	_, err := d.coll.Creator().InsertOne(ctx, post)
 	if err != nil {
 		return errors.Wrapf(err, "fails to insert a post, post=%v", post)
 	}
