@@ -36,4 +36,4 @@ mongodb:
   auth_source: fnote
   database: fnote
 gravatar:
-  api: https://1.gravatar.com/avatar/
+  api: https://dn-qiniu-avatar.qbox.me/avatar/
