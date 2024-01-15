@@ -2,10 +2,7 @@ mongosh -- "$MONGO_INITDB_DATABASE" <<EOF
 db = db.getSiblingDB('$MONGO_INITDB_DATABASE')
 db.auth('$MONGO_USERNAME', '$MONGO_PASSWORD');
 
-// ----------------------------
-// Collection structure for categories
-// ----------------------------
-db.getCollection("categories").drop();
+// categories
 db.createCollection("categories");
 db.getCollection("categories").createIndex({
     name: NumberInt("1")
@@ -13,7 +10,6 @@ db.getCollection("categories").createIndex({
     name: "unique_name",
     unique: true
 });
-
 db.getCollection("categories").createIndex({
     route: NumberInt("1")
 }, {
@@ -21,7 +17,7 @@ db.getCollection("categories").createIndex({
     unique: true
 });
 
-db.getCollection("tags").drop();
+// tags
 db.createCollection("tags");
 db.getCollection("tags").createIndex({
     name: NumberInt("1")
@@ -29,7 +25,6 @@ db.getCollection("tags").createIndex({
     name: "unique_name",
     unique: true
 });
-
 db.getCollection("tags").createIndex({
     route: NumberInt("1")
 }, {
@@ -37,27 +32,14 @@ db.getCollection("tags").createIndex({
     unique: true
 });
 
+// comments
+db.createCollection("comments");
+db.getCollection("comments").createIndex({ "post_info.post_id": 1 });
+db.getCollection("comments").createIndex({ "status": -1 });
 
-
-// ----------------------------
-// Collection structure for comment
-// ----------------------------
-db.getCollection("comment").drop();
-db.createCollection("comment");
-db.comment.createIndex({ "post_info.post_id": 1 });
-db.comment.createIndex({ "status": -1 });
-
-// ----------------------------
-// Collection structure for configs
-// ----------------------------
-db.getCollection("configs").drop();
+// configs
 db.createCollection("configs");
-
-db.configs.createIndex({ "typ": 1 });
-
-// ----------------------------
-// Documents of configs
-// ----------------------------
+db.getCollection("configs").createIndex({ "typ": 1 });
 // 站点信息
 db.getCollection("configs").insertOne({
   "create_time": Math.floor(new Date().getTime() / 1000),
@@ -87,7 +69,6 @@ db.getCollection("configs").insertOne(
     "update_time": Math.floor(new Date().getTime() / 1000)
   }
 )
-
 // seo 配置
 db.getCollection("configs").insertOne({
     "typ": "seo meta",
@@ -175,12 +156,9 @@ db.getCollection("configs").insertOne({
     update_time: Math.floor(new Date().getTime() / 1000)
 });
 
-// ----------------------------
-// Collection structure for friends
-// ----------------------------
-db.getCollection("friends").drop();
+// friends
 db.createCollection("friends");
-db.friends.createIndex({ status: 1, create_time: 1 })
+db.getCollection("friends").createIndex({ status: 1, create_time: 1 })
 db.getCollection("friends").createIndex({
     url: NumberInt("1")
 }, {
@@ -188,23 +166,18 @@ db.getCollection("friends").createIndex({
     unique: true
 });
 
-// ----------------------------
-// Collection structure for message_template
-// ----------------------------
-db.getCollection("message_template").drop();
-db.createCollection("message_template");
+// message_templates
+db.createCollection("message_templates");
 // 创建 name 升序索引
-db.getCollection("message_template").createIndex({
+db.getCollection("message_templates").createIndex({
     name: NumberInt("1")
 }, {
     name: "unique_name",
     unique: true
 });
 
-// ----------------------------
-// Documents of message_template
-// ----------------------------
-db.getCollection("message_template").insertOne({
+
+db.getCollection("message_templates").insertOne({
     name: "comment",
     title: "文章评论通知",
     content: "您好，您在文章有新的评论，详情请前往后台进行查看。",
@@ -214,7 +187,7 @@ db.getCollection("message_template").insertOne({
     active: 1
 });
 
-db.getCollection("message_template").insertOne({
+db.getCollection("message_templates").insertOne({
     name: "user-comment-approval",
     title: "评论审核通过通知",
     content: "您好，您在 %s 文章中发表的评论已通过审核。",
@@ -224,7 +197,7 @@ db.getCollection("message_template").insertOne({
     active: 1
 });
 
-db.getCollection("message_template").insertOne({
+db.getCollection("message_templates").insertOne({
     name: "user-comment-disapproval",
     title: "评论被驳回通知",
     content: "您好，您在 %s 文章中发表的评论未通过审核，原因：%s",
@@ -234,7 +207,7 @@ db.getCollection("message_template").insertOne({
     active: 1
 });
 
-db.getCollection("message_template").insertOne({
+db.getCollection("message_templates").insertOne({
     name: "user-comment-reply",
     title: "评论被回复通知",
     content: "您好，您在 %s 文章中发表的评论有新的回复。",
@@ -244,7 +217,7 @@ db.getCollection("message_template").insertOne({
     active: 1
 });
 
-db.getCollection("message_template").insertOne({
+db.getCollection("message_templates").insertOne({
     name: "friend",
     title: "友链申请通知",
     content: "您好，您的网站有了新的友链申请，详情可前往后台查看。",
@@ -254,7 +227,7 @@ db.getCollection("message_template").insertOne({
     recipient_type: 0
 });
 
-db.getCollection("message_template").insertOne({
+db.getCollection("message_templates").insertOne({
     name: "friend-approval",
     title: "友链申请通过通知",
     content: "您好，您在 %s 网站里提交的友链申请已通过审核并展示在页面上。",
@@ -264,7 +237,7 @@ db.getCollection("message_template").insertOne({
     active: 1
 });
 
-db.getCollection("message_template").insertOne({
+db.getCollection("message_templates").insertOne({
     name: "friend-rejection",
     title: "友链申请不通过通知",
     content: "您好，您在 %s 网站里提交的友链申请未通过审核，原因：%s",
@@ -274,27 +247,22 @@ db.getCollection("message_template").insertOne({
     active: 1
 });
 
-// ----------------------------
-// Collection structure for posts
-// ----------------------------
-db.getCollection("posts").drop();
+// posts
 db.createCollection("posts");
 // 创建 create_time 降序索引
-db.posts.createIndex({ "create_time": -1 });
+db.getCollection("posts").createIndex({ "create_time": -1 });
 // 创建 create_time 升序索引
-db.posts.createIndex({ "create_time": 1 });
+db.getCollection("posts").createIndex({ "create_time": 1 });
 // 创建 category 单字段索引
-db.posts.createIndex({ "categories": 1 });
-// 创建 category 和 tags 复合索引
-db.posts.createIndex({ "tags": 1 });
+db.getCollection("posts").createIndex({ "categories": 1 });
+// 创建 tags 单字段索引
+db.getCollection("posts").createIndex({ "tags": 1 });
 // 创建 title 文本索引
-db.posts.createIndex({ "title": "text" });
+db.getCollection("posts").createIndex({ "title": "text" });
 
-// ----------------------------
-// Collection structure for visit_logs
-// ----------------------------
+// visit_logs
 db.getCollection("visit_logs").drop();
 db.createCollection("visit_logs");
 // 创建 create_time 降序索引
-db.visit_logs.createIndex({ "create_time": -1 });
+db.getCollection("visit_logs").createIndex({ "create_time": -1 });
 EOF
