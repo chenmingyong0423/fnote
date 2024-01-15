@@ -95,7 +95,7 @@ func (d *FileDao) PushIntoUsedIn(ctx context.Context, fileId []byte, fileUsage F
 }
 
 func (d *FileDao) Save(ctx context.Context, file *File) (string, error) {
-	oneResult, err := d.coll.Creator().InsertOne(ctx, *file)
+	oneResult, err := d.coll.Creator().InsertOne(ctx, file)
 	if err != nil {
 		return "", err
 	}

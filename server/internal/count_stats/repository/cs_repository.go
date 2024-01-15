@@ -56,7 +56,7 @@ func (r *CountStatsRepository) DeleteByReferenceId(ctx context.Context, referenc
 
 func (r *CountStatsRepository) Create(ctx context.Context, countStats domain.CountStats) (string, error) {
 	unix := time.Now().Unix()
-	return r.dao.Create(ctx, dao.CountStats{
+	return r.dao.Create(ctx, &dao.CountStats{
 		Type:        countStats.Type,
 		ReferenceId: countStats.ReferenceId,
 		CreateTime:  unix,

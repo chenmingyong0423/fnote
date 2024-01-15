@@ -34,7 +34,7 @@ type VisitHistory struct {
 }
 
 type IVisitLogDao interface {
-	Add(ctx context.Context, visitHistory VisitHistory) error
+	Add(ctx context.Context, visitHistory *VisitHistory) error
 }
 
 var _ IVisitLogDao = (*VisitLogDao)(nil)
@@ -43,7 +43,7 @@ type VisitLogDao struct {
 	coll *mongox.Collection[VisitHistory]
 }
 
-func (d *VisitLogDao) Add(ctx context.Context, visitHistory VisitHistory) error {
+func (d *VisitLogDao) Add(ctx context.Context, visitHistory *VisitHistory) error {
 	result, err := d.coll.Creator().InsertOne(ctx, visitHistory)
 	if err != nil {
 		return errors.Wrapf(err, "fails to insert info visit_logs, visitHistory=%v", visitHistory)

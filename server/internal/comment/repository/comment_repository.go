@@ -205,7 +205,7 @@ func (r *CommentRepository) FindApprovedCommentById(ctx context.Context, cmtId s
 
 func (r *CommentRepository) AddComment(ctx context.Context, comment domain.Comment) (string, error) {
 	unix := time.Now().Unix()
-	return r.dao.AddComment(ctx, dao.Comment{
+	return r.dao.AddComment(ctx, &dao.Comment{
 		Id:         uuid.NewString(),
 		PostInfo:   dao.PostInfo(comment.PostInfo),
 		Content:    comment.Content,

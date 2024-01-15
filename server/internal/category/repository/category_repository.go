@@ -67,7 +67,7 @@ func (r *CategoryRepository) GetSelectCategories(ctx context.Context) ([]domain.
 }
 
 func (r *CategoryRepository) RecoverCategory(ctx context.Context, category domain.Category) error {
-	return r.dao.RecoverCategory(ctx, dao.Category{
+	return r.dao.RecoverCategory(ctx, &dao.Category{
 		Id:          primitive.ObjectID{},
 		Name:        category.Name,
 		Route:       category.Route,

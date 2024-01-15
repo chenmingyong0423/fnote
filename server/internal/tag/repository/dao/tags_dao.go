@@ -49,7 +49,7 @@ type ITagDao interface {
 	ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error
 	GetById(ctx context.Context, id primitive.ObjectID) (*Tags, error)
 	DeleteById(ctx context.Context, id primitive.ObjectID) error
-	RecoverTag(ctx context.Context, tag Tags) error
+	RecoverTag(ctx context.Context, tag *Tags) error
 	GetEnabled(ctx context.Context) ([]*Tags, error)
 }
 
@@ -71,7 +71,7 @@ func (d *TagDao) GetEnabled(ctx context.Context) ([]*Tags, error) {
 	return tags, nil
 }
 
-func (d *TagDao) RecoverTag(ctx context.Context, tag Tags) error {
+func (d *TagDao) RecoverTag(ctx context.Context, tag *Tags) error {
 	_, err := d.coll.Creator().InsertOne(ctx, tag)
 	if err != nil {
 		return errors.Wrapf(err, "Recover tag failed, tag: %+v", tag)
@@ -110,7 +110,7 @@ func (d *TagDao) ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabl
 }
 
 func (d *TagDao) Create(ctx context.Context, tag *Tags) (string, error) {
-	oneResult, err := d.coll.Creator().InsertOne(ctx, *tag)
+	oneResult, err := d.coll.Creator().InsertOne(ctx, tag)
 	if err != nil {
 		return "", err
 	}
