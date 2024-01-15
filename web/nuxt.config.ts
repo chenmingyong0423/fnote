@@ -57,6 +57,10 @@ export default defineNuxtConfig({
       { custom_border_gray: "border-1 border-gray-2 border-solid" },
       { custom_border_1E80FF: "border-2 border-#1E80FF border-solid" },
       { custom_bg_gray: "bg-gray-1 b-rounded-2" },
+      {
+        custom_dark_btn_hover:
+          "dark:hover:bg_transparent dark:hover:border-solid dark:hover:border-solid dark:hover:text-#1e80ff dark:hover:border-#1e80ff",
+      },
     ],
     rules: [
       ["footer_shadow", { "box-shadow": " 0 0 10px rgba(0, 0, 0, .5)" }],

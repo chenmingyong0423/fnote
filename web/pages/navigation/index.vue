@@ -17,7 +17,7 @@
         >
           <div class="i-ph-columns-fill w-10 h-10 text-gray-5 p-y-1"></div>
           <div class="text-8 font-bold p-y-1 dark_text_white">{{ c.name }}</div>
-          <div class="p-y-1">{{ c.description }}</div>
+          <div class="p-y-1 truncate">{{ c.description }}</div>
           <div class="p-y-1 flex items-center gap-x-1 h-8 text-5">
             <div class="i-ph-book dark:text-dtc"></div>
             <div>{{ c.count }}</div>
