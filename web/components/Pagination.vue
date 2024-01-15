@@ -4,24 +4,25 @@
   >
     <div class="list-none flex gap-x-5 m-auto lt-md:gap-x-1">
       <NuxtLink
-        class="w-[32px] h-[32px] flex-center"
+        class="w-[32px] h-[32px] flex-center box-border"
         :class="{
           'text-gray-3 select-none': currentPage == 1,
-          'cursor-pointer hover:bg-gray-1': currentPage != 1,
+          'cursor-pointer hover:bg-gray-1 custom_dark_btn_hover':
+            currentPage != 1,
         }"
         :to="fullUrl(calculatePages(currentPage - 1))"
       >
         &lt
       </NuxtLink>
       <NuxtLink
-        class="w-[32px] h-[32px] cursor-pointer hover:bg-gray-1 flex-center"
+        class="w-[32px] h-[32px] box-border cursor-pointer hover:bg-gray-1 flex-center custom_dark_btn_hover"
         v-if="maxPageNumbers - currentPage <= 1 && !pagesToShow.includes(1)"
         :to="fullUrl(1)"
       >
         1
       </NuxtLink>
       <NuxtLink
-        class="w-[32px] h-[32px] text-gray-3 flex-center select-none cursor-pointer hover:text-#1e80ff"
+        class="w-[32px] h-[32px] box-border text-gray-3 flex-center select-none cursor-pointer hover:text-#1e80ff"
         v-if="maxPageNumbers - currentPage <= 0"
         @mouseover="leftPointer = '<<'"
         @mouseleave="leftPointer = '...'"
@@ -31,7 +32,7 @@
       </NuxtLink>
 
       <NuxtLink
-        class="w-[32px] h-[32px] cursor-pointer hover:bg-gray-1 flex-center"
+        class="w-[32px] h-[32px] box-border cursor-pointer hover:bg-gray-1 flex-center custom_dark_btn_hover"
         v-for="(page, index) in pagesToShow"
         :class="{
           'border-solid border-#1e80ff border-1 b-rounded-2':
@@ -43,7 +44,7 @@
         {{ page }}
       </NuxtLink>
       <NuxtLink
-        class="w-[32px] h-[32px] text-gray-3 flex-center select-none hover:text-#1e80ff cursor-pointer hover:text-#1e80ff"
+        class="w-[32px] h-[32px] box-border text-gray-3 flex-center select-none hover:text-#1e80ff cursor-pointer hover:text-#1e80ff"
         v-if="totalPages > maxPageNumbers && !pagesToShow.includes(totalPages)"
         @mouseover="rightPointer = '>>'"
         @mouseleave="rightPointer = '...'"
@@ -52,16 +53,17 @@
         {{ rightPointer }}
       </NuxtLink>
       <NuxtLink
-        class="w-[32px] h-[32px] cursor-pointer hover:bg-gray-1 flex-center"
+        class="w-[32px] h-[32px] box-border cursor-pointer hover:bg-gray-1 flex-center custom_dark_btn_hover"
         v-if="!pagesToShow.includes(totalPages)"
         :to="fullUrl(totalPages)"
         >{{ totalPages }}
       </NuxtLink>
       <NuxtLink
-        class="w-[32px] h-[32px] flex-center"
+        class="w-[32px] h-[32px] box-border flex-center"
         :class="{
           'text-gray-3 select-none': currentPage == totalPages,
-          'cursor-pointer hover:bg-gray-1': currentPage != totalPages,
+          'cursor-pointer hover:bg-gray-1 custom_dark_btn_hover':
+            currentPage != totalPages,
         }"
         :to="fullUrl(calculatePages(currentPage + 1))"
       >

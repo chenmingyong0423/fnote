@@ -14,7 +14,7 @@
           :alt="item.title"
         />
         <div
-          class="flex justify-between gap-x-3 z-99 w-auto absolute top-3 ease-linear duration-200"
+          class="flex justify-between flex-wrap gap-y-2 gap-x-3 z-99 w-auto absolute top-3 ease-linear duration-200"
         >
           <span
             class="bg-#22c55e rounded-3 text-white py-0.2em px-0.8em"
