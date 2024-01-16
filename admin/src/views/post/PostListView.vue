@@ -1,5 +1,5 @@
 <template>
-  <a-button type="primary" @click="router.push('/post/edit')">发布文章</a-button>
+  <a-button type="primary" @click="router.push('/post')">发布文章</a-button>
   <a-table :columns="columns" :data-source="posts" :pagination="pagination" @change="change">
     <template #headerCell="{ column }">
       <template v-if="column.key === 'name'">
@@ -43,9 +43,14 @@
         <span>{{ dayjs.unix(record[column.key]).format('YYYY-MM-DD HH:mm:ss') }}</span>
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
-        <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deletePost(record)">
-          <a>删除</a>
-        </a-popconfirm>
+        <div class="flex gap-x-1">
+          <span>
+            <a @click="router.push(`/drafts/${record.id}`)">编辑</a>
+          </span>
+          <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deletePost(record)">
+            <a>删除</a>
+          </a-popconfirm>
+        </div>
       </template>
     </template>
   </a-table>

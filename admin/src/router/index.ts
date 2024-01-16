@@ -4,14 +4,19 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/post',
+      path: '/post/list',
       name: 'post',
       component: () => import('../views/post/PostListView.vue')
     },
     {
-      path: '/post/edit',
-      name: 'post-edit',
-      component: () => import('../views/post/PostEditView.vue')
+      path: '/post',
+      name: 'add-post',
+      component: () => import('../views/post/AddPostView.vue')
+    },
+    {
+      path: '/drafts/:id',
+      name: 'edit-post',
+      component: () => import('../views/post/UpdatePostView.vue')
     },
     {
       path: '/comment',

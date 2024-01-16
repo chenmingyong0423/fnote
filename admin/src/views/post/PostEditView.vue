@@ -62,7 +62,8 @@
             name="cover_img"
             label="封面"
             :rules="[{ required: true, message: '请选择封面' }]"
-            ><a-input v-model:value="postReq.cover_img" placeholder="请输入封面路径" />
+          >
+            <a-input v-model:value="postReq.cover_img" placeholder="请输入封面路径" />
             <a-upload
               v-model:file-list="fileList"
               name="file"
@@ -143,7 +144,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { type PropType, reactive, ref, defineEmits } from 'vue'
 import type { PostRequest } from '@/interfaces/Post'
 import {
   type FormInstance,
@@ -153,36 +154,37 @@ import {
   type UploadProps
 } from 'ant-design-vue'
 import axios from '@/http/axios'
-import type { IBaseResponse, IListData, IResponse } from '@/interfaces/Common'
+import type { IResponse } from '@/interfaces/Common'
 import type { SelectCategory } from '@/interfaces/Category'
 import type { SelectTag } from '@/interfaces/Tag'
 import type { File } from '@/interfaces/File'
+
+const emit = defineEmits(['submit'])
+
+const props = defineProps({
+  req: {
+    type: Object as PropType<PostRequest>,
+    required: true
+  },
+  categories: {
+    type: Array as PropType<SelectCategory[]>,
+    default: () => []
+  },
+  tags: {
+    type: Array as PropType<SelectTag[]>,
+    default: () => []
+  }
+})
 
 const imageUrl = ref<string>('')
 
 const formRef = ref<FormInstance>()
 const visible = ref(false)
-const postReq = reactive<PostRequest>({
-  id: '',
-  author: '',
-  title: '',
-  summary: '',
-  content: '',
-  cover_img: '',
-  categories: [],
-  tempCategories: [],
-  tags: [],
-  tempTags: [],
-  sticky_weight: 0,
-  meta_description: '',
-  meta_keywords: '',
-  is_comment_allowed: true,
-  status: 0
-})
+const postReq = reactive<PostRequest>(props.req)
 
-const categories = ref<SelectProps['options']>([])
+const categories = ref<SelectProps['options']>(props.categories)
 
-const tags = ref<SelectProps['options']>([])
+const tags = ref<SelectProps['options']>(props.tags)
 
 const submit = () => {
   if (formRef.value) {
@@ -215,27 +217,8 @@ const submit = () => {
             }
           })
         })
-        try {
-          const response = await axios.post<IBaseResponse>('/admin/posts', postReq)
-          if (response.data.code !== 200) {
-            message.error(response.data.message)
-            return
-          }
-          message.success('添加成功')
-          visible.value = false
-          if (formRef.value) {
-            formRef.value.resetFields()
-            postReq.title = ''
-            postReq.author = ''
-            postReq.content = ''
-            imageUrl.value = ''
-            postReq.categories = []
-            postReq.tags = []
-          }
-        } catch (error) {
-          console.log(error)
-          message.error('添加失败')
-        }
+        // 告诉父组件
+        emit('submit', postReq)
       })
       .catch((info) => {
         console.log('Validate Failed:', info)
@@ -244,33 +227,22 @@ const submit = () => {
   }
 }
 
-const getCategories = async () => {
-  try {
-    const response = await axios.get<IResponse<IListData<SelectCategory>>>(
-      '/admin/categories/select'
-    )
-    response.data.data?.list.forEach((item) => {
-      categories.value?.push(item)
-    })
-  } catch (error) {
-    console.log(error)
+const clearReq = () => {
+  if (formRef.value) {
+    formRef.value.resetFields()
+    postReq.title = ''
+    postReq.author = ''
+    postReq.content = ''
+    imageUrl.value = ''
+    postReq.categories = []
+    postReq.tags = []
   }
+  visible.value = false
 }
 
-getCategories()
-
-const getTags = async () => {
-  try {
-    const response = await axios.get<IResponse<IListData<SelectTag>>>('/admin/tags/select')
-    response.data.data?.list.forEach((item) => {
-      tags.value?.push(item)
-    })
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-getTags()
+defineExpose({
+  clearReq
+})
 
 // 封面上传
 function getBase64(img: Blob, callback: (base64Url: string) => void) {
@@ -289,7 +261,7 @@ const handleChange = (info: UploadChangeParam) => {
   }
   if (info.file.status === 'done') {
     // Get this url from response in real world.
-    getBase64(info.file.originFileObj, (base64Url: string) => {
+    getBase64(info.file.originFileObj!, (base64Url: string) => {
       imageUrl.value = base64Url
       loading.value = false
       // Get this url from response in real world.
@@ -332,8 +304,8 @@ const handleUploadImage = async (event, insertImage, files) => {
       return
     }
     insertImage({
-      url: response.data.data.url,
-      desc: response.data.data.file_name
+      url: response?.data?.data?.url,
+      desc: response?.data?.data?.file_name
       // width: 'auto',
       // height: 'auto',
     })
