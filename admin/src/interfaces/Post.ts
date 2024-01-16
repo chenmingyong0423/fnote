@@ -9,6 +9,22 @@ export interface IPost {
   update_time: number
 }
 
+export interface PostDetailVO {
+  id: string
+  author: string
+  title: string
+  summary: string
+  content: string
+  cover_img: string
+  categories: Category4Post[]
+  tags: Tag4Post[]
+  status: string
+  sticky_weight: number
+  meta_description: string
+  meta_keywords: string
+  is_comment_allowed: boolean
+}
+
 export interface Category4Post {
   id: string
   name: string

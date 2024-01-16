@@ -50,7 +50,7 @@ const items = reactive([
     title: '文章管理',
     children: [
       {
-        key: '/post',
+        key: '/post/list',
         label: '文章列表',
         title: '文章列表'
       }
