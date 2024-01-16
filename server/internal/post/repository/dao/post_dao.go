@@ -24,7 +24,6 @@ import (
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/builder/update"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -43,26 +42,26 @@ const (
 )
 
 type Post struct {
-	Id               string            `bson:"_id"`
-	Author           string            `bson:"author"`
-	Title            string            `bson:"title"`
-	Summary          string            `bson:"summary"`
-	Content          string            `bson:"content"`
-	CoverImg         string            `bson:"cover_img"`
-	Categories       []Category4Post   `bson:"categories"`
-	Tags             []Tag4Post        `bson:"tags"`
-	Status           domain.PostStatus `bson:"status"`
-	Likes            []string          `bson:"likes"`
-	LikeCount        int               `bson:"like_count"`
-	CommentCount     int               `bson:"comment_count"`
-	VisitCount       int               `bson:"visit_count"`
-	StickyWeight     int               `bson:"sticky_weight"`
-	MetaDescription  string            `bson:"meta_description"`
-	MetaKeywords     string            `bson:"meta_keywords"`
-	WordCount        int               `bson:"word_count"`
-	IsCommentAllowed bool              `bson:"is_comment_allowed"`
-	CreateTime       int64             `bson:"create_time"`
-	UpdateTime       int64             `bson:"update_time"`
+	Id               string          `bson:"_id"`
+	Author           string          `bson:"author"`
+	Title            string          `bson:"title"`
+	Summary          string          `bson:"summary"`
+	Content          string          `bson:"content"`
+	CoverImg         string          `bson:"cover_img"`
+	Categories       []Category4Post `bson:"categories"`
+	Tags             []Tag4Post      `bson:"tags"`
+	Status           PostStatus      `bson:"status"`
+	Likes            []string        `bson:"likes"`
+	LikeCount        int             `bson:"like_count"`
+	CommentCount     int             `bson:"comment_count"`
+	VisitCount       int             `bson:"visit_count"`
+	StickyWeight     int             `bson:"sticky_weight"`
+	MetaDescription  string          `bson:"meta_description"`
+	MetaKeywords     string          `bson:"meta_keywords"`
+	WordCount        int             `bson:"word_count"`
+	IsCommentAllowed bool            `bson:"is_comment_allowed"`
+	CreateTime       int64           `bson:"create_time"`
+	UpdateTime       int64           `bson:"update_time"`
 }
 
 type Category4Post struct {

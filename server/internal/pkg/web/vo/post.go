@@ -14,17 +14,6 @@
 
 package vo
 
-// {
-//    key: '1',
-//    coverImg: 'John Brown',
-//    title: 32,
-//    summary: 'New York No. 1 Lake Park',
-//    categories: ['nice', 'developer'],
-//    tags: ['nice', 'developer'],
-//    createTime: 121123123312132,
-//    updateTime: 121123123312132,
-//  },
-
 type AdminPostVO struct {
 	Id         string          `json:"id"`
 	CoverImg   string          `json:"cover_img"`
@@ -45,3 +34,30 @@ type Tag4Post struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
 }
+
+type PostDetailVO struct {
+	Id               string          `json:"id"`
+	Author           string          `json:"author"`
+	Title            string          `json:"title"`
+	Summary          string          `json:"summary"`
+	Content          string          `json:"content"`
+	CoverImg         string          `json:"cover_img"`
+	Categories       []Category4Post `json:"categories"`
+	Tags             []Tag4Post      `json:"tags"`
+	Status           PostStatus      `json:"status"`
+	StickyWeight     int             `json:"sticky_weight"`
+	MetaDescription  string          `json:"meta_description"`
+	MetaKeywords     string          `json:"meta_keywords"`
+	IsCommentAllowed bool            `json:"is_comment_allowed"`
+}
+
+type PostStatus uint
+
+const (
+	// PostStatusDraft 草稿
+	PostStatusDraft PostStatus = iota
+	// PostStatusPunished 已发布
+	PostStatusPunished
+	// PostStatusDeleted 已删除
+	PostStatusDeleted
+)
