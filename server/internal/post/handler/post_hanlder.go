@@ -74,6 +74,7 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 
 	adminGroup := engine.Group("/admin/posts")
 	adminGroup.GET("", api.WrapWithBody(h.AdminGetPosts))
+	adminGroup.GET("/:id", api.Wrap(h.AdminGetPostById))
 	adminGroup.POST("", api.WrapWithBody(h.AddPost))
 	adminGroup.DELETE("/:id", api.Wrap(h.DeletePost))
 }
@@ -247,4 +248,38 @@ func (h *PostHandler) AddPost(ctx *gin.Context, req request.PostReq) (any, error
 
 func (h *PostHandler) DeletePost(ctx *gin.Context) (any, error) {
 	return nil, h.serv.DeletePost(ctx, ctx.Param("id"))
+}
+
+func (h *PostHandler) AdminGetPostById(ctx *gin.Context) (vo.PostDetailVO, error) {
+	post, err := h.serv.AdminGetPostById(ctx, ctx.Param("id"))
+	if err != nil {
+		return vo.PostDetailVO{}, err
+	}
+	categories := slice.Map[domain.Category4Post, vo.Category4Post](post.PrimaryPost.Categories, func(_ int, c domain.Category4Post) vo.Category4Post {
+		return vo.Category4Post{
+			Id:   c.Id,
+			Name: c.Name,
+		}
+	})
+	tags := slice.Map[domain.Tag4Post, vo.Tag4Post](post.PrimaryPost.Tags, func(_ int, t domain.Tag4Post) vo.Tag4Post {
+		return vo.Tag4Post{
+			Id:   t.Id,
+			Name: t.Name,
+		}
+	})
+	return vo.PostDetailVO{
+		Id:               post.Id,
+		Author:           post.Author,
+		Title:            post.Title,
+		Summary:          post.Summary,
+		Content:          post.Content,
+		CoverImg:         post.CoverImg,
+		Categories:       categories,
+		Tags:             tags,
+		Status:           vo.PostStatus(post.Status),
+		StickyWeight:     post.StickyWeight,
+		MetaDescription:  post.MetaDescription,
+		MetaKeywords:     post.MetaKeywords,
+		IsCommentAllowed: post.IsCommentAllowed,
+	}, nil
 }

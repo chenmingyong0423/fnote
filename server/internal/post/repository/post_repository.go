@@ -102,7 +102,7 @@ func (r *PostRepository) AddPost(ctx context.Context, post domain.Post) error {
 		CoverImg:         post.CoverImg,
 		Categories:       categories,
 		Tags:             tags,
-		Status:           domain.PostStatus(post.Status),
+		Status:           dao.PostStatus(post.Status),
 		Likes:            make([]string, 0),
 		LikeCount:        0,
 		CommentCount:     0,
