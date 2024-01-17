@@ -5,6 +5,7 @@
       :req="postReq"
       :categories="categories"
       :tags="tags"
+      :is-new-post="false"
       @submit="submit"
     ></PostEditView>
   </div>
@@ -71,6 +72,7 @@ const getPostById = async () => {
       postReq.meta_keywords = post.meta_keywords
       postReq.is_comment_allowed = post.is_comment_allowed
       postReq.categories = post.categories
+      postReq.status = post.status
       postReq.tags = post.tags
       post.categories.forEach((item) => {
         postReq.tempCategories.push(item.name)

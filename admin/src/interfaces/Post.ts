@@ -18,7 +18,7 @@ export interface PostDetailVO {
   cover_img: string
   categories: Category4Post[]
   tags: Tag4Post[]
-  status: string
+  status: number
   sticky_weight: number
   meta_description: string
   meta_keywords: string
