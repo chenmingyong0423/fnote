@@ -29,6 +29,7 @@
           <a-form-item name="id" label="自定义 id">
             <a-input
               v-model:value="postReq.id"
+              :disabled="!props.isNewPost"
               placeholder="与文章关联的英文的 id 有助于 seo 优化"
             />
           </a-form-item>
@@ -173,6 +174,10 @@ const props = defineProps({
   tags: {
     type: Array as PropType<SelectTag[]>,
     default: () => []
+  },
+  isNewPost: {
+    type: Boolean,
+    default: true
   }
 })
 
