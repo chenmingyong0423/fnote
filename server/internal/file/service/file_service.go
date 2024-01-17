@@ -19,16 +19,16 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/chenmingyong0423/gkit/uuidx"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/spf13/viper"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
-	"github.com/chenmingyong0423/gkit/uuidx"
-
 	"github.com/chenmingyong0423/fnote/server/internal/file/repository"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 )
 
@@ -60,8 +60,9 @@ func (s *FileService) IndexFileMeta(ctx context.Context, fileId []byte, entityId
 
 func (s *FileService) Upload(ctx context.Context, fileDTO dto.FileDTO) (*domain.File, error) {
 	var (
-		filename, fileId string
+		filename string
 	)
+	fileId := uuidx.RearrangeUUID4()
 	if fileDTO.CustomFileName != "" {
 		filename = fileDTO.CustomFileName + fileDTO.FileExt
 		file, err := s.repo.FindByFileName(ctx, filename)
@@ -72,7 +73,6 @@ func (s *FileService) Upload(ctx context.Context, fileDTO dto.FileDTO) (*domain.
 			return nil, api.NewErrorResponseBody(http.StatusConflict, "file already exists")
 		}
 	} else {
-		fileId = uuidx.RearrangeUUID4()
 		filename = fileId + fileDTO.FileExt
 	}
 
