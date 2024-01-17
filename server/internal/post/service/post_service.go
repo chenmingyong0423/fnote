@@ -289,49 +289,57 @@ func (s *PostService) updatePostCallback(ctx context.Context, post *domain.Post,
 	removedCategories := slice.DiffFunc(post.Categories, savedPost.Categories, func(srcItem, dstItem domain.Category4Post) bool {
 		return srcItem.Id == dstItem.Id
 	})
-	removedCategoryIds := slice.Map[domain.Category4Post, string](removedCategories, func(_ int, c domain.Category4Post) string {
-		return c.Id
-	})
-	err := s.countStats.DecreaseByReferenceIdsAndType(ctx, removedCategoryIds, domain.CountStatsTypePostCountInCategory)
-	if err != nil {
-		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-		l.WarnContext(ctx, fmt.Sprintf("%+v", err))
+	if len(removedCategories) > 0 {
+		removedCategoryIds := slice.Map[domain.Category4Post, string](removedCategories, func(_ int, c domain.Category4Post) string {
+			return c.Id
+		})
+		err := s.countStats.DecreaseByReferenceIdsAndType(ctx, removedCategoryIds, domain.CountStatsTypePostCountInCategory)
+		if err != nil {
+			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", err))
+		}
 	}
 	// 被添加的
 	addedCategories := slice.DiffFunc(savedPost.Categories, post.Categories, func(srcItem, dstItem domain.Category4Post) bool {
 		return srcItem.Id == dstItem.Id
 	})
-	addedCategoryIds := slice.Map[domain.Category4Post, string](addedCategories, func(_ int, c domain.Category4Post) string {
-		return c.Id
-	})
-	err = s.countStats.IncreaseByReferenceIdsAndType(ctx, addedCategoryIds, domain.CountStatsTypePostCountInCategory)
-	if err != nil {
-		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-		l.WarnContext(ctx, fmt.Sprintf("%+v", err))
+	if len(addedCategories) > 0 {
+		addedCategoryIds := slice.Map[domain.Category4Post, string](addedCategories, func(_ int, c domain.Category4Post) string {
+			return c.Id
+		})
+		err := s.countStats.IncreaseByReferenceIdsAndType(ctx, addedCategoryIds, domain.CountStatsTypePostCountInCategory)
+		if err != nil {
+			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", err))
+		}
 	}
 	// tags
 	// 被移除的
 	removedTags := slice.DiffFunc(post.Tags, savedPost.Tags, func(srcItem, dstItem domain.Tag4Post) bool {
 		return srcItem.Id == dstItem.Id
 	})
-	removedTagIds := slice.Map[domain.Tag4Post, string](removedTags, func(_ int, t domain.Tag4Post) string {
-		return t.Id
-	})
-	err = s.countStats.DecreaseByReferenceIdsAndType(ctx, removedTagIds, domain.CountStatsTypePostCountInTag)
-	if err != nil {
-		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-		l.WarnContext(ctx, fmt.Sprintf("%+v", err))
+	if len(removedTags) > 0 {
+		removedTagIds := slice.Map[domain.Tag4Post, string](removedTags, func(_ int, t domain.Tag4Post) string {
+			return t.Id
+		})
+		err := s.countStats.DecreaseByReferenceIdsAndType(ctx, removedTagIds, domain.CountStatsTypePostCountInTag)
+		if err != nil {
+			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", err))
+		}
 	}
 	// 被添加的
 	addedTags := slice.DiffFunc(savedPost.Tags, post.Tags, func(srcItem, dstItem domain.Tag4Post) bool {
 		return srcItem.Id == dstItem.Id
 	})
-	addedTagIds := slice.Map[domain.Tag4Post, string](addedTags, func(_ int, t domain.Tag4Post) string {
-		return t.Id
-	})
-	err = s.countStats.IncreaseByReferenceIdsAndType(ctx, addedTagIds, domain.CountStatsTypePostCountInTag)
-	if err != nil {
-		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-		l.WarnContext(ctx, fmt.Sprintf("%+v", err))
+	if len(addedTags) > 0 {
+		addedTagIds := slice.Map[domain.Tag4Post, string](addedTags, func(_ int, t domain.Tag4Post) string {
+			return t.Id
+		})
+		err := s.countStats.IncreaseByReferenceIdsAndType(ctx, addedTagIds, domain.CountStatsTypePostCountInTag)
+		if err != nil {
+			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", err))
+		}
 	}
 }
