@@ -39,6 +39,18 @@
           </a-tag>
         </span>
       </template>
+      <template v-if="column.key === 'is_displayed'">
+        <a-switch
+          v-model:checked="record.is_displayed"
+          @change="changeDisplayStatus(record.id, record.is_displayed)"
+        />
+      </template>
+      <template v-if="column.key === 'is_comment_allowed'">
+        <a-switch
+          v-model:checked="record.is_comment_allowed"
+          @change="changeCommentAllowedStatus(record.id, record.is_comment_allowed)"
+        />
+      </template>
       <template v-else-if="column.key === 'create_time' || column.key === 'update_time'">
         <span>{{ dayjs.unix(record[column.key]).format('YYYY-MM-DD HH:mm:ss') }}</span>
       </template>
@@ -47,7 +59,7 @@
           <span>
             <a @click="router.push(`/drafts/${record.id}`)">编辑</a>
           </span>
-          <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deletePost(record)">
+          <a-popconfirm v-if="posts.length" title="确认删除？" @confirm="deletePost(record)">
             <a>删除</a>
           </a-popconfirm>
         </div>
@@ -59,12 +71,11 @@
 import { SmileOutlined } from '@ant-design/icons-vue'
 import axios from '@/http/axios'
 import { computed, ref } from 'vue'
-import type { IPost, PageRequest } from '@/interfaces/Post'
+import type { IPost, PageRequest, PostDetailVO } from '@/interfaces/Post'
 import type { IBaseResponse, IPageData, IResponse } from '@/interfaces/Common'
 import router from '@/router'
 import dayjs from 'dayjs'
 import { message } from 'ant-design-vue'
-import { template } from 'lodash-es'
 
 const columns = [
   {
@@ -98,6 +109,16 @@ const columns = [
     dataIndex: 'tags'
   },
   {
+    title: '是否显示',
+    key: 'is_displayed',
+    dataIndex: 'is_displayed'
+  },
+  {
+    title: '是否允许评论',
+    key: 'is_comment_allowed',
+    dataIndex: 'is_comment_allowed'
+  },
+  {
     title: '发布时间',
     key: 'create_time',
     dataIndex: 'create_time'
@@ -110,69 +131,6 @@ const columns = [
   {
     title: 'operation',
     dataIndex: 'operation'
-  }
-]
-
-const data = [
-  {
-    key: '1',
-    coverImg: 'John Brown',
-    title: 32,
-    summary: 'New York No. 1 Lake Park',
-    categories: ['nice', 'developer'],
-    tags: ['nice', 'developer'],
-    createTime: 121123123312132,
-    updateTime: 121123123312132
-  },
-  {
-    key: '2',
-    coverImg: 'John Brown',
-    title: 32,
-    summary: 'New York No. 1 Lake Park',
-    categories: ['nice', 'developer'],
-    tags: ['nice', 'developer'],
-    createTime: 121123123312132,
-    updateTime: 121123123312132
-  },
-  {
-    key: '3',
-    coverImg: 'John Brown',
-    title: 32,
-    summary: 'New York No. 1 Lake Park',
-    categories: ['nice', 'developer'],
-    tags: ['nice', 'developer'],
-    createTime: 121123123312132,
-    updateTime: 121123123312132
-  },
-  {
-    key: '4',
-    coverImg: 'John Brown',
-    title: 32,
-    summary: 'New York No. 1 Lake Park',
-    categories: ['nice', 'developer'],
-    tags: ['nice', 'developer'],
-    createTime: 121123123312132,
-    updateTime: 121123123312132
-  },
-  {
-    key: '5',
-    coverImg: 'John Brown',
-    title: 32,
-    summary: 'New York No. 1 Lake Park',
-    categories: ['nice', 'developer'],
-    tags: ['nice', 'developer'],
-    createTime: 121123123312132,
-    updateTime: 121123123312132
-  },
-  {
-    key: '6',
-    coverImg: 'John Brown',
-    title: 32,
-    summary: 'New York No. 1 Lake Park',
-    categories: ['nice', 'developer'],
-    tags: ['nice', 'developer'],
-    createTime: 121123123312132,
-    updateTime: 121123123312132
   }
 ]
 
@@ -228,4 +186,38 @@ const deletePost = async (record: IPost) => {
 }
 
 getPosts()
+
+const changeDisplayStatus = async (id: string, is_displayed: boolean) => {
+  try {
+    const response = await axios.put<IBaseResponse>(`/admin/posts/${id}/display`, {
+      is_displayed: is_displayed
+    })
+    if (response.data.code !== 200) {
+      message.error(response.data.message)
+      return
+    }
+    message.success('更新成功')
+    await getPosts()
+  } catch (error) {
+    console.log(error)
+    message.error('更新失败')
+  }
+}
+
+const changeCommentAllowedStatus = async (id: string, is_comment_allowed: boolean) => {
+  try {
+    const response = await axios.put<IBaseResponse>(`/admin/posts/${id}/comment-allowed`, {
+      is_comment_allowed: is_comment_allowed
+    })
+    if (response.data.code !== 200) {
+      message.error(response.data.message)
+      return
+    }
+    message.success('更新成功')
+    await getPosts()
+  } catch (error) {
+    console.log(error)
+    message.error('更新失败')
+  }
+}
 </script>
