@@ -43,10 +43,11 @@ type IPostRepository interface {
 	DeleteLike(ctx context.Context, id string, ip string) error
 	IncreaseCommentCount(ctx context.Context, id string) error
 	QueryAdminPostsPage(ctx context.Context, postsQueryDTO dto.PostsQueryDTO) ([]*domain.Post, int64, error)
-	AddPost(ctx context.Context, post domain.Post) error
+	AddPost(ctx context.Context, post *domain.Post) error
 	DeletePost(ctx context.Context, id string) error
 	FindPostById(ctx context.Context, id string) (*domain.Post, error)
 	DecreaseCommentCount(ctx context.Context, postId string, cnt int) error
+	SavePost(ctx context.Context, post *domain.Post) error
 }
 
 var _ IPostRepository = (*PostRepository)(nil)
@@ -59,6 +60,46 @@ func NewPostRepository(dao dao.IPostDao) *PostRepository {
 
 type PostRepository struct {
 	dao dao.IPostDao
+}
+
+func (r *PostRepository) SavePost(ctx context.Context, post *domain.Post) error {
+	unix := time.Now().Unix()
+	categories := r.toDaoCategory4Post(post.Categories)
+	tags := r.toDaoTags4Post(post.Tags)
+	return r.dao.SavePost(ctx, &dao.Post{
+		Id:               post.Id,
+		Author:           post.Author,
+		Title:            post.Title,
+		Summary:          post.Summary,
+		Content:          post.Content,
+		CoverImg:         post.CoverImg,
+		Categories:       categories,
+		Tags:             tags,
+		Status:           dao.PostStatus(post.Status),
+		StickyWeight:     post.StickyWeight,
+		MetaDescription:  post.MetaDescription,
+		MetaKeywords:     post.MetaKeywords,
+		WordCount:        post.WordCount,
+		IsCommentAllowed: post.IsCommentAllowed,
+		CreateTime: func() int64 {
+			if post.CreateTime == 0 {
+				return unix
+			} else {
+				return post.CreateTime
+			}
+		}(),
+		UpdateTime: unix,
+	})
+}
+
+func (r *PostRepository) toDaoCategory4Post(cs []domain.Category4Post) []dao.Category4Post {
+	categories := slice.Map[domain.Category4Post, dao.Category4Post](cs, func(_ int, c domain.Category4Post) dao.Category4Post {
+		return dao.Category4Post{
+			Id:   c.Id,
+			Name: c.Name,
+		}
+	})
+	return categories
 }
 
 func (r *PostRepository) DecreaseCommentCount(ctx context.Context, postId string, cnt int) error {
@@ -77,7 +118,7 @@ func (r *PostRepository) DeletePost(ctx context.Context, id string) error {
 	return r.dao.DeleteById(ctx, id)
 }
 
-func (r *PostRepository) AddPost(ctx context.Context, post domain.Post) error {
+func (r *PostRepository) AddPost(ctx context.Context, post *domain.Post) error {
 	unix := time.Now().Unix()
 	categories := make([]dao.Category4Post, 0, len(post.Categories))
 	for _, category := range post.Categories {
@@ -249,5 +290,15 @@ func (r *PostRepository) daoPostToDomainPost(post *dao.Post) *domain.Post {
 			Name: t.Name,
 		}
 	})
-	return &domain.Post{PrimaryPost: domain.PrimaryPost{Id: post.Id, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Categories: categories, Tags: tags, LikeCount: post.LikeCount, CommentCount: post.CommentCount, VisitCount: post.VisitCount, StickyWeight: post.StickyWeight, CreateTime: post.CreateTime}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, WordCount: post.WordCount, UpdateTime: post.UpdateTime}, IsCommentAllowed: post.IsCommentAllowed, Likes: post.Likes}
+	return &domain.Post{PrimaryPost: domain.PrimaryPost{Id: post.Id, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Categories: categories, Tags: tags, LikeCount: post.LikeCount, CommentCount: post.CommentCount, VisitCount: post.VisitCount, StickyWeight: post.StickyWeight, CreateTime: post.CreateTime}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, WordCount: post.WordCount, UpdateTime: post.UpdateTime, IsCommentAllowed: post.IsCommentAllowed}, Likes: post.Likes}
+}
+
+func (r *PostRepository) toDaoTags4Post(ts []domain.Tag4Post) []dao.Tag4Post {
+	tags := slice.Map[domain.Tag4Post, dao.Tag4Post](ts, func(_ int, t domain.Tag4Post) dao.Tag4Post {
+		return dao.Tag4Post{
+			Id:   t.Id,
+			Name: t.Name,
+		}
+	})
+	return tags
 }

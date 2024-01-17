@@ -45,6 +45,8 @@ type ICountStatsDao interface {
 	DeleteByReferenceId(ctx context.Context, referenceId string) error
 	IncreaseByReferenceIds(ctx context.Context, ids []string) error
 	DecreaseByReferenceIds(ctx context.Context, ids []string) error
+	DecreaseByReferenceIdsAndType(ctx context.Context, ids []string, statsType string) error
+	IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, statusType string) error
 }
 
 var _ ICountStatsDao = (*CountStatsDao)(nil)
@@ -57,6 +59,32 @@ func NewCountStatsDao(db *mongo.Database) *CountStatsDao {
 
 type CountStatsDao struct {
 	coll *mongox.Collection[CountStats]
+}
+
+func (d *CountStatsDao) IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, statusType string) error {
+	manyResult, err := d.coll.Updater().Filter(query.BsonBuilder().InString("reference_id", ids...).Eq("type", statusType).Build()).Updates(
+		update.Inc("count", 1),
+	).UpdateMany(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "increase count stats error, ids=%v", ids)
+	}
+	if manyResult.ModifiedCount == 0 {
+		return fmt.Errorf("ModifiedCount=0, increase count stats error, ids=%v", ids)
+	}
+	return nil
+}
+
+func (d *CountStatsDao) DecreaseByReferenceIdsAndType(ctx context.Context, ids []string, statsType string) error {
+	manyResult, err := d.coll.Updater().Filter(query.BsonBuilder().InString("reference_id", ids...).Eq("type", statsType).Build()).Updates(
+		update.Inc("count", -1),
+	).UpdateMany(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "decrease count stats error, ids=%v", ids)
+	}
+	if manyResult.ModifiedCount == 0 {
+		return fmt.Errorf("ModifiedCount=0, decrease count stats error, ids=%v", ids)
+	}
+	return nil
 }
 
 func (d *CountStatsDao) DecreaseByReferenceIds(ctx context.Context, ids []string) error {

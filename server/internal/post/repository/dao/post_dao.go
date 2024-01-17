@@ -51,10 +51,10 @@ type Post struct {
 	Categories       []Category4Post `bson:"categories"`
 	Tags             []Tag4Post      `bson:"tags"`
 	Status           PostStatus      `bson:"status"`
-	Likes            []string        `bson:"likes"`
-	LikeCount        int             `bson:"like_count"`
-	CommentCount     int             `bson:"comment_count"`
-	VisitCount       int             `bson:"visit_count"`
+	Likes            []string        `bson:"likes,omitempty"`
+	LikeCount        int             `bson:"like_count,omitempty"`
+	CommentCount     int             `bson:"comment_count,omitempty"`
+	VisitCount       int             `bson:"visit_count,omitempty"`
 	StickyWeight     int             `bson:"sticky_weight"`
 	MetaDescription  string          `bson:"meta_description"`
 	MetaKeywords     string          `bson:"meta_keywords"`
@@ -86,6 +86,7 @@ type IPostDao interface {
 	DeleteById(ctx context.Context, id string) error
 	FindById(ctx context.Context, id string) (*Post, error)
 	DecreaseByField(ctx context.Context, id string, filedName string, cnt int) error
+	SavePost(ctx context.Context, post *Post) error
 }
 
 var _ IPostDao = (*PostDao)(nil)
@@ -98,6 +99,17 @@ func NewPostDao(db *mongo.Database) *PostDao {
 
 type PostDao struct {
 	coll *mongox.Collection[Post]
+}
+
+func (d *PostDao) SavePost(ctx context.Context, post *Post) error {
+	result, err := d.coll.Updater().Filter(query.Id(post.Id)).UpdatesWithOperator("$set", post).UpdateOne(ctx, options.Update().SetUpsert(true))
+	if err != nil {
+		return errors.Wrapf(err, "fails to update a post, post=%v", post)
+	}
+	if result.ModifiedCount == 0 {
+		return fmt.Errorf("fails to update a post, post=%v", post)
+	}
+	return nil
 }
 
 func (d *PostDao) DecreaseByField(ctx context.Context, id string, filedName string, cnt int) error {
