@@ -15,7 +15,7 @@ import { reactive, ref } from 'vue'
 import type { PostDetailVO, PostRequest } from '@/interfaces/Post'
 import { message } from 'ant-design-vue'
 import axios from '@/http/axios'
-import type { IListData, IResponse } from '@/interfaces/Common'
+import type { IBaseResponse, IListData, IResponse } from '@/interfaces/Common'
 import type { SelectCategory } from '@/interfaces/Category'
 import type { SelectTag } from '@/interfaces/Tag'
 import { useRouter } from 'vue-router'
@@ -88,8 +88,20 @@ if (postReq.id) {
   getPostById()
 }
 
-const submit = (postReq: PostRequest) => {
-  console.log(postReq)
+const submit = async (postReq: PostRequest) => {
+  try {
+    const response = await axios.put<IBaseResponse>('/admin/posts', postReq)
+    if (response.data.code !== 200) {
+      message.error(response.data.message)
+      return
+    }
+    message.success('更新成功')
+    postEditRef.value.clearReq()
+    await router.push('/post/list')
+  } catch (error) {
+    console.log(error)
+    message.error('更新失败')
+  }
 }
 
 const getCategories = async () => {
