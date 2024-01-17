@@ -261,8 +261,17 @@ db.getCollection("posts").createIndex({ "tags": 1 });
 db.getCollection("posts").createIndex({ "title": "text" });
 
 // visit_logs
-db.getCollection("visit_logs").drop();
 db.createCollection("visit_logs");
 // 创建 create_time 降序索引
 db.getCollection("visit_logs").createIndex({ "create_time": -1 });
+
+// file_meta
+db.createCollection("file_meta");
+// 为 file_name  创建唯一索引
+db.getCollection("file_meta").createIndex({
+    file_name: NumberInt("1")
+}, {
+    name: "unique_file_name",
+    unique: true
+});
 EOF
