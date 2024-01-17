@@ -126,7 +126,7 @@ func (s *TagService) GetTags(ctx context.Context) ([]domain.TagWithCount, error)
 	tagMap := slice.IndexStructsByKey[domain.Tag, string](tags, func(tag domain.Tag) string {
 		return tag.Id
 	})
-	tagCounts, err := s.countStatsService.GetByReferenceIdAndType(ctx, ids, domain.CountStatsTypePostCountInTag)
+	tagCounts, err := s.countStatsService.GetByReferenceIdsAndType(ctx, ids, domain.CountStatsTypePostCountInTag)
 	if err != nil {
 		return nil, err
 	}

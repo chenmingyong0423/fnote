@@ -134,7 +134,29 @@ func (s *CategoryService) AdminCreateCategory(ctx context.Context, category doma
 }
 
 func (s *CategoryService) AdminGetCategories(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error) {
-	return s.QueryCategoriesPage(ctx, pageDTO)
+	categories, total, err := s.QueryCategoriesPage(ctx, pageDTO)
+	if err != nil {
+		return nil, 0, err
+	}
+	if len(categories) > 0 {
+		// 获取分类的统计数据
+		ids := slice.Map[domain.Category, string](categories, func(_ int, s domain.Category) string {
+			return s.Id
+		})
+		countStats, err := s.countStatsService.GetByReferenceIdsAndType(ctx, ids, domain.CountStatsTypePostCountInCategory)
+		if err != nil {
+			return nil, 0, err
+		}
+		countStatsMap := slice.IndexStructsByKey[domain.CountStats, string](countStats, func(countStats domain.CountStats) string {
+			return countStats.ReferenceId
+		})
+		for _, category := range categories {
+			if cs, ok := countStatsMap[category.Id]; ok {
+				category.PostCount = cs.Count
+			}
+		}
+	}
+	return categories, total, nil
 }
 
 func (s *CategoryService) GetCategoryByRoute(ctx context.Context, route string) (domain.Category, error) {
@@ -165,7 +187,7 @@ func (s *CategoryService) GetCategories(ctx context.Context) ([]domain.CategoryW
 		return category.Id
 	})
 
-	categoryCounts, err := s.countStatsService.GetByReferenceIdAndType(ctx, ids, domain.CountStatsTypePostCountInCategory)
+	categoryCounts, err := s.countStatsService.GetByReferenceIdsAndType(ctx, ids, domain.CountStatsTypePostCountInCategory)
 	if err != nil {
 		return nil, err
 	}
