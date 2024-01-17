@@ -78,6 +78,8 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("", api.WrapWithBody(h.AdminUpdatePost))
 	adminGroup.POST("", api.WrapWithBody(h.AddPost))
 	adminGroup.DELETE("/:id", api.Wrap(h.DeletePost))
+	adminGroup.PUT("/:id/display", api.WrapWithBody(h.UpdatePostIsDisplayed))
+	adminGroup.PUT("/:id/comment-allowed", api.WrapWithBody(h.UpdatePostIsCommentAllowed))
 }
 
 func (h *PostHandler) GetLatestPosts(ctx *gin.Context) (listVO api.ListVO[*SummaryPostVO], err error) {
@@ -198,14 +200,16 @@ func (h *PostHandler) postsToAdminPost(posts []*domain.Post) []vo.AdminPostVO {
 			}
 		})
 		adminPostVOs[i] = vo.AdminPostVO{
-			Id:         post.Id,
-			CoverImg:   post.CoverImg,
-			Title:      post.Title,
-			Summary:    post.Summary,
-			Categories: categories,
-			Tags:       tags,
-			CreateTime: post.CreateTime,
-			UpdateTime: post.UpdateTime,
+			Id:               post.Id,
+			CoverImg:         post.CoverImg,
+			Title:            post.Title,
+			Summary:          post.Summary,
+			Categories:       categories,
+			Tags:             tags,
+			IsDisplayed:      post.IsDisplayed,
+			IsCommentAllowed: post.IsCommentAllowed,
+			CreateTime:       post.CreateTime,
+			UpdateTime:       post.UpdateTime,
 		}
 	}
 	return adminPostVOs
@@ -325,4 +329,12 @@ func (h *PostHandler) AdminUpdatePost(ctx *gin.Context, req request.PostReq) (an
 		},
 		Likes: nil,
 	})
+}
+
+func (h *PostHandler) UpdatePostIsDisplayed(ctx *gin.Context, req request.PostDisplayReq) (any, error) {
+	return nil, h.serv.UpdatePostIsDisplayed(ctx, ctx.Param("id"), req.IsDisplayed)
+}
+
+func (h *PostHandler) UpdatePostIsCommentAllowed(ctx *gin.Context, req request.PostCommentAllowedReq) (any, error) {
+	return nil, h.serv.UpdatePostIsCommentAllowed(ctx, ctx.Param("id"), req.IsCommentAllowed)
 }

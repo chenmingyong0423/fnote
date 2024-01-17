@@ -76,6 +76,8 @@ type IPostDao interface {
 	FindById(ctx context.Context, id string) (*Post, error)
 	DecreaseByField(ctx context.Context, id string, filedName string, cnt int) error
 	SavePost(ctx context.Context, post *Post) error
+	UpdateIsDisplayedById(ctx context.Context, id string, isDisplayed bool) error
+	UpdateIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error
 }
 
 var _ IPostDao = (*PostDao)(nil)
@@ -88,6 +90,28 @@ func NewPostDao(db *mongo.Database) *PostDao {
 
 type PostDao struct {
 	coll *mongox.Collection[Post]
+}
+
+func (d *PostDao) UpdateIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error {
+	result, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("is_comment_allowed", isCommentAllowed).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to update the is_comment_allowed of post, id=%s, isCommentAllowed=%v", id, isCommentAllowed)
+	}
+	if result.ModifiedCount == 0 {
+		return fmt.Errorf("fails to update the is_comment_allowed of post, id=%s, isCommentAllowed=%v", id, isCommentAllowed)
+	}
+	return nil
+}
+
+func (d *PostDao) UpdateIsDisplayedById(ctx context.Context, id string, isDisplayed bool) error {
+	result, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("is_displayed", isDisplayed).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to update the is_displayed of post, id=%s, isDisplayed=%v", id, isDisplayed)
+	}
+	if result.ModifiedCount == 0 {
+		return fmt.Errorf("fails to update the is_displayed of post, id=%s, isDisplayed=%v", id, isDisplayed)
+	}
+	return nil
 }
 
 func (d *PostDao) SavePost(ctx context.Context, post *Post) error {

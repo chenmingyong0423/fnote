@@ -48,6 +48,8 @@ type IPostRepository interface {
 	FindPostById(ctx context.Context, id string) (*domain.Post, error)
 	DecreaseCommentCount(ctx context.Context, postId string, cnt int) error
 	SavePost(ctx context.Context, post *domain.Post) error
+	UpdatePostIsDisplayedById(ctx context.Context, id string, isDisplayed bool) error
+	UpdatePostIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error
 }
 
 var _ IPostRepository = (*PostRepository)(nil)
@@ -60,6 +62,14 @@ func NewPostRepository(dao dao.IPostDao) *PostRepository {
 
 type PostRepository struct {
 	dao dao.IPostDao
+}
+
+func (r *PostRepository) UpdatePostIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error {
+	return r.dao.UpdateIsCommentAllowedById(ctx, id, isCommentAllowed)
+}
+
+func (r *PostRepository) UpdatePostIsDisplayedById(ctx context.Context, id string, isDisplayed bool) error {
+	return r.dao.UpdateIsDisplayedById(ctx, id, isDisplayed)
 }
 
 func (r *PostRepository) SavePost(ctx context.Context, post *domain.Post) error {

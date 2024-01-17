@@ -56,6 +56,8 @@ type IPostService interface {
 	DecreaseCommentCount(ctx context.Context, postId string, cnt int) error
 	AdminGetPostById(ctx context.Context, id string) (*domain.Post, error)
 	AdminUpdatePostById(ctx context.Context, savedPost *domain.Post) error
+	UpdatePostIsDisplayed(ctx context.Context, id string, isDisplayed bool) error
+	UpdatePostIsCommentAllowed(ctx context.Context, id string, isCommentAllowed bool) error
 }
 
 var _ IPostService = (*PostService)(nil)
@@ -75,6 +77,14 @@ type PostService struct {
 	countStats  service2.ICountStatsService
 	fileService service3.IFileService
 	ipMap       sync.Map
+}
+
+func (s *PostService) UpdatePostIsCommentAllowed(ctx context.Context, id string, isCommentAllowed bool) error {
+	return s.repo.UpdatePostIsCommentAllowedById(ctx, id, isCommentAllowed)
+}
+
+func (s *PostService) UpdatePostIsDisplayed(ctx context.Context, id string, isDisplayed bool) error {
+	return s.repo.UpdatePostIsDisplayedById(ctx, id, isDisplayed)
 }
 
 func (s *PostService) AdminUpdatePostById(ctx context.Context, savedPost *domain.Post) error {
