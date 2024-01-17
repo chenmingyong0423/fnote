@@ -104,13 +104,13 @@
             </a-radio-group>
           </a-form-item>
           <a-form-item
-            name="status"
+            name="is_displayed"
             label="文章状态"
             :rules="[{ required: true, message: '请选择状态' }]"
           >
-            <a-radio-group v-model:value="postReq.status" name="radioGroup">
-              <a-radio :value="0">草稿</a-radio>
-              <a-radio :value="1">已发表</a-radio>
+            <a-radio-group v-model:value="postReq.is_displayed" name="radioGroup">
+              <a-radio :value="false">隐藏</a-radio>
+              <a-radio :value="true">显示</a-radio>
             </a-radio-group>
           </a-form-item>
           <a-form-item

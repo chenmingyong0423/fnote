@@ -19,6 +19,7 @@ import type { IBaseResponse, IListData, IResponse } from '@/interfaces/Common'
 import type { SelectCategory } from '@/interfaces/Category'
 import type { SelectTag } from '@/interfaces/Tag'
 import PostEditView from '@/views/post/PostEditView.vue'
+import originalAxios from 'axios'
 
 const postReq = reactive<PostRequest>({
   id: '',
@@ -35,7 +36,7 @@ const postReq = reactive<PostRequest>({
   meta_description: '',
   meta_keywords: '',
   is_comment_allowed: true,
-  status: 0
+  is_displayed: false
 })
 
 const postEditRef = ref()
@@ -56,6 +57,21 @@ const submit = async (postReq: PostRequest) => {
     postEditRef.value.clearReq()
   } catch (error) {
     console.log(error)
+    if (originalAxios.isAxiosError(error)) {
+      // 这是一个由 axios 抛出的错误
+      if (error.response) {
+        if (error.response.status === 409) {
+          message.error('id 重复')
+          return
+        }
+      } else if (error.request) {
+        // 请求已发出，但没有收到响应
+        console.log('No response received:', error.request)
+      } else {
+        // 在设置请求时触发了一个错误
+        console.log('Error Message:', error.message)
+      }
+    }
     message.error('添加失败')
   }
 }

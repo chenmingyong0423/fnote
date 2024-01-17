@@ -18,7 +18,7 @@ export interface PostDetailVO {
   cover_img: string
   categories: Category4Post[]
   tags: Tag4Post[]
-  status: number
+  is_displayed: boolean
   sticky_weight: number
   meta_description: string
   meta_keywords: string
@@ -56,7 +56,7 @@ export interface PostRequest {
   tempCategories: string[]
   tags: Tag4Post[]
   tempTags: string[]
-  status: number
+  is_displayed: boolean
   sticky_weight: number
   meta_description: string
   meta_keywords: string
