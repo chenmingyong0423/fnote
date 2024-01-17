@@ -150,9 +150,9 @@ func (s *CategoryService) AdminGetCategories(ctx context.Context, pageDTO dto.Pa
 		countStatsMap := slice.IndexStructsByKey[domain.CountStats, string](countStats, func(countStats domain.CountStats) string {
 			return countStats.ReferenceId
 		})
-		for _, category := range categories {
+		for i, category := range categories {
 			if cs, ok := countStatsMap[category.Id]; ok {
-				category.PostCount = cs.Count
+				categories[i].PostCount = cs.Count
 			}
 		}
 	}
