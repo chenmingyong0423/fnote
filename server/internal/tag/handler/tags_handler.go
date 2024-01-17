@@ -105,6 +105,7 @@ func (h *TagHandler) tagsToVO(tags []domain.Tag) []vo.Tag {
 			Id:         tag.Id,
 			Name:       tag.Name,
 			Route:      tag.Route,
+			PostCount:  tag.PostCount,
 			Enabled:    tag.Enabled,
 			CreateTime: tag.CreateTime,
 			UpdateTime: tag.UpdateTime,
