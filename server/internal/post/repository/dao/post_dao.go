@@ -30,17 +30,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type PostStatus uint
-
-const (
-	// PostStatusDraft 草稿
-	PostStatusDraft PostStatus = iota
-	// PostStatusPunished 已发布
-	PostStatusPunished
-	// PostStatusDeleted 已删除
-	PostStatusDeleted
-)
-
 type Post struct {
 	Id               string          `bson:"_id"`
 	Author           string          `bson:"author"`
@@ -50,7 +39,7 @@ type Post struct {
 	CoverImg         string          `bson:"cover_img"`
 	Categories       []Category4Post `bson:"categories"`
 	Tags             []Tag4Post      `bson:"tags"`
-	Status           PostStatus      `bson:"status"`
+	IsDisplayed      bool            `bson:"is_displayed"`
 	Likes            []string        `bson:"likes,omitempty"`
 	LikeCount        int             `bson:"like_count,omitempty"`
 	CommentCount     int             `bson:"comment_count,omitempty"`
@@ -165,7 +154,7 @@ func (d *PostDao) IncreaseFieldById(ctx context.Context, id string, field string
 
 func (d *PostDao) DeleteLike(ctx context.Context, id string, ip string) error {
 	result, err := d.coll.Updater().
-		Filter(query.BsonBuilder().Id(id).Add("status", PostStatusPunished).Build()).
+		Filter(query.BsonBuilder().Id(id).Add("is_displayed", true).Build()).
 		Updates(update.BsonBuilder().Pull("likes", ip).Inc("like_count", -1).Build()).
 		UpdateOne(ctx)
 	if err != nil {
@@ -179,7 +168,7 @@ func (d *PostDao) DeleteLike(ctx context.Context, id string, ip string) error {
 
 func (d *PostDao) AddLike(ctx context.Context, id string, ip string) error {
 	result, err := d.coll.Updater().
-		Filter(query.BsonBuilder().Id(id).Add("status", PostStatusPunished).Build()).
+		Filter(query.BsonBuilder().Id(id).Add("is_displayed", true).Build()).
 		Updates(update.BsonBuilder().Push("likes", ip).Inc("like_count", 1).Build()).
 		UpdateOne(ctx)
 	if err != nil {
@@ -200,7 +189,7 @@ func (d *PostDao) FindByIdAndIp(ctx context.Context, id string, ip string) (*Pos
 }
 
 func (d *PostDao) GetPunishedPostById(ctx context.Context, id string) (*Post, error) {
-	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add("status", PostStatusPunished).Build()).FindOne(ctx)
+	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add("is_displayed", true).Build()).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the document from post, id=%s", id)
 	}
@@ -221,7 +210,7 @@ func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *o
 
 func (d *PostDao) GetFrontPosts(ctx context.Context, count int64) ([]*Post, error) {
 	findOptions := options.Find().SetSort(bsonx.D(bsonx.E("sticky_weight", -1), bsonx.E("create_time", -1))).SetLimit(count)
-	posts, err := d.coll.Finder().Filter(bsonx.M("status", PostStatusPunished)).Find(ctx, findOptions)
+	posts, err := d.coll.Finder().Filter(bsonx.M("is_displayed", true)).Find(ctx, findOptions)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from post, findOptions=%v", findOptions)
 	}

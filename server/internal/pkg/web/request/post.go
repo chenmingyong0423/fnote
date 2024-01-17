@@ -24,7 +24,7 @@ type PostReq struct {
 	Categories       []Category4Post `json:"categories"`
 	Tags             []Tag4Post      `json:"tags"`
 	StickyWeight     int             `json:"sticky_weight"`
-	Status           int             `json:"status"`
+	IsDisplayed      bool            `json:"is_displayed"`
 	MetaDescription  string          `json:"meta_description"`
 	MetaKeywords     string          `json:"meta_keywords"`
 	WordCount        int             `json:"word_count"`

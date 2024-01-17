@@ -212,6 +212,13 @@ func (h *PostHandler) postsToAdminPost(posts []*domain.Post) []vo.AdminPostVO {
 }
 
 func (h *PostHandler) AddPost(ctx *gin.Context, req request.PostReq) (any, error) {
+	existPost, err := h.serv.AdminGetPostById(ctx, req.Id)
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, err
+	}
+	if existPost != nil {
+		return nil, api.NewErrorResponseBody(http.StatusConflict, "The postId already exists.")
+	}
 	categories := slice.Map[request.Category4Post, domain.Category4Post](req.Categories, func(_ int, c request.Category4Post) domain.Category4Post {
 		return domain.Category4Post{
 			Id:   c.Id,
@@ -240,7 +247,7 @@ func (h *PostHandler) AddPost(ctx *gin.Context, req request.PostReq) (any, error
 			MetaDescription:  req.MetaDescription,
 			MetaKeywords:     req.MetaKeywords,
 			WordCount:        req.WordCount,
-			Status:           req.Status,
+			IsDisplayed:      req.IsDisplayed,
 			IsCommentAllowed: req.IsCommentAllowed,
 		},
 	})
@@ -276,7 +283,7 @@ func (h *PostHandler) AdminGetPostById(ctx *gin.Context) (vo.PostDetailVO, error
 		CoverImg:         post.CoverImg,
 		Categories:       categories,
 		Tags:             tags,
-		Status:           vo.PostStatus(post.Status),
+		IsDisplayed:      post.IsDisplayed,
 		StickyWeight:     post.StickyWeight,
 		MetaDescription:  post.MetaDescription,
 		MetaKeywords:     post.MetaKeywords,
@@ -313,7 +320,7 @@ func (h *PostHandler) AdminUpdatePost(ctx *gin.Context, req request.PostReq) (an
 			MetaDescription:  req.MetaDescription,
 			MetaKeywords:     req.MetaKeywords,
 			WordCount:        req.WordCount,
-			Status:           req.Status,
+			IsDisplayed:      req.IsDisplayed,
 			IsCommentAllowed: req.IsCommentAllowed,
 		},
 		Likes: nil,

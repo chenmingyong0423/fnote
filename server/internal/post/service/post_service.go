@@ -124,19 +124,26 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 		// 对应的分类和标签文章数-1
-		referenceIds := make([]string, 0, len(post.Categories)+len(post.Tags))
 		categoryIds := slice.Map[domain.Category4Post, string](post.Categories, func(_ int, c domain.Category4Post) string {
 			return c.Id
 		})
-		referenceIds = append(referenceIds, categoryIds...)
+		if len(categoryIds) > 0 {
+			gErr = s.countStats.DecreaseByReferenceIdsAndType(ctx, categoryIds, domain.CountStatsTypePostCountInCategory)
+			if gErr != nil {
+				l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+				l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+			}
+		}
+
 		tagIds := slice.Map[domain.Tag4Post, string](post.Tags, func(_ int, t domain.Tag4Post) string {
 			return t.Id
 		})
-		referenceIds = append(referenceIds, tagIds...)
-		gErr = s.countStats.DecreaseByReferenceIds(ctx, referenceIds)
-		if gErr != nil {
-			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		if len(tagIds) > 0 {
+			gErr = s.countStats.DecreaseByReferenceIdsAndType(ctx, tagIds, domain.CountStatsTypePostCountInTag)
+			if gErr != nil {
+				l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+				l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+			}
 		}
 		// 删除封面文件索引
 		fid, gErr := hex.DecodeString(strings.Split(post.CoverImg[1:], ".")[0])
@@ -177,22 +184,25 @@ func (s *PostService) addPostCallback(ctx context.Context, post *domain.Post) {
 		l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 	}
 	// 对应的分类和标签文章数+1
-	referenceIds := make([]string, 0, len(post.Categories)+len(post.Tags))
 	categoryIds := slice.Map[domain.Category4Post, string](post.Categories, func(_ int, c domain.Category4Post) string {
 		return c.Id
 	})
-	referenceIds = append(referenceIds, categoryIds...)
+	if len(categoryIds) > 0 {
+		gErr = s.countStats.IncreaseByReferenceIdsAndType(ctx, categoryIds, domain.CountStatsTypePostCountInCategory)
+		if gErr != nil {
+			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+	}
 	tagIds := slice.Map[domain.Tag4Post, string](post.Tags, func(_ int, t domain.Tag4Post) string {
 		return t.Id
 	})
-	referenceIds = append(referenceIds, tagIds...)
-	for _, tag := range post.Tags {
-		referenceIds = append(referenceIds, tag.Id)
-	}
-	gErr = s.countStats.IncreaseByReferenceIds(ctx, referenceIds)
-	if gErr != nil {
-		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-		l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+	if len(tagIds) > 0 {
+		gErr = s.countStats.IncreaseByReferenceIdsAndType(ctx, tagIds, domain.CountStatsTypePostCountInTag)
+		if gErr != nil {
+			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
 	}
 	// 封面文件索引
 	fileId, gErr := hex.DecodeString(strings.Split(post.CoverImg[1:], ".")[0])
