@@ -24,6 +24,7 @@ type Category struct {
 	Sort        int64  `json:"sort"`
 	CreateTime  int64  `json:"create_time"`
 	UpdateTime  int64  `json:"update_time"`
+	PostCount   int64
 }
 
 type CategoryWithCount struct {

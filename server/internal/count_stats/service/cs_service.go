@@ -22,7 +22,7 @@ import (
 )
 
 type ICountStatsService interface {
-	GetByReferenceIdAndType(ctx context.Context, referenceIds []string, countStatsType domain.CountStatsType) ([]domain.CountStats, error)
+	GetByReferenceIdsAndType(ctx context.Context, referenceIds []string, countStatsType domain.CountStatsType) ([]domain.CountStats, error)
 	Create(ctx context.Context, countStats domain.CountStats) error
 	DeleteByReferenceId(ctx context.Context, referenceId string) error
 	IncreaseByReferenceIds(ctx context.Context, ids []string) error
@@ -71,6 +71,6 @@ func (s *CountStatsService) Create(ctx context.Context, countStats domain.CountS
 	return nil
 }
 
-func (s *CountStatsService) GetByReferenceIdAndType(ctx context.Context, referenceIds []string, countStatsType domain.CountStatsType) ([]domain.CountStats, error) {
+func (s *CountStatsService) GetByReferenceIdsAndType(ctx context.Context, referenceIds []string, countStatsType domain.CountStatsType) ([]domain.CountStats, error) {
 	return s.repo.GetByReferenceIdAndType(ctx, referenceIds, countStatsType)
 }
