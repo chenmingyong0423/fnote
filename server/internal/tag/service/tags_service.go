@@ -105,7 +105,29 @@ func (s *TagService) AdminCreateTag(ctx context.Context, tag domain.Tag) error {
 }
 
 func (s *TagService) AdminGetTags(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Tag, int64, error) {
-	return s.QueryTagsPage(ctx, pageDTO)
+	tags, total, err := s.QueryTagsPage(ctx, pageDTO)
+	if err != nil {
+		return nil, 0, err
+	}
+	// 查询标签的统计数据
+	if len(tags) > 0 {
+		ids := slice.Map[domain.Tag, string](tags, func(_ int, s domain.Tag) string {
+			return s.Id
+		})
+		countStats, fErr := s.countStatsService.GetByReferenceIdsAndType(ctx, ids, domain.CountStatsTypePostCountInTag)
+		if err != nil {
+			return nil, 0, fErr
+		}
+		countStatsMap := slice.IndexStructsByKey[domain.CountStats, string](countStats, func(countStats domain.CountStats) string {
+			return countStats.ReferenceId
+		})
+		for i, tag := range tags {
+			if cs, ok := countStatsMap[tag.Id]; ok {
+				tags[i].PostCount = cs.Count
+			}
+		}
+	}
+	return tags, total, nil
 }
 
 func (s *TagService) GetTagByRoute(ctx context.Context, route string) (domain.Tag, error) {

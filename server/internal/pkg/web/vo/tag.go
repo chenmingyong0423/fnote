@@ -19,6 +19,7 @@ type Tag struct {
 	Name        string `json:"name"`
 	Route       string `json:"route"`
 	Description string `json:"description"`
+	PostCount   int64  `json:"post_count"`
 	Enabled     bool   `json:"enabled"`
 	CreateTime  int64  `json:"create_time"`
 	UpdateTime  int64  `json:"update_time"`

@@ -18,6 +18,7 @@ type Tag struct {
 	Id         string
 	Name       string
 	Route      string
+	PostCount  int64
 	Enabled    bool
 	CreateTime int64
 	UpdateTime int64

@@ -143,9 +143,9 @@ func (s *CategoryService) AdminGetCategories(ctx context.Context, pageDTO dto.Pa
 		ids := slice.Map[domain.Category, string](categories, func(_ int, s domain.Category) string {
 			return s.Id
 		})
-		countStats, err := s.countStatsService.GetByReferenceIdsAndType(ctx, ids, domain.CountStatsTypePostCountInCategory)
+		countStats, fErr := s.countStatsService.GetByReferenceIdsAndType(ctx, ids, domain.CountStatsTypePostCountInCategory)
 		if err != nil {
-			return nil, 0, err
+			return nil, 0, fErr
 		}
 		countStatsMap := slice.IndexStructsByKey[domain.CountStats, string](countStats, func(countStats domain.CountStats) string {
 			return countStats.ReferenceId
