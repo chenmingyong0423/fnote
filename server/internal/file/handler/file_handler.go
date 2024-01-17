@@ -43,6 +43,7 @@ func (h *FileHandler) RegisterGinRoutes(engine *gin.Engine) {
 }
 
 func (h *FileHandler) UploadFile(ctx *gin.Context) (VO vo.FileVO, err error) {
+	fileName := ctx.PostForm("file_name")
 	file, err := ctx.FormFile("file")
 	if err != nil {
 		return
@@ -57,11 +58,12 @@ func (h *FileHandler) UploadFile(ctx *gin.Context) (VO vo.FileVO, err error) {
 		return
 	}
 	fileDto := dto.FileDTO{
-		FileName: file.Filename,
-		FileSize: file.Size,
-		Content:  content,
-		FileType: file.Header.Get("Content-Type"),
-		FileExt:  filepath.Ext(file.Filename),
+		FileName:       file.Filename,
+		FileSize:       file.Size,
+		Content:        content,
+		FileType:       file.Header.Get("Content-Type"),
+		FileExt:        filepath.Ext(file.Filename),
+		CustomFileName: fileName,
 	}
 	fileInfo, err := h.serv.Upload(ctx, fileDto)
 	if err != nil {

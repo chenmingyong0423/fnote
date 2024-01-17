@@ -15,9 +15,10 @@
 package dto
 
 type FileDTO struct {
-	FileName string `json:"file_name"`
-	FileSize int64  `json:"file_size"`
-	Content  []byte `json:"content"`
-	FileType string `json:"file_type"`
-	FileExt  string `json:"file_ext"`
+	FileName       string `json:"file_name"`
+	FileSize       int64  `json:"file_size"`
+	Content        []byte `json:"content"`
+	FileType       string `json:"file_type"`
+	FileExt        string `json:"file_ext"`
+	CustomFileName string
 }

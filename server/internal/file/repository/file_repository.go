@@ -28,6 +28,7 @@ type IFileRepository interface {
 	Save(ctx context.Context, file *domain.File) error
 	PushIntoUsedIn(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	PullUsedIn(ctx context.Context, fileId []byte, entityId string, entityType string) error
+	FindByFileName(ctx context.Context, filename string) (*domain.File, error)
 }
 
 var _ IFileRepository = (*FileRepository)(nil)
@@ -38,6 +39,14 @@ func NewFileRepository(dao dao.IFileDao) *FileRepository {
 
 type FileRepository struct {
 	dao dao.IFileDao
+}
+
+func (r *FileRepository) FindByFileName(ctx context.Context, filename string) (*domain.File, error) {
+	file, err := r.dao.FindByFileName(ctx, filename)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainFile(file), nil
 }
 
 func (r *FileRepository) PullUsedIn(ctx context.Context, fileId []byte, entityId string, entityType string) error {
@@ -77,4 +86,29 @@ func (r *FileRepository) Save(ctx context.Context, file *domain.File) error {
 		return err
 	}
 	return nil
+}
+
+func (r *FileRepository) toDomainFile(file *dao.File) *domain.File {
+	return &domain.File{
+		Id:               file.Id.Hex(),
+		FileId:           hex.EncodeToString(file.FileId),
+		FileName:         file.FileName,
+		OriginalFileName: file.OriginalFileName,
+		FileType:         file.FileType,
+		FileSize:         file.FileSize,
+		FilePath:         file.FilePath,
+		Url:              file.Url,
+		UsedIn: func() []domain.FileUsage {
+			usedIn := make([]domain.FileUsage, 0)
+			for _, usage := range file.UsedIn {
+				usedIn = append(usedIn, domain.FileUsage{
+					EntityId:   usage.EntityId,
+					EntityType: string(usage.EntityType),
+				})
+			}
+			return usedIn
+		}(),
+		CreateTime: file.CreateTime,
+		UpdateTime: file.UpdateTime,
+	}
 }
