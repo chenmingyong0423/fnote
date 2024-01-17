@@ -75,6 +75,7 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin/posts")
 	adminGroup.GET("", api.WrapWithBody(h.AdminGetPosts))
 	adminGroup.GET("/:id", api.Wrap(h.AdminGetPostById))
+	adminGroup.PUT("", api.WrapWithBody(h.AdminUpdatePost))
 	adminGroup.POST("", api.WrapWithBody(h.AddPost))
 	adminGroup.DELETE("/:id", api.Wrap(h.DeletePost))
 }
@@ -223,7 +224,7 @@ func (h *PostHandler) AddPost(ctx *gin.Context, req request.PostReq) (any, error
 			Name: t.Name,
 		}
 	})
-	return nil, h.serv.AddPost(ctx, domain.Post{
+	return nil, h.serv.AddPost(ctx, &domain.Post{
 		PrimaryPost: domain.PrimaryPost{
 			Id:           req.Id,
 			Author:       req.Author,
@@ -242,7 +243,6 @@ func (h *PostHandler) AddPost(ctx *gin.Context, req request.PostReq) (any, error
 			Status:           req.Status,
 			IsCommentAllowed: req.IsCommentAllowed,
 		},
-		IsCommentAllowed: req.IsCommentAllowed,
 	})
 }
 
@@ -282,4 +282,40 @@ func (h *PostHandler) AdminGetPostById(ctx *gin.Context) (vo.PostDetailVO, error
 		MetaKeywords:     post.MetaKeywords,
 		IsCommentAllowed: post.IsCommentAllowed,
 	}, nil
+}
+
+func (h *PostHandler) AdminUpdatePost(ctx *gin.Context, req request.PostReq) (any, error) {
+	categories := slice.Map[request.Category4Post, domain.Category4Post](req.Categories, func(_ int, c request.Category4Post) domain.Category4Post {
+		return domain.Category4Post{
+			Id:   c.Id,
+			Name: c.Name,
+		}
+	})
+	tags := slice.Map[request.Tag4Post, domain.Tag4Post](req.Tags, func(_ int, t request.Tag4Post) domain.Tag4Post {
+		return domain.Tag4Post{
+			Id:   t.Id,
+			Name: t.Name,
+		}
+	})
+	return nil, h.serv.AdminUpdatePostById(ctx, &domain.Post{
+		PrimaryPost: domain.PrimaryPost{
+			Id:           req.Id,
+			Author:       req.Author,
+			Title:        req.Title,
+			Summary:      req.Summary,
+			CoverImg:     req.CoverImg,
+			Categories:   categories,
+			Tags:         tags,
+			StickyWeight: req.StickyWeight,
+		},
+		ExtraPost: domain.ExtraPost{
+			Content:          req.Content,
+			MetaDescription:  req.MetaDescription,
+			MetaKeywords:     req.MetaKeywords,
+			WordCount:        req.WordCount,
+			Status:           req.Status,
+			IsCommentAllowed: req.IsCommentAllowed,
+		},
+		Likes: nil,
+	})
 }

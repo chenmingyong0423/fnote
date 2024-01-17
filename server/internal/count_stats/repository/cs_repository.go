@@ -28,6 +28,8 @@ type ICountStatsRepository interface {
 	DeleteByReferenceId(ctx context.Context, referenceId string) error
 	IncreaseByReferenceIds(ctx context.Context, ids []string) error
 	DecreaseByReferenceIds(ctx context.Context, ids []string) error
+	DecreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error
+	IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error
 }
 
 var _ ICountStatsRepository = (*CountStatsRepository)(nil)
@@ -40,6 +42,14 @@ func NewCountStatsRepository(dao dao.ICountStatsDao) *CountStatsRepository {
 
 type CountStatsRepository struct {
 	dao dao.ICountStatsDao
+}
+
+func (r *CountStatsRepository) IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error {
+	return r.dao.IncreaseByReferenceIdsAndType(ctx, ids, string(countStatsType))
+}
+
+func (r *CountStatsRepository) DecreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error {
+	return r.dao.DecreaseByReferenceIdsAndType(ctx, ids, string(countStatsType))
 }
 
 func (r *CountStatsRepository) DecreaseByReferenceIds(ctx context.Context, ids []string) error {

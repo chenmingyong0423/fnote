@@ -43,8 +43,7 @@ type DetailPostVO struct {
 type Post struct {
 	PrimaryPost
 	ExtraPost
-	IsCommentAllowed bool     `json:"is_comment_allowed"`
-	Likes            []string `json:"-"`
+	Likes []string `json:"-"`
 }
 
 type ExtraPost struct {
