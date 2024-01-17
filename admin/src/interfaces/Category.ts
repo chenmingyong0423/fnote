@@ -5,6 +5,7 @@ export interface ICategory {
   description: string
   enabled: boolean
   show_in_nav: boolean
+  post_count: number
   create_time: number
   update_time: number
 }

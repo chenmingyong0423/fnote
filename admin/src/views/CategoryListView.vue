@@ -118,6 +118,7 @@ import type { CategoryRequest, ICategory } from '@/interfaces/Category'
 import { message } from 'ant-design-vue'
 import { cloneDeep } from 'lodash-es'
 import dayjs from 'dayjs'
+
 const columns = [
   {
     title: '名称',
@@ -133,6 +134,11 @@ const columns = [
     title: '描述',
     key: 'description',
     dataIndex: 'description'
+  },
+  {
+    title: '文章数量',
+    key: 'post_count',
+    dataIndex: 'post_count'
   },
   {
     title: '状态',
