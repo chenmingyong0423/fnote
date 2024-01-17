@@ -16,7 +16,12 @@ package service
 
 import (
 	"context"
+	"net/http"
 	"os"
+
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/spf13/viper"
 
@@ -54,8 +59,23 @@ func (s *FileService) IndexFileMeta(ctx context.Context, fileId []byte, entityId
 }
 
 func (s *FileService) Upload(ctx context.Context, fileDTO dto.FileDTO) (*domain.File, error) {
-	fileId := uuidx.RearrangeUUID4()
-	filename := fileId + fileDTO.FileExt
+	var (
+		filename, fileId string
+	)
+	if fileDTO.CustomFileName != "" {
+		filename = fileDTO.CustomFileName + fileDTO.FileExt
+		file, err := s.repo.FindByFileName(ctx, filename)
+		if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, err
+		}
+		if file != nil {
+			return nil, api.NewErrorResponseBody(http.StatusConflict, "file already exists")
+		}
+	} else {
+		fileId = uuidx.RearrangeUUID4()
+		filename = fileId + fileDTO.FileExt
+	}
+
 	staticPath := viper.GetString("system.static_path")
 	err := os.MkdirAll(staticPath, os.ModePerm)
 	if err != nil {

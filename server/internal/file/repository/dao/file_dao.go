@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+
 	"github.com/pkg/errors"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
@@ -59,6 +61,7 @@ type IFileDao interface {
 	Save(ctx context.Context, file *File) (string, error)
 	PushIntoUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error
 	PullUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error
+	FindByFileName(ctx context.Context, filename string) (*File, error)
 }
 
 var _ IFileDao = (*FileDao)(nil)
@@ -69,6 +72,10 @@ func NewFileDao(db *mongo.Database) *FileDao {
 
 type FileDao struct {
 	coll *mongox.Collection[File]
+}
+
+func (d *FileDao) FindByFileName(ctx context.Context, filename string) (*File, error) {
+	return d.coll.Finder().Filter(query.Eq("file_name", filename)).FindOne(ctx)
 }
 
 func (d *FileDao) PullUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error {
