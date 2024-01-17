@@ -44,20 +44,9 @@ type PostDetailVO struct {
 	CoverImg         string          `json:"cover_img"`
 	Categories       []Category4Post `json:"categories"`
 	Tags             []Tag4Post      `json:"tags"`
-	Status           PostStatus      `json:"status"`
+	IsDisplayed      bool            `json:"is_displayed"`
 	StickyWeight     int             `json:"sticky_weight"`
 	MetaDescription  string          `json:"meta_description"`
 	MetaKeywords     string          `json:"meta_keywords"`
 	IsCommentAllowed bool            `json:"is_comment_allowed"`
 }
-
-type PostStatus uint
-
-const (
-	// PostStatusDraft 草稿
-	PostStatusDraft PostStatus = iota
-	// PostStatusPunished 已发布
-	PostStatusPunished
-	// PostStatusDeleted 已删除
-	PostStatusDeleted
-)

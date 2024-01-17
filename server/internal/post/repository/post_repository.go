@@ -75,7 +75,7 @@ func (r *PostRepository) SavePost(ctx context.Context, post *domain.Post) error 
 		CoverImg:         post.CoverImg,
 		Categories:       categories,
 		Tags:             tags,
-		Status:           dao.PostStatus(post.Status),
+		IsDisplayed:      post.IsDisplayed,
 		StickyWeight:     post.StickyWeight,
 		MetaDescription:  post.MetaDescription,
 		MetaKeywords:     post.MetaKeywords,
@@ -143,7 +143,7 @@ func (r *PostRepository) AddPost(ctx context.Context, post *domain.Post) error {
 		CoverImg:         post.CoverImg,
 		Categories:       categories,
 		Tags:             tags,
-		Status:           dao.PostStatus(post.Status),
+		IsDisplayed:      post.IsDisplayed,
 		Likes:            make([]string, 0),
 		LikeCount:        0,
 		CommentCount:     0,
@@ -224,7 +224,7 @@ func (r *PostRepository) GetPunishedPostById(ctx context.Context, id string) (*d
 }
 
 func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition domain.PostsQueryCondition) ([]*domain.Post, int64, error) {
-	condBuilder := query.BsonBuilder().Eq("status", dao.PostStatusPunished)
+	condBuilder := query.BsonBuilder().Eq("is_displayed", true)
 	if postsQueryCondition.Categories != nil && len(postsQueryCondition.Categories) > 0 {
 		condBuilder.Eq("categories.name", postsQueryCondition.Categories[0])
 	}
@@ -290,7 +290,7 @@ func (r *PostRepository) daoPostToDomainPost(post *dao.Post) *domain.Post {
 			Name: t.Name,
 		}
 	})
-	return &domain.Post{PrimaryPost: domain.PrimaryPost{Id: post.Id, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Categories: categories, Tags: tags, LikeCount: post.LikeCount, CommentCount: post.CommentCount, VisitCount: post.VisitCount, StickyWeight: post.StickyWeight, CreateTime: post.CreateTime}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, WordCount: post.WordCount, UpdateTime: post.UpdateTime, IsCommentAllowed: post.IsCommentAllowed, Status: int(post.Status)}, Likes: post.Likes}
+	return &domain.Post{PrimaryPost: domain.PrimaryPost{Id: post.Id, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Categories: categories, Tags: tags, LikeCount: post.LikeCount, CommentCount: post.CommentCount, VisitCount: post.VisitCount, StickyWeight: post.StickyWeight, CreateTime: post.CreateTime}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, WordCount: post.WordCount, UpdateTime: post.UpdateTime, IsCommentAllowed: post.IsCommentAllowed, IsDisplayed: post.IsDisplayed}, Likes: post.Likes}
 }
 
 func (r *PostRepository) toDaoTags4Post(ts []domain.Tag4Post) []dao.Tag4Post {

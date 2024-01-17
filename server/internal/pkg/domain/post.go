@@ -52,7 +52,7 @@ type ExtraPost struct {
 	MetaKeywords     string `json:"meta_keywords"`
 	WordCount        int    `json:"word_count"`
 	UpdateTime       int64  `json:"update_time"`
-	Status           int    `json:"status"`
+	IsDisplayed      bool   `json:"is_displayed"`
 	IsCommentAllowed bool   `json:"is_comment_allowed"`
 }
 
