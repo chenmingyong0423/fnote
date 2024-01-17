@@ -18,11 +18,12 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/chenmingyong0423/gkit/slice"
-	"go.mongodb.org/mongo-driver/mongo"
 	"log/slog"
 	"strings"
 	"sync"
+
+	"github.com/chenmingyong0423/gkit/slice"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	service3 "github.com/chenmingyong0423/fnote/server/internal/file/service"
 
