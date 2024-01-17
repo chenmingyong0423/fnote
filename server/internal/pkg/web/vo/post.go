@@ -15,14 +15,16 @@
 package vo
 
 type AdminPostVO struct {
-	Id         string          `json:"id"`
-	CoverImg   string          `json:"cover_img"`
-	Title      string          `json:"title"`
-	Summary    string          `json:"summary"`
-	Categories []Category4Post `json:"categories"`
-	Tags       []Tag4Post      `json:"tags"`
-	CreateTime int64           `json:"create_time"`
-	UpdateTime int64           `json:"update_time"`
+	Id               string          `json:"id"`
+	CoverImg         string          `json:"cover_img"`
+	Title            string          `json:"title"`
+	Summary          string          `json:"summary"`
+	Categories       []Category4Post `json:"categories"`
+	Tags             []Tag4Post      `json:"tags"`
+	IsDisplayed      bool            `json:"is_displayed"`
+	IsCommentAllowed bool            `json:"is_comment_allowed"`
+	CreateTime       int64           `json:"create_time"`
+	UpdateTime       int64           `json:"update_time"`
 }
 
 type Category4Post struct {

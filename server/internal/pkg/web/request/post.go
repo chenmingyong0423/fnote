@@ -14,6 +14,14 @@
 
 package request
 
+type PostDisplayReq struct {
+	IsDisplayed bool `json:"is_displayed"`
+}
+
+type PostCommentAllowedReq struct {
+	IsCommentAllowed bool `json:"is_comment_allowed"`
+}
+
 type PostReq struct {
 	Id               string          `json:"id"`
 	Author           string          `json:"author"`
