@@ -52,10 +52,6 @@
             <a-switch v-model:checked="record.enabled" @change="changeTagEnabled(record)" />
           </template>
 
-          <template v-if="column.key === 'show_in_nav'">
-            <a-switch v-model:checked="record.show_in_nav" @change="changeTagNav(record)" />
-          </template>
-
           <template v-else-if="column.dataIndex === 'operation'">
             <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteTag(record.id)">
               <a>删除</a>
@@ -86,6 +82,11 @@ const columns = [
     title: '路由',
     dataIndex: 'route',
     key: 'route'
+  },
+  {
+    title: '文章数量',
+    key: 'post_count',
+    dataIndex: 'post_count'
   },
   {
     title: '状态',
