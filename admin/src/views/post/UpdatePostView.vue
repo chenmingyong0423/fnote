@@ -37,7 +37,7 @@ const postReq = reactive<PostRequest>({
   meta_description: '',
   meta_keywords: '',
   is_comment_allowed: true,
-  status: 0
+  is_displayed: false
 })
 
 // 获取 query 参数
@@ -72,7 +72,7 @@ const getPostById = async () => {
       postReq.meta_keywords = post.meta_keywords
       postReq.is_comment_allowed = post.is_comment_allowed
       postReq.categories = post.categories
-      postReq.status = post.status
+      postReq.is_displayed = post.is_displayed
       postReq.tags = post.tags
       post.categories.forEach((item) => {
         postReq.tempCategories.push(item.name)
