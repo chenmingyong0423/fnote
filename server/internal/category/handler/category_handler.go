@@ -133,6 +133,7 @@ func (h *CategoryHandler) categoriesToVO(categories []domain.Category) []vo.Cate
 			Enabled:     category.Enabled,
 			ShowInNav:   category.ShowInNav,
 			Description: category.Description,
+			PostCount:   category.PostCount,
 			CreateTime:  category.CreateTime,
 			UpdateTime:  category.UpdateTime,
 		}
