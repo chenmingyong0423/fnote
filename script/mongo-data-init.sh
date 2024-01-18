@@ -45,12 +45,8 @@ db.getCollection("configs").insertOne({
   "create_time": Math.floor(new Date().getTime() / 1000),
   "props": {
     "name": "fnote",
-    "post_count": 0,
-    "category_count": 0,
-    "view_count": 0,
     "live_time": Math.floor(new Date().getTime() / 1000),
     "icon": "",
-    "domain": "",
     "records": []
   },
   "typ": "website",
@@ -274,4 +270,38 @@ db.getCollection("file_meta").createIndex({
     name: "unique_file_name",
     unique: true
 });
+
+// count_stats
+db.createCollection("count_stats")
+db.getCollection("count_stats").createIndex({ reference_id: 1, type: 1})
+db.getCollection("count_stats").insertMany([
+    {
+        "type": "PostCountInWebsite",
+        "reference_id": "PostCountInWebsite",
+        "count": 0,
+        create_time: Math.floor(new Date().getTime() / 1000),
+        update_time: Math.floor(new Date().getTime() / 1000)
+    },
+    {
+        "type": "CategoryCount",
+        "reference_id": "CategoryCount",
+        "count": 0,
+        create_time: Math.floor(new Date().getTime() / 1000),
+        update_time: Math.floor(new Date().getTime() / 1000)
+    },
+    {
+        "type": "TagCount",
+        "reference_id": "TagCount",
+        "count": 0,
+        create_time: Math.floor(new Date().getTime() / 1000),
+        update_time: Math.floor(new Date().getTime() / 1000)
+    },
+    {
+        "type": "CommentCount",
+        "reference_id": "CommentCount",
+        "count": 0,
+        create_time: Math.floor(new Date().getTime() / 1000),
+        update_time: Math.floor(new Date().getTime() / 1000)
+    }
+])
 EOF
