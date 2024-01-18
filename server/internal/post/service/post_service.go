@@ -128,7 +128,7 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 	}
 	go func() {
 		// 网站文章数-1
-		gErr := s.cfgService.DecreaseWebsitePostCount(ctx)
+		gErr := s.countStats.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCountInWebsite.ToString(), domain.CountStatsTypePostCountInWebsite)
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
@@ -188,7 +188,7 @@ func (s *PostService) AddPost(ctx context.Context, post *domain.Post) error {
 // addPostCallback 添加文章后的回调
 func (s *PostService) addPostCallback(ctx context.Context, post *domain.Post) {
 	// 网站文章数+1
-	gErr := s.cfgService.IncreaseWebsitePostCount(ctx)
+	gErr := s.countStats.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCountInWebsite.ToString(), domain.CountStatsTypePostCountInWebsite)
 	if gErr != nil {
 		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 		l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
@@ -271,6 +271,14 @@ func (s *PostService) AddLike(ctx context.Context, id string, ip string) error {
 		if err != nil {
 			return errors.WithMessage(err, "s.repo.AddLike")
 		}
+		go func() {
+			// 点赞数+1
+			gErr := s.countStats.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeLikeCount.ToString(), domain.CountStatsTypeLikeCount)
+			if gErr != nil {
+				l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+				l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+			}
+		}()
 	}
 	return nil
 }

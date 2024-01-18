@@ -75,7 +75,7 @@ func (s *MessageService) sendEmail(ctx context.Context, msgTplName, contentType 
 		Port:        emailCfg.Port,
 		Username:    emailCfg.Username,
 		Password:    emailCfg.Password,
-		Name:        webNMasterCfg.Name,
+		Name:        webNMasterCfg.WebsiteName,
 		To:          []string{email},
 		Subject:     msgTpl.Title,
 		Body:        msgTpl.Content,

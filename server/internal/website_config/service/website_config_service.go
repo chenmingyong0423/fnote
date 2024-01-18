@@ -27,15 +27,10 @@ import (
 
 type IWebsiteConfigService interface {
 	GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error)
-	IncreaseWebsiteViews(ctx context.Context) error
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
 	GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error)
 	GetFrontPostCount(ctx context.Context) (*domain.FrontPostCountConfig, error)
-	IncreaseCategoryCount(ctx context.Context) error
-	DecreaseCategoryCount(ctx context.Context) error
 	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
-	GetOwnerConfig(ctx context.Context) (domain.OwnerConfig, error)
-	UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error
 	GetSeoMetaConfig(ctx context.Context) (*domain.SeoMetaConfig, error)
 	UpdateSeoMetaConfig(ctx context.Context, seoCfg *domain.SeoMetaConfig) error
 	GetCommentConfig(ctx context.Context) (domain.CommentConfig, error)
@@ -48,8 +43,6 @@ type IWebsiteConfigService interface {
 	UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error
 	GetFrontPostCountConfig(ctx context.Context) (domain.FrontPostCountConfig, error)
 	UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error
-	IncreaseWebsitePostCount(ctx context.Context) error
-	DecreaseWebsitePostCount(ctx context.Context) error
 	AddRecordInWebsiteConfig(ctx context.Context, record string) error
 	DeleteRecordInWebsiteConfig(ctx context.Context, record string) error
 	GetPayConfig(ctx context.Context) (domain.PayInfoConfig, error)
@@ -117,14 +110,6 @@ func (s *WebsiteConfigService) DeleteRecordInWebsiteConfig(ctx context.Context, 
 
 func (s *WebsiteConfigService) AddRecordInWebsiteConfig(ctx context.Context, record string) error {
 	return s.repo.AddRecordInWebsiteConfig(ctx, record)
-}
-
-func (s *WebsiteConfigService) DecreaseWebsitePostCount(ctx context.Context) error {
-	return s.repo.Decrease(ctx, "post_count")
-}
-
-func (s *WebsiteConfigService) IncreaseWebsitePostCount(ctx context.Context) error {
-	return s.repo.Increase(ctx, "post_count")
 }
 
 func (s *WebsiteConfigService) UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error {
@@ -200,40 +185,8 @@ func (s *WebsiteConfigService) GetSeoMetaConfig(ctx context.Context) (*domain.Se
 	return cfg, nil
 }
 
-func (s *WebsiteConfigService) UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error {
-	return s.repo.UpdateOwnerConfig(ctx, ownerConfig)
-}
-
-func (s *WebsiteConfigService) GetOwnerConfig(ctx context.Context) (ownerCfg domain.OwnerConfig, err error) {
-	cfg, err := s.repo.FindByTyp(ctx, "owner")
-	if err != nil {
-		return
-	}
-	err = s.anyToStruct(cfg, &ownerCfg)
-	if err != nil {
-		return
-	}
-	return
-}
-
 func (s *WebsiteConfigService) UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error {
 	return s.repo.UpdateWebSiteConfig(ctx, webSiteConfig)
-}
-
-func (s *WebsiteConfigService) DecreaseCategoryCount(ctx context.Context) error {
-	err := s.repo.Decrease(ctx, "category_count")
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *WebsiteConfigService) IncreaseCategoryCount(ctx context.Context) error {
-	err := s.repo.Increase(ctx, "category_count")
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (s *WebsiteConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPostCountConfig, error) {
@@ -259,13 +212,6 @@ func (s *WebsiteConfigService) GetIndexConfig(ctx context.Context) (*domain.Inde
 				return nil, err
 			}
 			cfg.WebSiteConfig = wsc
-		} else if config.Typ == "owner" {
-			oc := domain.OwnerConfig{}
-			err = s.anyToStruct(config.Props, &oc)
-			if err != nil {
-				return nil, err
-			}
-			cfg.OwnerConfig = oc
 		} else if config.Typ == "notice" {
 			noticeCfg := domain.NoticeConfig{}
 			err = s.anyToStruct(config.Props, &noticeCfg)
@@ -320,10 +266,6 @@ func (s *WebsiteConfigService) getConfigAndConvertTo(ctx context.Context, typ st
 		return err
 	}
 	return nil
-}
-
-func (s *WebsiteConfigService) IncreaseWebsiteViews(ctx context.Context) error {
-	return s.repo.Increase(ctx, "view_count")
 }
 
 func (s *WebsiteConfigService) GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error) {

@@ -18,24 +18,25 @@ import (
 	"fmt"
 	"log/slog"
 
+	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
-	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/service"
 	"github.com/gin-gonic/gin"
 )
 
-func NewVisitLogHandler(serv service.IVisitLogService, cfgServ configServ.IWebsiteConfigService) *VisitLogHandler {
+func NewVisitLogHandler(serv service.IVisitLogService, csServ csServ.ICountStatsService) *VisitLogHandler {
 	return &VisitLogHandler{
-		serv:    serv,
-		cfgServ: cfgServ,
+		serv:   serv,
+		csServ: csServ,
 	}
 }
 
 type VisitLogHandler struct {
-	serv    service.IVisitLogService
-	cfgServ configServ.IWebsiteConfigService
+	serv   service.IVisitLogService
+	csServ csServ.ICountStatsService
 }
 
 func (h *VisitLogHandler) RegisterGinRoutes(engine *gin.Engine) {
@@ -61,7 +62,7 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context, req VisitLogReq) (r 
 		return
 	}
 	go func() {
-		gErr := h.cfgServ.IncreaseWebsiteViews(ctx)
+		gErr := h.csServ.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeWebsiteViewCount.ToString(), domain.CountStatsTypeWebsiteViewCount)
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))

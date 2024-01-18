@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"strings"
 
+	csService "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
 	"github.com/spf13/viper"
@@ -39,12 +41,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NewCommentHandler(serv service.ICommentService, cfgService configServ.IWebsiteConfigService, postServ postServ.IPostService, msgServ msgService.IMessageService) *CommentHandler {
+func NewCommentHandler(serv service.ICommentService, cfgService configServ.IWebsiteConfigService, postServ postServ.IPostService, msgServ msgService.IMessageService, statsServ csService.ICountStatsService) *CommentHandler {
 	return &CommentHandler{
 		serv:       serv,
 		cfgService: cfgService,
 		postServ:   postServ,
 		msgServ:    msgServ,
+		statsServ:  statsServ,
 	}
 }
 
@@ -53,6 +56,7 @@ type CommentHandler struct {
 	cfgService configServ.IWebsiteConfigService
 	postServ   postServ.IPostService
 	msgServ    msgService.IMessageService
+	statsServ  csService.ICountStatsService
 }
 
 type CommentRequest struct {
@@ -134,6 +138,11 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo ap
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
+		// 统计评论数
+		gErr = h.statsServ.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount.ToString(), domain.CountStatsTypeCommentCount)
+		if gErr != nil {
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
 	}()
 	return
 }
@@ -195,6 +204,11 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (vo
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 		gErr = h.msgServ.SendEmailToWebmaster(ctx, "comment", "text/plain")
+		if gErr != nil {
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+		// 统计评论数
+		gErr = h.statsServ.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount.ToString(), domain.CountStatsTypeCommentCount)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
@@ -447,6 +461,11 @@ func (h *CommentHandler) AdminDeleteComment(ctx *gin.Context) (any, error) {
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
+		// 减少评论数
+		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount.ToString(), domain.CountStatsTypeCommentCount)
+		if gErr != nil {
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
 	}()
 	return nil, nil
 }
@@ -469,6 +488,11 @@ func (h *CommentHandler) AdminDeleteCommentReply(ctx *gin.Context) (any, error) 
 	go func() {
 		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 		gErr := h.postServ.DecreaseCommentCount(ctx, commentReplyWithPostInfo.PostInfo.PostId, 1)
+		if gErr != nil {
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+		// 减少评论数
+		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount.ToString(), domain.CountStatsTypeCommentCount)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}

@@ -15,6 +15,7 @@ import (
 	repository5 "github.com/chenmingyong0423/fnote/server/internal/comment/repository"
 	dao5 "github.com/chenmingyong0423/fnote/server/internal/comment/repository/dao"
 	service5 "github.com/chenmingyong0423/fnote/server/internal/comment/service"
+	handler9 "github.com/chenmingyong0423/fnote/server/internal/count_stats/handler"
 	repository3 "github.com/chenmingyong0423/fnote/server/internal/count_stats/repository"
 	dao3 "github.com/chenmingyong0423/fnote/server/internal/count_stats/repository/dao"
 	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
@@ -82,7 +83,7 @@ func initializeApp() (*gin.Engine, error) {
 	msgTplRepository := repository7.NewMsgTplRepository(msgTplDao)
 	msgTplService := service8.NewMsgTplService(msgTplRepository)
 	messageService := service9.NewMessageService(websiteConfigService, emailService, msgTplService)
-	commentHandler := hanlder.NewCommentHandler(commentService, websiteConfigService, postService, messageService)
+	commentHandler := hanlder.NewCommentHandler(commentService, websiteConfigService, postService, messageService, countStatsService)
 	websiteConfigHandler := handler3.NewWebsiteConfigHandler(websiteConfigService)
 	friendDao := dao8.NewFriendDao(database)
 	friendRepository := repository8.NewFriendRepository(friendDao)
@@ -92,17 +93,18 @@ func initializeApp() (*gin.Engine, error) {
 	visitLogDao := dao9.NewVisitLogDao(database)
 	visitLogRepository := repository9.NewVisitLogRepository(visitLogDao)
 	visitLogService := service11.NewVisitLogService(visitLogRepository)
-	visitLogHandler := handler5.NewVisitLogHandler(visitLogService, websiteConfigService)
+	visitLogHandler := handler5.NewVisitLogHandler(visitLogService, countStatsService)
 	msgTplHandler := handler6.NewMsgTplHandler(msgTplService)
 	tagDao := dao10.NewTagDao(database)
 	tagRepository := repository10.NewTagRepository(tagDao)
 	tagService := service12.NewTagService(tagRepository, countStatsService)
 	tagHandler := handler7.NewTagHandler(tagService)
-	dataAnalysisHandler := handler8.NewDataAnalysisHandler(visitLogService, websiteConfigService)
+	dataAnalysisHandler := handler8.NewDataAnalysisHandler(visitLogService, countStatsService)
+	countStatsHandler := handler9.NewCountStatsHandler(countStatsService)
 	writer := ioc.InitLogger()
 	v := ioc.InitMiddlewares(writer)
 	validators := ioc.InitGinValidators()
-	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, v, validators)
+	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, countStatsHandler, v, validators)
 	if err != nil {
 		return nil, err
 	}

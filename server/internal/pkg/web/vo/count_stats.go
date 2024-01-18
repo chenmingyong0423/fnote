@@ -1,4 +1,4 @@
-// Copyright 2023 chenmingyong0423
+// Copyright 2024 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,21 +14,11 @@
 
 package vo
 
-type DataAnalysis struct {
-	// 文章总数
-	PostCount int64 `json:"post_count"`
-	// 分类总数
-	CategoryCount int64 `json:"category_count"`
-	// 评论总数
-	CommentCount int64 `json:"comment_count"`
-	// 点赞数
-	LikeCount int64 `json:"like_count"`
-	// 标签总数
-	TagCount int64 `json:"tag_count"`
-	// 今日访问量
-	TodayViewCount int64 `json:"today_view_count"`
-	// 总访问量
-	TotalViewCount int64 `json:"total_view_count"`
-	// 今日用户访问量
-	TodayUserVisitCount int64 `json:"today_user_visit_count"`
+type WebsiteCountStatsVO struct {
+	PostCount        int64 `json:"post_count"`
+	CategoryCount    int64 `json:"category_count"`
+	TagCount         int64 `json:"tag_count"`
+	CommentCount     int64 `json:"comment_count"`
+	LikeCount        int64 `json:"like_count"`
+	WebsiteViewCount int64 `json:"website_view_count"`
 }

@@ -15,9 +15,12 @@
 package request
 
 type UpdateWebsiteConfigReq struct {
-	Name     string `json:"name" binding:"required"`
-	Icon     string `json:"icon" binding:"required"`
-	LiveTime int64  `json:"live_time" binding:"required"`
+	WebsiteName  string `json:"website_name" binding:"required"`
+	LiveTime     int64  `json:"live_time" binding:"required"`
+	OwnerName    string `json:"owner_name" binding:"required"`
+	OwnerProfile string `json:"owner_profile" binding:"required"`
+	OwnerPicture string `json:"owner_picture"`
+	Icon         string `json:"icon"`
 }
 
 type UpdateOwnerConfigReq struct {

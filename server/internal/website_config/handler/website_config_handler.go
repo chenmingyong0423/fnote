@@ -47,8 +47,6 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/website", api.WrapWithBody(h.AdminUpdateWebsiteConfig))
 	adminGroup.POST("/website/records", api.WrapWithBody(h.AdminAddRecordInWebsiteConfig))
 	adminGroup.DELETE("/website/records", api.Wrap(h.AdminDeleteRecordInWebsiteConfig))
-	adminGroup.GET("/owner", api.Wrap(h.AdminGetOwnerConfig))
-	adminGroup.PUT("/owner", api.WrapWithBody(h.AdminUpdateOwnerConfig))
 	adminGroup.GET("/seo", api.Wrap(h.AdminGetSeoConfig))
 	adminGroup.PUT("/seo", api.WrapWithBody(h.AdminUpdateSeoConfig))
 	adminGroup.GET("/comment", api.Wrap(h.AdminGetCommentConfig))
@@ -71,7 +69,6 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.POST("/social", api.WrapWithBody(h.AdminAddSocialConfig))
 	adminGroup.PUT("/social/:id", api.WrapWithBody(h.AdminUpdateSocialConfig))
 	adminGroup.DELETE("/social/:id", api.Wrap(h.AdminDeleteSocialConfig))
-
 }
 
 func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfigVO, error) {
@@ -81,7 +78,6 @@ func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfig
 	}
 	return &vo.IndexConfigVO{
 		WebsiteConfig:      *h.toWebsiteConfigVO(&config.WebSiteConfig),
-		OwnerConfig:        *h.toOwnerConfigVO(&config.OwnerConfig),
 		NoticeConfigVO:     *h.toNoticeConfigVO(&config.NoticeConfig),
 		SocialInfoConfigVO: *h.toSocialInfoConfigVO(&config.SocialInfoConfig),
 		PayInfoConfigVO:    h.toPayInfoConfigVO(config.PayInfoConfig),
@@ -91,14 +87,13 @@ func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfig
 
 func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebSiteConfig) *vo.WebsiteConfigVO {
 	return &vo.WebsiteConfigVO{
-		Name:          webMasterCfg.Name,
-		Icon:          webMasterCfg.Icon,
-		PostCount:     webMasterCfg.PostCount,
-		CategoryCount: webMasterCfg.CategoryCount,
-		ViewCount:     webMasterCfg.ViewCount,
-		LiveTime:      webMasterCfg.LiveTime,
-		Domain:        webMasterCfg.Domain,
-		Records:       webMasterCfg.Records,
+		WebsiteName:  webMasterCfg.WebsiteName,
+		Icon:         webMasterCfg.Icon,
+		LiveTime:     webMasterCfg.LiveTime,
+		Records:      webMasterCfg.Records,
+		OwnerName:    webMasterCfg.OwnerName,
+		OwnerProfile: webMasterCfg.OwnerProfile,
+		OwnerPicture: webMasterCfg.OwnerPicture,
 	}
 }
 
@@ -138,14 +133,6 @@ func (h *WebsiteConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *
 	}
 }
 
-func (h *WebsiteConfigHandler) toOwnerConfigVO(ownerConfig *domain.OwnerConfig) *vo.OwnerConfigVO {
-	return &vo.OwnerConfigVO{
-		Name:    ownerConfig.Name,
-		Profile: ownerConfig.Profile,
-		Picture: ownerConfig.Picture,
-	}
-}
-
 func (h *WebsiteConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (vo.WebsiteConfigVO, error) {
 	config, err := h.serv.GetWebSiteConfig(ctx)
 	if err != nil {
@@ -156,25 +143,12 @@ func (h *WebsiteConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (vo.Websi
 
 func (h *WebsiteConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req request.UpdateWebsiteConfigReq) (any, error) {
 	return nil, h.serv.UpdateWebSiteConfig(ctx, domain.WebSiteConfig{
-		Name:     req.Name,
-		Icon:     req.Icon,
-		LiveTime: req.LiveTime,
-	})
-}
-
-func (h *WebsiteConfigHandler) AdminGetOwnerConfig(ctx *gin.Context) (vo.OwnerConfigVO, error) {
-	config, err := h.serv.GetOwnerConfig(ctx)
-	if err != nil {
-		return vo.OwnerConfigVO{}, err
-	}
-	return *h.toOwnerConfigVO(&config), nil
-}
-
-func (h *WebsiteConfigHandler) AdminUpdateOwnerConfig(ctx *gin.Context, req request.UpdateOwnerConfigReq) (any, error) {
-	return nil, h.serv.UpdateOwnerConfig(ctx, domain.OwnerConfig{
-		Name:    req.Name,
-		Profile: req.Profile,
-		Picture: req.Picture,
+		WebsiteName:  req.WebsiteName,
+		Icon:         req.Icon,
+		LiveTime:     req.LiveTime,
+		OwnerName:    req.OwnerName,
+		OwnerProfile: req.OwnerProfile,
+		OwnerPicture: req.OwnerPicture,
 	})
 }
 
