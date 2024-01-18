@@ -41,7 +41,7 @@ import Menu from "~/components/Menu.vue";
 const homeStore = useHomeStore();
 
 const isBlackMode = computed(() => homeStore.isBlackMode);
-const picture = ref<string>(homeStore.owner_info.picture);
+const picture = ref<string>(homeStore.website_info.owner_picture);
 
 watch(isBlackMode, (newValue) => {
   localStorage.setItem("isBlackMode", newValue.toString());

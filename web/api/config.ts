@@ -2,17 +2,10 @@ import httpRequest from "./http";
 
 export interface IWebsiteInfo {
   website_config: IWebsite;
-  owner_config: IOwner;
   notice_config: INotice;
   social_info_config: ISocialInfo;
   pay_info_config: IPayInfo[];
   seo_meta_config: SeoMetaConfigVO;
-}
-
-export interface IOwner {
-  name: string;
-  profile: string;
-  picture: string;
 }
 
 export interface ISocialInfo {
@@ -27,13 +20,13 @@ export interface ISocialInfoItem {
 }
 
 export interface IWebsite {
-  name: string;
+  website_name: string;
   icon: string;
-  post_count: number;
-  category_count: number;
-  view_count: number;
   live_time: number;
   records: string[];
+  owner_name: string;
+  owner_profile: string;
+  owner_picture: string;
 }
 
 export interface INotice {

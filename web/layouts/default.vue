@@ -29,7 +29,12 @@ import { type IWebsiteInfo, getWebsiteInfo } from "~/api/config";
 import type { IListData, IResponse } from "~/api/http";
 import { getMenus, type IMenu } from "~/api/category";
 import SmallMenu from "~/components/SmallMenu.vue";
-import { collectVisitLog, type VisitLogRequest } from "~/api/statiscs";
+import {
+  collectVisitLog,
+  getWebsiteCountStats,
+  type VisitLogRequest,
+  type WebsiteCountStats,
+} from "~/api/statiscs";
 
 const myDom = ref();
 const homeStore = useHomeStore();
@@ -48,7 +53,6 @@ const webMaster = async () => {
     let res: IResponse<IWebsiteInfo> = postRes.data.value;
     if (res && res.data) {
       homeStore.website_info = res.data.website_config;
-      homeStore.owner_info = res.data.owner_config;
       homeStore.notice_info = res.data.notice_config;
       homeStore.social_info_list = res.data.social_info_config.social_info_list;
       homeStore.pay_info = res.data.pay_info_config;
@@ -59,6 +63,19 @@ const webMaster = async () => {
   }
 };
 webMaster();
+
+const websiteCountStats = async () => {
+  try {
+    let postRes: any = await getWebsiteCountStats();
+    let res: IResponse<WebsiteCountStats> = postRes.data.value;
+    if (res && res.data) {
+      homeStore.website_count_stats = res.data;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+websiteCountStats();
 
 const menus = async () => {
   try {
@@ -81,10 +98,13 @@ const scrollEvent = () => {
   }
 };
 const handleScrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
+  if (process.client) {
+    // 客户端特有的代码
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
 };
 
 onMounted(() => {
@@ -96,13 +116,16 @@ onBeforeUnmount(() => {
 });
 
 const collect = async () => {
-  try {
-    const req = {
-      url: window.location.href,
-    } as VisitLogRequest;
-    await collectVisitLog(req);
-  } catch (error) {
-    console.log(error);
+  if (process.client) {
+    // 客户端特有的代码
+    try {
+      const req = {
+        url: window.location.href,
+      } as VisitLogRequest;
+      await collectVisitLog(req);
+    } catch (error) {
+      console.log(error);
+    }
   }
 };
 collect();
