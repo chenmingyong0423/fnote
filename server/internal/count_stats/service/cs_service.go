@@ -24,9 +24,12 @@ import (
 type ICountStatsService interface {
 	GetByReferenceIdsAndType(ctx context.Context, referenceIds []string, countStatsType domain.CountStatsType) ([]domain.CountStats, error)
 	Create(ctx context.Context, countStats domain.CountStats) error
-	DeleteByReferenceId(ctx context.Context, referenceId string) error
+	DeleteByReferenceIdAndType(ctx context.Context, referenceId string, statsType domain.CountStatsType) error
 	DecreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error
 	IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error
+	DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType) error
+	IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType) error
+	GetWebsiteCountStats(ctx context.Context) (domain.WebsiteCountStats, error)
 }
 
 var _ ICountStatsService = (*CountStatsService)(nil)
@@ -41,6 +44,33 @@ type CountStatsService struct {
 	repo repository.ICountStatsRepository
 }
 
+func (s *CountStatsService) GetWebsiteCountStats(ctx context.Context) (domain.WebsiteCountStats, error) {
+	var result = new(domain.WebsiteCountStats)
+	countStatsSlice, err := s.repo.GetWebsiteCountStats(ctx, []domain.CountStatsType{
+		domain.CountStatsTypePostCountInWebsite,
+		domain.CountStatsTypeCategoryCount,
+		domain.CountStatsTypeTagCount,
+		domain.CountStatsTypeCommentCount,
+		domain.CountStatsTypeLikeCount,
+		domain.CountStatsTypeWebsiteViewCount,
+	})
+	if err != nil {
+		return *result, err
+	}
+	for _, countStats := range countStatsSlice {
+		result.SetCountByType(countStats.Type, countStats.Count)
+	}
+	return *result, nil
+}
+
+func (s *CountStatsService) IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType) error {
+	return s.repo.IncreaseByReferenceIdAndType(ctx, referenceId, countStatsType)
+}
+
+func (s *CountStatsService) DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType) error {
+	return s.repo.DecreaseByReferenceIdAndType(ctx, referenceId, countStatsType)
+}
+
 func (s *CountStatsService) IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error {
 	return s.repo.IncreaseByReferenceIdsAndType(ctx, ids, countStatsType)
 }
@@ -49,12 +79,16 @@ func (s *CountStatsService) DecreaseByReferenceIdsAndType(ctx context.Context, i
 	return s.repo.DecreaseByReferenceIdsAndType(ctx, ids, countStatsType)
 }
 
-func (s *CountStatsService) DeleteByReferenceId(ctx context.Context, referenceId string) error {
-	return s.repo.DeleteByReferenceId(ctx, referenceId)
+func (s *CountStatsService) DeleteByReferenceIdAndType(ctx context.Context, referenceId string, statsType domain.CountStatsType) error {
+	return s.repo.DeleteByReferenceIdAndType(ctx, referenceId, statsType)
 }
 
 func (s *CountStatsService) Create(ctx context.Context, countStats domain.CountStats) error {
-	_, err := s.repo.Create(ctx, countStats)
+	err := countStats.Type.Valid()
+	if err != nil {
+		return err
+	}
+	_, err = s.repo.Create(ctx, countStats)
 	if err != nil {
 		return err
 	}

@@ -39,7 +39,6 @@ type IWebsiteConfigRepository interface {
 	FindConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error)
 	Decrease(ctx context.Context, field string) error
 	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
-	UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error
 	UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error
 	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
 	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
@@ -205,19 +204,23 @@ func (r *WebsiteConfigRepository) UpdateSeoMetaConfig(ctx context.Context, cfg *
 	)
 }
 
-func (r *WebsiteConfigRepository) UpdateOwnerConfig(ctx context.Context, ownerConfig domain.OwnerConfig) error {
-	return r.dao.UpdateByConditionAndUpdates(
-		ctx,
-		query.Eq("typ", "owner"),
-		update.BsonBuilder().Set("props.name", ownerConfig.Name).Set("props.profile", ownerConfig.Profile).Set("props.picture", ownerConfig.Picture).Set("update_time", time.Now().Unix()).Build(),
-	)
-}
-
 func (r *WebsiteConfigRepository) UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error {
+	builder := update.BsonBuilder().
+		Set("props.website_name", webSiteConfig.WebsiteName).
+		Set("props.live_time", webSiteConfig.LiveTime).
+		Set("props.owner_name", webSiteConfig.OwnerName).
+		Set("props.owner_profile", webSiteConfig.OwnerProfile).
+		Set("update_time", time.Now().Unix())
+	if webSiteConfig.Icon != "" {
+		builder.Set("props.icon", webSiteConfig.Icon)
+	}
+	if webSiteConfig.OwnerPicture != "" {
+		builder.Set("props.owner_picture", webSiteConfig.OwnerPicture)
+	}
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "website"),
-		update.BsonBuilder().Set("props.name", webSiteConfig.Name).Set("props.icon", webSiteConfig.Icon).Set("props.live_time", webSiteConfig.LiveTime).Set("update_time", time.Now().Unix()).Build(),
+		builder.Build(),
 	)
 }
 

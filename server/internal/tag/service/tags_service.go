@@ -68,15 +68,22 @@ func (s *TagService) DeleteTag(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	// 删除分类时，同时删除分类的统计数据
-	err = s.countStatsService.DeleteByReferenceId(ctx, id)
+	// 删除分类时，同时删除该分类下文章数量的统计数据
+	err = s.countStatsService.DeleteByReferenceIdAndType(ctx, id, domain.CountStatsTypePostCountInTag)
 	if err != nil {
-		gErr := s.repo.RecoverTag(ctx, tag)
-		if gErr != nil {
-			return gErr
+		nErr := s.repo.RecoverTag(ctx, tag)
+		if nErr != nil {
+			return nErr
 		}
 		return err
 	}
+	go func() {
+		// 分类数量 -1
+		gErr := s.countStatsService.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount)
+		if gErr != nil {
+
+		}
+	}()
 	return nil
 }
 
@@ -91,7 +98,7 @@ func (s *TagService) AdminCreateTag(ctx context.Context, tag domain.Tag) error {
 	}
 	// 创建标签时，同时创建标签的统计数据
 	err = s.countStatsService.Create(ctx, domain.CountStats{
-		Type:        domain.CountStatsTypePostCountInTag.ToString(),
+		Type:        domain.CountStatsTypePostCountInTag,
 		ReferenceId: id,
 	})
 	if err != nil {
@@ -101,6 +108,13 @@ func (s *TagService) AdminCreateTag(ctx context.Context, tag domain.Tag) error {
 		}
 		return err
 	}
+	go func() {
+		// 分类数量 +1
+		gErr := s.countStatsService.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount)
+		if gErr != nil {
+
+		}
+	}()
 	return nil
 }
 

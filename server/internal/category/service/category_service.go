@@ -20,6 +20,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/service"
 
 	"github.com/chenmingyong0423/fnote/server/internal/category/repository"
@@ -81,20 +83,23 @@ func (s *CategoryService) DeleteCategory(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	// 删除分类时，同时删除分类的统计数据
-	err = s.countStatsService.DeleteByReferenceId(ctx, id)
+	// 删除分类时，同时删除该分类下的文章数量统计数据
+	err = s.countStatsService.DeleteByReferenceIdAndType(ctx, id, domain.CountStatsTypePostCountInCategory)
 	if err != nil {
-		gErr := s.repo.RecoverCategory(ctx, category)
-		if gErr != nil {
-			return gErr
+		nErr := s.repo.RecoverCategory(ctx, category)
+		if nErr != nil {
+			return nErr
 		}
 		return err
 	}
-	// 网站配置更新分类数量
-	gErr := s.configService.DecreaseCategoryCount(ctx)
-	if gErr != nil {
-		slog.WarnContext(ctx, fmt.Sprintf("decrease category count failed, %v", gErr))
-	}
+	go func() {
+		// 更新分类数量
+		gErr := s.countStatsService.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount)
+		if gErr != nil {
+			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+	}()
 	return nil
 }
 
@@ -113,7 +118,7 @@ func (s *CategoryService) AdminCreateCategory(ctx context.Context, category doma
 	}
 	// 创建分类时，同时创建分类的统计数据
 	err = s.countStatsService.Create(ctx, domain.CountStats{
-		Type:        domain.CountStatsTypePostCountInCategory.ToString(),
+		Type:        domain.CountStatsTypePostCountInCategory,
 		ReferenceId: id,
 	})
 	if err != nil {
@@ -124,10 +129,11 @@ func (s *CategoryService) AdminCreateCategory(ctx context.Context, category doma
 		return err
 	}
 	go func() {
-		// 网站配置更新分类数量
-		gErr := s.configService.IncreaseCategoryCount(ctx)
+		// 更新分类数量
+		gErr := s.countStatsService.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount)
 		if gErr != nil {
-			slog.WarnContext(ctx, fmt.Sprintf("increase category count failed, %v", gErr))
+			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
 	return nil

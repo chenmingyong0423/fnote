@@ -15,23 +15,23 @@
 package handler
 
 import (
+	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
-	service2 "github.com/chenmingyong0423/fnote/server/internal/website_config/service"
 	"github.com/gin-gonic/gin"
 )
 
-func NewDataAnalysisHandler(vlServ service.IVisitLogService, cfgServ service2.IWebsiteConfigService) *DataAnalysisHandler {
+func NewDataAnalysisHandler(vlServ service.IVisitLogService, csServ csServ.ICountStatsService) *DataAnalysisHandler {
 	return &DataAnalysisHandler{
-		vlServ:  vlServ,
-		cfgServ: cfgServ,
+		vlServ: vlServ,
+		csServ: csServ,
 	}
 }
 
 type DataAnalysisHandler struct {
-	vlServ  service.IVisitLogService
-	cfgServ service2.IWebsiteConfigService
+	vlServ service.IVisitLogService
+	csServ csServ.ICountStatsService
 }
 
 func (h *DataAnalysisHandler) RegisterGinRoutes(engine *gin.Engine) {
@@ -40,26 +40,28 @@ func (h *DataAnalysisHandler) RegisterGinRoutes(engine *gin.Engine) {
 }
 
 func (h *DataAnalysisHandler) GetDataAnalysis(ctx *gin.Context) (result vo.DataAnalysis, err error) {
-	webSiteConfig, err := h.cfgServ.GetWebSiteConfig(ctx)
+	// 查询网站统计
+	websiteCountStats, err := h.csServ.GetWebsiteCountStats(ctx)
 	if err != nil {
 		return
 	}
+	result.PostCount = websiteCountStats.PostCount
+	result.CategoryCount = websiteCountStats.CategoryCount
+	result.TagCount = websiteCountStats.TagCount
+	result.LikeCount = websiteCountStats.LikeCount
+	result.TotalViewCount = websiteCountStats.WebsiteViewCount
+	result.CommentCount = websiteCountStats.CommentCount
 	// 查询当日访问量
 	todayViewCount, err := h.vlServ.GetTodayViewCount(ctx)
 	if err != nil {
 		return
 	}
+	result.TodayViewCount = todayViewCount
 	// 查询当日实际访问用户量
 	todayUserVisitCount, err := h.vlServ.GetTodayUserViewCount(ctx)
 	if err != nil {
 		return
 	}
-	result.PostCount = webSiteConfig.PostCount
-	result.CategoryCount = webSiteConfig.CategoryCount
-	result.TotalViewCount = webSiteConfig.ViewCount
-	result.TodayViewCount = todayViewCount
 	result.TodayUserVisitCount = todayUserVisitCount
-	result.CommentCount = 0
-	result.LikeCount = 0
 	return
 }

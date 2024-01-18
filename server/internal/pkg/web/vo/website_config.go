@@ -44,21 +44,19 @@ type NoticeConfigVO struct {
 
 type WebsiteConfigVO struct {
 	// 站点名称
-	Name string `json:"name"`
+	WebsiteName string `json:"website_name"`
 	// 站点图标
 	Icon string `json:"icon"`
-	// 文章数量
-	PostCount uint `json:"post_count"`
-	// 分类数量
-	CategoryCount uint `json:"category_count"`
-	// 访问量
-	ViewCount int64 `json:"view_count"`
 	// 网站运行时间
 	LiveTime int64 `json:"live_time"`
-	// 域名
-	Domain string `json:"domain"`
 	// 备案信息
 	Records []string `json:"records"`
+	// 站长名称
+	OwnerName string `json:"owner_name"`
+	// 站长简介
+	OwnerProfile string `json:"owner_profile"`
+	// 站长照片
+	OwnerPicture string `json:"owner_picture"`
 }
 
 type SocialInfoConfigVO struct {

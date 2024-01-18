@@ -24,7 +24,6 @@ type Config struct {
 
 type IndexConfig struct {
 	WebSiteConfig    WebSiteConfig
-	OwnerConfig      OwnerConfig
 	NoticeConfig     NoticeConfig
 	SocialInfoConfig SocialInfoConfig
 	PayInfoConfig    []PayInfoConfigElem
@@ -40,31 +39,22 @@ type PayInfoConfig struct {
 	List []PayInfoConfigElem `bson:"list"`
 }
 
-// OwnerConfig 站长信息
-type OwnerConfig struct {
-	Name    string `bson:"name" json:"name"`
-	Profile string `bson:"profile" json:"profile"`
-	Picture string `bson:"picture" json:"picture"`
-}
-
 // WebSiteConfig 站点信息
 type WebSiteConfig struct {
 	// 站点名称
-	Name string `bson:"name"`
+	WebsiteName string `bson:"website_name"`
 	// 站点图标
 	Icon string `bson:"icon"`
-	// 文章数量
-	PostCount uint `bson:"post_count"`
-	// 分类数量
-	CategoryCount uint `bson:"category_count"`
-	// 访问量
-	ViewCount int64 `bson:"view_count"`
 	// 网站运行时间
 	LiveTime int64 `bson:"live_time"`
-	// 域名
-	Domain string `bson:"domain"`
 	// 备案信息
 	Records []string `bson:"records"`
+	// 站长名称
+	OwnerName string `bson:"owner_name"`
+	// 站长简介
+	OwnerProfile string `bson:"owner_profile"`
+	// 站长照片
+	OwnerPicture string `bson:"owner_picture"`
 }
 
 // NoticeConfig 公告配置
