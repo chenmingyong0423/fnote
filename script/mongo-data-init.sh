@@ -39,32 +39,27 @@ db.getCollection("comments").createIndex({ "status": -1 });
 
 // configs
 db.createCollection("configs");
-db.getCollection("configs").createIndex({ "typ": 1 });
+db.getCollection("configs").createIndex({
+    typ: NumberInt("1")
+}, {
+    name: "unique_typ",
+    unique: true
+});
 // 站点信息
 db.getCollection("configs").insertOne({
   "create_time": Math.floor(new Date().getTime() / 1000),
   "props": {
-    "name": "fnote",
+    "website_name": "fnote",
     "live_time": Math.floor(new Date().getTime() / 1000),
     "icon": "",
-    "records": []
+    "records": [],
+    "owner_name": "fnote-user",
+    "owner_profile": "请及时前往后台修改站点和站长等相关配置，以便正常使用。",
+    "owner_picture": ""
   },
   "typ": "website",
   "update_time": Math.floor(new Date().getTime() / 1000)
 });
-// 站长信息
-db.getCollection("configs").insertOne(
-  {
-    "create_time": Math.floor(new Date().getTime() / 1000),
-    "props": {
-      "name": "fnote user",
-      "profile": "请及时前往后台修改站点和站长等相关配置，以便正常使用。",
-      "picture": ""
-    },
-    "typ": "owner",
-    "update_time": Math.floor(new Date().getTime() / 1000)
-  }
-)
 // seo 配置
 db.getCollection("configs").insertOne({
     "typ": "seo meta",
@@ -299,6 +294,20 @@ db.getCollection("count_stats").insertMany([
     {
         "type": "CommentCount",
         "reference_id": "CommentCount",
+        "count": 0,
+        create_time: Math.floor(new Date().getTime() / 1000),
+        update_time: Math.floor(new Date().getTime() / 1000)
+    },
+    {
+        "type": "LikeCount",
+        "reference_id": "LikeCount",
+        "count": 0,
+        create_time: Math.floor(new Date().getTime() / 1000),
+        update_time: Math.floor(new Date().getTime() / 1000)
+    },
+    {
+        "type": "WebsiteViewCount",
+        "reference_id": "WebsiteViewCount",
         "count": 0,
         create_time: Math.floor(new Date().getTime() / 1000),
         update_time: Math.floor(new Date().getTime() / 1000)
