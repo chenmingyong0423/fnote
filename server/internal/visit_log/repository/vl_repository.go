@@ -26,12 +26,22 @@ import (
 
 type IVisitLogRepository interface {
 	Add(ctx context.Context, visitHistory domain.VisitHistory) error
+	CountOfToday(ctx context.Context) (int64, error)
+	CountOfTodayByIp(ctx context.Context) (int64, error)
 }
 
 var _ IVisitLogRepository = (*VisitLogRepository)(nil)
 
 type VisitLogRepository struct {
 	dao dao.IVisitLogDao
+}
+
+func (r *VisitLogRepository) CountOfTodayByIp(ctx context.Context) (int64, error) {
+	return r.dao.CountOfTodayByIp(ctx)
+}
+
+func (r *VisitLogRepository) CountOfToday(ctx context.Context) (int64, error) {
+	return r.dao.CountOfToday(ctx)
 }
 
 func (r *VisitLogRepository) Add(ctx context.Context, visitHistory domain.VisitHistory) error {

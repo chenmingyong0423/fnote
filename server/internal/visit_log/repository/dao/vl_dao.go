@@ -16,6 +16,8 @@ package dao
 
 import (
 	"context"
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"time"
 
 	"github.com/chenmingyong0423/go-mongox"
 
@@ -35,12 +37,41 @@ type VisitHistory struct {
 
 type IVisitLogDao interface {
 	Add(ctx context.Context, visitHistory *VisitHistory) error
+	CountOfToday(ctx context.Context) (int64, error)
+	CountOfTodayByIp(ctx context.Context) (int64, error)
 }
 
 var _ IVisitLogDao = (*VisitLogDao)(nil)
 
 type VisitLogDao struct {
 	coll *mongox.Collection[VisitHistory]
+}
+
+func (d *VisitLogDao) CountOfTodayByIp(ctx context.Context) (int64, error) {
+	startOfDayUnix, endOfDayUnix := d.getBeginSecondsAndEndSeconds()
+	distinct, err := d.coll.Collection().Distinct(ctx, "ip", query.BsonBuilder().Gte("create_time", startOfDayUnix).Lte("create_time", endOfDayUnix).Build())
+	if err != nil {
+		return 0, errors.Wrap(err, "fails to find the count of today from visit_logs")
+	}
+	return int64(len(distinct)), nil
+}
+
+func (d *VisitLogDao) getBeginSecondsAndEndSeconds() (int64, int64) {
+	now := time.Now()
+	// 获取当日0点的时间
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	// 获取当日23:59:59的时间
+	endOfDay := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
+	return startOfDay.Unix(), endOfDay.Unix()
+}
+
+func (d *VisitLogDao) CountOfToday(ctx context.Context) (int64, error) {
+	startOfDayUnix, endOfDayUnix := d.getBeginSecondsAndEndSeconds()
+	count, err := d.coll.Finder().Filter(query.BsonBuilder().Gte("create_time", startOfDayUnix).Lte("create_time", endOfDayUnix).Build()).Count(ctx)
+	if err != nil {
+		return 0, errors.Wrap(err, "fails to find the count of today from visit_logs")
+	}
+	return count, nil
 }
 
 func (d *VisitLogDao) Add(ctx context.Context, visitHistory *VisitHistory) error {

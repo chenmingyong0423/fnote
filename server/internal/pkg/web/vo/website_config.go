@@ -52,7 +52,7 @@ type WebsiteConfigVO struct {
 	// 分类数量
 	CategoryCount uint `json:"category_count"`
 	// 访问量
-	ViewCount uint `json:"view_count"`
+	ViewCount int64 `json:"view_count"`
 	// 网站运行时间
 	LiveTime int64 `json:"live_time"`
 	// 域名

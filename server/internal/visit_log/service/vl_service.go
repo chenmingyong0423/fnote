@@ -16,7 +16,6 @@ package service
 
 import (
 	"context"
-
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/repository"
 	"github.com/pkg/errors"
@@ -24,12 +23,22 @@ import (
 
 type IVisitLogService interface {
 	CollectVisitLog(ctx context.Context, visitHistory domain.VisitHistory) error
+	GetTodayViewCount(ctx context.Context) (int64, error)
+	GetTodayUserViewCount(ctx context.Context) (int64, error)
 }
 
 var _ IVisitLogService = (*VisitLogService)(nil)
 
 type VisitLogService struct {
 	repo repository.IVisitLogRepository
+}
+
+func (s *VisitLogService) GetTodayUserViewCount(ctx context.Context) (int64, error) {
+	return s.repo.CountOfTodayByIp(ctx)
+}
+
+func (s *VisitLogService) GetTodayViewCount(ctx context.Context) (int64, error) {
+	return s.repo.CountOfToday(ctx)
 }
 
 func (s *VisitLogService) CollectVisitLog(ctx context.Context, visitHistory domain.VisitHistory) error {

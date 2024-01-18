@@ -18,6 +18,7 @@ import (
 	repository3 "github.com/chenmingyong0423/fnote/server/internal/count_stats/repository"
 	dao3 "github.com/chenmingyong0423/fnote/server/internal/count_stats/repository/dao"
 	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+	handler8 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/handler"
 	service7 "github.com/chenmingyong0423/fnote/server/internal/email/service"
 	"github.com/chenmingyong0423/fnote/server/internal/file/handler"
 	"github.com/chenmingyong0423/fnote/server/internal/file/repository"
@@ -97,10 +98,11 @@ func initializeApp() (*gin.Engine, error) {
 	tagRepository := repository10.NewTagRepository(tagDao)
 	tagService := service12.NewTagService(tagRepository, countStatsService)
 	tagHandler := handler7.NewTagHandler(tagService)
+	dataAnalysisHandler := handler8.NewDataAnalysisHandler(visitLogService, websiteConfigService)
 	writer := ioc.InitLogger()
 	v := ioc.InitMiddlewares(writer)
 	validators := ioc.InitGinValidators()
-	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, v, validators)
+	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, v, validators)
 	if err != nil {
 		return nil, err
 	}

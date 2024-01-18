@@ -58,7 +58,7 @@ type WebSiteConfig struct {
 	// 分类数量
 	CategoryCount uint `bson:"category_count"`
 	// 访问量
-	ViewCount uint `bson:"view_count"`
+	ViewCount int64 `bson:"view_count"`
 	// 网站运行时间
 	LiveTime int64 `bson:"live_time"`
 	// 域名
