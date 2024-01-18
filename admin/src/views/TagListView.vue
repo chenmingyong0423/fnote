@@ -4,7 +4,7 @@
       <a-button type="primary" @click="visible = true">新增标签</a-button>
       <a-modal
         v-model:open="visible"
-        title="新增分类"
+        title="新增标签"
         ok-text="提交"
         cancel-text="取消"
         @ok="addTag"
@@ -140,7 +140,7 @@ const getTags = async () => {
 
 getTags()
 
-// 添加分类
+// 添加标签
 const formRef = ref<FormInstance>()
 const visible = ref(false)
 const formState = reactive<TagRequest>({
