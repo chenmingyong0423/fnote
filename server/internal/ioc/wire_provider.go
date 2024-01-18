@@ -26,6 +26,7 @@ import (
 	repository8 "github.com/chenmingyong0423/fnote/server/internal/count_stats/repository"
 	dao8 "github.com/chenmingyong0423/fnote/server/internal/count_stats/repository/dao"
 	service10 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+	handler10 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/handler"
 	service7 "github.com/chenmingyong0423/fnote/server/internal/email/service"
 	handler9 "github.com/chenmingyong0423/fnote/server/internal/file/handler"
 	repository10 "github.com/chenmingyong0423/fnote/server/internal/file/repository"
@@ -110,4 +111,6 @@ var (
 		wire.Bind(new(repository10.IFileRepository), new(*repository10.FileRepository)),
 		wire.Bind(new(dao10.IFileDao), new(*dao10.FileDao)),
 	)
+
+	DataAnalysisProviders = wire.NewSet(handler10.NewDataAnalysisHandler)
 )

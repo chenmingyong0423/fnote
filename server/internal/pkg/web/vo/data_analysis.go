@@ -12,13 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package domain
+package vo
 
-type VisitHistory struct {
-	Url       string
-	Ip        string
-	UserAgent string
-	Origin    string
-	Type      string
-	Referer   string
+type DataAnalysis struct {
+	// 文章总数
+	PostCount uint `json:"post_count"`
+	// 分类总数
+	CategoryCount uint `json:"category_count"`
+	// 评论总数
+	CommentCount int64 `json:"comment_count"`
+	// 点赞数
+	LikeCount int64 `json:"like_count"`
+	// 标签总数
+	TagCount uint `json:"tag_count"`
+	// 今日访问量
+	TodayViewCount int64 `json:"today_view_count"`
+	// 总访问量
+	TotalViewCount int64 `json:"total_view_count"`
+	// 今日用户访问量
+	TodayUserVisitCount int64 `json:"today_user_visit_count"`
 }

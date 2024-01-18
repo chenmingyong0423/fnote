@@ -42,5 +42,6 @@ func initializeApp() (*gin.Engine, error) {
 		ioc.CountStatsProviders,
 		ioc.TagProviders,
 		ioc.FileProviders,
+		ioc.DataAnalysisProviders,
 	))
 }
