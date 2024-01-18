@@ -4,6 +4,11 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/',
+      name: 'index',
+      component: () => import('../views/IndexView.vue')
+    },
+    {
       path: '/post/list',
       name: 'post',
       component: () => import('../views/post/PostListView.vue')
