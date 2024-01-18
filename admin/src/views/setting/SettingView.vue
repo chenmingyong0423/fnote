@@ -1,7 +1,6 @@
 <template>
   <a-tabs v-model:activeKey="activeKey">
     <a-tab-pane key="basic" tab="站点信息"><BasicView /></a-tab-pane>
-    <a-tab-pane key="owner" tab="站长信息"><OwnerView /></a-tab-pane>
     <a-tab-pane key="seo" tab="seo 配置"><SeoView /></a-tab-pane>
     <a-tab-pane key="comment" tab="评论配置"><CommentSwitchView /></a-tab-pane>
     <a-tab-pane key="friend" tab="友链配置"><FriendSwitchView /></a-tab-pane>
@@ -17,7 +16,6 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import BasicView from '@/views/setting/BasicView.vue'
-import OwnerView from '@/views/setting/OwnerView.vue'
 import SeoView from '@/views/setting/SeoView.vue'
 import CommentSwitchView from '@/views/setting/CommentSwitchView.vue'
 import FriendSwitchView from '@/views/setting/FriendSwitchView.vue'

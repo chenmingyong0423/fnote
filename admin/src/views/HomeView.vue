@@ -21,9 +21,7 @@
         />
         <menu-fold-outlined v-else class="trigger" @click="() => (collapsed = !collapsed)" />
       </a-layout-header>
-      <a-layout-content
-        :style="{ margin: '24px 16px', padding: '24px', minHeight: '780px' }"
-      >
+      <a-layout-content :style="{ margin: '24px 16px', padding: '24px', minHeight: '780px' }">
         <RouterView />
       </a-layout-content>
     </a-layout>

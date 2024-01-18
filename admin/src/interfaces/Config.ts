@@ -1,18 +1,11 @@
 export interface WebsiteConfig {
-  name: string
+  website_name: string
   icon: string
-  post_count: number
-  category_count: number
-  view_count: number
   live_time: number
-  domain: string
   records: string[]
-}
-
-export interface OwnerConfig {
-  name: string
-  profile: string
-  picture: string
+  owner_name: string
+  owner_profile: string
+  owner_picture: string
 }
 
 export interface SeoConfig {

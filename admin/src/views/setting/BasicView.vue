@@ -3,10 +3,45 @@
     <a-descriptions title="站点信息" :column="1" bordered>
       <a-descriptions-item label="站点名称">
         <div>
-          <a-input v-if="editable" v-model:value="data.name" style="margin: -5px 0" />
+          <a-input v-if="editable" v-model:value="data.website_name" style="margin: -5px 0" />
           <template v-else>
-            {{ data.name }}
+            {{ data.website_name }}
           </template>
+        </div>
+      </a-descriptions-item>
+      <a-descriptions-item label="站长昵称">
+        <div>
+          <a-input v-if="editable" v-model:value="data.owner_name" style="margin: -5px 0" />
+          <template v-else>
+            {{ data.owner_name }}
+          </template>
+        </div>
+      </a-descriptions-item>
+      <a-descriptions-item label="站长简介">
+        <div>
+          <a-input v-if="editable" v-model:value="data.owner_profile" style="margin: -5px 0" />
+          <template v-else>
+            {{ data.owner_profile }}
+          </template>
+        </div>
+      </a-descriptions-item>
+      <a-descriptions-item label="站长照片">
+        <div>
+          <a-image :width="200" :src="data.owner_picture" />
+          <a-upload
+            v-if="editable"
+            v-model:file-list="fileList4picture"
+            name="file"
+            action="http://localhost:8080/admin/files/upload"
+            @change="handleChange4picture"
+            :before-upload="beforeUpload4picture"
+            :maxCount="1"
+          >
+            <a-button>
+              <upload-outlined></upload-outlined>
+              Click to Upload
+            </a-button>
+          </a-upload>
         </div>
       </a-descriptions-item>
       <a-descriptions-item label="站点运行时间">
@@ -74,20 +109,19 @@ const editable = ref<boolean>(false)
 const liveTime = ref<Dayjs>()
 
 const data = ref<WebsiteConfig>({
-  name: '',
+  website_name: '',
   icon: '',
-  post_count: 0,
-  category_count: 0,
-  view_count: 0,
   live_time: 0,
-  domain: '',
-  records: []
+  records: [],
+  owner_name: '',
+  owner_profile: '',
+  owner_picture: ''
 })
 
 const getWebsite = async () => {
   try {
     const response = await axios.get<IResponse<WebsiteConfig>>('/admin/configs/website')
-    data.value = response.data.data || {}
+    data.value = response.data.data || data.value
     liveTime.value = dayjs(data.value.live_time * 1000)
   } catch (error) {
     console.log(error)
@@ -109,9 +143,12 @@ const cancel = () => {
 const save = async () => {
   try {
     const response = await axios.put<IBaseResponse>('/admin/configs/website', {
-      name: data.value.name,
+      website_name: data.value.website_name,
       live_time: data.value.live_time,
-      icon: data.value.icon
+      icon: data.value.icon,
+      owner_name: data.value.owner_name,
+      owner_profile: data.value.owner_profile,
+      owner_picture: data.value.owner_name
     })
     if (response.data.code === 200) {
       message.success('保存成功')
@@ -137,7 +174,6 @@ const handleChange = (info: UploadChangeParam) => {
   if (info.file.status === 'done') {
     // Get this url from response in real world.
     data.value.icon = info.file.response.data.url
-    console.log(data.value.icon)
     message.success('上传成功')
   }
   if (info.file.status === 'error') {
@@ -196,6 +232,38 @@ const pullRecord = async (item: string) => {
     console.log(error)
     message.error('删除失败')
   }
+}
+
+// picture 文件操作
+
+// 文件操作
+const fileList4picture = ref<UploadProps['fileList']>([])
+
+const handleChange4picture = (info: UploadChangeParam) => {
+  if (info.file.status === 'uploading') {
+    return
+  }
+  console.log(info)
+  if (info.file.status === 'done') {
+    // Get this url from response in real world.
+    data.value.owner_picture = info.file.response.data.url
+    message.success('上传成功')
+  }
+  if (info.file.status === 'error') {
+    message.error('upload error')
+  }
+}
+
+const beforeUpload4picture = (file: UploadProps['fileList'][number]) => {
+  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
+  if (!isJpgOrPng) {
+    message.error('You can only upload JPG file!')
+  }
+  const isLt2M = file.size / 1024 / 1024 < 2
+  if (!isLt2M) {
+    message.error('Image must smaller than 2MB!')
+  }
+  return isJpgOrPng && isLt2M
 }
 </script>
 
