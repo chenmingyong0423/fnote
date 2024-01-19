@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full">
     <div class="mt-10 w-5% lt-md:hidden">
-      <div class="flex flex-col gap-y-3 items-center fixed">
+      <div class="flex flex-col gap-y-3 items-center fixed z-99999">
         <div
           class="group flex items-center justify-center w-12 h-12 border-rounded-50% bg-white p-2 cursor-pointer duration-200 dark:text-dtc dark_bg_gray relative"
           :class="{ ' hover:bg-#1e80ff': !post?.is_liked }"
