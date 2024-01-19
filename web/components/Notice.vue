@@ -51,7 +51,7 @@
         <p class="indent-8 leading-loose">
           {{ homeStore.notice_info.content }}
         </p>
-        <Button class="w-10% p-2 m-auto m-t-5" name="关闭" @click="closeModal"></Button>
+        <Button class="w-10% p-2 m-auto m-t-5 text-white bg-#1E80FF" name="关闭" @click="closeModal"></Button>
       </div>
     </div>
   </div>
