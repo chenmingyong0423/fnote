@@ -15,6 +15,9 @@
       <CommentHome></CommentHome>
     </div>
   </div>
+  <div>
+    <ExternalLink class="mb-5"></ExternalLink>
+  </div>
 </template>
 
 <script lang="ts" setup>
