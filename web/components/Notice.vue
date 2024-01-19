@@ -2,7 +2,7 @@
   <div>
     <div
       @click="visible = true"
-      class="flex items-center dark:text-dtc dark_bg_gray h-15 bg-#fff mb-5 b-rounded-4 cursor-pointer p-x-5 ease-linear duration-100 custom_shadow hover:translate-y--2"
+      class="flex items-center dark:text-dtc dark_bg_gray h-15 bg-#fff mb-5 b-rounded-4 cursor-pointer p-x-5 ease-linear duration-100 md:custom_shadow md:hover:translate-y--2"
     >
       <div class="-i-ph-speaker-high-duotone w-10 h-10 text-orange"></div>
       <div
@@ -30,9 +30,11 @@
     <div
       v-if="visible"
       class="fixed z-999 inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 custom_shadow"
+      @click="closeModal"
     >
       <div
-        class="bg-white p-6 rounded shadow-lg max-w-md min-w-400px dark:text-dtc dark_bg_full_black"
+        class="bg-white p-6 rounded-4 shadow-lg  md:min-w-400px lt-md:max-w-80% dark:text-dtc dark_bg_full_black"
+        @click.stop.prevent
       >
         <div class="text-right text-sm text-gray-500 mb-4">
           发布时间:
@@ -42,15 +44,14 @@
             )
           }}
         </div>
-        <span @click="closeModal" class="float-right text-xl cursor-pointer"
-          >&times;</span
-        >
+
         <h2 class="text-xl font-bold mb-4">
           {{ homeStore.notice_info.title }}
         </h2>
         <p class="indent-8 leading-loose">
           {{ homeStore.notice_info.content }}
         </p>
+        <Button class="w-10% p-2 m-auto m-t-5" name="关闭" @click="closeModal"></Button>
       </div>
     </div>
   </div>
