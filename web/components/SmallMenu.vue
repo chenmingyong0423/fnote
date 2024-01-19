@@ -9,10 +9,9 @@
     <div
       class="fixed z-999 right-0 bg-white w-70% h-full bg-#f7f9fe custom_border_gray duration-300 md:hidden dark:text-dtc dark_bg_full_black"
       :class="info.showSmallScreenMenu ? ' translate-x-0' : ' translate-x-100%'"
-      @click="info.showSmallScreenMenu = false"
     >
       <Profile></Profile>
-      <Menu :items="homeStore.menuList"></Menu>
+      <Menu :items="homeStore.menuList" @click="info.showSmallScreenMenu = false"></Menu>
     </div>
   </div>
 </template>
