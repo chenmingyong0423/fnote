@@ -2,14 +2,13 @@
   <div
       class="flex items-center justify-center gap-x-3 text-gray-5 text-6 p-t-5 w-full"
   >
-    <div class="group w-12 h-12 bg-white rounded-full flex items-center overflow-hidden md:hover:w-50 cursor-pointer duration-500" v-for="(icon, index) in homeStore.social_info_list" :key="index">
+    <div class="group w-12 h-12 bg-white rounded-full flex items-center overflow-hidden md:hover:w-50 cursor-pointer duration-500 dark:text-dtc dark_bg_gray" v-for="(icon, index) in homeStore.social_info_list" :key="index">
       <div
-          class="bg-white rounded-full p-3 w-10 flex items-center justify-center shadow-2xl shadow-black group-hover:bg-#1E80FF group-hover:text-#fff duration-300"
+          class="bg-white rounded-full dark:text-dtc dark_bg_gray p-3 w-10 flex items-center justify-center shadow-2xl shadow-black group-hover:bg-#1E80FF group-hover:text-#fff duration-300 dark:group-hover:bg-#1E80FF/50"
       >
         <a
             v-if="icon.is_link"
             :class="get(icon.css_class)"
-            :title="icon.social_name"
             :href="icon.social_value"
             target="_blank"
         ></a>
@@ -19,7 +18,7 @@
             @click="copyExternalLink(icon.social_name + ': ' + icon.social_value)"
         ></span>
       </div>
-      <div class="text-4 w-full text-center truncate select-none">
+      <div class="text-4 w-full text-center truncate select-none dark:text-dtc">
         <a
             v-if="icon.is_link"
             :href="icon.social_value"
