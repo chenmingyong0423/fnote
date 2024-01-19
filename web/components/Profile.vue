@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col items-center justify-center bg-#fff p-10 b-rounded-4 cursor-pointer dark:text-dtc md:dark_bg_gray ease-linear duration-100 custom_shadow hover:translate-y--2 lt-md:p-5 lt-md:bg_transparent">
+    class="flex flex-col items-center justify-center bg-#fff p-10 b-rounded-4 dark:text-dtc md:dark_bg_gray ease-linear duration-100 md:custom_shadow md:hover:translate-y--2 lt-md:p-5 lt-md:bg_transparent">
     <div class="avatar">
       <img
         :src="homeStore.website_info.owner_picture"
@@ -37,7 +37,7 @@
       </div>
     </div>
     <div
-      class="flex items-center justify-between border-t w-full text-gray-5 p-t-5 mb-5"
+      class="flex items-center justify-between border-t w-full text-gray-5 p-b-5 border-b-1 border-b-gray-2 border-b-solid"
     >
       <div class="flex flex-col items-center justify-center w-33%">
         <span class="mb-1">{{
