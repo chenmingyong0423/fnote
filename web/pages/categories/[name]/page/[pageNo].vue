@@ -2,6 +2,40 @@
   <div class="flex">
     <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
       <div class="flex flex-col">
+        <div class="flex flex-col">
+          <div class="mb-10 flex gap-x-5">
+            <NuxtLink
+              class="p-2 cursor-pointer"
+              :class="
+                filter === 'latest'
+                  ? 'custom_bottom_border_1E80FF'
+                  : 'hover:custom_bottom_border_1E80FF'
+              "
+              :to="path + generateQuery('latest')"
+              >最新
+            </NuxtLink>
+            <NuxtLink
+              class="p-2 cursor-pointer"
+              :class="
+                filter === 'oldest'
+                  ? 'custom_bottom_border_1E80FF'
+                  : 'hover:custom_bottom_border_1E80FF'
+              "
+              :to="path + generateQuery('oldest')"
+              >最早
+            </NuxtLink>
+            <NuxtLink
+              class="p-2 cursor-pointer"
+              :class="
+                filter === 'likes'
+                  ? 'custom_bottom_border_1E80FF'
+                  : 'hover:custom_bottom_border_1E80FF'
+              "
+              :to="path + generateQuery('likes')"
+              >点赞最多
+            </NuxtLink>
+          </div>
+        </div>
         <PostListItem :posts="posts" class="lt-md:hidden"></PostListItem>
         <PostListSquareItem
           :posts="posts"
@@ -12,6 +46,7 @@
           :total="totalPosts"
           :perPageCount="req.pageSize"
           :route="`/categories/${routeParam}/page/`"
+          :filterCond="filter"
         ></Pagination>
       </div>
     </div>
@@ -33,8 +68,16 @@ import { useConfigStore } from "~/store/config";
 
 const route = useRoute();
 const pageNo: number = +route.params.pageNo;
-const pageSize: number = Number(route.query.pageSize) || 5;
+let pageSize: number = Number(route.query.pageSize) || 5;
 const routeParam: string = String(route.params.name);
+const path: string = route.path.substring(0, route.path.length - 1) + "1";
+
+const generateQuery = (filter: string) => {
+  if (pageSize != 5) {
+    return "?pageSize=" + pageSize + "&filter=" + filter;
+  }
+  return "?filter=" + filter;
+};
 
 let posts = ref<IPost[]>([]);
 let req = ref<PageRequest>({
@@ -43,13 +86,31 @@ let req = ref<PageRequest>({
   sortField: "create_time",
   sortOrder: "desc",
 } as PageRequest);
-
 const totalPosts = ref<Number>(0);
-
 const title = ref<string>("");
 
 const homeStore = useHomeStore();
 const configStore = useConfigStore();
+const filter = ref<string>("latest");
+if (route.query.filter !== "") {
+  if (route.query.filter !== "latest") {
+    filter.value = String(route.query.filter);
+    switch (filter.value) {
+      case "oldest":
+        req.value.sortField = "create_time";
+        req.value.sortOrder = "ASC";
+        break;
+      case "likes":
+        req.value.sortField = "like_count";
+        req.value.sortOrder = "DESC";
+        break;
+      default:
+        req.value.sortField = "create_time";
+        req.value.sortOrder = "DESC";
+        break;
+    }
+  }
+}
 
 const postInfos = async () => {
   try {
@@ -68,24 +129,44 @@ const postInfos = async () => {
     console.log(error);
   }
 };
-postInfos();
+await postInfos();
 
 // 创建一个计算属性来追踪 query 对象
 const routeQuery = computed(() => route.query);
-
 watch(
   () => routeQuery,
-  (newQuery, oldQuery) => {
-    const pageSize: number = Number(route.query.pageSize) || -1;
-    if (pageSize != req.value.pageSize && pageSize != -1) {
-      req.value.pageSize = pageSize;
-      postInfos();
+  async (newQuery, oldQuery) => {
+    const p: number = Number(route.query.pageSize) || -1;
+    if (p != req.value.pageSize && p != -1) {
+      req.value.pageSize = p;
+      pageSize = p;
+      await postInfos();
+    }
+    if (
+      newQuery.value.filter &&
+      newQuery.value.filter !== "" &&
+      newQuery.value.filter !== filter.value
+    ) {
+      filter.value = String(newQuery.value.filter);
+      switch (filter.value) {
+        case "oldest":
+          req.value.sortField = "create_time";
+          req.value.sortOrder = "ASC";
+          break;
+        case "likes":
+          req.value.sortField = "like_count";
+          req.value.sortOrder = "DESC";
+          break;
+        default:
+          req.value.sortField = "create_time";
+          req.value.sortOrder = "DESC";
+          break;
+      }
+      await postInfos();
     }
   },
   { deep: true },
 );
-
-await postInfos();
 
 useHead({
   title: `${title.value} - ${configStore.seo_meta_config.title}`,
