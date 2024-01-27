@@ -1,4 +1,5 @@
 import { type UseFetchOptions, useFetch } from "nuxt/app";
+import { hash } from "ohash";
 
 type Methods = "GET" | "POST" | "DELETE" | "PUT";
 
@@ -34,6 +35,7 @@ class HttpRequest {
   ) {
     return new Promise((resolve, reject) => {
       const newOptions: UseFetchOptions<T> = {
+        key: hash(["api-fetch", "/api" + url, method, data]),
         baseURL: "/api" + url,
         method: method,
         ...options,

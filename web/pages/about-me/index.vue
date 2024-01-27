@@ -186,6 +186,7 @@ import { useHomeStore } from "~/store/home";
 
 const homeStore = useHomeStore();
 const isBlackMode = computed(() => homeStore.isBlackMode);
+const configStore = useConfigStore();
 
 const route = useRoute();
 const path: string = route.path;
@@ -211,7 +212,7 @@ const post = ref<IPostDetail>({
   is_liked: false,
 });
 const author = ref<string>("");
-const payList = ref<IPayInfo[]>(homeStore.pay_info || []);
+const payList = ref<IPayInfo[]>(configStore.pay_info || []);
 const existPost = ref<boolean>(false);
 const getPostDetail = async () => {
   try {
@@ -364,6 +365,7 @@ import {
   submitCommentReply,
 } from "~/api/comment";
 import type { IPayInfo } from "~/api/config";
+import { useConfigStore } from "~/store/config";
 
 const toast = useAlertStore();
 
@@ -487,21 +489,21 @@ const clearReply2ReplyReq = () => {
 };
 
 useHead({
-  title: `${post.value?.title} - ${homeStore.seo_meta_config.title}`,
+  title: `${post.value?.title} - ${configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: description },
-    { name: "keywords", content: homeStore.seo_meta_config.keywords },
-    { name: "author", content: homeStore.seo_meta_config.author },
-    { name: "robots", content: homeStore.seo_meta_config.robots },
+    { name: "keywords", content: configStore.seo_meta_config.keywords },
+    { name: "author", content: configStore.seo_meta_config.author },
+    { name: "robots", content: configStore.seo_meta_config.robots },
   ],
   link: [
-    { rel: "icon", type: "image/x-icon", href: homeStore.website_info.icon },
+    { rel: "icon", type: "image/x-icon", href: configStore.website_info.icon },
   ],
 });
 useSeoMeta({
-  ogTitle: `${post.value?.title} - ${homeStore.seo_meta_config.og_title}`,
+  ogTitle: `${post.value?.title} - ${configStore.seo_meta_config.og_title}`,
   ogDescription: description,
-  ogImage: homeStore.seo_meta_config.og_image,
+  ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",
 });
 </script>

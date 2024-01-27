@@ -28,12 +28,10 @@ import { getPosts } from "~/api/post";
 import type { PageRequest } from "~/api/post";
 import type { IPost } from "~/api/post";
 import type { IResponse, IPageData } from "~/api/http";
-import { useHomeStore } from "~/store/home";
-import type { IMenu } from "~/api/category";
+import { useConfigStore } from "~/store/config";
 
 const route = useRoute();
 const path = route.path;
-const homeStore = useHomeStore();
 const pageSize: number = Number(route.query.pageSize) || 5;
 let keyword = ref<string>(String(route.query.keyword));
 if (keyword.value == "undefined") {
@@ -77,24 +75,28 @@ watch(
   },
   { deep: true },
 );
-
+const configStore = useConfigStore();
 const seo = () => {
   useHead({
-    title: `${keyword.value} - 搜索 - ${homeStore.seo_meta_config.title}`,
+    title: `${keyword.value} - 搜索 - ${configStore.seo_meta_config.title}`,
     meta: [
       { name: "description", content: `${keyword.value} 搜索结果` },
-      { name: "keywords", content: homeStore.seo_meta_config.keywords },
-      { name: "author", content: homeStore.seo_meta_config.author },
-      { name: "robots", content: homeStore.seo_meta_config.robots },
+      { name: "keywords", content: configStore.seo_meta_config.keywords },
+      { name: "author", content: configStore.seo_meta_config.author },
+      { name: "robots", content: configStore.seo_meta_config.robots },
     ],
     link: [
-      { rel: "icon", type: "image/x-icon", href: homeStore.website_info.icon },
+      {
+        rel: "icon",
+        type: "image/x-icon",
+        href: configStore.website_info.icon,
+      },
     ],
   });
   useSeoMeta({
-    ogTitle: `${keyword.value} - 搜索 - ${homeStore.seo_meta_config.og_title}`,
+    ogTitle: `${keyword.value} - 搜索 - ${configStore.seo_meta_config.og_title}`,
     ogDescription: `${keyword.value} 搜索结果`,
-    ogImage: homeStore.seo_meta_config.og_image,
+    ogImage: configStore.seo_meta_config.og_image,
     twitterCard: "summary",
   });
 };

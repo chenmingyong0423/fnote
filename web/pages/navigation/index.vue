@@ -54,11 +54,10 @@ import type { ICategoryWithCount } from "~/api/category";
 import type { ITagWithCount } from "~/api/tag";
 import { getTagList } from "~/api/tag";
 import { getCategoriesAndTags } from "~/api/category";
-import { useHomeStore } from "~/store/home";
+import { useConfigStore } from "~/store/config";
 
 let categories = ref<ICategoryWithCount[]>([]);
 let ct = ref<string>("");
-const homeStore = useHomeStore();
 
 const categoryAndTags = async () => {
   try {
@@ -90,25 +89,27 @@ const tagList = async () => {
 await categoryAndTags();
 await tagList();
 ct.value = ct.value.substring(0, ct.value.length - 1);
+
+const configStore = useConfigStore();
 useHead({
-  title: `文章分类和标签 - ${homeStore.seo_meta_config.title}`,
+  title: `文章分类和标签 - ${configStore.seo_meta_config.title}`,
   meta: [
     {
       name: "description",
       content: `所有的文章分类和标签，包括${ct.value}等不同主题。`,
     },
-    { name: "keywords", content: homeStore.seo_meta_config.keywords },
-    { name: "author", content: homeStore.seo_meta_config.author },
-    { name: "robots", content: homeStore.seo_meta_config.robots },
+    { name: "keywords", content: configStore.seo_meta_config.keywords },
+    { name: "author", content: configStore.seo_meta_config.author },
+    { name: "robots", content: configStore.seo_meta_config.robots },
   ],
   link: [
-    { rel: "icon", type: "image/x-icon", href: homeStore.website_info.icon },
+    { rel: "icon", type: "image/x-icon", href: configStore.website_info.icon },
   ],
 });
 useSeoMeta({
-  ogTitle: `文章分类和标签 - ${homeStore.seo_meta_config.og_title}`,
+  ogTitle: `文章分类和标签 - ${configStore.seo_meta_config.og_title}`,
   ogDescription: `所有的文章分类和标签，包括${ct.value}等不同主题。`,
-  ogImage: homeStore.seo_meta_config.og_image,
+  ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",
 });
 </script>

@@ -11,7 +11,10 @@
       :class="info.showSmallScreenMenu ? ' translate-x-0' : ' translate-x-100%'"
     >
       <Profile></Profile>
-      <Menu :items="homeStore.menuList" @click="info.showSmallScreenMenu = false"></Menu>
+      <Menu
+        :items="homeStore.menuList"
+        @click="info.showSmallScreenMenu = false"
+      ></Menu>
     </div>
   </div>
 </template>

@@ -13,16 +13,16 @@
       >
         <span ref="marqueeContent" class="inline-block">
           [{{
-            $dayjs(homeStore.notice_info.publish_time * 1000).format(
+            $dayjs(configStore.notice_info.publish_time * 1000).format(
               "YYYY-MM-DD",
             )
-          }}] {{ homeStore.notice_info.title }}</span
+          }}] {{ configStore.notice_info.title }}</span
         >
         <span
           ref="marqueeContent2"
           class="inline-block m-l-5"
           v-show="showTheSecondMarquee"
-          >{{ homeStore.notice_info.title }}</span
+          >{{ configStore.notice_info.title }}</span
         >
       </div>
     </div>
@@ -33,25 +33,29 @@
       @click="closeModal"
     >
       <div
-        class="bg-white p-6 rounded-4 shadow-lg  md:min-w-400px lt-md:max-w-80% dark:text-dtc dark_bg_full_black"
+        class="bg-white p-6 rounded-4 shadow-lg md:min-w-400px lt-md:max-w-80% dark:text-dtc dark_bg_full_black"
         @click.stop.prevent
       >
         <div class="text-right text-sm text-gray-500 mb-4">
           发布时间:
           {{
-            $dayjs(homeStore.notice_info.publish_time * 1000).format(
+            $dayjs(configStore.notice_info.publish_time * 1000).format(
               "YYYY-MM-DD HH:mm:ss",
             )
           }}
         </div>
 
         <h2 class="text-xl font-bold mb-4">
-          {{ homeStore.notice_info.title }}
+          {{ configStore.notice_info.title }}
         </h2>
         <p class="indent-8 leading-loose">
-          {{ homeStore.notice_info.content }}
+          {{ configStore.notice_info.content }}
         </p>
-        <Button class="w-10% p-2 m-auto m-t-5 text-white bg-#1E80FF" name="关闭" @click="closeModal"></Button>
+        <Button
+          class="w-10% p-2 m-auto m-t-5 text-white bg-#1E80FF"
+          name="关闭"
+          @click="closeModal"
+        ></Button>
       </div>
     </div>
   </div>
@@ -59,9 +63,9 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import { useHomeStore } from "~/store/home";
+import { useConfigStore } from "~/store/config";
 
-const homeStore = useHomeStore();
+const configStore = useConfigStore();
 const marqueeContainer = ref<HTMLElement | null>(null);
 const marqueeContent = ref<HTMLElement | null>(null);
 const marqueeContent2 = ref<HTMLElement | null>(null);

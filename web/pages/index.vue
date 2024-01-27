@@ -25,8 +25,8 @@ import { getLatestPosts } from "~/api/post";
 import type { IPost } from "~/api/post";
 import type { IResponse, IListData } from "~/api/http";
 import { useHomeStore } from "~/store/home";
+import { useConfigStore } from "~/store/config";
 
-const homeStore = useHomeStore();
 let posts = ref<IPost[]>([]);
 
 const postInfos = async () => {
@@ -39,23 +39,23 @@ const postInfos = async () => {
   }
 };
 await postInfos();
-
+const configStore = useConfigStore();
 useHead({
-  title: homeStore.seo_meta_config.title,
+  title: configStore.seo_meta_config.title,
   meta: [
-    { name: "description", content: homeStore.seo_meta_config.description },
-    { name: "keywords", content: homeStore.seo_meta_config.keywords },
-    { name: "author", content: homeStore.seo_meta_config.author },
-    { name: "robots", content: homeStore.seo_meta_config.robots },
+    { name: "description", content: configStore.seo_meta_config.description },
+    { name: "keywords", content: configStore.seo_meta_config.keywords },
+    { name: "author", content: configStore.seo_meta_config.author },
+    { name: "robots", content: configStore.seo_meta_config.robots },
   ],
   link: [
-    { rel: "icon", type: "image/x-icon", href: homeStore.website_info.icon },
+    { rel: "icon", type: "image/x-icon", href: configStore.website_info.icon },
   ],
 });
 useSeoMeta({
-  ogTitle: homeStore.seo_meta_config.og_title,
-  ogDescription: homeStore.seo_meta_config.description,
-  ogImage: homeStore.seo_meta_config.og_image,
+  ogTitle: configStore.seo_meta_config.og_title,
+  ogDescription: configStore.seo_meta_config.description,
+  ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",
 });
 </script>
