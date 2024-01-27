@@ -3,7 +3,7 @@
     <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
       <div class="flex flex-col">
         <SearchInput :keyword="keyword" class="mb-5"></SearchInput>
-        <div class="mb-10 flex gap-x-5">
+        <div class="mb-10 flex gap-x-5 dark:text-dtc">
           <NuxtLink
             class="p-2 cursor-pointer"
             :class="
