@@ -1,55 +1,57 @@
 <template>
-  <div class="flex">
-    <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
-      <div class="flex flex-col">
-        <div class="mb-10 flex gap-x-5 dark:text-dtc">
-          <NuxtLink
-            class="p-2 cursor-pointer"
-            :class="
-              filter === 'latest'
-                ? 'custom_bottom_border_1E80FF'
-                : 'hover:custom_bottom_border_1E80FF'
-            "
-            :to="path + '?filter=latest'"
-            >最新
-          </NuxtLink>
-          <NuxtLink
-            class="p-2 cursor-pointer"
-            :class="
-              filter === 'oldest'
-                ? 'custom_bottom_border_1E80FF'
-                : 'hover:custom_bottom_border_1E80FF'
-            "
-            :to="path + '?filter=oldest'"
-            >最早
-          </NuxtLink>
-          <NuxtLink
-            class="p-2 cursor-pointer"
-            :class="
-              filter === 'likes'
-                ? 'custom_bottom_border_1E80FF'
-                : 'hover:custom_bottom_border_1E80FF'
-            "
-            :to="path + '?filter=likes'"
-            >点赞最多
-          </NuxtLink>
-        </div>
-        <PostListItem :posts="posts" class="lt-md:hidden"></PostListItem>
-        <PostListSquareItem
-          :posts="posts"
-          class="md:hidden"
-        ></PostListSquareItem>
-        <Pagination
-          :currentPage="req.pageNo"
-          :total="totalPosts"
-          :perPageCount="req.pageSize"
-          :route="`/tags/${routeParam}/page/`"
-          :filterCond="filter"
-        ></Pagination>
-      </div>
+  <div class="flex-col">
+    <div class="mb-10 ml-5 flex gap-x-5 dark:text-dtc">
+      <NuxtLink
+        class="p-2 cursor-pointer"
+        :class="
+          filter === 'latest'
+            ? 'custom_bottom_border_1E80FF font-bold'
+            : 'hover:custom_bottom_border_1E80FF'
+        "
+        :to="path + '?filter=latest'"
+        >最新
+      </NuxtLink>
+      <NuxtLink
+        class="p-2 cursor-pointer"
+        :class="
+          filter === 'oldest'
+            ? 'custom_bottom_border_1E80FF font-bold'
+            : 'hover:custom_bottom_border_1E80FF'
+        "
+        :to="path + '?filter=oldest'"
+        >最早
+      </NuxtLink>
+      <NuxtLink
+        class="p-2 cursor-pointer"
+        :class="
+          filter === 'likes'
+            ? 'custom_bottom_border_1E80FF font-bold'
+            : 'hover:custom_bottom_border_1E80FF'
+        "
+        :to="path + '?filter=likes'"
+        >点赞最多
+      </NuxtLink>
     </div>
-    <div class="flex flex-col w-30% lt-md:hidden">
-      <Profile class="mb-5"></Profile>
+    <div class="flex">
+      <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
+        <div class="flex flex-col">
+          <PostListItem :posts="posts" class="lt-md:hidden"></PostListItem>
+          <PostListSquareItem
+            :posts="posts"
+            class="md:hidden"
+          ></PostListSquareItem>
+          <Pagination
+            :currentPage="req.pageNo"
+            :total="totalPosts"
+            :perPageCount="req.pageSize"
+            :route="`/tags/${routeParam}/page/`"
+            :filterCond="filter"
+          ></Pagination>
+        </div>
+      </div>
+      <div class="flex flex-col w-30% lt-md:hidden">
+        <Profile class="mb-5"></Profile>
+      </div>
     </div>
   </div>
 </template>
