@@ -2,6 +2,38 @@
   <div class="flex">
     <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
       <div class="flex flex-col">
+        <div class="mb-10 flex gap-x-5">
+          <span
+            class="p-2 cursor-pointer"
+            :class="
+              filter === 'latest'
+                ? 'custom_bottom_border_1E80FF'
+                : 'hover:custom_bottom_border_1E80FF'
+            "
+            @click="filter = 'latest'"
+            >最新</span
+          >
+          <span
+            class="p-2 cursor-pointer"
+            :class="
+              filter === 'oldest'
+                ? 'custom_bottom_border_1E80FF'
+                : 'hover:custom_bottom_border_1E80FF'
+            "
+            @click="filter = 'oldest'"
+            >最早</span
+          >
+          <span
+            class="p-2 cursor-pointer"
+            :class="
+              filter === 'likes'
+                ? 'custom_bottom_border_1E80FF'
+                : 'hover:custom_bottom_border_1E80FF'
+            "
+            @click="filter = 'likes'"
+            >点赞最多</span
+          >
+        </div>
         <PostListItem :posts="posts" class="lt-md:hidden"></PostListItem>
         <PostListSquareItem
           :posts="posts"
@@ -44,6 +76,30 @@ let req = ref<PageRequest>({
   sortField: "create_time",
   sortOrder: "desc",
 } as PageRequest);
+const filter = ref<string>("latest");
+watch(filter, (newValue: String, oldValue: String) => {
+  if (newValue !== oldValue) {
+    switch (newValue) {
+      case "latest":
+        req.value.sortField = "create_time";
+        req.value.sortOrder = "DESC";
+        break;
+      case "oldest":
+        req.value.sortField = "create_time";
+        req.value.sortOrder = "ASC";
+        break;
+      case "likes":
+        req.value.sortField = "like_count";
+        req.value.sortOrder = "DESC";
+        break;
+      default:
+        req.value.sortField = "create_time";
+        req.value.sortOrder = "DESC";
+        break;
+    }
+    postInfos();
+  }
+});
 
 const totalPosts = ref<Number>(0);
 

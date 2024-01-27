@@ -54,6 +54,10 @@ export default defineNuxtConfig({
       {
         custom_bottom_border_gray: "border-b-1 border-b-gray-2 border-b-solid",
       },
+      {
+        custom_bottom_border_1E80FF:
+          "border-b-2 border-b-#1E80FF border-b-solid",
+      },
       { custom_border_gray: "border-1 border-gray-2 border-solid" },
       { custom_border_1E80FF: "border-2 border-#1E80FF border-solid" },
       { custom_bg_gray: "bg-gray-1 b-rounded-2" },
