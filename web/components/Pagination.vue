@@ -111,6 +111,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  filterCond: {
+    type: String,
+    default: "latest",
+  },
 });
 
 const currentPage = ref(props.currentPage);
@@ -129,6 +133,7 @@ onMounted(() => {
 const total = ref(props.total);
 const totalPages = computed(() => Math.ceil(total.value / perPageSize.value));
 const isFirst = ref(true);
+const filter = ref(props.filterCond);
 
 const pagesToShow = computed(() => {
   let pages = [];
@@ -162,6 +167,15 @@ watch(
   },
 );
 
+watch(
+  () => props.filterCond,
+  () => {
+    if (props.filterCond != filter.value) {
+      filter.value = props.filterCond;
+    }
+  },
+);
+
 const router = useRouter();
 
 const changeItemsPerPage = () => {
@@ -180,6 +194,7 @@ const calculatePages = (page: number): number => {
 const fullUrl = (pageNo: number) => {
   const params = new URLSearchParams({
     pageSize: String(perPageSize.value),
+    filter: filter.value,
     ...props.extraParams,
   }).toString();
   return `${props.route}${pageNo}?${params}`;
