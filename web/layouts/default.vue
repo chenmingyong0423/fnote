@@ -26,8 +26,7 @@
 <script lang="ts" setup>
 import { useHomeStore } from "~/store/home";
 import { type IWebsiteInfo, getWebsiteInfo } from "~/api/config";
-import type { IListData, IResponse } from "~/api/http";
-import { getMenus, type IMenu } from "~/api/category";
+import { type IResponse } from "~/api/http";
 import SmallMenu from "~/components/SmallMenu.vue";
 import {
   collectVisitLog,
@@ -35,9 +34,11 @@ import {
   type VisitLogRequest,
   type WebsiteCountStats,
 } from "~/api/statiscs";
+import { useConfigStore } from "~/store/config";
 
 const myDom = ref();
 const homeStore = useHomeStore();
+const configStore = useConfigStore();
 onMounted(() => {
   let isBlackMode = localStorage.getItem("isBlackMode");
   if (isBlackMode === "") {
@@ -52,11 +53,12 @@ const webMaster = async () => {
     let postRes: any = await getWebsiteInfo();
     let res: IResponse<IWebsiteInfo> = postRes.data.value;
     if (res && res.data) {
-      homeStore.website_info = res.data.website_config;
-      homeStore.notice_info = res.data.notice_config;
-      homeStore.social_info_list = res.data.social_info_config.social_info_list;
-      homeStore.pay_info = res.data.pay_info_config;
-      homeStore.seo_meta_config = res.data.seo_meta_config;
+      configStore.website_info = res.data.website_config;
+      configStore.notice_info = res.data.notice_config;
+      configStore.social_info_list =
+        res.data.social_info_config.social_info_list;
+      configStore.pay_info = res.data.pay_info_config;
+      configStore.seo_meta_config = res.data.seo_meta_config;
     }
   } catch (error) {
     console.log(error);
@@ -69,24 +71,13 @@ const websiteCountStats = async () => {
     let postRes: any = await getWebsiteCountStats();
     let res: IResponse<WebsiteCountStats> = postRes.data.value;
     if (res && res.data) {
-      homeStore.website_count_stats = res.data;
+      configStore.website_count_stats = res.data;
     }
   } catch (error) {
     console.log(error);
   }
 };
 websiteCountStats();
-
-const menus = async () => {
-  try {
-    let postRes: any = await getMenus();
-    let res: IResponse<IListData<IMenu>> = postRes.data.value;
-    homeStore.menuList = res.data?.list || [];
-  } catch (error) {
-    console.log(error);
-  }
-};
-menus();
 
 const scrollToTop = ref();
 

@@ -29,11 +29,13 @@ import type { IPost } from "~/api/post";
 import type { IResponse, IPageData } from "~/api/http";
 import type { ICategoryName } from "~/api/category";
 import { useHomeStore } from "~/store/home";
+import { useConfigStore } from "~/store/config";
 
 const route = useRoute();
 const pageSize: number = Number(route.query.pageSize) || 5;
 const routeParam: string = String(route.params.name);
 const homeStore = useHomeStore();
+const configStore = useConfigStore();
 
 let posts = ref<IPost[]>([]);
 let req = ref<PageRequest>({
@@ -67,21 +69,21 @@ const postInfos = async () => {
 await postInfos();
 
 useHead({
-  title: `${title.value} - ${homeStore.seo_meta_config.title}`,
+  title: `${title.value} - ${configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: `${title.value}文章列表` },
-    { name: "keywords", content: homeStore.seo_meta_config.keywords },
-    { name: "author", content: homeStore.seo_meta_config.author },
-    { name: "robots", content: homeStore.seo_meta_config.robots },
+    { name: "keywords", content: configStore.seo_meta_config.keywords },
+    { name: "author", content: configStore.seo_meta_config.author },
+    { name: "robots", content: configStore.seo_meta_config.robots },
   ],
   link: [
-    { rel: "icon", type: "image/x-icon", href: homeStore.website_info.icon },
+    { rel: "icon", type: "image/x-icon", href: configStore.website_info.icon },
   ],
 });
 useSeoMeta({
-  ogTitle: `${title.value} - ${homeStore.seo_meta_config.og_title}`,
+  ogTitle: `${title.value} - ${configStore.seo_meta_config.og_title}`,
   ogDescription: `${title.value}文章列表`,
-  ogImage: homeStore.seo_meta_config.og_image,
+  ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",
 });
 </script>

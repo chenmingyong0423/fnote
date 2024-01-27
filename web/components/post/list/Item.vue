@@ -1,30 +1,32 @@
 <template>
   <div>
     <NuxtLink
-        class="slide-up item group flex p-5 bg-#fff b-rounded-4 h-50 cursor-pointer ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--2 dark:text-dtc dark_bg_gray mb-5"
-        v-for="(item, index) in props.posts"
-        :key="index"
-        :to="'/posts/' + item.sug"
-        :title="item.title"
+      class="slide-up item group flex p-5 bg-#fff b-rounded-4 h-50 cursor-pointer ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--2 dark:text-dtc dark_bg_gray mb-5"
+      v-for="(item, index) in props.posts"
+      :key="index"
+      :to="'/posts/' + item.sug"
+      :title="item.title"
     >
       <div class="w-1/3 overflow-hidden relative">
         <img
-            class="object-contain max-w-full h-full"
-            :src="item.cover_img"
-            :alt="item.title"
+          class="object-contain max-w-full h-full"
+          :src="item.cover_img"
+          :alt="item.title"
         />
-        <div class="flex flex-wrap gap-x-3 w-full z-99 absolute top-3 left--100% group-hover:left-1% ease-linear duration-200">
+        <div
+          class="flex flex-wrap gap-x-3 w-full z-99 absolute top-3 left--100% group-hover:left-1% ease-linear duration-200"
+        >
           <span
-              class="bg-#2db7f5 rounded-3 text-white py-0.2em px-0.8em"
-              v-for="(category, idx) in item.categories"
-              :key="idx"
-          >{{ category }}</span
+            class="bg-#2db7f5 rounded-3 text-white py-0.2em px-0.8em"
+            v-for="(category, idx) in item.categories"
+            :key="idx"
+            >{{ category }}</span
           >
           <span
-              class="bg-orange rounded-3 text-white py-0.2em px-0.8em"
-              v-for="(tag, idx) in item.tags"
-              :key="idx"
-          >{{ tag }}</span
+            class="bg-orange rounded-3 text-white py-0.2em px-0.8em"
+            v-for="(tag, idx) in item.tags"
+            :key="idx"
+            >{{ tag }}</span
           >
         </div>
       </div>
@@ -49,8 +51,8 @@
           </div>
           <div class="ml-auto flex gap-x-1 items-center">
             <span>{{
-                $dayjs(item.create_time * 1000).format("YYYY-MM-DD")
-              }}</span>
+              $dayjs(item.create_time * 1000).format("YYYY-MM-DD")
+            }}</span>
           </div>
         </div>
       </div>
@@ -59,8 +61,8 @@
 </template>
 
 <script setup lang="ts">
-import type {PropType} from "vue";
-import type {IPost} from "~/api/post";
+import type { PropType } from "vue";
+import type { IPost } from "~/api/post";
 
 const props = defineProps({
   posts: {

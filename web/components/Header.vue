@@ -13,7 +13,7 @@
       </NuxtLink>
     </div>
     <div class="bg_transparent lt-md:hidden">
-      <Menu :items="homeStore.menuList"></Menu>
+      <Menu :items="menuList"></Menu>
     </div>
     <div class="ml-auto pr-5 flex gap-x-4">
       <div
@@ -37,11 +37,22 @@
 import { ref, onMounted } from "vue";
 import { useHomeStore } from "~/store/home";
 import Menu from "~/components/Menu.vue";
+import { useMenuStore } from "~/store/menu";
+import httpRequest, { type IListData, type IResponse } from "~/api/http";
+import type { IMenu } from "~/api/category";
+import { useConfigStore } from "~/store/config";
 
 const homeStore = useHomeStore();
+const menuStore = useMenuStore();
+const configStore = useConfigStore();
 
 const isBlackMode = computed(() => homeStore.isBlackMode);
-const picture = ref<string>(homeStore.website_info.owner_picture);
+const picture = ref<string>(configStore.website_info.owner_picture);
+
+const httpRes: any = await httpRequest.get(`/menus`);
+const menuRes: IResponse<IListData<IMenu>> = httpRes.data.value;
+menuStore.setMenuList(menuRes.data?.list || []);
+const menuList = menuRes.data?.list || [];
 
 watch(isBlackMode, (newValue) => {
   localStorage.setItem("isBlackMode", newValue.toString());

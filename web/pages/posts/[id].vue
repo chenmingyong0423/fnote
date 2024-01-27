@@ -219,6 +219,7 @@ import { useHomeStore } from "~/store/home";
 import VMdPreview from "@kangc/v-md-editor/lib/preview";
 
 const homeStore = useHomeStore();
+const configStore = useConfigStore();
 const isBlackMode = computed(() => homeStore.isBlackMode);
 
 const route = useRoute();
@@ -226,7 +227,7 @@ const path: string = route.path;
 const id: string = String(route.params.id);
 const post = ref<IPostDetail>();
 const author = ref<string>("");
-const payList = ref<IPayInfo[]>(homeStore.pay_info || []);
+const payList = ref<IPayInfo[]>(configStore.pay_info || []);
 
 const link = ref("");
 
@@ -284,7 +285,7 @@ const subscribeTitleFocus = () => {
   const preview = previewRef.value;
   if (!preview) return;
   const titles = preview.querySelectorAll("h1,h2,h3,h4,h5,h6");
-  titles.forEach((title, index) => {
+  titles.forEach((title, _) => {
     const cur = title as HTMLElement;
     if (cur.offsetTop - 60 <= scrollTop) {
       const lineIdx = cur.getAttribute("data-v-md-line");
@@ -376,6 +377,7 @@ import {
   submitCommentReply,
 } from "~/api/comment";
 import type { IPayInfo } from "~/api/config";
+import { useConfigStore } from "~/store/config";
 
 const toast = useAlertStore();
 
@@ -500,19 +502,19 @@ if (post.value?.meta_description) {
 }
 
 useHead({
-  title: `${post.value?.title} - ${homeStore.seo_meta_config.title}`,
+  title: `${post.value?.title} - ${configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: description },
-    { name: "keywords", content: homeStore.seo_meta_config.keywords },
-    { name: "author", content: homeStore.seo_meta_config.author },
-    { name: "robots", content: homeStore.seo_meta_config.robots },
+    { name: "keywords", content: configStore.seo_meta_config.keywords },
+    { name: "author", content: configStore.seo_meta_config.author },
+    { name: "robots", content: configStore.seo_meta_config.robots },
   ],
   link: [
-    { rel: "icon", type: "image/x-icon", href: homeStore.website_info.icon },
+    { rel: "icon", type: "image/x-icon", href: configStore.website_info.icon },
   ],
 });
 useSeoMeta({
-  ogTitle: `${post.value?.title} - ${homeStore.seo_meta_config.og_title}`,
+  ogTitle: `${post.value?.title} - ${configStore.seo_meta_config.og_title}`,
   ogDescription: description,
   ogImage: post.value?.cover_img,
   twitterCard: "summary",

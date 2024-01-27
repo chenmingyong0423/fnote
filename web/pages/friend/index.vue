@@ -116,9 +116,10 @@ import { useAlertStore } from "~/store/toast";
 import type { IBaseResponse, IListData, IResponse } from "~/api/http";
 import { isValidEmail } from "~/utils/email";
 import { useHomeStore } from "~/store/home";
+import { useConfigStore } from "~/store/config";
 
+const configStore = useConfigStore();
 const friends = ref<IFriend[]>([]);
-
 const toast = useAlertStore();
 
 const req = ref<FriendReq>({
@@ -128,7 +129,6 @@ const req = ref<FriendReq>({
   url: "",
   description: "",
 });
-const homeStore = useHomeStore();
 const getFriendList = async () => {
   try {
     let httpRes: any = await getFriends();
@@ -203,21 +203,21 @@ const submit = async () => {
 };
 
 useHead({
-  title: `友链 - ${homeStore.seo_meta_config.title}`,
+  title: `友链 - ${configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: "友链列表" },
-    { name: "keywords", content: homeStore.seo_meta_config.keywords },
-    { name: "author", content: homeStore.seo_meta_config.author },
-    { name: "robots", content: homeStore.seo_meta_config.robots },
+    { name: "keywords", content: configStore.seo_meta_config.keywords },
+    { name: "author", content: configStore.seo_meta_config.author },
+    { name: "robots", content: configStore.seo_meta_config.robots },
   ],
   link: [
-    { rel: "icon", type: "image/x-icon", href: homeStore.website_info.icon },
+    { rel: "icon", type: "image/x-icon", href: configStore.website_info.icon },
   ],
 });
 useSeoMeta({
-  ogTitle: `友链 - ${homeStore.seo_meta_config.og_title}`,
+  ogTitle: `友链 - ${configStore.seo_meta_config.og_title}`,
   ogDescription: "友链列表",
-  ogImage: homeStore.seo_meta_config.og_image,
+  ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",
 });
 </script>

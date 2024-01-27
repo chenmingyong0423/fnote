@@ -19,12 +19,14 @@
 </template>
 
 <script lang="ts" setup>
-import { useHomeStore } from "~/store/home";
-const homeStore = useHomeStore();
-const date = new Date(homeStore.website_info.live_time * 1000);
+import { useConfigStore } from "~/store/config";
+
+const configStore = useConfigStore();
+
+const date = new Date(configStore.website_info.live_time * 1000);
 const year = date.getFullYear();
 
-const records = homeStore.website_info.records;
+const records = configStore.website_info.records;
 </script>
 
 <style scoped></style>

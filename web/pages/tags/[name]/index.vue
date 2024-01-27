@@ -28,7 +28,7 @@ import type { PageRequest } from "~/api/post";
 import type { IPost } from "~/api/post";
 import type { IResponse, IPageData } from "~/api/http";
 import type { ITagName } from "~/api/tag";
-import { useHomeStore } from "~/store/home";
+import { useConfigStore } from "~/store/config";
 
 const route = useRoute();
 const pageSize: number = Number(route.query.pageSize) || 5;
@@ -43,7 +43,6 @@ let req = ref<PageRequest>({
 } as PageRequest);
 
 const totalPosts = ref<Number>(0);
-const homeStore = useHomeStore();
 const postInfos = async () => {
   try {
     if (!req.value.tags || req.value.tags.length == 0) {
@@ -61,23 +60,23 @@ const postInfos = async () => {
   }
 };
 await postInfos();
-
+const configStore = useConfigStore();
 useHead({
-  title: `${routeParam} - ${homeStore.seo_meta_config.title}`,
+  title: `${routeParam} - ${configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: `${routeParam}文章列表` },
-    { name: "keywords", content: homeStore.seo_meta_config.keywords },
-    { name: "author", content: homeStore.seo_meta_config.author },
-    { name: "robots", content: homeStore.seo_meta_config.robots },
+    { name: "keywords", content: configStore.seo_meta_config.keywords },
+    { name: "author", content: configStore.seo_meta_config.author },
+    { name: "robots", content: configStore.seo_meta_config.robots },
   ],
   link: [
-    { rel: "icon", type: "image/x-icon", href: homeStore.website_info.icon },
+    { rel: "icon", type: "image/x-icon", href: configStore.website_info.icon },
   ],
 });
 useSeoMeta({
-  ogTitle: `${routeParam} - ${homeStore.seo_meta_config.og_title}`,
+  ogTitle: `${routeParam} - ${configStore.seo_meta_config.og_title}`,
   ogDescription: `${routeParam}文章列表`,
-  ogImage: homeStore.seo_meta_config.og_image,
+  ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",
 });
 </script>
