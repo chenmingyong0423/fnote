@@ -2,6 +2,38 @@
   <div class="flex">
     <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
       <div class="flex flex-col">
+        <div class="mb-10 flex gap-x-5">
+          <NuxtLink
+            class="p-2 cursor-pointer"
+            :class="
+              filter === 'latest'
+                ? 'custom_bottom_border_1E80FF'
+                : 'hover:custom_bottom_border_1E80FF'
+            "
+            :to="path + '?filter=latest'"
+            >最新
+          </NuxtLink>
+          <NuxtLink
+            class="p-2 cursor-pointer"
+            :class="
+              filter === 'oldest'
+                ? 'custom_bottom_border_1E80FF'
+                : 'hover:custom_bottom_border_1E80FF'
+            "
+            :to="path + '?filter=oldest'"
+            >最早
+          </NuxtLink>
+          <NuxtLink
+            class="p-2 cursor-pointer"
+            :class="
+              filter === 'likes'
+                ? 'custom_bottom_border_1E80FF'
+                : 'hover:custom_bottom_border_1E80FF'
+            "
+            :to="path + '?filter=likes'"
+            >点赞最多
+          </NuxtLink>
+        </div>
         <PostListItem :posts="posts" class="lt-md:hidden"></PostListItem>
         <PostListSquareItem
           :posts="posts"
@@ -12,6 +44,7 @@
           :total="totalPosts"
           :perPageCount="req.pageSize"
           :route="`/tags/${routeParam}/page/`"
+          :filterCond="filter"
         ></Pagination>
       </div>
     </div>
@@ -33,6 +66,7 @@ import { useConfigStore } from "~/store/config";
 const route = useRoute();
 const pageSize: number = Number(route.query.pageSize) || 5;
 const routeParam: string = String(route.params.name);
+const path = route.path;
 
 let posts = ref<IPost[]>([]);
 let req = ref<PageRequest>({
@@ -43,6 +77,27 @@ let req = ref<PageRequest>({
 } as PageRequest);
 
 const totalPosts = ref<Number>(0);
+const filter = ref<string>("latest");
+if (route.query.filter && route.query.filter !== "") {
+  console.log(route.query.filter);
+  if (route.query.filter !== "latest") {
+    filter.value = String(route.query.filter);
+    switch (filter.value) {
+      case "oldest":
+        req.value.sortField = "create_time";
+        req.value.sortOrder = "ASC";
+        break;
+      case "likes":
+        req.value.sortField = "like_count";
+        req.value.sortOrder = "DESC";
+        break;
+      default:
+        req.value.sortField = "create_time";
+        req.value.sortOrder = "DESC";
+        break;
+    }
+  }
+}
 const postInfos = async () => {
   try {
     if (!req.value.tags || req.value.tags.length == 0) {
@@ -60,6 +115,38 @@ const postInfos = async () => {
   }
 };
 await postInfos();
+
+// 创建一个计算属性来追踪 query 对象
+const routeQuery = computed(() => route.query);
+watch(
+  () => routeQuery,
+  async (newQuery, oldQuery) => {
+    if (
+      newQuery.value.filter &&
+      newQuery.value.filter !== "" &&
+      newQuery.value.filter !== filter.value
+    ) {
+      filter.value = String(newQuery.value.filter);
+      switch (filter.value) {
+        case "oldest":
+          req.value.sortField = "create_time";
+          req.value.sortOrder = "ASC";
+          break;
+        case "likes":
+          req.value.sortField = "like_count";
+          req.value.sortOrder = "DESC";
+          break;
+        default:
+          req.value.sortField = "create_time";
+          req.value.sortOrder = "DESC";
+          break;
+      }
+      await postInfos();
+    }
+  },
+  { deep: true },
+);
+
 const configStore = useConfigStore();
 useHead({
   title: `${routeParam} - ${configStore.seo_meta_config.title}`,

@@ -76,11 +76,10 @@ let req = ref<PageRequest>({
   pageNo: 1,
   pageSize: pageSize,
   sortField: "create_time",
-  sortOrder: "desc",
+  sortOrder: "DESC",
 } as PageRequest);
 const filter = ref<string>("latest");
 if (route.query.filter && route.query.filter !== "") {
-  console.log(route.query.filter);
   if (route.query.filter !== "latest") {
     filter.value = String(route.query.filter);
     switch (filter.value) {

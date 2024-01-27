@@ -2,39 +2,37 @@
   <div class="flex">
     <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
       <div class="flex flex-col">
-        <div class="flex flex-col">
-          <div class="mb-10 flex gap-x-5">
-            <NuxtLink
-              class="p-2 cursor-pointer"
-              :class="
-                filter === 'latest'
-                  ? 'custom_bottom_border_1E80FF'
-                  : 'hover:custom_bottom_border_1E80FF'
-              "
-              :to="path + generateQuery('latest')"
-              >最新
-            </NuxtLink>
-            <NuxtLink
-              class="p-2 cursor-pointer"
-              :class="
-                filter === 'oldest'
-                  ? 'custom_bottom_border_1E80FF'
-                  : 'hover:custom_bottom_border_1E80FF'
-              "
-              :to="path + generateQuery('oldest')"
-              >最早
-            </NuxtLink>
-            <NuxtLink
-              class="p-2 cursor-pointer"
-              :class="
-                filter === 'likes'
-                  ? 'custom_bottom_border_1E80FF'
-                  : 'hover:custom_bottom_border_1E80FF'
-              "
-              :to="path + generateQuery('likes')"
-              >点赞最多
-            </NuxtLink>
-          </div>
+        <div class="mb-10 flex gap-x-5">
+          <NuxtLink
+            class="p-2 cursor-pointer"
+            :class="
+              filter === 'latest'
+                ? 'custom_bottom_border_1E80FF'
+                : 'hover:custom_bottom_border_1E80FF'
+            "
+            :to="path + generateQuery('latest')"
+            >最新
+          </NuxtLink>
+          <NuxtLink
+            class="p-2 cursor-pointer"
+            :class="
+              filter === 'oldest'
+                ? 'custom_bottom_border_1E80FF'
+                : 'hover:custom_bottom_border_1E80FF'
+            "
+            :to="path + generateQuery('oldest')"
+            >最早
+          </NuxtLink>
+          <NuxtLink
+            class="p-2 cursor-pointer"
+            :class="
+              filter === 'likes'
+                ? 'custom_bottom_border_1E80FF'
+                : 'hover:custom_bottom_border_1E80FF'
+            "
+            :to="path + generateQuery('likes')"
+            >点赞最多
+          </NuxtLink>
         </div>
         <PostListItem :posts="posts" class="lt-md:hidden"></PostListItem>
         <PostListSquareItem
@@ -84,7 +82,7 @@ let req = ref<PageRequest>({
   pageNo: pageNo,
   pageSize: pageSize,
   sortField: "create_time",
-  sortOrder: "desc",
+  sortOrder: "DESC",
 } as PageRequest);
 const totalPosts = ref<Number>(0);
 const title = ref<string>("");
@@ -92,7 +90,7 @@ const title = ref<string>("");
 const homeStore = useHomeStore();
 const configStore = useConfigStore();
 const filter = ref<string>("latest");
-if (route.query.filter !== "") {
+if (route.query.filter && route.query.filter !== "") {
   if (route.query.filter !== "latest") {
     filter.value = String(route.query.filter);
     switch (filter.value) {
