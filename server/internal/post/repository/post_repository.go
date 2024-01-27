@@ -249,7 +249,11 @@ func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition
 	findOptions := options.Find()
 	findOptions.SetSkip(postsQueryCondition.Skip).SetLimit(postsQueryCondition.Size)
 	if postsQueryCondition.Sorting.Field != nil && postsQueryCondition.Sorting.Order != nil {
-		findOptions.SetSort(bsonx.M(*postsQueryCondition.Sorting.Field, orderConvertToInt(*postsQueryCondition.Sorting.Order)))
+		sortBuilder := bsonx.NewD().Add(*postsQueryCondition.Sorting.Field, orderConvertToInt(*postsQueryCondition.Sorting.Order))
+		if *postsQueryCondition.Sorting.Field != "create_time" {
+			sortBuilder.Add("create_time", -1)
+		}
+		findOptions.SetSort(sortBuilder.Build())
 	} else {
 		findOptions.SetSort(bsonx.M("create_time", -1))
 	}

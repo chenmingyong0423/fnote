@@ -16,7 +16,11 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
@@ -81,7 +85,8 @@ func (s *TagService) DeleteTag(ctx context.Context, id string) error {
 		// 分类数量 -1
 		gErr := s.countStatsService.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount)
 		if gErr != nil {
-
+			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
 	return nil
@@ -112,7 +117,8 @@ func (s *TagService) AdminCreateTag(ctx context.Context, tag domain.Tag) error {
 		// 分类数量 +1
 		gErr := s.countStatsService.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount)
 		if gErr != nil {
-
+			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
 	return nil
