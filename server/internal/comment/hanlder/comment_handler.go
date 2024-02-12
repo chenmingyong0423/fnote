@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"strings"
 
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+
 	csService "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
@@ -77,16 +79,16 @@ func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group.POST("/:commentId/replies", api.WrapWithBody(h.AddCommentReply))
 
 	adminGroup := engine.Group("/admin/comments")
-	adminGroup.GET("", api.WrapWithBody(h.AdminGetComments))
-	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteComment))
-	adminGroup.PUT("/:id/status", api.WrapWithBody(h.AdminUpdateCommentStatus))
-	adminGroup.PUT("/:id/approval", api.Wrap(h.AdminApproveComment))
-	adminGroup.PUT("/:id/disapproval", api.WrapWithBody(h.AdminDisapproveComment))
+	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetComments))
+	adminGroup.DELETE("/:id", apiwrap.Wrap(h.AdminDeleteComment))
+	adminGroup.PUT("/:id/status", apiwrap.WrapWithBody(h.AdminUpdateCommentStatus))
+	adminGroup.PUT("/:id/approval", apiwrap.Wrap(h.AdminApproveComment))
+	adminGroup.PUT("/:id/disapproval", apiwrap.WrapWithBody(h.AdminDisapproveComment))
 
-	adminGroup.DELETE("/:id/replies/:rid", api.Wrap(h.AdminDeleteCommentReply))
-	adminGroup.PUT("/:id/replies/:rid/status", api.WrapWithBody(h.AdminUpdateReplyStatus))
-	adminGroup.PUT("/:id/replies/:rid/approval", api.Wrap(h.AdminApproveCommentReply))
-	adminGroup.PUT("/:id/replies/:rid/disapproval", api.WrapWithBody(h.AdminDisapproveCommentReply))
+	adminGroup.DELETE("/:id/replies/:rid", apiwrap.Wrap(h.AdminDeleteCommentReply))
+	adminGroup.PUT("/:id/replies/:rid/status", apiwrap.WrapWithBody(h.AdminUpdateReplyStatus))
+	adminGroup.PUT("/:id/replies/:rid/approval", apiwrap.Wrap(h.AdminApproveCommentReply))
+	adminGroup.PUT("/:id/replies/:rid/disapproval", apiwrap.WrapWithBody(h.AdminDisapproveCommentReply))
 }
 
 func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo api.IdVO, err error) {
@@ -289,7 +291,7 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (listVO api.ListV
 	return
 }
 
-func (h *CommentHandler) AdminGetComments(ctx *gin.Context, req request.PageRequest) (pageVO api.PageVO[vo.AdminCommentVO], err error) {
+func (h *CommentHandler) AdminGetComments(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[apiwrap.PageVO[vo.AdminCommentVO]], error) {
 	friends, total, err := h.serv.AdminGetComments(ctx, dto.PageDTO{
 		PageNo:   req.PageNo,
 		PageSize: req.PageSize,
@@ -298,13 +300,14 @@ func (h *CommentHandler) AdminGetComments(ctx *gin.Context, req request.PageRequ
 		Keyword:  req.Keyword,
 	})
 	if err != nil {
-		return
+		return nil, err
 	}
+	pageVO := apiwrap.PageVO[vo.AdminCommentVO]{}
 	pageVO.PageNo = req.PageNo
 	pageVO.PageSize = req.PageSize
 	pageVO.List = h.toAdminCommentVO(friends)
 	pageVO.SetTotalCountAndCalculateTotalPages(total)
-	return
+	return apiwrap.SuccessResponseWithData(pageVO), nil
 }
 
 func (h *CommentHandler) toAdminCommentVO(friends []domain.AdminComment) []vo.AdminCommentVO {
@@ -324,7 +327,7 @@ func (h *CommentHandler) toAdminCommentVO(friends []domain.AdminComment) []vo.Ad
 	return result
 }
 
-func (h *CommentHandler) AdminApproveComment(ctx *gin.Context) (any, error) {
+func (h *CommentHandler) AdminApproveComment(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	commentId := ctx.Param("id")
 	comment, err := h.serv.FindCommentById(ctx, commentId)
 	if err != nil {
@@ -334,7 +337,7 @@ func (h *CommentHandler) AdminApproveComment(ctx *gin.Context) (any, error) {
 		return nil, err
 	}
 	if comment.IsApproved() {
-		return "", api.NewErrorResponseBody(http.StatusBadRequest, "Comment has been approved.")
+		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Comment has been approved.")
 	}
 	err = h.serv.AdminApproveComment(ctx, commentId)
 	if err != nil {
@@ -348,10 +351,10 @@ func (h *CommentHandler) AdminApproveComment(ctx *gin.Context) (any, error) {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *CommentHandler) AdminDisapproveComment(ctx *gin.Context, req request.DisapproveCommentRequest) (any, error) {
+func (h *CommentHandler) AdminDisapproveComment(ctx *gin.Context, req request.DisapproveCommentRequest) (*apiwrap.ResponseBody[any], error) {
 	commentId := ctx.Param("id")
 	comment, err := h.serv.FindCommentById(ctx, commentId)
 	if err != nil {
@@ -361,7 +364,7 @@ func (h *CommentHandler) AdminDisapproveComment(ctx *gin.Context, req request.Di
 		return nil, err
 	}
 	if comment.IsDisapproved() {
-		return "", api.NewErrorResponseBody(http.StatusBadRequest, "Comment has been disapproved.")
+		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Comment has been disapproved.")
 	}
 
 	err = h.serv.AdminDisapproveComment(ctx, commentId)
@@ -376,10 +379,10 @@ func (h *CommentHandler) AdminDisapproveComment(ctx *gin.Context, req request.Di
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *CommentHandler) AdminApproveCommentReply(ctx *gin.Context) (any, error) {
+func (h *CommentHandler) AdminApproveCommentReply(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	commentId := ctx.Param("id")
 	replyId := ctx.Param("rid")
 	commentReplyWithPostInfo, err := h.serv.FindReplyByCIdAndRId(ctx, commentId, replyId)
@@ -390,7 +393,7 @@ func (h *CommentHandler) AdminApproveCommentReply(ctx *gin.Context) (any, error)
 		return nil, err
 	}
 	if commentReplyWithPostInfo.IsApproved() {
-		return "", api.NewErrorResponseBody(http.StatusBadRequest, "Comment reply has been approved.")
+		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Comment reply has been approved.")
 	}
 	err = h.serv.AdminApproveCommentReply(ctx, commentId, replyId)
 	if err != nil {
@@ -409,10 +412,10 @@ func (h *CommentHandler) AdminApproveCommentReply(ctx *gin.Context) (any, error)
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *CommentHandler) AdminDisapproveCommentReply(ctx *gin.Context, req request.DisapproveCommentRequest) (any, error) {
+func (h *CommentHandler) AdminDisapproveCommentReply(ctx *gin.Context, req request.DisapproveCommentRequest) (*apiwrap.ResponseBody[any], error) {
 	commentId := ctx.Param("id")
 	replyId := ctx.Param("rid")
 	commentReplyWithPostInfo, err := h.serv.FindReplyByCIdAndRId(ctx, commentId, replyId)
@@ -423,7 +426,7 @@ func (h *CommentHandler) AdminDisapproveCommentReply(ctx *gin.Context, req reque
 		return nil, err
 	}
 	if commentReplyWithPostInfo.IsDisapproved() {
-		return "", api.NewErrorResponseBody(http.StatusBadRequest, "Comment reply has been disapproved.")
+		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Comment reply has been disapproved.")
 	}
 	err = h.serv.AdminDisapproveCommentReply(ctx, commentId, replyId)
 	if err != nil {
@@ -437,10 +440,10 @@ func (h *CommentHandler) AdminDisapproveCommentReply(ctx *gin.Context, req reque
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *CommentHandler) AdminDeleteComment(ctx *gin.Context) (any, error) {
+func (h *CommentHandler) AdminDeleteComment(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	commentId := ctx.Param("id")
 	commentWithReplies, err := h.serv.FindCommentWithRepliesById(ctx, commentId)
 	if err != nil {
@@ -467,10 +470,10 @@ func (h *CommentHandler) AdminDeleteComment(ctx *gin.Context) (any, error) {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *CommentHandler) AdminDeleteCommentReply(ctx *gin.Context) (any, error) {
+func (h *CommentHandler) AdminDeleteCommentReply(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	commentId := ctx.Param("id")
 	replyId := ctx.Param("rid")
 	commentReplyWithPostInfo, err := h.serv.FindReplyByCIdAndRId(ctx, commentId, replyId)
@@ -497,24 +500,24 @@ func (h *CommentHandler) AdminDeleteCommentReply(ctx *gin.Context) (any, error) 
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *CommentHandler) AdminUpdateCommentStatus(ctx *gin.Context, req request.CommentStatusRequest) (any, error) {
+func (h *CommentHandler) AdminUpdateCommentStatus(ctx *gin.Context, req request.CommentStatusRequest) (*apiwrap.ResponseBody[any], error) {
 	commentId := ctx.Param("id")
 	err := h.serv.UpdateCommentStatus(ctx, commentId, domain.CommentStatus(req.Status))
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *CommentHandler) AdminUpdateReplyStatus(ctx *gin.Context, req request.CommentStatusRequest) (any, error) {
+func (h *CommentHandler) AdminUpdateReplyStatus(ctx *gin.Context, req request.CommentStatusRequest) (*apiwrap.ResponseBody[any], error) {
 	commentId := ctx.Param("id")
 	replyId := ctx.Param("rid")
 	err := h.serv.UpdateCommentReplyStatus(ctx, commentId, replyId, domain.CommentStatus(req.Status))
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }

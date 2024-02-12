@@ -105,3 +105,14 @@ type EmailConfigVO struct {
 type FrontPostCountConfigVO struct {
 	Count int64 `json:"count"`
 }
+
+type LoginVO struct {
+	AdminInfo  AdminInfoVO `json:"admin_info"`
+	Expiration int64       `json:"expiration"`
+	Token      string      `json:"token"`
+}
+
+type AdminInfoVO struct {
+	Username string `json:"username"`
+	Picture  string `json:"picture"`
+}

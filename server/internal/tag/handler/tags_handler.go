@@ -17,6 +17,8 @@ package handler
 import (
 	"net/http"
 
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
@@ -54,11 +56,11 @@ func (h *TagHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group.GET("/route/:route", api.Wrap(h.GetTagByRoute))
 
 	adminGroup := engine.Group("/admin/tags")
-	adminGroup.GET("", api.WrapWithBody(h.AdminGetTags))
-	adminGroup.GET("/select", api.Wrap(h.AdminGetSelectTags))
-	adminGroup.POST("", api.WrapWithBody(h.AdminCreateTag))
-	adminGroup.PUT("/enabled/:id", api.WrapWithBody(h.AdminModifyTagEnabled))
-	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteTag))
+	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetTags))
+	adminGroup.GET("/select", apiwrap.Wrap(h.AdminGetSelectTags))
+	adminGroup.POST("", apiwrap.WrapWithBody(h.AdminCreateTag))
+	adminGroup.PUT("/:id/enabled", apiwrap.WrapWithBody(h.AdminModifyTagEnabled))
+	adminGroup.DELETE("/:id", apiwrap.Wrap(h.AdminDeleteTag))
 }
 
 func (h *TagHandler) GetTags(ctx *gin.Context) (listVO api.ListVO[TagsWithCountVO], err error) {
@@ -86,16 +88,17 @@ func (h *TagHandler) GetTagByRoute(ctx *gin.Context) (TagNameVO, error) {
 	return TagNameVO{Name: tag.Name}, nil
 }
 
-func (h *TagHandler) AdminGetTags(ctx *gin.Context, req request.PageRequest) (pageVO vo.PageVO[vo.Tag], err error) {
+func (h *TagHandler) AdminGetTags(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.Tag]], error) {
 	tags, total, err := h.serv.AdminGetTags(ctx, dto.PageDTO{PageNo: req.PageNo, PageSize: req.PageSize, Field: req.Field, Order: req.Order, Keyword: req.Keyword})
 	if err != nil {
-		return
+		return nil, err
 	}
+	pageVO := vo.PageVO[vo.Tag]{}
 	pageVO.PageNo = req.PageNo
 	pageVO.PageSize = req.PageSize
 	pageVO.List = h.tagsToVO(tags)
 	pageVO.SetTotalCountAndCalculateTotalPages(total)
-	return
+	return apiwrap.SuccessResponseWithData(pageVO), nil
 }
 
 func (h *TagHandler) tagsToVO(tags []domain.Tag) []vo.Tag {
@@ -114,7 +117,7 @@ func (h *TagHandler) tagsToVO(tags []domain.Tag) []vo.Tag {
 	return result
 }
 
-func (h *TagHandler) AdminCreateTag(ctx *gin.Context, req request.CreateTagRequest) (any, error) {
+func (h *TagHandler) AdminCreateTag(ctx *gin.Context, req request.CreateTagRequest) (*apiwrap.ResponseBody[any], error) {
 	err := h.serv.AdminCreateTag(ctx, domain.Tag{
 		Name:    req.Name,
 		Route:   req.Route,
@@ -122,30 +125,30 @@ func (h *TagHandler) AdminCreateTag(ctx *gin.Context, req request.CreateTagReque
 	})
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
-			return nil, api.NewErrorResponseBody(http.StatusConflict, "tag name or route already exists")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusConflict, "tag name or route already exists")
 		}
 		return nil, err
 	}
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *TagHandler) AdminModifyTagEnabled(ctx *gin.Context, req request.TagEnabledRequest) (any, error) {
+func (h *TagHandler) AdminModifyTagEnabled(ctx *gin.Context, req request.TagEnabledRequest) (*apiwrap.ResponseBody[any], error) {
 	id := ctx.Param("id")
-	return nil, h.serv.ModifyTagEnabled(ctx, id, gkit.GetValueOrDefault(req.Enabled))
+	return apiwrap.SuccessResponse(), h.serv.ModifyTagEnabled(ctx, id, gkit.GetValueOrDefault(req.Enabled))
 }
 
-func (h *TagHandler) AdminDeleteTag(ctx *gin.Context) (any, error) {
+func (h *TagHandler) AdminDeleteTag(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	id := ctx.Param("id")
-	return nil, h.serv.DeleteTag(ctx, id)
+	return apiwrap.SuccessResponse(), h.serv.DeleteTag(ctx, id)
 }
 
-func (h *TagHandler) AdminGetSelectTags(ctx *gin.Context) (api.ListVO[vo.SelectTag], error) {
+func (h *TagHandler) AdminGetSelectTags(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[vo.SelectTag]], error) {
 	tags, err := h.serv.GetSelectTags(ctx)
 	if err != nil {
-		return api.ListVO[vo.SelectTag]{}, err
+		return nil, err
 	}
 	list := h.tagsToSelectVO(tags)
-	return api.ListVO[vo.SelectTag]{List: list}, nil
+	return apiwrap.SuccessResponseWithData(apiwrap.ListVO[vo.SelectTag]{List: list}), nil
 }
 
 func (h *TagHandler) tagsToSelectVO(tags []domain.Tag) []vo.SelectTag {

@@ -52,6 +52,7 @@ type IWebsiteConfigService interface {
 	AddSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
 	UpdateSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
 	DeleteSocialInfo(ctx context.Context, id []byte) error
+	GetAdminConfig(ctx context.Context) (*domain.AdminConfig, error)
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -64,6 +65,15 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) GetAdminConfig(ctx context.Context) (*domain.AdminConfig, error) {
+	cfg := &domain.AdminConfig{}
+	err := s.getConfigAndConvertTo(ctx, "admin", cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func (s *WebsiteConfigService) DeleteSocialInfo(ctx context.Context, id []byte) error {

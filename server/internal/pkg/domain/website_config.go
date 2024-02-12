@@ -111,3 +111,13 @@ type SeoMetaConfig struct {
 	Author                string `bson:"author"`
 	Robots                string `bson:"robots"`
 }
+
+type AdminConfig struct {
+	Username string `bson:"username"`
+	Password string `bson:"password"`
+}
+
+type TokenInfo struct {
+	Expiration int64
+	Token      string
+}

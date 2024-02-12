@@ -113,6 +113,7 @@ func InitMiddlewares(writer io.Writer) []gin.HandlerFunc {
 			AllowHeaders: viper.GetStringSlice("gin.allowed_headers"),
 			MaxAge:       12 * time.Hour,
 		}),
+		JwtParseMiddleware(),
 	}
 }
 

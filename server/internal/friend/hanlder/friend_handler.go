@@ -21,6 +21,8 @@ import (
 	"regexp"
 	"strings"
 
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
@@ -57,11 +59,11 @@ func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group.POST("", api.WrapWithBody(h.ApplyForFriend))
 
 	adminGroup := engine.Group("/admin/friends")
-	adminGroup.GET("", api.WrapWithBody(h.AdminGetFriends))
-	adminGroup.PUT("/:id", api.WrapWithBody(h.AdminUpdateFriend))
-	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteFriend))
-	adminGroup.PUT("/:id/approval", api.WrapWithBody(h.AdminApproveFriend))
-	adminGroup.PUT("/:id/rejection", api.WrapWithBody(h.AdminRejectFriend))
+	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetFriends))
+	adminGroup.PUT("/:id", apiwrap.WrapWithBody(h.AdminUpdateFriend))
+	adminGroup.DELETE("/:id", apiwrap.Wrap(h.AdminDeleteFriend))
+	adminGroup.PUT("/:id/approval", apiwrap.WrapWithBody(h.AdminApproveFriend))
+	adminGroup.PUT("/:id/rejection", apiwrap.WrapWithBody(h.AdminRejectFriend))
 }
 
 func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[vo.FriendVO], err error) {
@@ -138,7 +140,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any
 	return nil, nil
 }
 
-func (h *FriendHandler) AdminGetFriends(ctx *gin.Context, req request.PageRequest) (pageVO vo.PageVO[vo.AdminFriendVO], err error) {
+func (h *FriendHandler) AdminGetFriends(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.AdminFriendVO]], error) {
 	friends, total, err := h.serv.AdminGetFriends(ctx, dto.PageDTO{
 		PageNo:   req.PageNo,
 		PageSize: req.PageSize,
@@ -147,13 +149,14 @@ func (h *FriendHandler) AdminGetFriends(ctx *gin.Context, req request.PageReques
 		Keyword:  req.Keyword,
 	})
 	if err != nil {
-		return
+		return nil, err
 	}
+	pageVO := vo.PageVO[vo.AdminFriendVO]{}
 	pageVO.PageNo = req.PageNo
 	pageVO.PageSize = req.PageSize
 	pageVO.List = h.friendToAdminVO(friends)
 	pageVO.SetTotalCountAndCalculateTotalPages(total)
-	return
+	return apiwrap.SuccessResponseWithData(pageVO), nil
 }
 
 func (h *FriendHandler) friendToAdminVO(friends []domain.Friend) []vo.AdminFriendVO {
@@ -172,8 +175,8 @@ func (h *FriendHandler) friendToAdminVO(friends []domain.Friend) []vo.AdminFrien
 	return result
 }
 
-func (h *FriendHandler) AdminUpdateFriend(ctx *gin.Context, req request.FriendReq) (any, error) {
-	return nil, h.serv.AdminUpdateFriend(ctx, domain.Friend{
+func (h *FriendHandler) AdminUpdateFriend(ctx *gin.Context, req request.FriendReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.AdminUpdateFriend(ctx, domain.Friend{
 		Id:          ctx.Param("id"),
 		Name:        req.Name,
 		Logo:        req.Logo,
@@ -182,12 +185,12 @@ func (h *FriendHandler) AdminUpdateFriend(ctx *gin.Context, req request.FriendRe
 	})
 }
 
-func (h *FriendHandler) AdminDeleteFriend(ctx *gin.Context) (any, error) {
+func (h *FriendHandler) AdminDeleteFriend(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	id := ctx.Param("id")
-	return nil, h.serv.AdminDeleteFriend(ctx, id)
+	return apiwrap.SuccessResponse(), h.serv.AdminDeleteFriend(ctx, id)
 }
 
-func (h *FriendHandler) AdminApproveFriend(ctx *gin.Context, req request.FriendApproveReq) (any, error) {
+func (h *FriendHandler) AdminApproveFriend(ctx *gin.Context, req request.FriendApproveReq) (*apiwrap.ResponseBody[any], error) {
 	email, err := h.serv.AdminApproveFriend(ctx, ctx.Param("id"))
 	if err != nil {
 		return nil, err
@@ -200,10 +203,10 @@ func (h *FriendHandler) AdminApproveFriend(ctx *gin.Context, req request.FriendA
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *FriendHandler) AdminRejectFriend(ctx *gin.Context, req request.FriendRejectReq) (any, error) {
+func (h *FriendHandler) AdminRejectFriend(ctx *gin.Context, req request.FriendRejectReq) (*apiwrap.ResponseBody[any], error) {
 	email, err := h.serv.AdminRejectFriend(ctx, ctx.Param("id"))
 	if err != nil {
 		return nil, err
@@ -216,5 +219,5 @@ func (h *FriendHandler) AdminRejectFriend(ctx *gin.Context, req request.FriendRe
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }

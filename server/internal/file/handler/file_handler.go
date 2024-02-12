@@ -18,12 +18,13 @@ import (
 	"io"
 	"path/filepath"
 
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 
 	"github.com/chenmingyong0423/fnote/server/internal/file/service"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,23 +40,23 @@ type FileHandler struct {
 
 func (h *FileHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin/files")
-	adminGroup.POST("/upload", api.Wrap(h.UploadFile))
+	adminGroup.POST("/upload", apiwrap.Wrap(h.UploadFile))
 }
 
-func (h *FileHandler) UploadFile(ctx *gin.Context) (VO vo.FileVO, err error) {
+func (h *FileHandler) UploadFile(ctx *gin.Context) (*apiwrap.ResponseBody[vo.FileVO], error) {
 	fileName := ctx.PostForm("file_name")
 	file, err := ctx.FormFile("file")
 	if err != nil {
-		return
+		return nil, err
 	}
 	openedFile, err := file.Open()
 	if err != nil {
-		return
+		return nil, err
 	}
 	defer openedFile.Close()
 	content, err := io.ReadAll(openedFile)
 	if err != nil {
-		return
+		return nil, err
 	}
 	fileDto := dto.FileDTO{
 		FileName:       file.Filename,
@@ -67,12 +68,12 @@ func (h *FileHandler) UploadFile(ctx *gin.Context) (VO vo.FileVO, err error) {
 	}
 	fileInfo, err := h.serv.Upload(ctx, fileDto)
 	if err != nil {
-		return
+		return nil, err
 
 	}
-	return vo.FileVO{
+	return apiwrap.SuccessResponseWithData(vo.FileVO{
 		FileId:   fileInfo.FileId,
 		FileName: fileInfo.FileName,
 		Url:      fileInfo.Url,
-	}, nil
+	}), nil
 }
