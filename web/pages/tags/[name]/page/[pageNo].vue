@@ -124,7 +124,7 @@ const postInfos = async () => {
   }
 };
 
-await postInfos();
+postInfos();
 
 const configStore = useConfigStore();
 useHead({
