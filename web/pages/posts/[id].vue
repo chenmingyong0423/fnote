@@ -502,7 +502,7 @@ if (post.value?.meta_description) {
 }
 
 useHead({
-  title: `${post.value?.title} - ${configStore.seo_meta_config.title}`,
+  title: `${post.value?.title}-${configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: description },
     { name: "keywords", content: configStore.seo_meta_config.keywords },
