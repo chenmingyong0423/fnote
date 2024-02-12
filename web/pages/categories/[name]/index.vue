@@ -152,7 +152,7 @@ const postInfos = async () => {
     console.log(error);
   }
 };
-await postInfos();
+postInfos();
 
 useHead({
   title: `${title.value} - ${configStore.seo_meta_config.title}`,
