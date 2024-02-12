@@ -228,7 +228,7 @@ const getPostDetail = async () => {
     console.log(error);
   }
 };
-await getPostDetail();
+getPostDetail();
 const link = ref("");
 
 const handleCopyCodeSuccess = () => {

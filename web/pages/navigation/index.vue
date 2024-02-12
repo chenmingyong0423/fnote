@@ -86,8 +86,8 @@ const tagList = async () => {
   }
 };
 
-await categoryAndTags();
-await tagList();
+categoryAndTags();
+tagList();
 ct.value = ct.value.substring(0, ct.value.length - 1);
 
 const configStore = useConfigStore();

@@ -241,7 +241,7 @@ const getPostDetail = async () => {
     console.log(error);
   }
 };
-await getPostDetail();
+getPostDetail();
 
 const handleCopyCodeSuccess = () => {
   console.log("成功");

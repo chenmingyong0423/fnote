@@ -38,7 +38,7 @@ const postInfos = async () => {
     console.log(error);
   }
 };
-await postInfos();
+postInfos();
 const configStore = useConfigStore();
 useHead({
   title: configStore.seo_meta_config.title,
