@@ -1,105 +1,84 @@
 <template>
   <div
-      class="bg-#fff  backdrop-blur-20 fixed top-0 dark_text_gray w-full z-99 flex justify-between items-center p-1 dark_bg_gray duration-200 ease-linear">
+    ref="header"
+    class="bg-#fff backdrop-blur-20 fixed top-0 dark:text-dtc w-full z-99 flex justify-between items-center p-1 dark_bg_gray duration-200 ease-linear max-h-[70px] select-none"
+  >
     <div>
-      <a-avatar :size="50" :src="picture"
-                class="mx5 cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"></a-avatar>
+      <NuxtLink to="/">
+        <img
+          :src="picture"
+          alt=""
+          class="w-15 h-15 border-rounded-50% mx5 cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0 select-none"
+        />
+      </NuxtLink>
     </div>
-    <div class="bg-transparent">
-      <a-menu v-model:selectedKeys="current" mode="horizontal" @click="menuItemChanged" :items="items"
-              class="dark_text_gray bg-transparent"/>
+    <div class="bg_transparent lt-md:hidden">
+      <Menu :items="menuList"></Menu>
     </div>
-    <div class="ml-auto pr-5">
-      <a-space>
-        暗黑模式
-        <a-switch v-model:checked="homeStore.isBlackMode" checked-children="开" un-checked-children="关"/>
-        <div
-            class=" bg-#1890ff rounded-50% py2 px2 dark_bg_black cursor-pointer hover:bg-#4EA6F9 active:bg-#C7C7C8">
-          <div class="i-grommet-icons:search text-5 c-#fff "/>
-        </div>
-        <div
-            class="i-grommet-icons:github text-10 dark_text_white cursor-pointer hover:bg-#999 active:bg-#e5e5e5 lt-lg:display-none"/>
-      </a-space>
+    <div class="ml-auto pr-5 flex gap-x-4">
+      <div
+        class="i-ph-sun-dim-duotone dark:i-ph-moon-stars-fill cursor-pointer text-10 text-#86909c dark:text-dtc dark:hover:text-white"
+        @click="homeStore.isBlackMode = !homeStore.isBlackMode"
+      ></div>
+      <NuxtLink
+        class="i-ph-list-magnifying-glass-duotone cursor-pointer dark:text-dtc text-10 text-#86909c dark:hover:text-white"
+        to="/search?keyword="
+      >
+      </NuxtLink>
+      <div
+        class="i-ph:list text-10 text-#86909c dark:text-dtc cursor-pointer dark:hover:text-white active:bg-#e5e5e5 md:hidden"
+        @click="homeStore.showSmallScreenMenu = true"
+      ></div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {h, ref, onMounted} from 'vue';
-import {FileMarkdownOutlined, HomeOutlined, TeamOutlined, UserOutlined, FileWordOutlined} from "@ant-design/icons-vue";
-import type {MenuProps, ItemType} from "ant-design-vue";
-import {getMenus} from "~/server/api/category"
-import type {IMenu} from "~/server/api/category"
-import type {IResponse, IListData} from "~/server/api/http";
-import {useHomeStore} from '~/store/home';
+import { ref, onMounted } from "vue";
+import { useHomeStore } from "~/store/home";
+import Menu from "~/components/Menu.vue";
+import { useMenuStore } from "~/store/menu";
+import httpRequest, { type IListData, type IResponse } from "~/api/http";
+import type { IMenu } from "~/api/category";
+import { useConfigStore } from "~/store/config";
 
-const route = useRoute()
-const router = useRouter()
+const homeStore = useHomeStore();
+const menuStore = useMenuStore();
+const configStore = useConfigStore();
 
-const current = ref<string[]>([route.path])
-const items = ref<MenuProps['items']>([]);
-const homeStore = useHomeStore()
+const isBlackMode = computed(() => homeStore.isBlackMode);
+const picture = ref<string>(configStore.website_info.owner_picture);
 
-const isBlackMode = computed(() => homeStore.isBlackMode)
-const picture = ref<string>(homeStore.master_info.picture)
-const menus = async () => {
-  try {
-    let postRes: any = await getMenus()
-    let res: IResponse<IListData<IMenu>> = postRes.data.value
-    homeStore.menuList = res.data?.list || []
-  } catch (error) {
-    console.log(error);
-  }
-};
-menus()
-
-const menuItemChanged = (item: ItemType) => {
-  router.push(item?.key as string)
-}
-
-onMounted(() => {
-  items.value?.push({
-        key: '/index',
-        icon: () => h(HomeOutlined),
-        label: '首页',
-        title: '首页',
-      },
-      {
-        key: '/list',
-        icon: () => h(FileMarkdownOutlined),
-        label: '文章列表',
-        title: '文章列表',
-      },
-      {
-        key: '/friend',
-        icon: () => h(TeamOutlined),
-        label: '友链',
-        title: '友链',
-      },
-      {
-        key: '/about-me',
-        icon: () => h(UserOutlined),
-        label: '关于我',
-        title: '关于我',
-      }
-  )
-  let i = ref<number>(2)
-  homeStore.menuList.forEach((item: IMenu) => {
-    items.value?.splice(i.value, 0, {
-      key: item.route,
-      icon: () => h(FileWordOutlined),
-      label: item.name,
-      title: item.name,
-    })
-    i.value++
-  })
-})
+const httpRes: any = await httpRequest.get(`/menus`);
+const menuRes: IResponse<IListData<IMenu>> = httpRes.data.value;
+menuStore.setMenuList(menuRes.data?.list || []);
+const menuList = menuRes.data?.list || [];
 
 watch(isBlackMode, (newValue) => {
-  localStorage.setItem("isBlackMode", newValue.toString())
-  if (newValue)
-    document.querySelector('html')!.classList.add("dark");
-  else
-    document.querySelector('html')!.classList.remove("dark");
-})
+  localStorage.setItem("isBlackMode", newValue.toString());
+  if (newValue) {
+    document.querySelector("html")!.classList.add("dark");
+  } else {
+    document.querySelector("html")!.classList.remove("dark");
+  }
+});
+
+const header = ref();
+let scrollCount = ref(0);
+const headerScroll = () => {
+  if (document.documentElement.scrollTop > scrollCount.value) {
+    header.value.setAttribute("style", `top:-${header.value.clientHeight}px`);
+  } else {
+    header.value.setAttribute("style", "top:0px");
+  }
+  scrollCount.value = document.documentElement.scrollTop;
+};
+onMounted(() => {
+  window.addEventListener("scroll", headerScroll);
+});
+onBeforeUnmount(() => {
+  window.removeEventListener("scroll", headerScroll);
+});
 </script>
+
+<style scoped></style>
