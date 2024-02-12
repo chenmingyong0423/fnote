@@ -84,3 +84,8 @@ type SocialInfoReq struct {
 	CssClass    string `json:"css_class"`
 	IsLink      bool   `json:"is_link"`
 }
+
+type LoginRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}

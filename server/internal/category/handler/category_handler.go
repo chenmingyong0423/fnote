@@ -17,6 +17,8 @@ package handler
 import (
 	"net/http"
 
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+
 	"github.com/chenmingyong0423/gkit"
 
 	"github.com/chenmingyong0423/fnote/server/internal/category/service"
@@ -62,13 +64,13 @@ func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 	engine.GET("/menus", api.Wrap(h.GetMenus))
 
 	adminGroup := engine.Group("/admin/categories")
-	adminGroup.GET("", api.WrapWithBody(h.AdminGetCategories))
-	adminGroup.GET("/select", api.Wrap(h.AdminGetSelectCategories))
-	adminGroup.POST("", api.WrapWithBody(h.AdminCreateCategory))
-	adminGroup.PUT("/enabled/:id", api.WrapWithBody(h.AdminModifyCategoryEnabled))
-	adminGroup.PUT("/:id", api.WrapWithBody(h.AdminModifyCategory))
-	adminGroup.DELETE("/:id", api.Wrap(h.AdminDeleteCategory))
-	adminGroup.PUT("/navigation/:id", api.WrapWithBody(h.AdminModifyCategoryNavigation))
+	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetCategories))
+	adminGroup.GET("/select", apiwrap.Wrap(h.AdminGetSelectCategories))
+	adminGroup.POST("", apiwrap.WrapWithBody(h.AdminCreateCategory))
+	adminGroup.PUT("/:id/enabled", apiwrap.WrapWithBody(h.AdminModifyCategoryEnabled))
+	adminGroup.PUT("/:id", apiwrap.WrapWithBody(h.AdminModifyCategory))
+	adminGroup.DELETE("/:id", apiwrap.Wrap(h.AdminDeleteCategory))
+	adminGroup.PUT("/:id/navigation", apiwrap.WrapWithBody(h.AdminModifyCategoryNavigation))
 }
 
 func (h *CategoryHandler) GetCategories(ctx *gin.Context) (listVO api.ListVO[CategoryWithCountVO], err error) {
@@ -111,16 +113,17 @@ func (h *CategoryHandler) GetCategoryByRoute(ctx *gin.Context) (CategoryNameVO, 
 	return CategoryNameVO{Name: category.Name}, nil
 }
 
-func (h *CategoryHandler) AdminGetCategories(ctx *gin.Context, req request.PageRequest) (pageVO vo.PageVO[vo.Category], err error) {
+func (h *CategoryHandler) AdminGetCategories(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.Category]], error) {
 	categories, total, err := h.serv.AdminGetCategories(ctx, dto.PageDTO{PageNo: req.PageNo, PageSize: req.PageSize, Field: req.Field, Order: req.Order, Keyword: req.Keyword})
 	if err != nil {
-		return
+		return nil, err
 	}
+	pageVO := vo.PageVO[vo.Category]{}
 	pageVO.PageNo = req.PageNo
 	pageVO.PageSize = req.PageSize
 	pageVO.List = h.categoriesToVO(categories)
 	pageVO.SetTotalCountAndCalculateTotalPages(total)
-	return
+	return apiwrap.SuccessResponseWithData(pageVO), nil
 }
 
 func (h *CategoryHandler) categoriesToVO(categories []domain.Category) []vo.Category {
@@ -141,7 +144,7 @@ func (h *CategoryHandler) categoriesToVO(categories []domain.Category) []vo.Cate
 	return categoryVOs
 }
 
-func (h *CategoryHandler) AdminCreateCategory(ctx *gin.Context, req request.CreateCategoryRequest) (any, error) {
+func (h *CategoryHandler) AdminCreateCategory(ctx *gin.Context, req request.CreateCategoryRequest) (*apiwrap.ResponseBody[any], error) {
 	err := h.serv.AdminCreateCategory(ctx, domain.Category{
 		Name:        req.Name,
 		Route:       req.Route,
@@ -151,40 +154,40 @@ func (h *CategoryHandler) AdminCreateCategory(ctx *gin.Context, req request.Crea
 	})
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
-			return nil, api.NewErrorResponseBody(http.StatusConflict, "category name or route already exists")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusConflict, "category name or route already exists")
 		}
 		return nil, err
 	}
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *CategoryHandler) AdminModifyCategoryEnabled(ctx *gin.Context, req request.CategoryEnabledRequest) (any, error) {
+func (h *CategoryHandler) AdminModifyCategoryEnabled(ctx *gin.Context, req request.CategoryEnabledRequest) (*apiwrap.ResponseBody[any], error) {
 	id := ctx.Param("id")
-	return nil, h.serv.ModifyCategoryEnabled(ctx, id, gkit.GetValueOrDefault(req.Enabled))
+	return apiwrap.SuccessResponse(), h.serv.ModifyCategoryEnabled(ctx, id, gkit.GetValueOrDefault(req.Enabled))
 }
 
-func (h *CategoryHandler) AdminModifyCategory(ctx *gin.Context, req request.UpdateCategoryRequest) (any, error) {
+func (h *CategoryHandler) AdminModifyCategory(ctx *gin.Context, req request.UpdateCategoryRequest) (*apiwrap.ResponseBody[any], error) {
 	id := ctx.Param("id")
-	return nil, h.serv.ModifyCategory(ctx, id, req.Description)
+	return apiwrap.SuccessResponse(), h.serv.ModifyCategory(ctx, id, req.Description)
 }
 
-func (h *CategoryHandler) AdminDeleteCategory(ctx *gin.Context) (any, error) {
+func (h *CategoryHandler) AdminDeleteCategory(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	id := ctx.Param("id")
-	return nil, h.serv.DeleteCategory(ctx, id)
+	return apiwrap.SuccessResponse(), h.serv.DeleteCategory(ctx, id)
 }
 
-func (h *CategoryHandler) AdminModifyCategoryNavigation(ctx *gin.Context, req request.CategoryNavRequest) (any, error) {
+func (h *CategoryHandler) AdminModifyCategoryNavigation(ctx *gin.Context, req request.CategoryNavRequest) (*apiwrap.ResponseBody[any], error) {
 	id := ctx.Param("id")
-	return nil, h.serv.ModifyCategoryNavigation(ctx, id, gkit.GetValueOrDefault(req.ShowInNav))
+	return apiwrap.SuccessResponse(), h.serv.ModifyCategoryNavigation(ctx, id, gkit.GetValueOrDefault(req.ShowInNav))
 }
 
-func (h *CategoryHandler) AdminGetSelectCategories(ctx *gin.Context) (api.ListVO[vo.SelectCategory], error) {
+func (h *CategoryHandler) AdminGetSelectCategories(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[vo.SelectCategory]], error) {
 	categories, err := h.serv.AdminGetSelectCategories(ctx)
 	if err != nil {
-		return api.ListVO[vo.SelectCategory]{}, err
+		return nil, err
 	}
 	list := h.categoriesToSelectVO(categories)
-	return api.ListVO[vo.SelectCategory]{List: list}, nil
+	return apiwrap.SuccessResponseWithData(apiwrap.ListVO[vo.SelectCategory]{List: list}), nil
 }
 
 func (h *CategoryHandler) categoriesToSelectVO(categories []domain.Category) []vo.SelectCategory {

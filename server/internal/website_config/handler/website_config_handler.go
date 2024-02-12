@@ -17,6 +17,12 @@ package handler
 import (
 	"encoding/hex"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/jwtutil"
+
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
@@ -43,32 +49,35 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup.GET("/index", api.Wrap(h.GetIndexConfig))
 
 	adminGroup := engine.Group("/admin/configs")
-	adminGroup.GET("/website", api.Wrap(h.AdminGetWebsiteConfig))
-	adminGroup.PUT("/website", api.WrapWithBody(h.AdminUpdateWebsiteConfig))
-	adminGroup.POST("/website/records", api.WrapWithBody(h.AdminAddRecordInWebsiteConfig))
-	adminGroup.DELETE("/website/records", api.Wrap(h.AdminDeleteRecordInWebsiteConfig))
-	adminGroup.GET("/seo", api.Wrap(h.AdminGetSeoConfig))
-	adminGroup.PUT("/seo", api.WrapWithBody(h.AdminUpdateSeoConfig))
-	adminGroup.GET("/comment", api.Wrap(h.AdminGetCommentConfig))
-	adminGroup.PUT("/comment", api.WrapWithBody(h.AdminUpdateCommentConfig))
-	adminGroup.GET("/friend", api.Wrap(h.AdminGetFriendConfig))
-	adminGroup.PUT("/friend", api.WrapWithBody(h.AdminUpdateFriendConfig))
-	adminGroup.GET("/email", api.Wrap(h.AdminGetEmailConfig))
-	adminGroup.PUT("/email", api.WrapWithBody(h.AdminUpdateEmailConfig))
+	adminGroup.GET("/website", apiwrap.Wrap(h.AdminGetWebsiteConfig))
+	adminGroup.PUT("/website", apiwrap.WrapWithBody(h.AdminUpdateWebsiteConfig))
+	adminGroup.POST("/website/records", apiwrap.WrapWithBody(h.AdminAddRecordInWebsiteConfig))
+	adminGroup.DELETE("/website/records", apiwrap.Wrap(h.AdminDeleteRecordInWebsiteConfig))
+	adminGroup.GET("/seo", apiwrap.Wrap(h.AdminGetSeoConfig))
+	adminGroup.PUT("/seo", apiwrap.WrapWithBody(h.AdminUpdateSeoConfig))
+	adminGroup.GET("/comment", apiwrap.Wrap(h.AdminGetCommentConfig))
+	adminGroup.PUT("/comment", apiwrap.WrapWithBody(h.AdminUpdateCommentConfig))
+	adminGroup.GET("/friend", apiwrap.Wrap(h.AdminGetFriendConfig))
+	adminGroup.PUT("/friend", apiwrap.WrapWithBody(h.AdminUpdateFriendConfig))
+	adminGroup.GET("/email", apiwrap.Wrap(h.AdminGetEmailConfig))
+	adminGroup.PUT("/email", apiwrap.WrapWithBody(h.AdminUpdateEmailConfig))
 
-	adminGroup.GET("/notice", api.Wrap(h.AdminGetNoticeConfig))
-	adminGroup.PUT("/notice", api.WrapWithBody(h.AdminUpdateNoticeConfig))
-	adminGroup.PUT("/notice/enabled", api.WrapWithBody(h.AdminUpdateNoticeEnabled))
+	adminGroup.GET("/notice", apiwrap.Wrap(h.AdminGetNoticeConfig))
+	adminGroup.PUT("/notice", apiwrap.WrapWithBody(h.AdminUpdateNoticeConfig))
+	adminGroup.PUT("/notice/enabled", apiwrap.WrapWithBody(h.AdminUpdateNoticeEnabled))
 
-	adminGroup.GET("/front-post-count", api.Wrap(h.AdminGetFPCConfig))
-	adminGroup.PUT("/front-post-count", api.WrapWithBody(h.AdminUpdateFPCConfig))
-	adminGroup.GET("/pay", api.Wrap(h.AdminGetPayConfig))
-	adminGroup.POST("/pay", api.WrapWithBody(h.AdminAddPayInfo))
-	adminGroup.DELETE("/pay/:name", api.Wrap(h.AdminDeletePayInfo))
-	adminGroup.GET("/social", api.Wrap(h.AdminGetSocialConfig))
-	adminGroup.POST("/social", api.WrapWithBody(h.AdminAddSocialConfig))
-	adminGroup.PUT("/social/:id", api.WrapWithBody(h.AdminUpdateSocialConfig))
-	adminGroup.DELETE("/social/:id", api.Wrap(h.AdminDeleteSocialConfig))
+	adminGroup.GET("/front-post-count", apiwrap.Wrap(h.AdminGetFPCConfig))
+	adminGroup.PUT("/front-post-count", apiwrap.WrapWithBody(h.AdminUpdateFPCConfig))
+	adminGroup.GET("/pay", apiwrap.Wrap(h.AdminGetPayConfig))
+	adminGroup.POST("/pay", apiwrap.WrapWithBody(h.AdminAddPayInfo))
+	adminGroup.DELETE("/pay/:name", apiwrap.Wrap(h.AdminDeletePayInfo))
+	adminGroup.GET("/social", apiwrap.Wrap(h.AdminGetSocialConfig))
+	adminGroup.POST("/social", apiwrap.WrapWithBody(h.AdminAddSocialConfig))
+	adminGroup.PUT("/social/:id", apiwrap.WrapWithBody(h.AdminUpdateSocialConfig))
+	adminGroup.DELETE("/social/:id", apiwrap.Wrap(h.AdminDeleteSocialConfig))
+
+	engine.POST("/admin/login", apiwrap.WrapWithBody(h.AdminLogin))
+
 }
 
 func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfigVO, error) {
@@ -133,16 +142,16 @@ func (h *WebsiteConfigHandler) toSeoMetaConfigVO(config *domain.SeoMetaConfig) *
 	}
 }
 
-func (h *WebsiteConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (vo.WebsiteConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetWebsiteConfig(ctx *gin.Context) (*apiwrap.ResponseBody[vo.WebsiteConfigVO], error) {
 	config, err := h.serv.GetWebSiteConfig(ctx)
 	if err != nil {
-		return vo.WebsiteConfigVO{}, err
+		return nil, err
 	}
-	return *h.toWebsiteConfigVO(config), nil
+	return apiwrap.SuccessResponseWithData(*h.toWebsiteConfigVO(config)), nil
 }
 
-func (h *WebsiteConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req request.UpdateWebsiteConfigReq) (any, error) {
-	return nil, h.serv.UpdateWebSiteConfig(ctx, domain.WebSiteConfig{
+func (h *WebsiteConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req request.UpdateWebsiteConfigReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.UpdateWebSiteConfig(ctx, domain.WebSiteConfig{
 		WebsiteName:  req.WebsiteName,
 		Icon:         req.Icon,
 		LiveTime:     req.LiveTime,
@@ -152,16 +161,16 @@ func (h *WebsiteConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req re
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminGetSeoConfig(ctx *gin.Context) (vo.SeoMetaConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetSeoConfig(ctx *gin.Context) (*apiwrap.ResponseBody[vo.SeoMetaConfigVO], error) {
 	config, err := h.serv.GetSeoMetaConfig(ctx)
 	if err != nil {
-		return vo.SeoMetaConfigVO{}, err
+		return nil, err
 	}
-	return *h.toSeoMetaConfigVO(config), nil
+	return apiwrap.SuccessResponseWithData(*h.toSeoMetaConfigVO(config)), nil
 }
 
-func (h *WebsiteConfigHandler) AdminUpdateSeoConfig(ctx *gin.Context, req request.UpdateSeoMetaConfigReq) (any, error) {
-	return nil, h.serv.UpdateSeoMetaConfig(ctx, &domain.SeoMetaConfig{
+func (h *WebsiteConfigHandler) AdminUpdateSeoConfig(ctx *gin.Context, req request.UpdateSeoMetaConfigReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.UpdateSeoMetaConfig(ctx, &domain.SeoMetaConfig{
 		Title:                 req.Title,
 		Description:           req.Description,
 		OgTitle:               req.OgTitle,
@@ -173,12 +182,12 @@ func (h *WebsiteConfigHandler) AdminUpdateSeoConfig(ctx *gin.Context, req reques
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminGetCommentConfig(ctx *gin.Context) (vo.CommentConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetCommentConfig(ctx *gin.Context) (*apiwrap.ResponseBody[vo.CommentConfigVO], error) {
 	config, err := h.serv.GetCommentConfig(ctx)
 	if err != nil {
-		return vo.CommentConfigVO{}, err
+		return nil, err
 	}
-	return h.toCommentConfigVO(config), nil
+	return apiwrap.SuccessResponseWithData(h.toCommentConfigVO(config)), nil
 }
 
 func (h *WebsiteConfigHandler) toCommentConfigVO(config domain.CommentConfig) vo.CommentConfigVO {
@@ -187,18 +196,18 @@ func (h *WebsiteConfigHandler) toCommentConfigVO(config domain.CommentConfig) vo
 	}
 }
 
-func (h *WebsiteConfigHandler) AdminUpdateCommentConfig(ctx *gin.Context, req request.UpdateCommentConfigReq) (any, error) {
-	return nil, h.serv.UpdateCommentConfig(ctx, domain.CommentConfig{
+func (h *WebsiteConfigHandler) AdminUpdateCommentConfig(ctx *gin.Context, req request.UpdateCommentConfigReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.UpdateCommentConfig(ctx, domain.CommentConfig{
 		EnableComment: gkit.GetValueOrDefault(req.EnableComment),
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminGetFriendConfig(ctx *gin.Context) (vo.FriendConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetFriendConfig(ctx *gin.Context) (*apiwrap.ResponseBody[vo.FriendConfigVO], error) {
 	config, err := h.serv.GetFriendConfig(ctx)
 	if err != nil {
-		return vo.FriendConfigVO{}, err
+		return nil, err
 	}
-	return h.toFriendConfigVO(config), nil
+	return apiwrap.SuccessResponseWithData(h.toFriendConfigVO(config)), nil
 }
 
 func (h *WebsiteConfigHandler) toFriendConfigVO(config domain.FriendConfig) vo.FriendConfigVO {
@@ -207,18 +216,18 @@ func (h *WebsiteConfigHandler) toFriendConfigVO(config domain.FriendConfig) vo.F
 	}
 }
 
-func (h *WebsiteConfigHandler) AdminUpdateFriendConfig(ctx *gin.Context, req request.UpdateFriendConfigReq) (any, error) {
-	return nil, h.serv.UpdateFriendConfig(ctx, domain.FriendConfig{
+func (h *WebsiteConfigHandler) AdminUpdateFriendConfig(ctx *gin.Context, req request.UpdateFriendConfigReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.UpdateFriendConfig(ctx, domain.FriendConfig{
 		EnableFriendCommit: gkit.GetValueOrDefault(req.EnableFriendCommit),
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminGetEmailConfig(ctx *gin.Context) (vo.EmailConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetEmailConfig(ctx *gin.Context) (*apiwrap.ResponseBody[vo.EmailConfigVO], error) {
 	config, err := h.serv.GetEmailConfig(ctx)
 	if err != nil {
-		return vo.EmailConfigVO{}, err
+		return nil, err
 	}
-	return h.toEmailConfigVO(config), nil
+	return apiwrap.SuccessResponseWithData(h.toEmailConfigVO(config)), nil
 }
 
 func (h *WebsiteConfigHandler) toEmailConfigVO(config *domain.EmailConfig) vo.EmailConfigVO {
@@ -231,8 +240,8 @@ func (h *WebsiteConfigHandler) toEmailConfigVO(config *domain.EmailConfig) vo.Em
 	}
 }
 
-func (h *WebsiteConfigHandler) AdminUpdateEmailConfig(ctx *gin.Context, req request.UpdateEmailConfigReq) (any, error) {
-	return nil, h.serv.UpdateEmailConfig(ctx, &domain.EmailConfig{
+func (h *WebsiteConfigHandler) AdminUpdateEmailConfig(ctx *gin.Context, req request.UpdateEmailConfigReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.UpdateEmailConfig(ctx, &domain.EmailConfig{
 		Host:     req.Host,
 		Port:     req.Port,
 		Username: req.Username,
@@ -241,31 +250,31 @@ func (h *WebsiteConfigHandler) AdminUpdateEmailConfig(ctx *gin.Context, req requ
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminGetNoticeConfig(ctx *gin.Context) (vo.NoticeConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetNoticeConfig(ctx *gin.Context) (*apiwrap.ResponseBody[vo.NoticeConfigVO], error) {
 	config, err := h.serv.GetNoticeConfig(ctx)
 	if err != nil {
-		return vo.NoticeConfigVO{}, err
+		return nil, err
 	}
-	return *h.toNoticeConfigVO(&config), nil
+	return apiwrap.SuccessResponseWithData(*h.toNoticeConfigVO(&config)), nil
 }
 
-func (h *WebsiteConfigHandler) AdminUpdateNoticeConfig(ctx *gin.Context, req request.UpdateNoticeConfigReq) (any, error) {
-	return nil, h.serv.UpdateNoticeConfig(ctx, &domain.NoticeConfig{
+func (h *WebsiteConfigHandler) AdminUpdateNoticeConfig(ctx *gin.Context, req request.UpdateNoticeConfigReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.UpdateNoticeConfig(ctx, &domain.NoticeConfig{
 		Title:   req.Title,
 		Content: req.Content,
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminUpdateNoticeEnabled(ctx *gin.Context, req request.UpdateNoticeConfigEnabledReq) (any, error) {
-	return nil, h.serv.UpdateNoticeConfigEnabled(ctx, gkit.GetValueOrDefault(req.Enabled))
+func (h *WebsiteConfigHandler) AdminUpdateNoticeEnabled(ctx *gin.Context, req request.UpdateNoticeConfigEnabledReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.UpdateNoticeConfigEnabled(ctx, gkit.GetValueOrDefault(req.Enabled))
 }
 
-func (h *WebsiteConfigHandler) AdminGetFPCConfig(ctx *gin.Context) (vo.FrontPostCountConfigVO, error) {
+func (h *WebsiteConfigHandler) AdminGetFPCConfig(ctx *gin.Context) (*apiwrap.ResponseBody[vo.FrontPostCountConfigVO], error) {
 	config, err := h.serv.GetFrontPostCountConfig(ctx)
 	if err != nil {
-		return vo.FrontPostCountConfigVO{}, err
+		return nil, err
 	}
-	return h.toFrontPostCountConfigVO(config), nil
+	return apiwrap.SuccessResponseWithData(h.toFrontPostCountConfigVO(config)), nil
 }
 
 func (h *WebsiteConfigHandler) toFrontPostCountConfigVO(config domain.FrontPostCountConfig) vo.FrontPostCountConfigVO {
@@ -274,41 +283,40 @@ func (h *WebsiteConfigHandler) toFrontPostCountConfigVO(config domain.FrontPostC
 	}
 }
 
-func (h *WebsiteConfigHandler) AdminUpdateFPCConfig(ctx *gin.Context, req request.UpdateFPCConfigCountReq) (any, error) {
-	return nil, h.serv.UpdateFrontPostCountConfig(ctx, domain.FrontPostCountConfig{
+func (h *WebsiteConfigHandler) AdminUpdateFPCConfig(ctx *gin.Context, req request.UpdateFPCConfigCountReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.UpdateFrontPostCountConfig(ctx, domain.FrontPostCountConfig{
 		Count: req.Count,
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminAddRecordInWebsiteConfig(ctx *gin.Context, req request.AddRecordInWebsiteConfig) (any, error) {
-	return nil, h.serv.AddRecordInWebsiteConfig(ctx, req.Record)
+func (h *WebsiteConfigHandler) AdminAddRecordInWebsiteConfig(ctx *gin.Context, req request.AddRecordInWebsiteConfig) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.AddRecordInWebsiteConfig(ctx, req.Record)
 }
 
-func (h *WebsiteConfigHandler) AdminDeleteRecordInWebsiteConfig(ctx *gin.Context) (any, error) {
+func (h *WebsiteConfigHandler) AdminDeleteRecordInWebsiteConfig(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	record := ctx.Query("record")
 	if record == "" {
 		return nil, errors.New("record is empty")
 	}
-	return nil, h.serv.DeleteRecordInWebsiteConfig(ctx, record)
+	return apiwrap.SuccessResponse(), h.serv.DeleteRecordInWebsiteConfig(ctx, record)
 }
 
-func (h *WebsiteConfigHandler) AdminGetPayConfig(ctx *gin.Context) (vo api.ListVO[vo.PayInfoConfigVO], err error) {
+func (h *WebsiteConfigHandler) AdminGetPayConfig(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[vo.PayInfoConfigVO]], error) {
 	config, err := h.serv.GetPayConfig(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
-	vo.List = h.toPayInfoConfigVO(config.List)
-	return
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(h.toPayInfoConfigVO(config.List))), nil
 }
 
-func (h *WebsiteConfigHandler) AdminAddPayInfo(ctx *gin.Context, req request.AddPayInfoRequest) (any, error) {
-	return nil, h.serv.AddPayInfo(ctx, domain.PayInfoConfigElem{
+func (h *WebsiteConfigHandler) AdminAddPayInfo(ctx *gin.Context, req request.AddPayInfoRequest) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.AddPayInfo(ctx, domain.PayInfoConfigElem{
 		Name:  req.Name,
 		Image: req.Image,
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminDeletePayInfo(ctx *gin.Context) (any, error) {
+func (h *WebsiteConfigHandler) AdminDeletePayInfo(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	name := ctx.Param("name")
 	if name == "" {
 		return nil, errors.New("name is empty")
@@ -317,19 +325,18 @@ func (h *WebsiteConfigHandler) AdminDeletePayInfo(ctx *gin.Context) (any, error)
 	if image == "" {
 		return nil, errors.New("image is empty")
 	}
-	return nil, h.serv.DeletePayInfo(ctx, domain.PayInfoConfigElem{
+	return apiwrap.SuccessResponse(), h.serv.DeletePayInfo(ctx, domain.PayInfoConfigElem{
 		Name:  name,
 		Image: image,
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminGetSocialConfig(ctx *gin.Context) (vo api.ListVO[vo.AdminSocialInfoVO], err error) {
+func (h *WebsiteConfigHandler) AdminGetSocialConfig(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[vo.AdminSocialInfoVO]], error) {
 	socialConfig, err := h.serv.GetSocialConfig(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
-	vo.List = h.toAdminSocialInfoVO(socialConfig.SocialInfoList)
-	return
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(h.toAdminSocialInfoVO(socialConfig.SocialInfoList))), nil
 }
 
 func (h *WebsiteConfigHandler) toAdminSocialInfoVO(list []domain.SocialInfo) []vo.AdminSocialInfoVO {
@@ -348,8 +355,8 @@ func (h *WebsiteConfigHandler) toAdminSocialInfoVO(list []domain.SocialInfo) []v
 	return result
 }
 
-func (h *WebsiteConfigHandler) AdminAddSocialConfig(ctx *gin.Context, req request.SocialInfoReq) (any, error) {
-	return nil, h.serv.AddSocialInfo(ctx, domain.SocialInfo{
+func (h *WebsiteConfigHandler) AdminAddSocialConfig(ctx *gin.Context, req request.SocialInfoReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.AddSocialInfo(ctx, domain.SocialInfo{
 		SocialName:  req.SocialName,
 		SocialValue: req.SocialValue,
 		CssClass:    req.CssClass,
@@ -357,13 +364,13 @@ func (h *WebsiteConfigHandler) AdminAddSocialConfig(ctx *gin.Context, req reques
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminUpdateSocialConfig(ctx *gin.Context, req request.SocialInfoReq) (any, error) {
+func (h *WebsiteConfigHandler) AdminUpdateSocialConfig(ctx *gin.Context, req request.SocialInfoReq) (*apiwrap.ResponseBody[any], error) {
 	sid := ctx.Param("id")
 	id, err := hex.DecodeString(sid)
 	if err != nil {
 		return nil, err
 	}
-	return nil, h.serv.UpdateSocialInfo(ctx, domain.SocialInfo{
+	return apiwrap.SuccessResponse(), h.serv.UpdateSocialInfo(ctx, domain.SocialInfo{
 		Id:          id,
 		SocialName:  req.SocialName,
 		SocialValue: req.SocialValue,
@@ -372,11 +379,26 @@ func (h *WebsiteConfigHandler) AdminUpdateSocialConfig(ctx *gin.Context, req req
 	})
 }
 
-func (h *WebsiteConfigHandler) AdminDeleteSocialConfig(ctx *gin.Context) (any, error) {
+func (h *WebsiteConfigHandler) AdminDeleteSocialConfig(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	sid := ctx.Param("id")
 	id, err := hex.DecodeString(sid)
 	if err != nil {
 		return nil, err
 	}
-	return nil, h.serv.DeleteSocialInfo(ctx, id)
+	return apiwrap.SuccessResponse(), h.serv.DeleteSocialInfo(ctx, id)
+}
+
+func (h *WebsiteConfigHandler) AdminLogin(ctx *gin.Context, req request.LoginRequest) (*apiwrap.ResponseBody[any], error) {
+	adminConfig, err := h.serv.GetAdminConfig(ctx)
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, err
+	}
+	if adminConfig == nil || adminConfig.Username != req.Username || adminConfig.Password != req.Password {
+		return apiwrap.NewResponseBody[any](100001, "username or password is wrong.", nil), nil
+	}
+	jwt, exp, err := jwtutil.GenerateJwt()
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponseWithData[any](vo.LoginVO{Token: jwt, Expiration: exp}), nil
 }
