@@ -16,7 +16,8 @@
           name="image"
           label="二维码"
           :rules="[{ required: true, message: '请上传二维码' }]"
-          ><a-input v-model:value="formState.image" placeholder="请输入二维码路径" />
+        >
+          <a-input v-model:value="formState.image" placeholder="请输入二维码路径" />
           <a-upload
             v-model:file-list="fileList"
             name="file"
@@ -25,6 +26,7 @@
             :show-upload-list="false"
             action="http://localhost:8080/admin/files/upload"
             :before-upload="beforeUpload"
+            :headers="{ Authorization: userStore.token }"
             @change="handleChange"
           >
             <img v-if="imageUrl" :src="imageUrl" alt="avatar" width="250" height="150" />
@@ -54,15 +56,22 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
-import type { PayConfig, PayConfigRequest } from '@/interfaces/Config'
-import type { IBaseResponse, IListData, IResponse } from '@/interfaces/Common'
-import axios from '@/http/axios'
+import {
+  AddPay,
+  DeletePay,
+  GetPay,
+  type PayConfig,
+  type PayConfigRequest
+} from '@/interfaces/Config'
 import {
   type FormInstance,
   message,
   type UploadChangeParam,
   type UploadProps
 } from 'ant-design-vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 const columns = [
   {
@@ -85,8 +94,8 @@ const list = ref<PayConfig[]>([])
 const imageUrl = ref<string>('')
 
 const getPayConfig = async () => {
-  const res: any = await axios.get<IResponse<IListData<PayConfig>>>('/admin/configs/pay')
-  list.value = res.data.data.list || []
+  const res: any = await GetPay()
+  list.value = res.data.list || []
 }
 getPayConfig()
 
@@ -102,9 +111,8 @@ const addPay = () => {
       .validateFields()
       .then(async (values) => {
         try {
-          // 提交 body 参数 values
-          const response = await axios.post<IBaseResponse>('/admin/configs/pay', formState)
-          if (response.data.code !== 200) {
+          const response: any = await AddPay(formState)
+          if (response.code !== 0) {
             message.error(response.data.message)
             return
           }
@@ -116,7 +124,6 @@ const addPay = () => {
           await getPayConfig()
         } catch (error) {
           console.log(error)
-          message.error('添加失败')
         }
       })
       .catch((info) => {
@@ -128,18 +135,15 @@ const addPay = () => {
 
 const deletePay = async (record: PayConfig) => {
   try {
-    const response = await axios.delete<IBaseResponse>(
-      `/admin/configs/pay/${record.name}?image=${record.image}`
-    )
-    if (response.data.code === 200) {
+    const response: any = await DeletePay(record.name, record.image)
+    if (response.code === 0) {
       message.success('删除成功')
       await getPayConfig()
     } else {
-      message.error(response.data.message)
+      message.error(response.message)
     }
   } catch (error) {
     console.log(error)
-    message.error('删除失败')
   }
 }
 
@@ -164,7 +168,6 @@ const handleChange = (info: UploadChangeParam) => {
       imageUrl.value = base64Url
       loading.value = false
       // Get this url from response in real world.
-      postReq.cover_img = info.file.response.data.url
       message.success('上传成功')
     })
   }

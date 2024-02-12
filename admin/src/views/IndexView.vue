@@ -15,7 +15,7 @@
   </div>
   <div class="flex justify-between">
     <a-card class="">
-      <a-statistic title="评论数" :value="analysis.today_view_count" style="margin-right: 50px" />
+      <a-statistic title="评论数" :value="analysis.comment_count" style="margin-right: 50px" />
     </a-card>
     <a-card class="">
       <a-statistic
@@ -38,10 +38,8 @@
 </template>
 
 <script lang="ts" setup>
-import axios from '@/http/axios'
 import { message } from 'ant-design-vue'
-import type { DataAnalysisVO } from '@/interfaces/DataAnalysis'
-import type { IResponse } from '@/interfaces/Common'
+import { type DataAnalysisVO, GetDataAnalysis } from '@/interfaces/DataAnalysis'
 import { ref } from 'vue'
 
 const analysis = ref<DataAnalysisVO>({
@@ -56,15 +54,14 @@ const analysis = ref<DataAnalysisVO>({
 })
 const getAnalysis = async () => {
   try {
-    const response = await axios.get<IResponse<DataAnalysisVO>>(`/admin/data-analysis`)
-    if (response.data.code !== 200) {
+    const response: any = await GetDataAnalysis()
+    if (response.code !== 200) {
       message.error(response.data.message)
       return
     }
-    analysis.value = response.data.data || analysis.value
+    analysis.value = response.data || analysis.value
   } catch (error) {
     console.log(error)
-    message.error('获取数据失败')
   }
 }
 getAnalysis()

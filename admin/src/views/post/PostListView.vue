@@ -1,5 +1,5 @@
 <template>
-  <a-button type="primary" @click="router.push('/post')">发布文章</a-button>
+  <a-button type="primary" @click="router.push('/home/post')">发布文章</a-button>
   <a-table :columns="columns" :data-source="posts" :pagination="pagination" @change="change">
     <template #headerCell="{ column }">
       <template v-if="column.key === 'name'">
@@ -57,7 +57,7 @@
       <template v-else-if="column.dataIndex === 'operation'">
         <div class="flex gap-x-1">
           <span>
-            <a @click="router.push(`/drafts/${record.id}`)">编辑</a>
+            <a @click="router.push(`/home/drafts/${record.id}`)">编辑</a>
           </span>
           <a-popconfirm v-if="posts.length" title="确认删除？" @confirm="deletePost(record)">
             <a>删除</a>
@@ -69,10 +69,15 @@
 </template>
 <script lang="ts" setup>
 import { SmileOutlined } from '@ant-design/icons-vue'
-import axios from '@/http/axios'
 import { computed, ref } from 'vue'
-import type { IPost, PageRequest, PostDetailVO } from '@/interfaces/Post'
-import type { IBaseResponse, IPageData, IResponse } from '@/interfaces/Common'
+import {
+  ChangeCommentAllowedStatus,
+  ChangePostDisplayStatus,
+  DeletePost,
+  GetPost,
+  type IPost,
+  type PageRequest
+} from '@/interfaces/Post'
 import router from '@/router'
 import dayjs from 'dayjs'
 import { message } from 'ant-design-vue'
@@ -159,11 +164,9 @@ const change = (pg, filters, sorter, { currentDataSource }) => {
 
 const getPosts = async () => {
   try {
-    const response = await axios.get<IResponse<IPageData<IPost>>>('/admin/posts', {
-      params: req.value
-    })
-    posts.value = response.data.data?.list || []
-    total.value = response.data.data?.totalCount || 0
+    const response = await GetPost(req.value)
+    posts.value = response.data?.list || []
+    total.value = response.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
@@ -172,16 +175,15 @@ const getPosts = async () => {
 const deletePost = async (record: IPost) => {
   try {
     console.log(record)
-    const response = await axios.delete<IBaseResponse>(`/admin/posts/${record.id}`)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await DeletePost(record.id)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('删除成功')
     await getPosts()
   } catch (error) {
     console.log(error)
-    message.error('删除失败')
   }
 }
 
@@ -189,35 +191,29 @@ getPosts()
 
 const changeDisplayStatus = async (id: string, is_displayed: boolean) => {
   try {
-    const response = await axios.put<IBaseResponse>(`/admin/posts/${id}/display`, {
-      is_displayed: is_displayed
-    })
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await ChangePostDisplayStatus(id, is_displayed)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('更新成功')
     await getPosts()
   } catch (error) {
     console.log(error)
-    message.error('更新失败')
   }
 }
 
 const changeCommentAllowedStatus = async (id: string, is_comment_allowed: boolean) => {
   try {
-    const response = await axios.put<IBaseResponse>(`/admin/posts/${id}/comment-allowed`, {
-      is_comment_allowed: is_comment_allowed
-    })
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await ChangeCommentAllowedStatus(id, is_comment_allowed)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('更新成功')
     await getPosts()
   } catch (error) {
     console.log(error)
-    message.error('更新失败')
   }
 }
 </script>

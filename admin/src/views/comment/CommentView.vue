@@ -13,8 +13,8 @@
       <template v-if="column.dataIndex === 'status'">
         <a-tag
           :color="record.status === 0 ? 'processing' : record.status === 1 ? 'success' : 'warning'"
-          >{{ statusConvert(record.status) }}</a-tag
-        >
+          >{{ statusConvert(record.status) }}
+        </a-tag>
       </template>
       <template v-if="column.dataIndex === 'create_time'">
         {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
@@ -63,12 +63,20 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import { computed, ref } from 'vue'
-import type { IBaseResponse, IPageData, IResponse, PageRequest } from '@/interfaces/Common'
-import axios from '@/http/axios'
-import type { Comment } from '@/interfaces/Comment'
+import type { PageRequest } from '@/interfaces/Common'
+import {
+  ApproveCommentById,
+  ApproveReplyById,
+  type Comment,
+  DeleteCommentById,
+  DeleteReplyById,
+  DisapproveCommentById,
+  DisapproveReplyById,
+  GetComments,
+  UpdateCommentStatusById,
+  UpdateReplyStatusById
+} from '@/interfaces/Comment'
 import { message } from 'ant-design-vue'
-
-const domain: string = window.location.host
 
 const columns = [
   {
@@ -120,11 +128,9 @@ const pagination = computed(() => ({
 
 const get = async () => {
   try {
-    const response = await axios.get<IResponse<IPageData<Comment>>>('/admin/comments', {
-      params: pageReq.value
-    })
-    data.value = response.data.data?.list || []
-    total.value = response.data.data?.totalCount || 0
+    const response: any = await GetComments(pageReq.value)
+    data.value = response.data?.list || []
+    total.value = response.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
@@ -158,32 +164,29 @@ const approveComment = (record: Comment) => {
 
 const approveCommentById = async (id: string) => {
   try {
-    // 提交 body 参数 values
-    const response = await axios.put<IBaseResponse>(`/admin/comments/${id}/approval`)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await ApproveCommentById(id)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('审核成功')
     await get()
   } catch (error) {
     console.log(error)
-    message.error('审核失败')
   }
 }
 
 const approveReplyById = async (fid: string, id: string) => {
   try {
-    const response = await axios.put<IBaseResponse>(`/admin/comments/${fid}/replies/${id}/approval`)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await ApproveReplyById(fid, id)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('审核成功')
     await get()
   } catch (error) {
     console.log(error)
-    message.error('审核失败')
   }
 }
 
@@ -205,12 +208,9 @@ const disapproveComment = () => {
 
 const disapproveCommentById = async (id: string) => {
   try {
-    // 提交 body 参数 values
-    const response = await axios.put<IBaseResponse>(`/admin/comments/${id}/disapproval`, {
-      reason: reason.value
-    })
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await DisapproveCommentById(id, reason.value)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('驳回成功')
@@ -219,20 +219,14 @@ const disapproveCommentById = async (id: string) => {
     disapproveDialog.value = false
   } catch (error) {
     console.log(error)
-    message.error('驳回失败')
   }
 }
 
 const disapproveReplyById = async (fid: string, id: string) => {
   try {
-    const response = await axios.put<IBaseResponse>(
-      `/admin/comments/${fid}/replies/${id}/disapproval`,
-      {
-        reason: reason.value
-      }
-    )
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await DisapproveReplyById(fid, id, reason.value)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('驳回成功')
@@ -241,7 +235,6 @@ const disapproveReplyById = async (fid: string, id: string) => {
     disapproveDialog.value = false
   } catch (error) {
     console.log(error)
-    message.error('驳回失败')
   }
 }
 
@@ -249,43 +242,35 @@ const updateStatus = (record: Comment, status: number) => {
   if (record.type === 0) {
     updateStatusById(record.id, status)
   } else {
-    updateReplyStatusById(record.fid, record.id, status)
+    updateReplyStatusById(record.fid || '', record.id, status)
   }
 }
 
 const updateStatusById = async (id: string, status: number) => {
   try {
-    // 提交 body 参数 values
-    const response = await axios.put<IBaseResponse>(`/admin/comments/${id}/status`, {
-      status: status
-    })
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await UpdateCommentStatusById(id, status)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('更新成功')
     await get()
   } catch (error) {
     console.log(error)
-    message.error('更新失败')
   }
 }
 
 const updateReplyStatusById = async (fid: string, id: string, status: number) => {
   try {
-    // 提交 body 参数 values
-    const response = await axios.put<IBaseResponse>(`/admin/comments/${fid}/replies/${id}/status`, {
-      status: status
-    })
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await UpdateReplyStatusById(fid, id, status)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('更新成功')
     await get()
   } catch (error) {
     console.log(error)
-    message.error('更新失败')
   }
 }
 
@@ -293,32 +278,29 @@ const deleteById = (record: Comment) => {
   if (record.type === 0) {
     deleteCommentById(record.id)
   } else {
-    deleteReplyById(record.fid, record.id)
+    deleteReplyById(record.fid || '', record.id)
   }
 }
 
 const deleteCommentById = async (id: string) => {
   try {
-    // 提交 body 参数 values
-    const response = await axios.delete<IBaseResponse>(`/admin/comments/${id}`)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await DeleteCommentById(id)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('删除成功')
     await get()
   } catch (error) {
     console.log(error)
-    message.error('删除失败')
   }
 }
 
 const deleteReplyById = async (fid: string, id: string) => {
   try {
-    // 提交 body 参数 values
-    const response = await axios.delete<IBaseResponse>(`/admin/comments/${fid}/replies/${id}`)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await DeleteReplyById(fid, id)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('删除成功')

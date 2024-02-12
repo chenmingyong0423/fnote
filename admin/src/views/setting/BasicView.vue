@@ -35,6 +35,7 @@
             action="http://localhost:8080/admin/files/upload"
             @change="handleChange4picture"
             :before-upload="beforeUpload4picture"
+            :headers="{ Authorization: userStore.token }"
             :maxCount="1"
           >
             <a-button>
@@ -61,6 +62,7 @@
           action="http://localhost:8080/admin/files/upload"
           @change="handleChange"
           :before-upload="beforeUpload"
+          :headers="{ Authorization: userStore.token }"
           :maxCount="1"
         >
           <a-button>
@@ -80,7 +82,8 @@
     <div class="text-4 font-bold my-2">备案信息</div>
     <div class="flex flex-col">
       <div class="flex">
-        <a-input v-model:value="record"></a-input> <a-button @click="pushRecord">添加</a-button>
+        <a-input v-model:value="record"></a-input>
+        <a-button @click="pushRecord">添加</a-button>
       </div>
       <div
         class="flex p-3 border-b-1 border-b-solid border-b-gray-2"
@@ -96,14 +99,21 @@
   </div>
 </template>
 <script lang="ts" setup>
-import axios from '@/http/axios'
-import type { IBaseResponse, IResponse } from '@/interfaces/Common'
-import type { WebsiteConfig } from '@/interfaces/Config'
+import {
+  AddRecord,
+  DeleteRecord,
+  GetWebSite,
+  UpdateWebSite,
+  type WebsiteConfig
+} from '@/interfaces/Config'
 import { ref } from 'vue'
 import dayjs from 'dayjs'
 import { type Dayjs } from 'dayjs'
 import { message } from 'ant-design-vue'
 import type { UploadChangeParam, UploadProps } from 'ant-design-vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 const editable = ref<boolean>(false)
 const liveTime = ref<Dayjs>()
@@ -120,12 +130,13 @@ const data = ref<WebsiteConfig>({
 
 const getWebsite = async () => {
   try {
-    const response = await axios.get<IResponse<WebsiteConfig>>('/admin/configs/website')
-    data.value = response.data.data || data.value
-    liveTime.value = dayjs(data.value.live_time * 1000)
+    const response: any = await GetWebSite()
+    if (response.code === 0) {
+      data.value = response.data || data.value
+      liveTime.value = dayjs(data.value.live_time * 1000)
+    }
   } catch (error) {
     console.log(error)
-    message.error('获取站点信息失败')
   }
 }
 getWebsite()
@@ -142,7 +153,7 @@ const cancel = () => {
 
 const save = async () => {
   try {
-    const response = await axios.put<IBaseResponse>('/admin/configs/website', {
+    const response: any = await UpdateWebSite({
       website_name: data.value.website_name,
       live_time: data.value.live_time,
       icon: data.value.icon,
@@ -150,16 +161,15 @@ const save = async () => {
       owner_profile: data.value.owner_profile,
       owner_picture: data.value.owner_name
     })
-    if (response.data.code === 200) {
+    if (response.code === 0) {
       message.success('保存成功')
       await getWebsite()
       editable.value = false
     } else {
-      message.error(response.data.message)
+      message.error(response.message)
     }
   } catch (error) {
     console.log(error)
-    message.error('保存失败')
   }
 }
 
@@ -201,36 +211,30 @@ const pushRecord = async () => {
     return
   }
   try {
-    const response = await axios.post<IBaseResponse>('/admin/configs/website/records', {
-      record: record.value
-    })
-    if (response.data.code === 200) {
+    const response: any = await AddRecord(record.value)
+    if (response.code === 0) {
       message.success('添加成功')
       await getWebsite()
       record.value = ''
     } else {
-      message.error(response.data.message)
+      message.error(response.message)
     }
   } catch (error) {
     console.log(error)
-    message.error('添加失败')
   }
 }
 
-const pullRecord = async (item: string) => {
+const pullRecord = async (r: string) => {
   try {
-    const response = await axios.delete<IBaseResponse>(
-      `/admin/configs/website/records?record=${item}`
-    )
-    if (response.data.code === 200) {
+    const response: any = await DeleteRecord(r)
+    if (response.code === 0) {
       message.success('删除成功')
       await getWebsite()
     } else {
-      message.error(response.data.message)
+      message.error(response.message)
     }
   } catch (error) {
     console.log(error)
-    message.error('删除失败')
   }
 }
 
@@ -273,6 +277,7 @@ const beforeUpload4picture = (file: UploadProps['fileList'][number]) => {
   width: 200px;
   margin-right: 8px;
 }
+
 .upload-list-inline [class*='-upload-list-rtl'] :deep(.ant-upload-list-item) {
   float: right;
 }

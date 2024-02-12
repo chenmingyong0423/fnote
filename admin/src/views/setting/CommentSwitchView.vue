@@ -11,9 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import axios from '@/http/axios'
-import type { IBaseResponse, IResponse } from '@/interfaces/Common'
-import type { CommentConfig } from '@/interfaces/Config'
+import { type CommentConfig, GetComment, UpdateComment } from '@/interfaces/Config'
 import { message } from 'ant-design-vue'
 import { ref } from 'vue'
 
@@ -23,28 +21,26 @@ const data = ref<CommentConfig>({
 
 const getCommentConfig = async () => {
   try {
-    const response = await axios.get<IResponse<CommentConfig>>('/admin/configs/comment')
-    data.value.enable_comment = response.data.data.enable_comment || false
+    const response: any = await GetComment()
+    data.value.enable_comment = response.data.enable_comment || false
   } catch (error) {
     console.log(error)
-    message.error('获取信息失败')
   }
 }
 getCommentConfig()
 
 const save = async () => {
   try {
-    const response = await axios.put<IBaseResponse>('/admin/configs/comment', {
+    const response: any = await UpdateComment({
       enable_comment: data.value.enable_comment
     })
-    if (response.data.code === 200) {
+    if (response.code === 0) {
       message.success('保存成功')
     } else {
-      message.error(response.data.message)
+      message.error(response.message)
     }
   } catch (error) {
     console.log(error)
-    message.error('保存失败')
   }
   await getCommentConfig()
 }

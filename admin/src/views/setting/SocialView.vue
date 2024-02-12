@@ -25,39 +25,39 @@
         </a-form-item>
         <a-form-item name="css_class" label="图标样式">
           <a-radio-group v-model:value="formState.css_class">
-            <a-radio :value="`i-fa6-brands:x-twitter`"
-              ><div class="i-fa6-brands:x-twitter w-5 h-5"></div
-            ></a-radio>
-            <a-radio :value="`i-fa6-brands:facebook`"
-              ><div class="i-fa6-brands:facebook w-5 h-5"></div
-            ></a-radio>
-            <a-radio :value="`i-fa6-brands:instagram`"
-              ><div class="i-fa6-brands:instagram w-5 h-5"></div
-            ></a-radio>
-            <a-radio :value="`i-fa6-brands:youtube`"
-              ><div class="i-fa6-brands:youtube w-5 h-5"></div
-            ></a-radio>
-            <a-radio :value="`i-fa6-brands:bilibili`"
-              ><div class="i-fa6-brands:bilibili w-5 h-5"></div
-            ></a-radio>
-            <a-radio :value="`i-fa6-brands:qq`"
-              ><div class="i-fa6-brands:qq w-5 h-5"></div
-            ></a-radio>
-            <a-radio :value="`i-fa6-brands:github`"
-              ><div class="i-fa6-brands:github w-5 h-5"></div
-            ></a-radio>
-            <a-radio :value="`i-fa6-brands:square-git`"
-              ><div class="i-fa6-brands:square-git w-5 h-5"></div
-            ></a-radio>
-            <a-radio :value="`i-fa6-brands:weixin`"
-              ><div class="i-fa6-brands:weixin w-5 h-5"></div
-            ></a-radio>
-            <a-radio :value="`i-fa6-brands:zhihu`"
-              ><div class="i-fa6-brands:zhihu w-5 h-5"></div
-            ></a-radio>
-            <a-radio :value="`i-bi:link-45deg`"
-              ><div class="i-bi:link-45deg w-5 h-5"></div
-            ></a-radio>
+            <a-radio :value="`i-fa6-brands:x-twitter`">
+              <div class="i-fa6-brands:x-twitter w-5 h-5"></div>
+            </a-radio>
+            <a-radio :value="`i-fa6-brands:facebook`">
+              <div class="i-fa6-brands:facebook w-5 h-5"></div>
+            </a-radio>
+            <a-radio :value="`i-fa6-brands:instagram`">
+              <div class="i-fa6-brands:instagram w-5 h-5"></div>
+            </a-radio>
+            <a-radio :value="`i-fa6-brands:youtube`">
+              <div class="i-fa6-brands:youtube w-5 h-5"></div>
+            </a-radio>
+            <a-radio :value="`i-fa6-brands:bilibili`">
+              <div class="i-fa6-brands:bilibili w-5 h-5"></div>
+            </a-radio>
+            <a-radio :value="`i-fa6-brands:qq`">
+              <div class="i-fa6-brands:qq w-5 h-5"></div>
+            </a-radio>
+            <a-radio :value="`i-fa6-brands:github`">
+              <div class="i-fa6-brands:github w-5 h-5"></div>
+            </a-radio>
+            <a-radio :value="`i-fa6-brands:square-git`">
+              <div class="i-fa6-brands:square-git w-5 h-5"></div>
+            </a-radio>
+            <a-radio :value="`i-fa6-brands:weixin`">
+              <div class="i-fa6-brands:weixin w-5 h-5"></div>
+            </a-radio>
+            <a-radio :value="`i-fa6-brands:zhihu`">
+              <div class="i-fa6-brands:zhihu w-5 h-5"></div>
+            </a-radio>
+            <a-radio :value="`i-bi:link-45deg`">
+              <div class="i-bi:link-45deg w-5 h-5"></div>
+            </a-radio>
           </a-radio-group>
         </a-form-item>
         <a-form-item
@@ -94,39 +94,39 @@
               v-if="editableData[record.id]"
               v-model:value="editableData[record.id][column.dataIndex]"
             >
-              <a-radio :value="`i-fa6-brands:x-twitter`"
-                ><div class="i-fa6-brands:x-twitter w-5 h-5"></div
-              ></a-radio>
-              <a-radio :value="`i-fa6-brands:facebook`"
-                ><div class="i-fa6-brands:facebook w-5 h-5"></div
-              ></a-radio>
-              <a-radio :value="`i-fa6-brands:instagram`"
-                ><div class="i-fa6-brands:instagram w-5 h-5"></div
-              ></a-radio>
-              <a-radio :value="`i-fa6-brands:youtube`"
-                ><div class="i-fa6-brands:youtube w-5 h-5"></div
-              ></a-radio>
-              <a-radio :value="`i-fa6-brands:bilibili`"
-                ><div class="i-fa6-brands:bilibili w-5 h-5"></div
-              ></a-radio>
-              <a-radio :value="`i-fa6-brands:qq`"
-                ><div class="i-fa6-brands:qq w-5 h-5"></div
-              ></a-radio>
-              <a-radio :value="`i-fa6-brands:github`"
-                ><div class="i-fa6-brands:github w-5 h-5"></div
-              ></a-radio>
-              <a-radio :value="`i-fa6-brands:square-git`"
-                ><div class="i-fa6-brands:square-git w-5 h-5"></div
-              ></a-radio>
-              <a-radio :value="`i-fa6-brands:weixin`"
-                ><div class="i-fa6-brands:weixin w-5 h-5"></div
-              ></a-radio>
-              <a-radio :value="`i-fa6-brands:zhihu`"
-                ><div class="i-fa6-brands:zhihu w-5 h-5"></div
-              ></a-radio>
-              <a-radio :value="`i-bi:link-45deg`"
-                ><div class="i-bi:link-45deg w-5 h-5"></div
-              ></a-radio>
+              <a-radio :value="`i-fa6-brands:x-twitter`">
+                <div class="i-fa6-brands:x-twitter w-5 h-5"></div>
+              </a-radio>
+              <a-radio :value="`i-fa6-brands:facebook`">
+                <div class="i-fa6-brands:facebook w-5 h-5"></div>
+              </a-radio>
+              <a-radio :value="`i-fa6-brands:instagram`">
+                <div class="i-fa6-brands:instagram w-5 h-5"></div>
+              </a-radio>
+              <a-radio :value="`i-fa6-brands:youtube`">
+                <div class="i-fa6-brands:youtube w-5 h-5"></div>
+              </a-radio>
+              <a-radio :value="`i-fa6-brands:bilibili`">
+                <div class="i-fa6-brands:bilibili w-5 h-5"></div>
+              </a-radio>
+              <a-radio :value="`i-fa6-brands:qq`">
+                <div class="i-fa6-brands:qq w-5 h-5"></div>
+              </a-radio>
+              <a-radio :value="`i-fa6-brands:github`">
+                <div class="i-fa6-brands:github w-5 h-5"></div>
+              </a-radio>
+              <a-radio :value="`i-fa6-brands:square-git`">
+                <div class="i-fa6-brands:square-git w-5 h-5"></div>
+              </a-radio>
+              <a-radio :value="`i-fa6-brands:weixin`">
+                <div class="i-fa6-brands:weixin w-5 h-5"></div>
+              </a-radio>
+              <a-radio :value="`i-fa6-brands:zhihu`">
+                <div class="i-fa6-brands:zhihu w-5 h-5"></div>
+              </a-radio>
+              <a-radio :value="`i-bi:link-45deg`">
+                <div class="i-bi:link-45deg w-5 h-5"></div>
+              </a-radio>
             </a-radio-group>
             <template v-else>
               <div class="w-5 h-5" :class="getIcon(text)"></div>
@@ -170,10 +170,14 @@
 
 <script lang="ts" setup>
 import { reactive, ref, type UnwrapRef } from 'vue'
-import type { SocialConfig, SocialConfigReq } from '@/interfaces/Config'
-import type { ICategory } from '@/interfaces/Category'
-import type { IBaseResponse, IPageData, IResponse } from '@/interfaces/Common'
-import axios from '@/http/axios'
+import {
+  AddSocial,
+  DeleteSocial,
+  GetSocial,
+  type SocialConfig,
+  type SocialConfigReq,
+  UpdateSocial
+} from '@/interfaces/Config'
 import { type FormInstance, message } from 'ant-design-vue'
 import { cloneDeep } from 'lodash-es'
 
@@ -208,8 +212,8 @@ const data = ref<SocialConfig[]>([])
 
 const getSocialInfo = async () => {
   try {
-    const response = await axios.get<IResponse<IPageData<ICategory>>>('/admin/configs/social')
-    data.value = response.data.data?.list || []
+    const response: any = await GetSocial()
+    data.value = response.data?.list || []
   } catch (error) {
     console.log(error)
   }
@@ -232,10 +236,9 @@ const addSocialInfo = () => {
       .validateFields()
       .then(async (values) => {
         try {
-          // 提交 body 参数 values
-          const response = await axios.post<IBaseResponse>('/admin/configs/social', formState)
-          if (response.data.code !== 200) {
-            message.error(response.data.message)
+          const response: any = await AddSocial(formState)
+          if (response.code !== 0) {
+            message.error(response.message)
             return
           }
           message.success('添加成功')
@@ -246,7 +249,6 @@ const addSocialInfo = () => {
           await getSocialInfo()
         } catch (error) {
           console.log(error)
-          message.error('添加失败')
         }
       })
       .catch((info) => {
@@ -259,17 +261,15 @@ const addSocialInfo = () => {
 // 删除
 const deleteInfo = async (id: string) => {
   try {
-    // 提交 body 参数 values
-    const response = await axios.delete<IBaseResponse>(`/admin/configs/social/${id}`)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await DeleteSocial(id)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('删除成功')
     await getSocialInfo()
   } catch (error) {
     console.log(error)
-    message.error('删除失败')
   }
 }
 
@@ -282,13 +282,9 @@ const edit = (id: string) => {
 const save = async (id: string) => {
   const editableDatum = editableData[id]
   try {
-    // 提交 body 参数 values
-    const response = await axios.put<IBaseResponse>(
-      `/admin/configs/social/${editableDatum.id}`,
-      editableDatum
-    )
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await UpdateSocial(id, editableDatum)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('更新成功')
@@ -296,7 +292,6 @@ const save = async (id: string) => {
     await getSocialInfo()
   } catch (error) {
     console.log(error)
-    message.error('更新失败')
   }
 }
 const cancel = (key: string) => {

@@ -11,9 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import axios from '@/http/axios'
-import type { IBaseResponse, IResponse } from '@/interfaces/Common'
-import type { FriendConfig, OwnerConfig, SeoConfig } from '@/interfaces/Config'
+import { type FriendConfig, GetFriend, UpdateFriend } from '@/interfaces/Config'
 import { message } from 'ant-design-vue'
 import { ref } from 'vue'
 
@@ -23,28 +21,26 @@ const data = ref<FriendConfig>({
 
 const getCommentConfig = async () => {
   try {
-    const response = await axios.get<IResponse<OwnerConfig>>('/admin/configs/friend')
-    data.value.enable_friend_commit = response.data.data.enable_friend_commit || false
+    const response: any = await GetFriend()
+    data.value.enable_friend_commit = response.data.enable_friend_commit || false
   } catch (error) {
     console.log(error)
-    message.error('获取信息失败')
   }
 }
 getCommentConfig()
 
 const save = async () => {
   try {
-    const response = await axios.put<IBaseResponse>('/admin/configs/friend', {
+    const response: any = await UpdateFriend({
       enable_friend_commit: data.value.enable_friend_commit
     })
-    if (response.data.code === 200) {
+    if (response.code === 0) {
       message.success('保存成功')
     } else {
       message.error(response.data.message)
     }
   } catch (error) {
     console.log(error)
-    message.error('保存失败')
   }
   await getCommentConfig()
 }

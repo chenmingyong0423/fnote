@@ -13,12 +13,16 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
-import type { PostDetailVO, PostRequest } from '@/interfaces/Post'
+import {
+  type Category4Post,
+  GetPostDetail,
+  type PostRequest,
+  type Tag4Post,
+  UpdatePost
+} from '@/interfaces/Post'
 import { message } from 'ant-design-vue'
-import axios from '@/http/axios'
-import type { IBaseResponse, IListData, IResponse } from '@/interfaces/Common'
-import type { SelectCategory } from '@/interfaces/Category'
-import type { SelectTag } from '@/interfaces/Tag'
+import { GetSelectedCategories, type SelectCategory } from '@/interfaces/Category'
+import { GetSelectedTags, type SelectTag } from '@/interfaces/Tag'
 import { useRouter } from 'vue-router'
 import PostEditView from '@/views/post/PostEditView.vue'
 
@@ -54,12 +58,12 @@ const tags = ref<SelectTag[]>([])
 
 const getPostById = async () => {
   try {
-    const response = await axios.get<IResponse<PostDetailVO>>(`/admin/posts/${query.id}`)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await GetPostDetail(query.id as string)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
-    const post = response.data.data
+    const post = response.data
     if (post) {
       postReq.id = post.id
       postReq.author = post.author
@@ -74,10 +78,10 @@ const getPostById = async () => {
       postReq.categories = post.categories
       postReq.is_displayed = post.is_displayed
       postReq.tags = post.tags
-      post.categories.forEach((item) => {
+      post.categories.forEach((item: Category4Post) => {
         postReq.tempCategories.push(item.name)
       })
-      post.tags.forEach((item) => {
+      post.tags.forEach((item: Tag4Post) => {
         postReq.tempTags.push(item.name)
       })
     }
@@ -92,26 +96,23 @@ if (postReq.id) {
 
 const submit = async (postReq: PostRequest) => {
   try {
-    const response = await axios.put<IBaseResponse>('/admin/posts', postReq)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await UpdatePost(postReq)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('更新成功')
     postEditRef.value.clearReq()
-    await router.push('/post/list')
+    await router.push('/home/post/list')
   } catch (error) {
     console.log(error)
-    message.error('更新失败')
   }
 }
 
 const getCategories = async () => {
   try {
-    const response = await axios.get<IResponse<IListData<SelectCategory>>>(
-      '/admin/categories/select'
-    )
-    response.data.data?.list.forEach((item) => {
+    const response = await GetSelectedCategories()
+    response.data?.list.forEach((item: SelectCategory) => {
       categories.value?.push(item)
     })
   } catch (error) {
@@ -123,8 +124,8 @@ getCategories()
 
 const getTags = async () => {
   try {
-    const response = await axios.get<IResponse<IListData<SelectTag>>>('/admin/tags/select')
-    response.data.data?.list.forEach((item) => {
+    const response = await GetSelectedTags()
+    response.data?.list.forEach((item: SelectTag) => {
       tags.value?.push(item)
     })
   } catch (error) {

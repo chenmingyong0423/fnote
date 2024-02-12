@@ -12,12 +12,10 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
-import type { PostRequest } from '@/interfaces/Post'
+import { AddPost, type PostRequest } from '@/interfaces/Post'
 import { message } from 'ant-design-vue'
-import axios from '@/http/axios'
-import type { IBaseResponse, IListData, IResponse } from '@/interfaces/Common'
-import type { SelectCategory } from '@/interfaces/Category'
-import type { SelectTag } from '@/interfaces/Tag'
+import { GetSelectedCategories, type SelectCategory } from '@/interfaces/Category'
+import { GetSelectedTags, type SelectTag } from '@/interfaces/Tag'
 import PostEditView from '@/views/post/PostEditView.vue'
 import originalAxios from 'axios'
 
@@ -48,9 +46,9 @@ const tags = ref<SelectTag[]>([])
 const submit = async (postReq: PostRequest) => {
   console.log(postReq)
   try {
-    const response = await axios.post<IBaseResponse>('/admin/posts', postReq)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await AddPost(postReq)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('添加成功')
@@ -78,10 +76,8 @@ const submit = async (postReq: PostRequest) => {
 
 const getCategories = async () => {
   try {
-    const response = await axios.get<IResponse<IListData<SelectCategory>>>(
-      '/admin/categories/select'
-    )
-    response.data.data?.list.forEach((item) => {
+    const response: any = await GetSelectedCategories()
+    response.data?.list.forEach((item: SelectCategory) => {
       categories.value?.push(item)
     })
   } catch (error) {
@@ -92,8 +88,8 @@ getCategories()
 
 const getTags = async () => {
   try {
-    const response = await axios.get<IResponse<IListData<SelectTag>>>('/admin/tags/select')
-    response.data.data?.list.forEach((item) => {
+    const response: any = await GetSelectedTags()
+    response.data?.list.forEach((item: SelectTag) => {
       tags.value?.push(item)
     })
   } catch (error) {

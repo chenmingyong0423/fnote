@@ -57,9 +57,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import axios from '@/http/axios'
-import type { IBaseResponse, IResponse } from '@/interfaces/Common'
-import type { EmailConfig } from '@/interfaces/Config'
+import { type EmailConfig, GetEmail, UpdateEmail } from '@/interfaces/Config'
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
 
@@ -75,11 +73,10 @@ const data = ref<EmailConfig>({
 
 const getEmail = async () => {
   try {
-    const response = await axios.get<IResponse<EmailConfig>>('/admin/configs/email')
-    data.value = response.data.data || {}
+    const response: any = await GetEmail()
+    data.value = response.data || {}
   } catch (error) {
     console.log(error)
-    message.error('获取信息失败')
   }
 }
 getEmail()
@@ -91,23 +88,22 @@ const cancel = () => {
 
 const save = async () => {
   try {
-    const response = await axios.put<IBaseResponse>('/admin/configs/email', {
+    const response: any = await UpdateEmail({
       host: data.value.host,
       port: data.value.port,
       username: data.value.username,
       password: data.value.password,
       email: data.value.email
     })
-    if (response.data.code === 200) {
+    if (response.code === 0) {
       message.success('保存成功')
       await getEmail()
       editable.value = false
     } else {
-      message.error(response.data.message)
+      message.error(response.message)
     }
   } catch (error) {
     console.log(error)
-    message.error('保存失败')
   }
 }
 

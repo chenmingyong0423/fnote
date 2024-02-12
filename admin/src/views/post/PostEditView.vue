@@ -43,7 +43,7 @@
               mode="multiple"
               style="width: 100%"
               placeholder="请选择分类"
-              :options="categories"
+              :options="props.categories"
             ></a-select>
           </a-form-item>
           <a-form-item
@@ -56,7 +56,7 @@
               mode="multiple"
               style="width: 100%"
               placeholder="请选择标签"
-              :options="tags"
+              :options="props.tags"
             ></a-select>
           </a-form-item>
           <a-form-item
@@ -73,6 +73,7 @@
               :show-upload-list="false"
               action="http://localhost:8080/admin/files/upload"
               :before-upload="beforeUpload"
+              :headers="{ Authorization: userStore.token }"
               @change="handleChange"
             >
               <img v-if="imageUrl" :src="imageUrl" alt="avatar" width="250" height="150" />
@@ -154,13 +155,15 @@ import {
   type UploadChangeParam,
   type UploadProps
 } from 'ant-design-vue'
-import axios from '@/http/axios'
+import axios from '@/utils/axios'
 import type { IResponse } from '@/interfaces/Common'
 import type { SelectCategory } from '@/interfaces/Category'
 import type { SelectTag } from '@/interfaces/Tag'
 import type { File } from '@/interfaces/File'
+import { useUserStore } from '@/stores/user'
 
 const emit = defineEmits(['submit'])
+const userStore = useUserStore()
 
 const props = defineProps({
   req: {
@@ -187,10 +190,6 @@ const formRef = ref<FormInstance>()
 const visible = ref(false)
 const postReq = reactive<PostRequest>(props.req)
 
-const categories = ref<SelectProps['options']>(props.categories)
-
-const tags = ref<SelectProps['options']>(props.tags)
-
 const submit = () => {
   if (formRef.value) {
     formRef.value
@@ -201,9 +200,8 @@ const submit = () => {
           return
         }
         postReq.categories = []
-        postReq.tags = []
         values.tempCategories.forEach((item: string) => {
-          categories.value?.forEach((category) => {
+          props.categories.forEach((category) => {
             if (category.value === item) {
               postReq.categories.push({
                 id: category.id,
@@ -212,8 +210,9 @@ const submit = () => {
             }
           })
         })
+        postReq.tags = []
         values.tempTags.forEach((item: string) => {
-          tags.value?.forEach((tag) => {
+          props.tags.forEach((tag) => {
             if (tag.value === item) {
               postReq.tags.push({
                 id: tag.id,
@@ -222,6 +221,7 @@ const submit = () => {
             }
           })
         })
+        console.log(postReq)
         // 告诉父组件
         emit('submit', postReq)
       })
@@ -241,6 +241,8 @@ const clearReq = () => {
     imageUrl.value = ''
     postReq.categories = []
     postReq.tags = []
+    postReq.tempCategories = []
+    postReq.tempTags = []
   }
   visible.value = false
 }

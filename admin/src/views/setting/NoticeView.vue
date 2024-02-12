@@ -38,9 +38,12 @@
   </div>
 </template>
 <script lang="ts" setup>
-import axios from '@/http/axios'
-import type { IBaseResponse, IResponse } from '@/interfaces/Common'
-import type { NoticeConfig } from '@/interfaces/Config'
+import {
+  GetNotice,
+  type NoticeConfig,
+  UpdateNotice,
+  UpdateNoticeEnabled
+} from '@/interfaces/Config'
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
@@ -55,12 +58,10 @@ const data = ref<NoticeConfig>({
 
 const getNotice = async () => {
   try {
-    const response = await axios.get<IResponse<NoticeConfig>>('/admin/configs/notice')
-    data.value = response.data.data || {}
-    console.log(data)
+    const response: any = await GetNotice()
+    data.value = response.data || {}
   } catch (error) {
     console.log(error)
-    message.error('获取信息失败')
   }
 }
 getNotice()
@@ -72,38 +73,34 @@ const cancel = () => {
 
 const save = async () => {
   try {
-    const response = await axios.put<IBaseResponse>('/admin/configs/notice', {
+    const response: any = await UpdateNotice({
       title: data.value.title,
       content: data.value.content
     })
-    if (response.data.code === 200) {
+    if (response.code === 0) {
       message.success('保存成功')
       await getNotice()
       editable.value = false
     } else {
-      message.error(response.data.message)
+      message.error(response.message)
     }
   } catch (error) {
     console.log(error)
-    message.error('保存失败')
   }
 }
 
 const enabled = async () => {
   try {
-    const response = await axios.put<IBaseResponse>('/admin/configs/notice/enabled', {
-      enabled: data.value.enabled
-    })
-    if (response.data.code === 200) {
+    const response: any = await UpdateNoticeEnabled(data.value.enabled)
+    if (response.code === 0) {
       message.success('更新成功')
       await getNotice()
       editable.value = false
     } else {
-      message.error(response.data.message)
+      message.error(response.message)
     }
   } catch (error) {
     console.log(error)
-    message.error('更新失败')
   }
 }
 </script>
