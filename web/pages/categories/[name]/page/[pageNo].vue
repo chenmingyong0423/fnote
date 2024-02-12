@@ -129,7 +129,7 @@ const postInfos = async () => {
     console.log(error);
   }
 };
-await postInfos();
+postInfos();
 
 // 创建一个计算属性来追踪 query 对象
 const routeQuery = computed(() => route.query);
