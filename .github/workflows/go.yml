@@ -32,12 +32,12 @@ jobs:
         go-version: '1.21.0'
     - name: Get dependencies
       run: |
-        cd backend
+        cd server
         go mod download
     - name: Build
-      working-directory: ./backend
+      working-directory: ./server
       run: go build -v ./...
 
     - name: Test
-      working-directory: ./backend
+      working-directory: ./server
       run: go test -race -coverprofile=cover.out -v ./...

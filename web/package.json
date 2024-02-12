@@ -5,24 +5,36 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "start": "nuxt start",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
-    "@ant-design-vue/nuxt": "^1.2.0",
     "@iconify-json/grommet-icons": "^1.1.10",
     "@nuxt/devtools": "latest",
+    "@types/crypto-js": "^4.2.1",
     "@unocss/preset-icons": "^0.58.0",
+    "dayjs-nuxt": "^2.1.9",
+    "eslint": "^8.56.0",
     "nuxt": "^3.8.2",
+    "prettier": "^3.1.1",
     "vue": "^3.3.12",
     "vue-router": "^4.2.5"
   },
   "dependencies": {
+    "@iconify-json/bi": "^1.1.22",
+    "@iconify-json/fa6-brands": "^1.1.18",
+    "@iconify-json/ph": "^1.1.9",
+    "@kangc/v-md-editor": "^2.3.18",
     "@pinia/nuxt": "^0.5.1",
     "@types/node": "^20.10.4",
     "@unocss/nuxt": "^0.58.0",
+    "crypto-js": "^4.2.0",
+    "highlight.js": "^11.9.0",
     "pinia": "^2.1.7",
-    "pinia-plugin-persistedstate": "^3.2.1"
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "prismjs": "^1.29.0",
+    "qrcode.vue": "^3.4.1"
   }
 }
