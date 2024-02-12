@@ -1,3 +1,5 @@
+import instance from '@/utils/axios'
+
 export interface DataAnalysisVO {
   post_count: number
   category_count: number
@@ -7,4 +9,11 @@ export interface DataAnalysisVO {
   today_view_count: number
   total_view_count: number
   today_user_visit_count: number
+}
+
+export const GetDataAnalysis = () => {
+  return instance({
+    url: '/data-analysis',
+    method: 'get'
+  })
 }

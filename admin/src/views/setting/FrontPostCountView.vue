@@ -25,9 +25,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import axios from '@/http/axios'
-import type { IBaseResponse, IResponse } from '@/interfaces/Common'
-import type { FrontPostCountConfig } from '@/interfaces/Config'
+import {
+  type FrontPostCountConfig,
+  GetFrontPostCount,
+  UpdateFrontPostCount
+} from '@/interfaces/Config'
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
 
@@ -37,39 +39,35 @@ const data = ref<FrontPostCountConfig>({
   count: 0
 })
 
-const getEmail = async () => {
+const getData = async () => {
   try {
-    const response = await axios.get<IResponse<FrontPostCountConfig>>(
-      '/admin/configs/front-post-count'
-    )
-    data.value = response.data.data || {}
+    const response: any = await GetFrontPostCount()
+    data.value = response.data || {}
   } catch (error) {
     console.log(error)
-    message.error('获取信息失败')
   }
 }
-getEmail()
+getData()
 
 const cancel = () => {
   editable.value = false
-  getEmail()
+  getData()
 }
 
 const save = async () => {
   try {
-    const response = await axios.put<IBaseResponse>('/admin/configs/front-post-count', {
+    const response: any = await UpdateFrontPostCount({
       count: data.value.count
     })
-    if (response.data.code === 200) {
+    if (response.code === 0) {
       message.success('保存成功')
-      await getEmail()
+      await getData()
       editable.value = false
     } else {
-      message.error(response.data.message)
+      message.error(response.message)
     }
   } catch (error) {
     console.log(error)
-    message.error('保存失败')
   }
 }
 

@@ -63,15 +63,21 @@
   </div>
 </template>
 <script lang="ts" setup>
-import axios from '@/http/axios'
 import originalAxios from 'axios'
-import { ref, reactive, toRaw, type UnwrapRef, computed } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import type { FormInstance } from 'ant-design-vue'
-import type { IBaseResponse, IPageData, IResponse, PageRequest } from '@/interfaces/Common'
+import type { PageRequest } from '@/interfaces/Common'
 import { message } from 'ant-design-vue'
-import { cloneDeep } from 'lodash-es'
 import dayjs from 'dayjs'
-import type { Tag, TagRequest } from '@/interfaces/Tag'
+import {
+  AddTag,
+  ChangeTagEnabled,
+  DeleteTag,
+  GetTag,
+  type Tag,
+  type TagRequest
+} from '@/interfaces/Tag'
+
 const columns = [
   {
     title: '名称',
@@ -128,11 +134,9 @@ const pagination = computed(() => ({
 
 const getTags = async () => {
   try {
-    const response = await axios.get<IResponse<IPageData<Tag>>>('/admin/tags', {
-      params: pageReq.value
-    })
-    data.value = response.data.data?.list || []
-    total.value = response.data.data?.totalCount || 0
+    const response: any = await GetTag(pageReq.value)
+    data.value = response.data?.list || []
+    total.value = response.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
@@ -155,10 +159,9 @@ const addTag = () => {
       .validateFields()
       .then(async (values) => {
         try {
-          // 提交 body 参数 values
-          const response = await axios.post<IBaseResponse>('/admin/tags', formState)
-          if (response.data.code !== 200) {
-            message.error(response.data.message)
+          const response: any = await AddTag(formState)
+          if (response.code !== 0) {
+            message.error(response.message)
             return
           }
           message.success('添加成功')
@@ -168,7 +171,6 @@ const addTag = () => {
           }
           await getTags()
         } catch (error) {
-          console.log(error)
           if (originalAxios.isAxiosError(error)) {
             // 这是一个由 axios 抛出的错误
             if (error.response) {
@@ -196,17 +198,14 @@ const addTag = () => {
 
 const changeTagEnabled = async (record: Tag) => {
   try {
-    const response = await axios.put<IBaseResponse>(`/admin/tags/enabled/${record.id}`, {
-      enabled: record.enabled
-    })
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await ChangeTagEnabled(record.id, record.enabled)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('修改成功')
   } catch (error) {
     console.log(error)
-    message.error('修改失败')
   }
   await getTags()
 }
@@ -214,10 +213,9 @@ const changeTagEnabled = async (record: Tag) => {
 // 删除
 const deleteTag = async (id: string) => {
   try {
-    // 提交 body 参数 values
-    const response = await axios.delete<IBaseResponse>(`/admin/tags/${id}`)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await DeleteTag(id)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('删除成功')

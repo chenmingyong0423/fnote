@@ -42,13 +42,19 @@ const state = reactive({
 })
 const items = reactive([
   {
+    key: '/home/index',
+    icon: () => h(PieChartOutlined),
+    label: '博客总览',
+    title: '博客总览'
+  },
+  {
     key: 'sub post',
     icon: () => h(PieChartOutlined),
     label: '文章管理',
     title: '文章管理',
     children: [
       {
-        key: '/post/list',
+        key: '/home/post/list',
         label: '文章列表',
         title: '文章列表'
       }
@@ -61,7 +67,7 @@ const items = reactive([
     title: '评论管理',
     children: [
       {
-        key: '/comment',
+        key: '/home/comment',
         label: '评论列表',
         title: '评论列表'
       }
@@ -74,7 +80,7 @@ const items = reactive([
     title: '分类管理',
     children: [
       {
-        key: '/category',
+        key: '/home/category',
         label: '分类列表',
         title: '分类列表'
       }
@@ -87,7 +93,7 @@ const items = reactive([
     title: '标签管理',
     children: [
       {
-        key: '/tag',
+        key: '/home/tag',
         label: '标签列表',
         title: '标签列表'
       }
@@ -100,7 +106,7 @@ const items = reactive([
     title: '友链管理',
     children: [
       {
-        key: '/friend',
+        key: '/home/friend',
         label: '友链列表',
         title: '友链列表'
       }
@@ -113,7 +119,7 @@ const items = reactive([
     title: '系统',
     children: [
       {
-        key: '/setting',
+        key: '/home/setting',
         label: '博客设置',
         title: '博客设置'
       }

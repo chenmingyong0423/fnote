@@ -25,7 +25,11 @@
       </template>
       <template v-if="column.dataIndex === 'status'">
         <a-radio-group
-          v-if="editableData[record.id]"
+          v-if="
+            editableData[record.id] &&
+            editableData[record.id][column.dataIndex] != 3 &&
+            editableData[record.id][column.dataIndex] != 0
+          "
           v-model:value="editableData[record.id][column.dataIndex]"
         >
           <a-radio :value="2">隐藏</a-radio>
@@ -36,8 +40,8 @@
             :color="
               record.status === 0 ? 'processing' : record.status === 1 ? 'success' : 'warning'
             "
-            >{{ statusConvert(record.status) }}</a-tag
-          >
+            >{{ statusConvert(record.status) }}
+          </a-tag>
         </template>
       </template>
       <template v-if="column.dataIndex === 'create_time'">
@@ -90,12 +94,19 @@
 
 <script lang="ts" setup>
 import { computed, reactive, ref, type UnwrapRef } from 'vue'
-import type { Friend, FriendReq } from '@/interfaces/Friend'
-import axios from '@/http/axios'
-import type { IBaseResponse, IPageData, IResponse, PageRequest } from '@/interfaces/Common'
+import {
+  ApproveFriend,
+  DeleteFriend,
+  type Friend,
+  type FriendReq,
+  GetFriends,
+  RejectFriend
+} from '@/interfaces/Friend'
+import type { PageRequest } from '@/interfaces/Common'
 import { message } from 'ant-design-vue'
 import { cloneDeep } from 'lodash-es'
 import dayjs from 'dayjs'
+import { UpdateFriend } from '@/interfaces/Friend'
 
 const columns = [
   {
@@ -152,11 +163,9 @@ const pagination = computed(() => ({
 
 const get = async () => {
   try {
-    const response = await axios.get<IResponse<IPageData<Friend>>>('/admin/friends', {
-      params: pageReq.value
-    })
-    data.value = response.data.data?.list || []
-    total.value = response.data.data?.totalCount || 0
+    const response: any = await GetFriends(pageReq.value)
+    data.value = response.data?.list || []
+    total.value = response.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
@@ -170,17 +179,15 @@ const change = (pg, filters, sorter, { currentDataSource }) => {
 // 删除
 const deleteInfo = async (id: string) => {
   try {
-    // 提交 body 参数 values
-    const response = await axios.delete<IBaseResponse>(`/admin/friends/${id}`)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await DeleteFriend(id)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('删除成功')
     await get()
   } catch (error) {
     console.log(error)
-    message.error('删除失败')
   }
 }
 
@@ -196,12 +203,9 @@ const openApprovalDialog = (id: string) => {
 
 const approved = async () => {
   try {
-    // 提交 body 参数 values
-    const response = await axios.put<IBaseResponse>(`/admin/friends/${updatedId.value}/approval`, {
-      host: blogUrl.value
-    })
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await ApproveFriend(updatedId.value, blogUrl.value)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('接受成功')
@@ -210,7 +214,6 @@ const approved = async () => {
     await get()
   } catch (error) {
     console.log(error)
-    message.error('接受失败')
   }
 }
 
@@ -223,13 +226,9 @@ const rejectionDialog = ref(false)
 const reason = ref('')
 const rejected = async () => {
   try {
-    // 提交 body 参数 values
-    const response = await axios.put<IBaseResponse>(`/admin/friends/${updatedId.value}/rejection`, {
-      host: blogUrl.value,
-      reason: reason.value
-    })
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await RejectFriend(updatedId.value, blogUrl.value, reason.value)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('拒绝成功')
@@ -238,7 +237,6 @@ const rejected = async () => {
     updatedId.value = ''
   } catch (error) {
     console.log(error)
-    message.error('拒绝失败')
   }
 }
 
@@ -251,10 +249,9 @@ const edit = (id: string) => {
 const save = async (id: string) => {
   const editableDatum = editableData[id]
   try {
-    // 提交 body 参数 values
-    const response = await axios.put<IBaseResponse>(`/admin/friends/${id}`, editableDatum)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await UpdateFriend(id, editableDatum)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('更新成功')
@@ -262,7 +259,6 @@ const save = async (id: string) => {
     await get()
   } catch (error) {
     console.log(error)
-    message.error('更新失败')
   }
 }
 const cancel = (key: string) => {

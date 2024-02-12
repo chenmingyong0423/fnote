@@ -1,3 +1,5 @@
+import instance from '@/utils/axios'
+
 export interface IPost {
   id: string
   cover_img: string
@@ -61,4 +63,62 @@ export interface PostRequest {
   meta_description: string
   meta_keywords: string
   is_comment_allowed: boolean
+}
+
+export const AddPost = (post: PostRequest) => {
+  return instance({
+    url: '/posts',
+    method: 'post',
+    data: post
+  })
+}
+
+export const GetPost = (pageReq: PageRequest) => {
+  return instance({
+    url: '/posts',
+    method: 'get',
+    params: pageReq
+  })
+}
+
+export const DeletePost = (id: string) => {
+  return instance({
+    url: `/posts/${id}`,
+    method: 'delete'
+  })
+}
+
+export const ChangePostDisplayStatus = (id: string, isDisplayed: boolean) => {
+  return instance({
+    url: `/posts/${id}/display`,
+    method: 'put',
+    data: {
+      is_displayed: isDisplayed
+    }
+  })
+}
+
+export const ChangeCommentAllowedStatus = (id: string, isCommentAllowed: boolean) => {
+  return instance({
+    url: `/posts/${id}/comment-allowed`,
+    method: 'put',
+    data: {
+      is_comment_allowed: isCommentAllowed
+    }
+  })
+}
+
+export const GetPostDetail = (id: string) => {
+  return instance({
+    url: `/posts/${id}`,
+    method: 'get'
+  })
+}
+
+export const UpdatePost = (post: PostRequest) => {
+  return instance({
+    url: `/posts`,
+    method: 'put',
+    data: post
+  })
 }

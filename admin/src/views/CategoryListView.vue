@@ -109,12 +109,21 @@
   </div>
 </template>
 <script lang="ts" setup>
-import axios from '@/http/axios'
 import originalAxios from 'axios'
-import { ref, reactive, toRaw, type UnwrapRef, computed } from 'vue'
+import { ref, reactive, type UnwrapRef, computed } from 'vue'
 import type { FormInstance } from 'ant-design-vue'
-import type { IBaseResponse, IPageData, IResponse, PageRequest } from '@/interfaces/Common'
-import type { CategoryRequest, ICategory } from '@/interfaces/Category'
+import type { PageRequest } from '@/interfaces/Common'
+import {
+  AddCategory,
+  type CategoryRequest,
+  ChangeCategoryEnabled,
+  ChangeCategoryShowInNav,
+  DeleteCategory,
+  GetCategories,
+  type ICategory,
+  UpdateCategory,
+  type UpdateCategoryRequest
+} from '@/interfaces/Category'
 import { message } from 'ant-design-vue'
 import { cloneDeep } from 'lodash-es'
 import dayjs from 'dayjs'
@@ -185,11 +194,9 @@ const pagination = computed(() => ({
 
 const getCategories = async () => {
   try {
-    const response = await axios.get<IResponse<IPageData<ICategory>>>('/admin/categories', {
-      params: pageReq.value
-    })
-    data.value = response.data.data?.list || []
-    total.value = response.data.data?.totalCount || 0
+    const response: any = await GetCategories(pageReq.value)
+    data.value = response.data?.list || []
+    total.value = response.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
@@ -214,10 +221,9 @@ const addCategory = () => {
       .validateFields()
       .then(async (values) => {
         try {
-          // 提交 body 参数 values
-          const response = await axios.post<IBaseResponse>('/admin/categories', formState)
-          if (response.data.code !== 200) {
-            message.error(response.data.message)
+          const response: any = await AddCategory(formState)
+          if (response.code !== 0) {
+            message.error(response.message)
             return
           }
           message.success('添加成功')
@@ -227,7 +233,6 @@ const addCategory = () => {
           }
           await getCategories()
         } catch (error) {
-          console.log(error)
           if (originalAxios.isAxiosError(error)) {
             // 这是一个由 axios 抛出的错误
             if (error.response) {
@@ -255,34 +260,28 @@ const addCategory = () => {
 
 const changeCategoryEnabled = async (record: ICategory) => {
   try {
-    const response = await axios.put<IBaseResponse>(`/admin/categories/enabled/${record.id}`, {
-      enabled: record.enabled
-    })
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await ChangeCategoryEnabled(record.id, record.enabled)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('修改成功')
   } catch (error) {
     console.log(error)
-    message.error('修改失败')
   }
   await getCategories()
 }
 
 const changeCategoryNav = async (record: ICategory) => {
   try {
-    const response = await axios.put<IBaseResponse>(`/admin/categories/navigation/${record.id}`, {
-      show_in_nav: record.show_in_nav
-    })
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await ChangeCategoryShowInNav(record.id, record.show_in_nav)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('设置成功')
   } catch (error) {
     console.log(error)
-    message.error('设置失败')
   }
   await getCategories()
 }
@@ -290,10 +289,9 @@ const changeCategoryNav = async (record: ICategory) => {
 // 删除
 const deleteCategory = async (id: string) => {
   try {
-    // 提交 body 参数 values
-    const response = await axios.delete<IBaseResponse>(`/admin/categories/${id}`)
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await DeleteCategory(id)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('删除成功')
@@ -320,7 +318,7 @@ const deleteCategory = async (id: string) => {
 }
 
 // 编辑
-const editableData: UnwrapRef<Record<string, ICategory>> = reactive({})
+const editableData: UnwrapRef<Record<string, UpdateCategoryRequest>> = reactive({})
 const edit = (id: string) => {
   editableData[id] = cloneDeep(data.value.filter((item) => id === item.id)[0])
 }
@@ -328,13 +326,9 @@ const edit = (id: string) => {
 const save = async (id: string) => {
   const editableDatum = editableData[id]
   try {
-    // 提交 body 参数 values
-    const response = await axios.put<IBaseResponse>(
-      `/admin/categories/${editableDatum.id}`,
-      editableDatum
-    )
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    const response: any = await UpdateCategory(id, editableDatum)
+    if (response.code !== 0) {
+      message.error(response.message)
       return
     }
     message.success('更新成功')
@@ -342,7 +336,6 @@ const save = async (id: string) => {
     await getCategories()
   } catch (error) {
     console.log(error)
-    message.error('更新失败')
   }
 }
 const cancel = (key: string) => {

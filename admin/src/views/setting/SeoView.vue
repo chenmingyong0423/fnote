@@ -70,6 +70,7 @@
           action="http://localhost:8080/admin/files/upload"
           @change="handleChange"
           :before-upload="beforeUpload"
+          :headers="{ Authorization: userStore.token }"
           :maxCount="1"
         >
           <a-button>
@@ -89,12 +90,13 @@
   </div>
 </template>
 <script lang="ts" setup>
-import axios from '@/http/axios'
-import type { IBaseResponse, IResponse } from '@/interfaces/Common'
-import type { SeoConfig } from '@/interfaces/Config'
+import { GetSeo, type SeoConfig, UpdateSeo } from '@/interfaces/Config'
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
 import type { UploadChangeParam, UploadProps } from 'ant-design-vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 const editable = ref<boolean>(false)
 
@@ -111,11 +113,10 @@ const data = ref<SeoConfig>({
 
 const getSeo = async () => {
   try {
-    const response = await axios.get<IResponse<SeoConfig>>('/admin/configs/seo')
-    data.value = response.data.data || {}
+    const response = await GetSeo()
+    data.value = response.data || {}
   } catch (error) {
     console.log(error)
-    message.error('获取信息失败')
   }
 }
 getSeo()
@@ -127,7 +128,7 @@ const cancel = () => {
 
 const save = async () => {
   try {
-    const response = await axios.put<IBaseResponse>('/admin/configs/seo', {
+    const response: any = await UpdateSeo({
       title: data.value.title,
       description: data.value.description,
       og_title: data.value.og_title,
@@ -137,16 +138,15 @@ const save = async () => {
       author: data.value.author,
       robots: data.value.robots
     })
-    if (response.data.code === 200) {
+    if (response.code === 0) {
       message.success('保存成功')
       await getSeo()
       editable.value = false
     } else {
-      message.error(response.data.message)
+      message.error(response.message)
     }
   } catch (error) {
     console.log(error)
-    message.error('保存失败')
   }
 }
 
@@ -187,6 +187,7 @@ const beforeUpload = (file: UploadProps['fileList'][number]) => {
   width: 200px;
   margin-right: 8px;
 }
+
 .upload-list-inline [class*='-upload-list-rtl'] :deep(.ant-upload-list-item) {
   float: right;
 }
