@@ -33,9 +33,6 @@ mongodb:
   uri: mongodb://localhost:27017
   username: fnote-user
   password: fnote-password
-#  uri: mongodb://1.12.74.214:27017
-#  username: f-cmy
-#  password: f-lsyily999
   auth_source: fnote
   database: fnote
 gravatar:
