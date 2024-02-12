@@ -86,13 +86,13 @@ const tagList = async () => {
   }
 };
 
-categoryAndTags();
-tagList();
+await categoryAndTags();
+await tagList();
 ct.value = ct.value.substring(0, ct.value.length - 1);
 
 const configStore = useConfigStore();
 useHead({
-  title: `文章分类和标签 - ${configStore.seo_meta_config.title}`,
+  title: `文章分类和标签-${configStore.seo_meta_config.title}`,
   meta: [
     {
       name: "description",
@@ -107,7 +107,7 @@ useHead({
   ],
 });
 useSeoMeta({
-  ogTitle: `文章分类和标签 - ${configStore.seo_meta_config.og_title}`,
+  ogTitle: `文章分类和标签-${configStore.seo_meta_config.og_title}`,
   ogDescription: `所有的文章分类和标签，包括${ct.value}等不同主题。`,
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",

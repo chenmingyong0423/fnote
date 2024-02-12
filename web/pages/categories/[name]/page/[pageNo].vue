@@ -89,7 +89,6 @@ let req = ref<PageRequest>({
 const totalPosts = ref<Number>(0);
 const title = ref<string>("");
 
-const homeStore = useHomeStore();
 const configStore = useConfigStore();
 const filter = ref<string>("latest");
 if (route.query.filter && route.query.filter !== "") {
@@ -129,7 +128,7 @@ const postInfos = async () => {
     console.log(error);
   }
 };
-postInfos();
+await postInfos();
 
 // 创建一个计算属性来追踪 query 对象
 const routeQuery = computed(() => route.query);
@@ -169,7 +168,7 @@ watch(
 );
 
 useHead({
-  title: `${title.value} - ${configStore.seo_meta_config.title}`,
+  title: `${title.value}-${configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: `${title.value}文章列表` },
     { name: "keywords", content: configStore.seo_meta_config.keywords },
@@ -181,7 +180,7 @@ useHead({
   ],
 });
 useSeoMeta({
-  ogTitle: `${title.value} - ${configStore.seo_meta_config.og_title}`,
+  ogTitle: `${title.value}-${configStore.seo_meta_config.og_title}`,
   ogDescription: `${title.value}文章列表`,
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",

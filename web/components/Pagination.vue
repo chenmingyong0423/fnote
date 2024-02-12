@@ -122,7 +122,7 @@ const perPageSize = ref(props.perPageCount);
 // 最大显示多少个页码
 const maxPageNumbers = ref(3);
 
-onMounted(() => {
+onBeforeUpdate(() => {
   if (window.innerWidth >= 768) {
     maxPageNumbers.value = 5;
   } else {
