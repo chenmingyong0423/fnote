@@ -241,7 +241,7 @@ const getPostDetail = async () => {
     console.log(error);
   }
 };
-getPostDetail();
+await getPostDetail();
 
 const handleCopyCodeSuccess = () => {
   console.log("成功");
@@ -514,7 +514,7 @@ useHead({
   ],
 });
 useSeoMeta({
-  ogTitle: `${post.value?.title} - ${configStore.seo_meta_config.og_title}`,
+  ogTitle: `${post.value?.title}-${configStore.seo_meta_config.og_title}`,
   ogDescription: description,
   ogImage: post.value?.cover_img,
   twitterCard: "summary",

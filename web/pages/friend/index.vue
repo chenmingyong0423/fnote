@@ -146,7 +146,7 @@ const getFriendList = async () => {
     toast.showToast(error.toString(), 2000);
   }
 };
-getFriendList();
+await getFriendList();
 
 const submit = async () => {
   try {
@@ -203,7 +203,7 @@ const submit = async () => {
 };
 
 useHead({
-  title: `友链 - ${configStore.seo_meta_config.title}`,
+  title: `友链-${configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: "友链列表" },
     { name: "keywords", content: configStore.seo_meta_config.keywords },
@@ -215,7 +215,7 @@ useHead({
   ],
 });
 useSeoMeta({
-  ogTitle: `友链 - ${configStore.seo_meta_config.og_title}`,
+  ogTitle: `友链-${configStore.seo_meta_config.og_title}`,
   ogDescription: "友链列表",
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",

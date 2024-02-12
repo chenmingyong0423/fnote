@@ -152,10 +152,12 @@ const postInfos = async () => {
     console.log(error);
   }
 };
-postInfos();
+
+await postInfos();
+
 
 useHead({
-  title: `${title.value} - ${configStore.seo_meta_config.title}`,
+  title: `${title.value}-${configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: `${title.value}文章列表` },
     { name: "keywords", content: configStore.seo_meta_config.keywords },
@@ -167,7 +169,7 @@ useHead({
   ],
 });
 useSeoMeta({
-  ogTitle: `${title.value} - ${configStore.seo_meta_config.og_title}`,
+  ogTitle: `${title.value}-${configStore.seo_meta_config.og_title}`,
   ogDescription: `${title.value}文章列表`,
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",

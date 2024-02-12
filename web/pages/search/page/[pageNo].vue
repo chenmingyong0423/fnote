@@ -128,7 +128,7 @@ const postInfos = async () => {
     console.log(error);
   }
 };
-postInfos();
+await postInfos();
 
 // 创建一个计算属性来追踪 query 对象
 const routeQuery = computed(() => route.query);
@@ -175,7 +175,7 @@ watch(
 const configStore = useConfigStore();
 const seo = () => {
   useHead({
-    title: `${keyword.value} - 搜索 - ${configStore.seo_meta_config.title}`,
+    title: `${keyword.value}-搜索-${configStore.seo_meta_config.title}`,
     meta: [
       { name: "description", content: `${keyword.value} 搜索结果` },
       { name: "keywords", content: configStore.seo_meta_config.keywords },
@@ -191,7 +191,7 @@ const seo = () => {
     ],
   });
   useSeoMeta({
-    ogTitle: `${keyword.value} - 搜索 - ${configStore.seo_meta_config.og_title}`,
+    ogTitle: `${keyword.value}-搜索-${configStore.seo_meta_config.og_title}`,
     ogDescription: `${keyword.value} 搜索结果`,
     ogImage: configStore.seo_meta_config.og_image,
     twitterCard: "summary",
