@@ -78,7 +78,7 @@ const login = async () => {
   if (success) {
     await router.push('/home/index')
   }
-  // todo: 登录失败的提示
+  message.error('登录失败')
 }
 </script>
 
