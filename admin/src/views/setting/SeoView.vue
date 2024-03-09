@@ -114,7 +114,7 @@ const data = ref<SeoConfig>({
 const getSeo = async () => {
   try {
     const response = await GetSeo()
-    data.value = response.data || {}
+    data.value = response.data.data || {}
   } catch (error) {
     console.log(error)
   }
@@ -138,12 +138,12 @@ const save = async () => {
       author: data.value.author,
       robots: data.value.robots
     })
-    if (response.code === 0) {
+    if (response.data.code === 0) {
       message.success('保存成功')
       await getSeo()
       editable.value = false
     } else {
-      message.error(response.message)
+      message.error(response.data.message)
     }
   } catch (error) {
     console.log(error)
@@ -160,7 +160,7 @@ const handleChange = (info: UploadChangeParam) => {
   console.log(info)
   if (info.file.status === 'done') {
     // Get this url from response in real world.
-    data.value.og_image = info.file.response.data.url
+    data.value.og_image = info.file.response.data.data.url
     message.success('上传成功')
   }
   if (info.file.status === 'error') {

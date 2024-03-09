@@ -59,11 +59,11 @@ const tags = ref<SelectTag[]>([])
 const getPostById = async () => {
   try {
     const response: any = await GetPostDetail(query.id as string)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
-    const post = response.data
+    const post = response.data.data
     if (post) {
       postReq.id = post.id
       postReq.author = post.author
@@ -97,8 +97,8 @@ if (postReq.id) {
 const submit = async (postReq: PostRequest) => {
   try {
     const response: any = await UpdatePost(postReq)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('更新成功')
@@ -112,7 +112,7 @@ const submit = async (postReq: PostRequest) => {
 const getCategories = async () => {
   try {
     const response = await GetSelectedCategories()
-    response.data?.list.forEach((item: SelectCategory) => {
+    response.data.data?.list.forEach((item: SelectCategory) => {
       categories.value?.push(item)
     })
   } catch (error) {
@@ -125,7 +125,7 @@ getCategories()
 const getTags = async () => {
   try {
     const response = await GetSelectedTags()
-    response.data?.list.forEach((item: SelectTag) => {
+    response.data.data?.list.forEach((item: SelectTag) => {
       tags.value?.push(item)
     })
   } catch (error) {

@@ -112,8 +112,8 @@ const addPay = () => {
       .then(async (values) => {
         try {
           const response: any = await AddPay(formState)
-          if (response.code !== 0) {
-            message.error(response.data.message)
+          if (response.data.data.code !== 0) {
+            message.error(response.data.data.data.message)
             return
           }
           message.success('添加成功')
@@ -136,11 +136,11 @@ const addPay = () => {
 const deletePay = async (record: PayConfig) => {
   try {
     const response: any = await DeletePay(record.name, record.image)
-    if (response.code === 0) {
+    if (response.data.data.code === 0) {
       message.success('删除成功')
       await getPayConfig()
     } else {
-      message.error(response.message)
+      message.error(response.data.data.message)
     }
   } catch (error) {
     console.log(error)

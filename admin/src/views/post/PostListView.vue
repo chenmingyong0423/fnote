@@ -165,8 +165,8 @@ const change = (pg, filters, sorter, { currentDataSource }) => {
 const getPosts = async () => {
   try {
     const response = await GetPost(req.value)
-    posts.value = response.data?.list || []
-    total.value = response.data?.totalCount || 0
+    posts.value = response.data.data?.list || []
+    total.value = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
@@ -176,8 +176,8 @@ const deletePost = async (record: IPost) => {
   try {
     console.log(record)
     const response: any = await DeletePost(record.id)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('删除成功')
@@ -192,8 +192,8 @@ getPosts()
 const changeDisplayStatus = async (id: string, is_displayed: boolean) => {
   try {
     const response: any = await ChangePostDisplayStatus(id, is_displayed)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('更新成功')
@@ -206,8 +206,8 @@ const changeDisplayStatus = async (id: string, is_displayed: boolean) => {
 const changeCommentAllowedStatus = async (id: string, is_comment_allowed: boolean) => {
   try {
     const response: any = await ChangeCommentAllowedStatus(id, is_comment_allowed)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('更新成功')

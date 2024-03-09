@@ -213,7 +213,7 @@ const data = ref<SocialConfig[]>([])
 const getSocialInfo = async () => {
   try {
     const response: any = await GetSocial()
-    data.value = response.data?.list || []
+    data.value = response.data.data?.list || []
   } catch (error) {
     console.log(error)
   }
@@ -237,8 +237,8 @@ const addSocialInfo = () => {
       .then(async (values) => {
         try {
           const response: any = await AddSocial(formState)
-          if (response.code !== 0) {
-            message.error(response.message)
+          if (response.data.code !== 0) {
+            message.error(response.data.message)
             return
           }
           message.success('添加成功')
@@ -262,8 +262,8 @@ const addSocialInfo = () => {
 const deleteInfo = async (id: string) => {
   try {
     const response: any = await DeleteSocial(id)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('删除成功')
@@ -283,8 +283,8 @@ const save = async (id: string) => {
   const editableDatum = editableData[id]
   try {
     const response: any = await UpdateSocial(id, editableDatum)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('更新成功')

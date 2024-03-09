@@ -22,7 +22,7 @@ const data = ref<CommentConfig>({
 const getCommentConfig = async () => {
   try {
     const response: any = await GetComment()
-    data.value.enable_comment = response.data.enable_comment || false
+    data.value.enable_comment = response.data.data.enable_comment || false
   } catch (error) {
     console.log(error)
   }
@@ -34,10 +34,10 @@ const save = async () => {
     const response: any = await UpdateComment({
       enable_comment: data.value.enable_comment
     })
-    if (response.code === 0) {
+    if (response.data.code === 0) {
       message.success('保存成功')
     } else {
-      message.error(response.message)
+      message.error(response.data.message)
     }
   } catch (error) {
     console.log(error)

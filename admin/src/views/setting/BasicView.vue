@@ -131,8 +131,8 @@ const data = ref<WebsiteConfig>({
 const getWebsite = async () => {
   try {
     const response: any = await GetWebSite()
-    if (response.code === 0) {
-      data.value = response.data || data.value
+    if (response.data.code === 0) {
+      data.value = response.data.data || data.value
       liveTime.value = dayjs(data.value.live_time * 1000)
     }
   } catch (error) {
@@ -161,12 +161,12 @@ const save = async () => {
       owner_profile: data.value.owner_profile,
       owner_picture: data.value.owner_name
     })
-    if (response.code === 0) {
+    if (response.data.code === 0) {
       message.success('保存成功')
       await getWebsite()
       editable.value = false
     } else {
-      message.error(response.message)
+      message.error(response.data.message)
     }
   } catch (error) {
     console.log(error)
@@ -183,7 +183,7 @@ const handleChange = (info: UploadChangeParam) => {
   console.log(info)
   if (info.file.status === 'done') {
     // Get this url from response in real world.
-    data.value.icon = info.file.response.data.url
+    data.value.icon = info.file.response.data.data.url
     message.success('上传成功')
   }
   if (info.file.status === 'error') {
@@ -212,12 +212,12 @@ const pushRecord = async () => {
   }
   try {
     const response: any = await AddRecord(record.value)
-    if (response.code === 0) {
+    if (response.data.code === 0) {
       message.success('添加成功')
       await getWebsite()
       record.value = ''
     } else {
-      message.error(response.message)
+      message.error(response.data.message)
     }
   } catch (error) {
     console.log(error)
@@ -227,11 +227,11 @@ const pushRecord = async () => {
 const pullRecord = async (r: string) => {
   try {
     const response: any = await DeleteRecord(r)
-    if (response.code === 0) {
+    if (response.data.code === 0) {
       message.success('删除成功')
       await getWebsite()
     } else {
-      message.error(response.message)
+      message.error(response.data.message)
     }
   } catch (error) {
     console.log(error)
@@ -250,7 +250,7 @@ const handleChange4picture = (info: UploadChangeParam) => {
   console.log(info)
   if (info.file.status === 'done') {
     // Get this url from response in real world.
-    data.value.owner_picture = info.file.response.data.url
+    data.value.owner_picture = info.file.response.data.data.url
     message.success('上传成功')
   }
   if (info.file.status === 'error') {

@@ -74,7 +74,7 @@ const data = ref<EmailConfig>({
 const getEmail = async () => {
   try {
     const response: any = await GetEmail()
-    data.value = response.data || {}
+    data.value = response.data.data || {}
   } catch (error) {
     console.log(error)
   }
@@ -95,12 +95,12 @@ const save = async () => {
       password: data.value.password,
       email: data.value.email
     })
-    if (response.code === 0) {
+    if (response.data.code === 0) {
       message.success('保存成功')
       await getEmail()
       editable.value = false
     } else {
-      message.error(response.message)
+      message.error(response.data.message)
     }
   } catch (error) {
     console.log(error)
