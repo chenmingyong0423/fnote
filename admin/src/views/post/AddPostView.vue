@@ -47,8 +47,8 @@ const submit = async (postReq: PostRequest) => {
   console.log(postReq)
   try {
     const response: any = await AddPost(postReq)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('添加成功')
@@ -58,7 +58,7 @@ const submit = async (postReq: PostRequest) => {
     if (originalAxios.isAxiosError(error)) {
       // 这是一个由 axios 抛出的错误
       if (error.response) {
-        if (error.response.status === 409) {
+        if (error.response.data.status === 409) {
           message.error('id 重复')
           return
         }
@@ -77,7 +77,7 @@ const submit = async (postReq: PostRequest) => {
 const getCategories = async () => {
   try {
     const response: any = await GetSelectedCategories()
-    response.data?.list.forEach((item: SelectCategory) => {
+    response.data.data?.list.forEach((item: SelectCategory) => {
       categories.value?.push(item)
     })
   } catch (error) {
@@ -89,7 +89,7 @@ getCategories()
 const getTags = async () => {
   try {
     const response: any = await GetSelectedTags()
-    response.data?.list.forEach((item: SelectTag) => {
+    response.data.data?.list.forEach((item: SelectTag) => {
       tags.value?.push(item)
     })
   } catch (error) {

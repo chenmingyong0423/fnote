@@ -22,7 +22,7 @@ const data = ref<FriendConfig>({
 const getCommentConfig = async () => {
   try {
     const response: any = await GetFriend()
-    data.value.enable_friend_commit = response.data.enable_friend_commit || false
+    data.value.enable_friend_commit = response.data.data.enable_friend_commit || false
   } catch (error) {
     console.log(error)
   }
@@ -34,10 +34,10 @@ const save = async () => {
     const response: any = await UpdateFriend({
       enable_friend_commit: data.value.enable_friend_commit
     })
-    if (response.code === 0) {
+    if (response.data.code === 0) {
       message.success('保存成功')
     } else {
-      message.error(response.data.message)
+      message.error(response.data.data.message)
     }
   } catch (error) {
     console.log(error)

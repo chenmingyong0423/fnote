@@ -16,12 +16,12 @@ export const useUserStore = defineStore('user', {
       try {
         const res: any = await login(req)
         console.log(res)
-        if (res.code === 0) {
-          this.token = res.data?.token || ''
+        if (res.data.code === 0) {
+          this.token = res.data.data?.token || ''
           localStorage.setItem('token', this.token)
           return true
         }
-        if (res.code === 100001) {
+        if (res.data.code === 100001) {
           message.error('用户名或密码错误').then((r) => r)
           return false
         }

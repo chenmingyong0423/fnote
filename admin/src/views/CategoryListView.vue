@@ -195,8 +195,8 @@ const pagination = computed(() => ({
 const getCategories = async () => {
   try {
     const response: any = await GetCategories(pageReq.value)
-    data.value = response.data?.list || []
-    total.value = response.data?.totalCount || 0
+    data.value = response.data.data?.list || []
+    total.value = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
@@ -222,8 +222,8 @@ const addCategory = () => {
       .then(async (values) => {
         try {
           const response: any = await AddCategory(formState)
-          if (response.code !== 0) {
-            message.error(response.message)
+          if (response.data.code !== 0) {
+            message.error(response.data.message)
             return
           }
           message.success('添加成功')
@@ -236,7 +236,7 @@ const addCategory = () => {
           if (originalAxios.isAxiosError(error)) {
             // 这是一个由 axios 抛出的错误
             if (error.response) {
-              if (error.response.status === 409) {
+              if (error.response.data.status === 409) {
                 message.error('分类名称或路由重复')
                 return
               }
@@ -261,8 +261,8 @@ const addCategory = () => {
 const changeCategoryEnabled = async (record: ICategory) => {
   try {
     const response: any = await ChangeCategoryEnabled(record.id, record.enabled)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('修改成功')
@@ -275,8 +275,8 @@ const changeCategoryEnabled = async (record: ICategory) => {
 const changeCategoryNav = async (record: ICategory) => {
   try {
     const response: any = await ChangeCategoryShowInNav(record.id, record.show_in_nav)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('设置成功')
@@ -290,8 +290,8 @@ const changeCategoryNav = async (record: ICategory) => {
 const deleteCategory = async (id: string) => {
   try {
     const response: any = await DeleteCategory(id)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('删除成功')
@@ -301,7 +301,7 @@ const deleteCategory = async (id: string) => {
     if (originalAxios.isAxiosError(error)) {
       // 这是一个由 axios 抛出的错误
       if (error.response) {
-        if (error.response.status === 404) {
+        if (error.response.data.status === 404) {
           message.error('id 不存在')
           return
         }
@@ -327,8 +327,8 @@ const save = async (id: string) => {
   const editableDatum = editableData[id]
   try {
     const response: any = await UpdateCategory(id, editableDatum)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('更新成功')

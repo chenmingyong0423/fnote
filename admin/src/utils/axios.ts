@@ -14,7 +14,12 @@ instance.interceptors.request.use(
   (config) => {
     const userStore = useUserStore()
     config.headers.set('Authorization', userStore.token)
-    config.headers.set('Content-Type', 'application/json')
+    // 判断body里是否有 file 参数，有则设置请求头为 multipart/form-data
+    if (config.data instanceof FormData) {
+      config.headers.set('Content-Type', 'multipart/form-data')
+    } else {
+      config.headers.set('Content-Type', 'application/json')
+    }
     return config
   },
   (error) => {
@@ -26,7 +31,7 @@ instance.interceptors.request.use(
 // 响应拦截器
 instance.interceptors.response.use(
   (response) => {
-    return response.data
+    return response
   },
   (error) => {
     // 对响应错误做点什么
@@ -34,7 +39,9 @@ instance.interceptors.response.use(
       message.error(error.toString()).then((r) => r)
       return
     }
+
     const userStore = useUserStore()
+    const contentType = error.response.headers['content-type']
 
     switch (error.response.status) {
       case 401:
@@ -44,10 +51,22 @@ instance.interceptors.response.use(
         router.push({ path: '/login', replace: true }).then((r) => r)
         break
       case 500:
-        message.error(error.toString()).then((r) => r)
+        if (contentType && contentType.includes('application/json') && error.response.data) {
+          console.log(error)
+          message.error(error.response.data.message).then((r) => r)
+          return
+        } else {
+          message.error(error.toString()).then((r) => r)
+        }
         break
       case 404:
-        message.error(error.toString()).then((r) => r)
+        if (contentType && contentType.includes('application/json')) {
+          console.log(error)
+          message.error(error.response.data.message).then((r) => r)
+          return
+        } else {
+          message.error(error.toString()).then((r) => r)
+        }
         break
     }
     return Promise.reject(error)

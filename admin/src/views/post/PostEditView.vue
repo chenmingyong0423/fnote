@@ -272,7 +272,7 @@ const handleChange = (info: UploadChangeParam) => {
       imageUrl.value = base64Url
       loading.value = false
       // Get this url from response in real world.
-      postReq.cover_img = info.file.response.data.url
+      postReq.cover_img = info.file.response.data.data.url
       message.success('上传成功')
     })
   }
@@ -306,8 +306,8 @@ const handleUploadImage = async (event, insertImage, files) => {
         'Content-Type': 'multipart/form-data'
       }
     })
-    if (response.data.code !== 200) {
-      message.error(response.data.message)
+    if (response.data.data.code !== 200) {
+      message.error(response.data.data.message)
       return
     }
     insertImage({

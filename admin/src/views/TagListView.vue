@@ -135,8 +135,8 @@ const pagination = computed(() => ({
 const getTags = async () => {
   try {
     const response: any = await GetTag(pageReq.value)
-    data.value = response.data?.list || []
-    total.value = response.data?.totalCount || 0
+    data.value = response.data.data?.list || []
+    total.value = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
@@ -160,8 +160,8 @@ const addTag = () => {
       .then(async (values) => {
         try {
           const response: any = await AddTag(formState)
-          if (response.code !== 0) {
-            message.error(response.message)
+          if (response.data.code !== 0) {
+            message.error(response.data.message)
             return
           }
           message.success('添加成功')
@@ -174,7 +174,7 @@ const addTag = () => {
           if (originalAxios.isAxiosError(error)) {
             // 这是一个由 axios 抛出的错误
             if (error.response) {
-              if (error.response.status === 409) {
+              if (error.response.data.status === 409) {
                 message.error('标签名称或路由重复')
                 return
               }
@@ -199,8 +199,8 @@ const addTag = () => {
 const changeTagEnabled = async (record: Tag) => {
   try {
     const response: any = await ChangeTagEnabled(record.id, record.enabled)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('修改成功')
@@ -214,8 +214,8 @@ const changeTagEnabled = async (record: Tag) => {
 const deleteTag = async (id: string) => {
   try {
     const response: any = await DeleteTag(id)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('删除成功')
@@ -225,7 +225,7 @@ const deleteTag = async (id: string) => {
     if (originalAxios.isAxiosError(error)) {
       // 这是一个由 axios 抛出的错误
       if (error.response) {
-        if (error.response.status === 404) {
+        if (error.response.data.status === 404) {
           message.error('id 不存在')
           return
         }

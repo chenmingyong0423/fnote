@@ -164,8 +164,8 @@ const pagination = computed(() => ({
 const get = async () => {
   try {
     const response: any = await GetFriends(pageReq.value)
-    data.value = response.data?.list || []
-    total.value = response.data?.totalCount || 0
+    data.value = response.data.data?.list || []
+    total.value = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
@@ -180,8 +180,8 @@ const change = (pg, filters, sorter, { currentDataSource }) => {
 const deleteInfo = async (id: string) => {
   try {
     const response: any = await DeleteFriend(id)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('删除成功')
@@ -204,8 +204,8 @@ const openApprovalDialog = (id: string) => {
 const approved = async () => {
   try {
     const response: any = await ApproveFriend(updatedId.value, blogUrl.value)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('接受成功')
@@ -227,8 +227,8 @@ const reason = ref('')
 const rejected = async () => {
   try {
     const response: any = await RejectFriend(updatedId.value, blogUrl.value, reason.value)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('拒绝成功')
@@ -250,8 +250,8 @@ const save = async (id: string) => {
   const editableDatum = editableData[id]
   try {
     const response: any = await UpdateFriend(id, editableDatum)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('更新成功')

@@ -55,11 +55,11 @@ const analysis = ref<DataAnalysisVO>({
 const getAnalysis = async () => {
   try {
     const response: any = await GetDataAnalysis()
-    if (response.code !== 200) {
-      message.error(response.data.message)
+    if (response.data.code !== 200) {
+      message.error(response.data.data.message)
       return
     }
-    analysis.value = response.data || analysis.value
+    analysis.value = response.data.data || analysis.value
   } catch (error) {
     console.log(error)
   }

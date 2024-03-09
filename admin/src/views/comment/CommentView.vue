@@ -129,8 +129,8 @@ const pagination = computed(() => ({
 const get = async () => {
   try {
     const response: any = await GetComments(pageReq.value)
-    data.value = response.data?.list || []
-    total.value = response.data?.totalCount || 0
+    data.value = response.data.data?.list || []
+    total.value = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
   }
@@ -165,8 +165,8 @@ const approveComment = (record: Comment) => {
 const approveCommentById = async (id: string) => {
   try {
     const response: any = await ApproveCommentById(id)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('审核成功')
@@ -179,8 +179,8 @@ const approveCommentById = async (id: string) => {
 const approveReplyById = async (fid: string, id: string) => {
   try {
     const response: any = await ApproveReplyById(fid, id)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('审核成功')
@@ -209,8 +209,8 @@ const disapproveComment = () => {
 const disapproveCommentById = async (id: string) => {
   try {
     const response: any = await DisapproveCommentById(id, reason.value)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('驳回成功')
@@ -225,8 +225,8 @@ const disapproveCommentById = async (id: string) => {
 const disapproveReplyById = async (fid: string, id: string) => {
   try {
     const response: any = await DisapproveReplyById(fid, id, reason.value)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('驳回成功')
@@ -249,8 +249,8 @@ const updateStatus = (record: Comment, status: number) => {
 const updateStatusById = async (id: string, status: number) => {
   try {
     const response: any = await UpdateCommentStatusById(id, status)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('更新成功')
@@ -263,8 +263,8 @@ const updateStatusById = async (id: string, status: number) => {
 const updateReplyStatusById = async (fid: string, id: string, status: number) => {
   try {
     const response: any = await UpdateReplyStatusById(fid, id, status)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('更新成功')
@@ -285,8 +285,8 @@ const deleteById = (record: Comment) => {
 const deleteCommentById = async (id: string) => {
   try {
     const response: any = await DeleteCommentById(id)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('删除成功')
@@ -299,8 +299,8 @@ const deleteCommentById = async (id: string) => {
 const deleteReplyById = async (fid: string, id: string) => {
   try {
     const response: any = await DeleteReplyById(fid, id)
-    if (response.code !== 0) {
-      message.error(response.message)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
       return
     }
     message.success('删除成功')

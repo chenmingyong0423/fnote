@@ -122,6 +122,11 @@ const items = reactive([
         key: '/home/setting',
         label: '博客设置',
         title: '博客设置'
+      },
+      {
+        key: '/home/backup',
+        label: '备份',
+        title: '备份'
       }
     ]
   }
