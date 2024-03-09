@@ -43,5 +43,6 @@ func initializeApp() (*gin.Engine, error) {
 		ioc.TagProviders,
 		ioc.FileProviders,
 		ioc.DataAnalysisProviders,
+		ioc.BackupProviders,
 	))
 }

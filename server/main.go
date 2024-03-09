@@ -33,6 +33,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	staticPath := viper.GetString("system.static_path")
+	if staticPath != "" {
+		err = os.MkdirAll(staticPath, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+	}
 	app, err := initializeApp()
 	if err != nil {
 		panic(err)
