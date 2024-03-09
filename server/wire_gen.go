@@ -7,6 +7,8 @@
 package main
 
 import (
+	handler10 "github.com/chenmingyong0423/fnote/server/internal/backup/handler"
+	service13 "github.com/chenmingyong0423/fnote/server/internal/backup/service"
 	handler2 "github.com/chenmingyong0423/fnote/server/internal/category/handler"
 	repository2 "github.com/chenmingyong0423/fnote/server/internal/category/repository"
 	dao2 "github.com/chenmingyong0423/fnote/server/internal/category/repository/dao"
@@ -101,10 +103,12 @@ func initializeApp() (*gin.Engine, error) {
 	tagHandler := handler7.NewTagHandler(tagService)
 	dataAnalysisHandler := handler8.NewDataAnalysisHandler(visitLogService, countStatsService)
 	countStatsHandler := handler9.NewCountStatsHandler(countStatsService)
+	backupService := service13.NewBackupService(database)
+	backupHandler := handler10.NewBackupHandler(backupService)
 	writer := ioc.InitLogger()
 	v := ioc.InitMiddlewares(writer)
 	validators := ioc.InitGinValidators()
-	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, countStatsHandler, v, validators)
+	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v, validators)
 	if err != nil {
 		return nil, err
 	}

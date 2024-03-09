@@ -21,6 +21,8 @@ import (
 	"strings"
 	"time"
 
+	handler6 "github.com/chenmingyong0423/fnote/server/internal/backup/handler"
+
 	handler5 "github.com/chenmingyong0423/fnote/server/internal/count_stats/handler"
 
 	handler4 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/handler"
@@ -48,7 +50,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *cfgHandler.WebsiteConfigHandler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *handler4.DataAnalysisHandler, csHandler *handler5.CountStatsHandler, middleware []gin.HandlerFunc, validators Validators) (*gin.Engine, error) {
+func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *cfgHandler.WebsiteConfigHandler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *handler4.DataAnalysisHandler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators) (*gin.Engine, error) {
 	engine := gin.Default()
 
 	// 参数校验器注册
@@ -77,6 +79,7 @@ func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHand
 		fileHdr.RegisterGinRoutes(engine)
 		daHandler.RegisterGinRoutes(engine)
 		csHandler.RegisterGinRoutes(engine)
+		backupHandler.RegisterGinRoutes(engine)
 	}
 	return engine, nil
 }

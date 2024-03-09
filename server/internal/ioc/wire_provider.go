@@ -15,6 +15,8 @@
 package ioc
 
 import (
+	handler12 "github.com/chenmingyong0423/fnote/server/internal/backup/handler"
+	service13 "github.com/chenmingyong0423/fnote/server/internal/backup/service"
 	"github.com/chenmingyong0423/fnote/server/internal/category/handler"
 	"github.com/chenmingyong0423/fnote/server/internal/category/repository"
 	"github.com/chenmingyong0423/fnote/server/internal/category/repository/dao"
@@ -114,4 +116,8 @@ var (
 	)
 
 	DataAnalysisProviders = wire.NewSet(handler10.NewDataAnalysisHandler)
+
+	BackupProviders = wire.NewSet(handler12.NewBackupHandler, service13.NewBackupService,
+		wire.Bind(new(service13.IBackupService), new(*service13.BackupService)),
+	)
 )
