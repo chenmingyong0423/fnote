@@ -269,6 +269,13 @@ db.getCollection("file_meta").createIndex({
 // count_stats
 db.createCollection("count_stats")
 db.getCollection("count_stats").createIndex({ reference_id: 1, type: 1})
+db.getCollection("count_stats").createIndex({
+    type: NumberInt("1"),
+    reference_id: NumberInt("1"),
+}, {
+    name: "unique_type_reference_id",
+    unique: true
+});
 db.getCollection("count_stats").insertMany([
     {
         "type": "PostCountInWebsite",
