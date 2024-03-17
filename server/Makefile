@@ -26,3 +26,7 @@ tidy:
 check:
 	@$(MAKE) fmt
 	@$(MAKE) tidy
+
+.PHONY:	mongo
+mongo:
+	@sh ./script/mongo/local_mongo.sh
