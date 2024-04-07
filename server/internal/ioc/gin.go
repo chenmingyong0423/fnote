@@ -17,6 +17,7 @@ package ioc
 import (
 	"io"
 	"log/slog"
+	"net/http"
 	"slices"
 	"strings"
 	"time"
@@ -84,7 +85,7 @@ func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHand
 	return engine, nil
 }
 
-func InitMiddlewares(writer io.Writer) []gin.HandlerFunc {
+func InitMiddlewares(writer io.Writer, isWebsiteInitialized func() bool) []gin.HandlerFunc {
 	return []gin.HandlerFunc{
 		gin.LoggerWithWriter(writer),
 		id.RequestId(),
@@ -116,7 +117,16 @@ func InitMiddlewares(writer io.Writer) []gin.HandlerFunc {
 			AllowHeaders: viper.GetStringSlice("gin.allowed_headers"),
 			MaxAge:       12 * time.Hour,
 		}),
-		JwtParseMiddleware(),
+		func(ctx *gin.Context) {
+			uri := ctx.Request.RequestURI
+			if isWebsiteInitialized() || uri == "/admin/files/upload" {
+				ctx.Next()
+			} else {
+				ctx.JSON(http.StatusServiceUnavailable, nil)
+				ctx.Abort()
+			}
+		},
+		JwtParseMiddleware(isWebsiteInitialized),
 	}
 }
 

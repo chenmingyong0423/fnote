@@ -31,6 +31,7 @@ import (
 	repository8 "github.com/chenmingyong0423/fnote/server/internal/friend/repository"
 	dao8 "github.com/chenmingyong0423/fnote/server/internal/friend/repository/dao"
 	service10 "github.com/chenmingyong0423/fnote/server/internal/friend/service"
+	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
 	service9 "github.com/chenmingyong0423/fnote/server/internal/message/service"
 	handler6 "github.com/chenmingyong0423/fnote/server/internal/message_template/handler"
@@ -106,9 +107,13 @@ func initializeApp() (*gin.Engine, error) {
 	backupService := service13.NewBackupService(database)
 	backupHandler := handler10.NewBackupHandler(backupService)
 	writer := ioc.InitLogger()
-	v := ioc.InitMiddlewares(writer)
+	v, err := global.IsWebsiteInitializedFn(database)
+	if err != nil {
+		return nil, err
+	}
+	v2 := ioc.InitMiddlewares(writer, v)
 	validators := ioc.InitGinValidators()
-	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v, validators)
+	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v2, validators)
 	if err != nil {
 		return nil, err
 	}

@@ -7,15 +7,16 @@ export const useUserStore = defineStore('user', {
   state: () => ({
     userInfo: ref({
       username: '',
-      picture: ''
+      picture: '',
     }),
-    token: ref(localStorage.getItem('token') || '')
+    token: ref(localStorage.getItem('token') || ''),
+    isLoggedIn: false,
+    isInit: false,
   }),
   actions: {
     async loginIn(req: LoginRequest): Promise<boolean> {
       try {
         const res: any = await login(req)
-        console.log(res)
         if (res.data.code === 0) {
           this.token = res.data.data?.token || ''
           localStorage.setItem('token', this.token)

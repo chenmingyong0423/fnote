@@ -49,13 +49,24 @@ db.getCollection("configs").createIndex({
 db.getCollection("configs").insertOne({
   "create_time": Math.floor(new Date().getTime() / 1000),
   "props": {
-    "website_name": "fnote",
-    "live_time": Math.floor(new Date().getTime() / 1000),
-    "icon": "",
-    "records": [],
-    "owner_name": "fnote-user",
-    "owner_profile": "请及时前往后台修改站点和站长等相关配置，以便正常使用。",
-    "owner_picture": ""
+    // 站点名称
+    "website_name": "",
+    // 站点图标
+    "website_icon": "",
+    // 站长昵称
+    "website_owner": "",
+    // 站长简介
+    "website_owner_profile": "",
+    // 站长头像
+    "website_owner_avatar": "",
+    // 站点运行时间
+    "website_runtime": Math.floor(new Date().getTime() / 1000),
+    // 站点备案号
+    "website_records": [],
+    // 是否完成初始化
+    "website_init": false,
+    // 域名
+    "website_domain": ""
   },
   "typ": "website",
   "update_time": Math.floor(new Date().getTime() / 1000)
@@ -64,14 +75,14 @@ db.getCollection("configs").insertOne({
 db.getCollection("configs").insertOne({
     "typ": "seo meta",
     "props": {
-        "title": "fnote",
-        "og_title": "fnote",
-        "description": "fnote",
+        "title": "",
+        "og_title": "",
+        "description": "",
         "og_image": "",
         "baidu_site_verification": "",
-        "keywords": "fnote,blog,BLOG",
-        "author": "fnote",
-        "robots": "fnote,blog"
+        "keywords": "",
+        "author": "",
+        "robots": ""
     },
     create_time: Math.floor(new Date().getTime() / 1000),
     update_time: Math.floor(new Date().getTime() / 1000)

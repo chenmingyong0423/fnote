@@ -17,6 +17,8 @@ package handler
 import (
 	"encoding/hex"
 
+	"github.com/chenmingyong0423/fnote/server/internal/global"
+
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/jwtutil"
@@ -47,6 +49,7 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/configs")
 	// 获取首页的配置信息
 	routerGroup.GET("/index", api.Wrap(h.GetIndexConfig))
+	routerGroup.GET("/init_status", api.Wrap(h.GetInitStatus))
 
 	adminGroup := engine.Group("/admin/configs")
 	adminGroup.GET("/website", apiwrap.Wrap(h.AdminGetWebsiteConfig))
@@ -401,4 +404,10 @@ func (h *WebsiteConfigHandler) AdminLogin(ctx *gin.Context, req request.LoginReq
 		return nil, err
 	}
 	return apiwrap.SuccessResponseWithData[any](vo.LoginVO{Token: jwt, Expiration: exp}), nil
+}
+
+func (h *WebsiteConfigHandler) GetInitStatus(_ *gin.Context) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponseWithData[any](map[string]bool{
+		"initStatus": global.IsWebsiteInitialized(),
+	}), nil
 }

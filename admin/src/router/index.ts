@@ -1,4 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { isInit } from '@/interfaces/Config'
+import { login } from '@/interfaces/User'
+import { message } from 'ant-design-vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -77,6 +81,26 @@ const router = createRouter({
       ]
     }
   ]
+})
+
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore();
+  if (!userStore.isInit) {
+    if (to.name !== 'init') {
+      next({ name: 'init' });
+    } else {
+      next();
+    }
+  }
+
+  // 检查用户是否登录，示例逻辑
+  if (to.name !== 'login' && !userStore.isLoggedIn) {
+    // 如果用户未登录，重定向到登录页面
+    next({ name: 'login' });
+  } else {
+    // 如果用户已登录，或者访问的是登录页面，正常导航
+    next();
+  }
 })
 
 export default router

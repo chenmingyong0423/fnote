@@ -1,4 +1,5 @@
 import instance from '@/utils/axios'
+import type { LoginRequest } from '@/interfaces/User'
 
 export interface WebsiteConfig {
   website_name: string
@@ -312,8 +313,27 @@ export const UpdateSocial = (id: string, req: SocialConfigRequest) => {
 }
 
 export interface InitReq {
-  blog_name: string
-  nickname: string
-  profile: string
-  icon: string
+  website_name: string
+  website_icon: string
+  website_owner: string
+  website_owner_profile: string
+  website_owner_avatar: string
+  website_domain: string
+  seo: {
+    title: string
+    description: string
+    og_title: string
+    og_image: string
+    baidu_site_verification: string
+    keywords: string
+    author: string
+    robots: string
+  }
+}
+
+export const isInit = () => {
+  return instance({
+    url: '/init_status',
+    method: 'get',
+  })
 }
