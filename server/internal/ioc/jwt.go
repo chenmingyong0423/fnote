@@ -22,9 +22,13 @@ import (
 )
 
 // JwtParseMiddleware jwt 解析中间件
-func JwtParseMiddleware() gin.HandlerFunc {
+func JwtParseMiddleware(isWebsiteInitialized func() bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		uri := ctx.Request.RequestURI
+		if isWebsiteInitialized() || uri == "/admin/files/upload" {
+			ctx.Next()
+			return
+		}
 		// 非 admin 接口不需要 jwt
 		if !strings.HasPrefix(uri, "/admin") {
 			ctx.Next()

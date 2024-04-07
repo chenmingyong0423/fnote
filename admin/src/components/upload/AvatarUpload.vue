@@ -1,7 +1,7 @@
 <template>
   <a-upload
     v-model:file-list="fileList"
-    name="avatar"
+    name="file"
     list-type="picture-card"
     class="avatar-uploader"
     :show-upload-list="false"
@@ -21,11 +21,11 @@
 import { PlusOutlined, LoadingOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import type { UploadChangeParam, UploadProps } from 'ant-design-vue';
-import { type PropType, ref } from 'vue'
+import { ref } from 'vue'
 
 defineProps({
   imageUrl: {
-    type: String as PropType<string>,
+    type: String,
     required: true,
   },
 });
@@ -41,7 +41,7 @@ function getBase64(img: Blob, callback: (base64Url: string) => void) {
 const fileList = ref([]);
 const loading = ref<boolean>(false);
 
-const handleChange = (info: UploadChangeParam) => {
+const handleChange = async (info: UploadChangeParam) => {
   if (info.file.status === 'uploading') {
     loading.value = true;
     return;
@@ -49,9 +49,10 @@ const handleChange = (info: UploadChangeParam) => {
   if (info.file.status === 'done') {
     // Get this url from response in real world.
     getBase64(info.file.originFileObj, () => {
-      emit('update:imageUrl', info.file.response.data.data.url);
+      emit('update:imageUrl', info.file.response.data.url);
       loading.value = false;
-    });
+    })
+
   }
   if (info.file.status === 'error') {
     loading.value = false;
