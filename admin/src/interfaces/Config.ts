@@ -310,3 +310,10 @@ export const UpdateSocial = (id: string, req: SocialConfigRequest) => {
     data: req
   })
 }
+
+export interface InitReq {
+  blog_name: string
+  nickname: string
+  profile: string
+  icon: string
+}
