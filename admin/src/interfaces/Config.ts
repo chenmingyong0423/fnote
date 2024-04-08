@@ -319,21 +319,19 @@ export interface InitReq {
   website_owner_profile: string
   website_owner_avatar: string
   website_domain: string
-  seo: {
-    title: string
-    description: string
-    og_title: string
-    og_image: string
-    baidu_site_verification: string
-    keywords: string
-    author: string
-    robots: string
+  website_owner_email: string
+  email_server: {
+    host: string
+    port: string
+    username: string
+    password: string
+    email: string
   }
 }
 
 export const isInit = () => {
   return instance({
-    url: '/init_status',
+    url: '/check-initialization',
     method: 'get',
   })
 }
