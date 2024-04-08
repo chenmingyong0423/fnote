@@ -65,8 +65,6 @@ db.getCollection("configs").insertOne({
     "website_records": [],
     // 是否完成初始化
     "website_init": false,
-    // 域名
-    "website_domain": "",
     // 接收通知时使用的邮箱
     "website_owner_email": ""
   },
@@ -155,6 +153,17 @@ db.getCollection("configs").insertOne({
     typ: "pay",
     "props": {
         "list": []
+    },
+    create_time: Math.floor(new Date().getTime() / 1000),
+    update_time: Math.floor(new Date().getTime() / 1000)
+});
+
+// 支付二维码配置
+db.getCollection("configs").insertOne({
+    typ: "admin",
+    "props": {
+        "username": "",
+        "password": ""
     },
     create_time: Math.floor(new Date().getTime() / 1000),
     update_time: Math.floor(new Date().getTime() / 1000)

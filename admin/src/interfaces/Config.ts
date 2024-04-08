@@ -318,20 +318,31 @@ export interface InitReq {
   website_owner: string
   website_owner_profile: string
   website_owner_avatar: string
-  website_domain: string
   website_owner_email: string
   email_server: {
     host: string
-    port: string
+    port: number
     username: string
     password: string
     email: string
+  }
+  admin: {
+    username: string
+    password: string
   }
 }
 
 export const isInit = () => {
   return instance({
-    url: '/check-initialization',
-    method: 'get',
+    url: '/configs/check-initialization',
+    method: 'get'
+  })
+}
+
+export const Init = (req: InitReq) => {
+  return instance({
+    url: '/configs/initialization',
+    method: 'post',
+    data: req
   })
 }

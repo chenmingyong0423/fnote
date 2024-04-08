@@ -26,16 +26,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var (
-	isWebsiteInitialized bool
-)
+var Config = &config{}
 
-func IsWebsiteInitialized() bool {
-	return isWebsiteInitialized
+type config struct {
+	IsWebsiteInitialized bool
+	Domain               string
 }
 
-func WebsiteInitialized() {
-	isWebsiteInitialized = true
+func IsWebsiteInitialized() bool {
+	return Config.IsWebsiteInitialized
 }
 
 func IsWebsiteInitializedFn(db *mongo.Database) (func() bool, error) {
@@ -51,11 +50,11 @@ func IsWebsiteInitializedFn(db *mongo.Database) (func() bool, error) {
 		return nil, errors.New("The collections of config does not have a field named initialized.")
 	}
 
-	if isWebsiteInitialized, ok = props["website_init"].(bool); !ok {
+	if Config.IsWebsiteInitialized, ok = props["website_init"].(bool); !ok {
 		return nil, errors.New("The collections of config does not have a field named initialized.")
 	} else {
 		return func() bool {
-			return isWebsiteInitialized
+			return Config.IsWebsiteInitialized
 		}, nil
 	}
 }

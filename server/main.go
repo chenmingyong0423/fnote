@@ -19,6 +19,8 @@ import (
 	"flag"
 	"os"
 
+	"github.com/chenmingyong0423/fnote/server/internal/global"
+
 	"github.com/spf13/viper"
 )
 
@@ -44,6 +46,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	domain := os.Getenv("FNOTE_DOMAIN")
+	if domain == "" {
+		domain = "http://localhost:" + *port
+	}
+	global.Config.Domain = domain
+
+	app.Static("/static", viper.GetString("system.static_path"))
 	err = app.Run(*port)
 	if err != nil {
 		panic(err)

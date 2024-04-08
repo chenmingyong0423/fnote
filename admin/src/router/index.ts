@@ -83,23 +83,41 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to, from, next) => {
-  const userStore = useUserStore();
-  if (!userStore.isInit) {
+let flag = true
+router.beforeEach(async (to, from, next) => {
+  const userStore = useUserStore()
+  if (flag) {
+    await isInit()
+      .then((res) => {
+        if (res.data.code === 200) {
+          userStore.initialization = res.data.data.data.initStatus
+        }
+      })
+      .catch((err) => {
+        console.error(err)
+      })
+    flag = false
+  }
+  if (!userStore.initialization) {
     if (to.name !== 'init') {
-      next({ name: 'init' });
+      message.warn('网站未初始化，请初始化').then((r) => r)
+      next({ name: 'init' })
     } else {
-      next();
+      next()
     }
+    return
   }
 
   // 检查用户是否登录，示例逻辑
   if (to.name !== 'login' && !userStore.isLoggedIn) {
     // 如果用户未登录，重定向到登录页面
-    next({ name: 'login' });
+    next({ name: 'login' })
+  } else if (to.name == 'init') {
+    message.warn('网站已经初始化').then((r) => r)
+    next({ name: 'home' })
   } else {
     // 如果用户已登录，或者访问的是登录页面，正常导航
-    next();
+    next()
   }
 })
 

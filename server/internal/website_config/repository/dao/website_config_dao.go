@@ -45,6 +45,7 @@ type IWebsiteConfigDao interface {
 	GetByTypes(ctx context.Context, types ...string) ([]*WebsiteConfig, error)
 	Decrease(ctx context.Context, field string) error
 	UpdateByConditionAndUpdates(ctx context.Context, cond bson.D, updates bson.D) error
+	UpdatePropsByTyp(ctx context.Context, typ string, cfg any, now int64) error
 }
 
 var _ IWebsiteConfigDao = (*WebsiteConfigDao)(nil)
@@ -57,6 +58,17 @@ func NewWebsiteConfigDao(db *mongo.Database) *WebsiteConfigDao {
 
 type WebsiteConfigDao struct {
 	coll *mongox.Collection[WebsiteConfig]
+}
+
+func (d *WebsiteConfigDao) UpdatePropsByTyp(ctx context.Context, typ string, cfg any, now int64) error {
+	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", typ)).Updates(update.BsonBuilder().Set("props", cfg).Set("update_time", now).Build()).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to update %s config, updates=%v", typ, cfg)
+	}
+	if updateResult.ModifiedCount == 0 {
+		return fmt.Errorf("ModifiedCount=0, fails to update %s config, updates=%v", typ, cfg)
+	}
+	return nil
 }
 
 func (d *WebsiteConfigDao) UpdateByConditionAndUpdates(ctx context.Context, cond bson.D, updates bson.D) error {
