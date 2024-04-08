@@ -66,7 +66,9 @@ db.getCollection("configs").insertOne({
     // 是否完成初始化
     "website_init": false,
     // 域名
-    "website_domain": ""
+    "website_domain": "",
+    // 接收通知时使用的邮箱
+    "website_owner_email": ""
   },
   "typ": "website",
   "update_time": Math.floor(new Date().getTime() / 1000)

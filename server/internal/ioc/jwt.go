@@ -25,7 +25,7 @@ import (
 func JwtParseMiddleware(isWebsiteInitialized func() bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		uri := ctx.Request.RequestURI
-		if isWebsiteInitialized() || uri == "/admin/files/upload" {
+		if !isWebsiteInitialized() && uri == "/admin/files/upload" {
 			ctx.Next()
 			return
 		}

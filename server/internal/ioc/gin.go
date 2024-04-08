@@ -119,6 +119,9 @@ func InitMiddlewares(writer io.Writer, isWebsiteInitialized func() bool) []gin.H
 		}),
 		func(ctx *gin.Context) {
 			uri := ctx.Request.RequestURI
+			if uri == "" {
+
+			}
 			if isWebsiteInitialized() || uri == "/admin/files/upload" {
 				ctx.Next()
 			} else {
