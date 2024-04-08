@@ -78,7 +78,6 @@ const login = async () => {
   if (success) {
     await router.push('/home/index')
   }
-  message.error('登录失败')
 }
 </script>
 
