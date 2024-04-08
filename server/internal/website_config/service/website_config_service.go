@@ -16,6 +16,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -53,6 +54,7 @@ type IWebsiteConfigService interface {
 	UpdateSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
 	DeleteSocialInfo(ctx context.Context, id []byte) error
 	GetAdminConfig(ctx context.Context) (*domain.AdminConfig, error)
+	InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfigV2 domain.WebsiteConfigV2, emailConfig domain.EmailConfig) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -65,6 +67,25 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfigV2 domain.WebsiteConfigV2, emailConfig domain.EmailConfig) error {
+	now := time.Now().Unix()
+	err := s.UpdateAdminConfig(ctx, adminConfig, now)
+	if err != nil {
+		return err
+	}
+
+	err = s.repo.UpdateEmailConfig(ctx, &emailConfig, now)
+	if err != nil {
+		return err
+	}
+
+	err = s.UpdateWebSiteConfigV2(ctx, webSiteConfigV2, now)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *WebsiteConfigService) GetAdminConfig(ctx context.Context) (*domain.AdminConfig, error) {
@@ -153,7 +174,7 @@ func (s *WebsiteConfigService) GetNoticeConfig(ctx context.Context) (domain.Noti
 }
 
 func (s *WebsiteConfigService) UpdateEmailConfig(ctx context.Context, emailCfg *domain.EmailConfig) error {
-	return s.repo.UpdateEmailConfig(ctx, emailCfg)
+	return s.repo.UpdateEmailConfig(ctx, emailCfg, time.Now().Unix())
 }
 
 func (s *WebsiteConfigService) UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error {
@@ -298,4 +319,12 @@ func (s *WebsiteConfigService) anyToStruct(props any, cfgInfos any) error {
 		return errors.Wrapf(err, "bson.Unmarshal failed, data=%v, val=%v", marshal, cfgInfos)
 	}
 	return nil
+}
+
+func (s *WebsiteConfigService) UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now int64) error {
+	return s.repo.UpdateAdminConfig(ctx, adminConfig, now)
+}
+
+func (s *WebsiteConfigService) UpdateWebSiteConfigV2(ctx context.Context, websiteConfigV2 domain.WebsiteConfigV2, now int64) error {
+	return s.repo.UpdateWebSiteConfigV2(ctx, websiteConfigV2, now)
 }

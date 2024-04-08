@@ -42,7 +42,7 @@ type IWebsiteConfigRepository interface {
 	UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error
 	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
 	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
-	UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig) error
+	UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig, now int64) error
 	UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error
 	UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error
 	UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error
@@ -53,6 +53,8 @@ type IWebsiteConfigRepository interface {
 	AddSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
 	UpdateSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
 	DeleteSocialInfo(ctx context.Context, id []byte) error
+	UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now int64) error
+	UpdateWebSiteConfigV2(ctx context.Context, websiteConfigV2 domain.WebsiteConfigV2, now int64) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -65,6 +67,14 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) UpdateWebSiteConfigV2(ctx context.Context, websiteConfigV2 domain.WebsiteConfigV2, now int64) error {
+	return r.dao.UpdatePropsByTyp(ctx, "website", websiteConfigV2, now)
+}
+
+func (r *WebsiteConfigRepository) UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now int64) error {
+	return r.dao.UpdatePropsByTyp(ctx, "admin", adminConfig, now)
 }
 
 func (r *WebsiteConfigRepository) DeleteSocialInfo(ctx context.Context, id []byte) error {
@@ -157,18 +167,8 @@ func (r *WebsiteConfigRepository) UpdateNoticeConfig(ctx context.Context, notice
 	)
 }
 
-func (r *WebsiteConfigRepository) UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig) error {
-	return r.dao.UpdateByConditionAndUpdates(
-		ctx,
-		query.Eq("typ", "email"),
-		update.BsonBuilder().
-			Set("props.host", emailConfig.Host).
-			Set("props.port", emailConfig.Port).
-			Set("props.username", emailConfig.Username).
-			Set("props.password", emailConfig.Password).
-			Set("props.email", emailConfig.Email).
-			Set("update_time", time.Now().Unix()).Build(),
-	)
+func (r *WebsiteConfigRepository) UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig, now int64) error {
+	return r.dao.UpdatePropsByTyp(ctx, "email", emailConfig, now)
 }
 
 func (r *WebsiteConfigRepository) UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error {

@@ -25,7 +25,7 @@ import (
 func JwtParseMiddleware(isWebsiteInitialized func() bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		uri := ctx.Request.RequestURI
-		if !isWebsiteInitialized() && uri == "/admin/files/upload" {
+		if !isWebsiteInitialized() && (uri == "/admin/files/upload" || uri == "/admin/configs/initialization") {
 			ctx.Next()
 			return
 		}
@@ -35,7 +35,7 @@ func JwtParseMiddleware(isWebsiteInitialized func() bool) gin.HandlerFunc {
 			return
 		}
 		// 登录和初始化接口不需要 jwt
-		if uri == "/admin/login" || uri == "/admin/init" {
+		if uri == "/admin/login" || uri == "/admin/configs/check-initialization" {
 			ctx.Next()
 			return
 		}

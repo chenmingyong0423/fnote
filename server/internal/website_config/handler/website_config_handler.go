@@ -16,6 +16,8 @@ package handler
 
 import (
 	"encoding/hex"
+	"net/http"
+	"sync"
 
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 
@@ -42,16 +44,18 @@ func NewWebsiteConfigHandler(serv service.IWebsiteConfigService) *WebsiteConfigH
 }
 
 type WebsiteConfigHandler struct {
-	serv service.IWebsiteConfigService
+	initMutex sync.Mutex
+	serv      service.IWebsiteConfigService
 }
 
 func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/configs")
 	// 获取首页的配置信息
 	routerGroup.GET("/index", api.Wrap(h.GetIndexConfig))
-	routerGroup.GET("/check-initialization", api.Wrap(h.GetInitStatus))
 
 	adminGroup := engine.Group("/admin/configs")
+	adminGroup.GET("/check-initialization", api.Wrap(h.GetInitStatus))
+	adminGroup.POST("/initialization", api.WrapWithBody(h.InitializeWebsite))
 	adminGroup.GET("/website", apiwrap.Wrap(h.AdminGetWebsiteConfig))
 	adminGroup.PUT("/website", apiwrap.WrapWithBody(h.AdminUpdateWebsiteConfig))
 	adminGroup.POST("/website/records", apiwrap.WrapWithBody(h.AdminAddRecordInWebsiteConfig))
@@ -410,4 +414,34 @@ func (h *WebsiteConfigHandler) GetInitStatus(_ *gin.Context) (*apiwrap.ResponseB
 	return apiwrap.SuccessResponseWithData[any](map[string]bool{
 		"initStatus": global.IsWebsiteInitialized(),
 	}), nil
+}
+
+func (h *WebsiteConfigHandler) InitializeWebsite(ctx *gin.Context, req request.InitRequest) (*apiwrap.ResponseBody[any], error) {
+	h.initMutex.Lock()
+	defer h.initMutex.Unlock()
+	if global.IsWebsiteInitialized() {
+		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "website has been initialized")
+	}
+	err := h.serv.InitializeWebsite(ctx, domain.AdminConfig{
+		Username: req.Admin.Username,
+		Password: req.Admin.Password,
+	}, domain.WebsiteConfigV2{
+		WebsiteName:         req.WebsiteName,
+		WebsiteIcon:         req.WebsiteIcon,
+		WebsiteOwner:        req.WebsiteOwner,
+		WebsiteOwnerProfile: req.WebsiteOwnerProfile,
+		WebsiteOwnerAvatar:  req.WebsiteOwnerAvatar,
+		WebsiteOwnerEmail:   req.WebsiteOwnerEmail,
+		WebsiteInit:         true,
+	}, domain.EmailConfig{
+		Host:     req.EmailServer.Host,
+		Port:     req.EmailServer.Port,
+		Username: req.EmailServer.Username,
+		Password: req.EmailServer.Password,
+		Email:    req.EmailServer.Email,
+	})
+	if err == nil {
+		global.Config.IsWebsiteInitialized = true
+	}
+	return apiwrap.SuccessResponse(), err
 }

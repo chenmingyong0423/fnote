@@ -57,6 +57,18 @@ type WebSiteConfig struct {
 	OwnerPicture string `bson:"owner_picture"`
 }
 
+type WebsiteConfigV2 struct {
+	WebsiteName         string   `bson:"website_name"`
+	WebsiteIcon         string   `bson:"website_icon"`
+	WebsiteOwner        string   `bson:"website_owner"`
+	WebsiteOwnerProfile string   `bson:"website_owner_profile"`
+	WebsiteOwnerAvatar  string   `bson:"website_owner_avatar"`
+	WebsiteOwnerEmail   string   `bson:"website_owner_email"`
+	WebsiteRuntime      int64    `bson:"website_runtime,omitempty"`
+	WebsiteRecords      []string `bson:"website_records,omitempty"`
+	WebsiteInit         bool     `bson:"website_init"`
+}
+
 // NoticeConfig 公告配置
 type NoticeConfig struct {
 	Title       string `bson:"title"`
