@@ -15,8 +15,8 @@ export default defineNuxtPlugin(nuxtApp => {
                 const res: any = await getInitializationStatus()
                 const apiRes: IResponse<InitializationStatusVO> = res.data.value;
                 if (apiRes) {
-                    if (apiRes.code === 200) {
-                        cfg.initialization = apiRes.data?.data?.initStatus || false
+                    if (apiRes.code === 0) {
+                        cfg.initialization = apiRes.data?.initStatus || false
                     }
                 }
             } catch (e) {

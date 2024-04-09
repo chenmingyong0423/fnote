@@ -293,7 +293,7 @@ const initWebsite = () => {
     .then(async () => {
       formState.email_server.port = Number(formState.email_server.port)
       const response: any = await Init(toRaw(formState))
-      if (response.data.code !== 200) {
+      if (response.data.code !== 0) {
         message.error(response.data.message)
         return
       }

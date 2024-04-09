@@ -306,7 +306,7 @@ const handleUploadImage = async (event, insertImage, files) => {
         'Content-Type': 'multipart/form-data'
       }
     })
-    if (response.data.data.code !== 200) {
+    if (response.data.data.code !== 0) {
       message.error(response.data.data.message)
       return
     }
