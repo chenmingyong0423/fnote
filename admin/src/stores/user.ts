@@ -17,16 +17,16 @@ export const useUserStore = defineStore('user', {
     async loginIn(req: LoginRequest): Promise<boolean> {
       try {
         const res: any = await login(req)
+        if (res.data.code === 40101) {
+          message.error('用户名或密码错误').then((r) => r)
+          return false
+        }
         if (res.data.code === 0) {
           this.token = res.data.data.token || ''
           this.isLoggedIn = true
           localStorage.setItem('token', this.token)
           message.success('登录成功').then((r) => r)
           return true
-        }
-        if (res.data.code === 100001) {
-          message.error('用户名或密码错误').then((r) => r)
-          return false
         }
         return false
       } catch (error) {

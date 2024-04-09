@@ -89,8 +89,8 @@ router.beforeEach(async (to, from, next) => {
   if (flag) {
     await isInit()
       .then((res) => {
-        if (res.data.code === 200) {
-          userStore.initialization = res.data.data.data.initStatus
+        if (res.data.code === 0) {
+          userStore.initialization = res.data.data.initStatus
         }
       })
       .catch((err) => {
