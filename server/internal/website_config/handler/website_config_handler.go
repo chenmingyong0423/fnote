@@ -52,6 +52,7 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/configs")
 	// 获取首页的配置信息
 	routerGroup.GET("/index", api.Wrap(h.GetIndexConfig))
+	routerGroup.GET("/check-initialization", api.Wrap(h.GetInitStatus))
 
 	adminGroup := engine.Group("/admin/configs")
 	adminGroup.GET("/check-initialization", api.Wrap(h.GetInitStatus))
