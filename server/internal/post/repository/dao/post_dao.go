@@ -233,7 +233,8 @@ func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *o
 }
 
 func (d *PostDao) GetFrontPosts(ctx context.Context, count int64) ([]*Post, error) {
-	findOptions := options.Find().SetSort(bsonx.D(bsonx.E("sticky_weight", -1), bsonx.E("create_time", -1))).SetLimit(count)
+	findOptions := options.Find().SetSort(
+		bsonx.NewD().Add("sticky_weight", -1).Add("create_time", -1).Build()).SetLimit(count)
 	posts, err := d.coll.Finder().Filter(bsonx.M("is_displayed", true)).Find(ctx, findOptions)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from post, findOptions=%v", findOptions)

@@ -206,9 +206,7 @@ func (d *CommentDao) FindReplyByCIdAndRId(ctx context.Context, commentId string,
 		AddFields(bsonx.M("replies.post_info", "$post_info")).
 		ReplaceWith("$replies").Build()
 	var result []ReplyWithPostInfo
-	err := d.coll.Aggregator().Pipeline(pipeline).AggregateWithCallback(ctx, func(ctx context.Context, cursor *mongo.Cursor) error {
-		return cursor.All(ctx, &result)
-	})
+	err := d.coll.Aggregator().Pipeline(pipeline).AggregateWithParse(ctx, &result)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to execute aggregation operation, pipeline=%v", pipeline)
 	}
@@ -255,10 +253,7 @@ func (d *CommentDao) AggregationQuerySkipAndSetLimit(ctx context.Context, cond b
 	var results []AdminComment
 
 	// 执行聚合查询
-	err := d.coll.Aggregator().Pipeline(pipeline).AggregateWithCallback(ctx, func(ctx context.Context, cursor *mongo.Cursor) error {
-		// 解析并输出结果
-		return cursor.All(ctx, &results)
-	})
+	err := d.coll.Aggregator().Pipeline(pipeline).AggregateWithParse(ctx, &results)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "Fails to execute aggregation operation, pipeline=%v", pipeline)
 	}
@@ -267,7 +262,7 @@ func (d *CommentDao) AggregationQuerySkipAndSetLimit(ctx context.Context, cond b
 }
 
 func (d *CommentDao) FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string, cmtStatus uint) ([]*Comment, error) {
-	cond := bsonx.D(bsonx.E("post_info.post_id", postId), bsonx.E("status", cmtStatus))
+	cond := bsonx.NewD().Add("post_info.post_id", postId).Add("status", cmtStatus).Build()
 	result, err := d.coll.Finder().Filter(cond).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Fails to find the docs from comment, condition=%v", cond)
@@ -328,10 +323,7 @@ func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]
 	var results []LatestComment
 
 	// 执行聚合查询
-	err := d.coll.Aggregator().Pipeline(pipeline).AggregateWithCallback(ctx, func(ctx context.Context, cursor *mongo.Cursor) error {
-		// 解析并输出结果
-		return cursor.All(ctx, &results)
-	})
+	err := d.coll.Aggregator().Pipeline(pipeline).AggregateWithParse(ctx, results)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Fails to execute aggregation operation, pipeline=%v", pipeline)
 	}
@@ -356,7 +348,8 @@ func (d *CommentDao) AddCommentReply(ctx context.Context, cmtId string, commentR
 }
 
 func (d *CommentDao) FindApprovedCommentById(ctx context.Context, cmtId string) (*Comment, error) {
-	comment, err := d.coll.Finder().Filter(bsonx.D(bsonx.E("_id", cmtId), bsonx.E("status", CommentStatusApproved))).FindOne(ctx)
+	comment, err := d.coll.Finder().Filter(
+		query.BsonBuilder().Id(cmtId).Eq("status", CommentStatusApproved).Build()).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the document from comment, cmtId=%s", cmtId)
 	}
