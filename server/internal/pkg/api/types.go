@@ -95,7 +95,7 @@ type ResponseBody[T any] struct {
 
 func SuccessResponseWithData[T any](data T) ResponseBody[T] {
 	return ResponseBody[T]{
-		Code:    http.StatusOK,
+		Code:    0,
 		Message: http.StatusText(http.StatusOK),
 		Data:    data,
 	}

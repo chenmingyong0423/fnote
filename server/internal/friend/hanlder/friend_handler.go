@@ -55,8 +55,8 @@ type FriendHandler struct {
 
 func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/friends")
-	group.GET("", api.Wrap(h.GetFriends))
-	group.POST("", api.WrapWithBody(h.ApplyForFriend))
+	group.GET("", apiwrap.Wrap(h.GetFriends))
+	group.POST("", apiwrap.WrapWithBody(h.ApplyForFriend))
 
 	adminGroup := engine.Group("/admin/friends")
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetFriends))
@@ -66,13 +66,12 @@ func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/:id/rejection", apiwrap.WrapWithBody(h.AdminRejectFriend))
 }
 
-func (h *FriendHandler) GetFriends(ctx *gin.Context) (listVO api.ListVO[vo.FriendVO], err error) {
+func (h *FriendHandler) GetFriends(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[vo.FriendVO]], error) {
 	friends, err := h.serv.GetFriends(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
-	listVO.List = h.toFriendVOs(friends)
-	return
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(h.toFriendVOs(friends))), nil
 }
 
 func (h *FriendHandler) toFriendVOs(friends []domain.Friend) []vo.FriendVO {
@@ -99,7 +98,7 @@ type FriendRequest struct {
 	Email       string `json:"email"`
 }
 
-func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any, error) {
+func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (*apiwrap.ResponseBody[any], error) {
 	if req.Email != "" {
 		regExp := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 		if !regExp.MatchString(req.Email) {
@@ -137,7 +136,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (any
 		}
 	}()
 
-	return nil, nil
+	return apiwrap.SuccessResponse(), nil
 }
 
 func (h *FriendHandler) AdminGetFriends(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.AdminFriendVO]], error) {

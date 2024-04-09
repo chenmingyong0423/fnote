@@ -27,7 +27,6 @@ import (
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
@@ -51,12 +50,12 @@ type WebsiteConfigHandler struct {
 func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/configs")
 	// 获取首页的配置信息
-	routerGroup.GET("/index", api.Wrap(h.GetIndexConfig))
-	routerGroup.GET("/check-initialization", api.Wrap(h.GetInitStatus))
+	routerGroup.GET("/index", apiwrap.Wrap(h.GetIndexConfig))
+	routerGroup.GET("/check-initialization", apiwrap.Wrap(h.GetInitStatus))
 
 	adminGroup := engine.Group("/admin/configs")
-	adminGroup.GET("/check-initialization", api.Wrap(h.GetInitStatus))
-	adminGroup.POST("/initialization", api.WrapWithBody(h.InitializeWebsite))
+	adminGroup.GET("/check-initialization", apiwrap.Wrap(h.GetInitStatus))
+	adminGroup.POST("/initialization", apiwrap.WrapWithBody(h.InitializeWebsite))
 	adminGroup.GET("/website", apiwrap.Wrap(h.AdminGetWebsiteConfig))
 	adminGroup.PUT("/website", apiwrap.WrapWithBody(h.AdminUpdateWebsiteConfig))
 	adminGroup.POST("/website/records", apiwrap.WrapWithBody(h.AdminAddRecordInWebsiteConfig))
@@ -88,18 +87,18 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 
 }
 
-func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*vo.IndexConfigVO, error) {
+func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*apiwrap.ResponseBody[vo.IndexConfigVO], error) {
 	config, err := h.serv.GetIndexConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &vo.IndexConfigVO{
+	return apiwrap.SuccessResponseWithData(vo.IndexConfigVO{
 		WebsiteConfig:      *h.toWebsiteConfigVO(&config.WebSiteConfig),
 		NoticeConfigVO:     *h.toNoticeConfigVO(&config.NoticeConfig),
 		SocialInfoConfigVO: *h.toSocialInfoConfigVO(&config.SocialInfoConfig),
 		PayInfoConfigVO:    h.toPayInfoConfigVO(config.PayInfoConfig),
 		SeoMetaConfigVO:    *h.toSeoMetaConfigVO(&config.SeoMetaConfig),
-	}, nil
+	}), nil
 }
 
 func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebSiteConfig) *vo.WebsiteConfigVO {
@@ -396,23 +395,23 @@ func (h *WebsiteConfigHandler) AdminDeleteSocialConfig(ctx *gin.Context) (*apiwr
 	return apiwrap.SuccessResponse(), h.serv.DeleteSocialInfo(ctx, id)
 }
 
-func (h *WebsiteConfigHandler) AdminLogin(ctx *gin.Context, req request.LoginRequest) (*apiwrap.ResponseBody[any], error) {
+func (h *WebsiteConfigHandler) AdminLogin(ctx *gin.Context, req request.LoginRequest) (*apiwrap.ResponseBody[vo.LoginVO], error) {
 	adminConfig, err := h.serv.GetAdminConfig(ctx)
 	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, err
 	}
 	if adminConfig == nil || adminConfig.Username != req.Username || adminConfig.Password != req.Password {
-		return apiwrap.NewResponseBody[any](100001, "username or password is wrong.", nil), nil
+		return nil, *apiwrap.NewResponseBody[any](40101, "username or password is incorrect", nil)
 	}
 	jwt, exp, err := jwtutil.GenerateJwt()
 	if err != nil {
 		return nil, err
 	}
-	return apiwrap.SuccessResponseWithData[any](vo.LoginVO{Token: jwt, Expiration: exp}), nil
+	return apiwrap.SuccessResponseWithData(vo.LoginVO{Token: jwt, Expiration: exp}), nil
 }
 
-func (h *WebsiteConfigHandler) GetInitStatus(_ *gin.Context) (*apiwrap.ResponseBody[any], error) {
-	return apiwrap.SuccessResponseWithData[any](map[string]bool{
+func (h *WebsiteConfigHandler) GetInitStatus(_ *gin.Context) (*apiwrap.ResponseBody[map[string]bool], error) {
+	return apiwrap.SuccessResponseWithData(map[string]bool{
 		"initStatus": global.IsWebsiteInitialized(),
 	}), nil
 }

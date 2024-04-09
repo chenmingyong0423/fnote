@@ -68,10 +68,10 @@ type PostHandler struct {
 
 func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/posts")
-	group.GET("/latest", api.Wrap(h.GetLatestPosts))
-	group.GET("", api.WrapWithBody(h.GetPosts))
-	group.GET("/:id", api.Wrap(h.GetPostBySug))
-	group.POST("/:id/likes", api.Wrap(h.AddLike))
+	group.GET("/latest", apiwrap.Wrap(h.GetLatestPosts))
+	group.GET("", apiwrap.WrapWithBody(h.GetPosts))
+	group.GET("/:id", apiwrap.Wrap(h.GetPostBySug))
+	group.POST("/:id/likes", apiwrap.Wrap(h.AddLike))
 	//group.DELETE("/:id/likes", api.Wrap(h.DeleteLike))
 
 	adminGroup := engine.Group("/admin/posts")
@@ -124,39 +124,50 @@ func (h *PostHandler) postsToPostVOs(posts []*domain.Post) []*SummaryPostVO {
 	return postVOs
 }
 
-func (h *PostHandler) GetPosts(ctx *gin.Context, req *domain.PostRequest) (pageVO api.PageVO[*SummaryPostVO], err error) {
+func (h *PostHandler) GetPosts(ctx *gin.Context, req *domain.PostRequest) (*apiwrap.ResponseBody[apiwrap.PageVO[*SummaryPostVO]], error) {
 	req.ValidateAndSetDefault()
 	posts, cnt, err := h.serv.GetPosts(ctx, req)
 	if err != nil {
-		return
+		return nil, err
 	}
-	pageVO.Page = req.Page
-	pageVO.List = h.postsToPostVOs(posts)
+	pageVO := apiwrap.PageVO[*SummaryPostVO]{
+		Page: apiwrap.Page{
+			PageNo:   req.Page.PageNo,
+			PageSize: req.Page.PageSize,
+		},
+		List: h.postsToPostVOs(posts),
+	}
 	pageVO.SetTotalCountAndCalculateTotalPages(cnt)
-	return
+	return apiwrap.SuccessResponseWithData(pageVO), nil
 }
 
-func (h *PostHandler) GetPostBySug(ctx *gin.Context) (vo *domain.DetailPostVO, err error) {
+func (h *PostHandler) GetPostBySug(ctx *gin.Context) (*apiwrap.ResponseBody[domain.DetailPostVO], error) {
 	sug := ctx.Param("id")
 	post, err := h.serv.GetPunishedPostById(ctx, sug)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, api.NewErrorResponseBody(http.StatusBadRequest, "The postId does not exist.")
 		}
-		return
+		return nil, err
 	}
-	vo = new(domain.DetailPostVO)
-	vo.PrimaryPost, vo.ExtraPost, vo.IsLiked = post.PrimaryPost, post.ExtraPost, slices.Contains(post.Likes, ctx.ClientIP())
-	return
+	return apiwrap.SuccessResponseWithData(domain.DetailPostVO{
+		PrimaryPost: post.PrimaryPost,
+		ExtraPost:   post.ExtraPost,
+		IsLiked:     slices.Contains(post.Likes, ctx.ClientIP()),
+	}), nil
 }
 
-func (h *PostHandler) AddLike(ctx *gin.Context) (r any, err error) {
+func (h *PostHandler) AddLike(ctx *gin.Context) (body *apiwrap.ResponseBody[any], err error) {
 	ip := ctx.ClientIP()
 	if ip == "" {
 		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
 	sug := ctx.Param("id")
-	return r, h.serv.AddLike(ctx, sug, ip)
+	err = h.serv.AddLike(ctx, sug, ip)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponse(), nil
 }
 
 func (h *PostHandler) DeleteLike(ctx *gin.Context) (r any, err error) {

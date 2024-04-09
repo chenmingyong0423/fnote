@@ -29,6 +29,10 @@ type ResponseBody[T any] struct {
 	Data    T      `json:"data,omitempty"`
 }
 
+func (er ResponseBody[T]) Error() string {
+	return fmt.Sprintf("%d:%s", er.Code, er.Message)
+}
+
 func SuccessResponse() *ResponseBody[any] {
 	return &ResponseBody[any]{
 		Code:    0,
@@ -119,10 +123,13 @@ func Wrap[T any](fn func(ctx *gin.Context) (T, error)) gin.HandlerFunc {
 func ErrorHandler(ctx *gin.Context, err error) {
 	l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 	var e ErrorResponseBody
+	var r ResponseBody[any]
 	switch {
 	case errors.As(err, &e):
 		l.ErrorContext(ctx, e.Error())
 		ctx.JSON(e.HttpCode, nil)
+	case errors.As(err, &r):
+		ctx.JSON(http.StatusOK, r)
 	default:
 		l.ErrorContext(ctx, fmt.Sprintf("%+v", err))
 		ctx.JSON(http.StatusInternalServerError, nil)

@@ -19,7 +19,6 @@ import (
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
@@ -52,8 +51,8 @@ type TagHandler struct {
 
 func (h *TagHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/tags")
-	group.GET("", api.Wrap(h.GetTags))
-	group.GET("/route/:route", api.Wrap(h.GetTagByRoute))
+	group.GET("", apiwrap.Wrap(h.GetTags))
+	group.GET("/route/:route", apiwrap.Wrap(h.GetTagByRoute))
 
 	adminGroup := engine.Group("/admin/tags")
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetTags))
@@ -63,12 +62,12 @@ func (h *TagHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.DELETE("/:id", apiwrap.Wrap(h.AdminDeleteTag))
 }
 
-func (h *TagHandler) GetTags(ctx *gin.Context) (listVO api.ListVO[TagsWithCountVO], err error) {
+func (h *TagHandler) GetTags(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[TagsWithCountVO]], error) {
 	tags, err := h.serv.GetTags(ctx)
 	if err != nil {
-		return listVO, err
+		return nil, err
 	}
-	listVO.List = make([]TagsWithCountVO, 0, len(tags))
+	listVO := apiwrap.NewListVO(make([]TagsWithCountVO, 0, len(tags)))
 	for _, tag := range tags {
 		listVO.List = append(listVO.List, TagsWithCountVO{
 			Name:  tag.Name,
@@ -76,16 +75,16 @@ func (h *TagHandler) GetTags(ctx *gin.Context) (listVO api.ListVO[TagsWithCountV
 			Count: tag.Count,
 		})
 	}
-	return listVO, nil
+	return apiwrap.SuccessResponseWithData(listVO), nil
 }
 
-func (h *TagHandler) GetTagByRoute(ctx *gin.Context) (TagNameVO, error) {
+func (h *TagHandler) GetTagByRoute(ctx *gin.Context) (*apiwrap.ResponseBody[TagNameVO], error) {
 	route := ctx.Param("route")
 	tag, err := h.serv.GetTagByRoute(ctx, route)
 	if err != nil {
-		return TagNameVO{}, err
+		return nil, err
 	}
-	return TagNameVO{Name: tag.Name}, nil
+	return apiwrap.SuccessResponseWithData(TagNameVO{Name: tag.Name}), nil
 }
 
 func (h *TagHandler) AdminGetTags(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.Tag]], error) {

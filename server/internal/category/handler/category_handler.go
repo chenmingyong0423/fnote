@@ -22,7 +22,6 @@ import (
 	"github.com/chenmingyong0423/gkit"
 
 	"github.com/chenmingyong0423/fnote/server/internal/category/service"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
@@ -59,9 +58,9 @@ type CategoryHandler struct {
 
 func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/categories")
-	group.GET("", api.Wrap(h.GetCategories))
-	group.GET("/route/:route", api.Wrap(h.GetCategoryByRoute))
-	engine.GET("/menus", api.Wrap(h.GetMenus))
+	group.GET("", apiwrap.Wrap(h.GetCategories))
+	group.GET("/route/:route", apiwrap.Wrap(h.GetCategoryByRoute))
+	engine.GET("/menus", apiwrap.Wrap(h.GetMenus))
 
 	adminGroup := engine.Group("/admin/categories")
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetCategories))
@@ -73,10 +72,10 @@ func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/:id/navigation", apiwrap.WrapWithBody(h.AdminModifyCategoryNavigation))
 }
 
-func (h *CategoryHandler) GetCategories(ctx *gin.Context) (listVO api.ListVO[CategoryWithCountVO], err error) {
+func (h *CategoryHandler) GetCategories(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[CategoryWithCountVO]], error) {
 	categoriesWithCount, err := h.serv.GetCategories(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
 	result := make([]CategoryWithCountVO, len(categoriesWithCount))
 	for i, category := range categoriesWithCount {
@@ -87,30 +86,28 @@ func (h *CategoryHandler) GetCategories(ctx *gin.Context) (listVO api.ListVO[Cat
 			Count:       category.Count,
 		}
 	}
-	listVO.List = result
-	return
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(result)), nil
 }
 
-func (h *CategoryHandler) GetMenus(ctx *gin.Context) (listVO api.ListVO[MenuVO], err error) {
+func (h *CategoryHandler) GetMenus(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[MenuVO]], error) {
 	menus, err := h.serv.GetMenus(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
 	menuVOs := make([]MenuVO, len(menus))
 	for i, menu := range menus {
 		menuVOs[i] = MenuVO{Name: menu.Name, Route: menu.Route}
 	}
-	listVO.List = menuVOs
-	return
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(menuVOs)), nil
 }
 
-func (h *CategoryHandler) GetCategoryByRoute(ctx *gin.Context) (CategoryNameVO, error) {
+func (h *CategoryHandler) GetCategoryByRoute(ctx *gin.Context) (*apiwrap.ResponseBody[CategoryNameVO], error) {
 	route := ctx.Param("route")
 	category, err := h.serv.GetCategoryByRoute(ctx, route)
 	if err != nil {
-		return CategoryNameVO{}, err
+		return nil, err
 	}
-	return CategoryNameVO{Name: category.Name}, nil
+	return apiwrap.SuccessResponseWithData(CategoryNameVO{Name: category.Name}), nil
 }
 
 func (h *CategoryHandler) AdminGetCategories(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.Category]], error) {

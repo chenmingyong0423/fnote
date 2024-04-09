@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"log/slog"
 
-	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
+	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
@@ -41,7 +41,7 @@ type VisitLogHandler struct {
 
 func (h *VisitLogHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/logs")
-	routerGroup.POST("", api.WrapWithBody(h.CollectVisitLog))
+	routerGroup.POST("", apiwrap.WrapWithBody(h.CollectVisitLog))
 }
 
 type VisitLogReq struct {
@@ -52,14 +52,14 @@ type VisitLogReq struct {
 	Referer   string `json:"referer"`
 }
 
-func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context, req VisitLogReq) (r any, err error) {
+func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context, req VisitLogReq) (*apiwrap.ResponseBody[any], error) {
 	req.Ip = ctx.ClientIP()
 	req.UserAgent = ctx.GetHeader("User-Agent")
 	req.Origin = ctx.GetHeader("Origin")
 	req.Referer = ctx.GetHeader("Referer")
-	err = h.serv.CollectVisitLog(ctx, domain.VisitHistory{Url: req.Url, Ip: req.Ip, UserAgent: req.UserAgent, Origin: req.UserAgent, Referer: req.Referer})
+	err := h.serv.CollectVisitLog(ctx, domain.VisitHistory{Url: req.Url, Ip: req.Ip, UserAgent: req.UserAgent, Origin: req.UserAgent, Referer: req.Referer})
 	if err != nil {
-		return
+		return nil, err
 	}
 	go func() {
 		gErr := h.csServ.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeWebsiteViewCount.ToString(), domain.CountStatsTypeWebsiteViewCount)
@@ -68,5 +68,5 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context, req VisitLogReq) (r 
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return
+	return apiwrap.SuccessResponse(), nil
 }
