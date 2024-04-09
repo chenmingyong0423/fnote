@@ -218,12 +218,14 @@ const getPostDetail = async () => {
   try {
     let postRes: any = await getPostsById(id);
     let res: IResponse<IPostDetail> = postRes.data.value;
-    if (res.code !== 200) {
-      return;
+    if (res && res.data) {
+      if (res.code !== 200) {
+        return;
+      }
+      existPost.value = true;
+      post.value = res.data!;
+      author.value = post.value?.author || "";
     }
-    existPost.value = true;
-    post.value = res.data!;
-    author.value = post.value?.author || "";
   } catch (error) {
     console.log(error);
   }

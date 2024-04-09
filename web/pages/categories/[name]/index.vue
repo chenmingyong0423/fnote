@@ -140,14 +140,18 @@ const postInfos = async () => {
     if (!req.value.categories || req.value.categories.length == 0) {
       let categoryRes: any = await getCategoryByRoute(routeParam);
       let res: IResponse<ICategoryName> = categoryRes.data.value;
+      if (res && res.data) {
       title.value = res.data?.name || "";
+      }
       req.value.categories = [title.value];
     }
     const deepCopyReq = JSON.parse(JSON.stringify(req.value));
     let postRes: any = await getPosts(deepCopyReq);
     let res: IResponse<IPageData<IPost>> = postRes.data.value;
+    if (res && res.data) {
     posts.value = res.data?.list || [];
     totalPosts.value = res.data?.totalCount || totalPosts.value;
+    }
   } catch (error) {
     console.log(error);
   }

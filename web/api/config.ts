@@ -55,3 +55,8 @@ export interface SeoMetaConfigVO {
 const prefix = "/configs";
 
 export const getWebsiteInfo = () => httpRequest.get(`${prefix}/index`);
+
+export interface InitializationStatusVO {
+  initStatus: boolean;
+}
+export const getInitializationStatus = () => httpRequest.get(`${prefix}/check-initialization`);

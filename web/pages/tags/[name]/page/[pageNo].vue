@@ -112,12 +112,16 @@ const postInfos = async () => {
     if (!req.value.tags || req.value.tags.length == 0) {
       let categoryRes: any = await getTagByRoute(routeParam);
       let res: IResponse<ICategoryName> = categoryRes.data.value;
-      req.value.tags = [res.data?.name || ""];
+      if (res && res.data) {
+        req.value.tags = [res.data?.name || ""];
+      }
     }
     const deepCopyReq = JSON.parse(JSON.stringify(req.value));
     let postRes: any = await getPosts(deepCopyReq);
     let res: IResponse<IPageData<IPost>> = postRes.data.value;
-    posts.value = res.data?.list || [];
+    if (res && res.data){
+      posts.value = res.data?.list || [];
+    }
     totalPosts.value = res.data?.totalCount || totalPosts.value;
   } catch (error) {
     console.log(error);
