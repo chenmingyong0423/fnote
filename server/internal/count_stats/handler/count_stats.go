@@ -16,8 +16,8 @@ package handler
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,21 +33,21 @@ type CountStatsHandler struct {
 
 func (h *CountStatsHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/stats")
-	routerGroup.GET("", api.Wrap(h.GetWebsiteCountStats))
+	routerGroup.GET("", apiwrap.Wrap(h.GetWebsiteCountStats))
 }
 
-func (h *CountStatsHandler) GetWebsiteCountStats(ctx *gin.Context) (vo.WebsiteCountStatsVO, error) {
+func (h *CountStatsHandler) GetWebsiteCountStats(ctx *gin.Context) (*apiwrap.ResponseBody[vo.WebsiteCountStatsVO], error) {
 	// 查询网站的统计数据
 	websiteCountStats, err := h.serv.GetWebsiteCountStats(ctx)
 	if err != nil {
-		return vo.WebsiteCountStatsVO{}, err
+		return nil, err
 	}
-	return vo.WebsiteCountStatsVO{
+	return apiwrap.SuccessResponseWithData(vo.WebsiteCountStatsVO{
 		PostCount:        websiteCountStats.PostCount,
 		CategoryCount:    websiteCountStats.CategoryCount,
 		TagCount:         websiteCountStats.TagCount,
 		CommentCount:     websiteCountStats.CommentCount,
 		LikeCount:        websiteCountStats.LikeCount,
 		WebsiteViewCount: websiteCountStats.WebsiteViewCount,
-	}, nil
+	}), nil
 }

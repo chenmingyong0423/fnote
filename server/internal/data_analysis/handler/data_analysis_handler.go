@@ -16,8 +16,8 @@ package handler
 
 import (
 	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
 	"github.com/gin-gonic/gin"
 )
@@ -36,32 +36,34 @@ type DataAnalysisHandler struct {
 
 func (h *DataAnalysisHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/admin/data-analysis")
-	routerGroup.GET("", api.Wrap(h.GetDataAnalysis))
+	routerGroup.GET("", apiwrap.Wrap(h.GetDataAnalysis))
 }
 
-func (h *DataAnalysisHandler) GetDataAnalysis(ctx *gin.Context) (result vo.DataAnalysis, err error) {
+func (h *DataAnalysisHandler) GetDataAnalysis(ctx *gin.Context) (*apiwrap.ResponseBody[vo.DataAnalysis], error) {
 	// 查询网站统计
 	websiteCountStats, err := h.csServ.GetWebsiteCountStats(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
-	result.PostCount = websiteCountStats.PostCount
-	result.CategoryCount = websiteCountStats.CategoryCount
-	result.TagCount = websiteCountStats.TagCount
-	result.LikeCount = websiteCountStats.LikeCount
-	result.TotalViewCount = websiteCountStats.WebsiteViewCount
-	result.CommentCount = websiteCountStats.CommentCount
+	result := vo.DataAnalysis{
+		PostCount:      websiteCountStats.PostCount,
+		CategoryCount:  websiteCountStats.CategoryCount,
+		TagCount:       websiteCountStats.TagCount,
+		LikeCount:      websiteCountStats.LikeCount,
+		TotalViewCount: websiteCountStats.WebsiteViewCount,
+		CommentCount:   websiteCountStats.CommentCount,
+	}
 	// 查询当日访问量
 	todayViewCount, err := h.vlServ.GetTodayViewCount(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
 	result.TodayViewCount = todayViewCount
 	// 查询当日实际访问用户量
 	todayUserVisitCount, err := h.vlServ.GetTodayUserViewCount(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
 	result.TodayUserVisitCount = todayUserVisitCount
-	return
+	return apiwrap.SuccessResponseWithData(result), nil
 }

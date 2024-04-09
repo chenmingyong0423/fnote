@@ -71,12 +71,12 @@ type CommentRequest struct {
 
 func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/comments")
-	group.GET("/latest", api.Wrap(h.GetLatestCommentAndReply))
+	group.GET("/latest", apiwrap.Wrap(h.GetLatestCommentAndReply))
 	// 评论
-	group.GET("/id/:id", api.Wrap(h.GetCommentsByPostId))
-	group.POST("", api.WrapWithBody(h.AddComment))
+	group.GET("/id/:id", apiwrap.Wrap(h.GetCommentsByPostId))
+	group.POST("", apiwrap.WrapWithBody(h.AddComment))
 	// 评论回复
-	group.POST("/:commentId/replies", api.WrapWithBody(h.AddCommentReply))
+	group.POST("/:commentId/replies", apiwrap.WrapWithBody(h.AddCommentReply))
 
 	adminGroup := engine.Group("/admin/comments")
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetComments))
@@ -91,29 +91,29 @@ func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/:id/replies/:rid/disapproval", apiwrap.WrapWithBody(h.AdminDisapproveCommentReply))
 }
 
-func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo api.IdVO, err error) {
+func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiwrap.ResponseBody[api.IdVO], error) {
 	ip := ctx.ClientIP()
 	if ip == "" {
-		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
+		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
 	if req.Website != "" && !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
-		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
+		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
 	}
 	switchConfig, err := h.cfgService.GetCommentConfig(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
 	if !switchConfig.EnableComment {
-		return vo, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
+		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
 	post, err := h.postServ.GetPunishedPostById(ctx, req.PostId)
 	if err != nil {
-		return
+		return nil, err
 	}
 	if !post.IsCommentAllowed {
-		return vo, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
+		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
-	vo.Id, err = h.serv.AddComment(ctx, domain.Comment{
+	id, err := h.serv.AddComment(ctx, domain.Comment{
 		PostInfo: domain.PostInfo{
 			PostId:    req.PostId,
 			PostTitle: post.Title,
@@ -128,7 +128,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo ap
 		},
 	})
 	if err != nil {
-		return
+		return nil, err
 	}
 	go func() {
 		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
@@ -146,7 +146,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (vo ap
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return
+	return apiwrap.SuccessResponseWithData(api.IdVO{Id: id}), nil
 }
 
 type ReplyRequest struct {
@@ -159,34 +159,34 @@ type ReplyRequest struct {
 	Content   string `json:"content" binding:"required,max=200"`
 }
 
-func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (vo api.IdVO, err error) {
+func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*apiwrap.ResponseBody[api.IdVO], error) {
 	// 根评论的 id
 	commentId := ctx.Param("commentId")
 	ip := ctx.ClientIP()
 	if ip == "" {
-		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
+		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
 	if req.Website != "" && !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
-		return vo, api.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
+		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
 	}
 	switchConfig, err := h.cfgService.GetCommentConfig(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
 	if !switchConfig.EnableComment {
-		return vo, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
+		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
 	post, err := h.postServ.GetPunishedPostById(ctx, req.PostId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return vo, api.NewErrorResponseBody(http.StatusForbidden, "The postId does not exist.")
+			return nil, api.NewErrorResponseBody(http.StatusForbidden, "The postId does not exist.")
 		}
-		return
+		return nil, err
 	}
 	if !post.IsCommentAllowed {
-		return vo, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
+		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
-	vo.Id, err = h.serv.AddReply(ctx, commentId, req.PostId, domain.CommentReply{
+	id, err := h.serv.AddReply(ctx, commentId, req.PostId, domain.CommentReply{
 		Content:   req.Content,
 		ReplyToId: req.ReplyToId,
 		UserInfo: domain.UserInfo4Reply{
@@ -197,7 +197,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (vo
 		},
 	})
 	if err != nil {
-		return
+		return nil, err
 	}
 	go func() {
 		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
@@ -215,13 +215,13 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (vo
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return
+	return apiwrap.SuccessResponseWithData(api.IdVO{Id: id}), nil
 }
 
-func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) (result api.ListVO[vo.LatestCommentVO], err error) {
+func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[vo.LatestCommentVO]], error) {
 	latestComments, err := h.serv.FineLatestCommentAndReply(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
 	lc := make([]vo.LatestCommentVO, 0, len(latestComments))
 	for _, latestComment := range latestComments {
@@ -238,15 +238,14 @@ func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) (result api.
 			CreateTime: latestComment.CreateTime,
 		})
 	}
-	result.List = lc
-	return
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(lc)), nil
 }
 
-func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (listVO api.ListVO[vo.PostCommentVO], err error) {
+func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[vo.PostCommentVO]], error) {
 	postId := ctx.Param("id")
 	comments, err := h.serv.FindCommentsByPostId(ctx, postId)
 	if err != nil {
-		return
+		return nil, err
 	}
 	pc := make([]vo.PostCommentVO, 0, len(comments))
 	for _, comment := range comments {
@@ -287,8 +286,7 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (listVO api.ListV
 			Replies:     replies,
 		})
 	}
-	listVO.List = pc
-	return
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(pc)), nil
 }
 
 func (h *CommentHandler) AdminGetComments(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[apiwrap.PageVO[vo.AdminCommentVO]], error) {
