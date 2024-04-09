@@ -122,8 +122,10 @@ const postInfos = async () => {
     const deepCopyReq = JSON.parse(JSON.stringify(req.value));
     let postRes: any = await getPosts(deepCopyReq);
     let res: IResponse<IPageData<IPost>> = postRes.data.value;
+    if (res && res.data) {
     posts.value = res.data?.list || [];
     totalPosts.value = res.data?.totalCount || 0;
+    }
   } catch (error) {
     console.log(error);
   }

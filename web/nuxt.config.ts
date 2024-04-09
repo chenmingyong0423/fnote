@@ -86,5 +86,6 @@ export default defineNuxtConfig({
     "~/plugins/localStorage.client.ts",
     "~/plugins/v-md-editor.client.js",
     "~/plugins/qrcode.client.ts",
+    '~/plugins/routerGuard.ts'
   ],
 });

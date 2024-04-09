@@ -56,7 +56,9 @@ const commentsInfos = async () => {
   try {
     let postRes: any = await getLatestComments();
     let res: IResponse<IListData<ILatestComment>> = postRes.data.value;
+    if (res && res.data) {
     comments.value = res.data?.list || [];
+    }
   } catch (error) {
     console.log(error);
   }

@@ -235,8 +235,10 @@ const getPostDetail = async () => {
   try {
     let postRes: any = await getPostsById(id);
     let res: IResponse<IPostDetail> = postRes.data.value;
+    if (res && res.data) {
     post.value = res.data;
     author.value = post.value?.author || "";
+    }
   } catch (error) {
     console.log(error);
   }
@@ -391,11 +393,13 @@ const initComments = async () => {
   try {
     let commentRes: any = await getComments(id);
     let res: IResponse<IPageData<IComment>> = commentRes.data.value;
+    if (res && res.data) {
     if (res.code !== 200) {
       toast.showToast(res.message, 2000);
       return;
     }
     comments.value = res.data?.list || [];
+    }
   } catch (error: any) {
     toast.showToast(error.toString(), 2000);
   }
@@ -416,12 +420,14 @@ const submit = async (req: ICommentRequest) => {
       return;
     }
     let res: IBaseResponse = commentRes.data.value;
+    if (res && res.data) {
     if (res.code !== 200) {
       toast.showToast(res.message, 2000);
       return;
     }
     toast.showToast("提交评论成功，待站长审核通过后将会通过邮件告知。", 3000);
     clearCommentReq();
+    }
   } catch (error: any) {
     toast.showToast(error.toString(), 2000);
   }
@@ -440,12 +446,14 @@ const submitReply = async (req: ICommentReplyRequest, commentId: string) => {
       return;
     }
     let res: IBaseResponse = commentRes.data.value;
+    if (res) {
     if (res.code !== 200) {
       toast.showToast(res.message, 2000);
       return;
     }
     toast.showToast("提交评论成功，待站长审核通过后将会通过邮件告知。", 3000);
     clearCommentReplyReq();
+    }
   } catch (error: any) {
     toast.showToast(error.toString(), 2000);
   }
@@ -479,12 +487,14 @@ const submitReply2Reply = async (
       return;
     }
     let res: IBaseResponse = commentRes.data.value;
+    if (res) {
     if (res.code !== 200) {
       toast.showToast(res.message, 2000);
       return;
     }
     toast.showToast("提交评论成功，待站长审核通过后将会通过邮件告知。", 3000);
     clearReply2ReplyReq();
+    }
   } catch (error: any) {
     toast.showToast(error.toString(), 2000);
   }

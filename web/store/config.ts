@@ -38,5 +38,6 @@ export const useConfigStore = defineStore("config", {
       description: "fnote blog",
       og_title: "fnote blog",
     } as SeoMetaConfigVO,
+    initialization: false,
   }),
 });

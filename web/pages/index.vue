@@ -5,8 +5,8 @@
       <PostListSquareItem :posts="posts"></PostListSquareItem>
       <NuxtLink class="m-auto" to="/navigation">
         <Button
-          name="查看更多"
-          class="w-30 h-10 line-height-10 bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"
+            name="查看更多"
+            class="w-30 h-10 line-height-10 bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"
         ></Button>
       </NuxtLink>
     </div>
@@ -21,11 +21,11 @@
 </template>
 
 <script lang="ts" setup>
-import { getLatestPosts } from "~/api/post";
-import type { IPost } from "~/api/post";
-import type { IResponse, IListData } from "~/api/http";
-import { useHomeStore } from "~/store/home";
-import { useConfigStore } from "~/store/config";
+import {getLatestPosts} from "~/api/post";
+import type {IPost} from "~/api/post";
+import type {IResponse, IListData} from "~/api/http";
+import {useHomeStore} from "~/store/home";
+import {useConfigStore} from "~/store/config";
 
 let posts = ref<IPost[]>([]);
 
@@ -33,7 +33,9 @@ const postInfos = async () => {
   try {
     let postRes: any = await getLatestPosts();
     let res: IResponse<IListData<IPost>> = postRes.data.value;
-    posts.value = res.data?.list || [];
+    if (res) {
+      posts.value = res.data?.list || [];
+    }
   } catch (error) {
     console.log(error);
   }
@@ -43,13 +45,13 @@ const configStore = useConfigStore();
 useHead({
   title: configStore.seo_meta_config.title,
   meta: [
-    { name: "description", content: configStore.seo_meta_config.description },
-    { name: "keywords", content: configStore.seo_meta_config.keywords },
-    { name: "author", content: configStore.seo_meta_config.author },
-    { name: "robots", content: configStore.seo_meta_config.robots },
+    {name: "description", content: configStore.seo_meta_config.description},
+    {name: "keywords", content: configStore.seo_meta_config.keywords},
+    {name: "author", content: configStore.seo_meta_config.author},
+    {name: "robots", content: configStore.seo_meta_config.robots},
   ],
   link: [
-    { rel: "icon", type: "image/x-icon", href: configStore.website_info.icon },
+    {rel: "icon", type: "image/x-icon", href: configStore.website_info.icon},
   ],
 });
 useSeoMeta({
