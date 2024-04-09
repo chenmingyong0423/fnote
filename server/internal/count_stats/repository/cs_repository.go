@@ -18,12 +18,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"go.mongodb.org/mongo-driver/bson"
-
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/builder/query"
 )
 
 type ICountStatsRepository interface {
@@ -50,7 +48,7 @@ type CountStatsRepository struct {
 }
 
 func (r *CountStatsRepository) GetWebsiteCountStats(ctx context.Context, countStatsTypes []domain.CountStatsType) ([]domain.CountStats, error) {
-	ds := make([]bson.D, 0, len(countStatsTypes))
+	ds := make([]any, 0, len(countStatsTypes))
 	for _, statsType := range countStatsTypes {
 		ds = append(ds, bsonx.NewD().Add("reference_id", statsType.ToString()).Add("type", statsType.ToString()).Build())
 	}
