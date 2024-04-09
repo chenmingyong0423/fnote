@@ -20,9 +20,9 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/internal/service"
 
-	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/service"
+	"github.com/gin-gonic/gin"
 
 	"github.com/chenmingyong0423/fnote/server/internal/category/repository"
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/service"

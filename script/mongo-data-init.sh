@@ -47,7 +47,7 @@ db.getCollection("configs").createIndex({
 });
 // 站点信息
 db.getCollection("configs").insertOne({
-  "create_time": Math.floor(new Date().getTime() / 1000),
+  "created_at": new Date(),
   "props": {
     // 站点名称
     "website_name": "",
@@ -60,7 +60,7 @@ db.getCollection("configs").insertOne({
     // 站长头像
     "website_owner_avatar": "",
     // 站点运行时间
-    "website_runtime": Math.floor(new Date().getTime() / 1000),
+    "website_runtime": new Date(),
     // 站点备案号
     "website_records": [],
     // 是否完成初始化
@@ -69,7 +69,7 @@ db.getCollection("configs").insertOne({
     "website_owner_email": ""
   },
   "typ": "website",
-  "update_time": Math.floor(new Date().getTime() / 1000)
+  "updated_at": new Date()
 });
 // seo 配置
 db.getCollection("configs").insertOne({
@@ -84,8 +84,8 @@ db.getCollection("configs").insertOne({
         "author": "",
         "robots": ""
     },
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000)
+    created_at: new Date(),
+    updated_at: new Date()
 });
 // 评论开关配置
 db.getCollection("configs").insertOne({
@@ -93,8 +93,8 @@ db.getCollection("configs").insertOne({
     props: {
         enable_comment: true
     },
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000)
+    created_at: new Date(),
+    updated_at: new Date()
 });
 // 友链开关配置
 db.getCollection("configs").insertOne({
@@ -102,8 +102,8 @@ db.getCollection("configs").insertOne({
     props: {
         enable_friend_commit: false
     },
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000)
+    created_at: new Date(),
+    updated_at: new Date()
 });
 // 邮件配置
 db.getCollection("configs").insertOne({
@@ -115,8 +115,8 @@ db.getCollection("configs").insertOne({
         "password": "",
         "email": ""
     },
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000)
+    created_at: new Date(),
+    updated_at: new Date()
 });
 // 公告配置
 db.getCollection("configs").insertOne({
@@ -124,11 +124,11 @@ db.getCollection("configs").insertOne({
     "props": {
         "title": "暂无最新公告",
         "content": "暂无最新公告",
-        "publish_time": Math.floor(new Date().getTime() / 1000),
+        "publish_time": new Date(),
         "enabled": true
     },
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000)
+    created_at: new Date(),
+    updated_at: new Date()
 });
 // 社交外链配置
 db.getCollection("configs").insertOne({
@@ -136,8 +136,8 @@ db.getCollection("configs").insertOne({
     "props": {
         "social_info_list": []
     },
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000)
+    created_at: new Date(),
+    updated_at: new Date()
 });
 // 首页展示文章数量配置
 db.getCollection("configs").insertOne({
@@ -145,8 +145,8 @@ db.getCollection("configs").insertOne({
     "props": {
         "count": 6
     },
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000)
+    created_at: new Date(),
+    updated_at: new Date()
 });
 // 支付二维码配置
 db.getCollection("configs").insertOne({
@@ -154,19 +154,19 @@ db.getCollection("configs").insertOne({
     "props": {
         "list": []
     },
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000)
+    created_at: new Date(),
+    updated_at: new Date()
 });
 
-// 支付二维码配置
+// 管理员配置
 db.getCollection("configs").insertOne({
     typ: "admin",
     "props": {
         "username": "",
         "password": ""
     },
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000)
+    created_at: new Date(),
+    updated_at: new Date()
 });
 
 // friends

@@ -56,10 +56,6 @@ import (
 	repository6 "github.com/chenmingyong0423/fnote/server/internal/visit_log/repository"
 	dao6 "github.com/chenmingyong0423/fnote/server/internal/visit_log/repository/dao"
 	service6 "github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
-	handler3 "github.com/chenmingyong0423/fnote/server/internal/website_config/handler"
-	repository3 "github.com/chenmingyong0423/fnote/server/internal/website_config/repository"
-	dao3 "github.com/chenmingyong0423/fnote/server/internal/website_config/repository/dao"
-	service3 "github.com/chenmingyong0423/fnote/server/internal/website_config/service"
 	"github.com/google/wire"
 )
 
@@ -73,10 +69,7 @@ var (
 		wire.Bind(new(service2.ICommentService), new(*service2.CommentService)),
 		wire.Bind(new(repository2.ICommentRepository), new(*repository2.CommentRepository)),
 		wire.Bind(new(dao2.ICommentDao), new(*dao2.CommentDao)))
-	ConfigProviders = wire.NewSet(handler3.NewWebsiteConfigHandler, service3.NewWebsiteConfigService, repository3.NewWebsiteConfigRepository, dao3.NewWebsiteConfigDao,
-		wire.Bind(new(service3.IWebsiteConfigService), new(*service3.WebsiteConfigService)),
-		wire.Bind(new(repository3.IWebsiteConfigRepository), new(*repository3.WebsiteConfigRepository)),
-		wire.Bind(new(dao3.IWebsiteConfigDao), new(*dao3.WebsiteConfigDao)))
+
 	FriendProviders = wire.NewSet(handler4.NewFriendHandler, service4.NewFriendService, repository4.NewFriendRepository, dao4.NewFriendDao,
 		wire.Bind(new(service4.IFriendService), new(*service4.FriendService)),
 		wire.Bind(new(repository4.IFriendRepository), new(*repository4.FriendRepository)),

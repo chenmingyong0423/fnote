@@ -22,6 +22,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/website_config"
+
 	handler6 "github.com/chenmingyong0423/fnote/server/internal/backup/handler"
 
 	handler5 "github.com/chenmingyong0423/fnote/server/internal/count_stats/handler"
@@ -45,13 +47,12 @@ import (
 	myValidator "github.com/chenmingyong0423/fnote/server/internal/pkg/validator"
 	postHanlder "github.com/chenmingyong0423/fnote/server/internal/post/handler"
 	vlHandler "github.com/chenmingyong0423/fnote/server/internal/visit_log/handler"
-	cfgHandler "github.com/chenmingyong0423/fnote/server/internal/website_config/handler"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *cfgHandler.WebsiteConfigHandler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *handler4.DataAnalysisHandler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators) (*gin.Engine, error) {
+func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *website_config.Handler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *handler4.DataAnalysisHandler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators) (*gin.Engine, error) {
 	engine := gin.Default()
 
 	// 参数校验器注册

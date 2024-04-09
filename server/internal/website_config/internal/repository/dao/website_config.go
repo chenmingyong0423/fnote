@@ -17,6 +17,7 @@ package dao
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 
@@ -32,11 +33,9 @@ import (
 
 // WebsiteConfig defines for the MongoDB Collection "website_config"
 type WebsiteConfig struct {
-	Id         string `bson:"_id"`
-	Props      any    `bson:"props"`
-	Typ        string `bson:"typ"`
-	CreateTime int64  `bson:"create_time"`
-	UpdateTime int64  `bson:"update_time"`
+	mongox.Model `bson:",inline"`
+	Props        any    `bson:"props"`
+	Typ          string `bson:"typ"`
 }
 
 type IWebsiteConfigDao interface {
@@ -45,7 +44,7 @@ type IWebsiteConfigDao interface {
 	GetByTypes(ctx context.Context, types ...string) ([]*WebsiteConfig, error)
 	Decrease(ctx context.Context, field string) error
 	UpdateByConditionAndUpdates(ctx context.Context, cond bson.D, updates bson.D) error
-	UpdatePropsByTyp(ctx context.Context, typ string, cfg any, now int64) error
+	UpdatePropsByTyp(ctx context.Context, typ string, cfg any, now time.Time) error
 }
 
 var _ IWebsiteConfigDao = (*WebsiteConfigDao)(nil)
@@ -60,7 +59,7 @@ type WebsiteConfigDao struct {
 	coll *mongox.Collection[WebsiteConfig]
 }
 
-func (d *WebsiteConfigDao) UpdatePropsByTyp(ctx context.Context, typ string, cfg any, now int64) error {
+func (d *WebsiteConfigDao) UpdatePropsByTyp(ctx context.Context, typ string, cfg any, now time.Time) error {
 	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", typ)).Updates(update.BsonBuilder().Set("props", cfg).Set("update_time", now).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update %s config, updates=%v", typ, cfg)

@@ -19,6 +19,7 @@ package main
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
+	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
@@ -34,7 +35,7 @@ func initializeApp() (*gin.Engine, error) {
 
 		ioc.CategoryProviders,
 		ioc.CommentProviders,
-		ioc.ConfigProviders,
+		website_config.InitHandler,
 		ioc.FriendProviders,
 		ioc.PostProviders,
 		ioc.VlProviders,
