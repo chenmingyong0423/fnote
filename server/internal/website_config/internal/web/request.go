@@ -1,4 +1,4 @@
-// Copyright 2023 chenmingyong0423
+// Copyright 2024 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package request
+package web
 
 type UpdateWebsiteConfigReq struct {
-	WebsiteName  string `json:"website_name" binding:"required"`
-	LiveTime     int64  `json:"live_time" binding:"required"`
-	OwnerName    string `json:"owner_name" binding:"required"`
-	OwnerProfile string `json:"owner_profile" binding:"required"`
-	OwnerPicture string `json:"owner_picture"`
-	Icon         string `json:"icon"`
+	WebsiteName         string `json:"website_name" binding:"required"`
+	WebsiteIcon         string `json:"website_icon" binding:"required"`
+	WebsiteOwner        string `json:"website_owner" binding:"required"`
+	WebsiteOwnerProfile string `json:"website_owner_profile" binding:"required"`
+	WebsiteOwnerAvatar  string `json:"website_owner_avatar" binding:"required"`
+	WebsiteOwnerEmail   string `json:"website_owner_email" binding:"required"`
+	WebsiteRuntime      int64  `json:"website_runtime" binding:"required"`
 }
 
 type UpdateOwnerConfigReq struct {

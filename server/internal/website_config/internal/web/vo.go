@@ -1,4 +1,4 @@
-// Copyright 2023 chenmingyong0423
+// Copyright 2024 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package vo
+package web
 
 // IndexConfigVO 首页信息
 type IndexConfigVO struct {
@@ -43,20 +43,14 @@ type NoticeConfigVO struct {
 }
 
 type WebsiteConfigVO struct {
-	// 站点名称
-	WebsiteName string `json:"website_name"`
-	// 站点图标
-	Icon string `json:"icon"`
-	// 网站运行时间
-	LiveTime int64 `json:"live_time"`
-	// 备案信息
-	Records []string `json:"records"`
-	// 站长名称
-	OwnerName string `json:"owner_name"`
-	// 站长简介
-	OwnerProfile string `json:"owner_profile"`
-	// 站长照片
-	OwnerPicture string `json:"owner_picture"`
+	WebsiteName         string   `json:"website_name"`
+	WebsiteIcon         string   `json:"website_icon"`
+	WebsiteOwner        string   `json:"website_owner"`
+	WebsiteOwnerProfile string   `json:"website_owner_profile"`
+	WebsiteOwnerAvatar  string   `json:"website_owner_avatar"`
+	WebsiteOwnerEmail   string   `json:"website_owner_email"`
+	WebsiteRuntime      int64    `json:"website_runtime,omitempty"`
+	WebsiteRecords      []string `json:"website_records,omitempty"`
 }
 
 type SocialInfoConfigVO struct {

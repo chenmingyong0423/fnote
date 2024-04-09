@@ -21,6 +21,8 @@ import (
 	"regexp"
 	"strings"
 
+	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/internal/service"
+
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
@@ -29,10 +31,8 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
 
-	msgService "github.com/chenmingyong0423/fnote/server/internal/message/service"
-	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/service"
-
 	"github.com/chenmingyong0423/fnote/server/internal/friend/service"
+	msgService "github.com/chenmingyong0423/fnote/server/internal/message/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/gin-gonic/gin"

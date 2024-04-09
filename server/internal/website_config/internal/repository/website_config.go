@@ -19,17 +19,17 @@ import (
 	"encoding/hex"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/repository/dao"
 	"github.com/chenmingyong0423/gkit/uuidx"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/builder/update"
 
-	"github.com/chenmingyong0423/fnote/server/internal/website_config/repository/dao"
 	"github.com/pkg/errors"
 )
 
@@ -38,11 +38,10 @@ type IWebsiteConfigRepository interface {
 	Increase(ctx context.Context, field string) error
 	FindConfigByTypes(ctx context.Context, types ...string) ([]domain.Config, error)
 	Decrease(ctx context.Context, field string) error
-	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
 	UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error
 	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
 	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
-	UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig, now int64) error
+	UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig, now time.Time) error
 	UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error
 	UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error
 	UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error
@@ -53,8 +52,8 @@ type IWebsiteConfigRepository interface {
 	AddSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
 	UpdateSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
 	DeleteSocialInfo(ctx context.Context, id []byte) error
-	UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now int64) error
-	UpdateWebSiteConfigV2(ctx context.Context, websiteConfigV2 domain.WebsiteConfigV2, now int64) error
+	UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now time.Time) error
+	UpdateWebSiteConfig(ctx context.Context, websiteConfigV2 domain.WebsiteConfig, now time.Time) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -69,11 +68,11 @@ type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
 }
 
-func (r *WebsiteConfigRepository) UpdateWebSiteConfigV2(ctx context.Context, websiteConfigV2 domain.WebsiteConfigV2, now int64) error {
+func (r *WebsiteConfigRepository) UpdateWebSiteConfig(ctx context.Context, websiteConfigV2 domain.WebsiteConfig, now time.Time) error {
 	return r.dao.UpdatePropsByTyp(ctx, "website", websiteConfigV2, now)
 }
 
-func (r *WebsiteConfigRepository) UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now int64) error {
+func (r *WebsiteConfigRepository) UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now time.Time) error {
 	return r.dao.UpdatePropsByTyp(ctx, "admin", adminConfig, now)
 }
 
@@ -167,7 +166,7 @@ func (r *WebsiteConfigRepository) UpdateNoticeConfig(ctx context.Context, notice
 	)
 }
 
-func (r *WebsiteConfigRepository) UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig, now int64) error {
+func (r *WebsiteConfigRepository) UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig, now time.Time) error {
 	return r.dao.UpdatePropsByTyp(ctx, "email", emailConfig, now)
 }
 
@@ -201,26 +200,6 @@ func (r *WebsiteConfigRepository) UpdateSeoMetaConfig(ctx context.Context, cfg *
 			Set("props.author", cfg.Author).
 			Set("props.robots", cfg.Robots).
 			Set("update_time", time.Now().Unix()).Build(),
-	)
-}
-
-func (r *WebsiteConfigRepository) UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error {
-	builder := update.BsonBuilder().
-		Set("props.website_name", webSiteConfig.WebsiteName).
-		Set("props.live_time", webSiteConfig.LiveTime).
-		Set("props.owner_name", webSiteConfig.OwnerName).
-		Set("props.owner_profile", webSiteConfig.OwnerProfile).
-		Set("update_time", time.Now().Unix())
-	if webSiteConfig.Icon != "" {
-		builder.Set("props.icon", webSiteConfig.Icon)
-	}
-	if webSiteConfig.OwnerPicture != "" {
-		builder.Set("props.owner_picture", webSiteConfig.OwnerPicture)
-	}
-	return r.dao.UpdateByConditionAndUpdates(
-		ctx,
-		query.Eq("typ", "website"),
-		builder.Build(),
 	)
 }
 

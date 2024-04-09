@@ -18,20 +18,21 @@ import (
 	"context"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/domain"
+
+	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/repository"
+
 	"github.com/gin-gonic/gin"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/server/internal/website_config/repository"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type IWebsiteConfigService interface {
-	GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error)
+	GetWebSiteConfig(ctx context.Context) (*domain.WebsiteConfig, error)
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
 	GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error)
 	GetFrontPostCount(ctx context.Context) (*domain.FrontPostCountConfig, error)
-	UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error
 	GetSeoMetaConfig(ctx context.Context) (*domain.SeoMetaConfig, error)
 	UpdateSeoMetaConfig(ctx context.Context, seoCfg *domain.SeoMetaConfig) error
 	GetCommentConfig(ctx context.Context) (domain.CommentConfig, error)
@@ -54,7 +55,8 @@ type IWebsiteConfigService interface {
 	UpdateSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
 	DeleteSocialInfo(ctx context.Context, id []byte) error
 	GetAdminConfig(ctx context.Context) (*domain.AdminConfig, error)
-	InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfigV2 domain.WebsiteConfigV2, emailConfig domain.EmailConfig) error
+	InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfig domain.WebsiteConfig, emailConfig domain.EmailConfig) error
+	UpdateWebsiteConfig(ctx context.Context, websiteConfig domain.WebsiteConfig, now time.Time) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -69,8 +71,8 @@ type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
 }
 
-func (s *WebsiteConfigService) InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfigV2 domain.WebsiteConfigV2, emailConfig domain.EmailConfig) error {
-	now := time.Now().Unix()
+func (s *WebsiteConfigService) InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfig domain.WebsiteConfig, emailConfig domain.EmailConfig) error {
+	now := time.Now()
 	err := s.UpdateAdminConfig(ctx, adminConfig, now)
 	if err != nil {
 		return err
@@ -81,7 +83,7 @@ func (s *WebsiteConfigService) InitializeWebsite(ctx context.Context, adminConfi
 		return err
 	}
 
-	err = s.UpdateWebSiteConfigV2(ctx, webSiteConfigV2, now)
+	err = s.UpdateWebsiteConfig(ctx, webSiteConfig, now)
 	if err != nil {
 		return err
 	}
@@ -174,7 +176,7 @@ func (s *WebsiteConfigService) GetNoticeConfig(ctx context.Context) (domain.Noti
 }
 
 func (s *WebsiteConfigService) UpdateEmailConfig(ctx context.Context, emailCfg *domain.EmailConfig) error {
-	return s.repo.UpdateEmailConfig(ctx, emailCfg, time.Now().Unix())
+	return s.repo.UpdateEmailConfig(ctx, emailCfg, time.Now())
 }
 
 func (s *WebsiteConfigService) UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error {
@@ -216,10 +218,6 @@ func (s *WebsiteConfigService) GetSeoMetaConfig(ctx context.Context) (*domain.Se
 	return cfg, nil
 }
 
-func (s *WebsiteConfigService) UpdateWebSiteConfig(ctx context.Context, webSiteConfig domain.WebSiteConfig) error {
-	return s.repo.UpdateWebSiteConfig(ctx, webSiteConfig)
-}
-
 func (s *WebsiteConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPostCountConfig, error) {
 	cfg := &domain.FrontPostCountConfig{}
 	err := s.getConfigAndConvertTo(ctx, "front-post-count", cfg)
@@ -237,7 +235,7 @@ func (s *WebsiteConfigService) GetIndexConfig(ctx context.Context) (*domain.Inde
 	cfg := &domain.IndexConfig{}
 	for _, config := range configs {
 		if config.Typ == "website" {
-			wsc := domain.WebSiteConfig{}
+			wsc := domain.WebsiteConfig{}
 			err = s.anyToStruct(config.Props, &wsc)
 			if err != nil {
 				return nil, err
@@ -299,12 +297,12 @@ func (s *WebsiteConfigService) getConfigAndConvertTo(ctx context.Context, typ st
 	return nil
 }
 
-func (s *WebsiteConfigService) GetWebSiteConfig(ctx context.Context) (*domain.WebSiteConfig, error) {
+func (s *WebsiteConfigService) GetWebSiteConfig(ctx context.Context) (*domain.WebsiteConfig, error) {
 	props, err := s.repo.FindByTyp(ctx, "website")
 	if err != nil {
 		return nil, errors.WithMessage(err, "s.repo.FindByTyp failed")
 	}
-	wsc := new(domain.WebSiteConfig)
+	wsc := new(domain.WebsiteConfig)
 	err = s.anyToStruct(props, wsc)
 	return wsc, err
 }
@@ -321,10 +319,10 @@ func (s *WebsiteConfigService) anyToStruct(props any, cfgInfos any) error {
 	return nil
 }
 
-func (s *WebsiteConfigService) UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now int64) error {
+func (s *WebsiteConfigService) UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now time.Time) error {
 	return s.repo.UpdateAdminConfig(ctx, adminConfig, now)
 }
 
-func (s *WebsiteConfigService) UpdateWebSiteConfigV2(ctx context.Context, websiteConfigV2 domain.WebsiteConfigV2, now int64) error {
-	return s.repo.UpdateWebSiteConfigV2(ctx, websiteConfigV2, now)
+func (s *WebsiteConfigService) UpdateWebsiteConfig(ctx context.Context, websiteConfig domain.WebsiteConfig, now time.Time) error {
+	return s.repo.UpdateWebSiteConfig(ctx, websiteConfig, now)
 }

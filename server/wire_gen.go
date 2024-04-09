@@ -50,10 +50,9 @@ import (
 	repository9 "github.com/chenmingyong0423/fnote/server/internal/visit_log/repository"
 	dao9 "github.com/chenmingyong0423/fnote/server/internal/visit_log/repository/dao"
 	service11 "github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
-	handler3 "github.com/chenmingyong0423/fnote/server/internal/website_config/handler"
-	repository4 "github.com/chenmingyong0423/fnote/server/internal/website_config/repository"
-	dao4 "github.com/chenmingyong0423/fnote/server/internal/website_config/repository/dao"
-	service3 "github.com/chenmingyong0423/fnote/server/internal/website_config/service"
+	repository4 "github.com/chenmingyong0423/fnote/server/internal/website_config/internal/repository"
+	dao4 "github.com/chenmingyong0423/fnote/server/internal/website_config/internal/repository/dao"
+	service3 "github.com/chenmingyong0423/fnote/server/internal/website_config/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -87,7 +86,7 @@ func initializeApp() (*gin.Engine, error) {
 	msgTplService := service8.NewMsgTplService(msgTplRepository)
 	messageService := service9.NewMessageService(websiteConfigService, emailService, msgTplService)
 	commentHandler := hanlder.NewCommentHandler(commentService, websiteConfigService, postService, messageService, countStatsService)
-	websiteConfigHandler := handler3.NewWebsiteConfigHandler(websiteConfigService)
+	websiteConfigHandler := web.NewWebsiteConfigHandler(websiteConfigService)
 	friendDao := dao8.NewFriendDao(database)
 	friendRepository := repository8.NewFriendRepository(friendDao)
 	friendService := service10.NewFriendService(friendRepository)

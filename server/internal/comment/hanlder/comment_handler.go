@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"strings"
 
+	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/internal/service"
+
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
 	csService "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
@@ -37,7 +39,6 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	postServ "github.com/chenmingyong0423/fnote/server/internal/post/service"
-	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/service"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
