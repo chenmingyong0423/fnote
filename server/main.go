@@ -49,7 +49,7 @@ func main() {
 
 	domain := os.Getenv("FNOTE_DOMAIN")
 	if domain == "" {
-		domain = "http://localhost:" + *port
+		domain = "http://localhost" + *port
 	}
 	global.Config.Domain = domain
 
