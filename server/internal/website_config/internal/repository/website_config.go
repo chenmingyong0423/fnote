@@ -53,7 +53,7 @@ type IWebsiteConfigRepository interface {
 	UpdateSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
 	DeleteSocialInfo(ctx context.Context, id []byte) error
 	UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now time.Time) error
-	UpdateWebSiteConfig(ctx context.Context, websiteConfigV2 domain.WebsiteConfig, now time.Time) error
+	UpdateWebSiteConfig(ctx context.Context, websiteConfig domain.WebsiteConfig, now time.Time) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -68,8 +68,19 @@ type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
 }
 
-func (r *WebsiteConfigRepository) UpdateWebSiteConfig(ctx context.Context, websiteConfigV2 domain.WebsiteConfig, now time.Time) error {
-	return r.dao.UpdatePropsByTyp(ctx, "website", websiteConfigV2, now)
+func (r *WebsiteConfigRepository) UpdateWebSiteConfig(ctx context.Context, websiteConfig domain.WebsiteConfig, now time.Time) error {
+	return r.dao.UpdateByConditionAndUpdates(ctx,
+		query.Eq("typ", "website"),
+		update.BsonBuilder().
+			Set("props.website_name", websiteConfig.WebsiteName).
+			Set("props.website_icon", websiteConfig.WebsiteIcon).
+			Set("props.website_owner", websiteConfig.WebsiteOwner).
+			Set("props.website_owner_profile", websiteConfig.WebsiteOwnerProfile).
+			Set("props.website_owner_avatar", websiteConfig.WebsiteOwnerAvatar).
+			Set("props.website_owner_email", websiteConfig.WebsiteOwnerEmail).
+			Set("props.website_init", websiteConfig.WebsiteInit).
+			Set("updated_at", now).
+			Build())
 }
 
 func (r *WebsiteConfigRepository) UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now time.Time) error {
