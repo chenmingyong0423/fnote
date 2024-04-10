@@ -7,9 +7,10 @@
       @preview="handlePreview"
       @change="handleChange"
       :before-upload="beforeUpload"
+      :headers="{ Authorization: authorization }"
       name="file"
     >
-      <div v-if="fileList.length < 1">
+      <div v-if="fileList && fileList.length < 1">
         <plus-outlined />
         <div style="margin-top: 8px">Upload</div>
       </div>
@@ -29,7 +30,8 @@ defineProps({
   imageUrl: {
     type: String,
     required: true
-  }
+  },
+  authorization: String
 })
 const emit = defineEmits(['update:imageUrl'])
 

@@ -3,12 +3,13 @@ import type { LoginRequest } from '@/interfaces/User'
 
 export interface WebsiteConfig {
   website_name: string
-  icon: string
-  live_time: number
-  records: string[]
-  owner_name: string
-  owner_profile: string
-  owner_picture: string
+  website_icon: string
+  website_owner: string
+  website_owner_profile: string
+  website_owner_avatar: string
+  website_owner_email: string
+  website_runtime: number
+  website_records: string[]
 }
 
 export interface SeoConfig {
@@ -76,11 +77,12 @@ export interface SocialConfigReq {
 
 export interface WebsiteConfigRequest {
   website_name: string
-  live_time: number
-  icon: string
-  owner_name: string
-  owner_profile: string
-  owner_picture: string
+  website_icon: string
+  website_owner: string
+  website_owner_profile: string
+  website_owner_avatar: string
+  website_owner_email: string
+  website_runtime: number
 }
 
 export interface SeoConfigRequest {
@@ -114,14 +116,14 @@ export const AddRecord = (record: string) => {
     url: '/configs/website/records',
     method: 'post',
     data: {
-      record: record
+      website_record: record
     }
   })
 }
 
 export const DeleteRecord = (record: string) => {
   return instance({
-    url: '/configs/website/records?record=' + record,
+    url: '/configs/website/records?website_record=' + record,
     method: 'delete'
   })
 }
