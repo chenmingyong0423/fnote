@@ -25,13 +25,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Handler = web.WebsiteConfigHandler
-
 var ConfigProviders = wire.NewSet(web.NewWebsiteConfigHandler, service.NewWebsiteConfigService, repository.NewWebsiteConfigRepository, dao.NewWebsiteConfigDao,
 	wire.Bind(new(service.IWebsiteConfigService), new(*service.WebsiteConfigService)),
 	wire.Bind(new(repository.IWebsiteConfigRepository), new(*repository.WebsiteConfigRepository)),
 	wire.Bind(new(dao.IWebsiteConfigDao), new(*dao.WebsiteConfigDao)))
 
-func InitHandler(mongoDB *mongo.Database) *Handler {
-	panic(wire.Build(ConfigProviders))
+func InitWebsiteConfigModule(mongoDB *mongo.Database) Model {
+	panic(wire.Build(
+		ConfigProviders,
+		wire.Struct(new(Model), "Svc", "Hdl"),
+	))
 }

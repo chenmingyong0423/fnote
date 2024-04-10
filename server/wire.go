@@ -35,7 +35,9 @@ func initializeApp() (*gin.Engine, error) {
 
 		ioc.CategoryProviders,
 		ioc.CommentProviders,
-		website_config.InitHandler,
+		website_config.InitWebsiteConfigModule,
+		wire.FieldsOf(new(website_config.Model), "Svc"),
+		wire.FieldsOf(new(website_config.Model), "Hdl"),
 		ioc.FriendProviders,
 		ioc.PostProviders,
 		ioc.VlProviders,
