@@ -71,7 +71,7 @@ type UpdateFPCConfigCountReq struct {
 }
 
 type AddRecordInWebsiteConfig struct {
-	Record string `json:"record" binding:"required"`
+	Record string `json:"website_record" binding:"required"`
 }
 
 type AddPayInfoRequest struct {

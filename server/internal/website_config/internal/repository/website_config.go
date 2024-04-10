@@ -69,18 +69,21 @@ type WebsiteConfigRepository struct {
 }
 
 func (r *WebsiteConfigRepository) UpdateWebSiteConfig(ctx context.Context, websiteConfig domain.WebsiteConfig, now time.Time) error {
-	return r.dao.UpdateByConditionAndUpdates(ctx,
-		query.Eq("typ", "website"),
-		update.BsonBuilder().
-			Set("props.website_name", websiteConfig.WebsiteName).
-			Set("props.website_icon", websiteConfig.WebsiteIcon).
-			Set("props.website_owner", websiteConfig.WebsiteOwner).
-			Set("props.website_owner_profile", websiteConfig.WebsiteOwnerProfile).
-			Set("props.website_owner_avatar", websiteConfig.WebsiteOwnerAvatar).
-			Set("props.website_owner_email", websiteConfig.WebsiteOwnerEmail).
-			Set("props.website_init", websiteConfig.WebsiteInit).
-			Set("updated_at", now).
-			Build())
+	b := update.BsonBuilder().
+		Set("props.website_name", websiteConfig.WebsiteName).
+		Set("props.website_icon", websiteConfig.WebsiteIcon).
+		Set("props.website_owner", websiteConfig.WebsiteOwner).
+		Set("props.website_owner_profile", websiteConfig.WebsiteOwnerProfile).
+		Set("props.website_owner_avatar", websiteConfig.WebsiteOwnerAvatar).
+		Set("props.website_owner_email", websiteConfig.WebsiteOwnerEmail).
+		Set("updated_at", now)
+	if websiteConfig.WebsiteInit != nil {
+		b.Set("props.website_init", websiteConfig.WebsiteInit)
+	}
+	if websiteConfig.WebsiteRuntime != nil {
+		b.Set("props.website_runtime", websiteConfig.WebsiteRuntime)
+	}
+	return r.dao.UpdateByConditionAndUpdates(ctx, query.Eq("typ", "website"), b.Build())
 }
 
 func (r *WebsiteConfigRepository) UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now time.Time) error {
@@ -91,7 +94,7 @@ func (r *WebsiteConfigRepository) DeleteSocialInfo(ctx context.Context, id []byt
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "social"),
-		update.BsonBuilder().Pull("props.social_info_list", bsonx.M("id", id)).Set("update_time", time.Now().Unix()).Build(),
+		update.BsonBuilder().Pull("props.social_info_list", bsonx.M("id", id)).Set("updated_at", time.Now().Unix()).Build(),
 	)
 }
 
@@ -104,7 +107,7 @@ func (r *WebsiteConfigRepository) UpdateSocialInfo(ctx context.Context, socialIn
 			Set("props.social_info_list.$.social_value", socialInfo.SocialValue).
 			Set("props.social_info_list.$.css_class", socialInfo.CssClass).
 			Set("props.social_info_list.$.is_link", socialInfo.IsLink).
-			Set("update_time", time.Now().Unix()).Build(),
+			Set("updated_at", time.Now().Unix()).Build(),
 	)
 }
 
@@ -117,7 +120,7 @@ func (r *WebsiteConfigRepository) AddSocialInfo(ctx context.Context, socialInfo 
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "social"),
-		update.BsonBuilder().Push("props.social_info_list", socialInfo).Set("update_time", time.Now().Unix()).Build(),
+		update.BsonBuilder().Push("props.social_info_list", socialInfo).Set("updated_at", time.Now().Unix()).Build(),
 	)
 }
 
@@ -125,7 +128,7 @@ func (r *WebsiteConfigRepository) DeletePayInfo(ctx context.Context, payInfoConf
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "pay"),
-		update.BsonBuilder().Pull("props.list", payInfoConfigElem).Set("update_time", time.Now().Unix()).Build(),
+		update.BsonBuilder().Pull("props.list", payInfoConfigElem).Set("updated_at", time.Now().Unix()).Build(),
 	)
 }
 
@@ -133,7 +136,7 @@ func (r *WebsiteConfigRepository) PushPayInfo(ctx *gin.Context, payInfoConfigEle
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "pay"),
-		update.BsonBuilder().Push("props.list", payInfoConfigElem).Set("update_time", time.Now().Unix()).Build(),
+		update.BsonBuilder().Push("props.list", payInfoConfigElem).Set("updated_at", time.Now().Unix()).Build(),
 	)
 }
 
@@ -141,7 +144,7 @@ func (r *WebsiteConfigRepository) DeleteRecordInWebsiteConfig(ctx context.Contex
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "website"),
-		update.BsonBuilder().Pull("props.records", record).Set("update_time", time.Now().Unix()).Build(),
+		update.BsonBuilder().Pull("props.website_records", record).Set("updated_at", time.Now().Unix()).Build(),
 	)
 }
 
@@ -149,7 +152,7 @@ func (r *WebsiteConfigRepository) AddRecordInWebsiteConfig(ctx context.Context, 
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "website"),
-		update.BsonBuilder().Push("props.records", record).Set("update_time", time.Now().Unix()).Build(),
+		update.BsonBuilder().Push("props.website_records", record).Set("updated_at", time.Now().Unix()).Build(),
 	)
 }
 
@@ -157,7 +160,7 @@ func (r *WebsiteConfigRepository) UpdateFrontPostCountConfig(ctx context.Context
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "front-post-count"),
-		update.BsonBuilder().Set("props.count", cfg.Count).Set("update_time", time.Now().Unix()).Build(),
+		update.BsonBuilder().Set("props.count", cfg.Count).Set("updated_at", time.Now().Unix()).Build(),
 	)
 }
 
@@ -165,7 +168,7 @@ func (r *WebsiteConfigRepository) UpdateNoticeConfigEnabled(ctx context.Context,
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "notice"),
-		update.BsonBuilder().Set("props.enabled", enabled).Set("update_time", time.Now().Unix()).Build(),
+		update.BsonBuilder().Set("props.enabled", enabled).Set("updated_at", time.Now().Unix()).Build(),
 	)
 }
 
@@ -185,7 +188,7 @@ func (r *WebsiteConfigRepository) UpdateFriendConfig(ctx context.Context, friend
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "friend"),
-		update.BsonBuilder().Set("props.enable_friend_commit", friendConfig.EnableFriendCommit).Set("update_time", time.Now().Unix()).Build(),
+		update.BsonBuilder().Set("props.enable_friend_commit", friendConfig.EnableFriendCommit).Set("updated_at", time.Now().Unix()).Build(),
 	)
 }
 
@@ -193,7 +196,7 @@ func (r *WebsiteConfigRepository) UpdateCommentConfig(ctx context.Context, comme
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "comment"),
-		update.BsonBuilder().Set("props.enable_comment", commentConfig.EnableComment).Set("update_time", time.Now().Unix()).Build(),
+		update.BsonBuilder().Set("props.enable_comment", commentConfig.EnableComment).Set("updated_at", time.Now().Unix()).Build(),
 	)
 }
 
@@ -210,7 +213,7 @@ func (r *WebsiteConfigRepository) UpdateSeoMetaConfig(ctx context.Context, cfg *
 			Set("props.keywords", cfg.Keywords).
 			Set("props.author", cfg.Author).
 			Set("props.robots", cfg.Robots).
-			Set("update_time", time.Now().Unix()).Build(),
+			Set("updated_at", time.Now().Unix()).Build(),
 	)
 }
 
