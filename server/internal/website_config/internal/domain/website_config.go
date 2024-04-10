@@ -42,15 +42,15 @@ type PayInfoConfig struct {
 }
 
 type WebsiteConfig struct {
-	WebsiteName         string    `bson:"website_name"`
-	WebsiteIcon         string    `bson:"website_icon"`
-	WebsiteOwner        string    `bson:"website_owner"`
-	WebsiteOwnerProfile string    `bson:"website_owner_profile"`
-	WebsiteOwnerAvatar  string    `bson:"website_owner_avatar"`
-	WebsiteOwnerEmail   string    `bson:"website_owner_email"`
-	WebsiteRuntime      time.Time `bson:"website_runtime,omitempty"`
-	WebsiteRecords      []string  `bson:"website_records,omitempty"`
-	WebsiteInit         *bool     `bson:"website_init,omitempty"`
+	WebsiteName         string     `bson:"website_name"`
+	WebsiteIcon         string     `bson:"website_icon"`
+	WebsiteOwner        string     `bson:"website_owner"`
+	WebsiteOwnerProfile string     `bson:"website_owner_profile"`
+	WebsiteOwnerAvatar  string     `bson:"website_owner_avatar"`
+	WebsiteOwnerEmail   string     `bson:"website_owner_email"`
+	WebsiteRuntime      *time.Time `bson:"website_runtime,omitempty"`
+	WebsiteRecords      []string   `bson:"website_records,omitempty"`
+	WebsiteInit         *bool      `bson:"website_init,omitempty"`
 }
 
 // NoticeConfig 公告配置

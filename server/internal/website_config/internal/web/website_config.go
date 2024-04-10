@@ -110,7 +110,7 @@ func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebsiteCon
 		WebsiteOwnerProfile: webMasterCfg.WebsiteOwnerProfile,
 		WebsiteOwnerAvatar:  webMasterCfg.WebsiteOwnerAvatar,
 		WebsiteOwnerEmail:   webMasterCfg.WebsiteOwnerEmail,
-		WebsiteRuntime:      webMasterCfg.WebsiteRuntime.Unix(),
+		WebsiteRuntime:      gkit.GetValueOrDefault(webMasterCfg.WebsiteRuntime).Unix(),
 		WebsiteRecords:      webMasterCfg.WebsiteRecords,
 	}
 }
@@ -167,7 +167,7 @@ func (h *WebsiteConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req Up
 		WebsiteOwnerProfile: req.WebsiteOwnerProfile,
 		WebsiteOwnerAvatar:  req.WebsiteOwnerAvatar,
 		WebsiteOwnerEmail:   req.WebsiteOwnerEmail,
-		WebsiteRuntime:      time.Unix(req.WebsiteRuntime, 0).Local(),
+		WebsiteRuntime:      gkit.ToPtr(time.Unix(req.WebsiteRuntime, 0).Local()),
 		WebsiteRecords:      nil,
 	}, time.Now())
 }
