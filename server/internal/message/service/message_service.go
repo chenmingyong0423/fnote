@@ -17,9 +17,8 @@ package service
 import (
 	"context"
 
-	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/internal/service"
-
 	"github.com/chenmingyong0423/fnote/server/internal/message_template/service"
+	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
 	emailServ "github.com/chenmingyong0423/fnote/server/internal/email/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
@@ -34,7 +33,7 @@ var (
 	_ IMessageService = (*MessageService)(nil)
 )
 
-func NewMessageService(configServ configServ.IWebsiteConfigService, emailServ emailServ.IEmailService, msgTplService service.IMsgTplService) *MessageService {
+func NewMessageService(configServ website_config.Service, emailServ emailServ.IEmailService, msgTplService service.IMsgTplService) *MessageService {
 	return &MessageService{
 		configServ:    configServ,
 		emailServ:     emailServ,
@@ -43,7 +42,7 @@ func NewMessageService(configServ configServ.IWebsiteConfigService, emailServ em
 }
 
 type MessageService struct {
-	configServ    configServ.IWebsiteConfigService
+	configServ    website_config.Service
 	emailServ     emailServ.IEmailService
 	msgTplService service.IMsgTplService
 }

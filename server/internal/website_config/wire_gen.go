@@ -17,16 +17,18 @@ import (
 
 // Injectors from wire.go:
 
-func InitHandler(mongoDB *mongo.Database) *web.WebsiteConfigHandler {
+func InitWebsiteConfigModule(mongoDB *mongo.Database) Model {
 	websiteConfigDao := dao.NewWebsiteConfigDao(mongoDB)
 	websiteConfigRepository := repository.NewWebsiteConfigRepository(websiteConfigDao)
 	websiteConfigService := service.NewWebsiteConfigService(websiteConfigRepository)
 	websiteConfigHandler := web.NewWebsiteConfigHandler(websiteConfigService)
-	return websiteConfigHandler
+	model := Model{
+		Svc: websiteConfigService,
+		Hdl: websiteConfigHandler,
+	}
+	return model
 }
 
 // wire.go:
-
-type Handler = web.WebsiteConfigHandler
 
 var ConfigProviders = wire.NewSet(web.NewWebsiteConfigHandler, service.NewWebsiteConfigService, repository.NewWebsiteConfigRepository, dao.NewWebsiteConfigDao, wire.Bind(new(service.IWebsiteConfigService), new(*service.WebsiteConfigService)), wire.Bind(new(repository.IWebsiteConfigRepository), new(*repository.WebsiteConfigRepository)), wire.Bind(new(dao.IWebsiteConfigDao), new(*dao.WebsiteConfigDao)))

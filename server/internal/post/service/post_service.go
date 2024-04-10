@@ -22,7 +22,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
 	"github.com/chenmingyong0423/gkit/slice"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -62,7 +62,7 @@ type IPostService interface {
 
 var _ IPostService = (*PostService)(nil)
 
-func NewPostService(repo repository.IPostRepository, cfgService service.IWebsiteConfigService, countStats service2.ICountStatsService, fileService service3.IFileService) *PostService {
+func NewPostService(repo repository.IPostRepository, cfgService website_config.Service, countStats service2.ICountStatsService, fileService service3.IFileService) *PostService {
 	return &PostService{
 		repo:        repo,
 		cfgService:  cfgService,
@@ -73,7 +73,7 @@ func NewPostService(repo repository.IPostRepository, cfgService service.IWebsite
 
 type PostService struct {
 	repo        repository.IPostRepository
-	cfgService  service.IWebsiteConfigService
+	cfgService  website_config.Service
 	countStats  service2.ICountStatsService
 	fileService service3.IFileService
 	ipMap       sync.Map

@@ -18,7 +18,7 @@ import (
 	"net/http"
 	"slices"
 
-	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
@@ -54,7 +54,7 @@ type SummaryPostVO struct {
 	CreateTime   int64    `json:"create_time"`
 }
 
-func NewPostHandler(serv service.IPostService, cfgService configServ.IWebsiteConfigService) *PostHandler {
+func NewPostHandler(serv service.IPostService, cfgService website_config.Service) *PostHandler {
 	return &PostHandler{
 		serv:       serv,
 		cfgService: cfgService,
@@ -63,7 +63,7 @@ func NewPostHandler(serv service.IPostService, cfgService configServ.IWebsiteCon
 
 type PostHandler struct {
 	serv       service.IPostService
-	cfgService configServ.IWebsiteConfigService
+	cfgService website_config.Service
 }
 
 func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {

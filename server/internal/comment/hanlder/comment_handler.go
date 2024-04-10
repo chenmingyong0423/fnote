@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	configServ "github.com/chenmingyong0423/fnote/server/internal/website_config/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
@@ -44,7 +44,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NewCommentHandler(serv service.ICommentService, cfgService configServ.IWebsiteConfigService, postServ postServ.IPostService, msgServ msgService.IMessageService, statsServ csService.ICountStatsService) *CommentHandler {
+func NewCommentHandler(serv service.ICommentService, cfgService website_config.Service, postServ postServ.IPostService, msgServ msgService.IMessageService, statsServ csService.ICountStatsService) *CommentHandler {
 	return &CommentHandler{
 		serv:       serv,
 		cfgService: cfgService,
@@ -56,7 +56,7 @@ func NewCommentHandler(serv service.ICommentService, cfgService configServ.IWebs
 
 type CommentHandler struct {
 	serv       service.ICommentService
-	cfgService configServ.IWebsiteConfigService
+	cfgService website_config.Service
 	postServ   postServ.IPostService
 	msgServ    msgService.IMessageService
 	statsServ  csService.ICountStatsService
