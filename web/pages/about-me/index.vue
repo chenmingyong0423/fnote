@@ -219,7 +219,7 @@ const getPostDetail = async () => {
     let postRes: any = await getPostsById(id);
     let res: IResponse<IPostDetail> = postRes.data.value;
     if (res && res.data) {
-      if (res.code !== 200) {
+      if (res.code !== 0) {
         return;
       }
       existPost.value = true;
@@ -381,7 +381,7 @@ const initComments = async () => {
   try {
     let commentRes: any = await getComments(id);
     let res: IResponse<IPageData<IComment>> = commentRes.data.value;
-    if (res.code !== 200) {
+    if (res.code !== 0) {
       toast.showToast(res.message, 2000);
       return;
     }
@@ -406,7 +406,7 @@ const submit = async (req: ICommentRequest) => {
       return;
     }
     let res: IBaseResponse = commentRes.data.value;
-    if (res.code !== 200) {
+    if (res.code !== 0) {
       toast.showToast(res.message, 2000);
       return;
     }
@@ -430,7 +430,7 @@ const submitReply = async (req: ICommentReplyRequest, commentId: string) => {
       return;
     }
     let res: IBaseResponse = commentRes.data.value;
-    if (res.code !== 200) {
+    if (res.code !== 0) {
       toast.showToast(res.message, 2000);
       return;
     }
@@ -469,7 +469,7 @@ const submitReply2Reply = async (
       return;
     }
     let res: IBaseResponse = commentRes.data.value;
-    if (res.code !== 200) {
+    if (res.code !== 0) {
       toast.showToast(res.message, 2000);
       return;
     }
@@ -491,7 +491,7 @@ const clearReply2ReplyReq = () => {
 };
 
 useHead({
-  title: `${post.value?.title} - ${configStore.seo_meta_config.title}`,
+  title: `${post.value?.title} - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: description },
     { name: "keywords", content: configStore.seo_meta_config.keywords },
@@ -499,11 +499,11 @@ useHead({
     { name: "robots", content: configStore.seo_meta_config.robots },
   ],
   link: [
-    { rel: "icon", type: "image/x-icon", href: configStore.website_info.icon },
+    { rel: "icon", type: "image/x-icon", href: configStore.website_info.website_icon },
   ],
 });
 useSeoMeta({
-  ogTitle: `${post.value?.title} - ${configStore.seo_meta_config.og_title}`,
+  ogTitle: `${post.value?.title} - ${configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.og_title}`,
   ogDescription: description,
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",

@@ -47,7 +47,7 @@ const menuStore = useMenuStore();
 const configStore = useConfigStore();
 
 const isBlackMode = computed(() => homeStore.isBlackMode);
-const picture = ref<string>(configStore.website_info.owner_picture);
+const picture = ref<string>(configStore.website_info.website_owner_avatar);
 
 const httpRes: any = await httpRequest.get(`/menus`);
 // if (httpRes.error?.value.statusCode == 503) {

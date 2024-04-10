@@ -161,7 +161,7 @@ await postInfos();
 
 
 useHead({
-  title: `${title.value}-${configStore.seo_meta_config.title}`,
+  title: `${title.value} - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: `${title.value}文章列表` },
     { name: "keywords", content: configStore.seo_meta_config.keywords },
@@ -169,11 +169,11 @@ useHead({
     { name: "robots", content: configStore.seo_meta_config.robots },
   ],
   link: [
-    { rel: "icon", type: "image/x-icon", href: configStore.website_info.icon },
+    { rel: "icon", type: "image/x-icon", href: configStore.website_info.website_icon },
   ],
 });
 useSeoMeta({
-  ogTitle: `${title.value}-${configStore.seo_meta_config.og_title}`,
+  ogTitle: `${title.value} - ${configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.og_title}`,
   ogDescription: `${title.value}文章列表`,
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",

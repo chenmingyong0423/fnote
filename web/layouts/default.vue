@@ -3,7 +3,7 @@
     <SmallMenu></SmallMenu>
     <MyToast></MyToast>
     <div ref="myDom">
-      <Header class="slide-down" />
+      <Header class="slide-down"/>
     </div>
     <div class="bg-#F0F2F5 dark:bg-#03080c pt-25 p-5">
       <div class="slide-up w-90% m-auto lt-md:w-99%">
@@ -11,22 +11,22 @@
       </div>
     </div>
     <div>
-      <Footer />
+      <Footer/>
     </div>
     <div>
       <div
-        ref="scrollToTop"
-        class="i-ph:caret-circle-up-fill text-#1e80ff dark:text-dtc w-15 h-15 fixed bottom-[100px] right-[20px] cursor-pointer"
-        style="display: none"
-        @click="handleScrollToTop"
+          ref="scrollToTop"
+          class="i-ph:caret-circle-up-fill text-#1e80ff dark:text-dtc w-15 h-15 fixed bottom-[100px] right-[20px] cursor-pointer"
+          style="display: none"
+          @click="handleScrollToTop"
       ></div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { useHomeStore } from "~/store/home";
-import { type IWebsiteInfo, getWebsiteInfo } from "~/api/config";
-import { type IResponse } from "~/api/http";
+import {useHomeStore} from "~/store/home";
+import {type IWebsiteInfo, getWebsiteInfo} from "~/api/config";
+import {type IResponse} from "~/api/http";
 import SmallMenu from "~/components/SmallMenu.vue";
 import {
   collectVisitLog,
@@ -34,7 +34,7 @@ import {
   type VisitLogRequest,
   type WebsiteCountStats,
 } from "~/api/statiscs";
-import { useConfigStore } from "~/store/config";
+import {useConfigStore} from "~/store/config";
 
 const myDom = ref();
 const homeStore = useHomeStore();
@@ -48,15 +48,22 @@ onMounted(() => {
   }
 });
 
+const siteName = ref('fnote');
+const runtimeConfig = useRuntimeConfig()
+const siteURL = runtimeConfig.public.domain;
+console.log('siteURL: ', siteURL)
+
+
 const webMaster = async () => {
   try {
     let postRes: any = await getWebsiteInfo();
     let res: IResponse<IWebsiteInfo> = postRes.data.value;
     if (res && res.data) {
       configStore.website_info = res.data.website_config;
+      siteName.value = res.data.website_config.website_name;
       configStore.notice_info = res.data.notice_config;
       configStore.social_info_list =
-        res.data.social_info_config.social_info_list;
+          res.data.social_info_config.social_info_list;
       configStore.pay_info = res.data.pay_info_config;
       configStore.seo_meta_config = res.data.seo_meta_config;
     }
@@ -97,6 +104,22 @@ const handleScrollToTop = () => {
     });
   }
 };
+
+const jsonLd = computed(() => {
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": `${siteName.value}`,
+    "url": `${siteURL}`,
+  });
+});
+
+useHead({
+  script: [{
+    type: 'application/ld+json',
+    innerHTML: jsonLd.value
+  }]
+})
 
 onMounted(() => {
   window.addEventListener("scroll", scrollEvent);

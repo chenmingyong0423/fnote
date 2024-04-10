@@ -177,7 +177,7 @@ watch(
 const configStore = useConfigStore();
 const seo = () => {
   useHead({
-    title: `${keyword.value}-搜索-${configStore.seo_meta_config.title}`,
+    title: `${keyword.value} - 搜索 - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
     meta: [
       { name: "description", content: `${keyword.value} 搜索结果` },
       { name: "keywords", content: configStore.seo_meta_config.keywords },
@@ -188,12 +188,12 @@ const seo = () => {
       {
         rel: "icon",
         type: "image/x-icon",
-        href: configStore.website_info.icon,
+        href: configStore.website_info.website_icon,
       },
     ],
   });
   useSeoMeta({
-    ogTitle: `${keyword.value}-搜索-${configStore.seo_meta_config.og_title}`,
+    ogTitle: `${keyword.value} - 搜索 - ${configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.og_title}`,
     ogDescription: `${keyword.value} 搜索结果`,
     ogImage: configStore.seo_meta_config.og_image,
     twitterCard: "summary",

@@ -24,7 +24,6 @@
 import {getLatestPosts} from "~/api/post";
 import type {IPost} from "~/api/post";
 import type {IResponse, IListData} from "~/api/http";
-import {useHomeStore} from "~/store/home";
 import {useConfigStore} from "~/store/config";
 
 let posts = ref<IPost[]>([]);
@@ -43,7 +42,7 @@ const postInfos = async () => {
 await postInfos();
 const configStore = useConfigStore();
 useHead({
-  title: configStore.seo_meta_config.title,
+  title: configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title,
   meta: [
     {name: "description", content: configStore.seo_meta_config.description},
     {name: "keywords", content: configStore.seo_meta_config.keywords},
@@ -51,11 +50,11 @@ useHead({
     {name: "robots", content: configStore.seo_meta_config.robots},
   ],
   link: [
-    {rel: "icon", type: "image/x-icon", href: configStore.website_info.icon},
+    {rel: "icon", type: "image/x-icon", href: configStore.website_info.website_icon},
   ],
 });
 useSeoMeta({
-  ogTitle: configStore.seo_meta_config.og_title,
+  ogTitle: configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title,
   ogDescription: configStore.seo_meta_config.description,
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",
