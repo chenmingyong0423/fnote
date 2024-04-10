@@ -168,7 +168,6 @@ func (h *WebsiteConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req Up
 		WebsiteOwnerAvatar:  req.WebsiteOwnerAvatar,
 		WebsiteOwnerEmail:   req.WebsiteOwnerEmail,
 		WebsiteRuntime:      gkit.ToPtr(time.Unix(req.WebsiteRuntime, 0).Local()),
-		WebsiteRecords:      nil,
 	}, time.Now())
 }
 
@@ -305,7 +304,7 @@ func (h *WebsiteConfigHandler) AdminAddRecordInWebsiteConfig(ctx *gin.Context, r
 }
 
 func (h *WebsiteConfigHandler) AdminDeleteRecordInWebsiteConfig(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
-	record := ctx.Query("record")
+	record := ctx.Query("website_record")
 	if record == "" {
 		return nil, errors.New("record is empty")
 	}
