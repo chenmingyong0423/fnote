@@ -21,12 +21,13 @@ export interface ISocialInfoItem {
 
 export interface IWebsite {
   website_name: string;
-  icon: string;
-  live_time: number;
-  records: string[];
-  owner_name: string;
-  owner_profile: string;
-  owner_picture: string;
+  website_icon: string;
+  website_owner: string;
+  website_owner_profile: string;
+  website_owner_avatar: string;
+  website_owner_email: string;
+  website_runtime: number;
+  website_records: string[];
 }
 
 export interface INotice {

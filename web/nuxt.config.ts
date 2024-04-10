@@ -2,6 +2,13 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ["@unocss/nuxt", "@pinia/nuxt", "dayjs-nuxt"],
+  runtimeConfig: {
+    public: {
+      domain: process.argv
+          .find((arg) => arg.startsWith("--API_DOMAIN="))
+          ?.split("=")[1] || "http://localhost:3000"
+    },
+  },
   nitro: {
     // 该配置用于服务端请求转发
     routeRules: {

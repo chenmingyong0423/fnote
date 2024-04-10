@@ -1,67 +1,67 @@
 <template>
   <div
-    class="flex flex-col items-center justify-center bg-#fff p-10 b-rounded-4 dark:text-dtc md:dark_bg_gray ease-linear duration-100 md:custom_shadow md:hover:translate-y--2 lt-md:p-5 lt-md:bg_transparent"
+      class="flex flex-col items-center justify-center bg-#fff p-10 b-rounded-4 dark:text-dtc md:dark_bg_gray ease-linear duration-100 md:custom_shadow md:hover:translate-y--2 lt-md:p-5 lt-md:bg_transparent"
   >
     <div class="avatar">
       <img
-        :src="configStore.website_info.owner_picture"
-        alt=""
-        class="w-25 h-25 border-rounded-50% mx5 cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"
+          :src="configStore.website_info.website_owner_avatar"
+          alt=""
+          class="w-25 h-25 border-rounded-50% mx5 cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"
       />
     </div>
     <div class="introduction flex flex-col items-center justify-center p-5">
       <span class="text-1.5em mb-2">{{
-        configStore.website_info.owner_name
-      }}</span>
+          configStore.website_info.website_owner
+        }}</span>
       <span class="text-gray-5 mb-2">{{
-        configStore.website_info.owner_profile
-      }}</span>
+          configStore.website_info.website_owner_profile
+        }}</span>
     </div>
     <div
-      class="flex items-center justify-between border-t w-full text-gray-5 border-t-1 border-t-gray-2 border-t-solid p-t-5 mb-5"
+        class="flex items-center justify-between border-t w-full text-gray-5 border-t-1 border-t-gray-2 border-t-solid p-t-5 mb-5"
     >
       <div class="flex flex-col items-center justify-center w-33%">
         <span class="mb-1">{{
-          configStore.website_count_stats.post_count
-        }}</span>
+            configStore.website_count_stats.post_count
+          }}</span>
         <span class="">文章</span>
       </div>
       <div
-        class="flex flex-col items-center justify-center w-33% border-x-1 border-x-gray-2 border-x-solid"
+          class="flex flex-col items-center justify-center w-33% border-x-1 border-x-gray-2 border-x-solid"
       >
         <span class="mb-1">{{
-          configStore.website_count_stats.category_count
-        }}</span>
+            configStore.website_count_stats.category_count
+          }}</span>
         <span class="">分类</span>
       </div>
       <div class="flex flex-col items-center justify-center w-33%">
         <span class="mb-1">{{
-          configStore.website_count_stats.tag_count
-        }}</span>
+            configStore.website_count_stats.tag_count
+          }}</span>
         <span class="">标签</span>
       </div>
     </div>
     <div
-      class="flex items-center justify-between border-t w-full text-gray-5 p-b-5 border-b-1 border-b-gray-2 border-b-solid"
+        class="flex items-center justify-between border-t w-full text-gray-5 p-b-5 border-b-1 border-b-gray-2 border-b-solid"
     >
       <div class="flex flex-col items-center justify-center w-33%">
         <span class="mb-1">{{
-          configStore.website_count_stats.comment_count
-        }}</span>
+            configStore.website_count_stats.comment_count
+          }}</span>
         <span class="">评论</span>
       </div>
       <div
-        class="flex flex-col items-center justify-center w-33% border-x-1 border-x-gray-2 border-x-solid"
+          class="flex flex-col items-center justify-center w-33% border-x-1 border-x-gray-2 border-x-solid"
       >
         <span class="mb-1">{{
-          configStore.website_count_stats.like_count
-        }}</span>
+            configStore.website_count_stats.like_count
+          }}</span>
         <span class="">点赞</span>
       </div>
       <div class="flex flex-col items-center justify-center w-33%">
         <span class="mb-1">{{
-          configStore.website_count_stats.website_view_count
-        }}</span>
+            configStore.website_count_stats.website_view_count
+          }}</span>
         <span class="">浏览量</span>
       </div>
     </div>
@@ -69,12 +69,9 @@
 </template>
 
 <script lang="ts" setup>
-import { useAlertStore } from "~/store/toast";
-import { useConfigStore } from "~/store/config";
+import {useConfigStore} from "~/store/config";
 
 const configStore = useConfigStore();
-
-const toast = useAlertStore();
 
 const get = (icon: string): string => {
   switch (icon) {
