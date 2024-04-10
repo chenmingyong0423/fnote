@@ -8,6 +8,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: fnote
       MONGO_INITDB_ROOT_PASSWORD: fnote
       MONGO_INITDB_DATABASE: fnote
+      # 部署前请修改用户名和密码
       MONGO_USERNAME: fnote-user
       MONGO_PASSWORD: fnote-password
     volumes:
@@ -24,6 +25,9 @@ services:
     build:
       dockerfile: Dockerfile
       context: ./server
+      args:
+        # 修改成你的网站域名
+        WEBSITE_DOMAIN: https://xxx.com
     ports:
       - "8080:8080"
     depends_on:
@@ -37,6 +41,9 @@ services:
     build: 
       dockerfile: Dockerfile
       context: ./web
+      args:
+        # 修改成你的网站域名
+        WEBSITE_DOMAIN: https://xxx.com
     ports:
       - "3000:3000"
     depends_on:
