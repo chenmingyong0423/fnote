@@ -9,67 +9,67 @@
           </template>
         </div>
       </a-descriptions-item>
+      <a-descriptions-item label="站点 logo">
+        <div>
+          <StaticUpload
+            v-if="editable"
+            :image-url="data.website_icon"
+            :authorization="userStore.token"
+            @update:imageUrl="(value) => (data.website_icon = value)"
+          />
+          <a-image v-else :width="200" :src="data.website_icon" />
+        </div>
+      </a-descriptions-item>
       <a-descriptions-item label="站长昵称">
         <div>
-          <a-input v-if="editable" v-model:value="data.owner_name" style="margin: -5px 0" />
+          <a-input v-if="editable" v-model:value="data.website_owner" style="margin: -5px 0" />
           <template v-else>
-            {{ data.owner_name }}
+            {{ data.website_owner }}
           </template>
         </div>
       </a-descriptions-item>
       <a-descriptions-item label="站长简介">
         <div>
-          <a-input v-if="editable" v-model:value="data.owner_profile" style="margin: -5px 0" />
+          <a-input
+            v-if="editable"
+            v-model:value="data.website_owner_profile"
+            style="margin: -5px 0"
+          />
           <template v-else>
-            {{ data.owner_profile }}
+            {{ data.website_owner_profile }}
+          </template>
+        </div>
+      </a-descriptions-item>
+      <a-descriptions-item label="站长邮箱">
+        <div>
+          <a-input
+            v-if="editable"
+            v-model:value="data.website_owner_email"
+            style="margin: -5px 0"
+          />
+          <template v-else>
+            {{ data.website_owner_email }}
           </template>
         </div>
       </a-descriptions-item>
       <a-descriptions-item label="站长照片">
         <div>
-          <a-image :width="200" :src="data.owner_picture" />
-          <a-upload
+          <StaticUpload
             v-if="editable"
-            v-model:file-list="fileList4picture"
-            name="file"
-            action="http://localhost:8080/admin/files/upload"
-            @change="handleChange4picture"
-            :before-upload="beforeUpload4picture"
-            :headers="{ Authorization: userStore.token }"
-            :maxCount="1"
-          >
-            <a-button>
-              <upload-outlined></upload-outlined>
-              Click to Upload
-            </a-button>
-          </a-upload>
+            :image-url="data.website_owner_avatar"
+            :authorization="userStore.token"
+            @update:imageUrl="(value) => (data.website_owner_avatar = value)"
+          />
+          <a-image v-else :width="200" :src="data.website_owner_avatar" />
         </div>
       </a-descriptions-item>
       <a-descriptions-item label="站点运行时间">
         <div>
           <a-date-picker v-if="editable" v-model:value="liveTime" @change="liveTimeChanged" />
           <template v-else>
-            {{ dayjs.unix(data.live_time).format('YYYY-MM-DD') }}
+            {{ dayjs.unix(data.website_runtime).format('YYYY-MM-DD') }}
           </template>
         </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="站点图标">
-        <a-image :width="200" :src="data.icon" />
-        <a-upload
-          v-if="editable"
-          v-model:file-list="fileList"
-          name="file"
-          action="http://localhost:8080/admin/files/upload"
-          @change="handleChange"
-          :before-upload="beforeUpload"
-          :headers="{ Authorization: userStore.token }"
-          :maxCount="1"
-        >
-          <a-button>
-            <upload-outlined></upload-outlined>
-            Click to Upload
-          </a-button>
-        </a-upload>
       </a-descriptions-item>
     </a-descriptions>
     <div style="margin-top: 10px">
@@ -87,7 +87,7 @@
       </div>
       <div
         class="flex p-3 border-b-1 border-b-solid border-b-gray-2"
-        v-for="(item, index) in data.records"
+        v-for="(item, index) in data.website_records"
         :key="index"
       >
         <div v-html="item"></div>
@@ -112,6 +112,7 @@ import { type Dayjs } from 'dayjs'
 import { message } from 'ant-design-vue'
 import type { UploadChangeParam, UploadProps } from 'ant-design-vue'
 import { useUserStore } from '@/stores/user'
+import StaticUpload from '@/components/upload/StaticUpload.vue'
 
 const userStore = useUserStore()
 
@@ -120,12 +121,13 @@ const liveTime = ref<Dayjs>()
 
 const data = ref<WebsiteConfig>({
   website_name: '',
-  icon: '',
-  live_time: 0,
-  records: [],
-  owner_name: '',
-  owner_profile: '',
-  owner_picture: ''
+  website_icon: '',
+  website_owner: '',
+  website_owner_profile: '',
+  website_owner_avatar: '',
+  website_owner_email: '',
+  website_runtime: 0,
+  website_records: []
 })
 
 const getWebsite = async () => {
@@ -133,7 +135,7 @@ const getWebsite = async () => {
     const response: any = await GetWebSite()
     if (response.data.code === 0) {
       data.value = response.data.data || data.value
-      liveTime.value = dayjs(data.value.live_time * 1000)
+      liveTime.value = dayjs(data.value.website_runtime * 1000)
     }
   } catch (error) {
     console.log(error)
@@ -143,7 +145,7 @@ getWebsite()
 
 const liveTimeChanged = (date: Dayjs) => {
   liveTime.value = date
-  data.value.live_time = Math.floor(date.valueOf() / 1000)
+  data.value.website_runtime = Math.floor(date.valueOf() / 1000)
 }
 
 const cancel = () => {
@@ -155,11 +157,12 @@ const save = async () => {
   try {
     const response: any = await UpdateWebSite({
       website_name: data.value.website_name,
-      live_time: data.value.live_time,
-      icon: data.value.icon,
-      owner_name: data.value.owner_name,
-      owner_profile: data.value.owner_profile,
-      owner_picture: data.value.owner_name
+      website_icon: data.value.website_icon,
+      website_owner: data.value.website_owner,
+      website_owner_profile: data.value.website_owner_profile,
+      website_owner_avatar: data.value.website_owner_avatar,
+      website_owner_email: data.value.website_owner_email,
+      website_runtime: data.value.website_runtime
     })
     if (response.data.code === 0) {
       message.success('保存成功')
@@ -171,36 +174,6 @@ const save = async () => {
   } catch (error) {
     console.log(error)
   }
-}
-
-// 文件操作
-const fileList = ref<UploadProps['fileList']>([])
-
-const handleChange = (info: UploadChangeParam) => {
-  if (info.file.status === 'uploading') {
-    return
-  }
-  console.log(info)
-  if (info.file.status === 'done') {
-    // Get this url from response in real world.
-    data.value.icon = info.file.response.data.data.url
-    message.success('上传成功')
-  }
-  if (info.file.status === 'error') {
-    message.error('upload error')
-  }
-}
-
-const beforeUpload = (file: UploadProps['fileList'][number]) => {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
-  if (!isJpgOrPng) {
-    message.error('You can only upload JPG file!')
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isLt2M) {
-    message.error('Image must smaller than 2MB!')
-  }
-  return isJpgOrPng && isLt2M
 }
 
 const record = ref<string>('')
@@ -224,7 +197,7 @@ const pushRecord = async () => {
   }
 }
 
-const pullRecord = async (r: string) => {
+const pullRecord = async (r: '') => {
   try {
     const response: any = await DeleteRecord(r)
     if (response.data.code === 0) {
@@ -236,38 +209,6 @@ const pullRecord = async (r: string) => {
   } catch (error) {
     console.log(error)
   }
-}
-
-// picture 文件操作
-
-// 文件操作
-const fileList4picture = ref<UploadProps['fileList']>([])
-
-const handleChange4picture = (info: UploadChangeParam) => {
-  if (info.file.status === 'uploading') {
-    return
-  }
-  console.log(info)
-  if (info.file.status === 'done') {
-    // Get this url from response in real world.
-    data.value.owner_picture = info.file.response.data.data.url
-    message.success('上传成功')
-  }
-  if (info.file.status === 'error') {
-    message.error('upload error')
-  }
-}
-
-const beforeUpload4picture = (file: UploadProps['fileList'][number]) => {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
-  if (!isJpgOrPng) {
-    message.error('You can only upload JPG file!')
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isLt2M) {
-    message.error('Image must smaller than 2MB!')
-  }
-  return isJpgOrPng && isLt2M
 }
 </script>
 
