@@ -26,7 +26,7 @@ export default defineNuxtPlugin(nuxtApp => {
             }
         }
         if (!cfg.initialization) {
-            const host = process.env.WEBSITE_DOMAIN || "http://localhost:5173";
+            const host = process.env.BACKEND_HOST || "http://localhost:5173";
             if (process.client) {
                 // 客户端重定向
                 window.location.href = host + "/init";
