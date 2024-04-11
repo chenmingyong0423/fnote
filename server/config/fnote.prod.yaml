@@ -33,7 +33,7 @@ mongodb:
   # 建议 mongo 部署的容器名为 fnote-mongo
   uri: mongodb://fnote-mongo:27017
   username: fnote-user
-  password: fnote-password
+  password: 12345678
   auth_source: fnote
   database: fnote
 gravatar:
