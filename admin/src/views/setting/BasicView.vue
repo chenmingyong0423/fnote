@@ -197,7 +197,7 @@ const pushRecord = async () => {
   }
 }
 
-const pullRecord = async (r: '') => {
+const pullRecord = async (r: string) => {
   try {
     const response: any = await DeleteRecord(r)
     if (response.data.code === 0) {

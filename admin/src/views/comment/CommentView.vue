@@ -136,7 +136,7 @@ const get = async () => {
   }
 }
 get()
-const change = (pg, filters, sorter, { currentDataSource }) => {
+const change = (pg: any) => {
   pageReq.value.pageNo = pg.current
   pageReq.value.pageSize = pg.pageSize
   get()

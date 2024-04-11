@@ -15,7 +15,7 @@ export interface FriendReq {
   name: string
   logo: string
   description: string
-  show: boolean
+  show?: boolean
 }
 
 export const GetFriends = (pageReq: PageRequest) => {

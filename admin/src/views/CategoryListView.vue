@@ -57,7 +57,9 @@
             <div>
               <a-textarea
                 v-if="editableData[record.id]"
-                v-model:value="editableData[record.id][column.dataIndex]"
+                v-model:value="
+                  editableData[record.id][column.dataIndex as keyof UpdateCategoryRequest]
+                "
                 style="margin: -5px 0"
               />
               <template v-else>
@@ -342,7 +344,7 @@ const cancel = (key: string) => {
   delete editableData[key]
 }
 
-const change = (pg, filters, sorter, { currentDataSource }) => {
+const change = (pg: any) => {
   pageReq.value.pageNo = pg.current
   pageReq.value.pageSize = pg.pageSize
   getCategories()

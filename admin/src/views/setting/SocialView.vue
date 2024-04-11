@@ -80,7 +80,7 @@
           <div>
             <a-input
               v-if="editableData[record.id]"
-              v-model:value="editableData[record.id][column.dataIndex]"
+              v-model:value="editableData[record.id][column.dataIndex as keyof SocialConfig]"
               style="margin: -5px 0"
             />
             <template v-else>
@@ -92,7 +92,7 @@
           <div>
             <a-radio-group
               v-if="editableData[record.id]"
-              v-model:value="editableData[record.id][column.dataIndex]"
+              v-model:value="editableData[record.id][column.dataIndex as keyof SocialConfig]"
             >
               <a-radio :value="`i-fa6-brands:x-twitter`">
                 <div class="i-fa6-brands:x-twitter w-5 h-5"></div>
@@ -136,7 +136,7 @@
         <template v-if="column.key === 'is_link'">
           <a-radio-group
             v-if="editableData[record.id]"
-            v-model:value="editableData[record.id][column.dataIndex]"
+            v-model:value="editableData[record.id][column.dataIndex as keyof SocialConfig]"
           >
             <a-radio :value="false">否</a-radio>
             <a-radio :value="true">是</a-radio>
@@ -234,7 +234,7 @@ const addSocialInfo = () => {
   if (formRef.value) {
     formRef.value
       .validateFields()
-      .then(async (values) => {
+      .then(async () => {
         try {
           const response: any = await AddSocial(formState)
           if (response.data.code !== 0) {
