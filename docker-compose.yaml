@@ -8,9 +8,9 @@ services:
       MONGO_INITDB_ROOT_USERNAME: fnote
       MONGO_INITDB_ROOT_PASSWORD: fnote
       MONGO_INITDB_DATABASE: fnote
-      # 部署前请修改用户名和密码
+      # 默认的用户，如果你修改了用户名和密码，请同步修改 /server/config/fnote.prod.yaml 文件下的用户名和密码
       MONGO_USERNAME: fnote-user
-      MONGO_PASSWORD: fnote-password
+      MONGO_PASSWORD: 12345678
     volumes:
       - /fnote/mongo_data:/data/db
       - ./script/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
