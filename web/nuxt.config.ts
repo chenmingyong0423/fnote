@@ -7,6 +7,9 @@ export default defineNuxtConfig({
       domain: process.argv
           .find((arg) => arg.startsWith("--WEBSITE_DOMAIN="))
           ?.split("=")[1] || "http://localhost:3000",
+      serverHost: process.argv
+          .find((arg) => arg.startsWith("--SERVER_HOST="))
+          ?.split("=")[1] || "http://localhost:5173",
     },
   },
   nitro: {

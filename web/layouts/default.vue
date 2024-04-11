@@ -51,7 +51,6 @@ onMounted(() => {
 const siteName = ref('fnote');
 const runtimeConfig = useRuntimeConfig()
 const siteURL = runtimeConfig.public.domain;
-console.log('siteURL: ', siteURL)
 
 
 const webMaster = async () => {

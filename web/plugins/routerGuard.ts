@@ -7,6 +7,7 @@ import type {IComment} from "~/api/comment";
 
 export default defineNuxtPlugin(nuxtApp => {
     const router = useRouter();
+    const runtimeConfig = useRuntimeConfig()
     let flag = true
     router.beforeEach(async (to, from, next) => {
         const cfg = useConfigStore()
@@ -26,7 +27,7 @@ export default defineNuxtPlugin(nuxtApp => {
             }
         }
         if (!cfg.initialization) {
-            const host = process.env.BACKEND_HOST || "http://localhost:5173";
+            const host = runtimeConfig.public.serverHost;
             if (process.client) {
                 // 客户端重定向
                 window.location.href = host + "/init";
