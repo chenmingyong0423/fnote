@@ -4,22 +4,15 @@ export default defineNuxtConfig({
   modules: ["@unocss/nuxt", "@pinia/nuxt", "dayjs-nuxt"],
   runtimeConfig: {
     public: {
-      domain: process.argv
-          .find((arg) => arg.startsWith("--WEBSITE_DOMAIN="))
-          ?.split("=")[1] || "http://localhost:3000",
-      adminHost: process.argv
-          .find((arg) => arg.startsWith("--ADMIN_HOST="))
-          ?.split("=")[1] || "http://localhost:5173",
+      domain: process.env.NUXT_APP_BASE_HOST,
+      adminHost: process.env.NUXT_APP_ADMIN_HOST,
     },
   },
   nitro: {
     // 该配置用于服务端请求转发
     routeRules: {
       "/api/**": {
-        proxy:
-          (process.argv
-            .find((arg) => arg.startsWith("--API_BASE_URL="))
-            ?.split("=")[1] || "http://localhost:8080") + "/**",
+        proxy: process.env.NUXT_APP_SERVER_HOST + "/**",
       },
     },
   },
