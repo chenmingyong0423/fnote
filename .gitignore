@@ -35,7 +35,6 @@ web/.nuxt
 .nitro
 .cache
 .output
-.env
 
 web/dist
 admin/dist
