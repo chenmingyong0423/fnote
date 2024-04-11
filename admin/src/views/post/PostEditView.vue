@@ -65,24 +65,10 @@
             :rules="[{ required: true, message: '请选择封面' }]"
           >
             <a-input v-model:value="postReq.cover_img" placeholder="请输入封面路径" />
-            <a-upload
-              v-model:file-list="fileList"
-              name="file"
-              list-type="picture-card"
-              class="avatar-uploader m-y-5"
-              :show-upload-list="false"
-              action="http://localhost:8080/admin/files/upload"
-              :before-upload="beforeUpload"
-              :headers="{ Authorization: userStore.token }"
-              @change="handleChange"
-            >
-              <img v-if="imageUrl" :src="imageUrl" alt="avatar" width="250" height="150" />
-              <div v-else>
-                <loading-outlined v-if="loading"></loading-outlined>
-                <plus-outlined v-else></plus-outlined>
-                <div class="ant-upload-text">Upload</div>
-              </div>
-            </a-upload>
+            <StaticUpload
+              :image-url="postReq.cover_img"
+              @update:imageUrl="(value) => (postReq.cover_img = value)"
+            />
           </a-form-item>
           <a-form-item
             name="is_comment_allowed"
@@ -161,6 +147,7 @@ import type { SelectCategory } from '@/interfaces/Category'
 import type { SelectTag } from '@/interfaces/Tag'
 import type { File } from '@/interfaces/File'
 import { useUserStore } from '@/stores/user'
+import StaticUpload from '@/components/upload/StaticUpload.vue'
 
 const emit = defineEmits(['submit'])
 const userStore = useUserStore()
@@ -282,7 +269,8 @@ const handleChange = (info: UploadChangeParam) => {
   }
 }
 
-const beforeUpload = (file: UploadProps['fileList'][number]) => {
+// const beforeUpload = (file: UploadProps['fileList'][number]) => { = -!无力吐槽， 官网的写法，ts 无法保证类型安全
+const beforeUpload = (file: any) => {
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
   if (!isJpgOrPng) {
     message.error('You can only upload JPG file!')
@@ -295,27 +283,26 @@ const beforeUpload = (file: UploadProps['fileList'][number]) => {
 }
 
 // md 图片上传
-const handleUploadImage = async (event, insertImage, files) => {
-  console.log(files)
+const handleUploadImage = async (event: any, insertImage: any, files: any) => {
   try {
     const formData = new FormData()
     formData.append('file', files[0])
 
-    const response = await axios.post<IResponse<File>>('/admin/files/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-    if (response.data.data.code !== 0) {
-      message.error(response.data.data.message)
-      return
-    }
-    insertImage({
-      url: response?.data?.data?.url,
-      desc: response?.data?.data?.file_name
-      // width: 'auto',
-      // height: 'auto',
-    })
+    // const response = await axios.post<IResponse<File>>('/admin/files/upload', formData, {
+    //   headers: {
+    //     'Content-Type': 'multipart/form-data'
+    //   }
+    // })
+    // if (response.data.data.code !== 0) {
+    //   message.error(response.data.data.message)
+    //   return
+    // }
+    // insertImage({
+    //   url: response?.data?.data?.url,
+    //   desc: response?.data?.data?.file_name
+    //   // width: 'auto',
+    //   // height: 'auto',
+    // })
   } catch (error) {
     console.log(error)
   }

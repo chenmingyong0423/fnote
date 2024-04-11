@@ -4,7 +4,7 @@
       <template v-if="column.dataIndex === 'logo'">
         <a-input
           v-if="editableData[record.id]"
-          v-model:value="editableData[record.id][column.dataIndex]"
+          v-model:value="editableData[record.id][column.dataIndex as keyof FriendReq]"
         >
         </a-input>
         <template v-else>
@@ -15,7 +15,7 @@
         <div>
           <a-input
             v-if="editableData[record.id]"
-            v-model:value="editableData[record.id][column.dataIndex]"
+            v-model:value="editableData[record.id][column.dataIndex as keyof FriendReq]"
             style="margin: -5px 0"
           />
           <template v-else>
@@ -25,12 +25,8 @@
       </template>
       <template v-if="column.dataIndex === 'status'">
         <a-radio-group
-          v-if="
-            editableData[record.id] &&
-            editableData[record.id][column.dataIndex] != 3 &&
-            editableData[record.id][column.dataIndex] != 0
-          "
-          v-model:value="editableData[record.id][column.dataIndex]"
+          v-if="editableData[record.id] && record.status != 3 && record.status != 0"
+          v-model:value="editableData[record.id][column.dataIndex as keyof FriendReq]"
         >
           <a-radio :value="2">隐藏</a-radio>
           <a-radio :value="1">展示</a-radio>
@@ -171,7 +167,7 @@ const get = async () => {
   }
 }
 get()
-const change = (pg, filters, sorter, { currentDataSource }) => {
+const change = (pg: any) => {
   pageReq.value.pageNo = pg.current
   pageReq.value.pageSize = pg.pageSize
   get()

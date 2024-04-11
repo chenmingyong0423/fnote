@@ -79,7 +79,8 @@ const handleChange = async (info: UploadChangeParam) => {
   }
 }
 
-const handlePreview = async (file: UploadProps['fileList'][number]) => {
+// const handlePreview = async (file: UploadProps['fileList'][number]) => { = -!无力吐槽， 官网的写法，ts 无法保证类型安全
+const handlePreview = async (file: any) => {
   if (!file.url && !file.preview) {
     file.preview = (await getBase64(file.originFileObj)) as string
   }
@@ -88,7 +89,8 @@ const handlePreview = async (file: UploadProps['fileList'][number]) => {
   previewTitle.value = file.name || file.url.substring(file.url.lastIndexOf('/') + 1)
 }
 
-const beforeUpload = (file: UploadProps['fileList'][number]) => {
+// const beforeUpload = (file: UploadProps['fileList'][number]) => { = -!无力吐槽， 官网的写法，ts 无法保证类型安全
+const beforeUpload = (file: any) => {
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
   if (!isJpgOrPng) {
     message.error('You can only upload JPG file!')

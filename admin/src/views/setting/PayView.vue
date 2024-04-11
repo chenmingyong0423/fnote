@@ -17,25 +17,10 @@
           label="二维码"
           :rules="[{ required: true, message: '请上传二维码' }]"
         >
-          <a-input v-model:value="formState.image" placeholder="请输入二维码路径" />
-          <a-upload
-            v-model:file-list="fileList"
-            name="file"
-            list-type="picture-card"
-            class="avatar-uploader m-y-5"
-            :show-upload-list="false"
-            action="http://localhost:8080/admin/files/upload"
-            :before-upload="beforeUpload"
-            :headers="{ Authorization: userStore.token }"
-            @change="handleChange"
-          >
-            <img v-if="imageUrl" :src="imageUrl" alt="avatar" width="250" height="150" />
-            <div v-else>
-              <loading-outlined v-if="loading"></loading-outlined>
-              <plus-outlined v-else></plus-outlined>
-              <div class="ant-upload-text">Upload</div>
-            </div>
-          </a-upload>
+          <StaticUpload
+            :image-url="formState.image"
+            @update:imageUrl="(value) => (formState.image = value)"
+          />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -63,15 +48,8 @@ import {
   type PayConfig,
   type PayConfigRequest
 } from '@/interfaces/Config'
-import {
-  type FormInstance,
-  message,
-  type UploadChangeParam,
-  type UploadProps
-} from 'ant-design-vue'
-import { useUserStore } from '@/stores/user'
-
-const userStore = useUserStore()
+import { type FormInstance, message } from 'ant-design-vue'
+import StaticUpload from '@/components/upload/StaticUpload.vue'
 
 const columns = [
   {
@@ -91,7 +69,6 @@ const columns = [
   }
 ]
 const list = ref<PayConfig[]>([])
-const imageUrl = ref<string>('')
 
 const getPayConfig = async () => {
   const res: any = await GetPay()
@@ -109,7 +86,7 @@ const addPay = () => {
   if (formRef.value) {
     formRef.value
       .validateFields()
-      .then(async (values) => {
+      .then(async () => {
         try {
           const response: any = await AddPay(formState)
           if (response.data.data.code !== 0) {
@@ -145,47 +122,5 @@ const deletePay = async (record: PayConfig) => {
   } catch (error) {
     console.log(error)
   }
-}
-
-// 二维码上传
-function getBase64(img: Blob, callback: (base64Url: string) => void) {
-  const reader = new FileReader()
-  reader.addEventListener('load', () => callback(reader.result as string))
-  reader.readAsDataURL(img)
-}
-
-const fileList = ref([])
-const loading = ref<boolean>(false)
-
-const handleChange = (info: UploadChangeParam) => {
-  if (info.file.status === 'uploading') {
-    loading.value = true
-    return
-  }
-  if (info.file.status === 'done') {
-    // Get this url from response in real world.
-    getBase64(info.file.originFileObj, (base64Url: string) => {
-      imageUrl.value = base64Url
-      loading.value = false
-      // Get this url from response in real world.
-      message.success('上传成功')
-    })
-  }
-  if (info.file.status === 'error') {
-    loading.value = false
-    message.error('upload error')
-  }
-}
-
-const beforeUpload = (file: UploadProps['fileList'][number]) => {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
-  if (!isJpgOrPng) {
-    message.error('You can only upload JPG file!')
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isLt2M) {
-    message.error('Image must smaller than 2MB!')
-  }
-  return isJpgOrPng && isLt2M
 }
 </script>

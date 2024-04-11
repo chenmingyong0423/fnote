@@ -67,7 +67,7 @@
             name="website_name"
             :rules="[{ required: true, message: '请输入站点昵称' }]"
           >
-            <a-input v-model:value="formState.website_name"> </a-input>
+            <a-input v-model:value="formState.website_name"></a-input>
           </a-form-item>
 
           <a-form-item
@@ -75,7 +75,7 @@
             name="website_owner"
             :rules="[{ required: true, message: '请输入站长昵称' }]"
           >
-            <a-input v-model:value="formState.website_owner"> </a-input>
+            <a-input v-model:value="formState.website_owner"></a-input>
           </a-form-item>
           <a-form-item
             label="邮箱地址"
@@ -83,7 +83,7 @@
             :rules="[{ required: true, message: '请输入邮箱地址' }]"
             tooltip="接收通知时使用"
           >
-            <a-input v-model:value="formState.website_owner_email"> </a-input>
+            <a-input v-model:value="formState.website_owner_email"></a-input>
           </a-form-item>
           <a-form-item
             label="站长简介"
@@ -300,7 +300,7 @@ const initWebsite = () => {
       userStore.initialization = true
       await router.push('/login')
     })
-    .catch((error) => {
+    .catch((error: any) => {
       console.log('error', error)
     })
 }

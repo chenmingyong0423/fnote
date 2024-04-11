@@ -168,7 +168,8 @@ const handleChange = (info: UploadChangeParam) => {
   }
 }
 
-const beforeUpload = (file: UploadProps['fileList'][number]) => {
+// const beforeUpload = (file: UploadProps['fileList'][number]) => { = -!无力吐槽， 官网的写法，ts 无法保证类型安全
+const beforeUpload = (file: any) => {
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
   if (!isJpgOrPng) {
     message.error('You can only upload JPG file!')

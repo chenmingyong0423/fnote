@@ -142,7 +142,7 @@ const toggleCollapsed = () => {
   state.openKeys = state.collapsed ? [] : state.preOpenKeys
 }
 
-const itemClick = (item) => {
+const itemClick = (item: any) => {
   router.push(item.key)
 }
 </script>

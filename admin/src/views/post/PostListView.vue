@@ -156,7 +156,7 @@ const pagination = computed(() => ({
   pageSize: req.value.pageSize
 }))
 
-const change = (pg, filters, sorter, { currentDataSource }) => {
+const change = (pg: any) => {
   req.value.pageNo = pg.current
   req.value.pageSize = pg.pageSize
   getPosts()
