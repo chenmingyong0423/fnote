@@ -5,8 +5,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       domain: process.argv
-          .find((arg) => arg.startsWith("--API_DOMAIN="))
-          ?.split("=")[1] || "http://localhost:3000"
+          .find((arg) => arg.startsWith("--WEBSITE_DOMAIN="))
+          ?.split("=")[1] || "http://localhost:3000",
     },
   },
   nitro: {

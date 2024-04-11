@@ -50,10 +50,6 @@ const isBlackMode = computed(() => homeStore.isBlackMode);
 const picture = ref<string>(configStore.website_info.website_owner_avatar);
 
 const httpRes: any = await httpRequest.get(`/menus`);
-// if (httpRes.error?.value.statusCode == 503) {
-//   const host = process.env.API_BASE_URL || "http://localhost:5173";
-//   navigateTo(host + "/init", {external: true})
-// }
 const menuRes: IResponse<IListData<IMenu>> = httpRes.data?.value;
 if (menuRes) {
   menuStore.setMenuList(menuRes.data?.list || []);
