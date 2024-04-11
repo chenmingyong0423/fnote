@@ -26,8 +26,7 @@ services:
       dockerfile: Dockerfile
       context: ./server
       args:
-        # 修改成你的网站域名或 IP，用于后端资源访问
-        WEBSITE_HOST: "domain/ip:8080"
+        WEBSITE_HOST: ${WEBSITE_DOMAIN}:8080"
     ports:
       - "8080:8080"
     depends_on:
@@ -38,15 +37,12 @@ services:
   web:
     container_name: fnote-web
     image: fnote/fnote-web:latest
-    environment:
-      # 修改成你的网站域名或 IP，用于初始化时跳转到后台界面
-      BACKEND_HOST: "domain/ip:3000"
     build: 
       dockerfile: Dockerfile
       context: ./web
       args:
-        # 修改成你的网站域名或 IP，用于设置 jsonLd
-        WEBSITE_DOMAIN: "domain/ip:8081"
+        WEBSITE_DOMAIN: ${WEBSITE_DOMAIN}
+        ADMIN_HOST: ${WEBSITE_DOMAIN}:3000
     ports:
       - "3000:3000"
     depends_on:
