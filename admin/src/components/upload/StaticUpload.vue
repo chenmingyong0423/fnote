@@ -7,7 +7,7 @@
       @preview="handlePreview"
       @change="handleChange"
       :before-upload="beforeUpload"
-      :headers="{ Authorization: authorization }"
+      :headers="{ Authorization: props.authorization }"
       name="file"
     >
       <div v-if="fileList && fileList.length < 1">
@@ -26,7 +26,7 @@ import { LoadingOutlined, PlusOutlined } from '@ant-design/icons-vue'
 import { ref } from 'vue'
 import { message, type UploadChangeParam, type UploadProps } from 'ant-design-vue'
 
-defineProps({
+const props = defineProps({
   imageUrl: {
     type: String,
     required: true
