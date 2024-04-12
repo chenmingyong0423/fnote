@@ -31,7 +31,7 @@ export default defineNuxtPlugin(nuxtApp => {
             console.log("host", host)
             if (process.client) {
                 // 客户端重定向
-                window.location.href = host + "/init";
+                window.location.href = host;
                 return;
             }
         }
