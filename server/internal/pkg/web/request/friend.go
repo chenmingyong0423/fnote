@@ -21,11 +21,6 @@ type FriendReq struct {
 	Status      int    `json:"status" binding:"required"`
 }
 
-type FriendApproveReq struct {
-	Host string `json:"host" binding:"required"`
-}
-
 type FriendRejectReq struct {
-	Host   string `json:"host" binding:"required"`
 	Reason string `json:"reason" binding:"required"`
 }

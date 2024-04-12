@@ -75,7 +75,6 @@ func (r *WebsiteConfigRepository) UpdateWebSiteConfig(ctx context.Context, websi
 		Set("props.website_owner", websiteConfig.WebsiteOwner).
 		Set("props.website_owner_profile", websiteConfig.WebsiteOwnerProfile).
 		Set("props.website_owner_avatar", websiteConfig.WebsiteOwnerAvatar).
-		Set("props.website_owner_email", websiteConfig.WebsiteOwnerEmail).
 		Set("updated_at", now)
 	if websiteConfig.WebsiteInit != nil {
 		b.Set("props.website_init", websiteConfig.WebsiteInit)

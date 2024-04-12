@@ -64,9 +64,7 @@ db.getCollection("configs").insertOne({
     // 站点备案号
     "website_records": [],
     // 是否完成初始化
-    "website_init": false,
-    // 接收通知时使用的邮箱
-    "website_owner_email": ""
+    "website_init": false
   },
   "typ": "website",
   "updated_at": new Date()

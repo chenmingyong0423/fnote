@@ -7,7 +7,6 @@ export interface WebsiteConfig {
   website_owner: string
   website_owner_profile: string
   website_owner_avatar: string
-  website_owner_email: string
   website_runtime: number
   website_records: string[]
 }
@@ -81,7 +80,6 @@ export interface WebsiteConfigRequest {
   website_owner: string
   website_owner_profile: string
   website_owner_avatar: string
-  website_owner_email: string
   website_runtime: number
 }
 
@@ -304,7 +302,8 @@ export const DeleteSocial = (id: string) => {
   })
 }
 
-export interface SocialConfigRequest {}
+export interface SocialConfigRequest {
+}
 
 export const UpdateSocial = (id: string, req: SocialConfigRequest) => {
   return instance({
@@ -320,7 +319,6 @@ export interface InitReq {
   website_owner: string
   website_owner_profile: string
   website_owner_avatar: string
-  website_owner_email: string
   email_server: {
     host: string
     port: number

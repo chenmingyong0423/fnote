@@ -21,6 +21,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/spf13/viper"
+
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
@@ -62,7 +64,7 @@ func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetFriends))
 	adminGroup.PUT("/:id", apiwrap.WrapWithBody(h.AdminUpdateFriend))
 	adminGroup.DELETE("/:id", apiwrap.Wrap(h.AdminDeleteFriend))
-	adminGroup.PUT("/:id/approval", apiwrap.WrapWithBody(h.AdminApproveFriend))
+	adminGroup.PUT("/:id/approval", apiwrap.Wrap(h.AdminApproveFriend))
 	adminGroup.PUT("/:id/rejection", apiwrap.WrapWithBody(h.AdminRejectFriend))
 }
 
@@ -189,14 +191,14 @@ func (h *FriendHandler) AdminDeleteFriend(ctx *gin.Context) (*apiwrap.ResponseBo
 	return apiwrap.SuccessResponse(), h.serv.AdminDeleteFriend(ctx, id)
 }
 
-func (h *FriendHandler) AdminApproveFriend(ctx *gin.Context, req request.FriendApproveReq) (*apiwrap.ResponseBody[any], error) {
+func (h *FriendHandler) AdminApproveFriend(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	email, err := h.serv.AdminApproveFriend(ctx, ctx.Param("id"))
 	if err != nil {
 		return nil, err
 	}
 	// 发送邮件通知朋友
 	go func() {
-		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-approval", email, "text/plain", req.Host)
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-approval", email, "text/plain", viper.GetString("website.base_host")+"/friend")
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
@@ -212,7 +214,7 @@ func (h *FriendHandler) AdminRejectFriend(ctx *gin.Context, req request.FriendRe
 	}
 	// 发送邮件通知朋友
 	go func() {
-		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-rejection", email, "text/plain", req.Host, req.Reason)
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-rejection", email, "text/plain", viper.GetString("website.base_host")+"/friend", req.Reason)
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))

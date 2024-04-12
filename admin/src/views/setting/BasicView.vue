@@ -40,18 +40,6 @@
           </template>
         </div>
       </a-descriptions-item>
-      <a-descriptions-item label="站长邮箱">
-        <div>
-          <a-input
-            v-if="editable"
-            v-model:value="data.website_owner_email"
-            style="margin: -5px 0"
-          />
-          <template v-else>
-            {{ data.website_owner_email }}
-          </template>
-        </div>
-      </a-descriptions-item>
       <a-descriptions-item label="站长照片">
         <div>
           <StaticUpload
@@ -125,7 +113,6 @@ const data = ref<WebsiteConfig>({
   website_owner: '',
   website_owner_profile: '',
   website_owner_avatar: '',
-  website_owner_email: '',
   website_runtime: 0,
   website_records: []
 })
@@ -161,7 +148,6 @@ const save = async () => {
       website_owner: data.value.website_owner,
       website_owner_profile: data.value.website_owner_profile,
       website_owner_avatar: data.value.website_owner_avatar,
-      website_owner_email: data.value.website_owner_email,
       website_runtime: data.value.website_runtime
     })
     if (response.data.code === 0) {
