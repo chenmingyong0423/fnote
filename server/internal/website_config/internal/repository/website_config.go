@@ -201,19 +201,26 @@ func (r *WebsiteConfigRepository) UpdateCommentConfig(ctx context.Context, comme
 }
 
 func (r *WebsiteConfigRepository) UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error {
+	b := update.BsonBuilder().
+		Set("props.description", cfg.Description).
+		Set("props.baidu_site_verification", cfg.BaiduSiteVerification).
+		Set("props.keywords", cfg.Keywords).
+		Set("props.author", cfg.Author).
+		Set("props.robots", cfg.Robots).
+		Set("updated_at", time.Now().Unix())
+	if cfg.Title != "" {
+		b.Set("props.title", cfg.Title)
+	}
+	if cfg.OgTitle != "" {
+		b.Set("props.og_title", cfg.Title)
+	}
+	if cfg.OgImage != "" {
+		b.Set("props.og_image", cfg.Title)
+	}
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "seo meta"),
-		update.BsonBuilder().
-			Set("props.title", cfg.Title).
-			Set("props.description", cfg.Description).
-			Set("props.og_title", cfg.OgTitle).
-			Set("props.og_image", cfg.OgImage).
-			Set("props.baidu_site_verification", cfg.BaiduSiteVerification).
-			Set("props.keywords", cfg.Keywords).
-			Set("props.author", cfg.Author).
-			Set("props.robots", cfg.Robots).
-			Set("updated_at", time.Now().Unix()).Build(),
+		b.Build(),
 	)
 }
 
