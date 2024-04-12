@@ -10,7 +10,9 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "build:docker": "run-p type-check \"build-only:docker\" --",
+    "build-only:docker": "vite build --mode docker"
   },
   "dependencies": {
     "@iconify-json/bi": "^1.1.22",
