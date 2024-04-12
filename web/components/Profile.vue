@@ -4,7 +4,7 @@
   >
     <div class="avatar">
       <img
-          :src="serverHost + configStore.website_info.website_owner_avatar"
+          :src="apiHost + configStore.website_info.website_owner_avatar"
           alt=""
           class="w-25 h-25 border-rounded-50% mx5 cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"
       />
@@ -73,7 +73,7 @@ import {useConfigStore} from "~/store/config";
 
 const configStore = useConfigStore();
 const runtimeConfig = useRuntimeConfig()
-const serverHost = runtimeConfig.public.serverHost;
+const apiHost = runtimeConfig.public.apiHost;
 const get = (icon: string): string => {
   switch (icon) {
     case "i-fa6-brands:x-twitter":
