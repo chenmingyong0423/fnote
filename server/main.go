@@ -19,15 +19,12 @@ import (
 	"flag"
 	"os"
 
-	"github.com/chenmingyong0423/fnote/server/internal/global"
-
 	"github.com/spf13/viper"
 )
 
 var (
 	configPath = flag.String("config", "./config/fnote.yaml", "the path of config")
 	port       = flag.String("port", ":8080", "HTTP port")
-	domain     = flag.String("domain", "", "api domain")
 )
 
 func main() {
@@ -47,11 +44,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	if domain == nil || *domain == "" {
-		*domain = "http://localhost" + *port
-	}
-	global.Config.Domain = *domain
 
 	app.Static("/static", viper.GetString("system.static_path"))
 	err = app.Run(*port)
