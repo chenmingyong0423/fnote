@@ -15,6 +15,7 @@
 package handler
 
 import (
+	"github.com/spf13/viper"
 	"net/http"
 	"slices"
 
@@ -107,7 +108,7 @@ func (h *PostHandler) postsToPostVOs(posts []*domain.Post) []*SummaryPostVO {
 			return t.Name
 		})
 		postVOs = append(postVOs, &SummaryPostVO{
-			Sug:          post.PrimaryPost.Id,
+			Sug:          viper.GetString("website.base_host") + "/" + post.PrimaryPost.Id,
 			Author:       post.PrimaryPost.Author,
 			Title:        post.PrimaryPost.Title,
 			Summary:      post.PrimaryPost.Summary,
