@@ -76,7 +76,7 @@ const list = ref<PayConfig[]>([])
 
 const getPayConfig = async () => {
   const res: any = await GetPay()
-  list.value = res.data.list || []
+  list.value = res.data.data.list || []
 }
 getPayConfig()
 
@@ -93,8 +93,9 @@ const addPay = () => {
       .then(async () => {
         try {
           const response: any = await AddPay(formState)
-          if (response.data.data.code !== 0) {
-            message.error(response.data.data.data.message)
+          console.log(response)
+          if (response.data.code !== 0) {
+            message.error(response.data.data.message)
             return
           }
           message.success('添加成功')
@@ -117,7 +118,7 @@ const addPay = () => {
 const deletePay = async (record: PayConfig) => {
   try {
     const response: any = await DeletePay(record.name, record.image)
-    if (response.data.data.code === 0) {
+    if (response.data.code === 0) {
       message.success('删除成功')
       await getPayConfig()
     } else {
