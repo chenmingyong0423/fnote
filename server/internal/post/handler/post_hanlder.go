@@ -85,17 +85,16 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/:id/comment-allowed", apiwrap.WrapWithBody(h.UpdatePostIsCommentAllowed))
 }
 
-func (h *PostHandler) GetLatestPosts(ctx *gin.Context) (listVO api.ListVO[*SummaryPostVO], err error) {
+func (h *PostHandler) GetLatestPosts(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[*SummaryPostVO]], error) {
 	countCfg, err := h.cfgService.GetFrontPostCount(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
 	posts, err := h.serv.GetLatestPosts(ctx, countCfg.Count)
 	if err != nil {
-		return
+		return nil, err
 	}
-	listVO.List = h.postsToPostVOs(posts)
-	return
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(h.postsToPostVOs(posts))), nil
 }
 
 func (h *PostHandler) postsToPostVOs(posts []*domain.Post) []*SummaryPostVO {
