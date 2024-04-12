@@ -68,6 +68,7 @@
             <StaticUpload
               :image-url="postReq.cover_img"
               @update:imageUrl="(value) => (postReq.cover_img = value)"
+              :authorization="userStore.token"
             />
           </a-form-item>
           <a-form-item

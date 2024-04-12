@@ -20,6 +20,7 @@
           <StaticUpload
             :image-url="formState.image"
             @update:imageUrl="(value) => (formState.image = value)"
+            :authorization="userStore.token"
           />
         </a-form-item>
       </a-form>
@@ -50,6 +51,9 @@ import {
 } from '@/interfaces/Config'
 import { type FormInstance, message } from 'ant-design-vue'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 const columns = [
   {
