@@ -102,7 +102,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (*ap
 	if req.Email != "" {
 		regExp := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 		if !regExp.MatchString(req.Email) {
-			return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Email format is incorrect.")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "Email format is incorrect.")
 		}
 	}
 	switchConfig, err := h.cfgService.GetFriendConfig(ctx)
@@ -110,7 +110,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (*ap
 		return nil, err
 	}
 	if !switchConfig.EnableFriendCommit {
-		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Friend module is close.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Friend module is close.")
 	}
 	err = h.serv.ApplyForFriend(ctx, domain.Friend{
 		Name:        req.Name,
