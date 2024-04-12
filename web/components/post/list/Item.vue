@@ -1,10 +1,11 @@
 <template>
   <div>
-    <NuxtLink
+    <a
       class="slide-up item group flex p-5 bg-#fff b-rounded-4 h-50 cursor-pointer ease-linear duration-100 hover:drop-shadow-xl hover:translate-y--2 dark:text-dtc dark_bg_gray mb-5"
       v-for="(item, index) in props.posts"
       :key="index"
-      :to="'/posts/' + item.sug"
+      :href="item.sug"
+      target="_blank"
       :title="item.title"
     >
       <div class="w-1/3 overflow-hidden relative">
@@ -56,7 +57,7 @@
           </div>
         </div>
       </div>
-    </NuxtLink>
+    </a>
   </div>
 </template>
 

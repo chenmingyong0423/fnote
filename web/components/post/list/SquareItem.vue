@@ -1,10 +1,11 @@
 <template>
   <div class="flex flex-wrap justify-between">
-    <NuxtLink
+    <a
       class="item group flex flex-col items-center box-border p-5 bg-#fff b-rounded-4 w-49% lt-md:w-100% h-100 cursor-pointer duration-100 custom_shadow dark:text-dtc dark_bg_gray mb-5"
       v-for="(item, index) in props.posts"
       :key="index"
-      :to="'/posts/' + item.sug"
+      :href="item.sug"
+      target="_blank"
       :title="item.title"
     >
       <div class="h-2/3 overflow-hidden relative w-full">
@@ -63,7 +64,7 @@
           </div>
         </div>
       </div>
-    </NuxtLink>
+    </a>
   </div>
 </template>
 
