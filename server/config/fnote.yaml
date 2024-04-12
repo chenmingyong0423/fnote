@@ -1,6 +1,6 @@
 system:
   # 存放静态文件的目录，例如文章封面，建议 /fnote/static/
-  static_path: /fnote/static/
+  static_path: /tmp/fnote/static/
 gin:
   # 跨域配置，默认 “*“
   allowed_origins:
@@ -32,13 +32,12 @@ logger:
 mongodb:
   uri: mongodb://localhost:27017
   username: fnote-user
-  password: fnote-password
+  password: 12345678
   auth_source: fnote
   database: fnote
 website:
   base_host: http://localhost:3000 # 网站域名，对应前端的 host
 uploader:
-  local:
-    host: http://localhost:8080 # 后端 host
+  host: http://localhost:8080 # 后端 host
 gravatar:
   api: https://dn-qiniu-avatar.qbox.me/avatar/

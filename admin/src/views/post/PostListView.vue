@@ -15,7 +15,7 @@
         {{ `/${record.id}` }}
       </template>
       <template v-if="column.key === 'cover_img'">
-        <a-image :width="200" :src="record.cover_img" />
+        <a-image :width="200" :src="serverHost + record.cover_img" />
       </template>
       <template v-else-if="column.key === 'categories'">
         <span>
@@ -138,7 +138,7 @@ const columns = [
     dataIndex: 'operation'
   }
 ]
-
+const serverHost = import.meta.env.VITE_API_HOST
 const req = ref<PageRequest>({
   pageNo: 1,
   pageSize: 5,

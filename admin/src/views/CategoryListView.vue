@@ -214,7 +214,7 @@ const formState = reactive<CategoryRequest>({
   route: '',
   description: '',
   show_in_nav: false,
-  enabled: false
+  enabled: true
 })
 
 const addCategory = () => {

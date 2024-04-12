@@ -6,12 +6,16 @@ export default defineNuxtConfig({
     public: {
       domain: process.env.BASE_HOST,
       adminHost: process.env.ADMIN_HOST,
+      serverHost: process.env.SERVER_HOST,
     },
   },
   nitro: {
     // 该配置用于服务端请求转发
     routeRules: {
       "/api/**": {
+        proxy: process.env.SERVER_HOST + "/**",
+      },
+      "/static/**": {
         proxy: process.env.SERVER_HOST + "/**",
       },
     },

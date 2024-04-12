@@ -9,7 +9,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: fnote
       MONGO_INITDB_DATABASE: fnote
       MONGO_USERNAME: fnote-user
-      MONGO_PASSWORD: fnote-password
+      MONGO_PASSWORD: 12345678
     volumes:
       - /tmp/fnote/mongo_data:/data/db
       - ../../../script/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh

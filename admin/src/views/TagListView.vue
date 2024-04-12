@@ -150,7 +150,7 @@ const visible = ref(false)
 const formState = reactive<TagRequest>({
   name: '',
   route: '',
-  enabled: false
+  enabled: true
 })
 
 const addTag = () => {

@@ -6,7 +6,7 @@
     <div>
       <NuxtLink to="/">
         <img
-            :src="picture"
+            :src="serverHost + picture"
             alt=""
             class="w-15 h-15 border-rounded-50% mx5 cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0 select-none"
         />
@@ -45,7 +45,8 @@ import {useConfigStore} from "~/store/config";
 const homeStore = useHomeStore();
 const menuStore = useMenuStore();
 const configStore = useConfigStore();
-
+const runtimeConfig = useRuntimeConfig()
+const serverHost = runtimeConfig.public.serverHost;
 const isBlackMode = computed(() => homeStore.isBlackMode);
 const picture = ref<string>(configStore.website_info.website_owner_avatar);
 
