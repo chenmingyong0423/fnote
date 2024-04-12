@@ -12,7 +12,7 @@ RUN go build
 FROM alpine:latest
 
 COPY --from=builder /fnote/server/server /fnote/server
-COPY --from=builder /fnote/server/config/fnote.prod.yaml /fnote/config/fnote.prod.yaml
+COPY --from=builder /fnote/server/config/fnote.docker.yaml /fnote/config/fnote.docker.yaml
 
 WORKDIR /fnote
 
