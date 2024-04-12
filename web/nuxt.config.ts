@@ -6,7 +6,7 @@ export default defineNuxtConfig({
     public: {
       domain: process.env.BASE_HOST,
       adminHost: process.env.ADMIN_HOST,
-      serverHost: process.env.SERVER_HOST,
+      apiHost: process.env.API_HOST,
     },
   },
   nitro: {

@@ -11,7 +11,7 @@
       <div class="w-1/3 overflow-hidden relative">
         <img
             class="object-contain max-w-full h-full"
-            :src="serverHost + item.cover_img"
+            :src="apiHost + item.cover_img"
             :alt="item.title"
         />
         <div
@@ -74,7 +74,7 @@ const props = defineProps({
 });
 const runtimeConfig = useRuntimeConfig()
 const baseUrl = runtimeConfig.public.domain;
-const serverHost = runtimeConfig.public.serverHost;
+const apiHost = runtimeConfig.public.apiHost;
 </script>
 
 <style scoped>

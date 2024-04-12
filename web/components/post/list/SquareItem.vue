@@ -11,7 +11,7 @@
       <div class="h-2/3 overflow-hidden relative w-full">
         <img
             class="object-contain w-full h-full group-hover:scale-110 duration-500"
-            :src="serverHost + item.cover_img"
+            :src="apiHost + item.cover_img"
             :alt="item.title"
         />
         <div
@@ -82,7 +82,7 @@ const props = defineProps({
 
 const runtimeConfig = useRuntimeConfig()
 const baseUrl = runtimeConfig.public.domain;
-const serverHost = runtimeConfig.public.serverHost;
+const apiHost = runtimeConfig.public.apiHost;
 </script>
 
 <style scoped></style>
