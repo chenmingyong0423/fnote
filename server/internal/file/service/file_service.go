@@ -19,8 +19,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/chenmingyong0423/fnote/server/internal/global"
-
 	"github.com/chenmingyong0423/gkit/uuidx"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
@@ -99,7 +97,7 @@ func (s *FileService) Upload(ctx context.Context, fileDTO dto.FileDTO) (*domain.
 		FileType:         fileDTO.FileType,
 		FileSize:         fileDTO.FileSize,
 		FilePath:         staticPath + filename,
-		Url:              global.Config.Domain + "/static/" + filename,
+		Url:              viper.GetString("uploader.host") + "/static/" + filename,
 	}
 	err = s.repo.Save(ctx, file)
 	if err != nil {
