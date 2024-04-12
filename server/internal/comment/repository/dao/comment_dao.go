@@ -323,7 +323,7 @@ func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]
 	var results []LatestComment
 
 	// 执行聚合查询
-	err := d.coll.Aggregator().Pipeline(pipeline).AggregateWithParse(ctx, results)
+	err := d.coll.Aggregator().Pipeline(pipeline).AggregateWithParse(ctx, &results)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Fails to execute aggregation operation, pipeline=%v", pipeline)
 	}
