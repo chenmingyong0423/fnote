@@ -34,22 +34,18 @@ export const DeleteFriend = (id: string) => {
 }
 
 // blogUrl 后续要删除
-export const ApproveFriend = (id: string, blogUrl: string) => {
+export const ApproveFriend = (id: string) => {
   return instance({
     url: `/friends/${id}/approval`,
-    method: 'put',
-    data: {
-      host: blogUrl
-    }
+    method: 'put'
   })
 }
 
-export const RejectFriend = (id: string, blogUrl: string, reason: string) => {
+export const RejectFriend = (id: string, reason: string) => {
   return instance({
     url: `/friends/${id}/rejection`,
     method: 'put',
     data: {
-      host: blogUrl,
       reason: reason
     }
   })

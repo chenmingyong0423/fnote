@@ -45,24 +45,18 @@
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
         <div class="editable-row-operations">
-          <a-modal
-            v-model:open="approvalDialog"
-            title="请输入博客地址，默认值为当前域名。"
-            @ok="approved"
+          <a-popconfirm
+            v-if="data.length && record.status === 0"
+            title="确认接受?"
+            @confirm="approved(record.id)"
           >
-            <a-input v-model:value="blogUrl" placeholder="请输入博客地址，默认值为当前域名。" />
-          </a-modal>
-
-          <span v-if="data.length && record.status === 0" @click="openApprovalDialog(record.id)">
-            <a>接受</a>
-          </span>
-
+            <a>接收</a>
+          </a-popconfirm>
           <a-modal
             v-model:open="rejectionDialog"
-            title="请输入博客地址，默认值为当前域名。"
+            title="请输入原因"
             @ok="rejected"
           >
-            <a-input v-model:value="blogUrl" placeholder="请输入博客地址，默认值为当前域名。" />
             <a-input v-model:value="reason" placeholder="请输入审核不通过的原因。" />
           </a-modal>
           <span v-if="data.length && record.status === 0" @click="openRejectionDialog(record.id)">
@@ -187,26 +181,16 @@ const deleteInfo = async (id: string) => {
   }
 }
 
-const blogUrl = ref(window.location.host)
-const approvalDialog = ref(false)
-
 const updatedId = ref('')
 
-const openApprovalDialog = (id: string) => {
-  updatedId.value = id
-  approvalDialog.value = true
-}
-
-const approved = async () => {
+const approved = async (id: string) => {
   try {
-    const response: any = await ApproveFriend(updatedId.value, blogUrl.value)
+    const response: any = await ApproveFriend(id)
     if (response.data.code !== 0) {
       message.error(response.data.message)
       return
     }
     message.success('接受成功')
-    approvalDialog.value = false
-    updatedId.value = ''
     await get()
   } catch (error) {
     console.log(error)
@@ -222,7 +206,7 @@ const rejectionDialog = ref(false)
 const reason = ref('')
 const rejected = async () => {
   try {
-    const response: any = await RejectFriend(updatedId.value, blogUrl.value, reason.value)
+    const response: any = await RejectFriend(updatedId.value,reason.value)
     if (response.data.code !== 0) {
       message.error(response.data.message)
       return
