@@ -34,7 +34,7 @@ const postReq = reactive<PostRequest>({
   meta_description: '',
   meta_keywords: '',
   is_comment_allowed: true,
-  is_displayed: false
+  is_displayed: true
 })
 
 const postEditRef = ref()

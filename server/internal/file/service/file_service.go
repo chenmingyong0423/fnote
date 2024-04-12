@@ -97,7 +97,7 @@ func (s *FileService) Upload(ctx context.Context, fileDTO dto.FileDTO) (*domain.
 		FileType:         fileDTO.FileType,
 		FileSize:         fileDTO.FileSize,
 		FilePath:         staticPath + filename,
-		Url:              viper.GetString("uploader.host") + "/static/" + filename,
+		Url:              "/static/" + filename,
 	}
 	err = s.repo.Save(ctx, file)
 	if err != nil {
