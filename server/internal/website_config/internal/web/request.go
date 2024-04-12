@@ -31,13 +31,13 @@ type UpdateOwnerConfigReq struct {
 }
 
 type UpdateSeoMetaConfigReq struct {
-	Title                 string `json:"title" binding:"required"`
+	Title                 string `json:"title,omitempty"`
 	Description           string `json:"description" binding:"required"`
-	OgTitle               string `json:"og_title" binding:"required"`
+	OgTitle               string `json:"og_title,omitempty"`
 	Keywords              string `json:"keywords" binding:"required"`
 	Author                string `json:"author" binding:"required"`
 	Robots                string `json:"robots" binding:"required"`
-	OgImage               string `json:"og_image"`
+	OgImage               string `json:"og_image,omitempty"`
 	BaiduSiteVerification string `json:"baidu_site_verification"`
 }
 
