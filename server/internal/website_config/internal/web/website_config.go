@@ -109,7 +109,6 @@ func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebsiteCon
 		WebsiteOwner:        webMasterCfg.WebsiteOwner,
 		WebsiteOwnerProfile: webMasterCfg.WebsiteOwnerProfile,
 		WebsiteOwnerAvatar:  webMasterCfg.WebsiteOwnerAvatar,
-		WebsiteOwnerEmail:   webMasterCfg.WebsiteOwnerEmail,
 		WebsiteRuntime:      gkit.GetValueOrDefault(webMasterCfg.WebsiteRuntime).Unix(),
 		WebsiteRecords:      webMasterCfg.WebsiteRecords,
 	}
@@ -166,7 +165,6 @@ func (h *WebsiteConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req Up
 		WebsiteOwner:        req.WebsiteOwner,
 		WebsiteOwnerProfile: req.WebsiteOwnerProfile,
 		WebsiteOwnerAvatar:  req.WebsiteOwnerAvatar,
-		WebsiteOwnerEmail:   req.WebsiteOwnerEmail,
 		WebsiteRuntime:      gkit.ToPtr(time.Unix(req.WebsiteRuntime, 0).Local()),
 	}, time.Now())
 }
@@ -434,7 +432,6 @@ func (h *WebsiteConfigHandler) InitializeWebsite(ctx *gin.Context, req InitReque
 		WebsiteOwner:        req.WebsiteOwner,
 		WebsiteOwnerProfile: req.WebsiteOwnerProfile,
 		WebsiteOwnerAvatar:  req.WebsiteOwnerAvatar,
-		WebsiteOwnerEmail:   req.WebsiteOwnerEmail,
 		WebsiteInit:         gkit.ToPtr(true),
 	}, domain.EmailConfig{
 		Host:     req.EmailServer.Host,

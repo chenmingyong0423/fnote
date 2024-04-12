@@ -20,7 +20,6 @@ type UpdateWebsiteConfigReq struct {
 	WebsiteOwner        string `json:"website_owner" binding:"required"`
 	WebsiteOwnerProfile string `json:"website_owner_profile" binding:"required"`
 	WebsiteOwnerAvatar  string `json:"website_owner_avatar" binding:"required"`
-	WebsiteOwnerEmail   string `json:"website_owner_email" binding:"required"`
 	WebsiteRuntime      int64  `json:"website_runtime" binding:"required"`
 }
 
@@ -97,7 +96,6 @@ type InitRequest struct {
 	WebsiteOwner        string      `json:"website_owner" binding:"required"`
 	WebsiteOwnerProfile string      `json:"website_owner_profile" binding:"required"`
 	WebsiteOwnerAvatar  string      `json:"website_owner_avatar" binding:"required"`
-	WebsiteOwnerEmail   string      `json:"website_owner_email" binding:"required"`
 	EmailServer         EmailServer `json:"email_server" binding:"required"`
 	Admin               Admin       `json:"admin" binding:"required"`
 }

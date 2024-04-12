@@ -78,14 +78,6 @@
             <a-input v-model:value="formState.website_owner"></a-input>
           </a-form-item>
           <a-form-item
-            label="邮箱地址"
-            name="website_owner_email"
-            :rules="[{ required: true, message: '请输入邮箱地址' }]"
-            tooltip="接收通知时使用"
-          >
-            <a-input v-model:value="formState.website_owner_email"></a-input>
-          </a-form-item>
-          <a-form-item
             label="站长简介"
             name="website_owner_profile"
             :rules="[{ required: true, message: '请输入站长简介' }]"
@@ -202,7 +194,8 @@
           <a-form-item
             label="email"
             :name="['email_server', 'email']"
-            :rules="[{ required: true, message: '请输入邮件服务的 email' }]"
+            :rules="[{ required: true, message: '请输入接收邮件的 email' }]"
+            tooltip="接收通知时使用"
           >
             <a-input v-model:value="formState.email_server.email" />
           </a-form-item>
@@ -243,7 +236,6 @@ const formState: UnwrapRef<InitReq> = reactive({
   website_owner: '',
   website_owner_profile: '',
   website_owner_avatar: '',
-  website_owner_email: '',
   email_server: {
     host: '',
     port: 0,

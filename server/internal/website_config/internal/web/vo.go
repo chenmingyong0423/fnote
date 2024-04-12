@@ -48,7 +48,6 @@ type WebsiteConfigVO struct {
 	WebsiteOwner        string   `json:"website_owner"`
 	WebsiteOwnerProfile string   `json:"website_owner_profile"`
 	WebsiteOwnerAvatar  string   `json:"website_owner_avatar"`
-	WebsiteOwnerEmail   string   `json:"website_owner_email"`
 	WebsiteRuntime      int64    `json:"website_runtime,omitempty"`
 	WebsiteRecords      []string `json:"website_records,omitempty"`
 }
