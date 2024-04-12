@@ -28,6 +28,7 @@ export default defineNuxtPlugin(nuxtApp => {
         }
         if (!cfg.initialization) {
             const host = runtimeConfig.public.adminHost;
+            console.log("host", host)
             if (process.client) {
                 // 客户端重定向
                 window.location.href = host + "/init";

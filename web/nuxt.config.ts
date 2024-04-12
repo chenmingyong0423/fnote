@@ -4,15 +4,15 @@ export default defineNuxtConfig({
   modules: ["@unocss/nuxt", "@pinia/nuxt", "dayjs-nuxt"],
   runtimeConfig: {
     public: {
-      domain: process.env.NUXT_APP_BASE_HOST,
-      adminHost: process.env.NUXT_APP_ADMIN_HOST,
+      domain: process.env.BASE_HOST,
+      adminHost: process.env.ADMIN_HOST,
     },
   },
   nitro: {
     // 该配置用于服务端请求转发
     routeRules: {
       "/api/**": {
-        proxy: process.env.NUXT_APP_SERVER_HOST + "/**",
+        proxy: process.env.SERVER_HOST + "/**",
       },
     },
   },
