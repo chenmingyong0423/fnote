@@ -64,7 +64,6 @@
             label="封面"
             :rules="[{ required: true, message: '请选择封面' }]"
           >
-            <a-input v-model:value="postReq.cover_img" placeholder="请输入封面路径" />
             <StaticUpload
               :image-url="postReq.cover_img"
               @update:imageUrl="(value) => (postReq.cover_img = value)"
