@@ -8,7 +8,7 @@
         >
         </a-input>
         <template v-else>
-          <a-image :width="50" :src="record.logo" />
+          <a-image :width="50" :src="serverHost + record.logo" />
         </template>
       </template>
       <template v-if="['name', 'description'].includes(column.dataIndex)">
@@ -36,7 +36,7 @@
             :color="
               record.status === 0 ? 'processing' : record.status === 1 ? 'success' : 'warning'
             "
-            >{{ statusConvert(record.status) }}
+          >{{ statusConvert(record.status) }}
           </a-tag>
         </template>
       </template>
@@ -140,7 +140,7 @@ const columns = [
     dataIndex: 'operation'
   }
 ]
-
+const serverHost = import.meta.env.VITE_API_HOST
 const data = ref<Friend[]>([])
 const pageReq = ref<PageRequest>({
   pageNo: 1,
