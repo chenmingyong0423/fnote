@@ -11,8 +11,6 @@ RUN go build
 
 FROM alpine:latest
 
-ENV DOMAIN "${WEBSITE_HOST}"
-
 COPY --from=builder /fnote/server/server /fnote/server
 COPY --from=builder /fnote/server/config/fnote.prod.yaml /fnote/config/fnote.prod.yaml
 
@@ -20,4 +18,4 @@ WORKDIR /fnote
 
 EXPOSE 8080
 
-ENTRYPOINT ["./server", "--port", ":8080", "--config", "./config/fnote.prod.yaml", "--domain", "$DOMAIN"]
+ENTRYPOINT ["./server", "--port", ":8080", "--config", "./config/fnote.docker.yaml"]

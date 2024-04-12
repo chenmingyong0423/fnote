@@ -8,7 +8,7 @@ COPY . ./
 # install
 RUN npm config set registry http://registry.npmmirror.com
 RUN npm install
-RUN npm run build
+RUN npm run build:docker
 
 FROM nginx:latest
 
