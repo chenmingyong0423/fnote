@@ -19,6 +19,8 @@ import (
 	"encoding/hex"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
+
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/repository/dao"
 	"github.com/chenmingyong0423/gkit/uuidx"
@@ -54,6 +56,9 @@ type IWebsiteConfigRepository interface {
 	DeleteSocialInfo(ctx context.Context, id []byte) error
 	UpdateAdminConfig(ctx context.Context, adminConfig domain.AdminConfig, now time.Time) error
 	UpdateWebSiteConfig(ctx context.Context, websiteConfig domain.WebsiteConfig, now time.Time) error
+	GetTPSVConfig(ctx context.Context) (*domain.TPSVConfig, error)
+	AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error
+	DeleteTPSVConfigByKey(ctx context.Context, key string) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -66,6 +71,39 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) DeleteTPSVConfigByKey(ctx context.Context, key string) error {
+	return r.dao.DeleteTPSVConfigByKey(ctx, key)
+}
+
+func (r *WebsiteConfigRepository) AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error {
+	return r.dao.AddTPSVConfig(ctx, tpsv)
+}
+
+func (r *WebsiteConfigRepository) GetTPSVConfig(ctx context.Context) (*domain.TPSVConfig, error) {
+	cfg, err := r.dao.FindByTyp(ctx, "third party site verification")
+	if err != nil {
+		return nil, err
+	}
+	tpsvCfg := &domain.TPSVConfig{List: make([]domain.TPSV, 0)}
+	err = r.anyToStruct(cfg.Props, tpsvCfg)
+	if err != nil {
+		return nil, err
+	}
+	return tpsvCfg, nil
+}
+
+func (r *WebsiteConfigRepository) anyToStruct(props any, cfgInfos any) error {
+	marshal, err := bson.Marshal(props)
+	if err != nil {
+		return errors.Wrapf(err, "bson.Marshal failed, val=%v", props)
+	}
+	err = bson.Unmarshal(marshal, cfgInfos)
+	if err != nil {
+		return errors.Wrapf(err, "bson.Unmarshal failed, data=%v, val=%v", marshal, cfgInfos)
+	}
+	return nil
 }
 
 func (r *WebsiteConfigRepository) UpdateWebSiteConfig(ctx context.Context, websiteConfig domain.WebsiteConfig, now time.Time) error {

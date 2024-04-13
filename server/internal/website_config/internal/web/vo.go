@@ -22,6 +22,7 @@ type IndexConfigVO struct {
 	SocialInfoConfigVO SocialInfoConfigVO `json:"social_info_config"`
 	PayInfoConfigVO    []PayInfoConfigVO  `json:"pay_info_config"`
 	SeoMetaConfigVO    SeoMetaConfigVO    `json:"seo_meta_config"`
+	TPSVVO             []TPSVVO           `json:"third_party_site_verification"`
 }
 
 type OwnerConfigVO struct {
@@ -108,4 +109,10 @@ type LoginVO struct {
 type AdminInfoVO struct {
 	Username string `json:"username"`
 	Picture  string `json:"picture"`
+}
+
+type TPSVVO struct {
+	Key         string `json:"key"`
+	Value       string `json:"value"`
+	Description string `json:"description"`
 }

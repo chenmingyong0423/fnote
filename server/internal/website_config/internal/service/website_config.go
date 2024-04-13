@@ -57,6 +57,9 @@ type IWebsiteConfigService interface {
 	GetAdminConfig(ctx context.Context) (*domain.AdminConfig, error)
 	InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfig domain.WebsiteConfig, emailConfig domain.EmailConfig) error
 	UpdateWebsiteConfig(ctx context.Context, websiteConfig domain.WebsiteConfig, now time.Time) error
+	GetTPSVConfig(ctx context.Context) (*domain.TPSVConfig, error)
+	AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error
+	DeleteTPSVConfigByKey(ctx context.Context, key string) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -69,6 +72,18 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) DeleteTPSVConfigByKey(ctx context.Context, key string) error {
+	return s.repo.DeleteTPSVConfigByKey(ctx, key)
+}
+
+func (s *WebsiteConfigService) AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error {
+	return s.repo.AddTPSVConfig(ctx, tpsv)
+}
+
+func (s *WebsiteConfigService) GetTPSVConfig(ctx context.Context) (*domain.TPSVConfig, error) {
+	return s.repo.GetTPSVConfig(ctx)
 }
 
 func (s *WebsiteConfigService) InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfig domain.WebsiteConfig, emailConfig domain.EmailConfig) error {
@@ -228,7 +243,7 @@ func (s *WebsiteConfigService) GetFrontPostCount(ctx context.Context) (*domain.F
 }
 
 func (s *WebsiteConfigService) GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error) {
-	configs, err := s.repo.FindConfigByTypes(ctx, "website", "owner", "notice", "social", "pay", "seo meta")
+	configs, err := s.repo.FindConfigByTypes(ctx, "website", "owner", "notice", "social", "pay", "seo meta", "third party site verification")
 	if err != nil {
 		return nil, err
 	}
@@ -271,6 +286,13 @@ func (s *WebsiteConfigService) GetIndexConfig(ctx context.Context) (*domain.Inde
 				return nil, err
 			}
 			cfg.SeoMetaConfig = seoMetaConfig
+		} else if config.Typ == "third party site verification" {
+			tpsvConfig := domain.TPSVConfig{}
+			err = s.anyToStruct(config.Props, &tpsvConfig)
+			if err != nil {
+				return nil, err
+			}
+			cfg.TPSVConfig = tpsvConfig.List
 		}
 	}
 	return cfg, nil

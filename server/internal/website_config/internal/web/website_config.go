@@ -83,6 +83,9 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.POST("/social", apiwrap.WrapWithBody(h.AdminAddSocialConfig))
 	adminGroup.PUT("/social/:id", apiwrap.WrapWithBody(h.AdminUpdateSocialConfig))
 	adminGroup.DELETE("/social/:id", apiwrap.Wrap(h.AdminDeleteSocialConfig))
+	adminGroup.GET("/third-party-site-verification", apiwrap.Wrap(h.AdminGetTPSVConfig))
+	adminGroup.POST("/third-party-site-verification", apiwrap.WrapWithBody(h.AdminAddTPSVConfig))
+	adminGroup.DELETE("/third-party-site-verification/:key", apiwrap.Wrap(h.AdminDeleteTPSVConfig))
 
 	engine.POST("/admin/login", apiwrap.WrapWithBody(h.AdminLogin))
 
@@ -99,6 +102,7 @@ func (h *WebsiteConfigHandler) GetIndexConfig(ctx *gin.Context) (*apiwrap.Respon
 		SocialInfoConfigVO: h.toSocialInfoConfigVO(&config.SocialInfoConfig),
 		PayInfoConfigVO:    h.toPayInfoConfigVO(config.PayInfoConfig),
 		SeoMetaConfigVO:    h.toSeoMetaConfigVO(&config.SeoMetaConfig),
+		TPSVVO:             h.toTPSVVO(config.TPSVConfig),
 	}), nil
 }
 
@@ -444,4 +448,36 @@ func (h *WebsiteConfigHandler) InitializeWebsite(ctx *gin.Context, req InitReque
 		global.Config.IsWebsiteInitialized = true
 	}
 	return apiwrap.SuccessResponse(), err
+}
+
+func (h *WebsiteConfigHandler) AdminGetTPSVConfig(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[TPSVVO]], error) {
+	config, err := h.serv.GetTPSVConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(h.toTPSVVO(config.List))), nil
+}
+
+func (h *WebsiteConfigHandler) toTPSVVO(list []domain.TPSV) []TPSVVO {
+	result := make([]TPSVVO, len(list))
+	for i, tpsv := range list {
+		result[i] = TPSVVO{
+			Key:         tpsv.Key,
+			Value:       tpsv.Value,
+			Description: tpsv.Description,
+		}
+	}
+	return result
+}
+
+func (h *WebsiteConfigHandler) AdminAddTPSVConfig(ctx *gin.Context, req TPSVRequest) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.AddTPSVConfig(ctx, domain.TPSV{
+		Key:         req.Key,
+		Value:       req.Value,
+		Description: req.Description,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminDeleteTPSVConfig(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.DeleteTPSVConfigByKey(ctx, ctx.Param("key"))
 }
