@@ -30,6 +30,7 @@ type IndexConfig struct {
 	SocialInfoConfig SocialInfoConfig
 	PayInfoConfig    []PayInfoConfigElem
 	SeoMetaConfig    SeoMetaConfig
+	TPSVConfig       []TPSV
 }
 
 type PayInfoConfigElem struct {
@@ -115,4 +116,13 @@ type AdminConfig struct {
 type TokenInfo struct {
 	Expiration int64
 	Token      string
+}
+
+type TPSVConfig struct {
+	List []TPSV `bson:"list"`
+}
+type TPSV struct {
+	Key         string `bson:"key"`
+	Value       string `bson:"value"`
+	Description string `bson:"description"`
 }

@@ -112,3 +112,14 @@ type Admin struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
+type TPSVRequest struct {
+	Key         string `json:"key" binding:"required"`
+	Value       string `json:"value" binding:"required"`
+	Description string `json:"description" binding:"required"`
+}
+
+type TPSVUpdateRequest struct {
+	Value       string `json:"value" binding:"required"`
+	Description string `json:"description" binding:"required"`
+}
