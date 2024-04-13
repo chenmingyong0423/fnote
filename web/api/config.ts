@@ -6,6 +6,7 @@ export interface IWebsiteInfo {
   social_info_config: ISocialInfo;
   pay_info_config: IPayInfo[];
   seo_meta_config: SeoMetaConfigVO;
+  third_party_site_verification: TPSVVO[];
 }
 
 export interface ISocialInfo {
@@ -51,6 +52,12 @@ export interface SeoMetaConfigVO {
   keywords: string;
   author: string;
   robots: string;
+}
+
+export interface TPSVVO {
+  key: string;
+  value: string;
+  description: string;
 }
 
 const prefix = "/configs";

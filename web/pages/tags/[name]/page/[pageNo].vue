@@ -88,10 +88,8 @@ const filter = ref<string>("latest");
 if (route.query.filter && route.query.filter !== "") {
   if (route.query.filter !== "latest") {
     filter.value = String(route.query.filter);
-    console.log(filter.value);
     switch (filter.value) {
       case "oldest":
-        console.log(12344);
         req.value.sortField = "create_time";
         req.value.sortOrder = "ASC";
         break;
