@@ -49,35 +49,15 @@
           </template>
         </div>
       </a-descriptions-item>
-      <a-descriptions-item label="baidu_site_verification - 百度站点验证">
-        <div>
-          <a-input
-            v-if="editable"
-            v-model:value="data.baidu_site_verification"
-            style="margin: -5px 0"
-          />
-          <template v-else>
-            {{ data.baidu_site_verification }}
-          </template>
-        </div>
-      </a-descriptions-item>
       <a-descriptions-item label="分享封面">
-        <a-image :width="200" :src="data.og_image" />
-        <a-upload
+
+        <StaticUpload
           v-if="editable"
-          v-model:file-list="fileList"
-          name="file"
-          action="http://localhost:8080/admin/files/upload"
-          @change="handleChange"
-          :before-upload="beforeUpload"
-          :headers="{ Authorization: userStore.token }"
-          :maxCount="1"
-        >
-          <a-button>
-            <upload-outlined></upload-outlined>
-            Click to Upload
-          </a-button>
-        </a-upload>
+          :image-url="data.og_image"
+          :authorization="userStore.token"
+          @update:imageUrl="(value) => (data.og_image = value)"
+        />
+        <a-image v-else :width="200" :src="data.og_image" />
       </a-descriptions-item>
     </a-descriptions>
     <div style="margin-top: 10px">
@@ -88,6 +68,8 @@
       </div>
     </div>
   </div>
+  <div>
+  </div>
 </template>
 <script lang="ts" setup>
 import { GetSeo, type SeoConfig, UpdateSeo } from '@/interfaces/Config'
@@ -95,6 +77,7 @@ import { ref } from 'vue'
 import { message } from 'ant-design-vue'
 import type { UploadChangeParam, UploadProps } from 'ant-design-vue'
 import { useUserStore } from '@/stores/user'
+import StaticUpload from '@/components/upload/StaticUpload.vue'
 
 const userStore = useUserStore()
 
@@ -105,7 +88,6 @@ const data = ref<SeoConfig>({
   description: '',
   og_title: '',
   og_image: '',
-  baidu_site_verification: '',
   keywords: '',
   author: '',
   robots: ''
@@ -133,7 +115,6 @@ const save = async () => {
       description: data.value.description,
       og_title: data.value.og_title,
       og_image: data.value.og_image,
-      baidu_site_verification: data.value.baidu_site_verification,
       keywords: data.value.keywords,
       author: data.value.author,
       robots: data.value.robots
@@ -148,37 +129,6 @@ const save = async () => {
   } catch (error) {
     console.log(error)
   }
-}
-
-// 文件操作
-const fileList = ref<UploadProps['fileList']>([])
-
-const handleChange = (info: UploadChangeParam) => {
-  if (info.file.status === 'uploading') {
-    return
-  }
-  console.log(info)
-  if (info.file.status === 'done') {
-    // Get this url from response in real world.
-    data.value.og_image = info.file.response.data.data.url
-    message.success('上传成功')
-  }
-  if (info.file.status === 'error') {
-    message.error('upload error')
-  }
-}
-
-// const beforeUpload = (file: UploadProps['fileList'][number]) => { = -!无力吐槽， 官网的写法，ts 无法保证类型安全
-const beforeUpload = (file: any) => {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
-  if (!isJpgOrPng) {
-    message.error('You can only upload JPG file!')
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isLt2M) {
-    message.error('Image must smaller than 2MB!')
-  }
-  return isJpgOrPng && isLt2M
 }
 </script>
 

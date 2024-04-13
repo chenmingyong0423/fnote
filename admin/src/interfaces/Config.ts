@@ -16,7 +16,6 @@ export interface SeoConfig {
   description: string
   og_title: string
   og_image: string
-  baidu_site_verification: string
   keywords: string
   author: string
   robots: string
@@ -88,7 +87,6 @@ export interface SeoConfigRequest {
   description: string
   og_title?: string
   og_image?: string
-  baidu_site_verification: string
   keywords: string
   author: string
   robots: string
@@ -344,5 +342,39 @@ export const Init = (req: InitReq) => {
     url: '/configs/initialization',
     method: 'post',
     data: req
+  })
+}
+
+export interface ThirdPartySiteVerification {
+  key: string;
+  value: string;
+  description: string;
+}
+
+export interface ThirdPartySiteVerificationRequest {
+  key: string;
+  value: string;
+  description: string;
+}
+
+export const GetThirdPartySiteVerification = () => {
+  return instance({
+    url: '/configs/third-party-site-verification',
+    method: 'get'
+  })
+}
+
+export const AddThirdPartySiteVerification = (req: ThirdPartySiteVerificationRequest) => {
+  return instance({
+    url: '/configs/third-party-site-verification',
+    method: 'post',
+    data: req
+  })
+}
+
+export const DeleteThirdPartySiteVerification = (id: string) => {
+  return instance({
+    url: '/configs/third-party-site-verification/' + id,
+    method: 'delete'
   })
 }
