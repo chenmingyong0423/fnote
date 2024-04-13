@@ -44,10 +44,10 @@ const configStore = useConfigStore();
 useHead({
   title: configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title,
   meta: [
-    {name: "description", content: configStore.seo_meta_config.description},
-    {name: "keywords", content: configStore.seo_meta_config.keywords},
-    {name: "author", content: configStore.seo_meta_config.author},
-    {name: "robots", content: configStore.seo_meta_config.robots},
+    {name: "description", content: configStore.seo_meta_config.description || "fnote"},
+    {name: "keywords", content: configStore.seo_meta_config.keywords || "fnote"},
+    {name: "author", content: configStore.seo_meta_config.author || "fnote"},
+    {name: "robots", content: configStore.seo_meta_config.robots || "fnote"},
   ],
   link: [
     {rel: "icon", type: "image/x-icon", href: configStore.website_info.website_icon},
@@ -55,7 +55,7 @@ useHead({
 });
 useSeoMeta({
   ogTitle: configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title,
-  ogDescription: configStore.seo_meta_config.description,
+  ogDescription: configStore.seo_meta_config.description || "fnote",
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",
 });

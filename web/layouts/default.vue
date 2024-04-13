@@ -25,7 +25,7 @@
 </template>
 <script lang="ts" setup>
 import {useHomeStore} from "~/store/home";
-import {type IWebsiteInfo, getWebsiteInfo} from "~/api/config";
+import {type IWebsiteInfo, getWebsiteInfo, type TPSVVO} from "~/api/config";
 import {type IResponse} from "~/api/http";
 import SmallMenu from "~/components/SmallMenu.vue";
 import {
@@ -51,6 +51,7 @@ onMounted(() => {
 const siteName = ref('fnote');
 const runtimeConfig = useRuntimeConfig()
 const siteURL = runtimeConfig.public.domain;
+const metaVerificationList = ref([] as { name: string; content: string }[]);
 
 
 const webMaster = async () => {
@@ -65,12 +66,19 @@ const webMaster = async () => {
           res.data.social_info_config.social_info_list;
       configStore.pay_info = res.data.pay_info_config;
       configStore.seo_meta_config = res.data.seo_meta_config;
+      configStore.tpsv_list = res.data.third_party_site_verification;
+      configStore.tpsv_list.forEach((item) => {
+        metaVerificationList.value.push({
+          name: item.key,
+          content: item.value,
+        });
+      });
     }
   } catch (error) {
     console.log(error);
   }
 };
-webMaster();
+await webMaster();
 
 const websiteCountStats = async () => {
   try {
@@ -117,7 +125,8 @@ useHead({
   script: [{
     type: 'application/ld+json',
     innerHTML: jsonLd.value
-  }]
+  }],
+  meta: metaVerificationList.value,
 })
 
 onMounted(() => {

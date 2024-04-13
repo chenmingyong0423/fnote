@@ -3,7 +3,7 @@ import type {
     INotice,
     IPayInfo,
     SeoMetaConfigVO,
-    IWebsite,
+    IWebsite, TPSVVO,
 } from "@/api/config";
 import {defineStore} from "pinia";
 import type {WebsiteCountStats} from "~/api/statiscs";
@@ -38,6 +38,7 @@ export const useConfigStore = defineStore("config", {
             description: "fnote blog",
             og_title: "fnote blog",
         } as SeoMetaConfigVO,
+        tpsv_list: [] as TPSVVO[],
         initialization: false,
     }),
 });
