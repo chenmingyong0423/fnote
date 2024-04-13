@@ -77,14 +77,24 @@ db.getCollection("configs").insertOne({
         "og_title": "",
         "description": "",
         "og_image": "",
-        "baidu_site_verification": "",
         "keywords": "",
         "author": "",
-        "robots": ""
+        "robots": "",
+        "third_party_site_verification": []
     },
     created_at: new Date(),
     updated_at: new Date()
 });
+// 第三方站点验证配置
+db.getCollection("configs").insertOne({
+    "typ": "third party site verification",
+    "props": {
+        "list": []
+    },
+    created_at: new Date(),
+    updated_at: new Date()
+});
+
 // 评论开关配置
 db.getCollection("configs").insertOne({
     typ: "comment",
