@@ -131,7 +131,8 @@ func ErrorHandler(ctx *gin.Context, err error) {
 	case errors.As(err, &r):
 		ctx.JSON(http.StatusOK, r)
 	default:
-		l.ErrorContext(ctx, fmt.Sprintf("%+v", err))
+		l.ErrorContext(ctx, err.Error())
+		fmt.Printf("stack trace: \n%+v\n", err)
 		ctx.JSON(http.StatusInternalServerError, nil)
 	}
 }
