@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/domain"
+
 	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
@@ -45,6 +47,8 @@ type IWebsiteConfigDao interface {
 	Decrease(ctx context.Context, field string) error
 	UpdateByConditionAndUpdates(ctx context.Context, cond bson.D, updates bson.D) error
 	UpdatePropsByTyp(ctx context.Context, typ string, cfg any, now time.Time) error
+	AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error
+	DeleteTPSVConfigByKey(ctx context.Context, key string) error
 }
 
 var _ IWebsiteConfigDao = (*WebsiteConfigDao)(nil)
@@ -57,6 +61,33 @@ func NewWebsiteConfigDao(db *mongo.Database) *WebsiteConfigDao {
 
 type WebsiteConfigDao struct {
 	coll *mongox.Collection[WebsiteConfig]
+}
+
+func (d *WebsiteConfigDao) DeleteTPSVConfigByKey(ctx context.Context, key string) error {
+	updateResult, err := d.coll.Updater().
+		Filter(query.Eq("typ", "third party site verification")).
+		Updates(update.Pull("props.list", bsonx.M("key", key))).
+		UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to delete tpsv config, key=%s", key)
+	}
+	if updateResult.ModifiedCount == 0 {
+		return fmt.Errorf("DeletedCount=0, fails to delete tpsv config, key=%s", key)
+	}
+	return nil
+}
+
+func (d *WebsiteConfigDao) AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error {
+	updateResult, err := d.coll.Updater().Filter(query.Eq("typ", "third party site verification")).Updates(
+		update.BsonBuilder().Push("props.list", tpsv).Set("updated_at", time.Now()).Build(),
+	).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to add tpsv config, tpsv=%v", tpsv)
+	}
+	if updateResult.ModifiedCount == 0 {
+		return fmt.Errorf("ModifiedCount=0, fails to add tpsv config, tpsv=%v", tpsv)
+	}
+	return nil
 }
 
 func (d *WebsiteConfigDao) UpdatePropsByTyp(ctx context.Context, typ string, cfg any, now time.Time) error {
