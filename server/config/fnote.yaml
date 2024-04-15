@@ -41,3 +41,6 @@ uploader:
   host: http://localhost:8080 # 后端 host
 gravatar:
   api: https://dn-qiniu-avatar.qbox.me/avatar/
+push:
+  baidu:
+    endpoint: http://data.zz.baidu.com/urls

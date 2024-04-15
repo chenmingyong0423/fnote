@@ -1,10 +1,11 @@
 module github.com/chenmingyong0423/fnote/server
 
-go 1.21.0
+go 1.22.0
 
 require (
 	github.com/chenmingyong0423/ginx v0.0.2
 	github.com/chenmingyong0423/gkit v0.5.0
+	github.com/chenmingyong0423/go-http-chain v0.3.2
 	github.com/chenmingyong0423/go-mongox v0.18.0
 	github.com/gin-contrib/cors v1.7.1
 	github.com/gin-gonic/gin v1.9.1

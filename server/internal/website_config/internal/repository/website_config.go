@@ -59,6 +59,7 @@ type IWebsiteConfigRepository interface {
 	GetTPSVConfig(ctx context.Context) (*domain.TPSVConfig, error)
 	AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error
 	DeleteTPSVConfigByKey(ctx context.Context, key string) error
+	GetBaiduPushConfig(ctx context.Context) (*domain.Baidu, error)
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -71,6 +72,19 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) GetBaiduPushConfig(ctx context.Context) (*domain.Baidu, error) {
+	cfg, err := r.dao.FindByTyp(ctx, "post index")
+	if err != nil {
+		return nil, err
+	}
+	baiduCfg := &domain.BaiduPushConfig{}
+	err = r.anyToStruct(cfg.Props, baiduCfg)
+	if err != nil {
+		return nil, err
+	}
+	return &baiduCfg.Baidu, nil
 }
 
 func (r *WebsiteConfigRepository) DeleteTPSVConfigByKey(ctx context.Context, key string) error {

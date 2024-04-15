@@ -126,3 +126,12 @@ type TPSV struct {
 	Value       string `bson:"value"`
 	Description string `bson:"description"`
 }
+
+type BaiduPushConfig struct {
+	Baidu Baidu `bson:"baidu"`
+}
+
+type Baidu struct {
+	Site  string `bson:"site"`
+	Token string `bson:"token"`
+}

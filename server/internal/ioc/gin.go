@@ -15,6 +15,7 @@
 package ioc
 
 import (
+	"github.com/chenmingyong0423/fnote/server/internal/post_index"
 	"io"
 	"log/slog"
 	"net/http"
@@ -52,7 +53,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *website_config.Handler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *handler4.DataAnalysisHandler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators) (*gin.Engine, error) {
+func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *website_config.Handler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *handler4.DataAnalysisHandler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler) (*gin.Engine, error) {
 	engine := gin.Default()
 
 	// 参数校验器注册
@@ -82,6 +83,7 @@ func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHand
 		daHandler.RegisterGinRoutes(engine)
 		csHandler.RegisterGinRoutes(engine)
 		backupHandler.RegisterGinRoutes(engine)
+		postIndexHdr.RegisterGinRoutes(engine)
 	}
 	return engine, nil
 }
