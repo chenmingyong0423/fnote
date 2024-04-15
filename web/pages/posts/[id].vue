@@ -212,7 +212,7 @@
 </template>
 
 <script lang="ts" setup>
-import { type IPostDetail, getPostsById, likePost } from "~/api/post";
+import {type IPostDetail, getPostsById, likePost, baiduPostIndex} from "~/api/post";
 import type { IResponse, IBaseResponse, IPageData } from "~/api/http";
 import { onMounted, ref } from "vue";
 import { useHomeStore } from "~/store/home";
@@ -244,6 +244,10 @@ const getPostDetail = async () => {
   }
 };
 await getPostDetail();
+
+const bdPush = async (urls : string) => {
+  await baiduPostIndex(urls)
+}
 
 const handleCopyCodeSuccess = () => {
   console.log("成功");
@@ -301,6 +305,7 @@ onMounted(() => {
   window.addEventListener("scroll", anchorScroll);
   window.addEventListener("scroll", subscribeTitleFocus);
   link.value = window.location.href;
+  bdPush(link.value)
 });
 onBeforeUnmount(() => {
   window.removeEventListener("scroll", anchorScroll);
