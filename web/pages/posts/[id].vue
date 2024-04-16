@@ -249,6 +249,8 @@ const bdPush = async (urls : string) => {
   await baiduPostIndex(urls)
 }
 
+const runtimeConfig = useRuntimeConfig()
+
 const handleCopyCodeSuccess = () => {
   console.log("成功");
 };
@@ -305,7 +307,6 @@ onMounted(() => {
   window.addEventListener("scroll", anchorScroll);
   window.addEventListener("scroll", subscribeTitleFocus);
   link.value = window.location.href;
-  bdPush(link.value)
 });
 onBeforeUnmount(() => {
   window.removeEventListener("scroll", anchorScroll);
@@ -511,15 +512,15 @@ const clearReply2ReplyReq = () => {
   }
 };
 
-let description = post.value?.summary;
-if (post.value?.meta_description) {
-  description = post.value?.meta_description;
-}
+let description = post.value?.meta_description || post.value?.summary;
+
+let keywords = configStore.seo_meta_config.keywords + ',' + post.value?.meta_keywords;
 
 useHead({
   title: `${post.value?.title} - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: description },
+    { name: "keywords", content: keywords },
   ],
 });
 useSeoMeta({
@@ -528,6 +529,8 @@ useSeoMeta({
   ogImage: post.value?.cover_img,
   twitterCard: "summary",
 });
+
+bdPush(runtimeConfig.public.domain + route.path)
 </script>
 
 <style scoped>
