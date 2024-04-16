@@ -85,6 +85,13 @@ db.getCollection("configs").insertOne({
     created_at: new Date(),
     updated_at: new Date()
 });
+// 文章索引推送配置
+db.getCollection("configs").insertOne({
+    "typ": "post index",
+    "props": {},
+    created_at: new Date(),
+    updated_at: new Date()
+});
 // 第三方站点验证配置
 db.getCollection("configs").insertOne({
     "typ": "third party site verification",
