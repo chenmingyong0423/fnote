@@ -18,6 +18,8 @@ services:
       - "27017:27017"
     command:
       - --auth
+    networks:
+      - fnote-network
   server:
     container_name: fnote-server
     image: fnote/fnote-server:latest
@@ -31,16 +33,20 @@ services:
     volumes:
       - /tmp/fnote/logs:/fnote/logs
       - /tmp/fnote/static:/fnote/static
+    networks:
+      - fnote-network
   web:
     container_name: fnote-web
     image: fnote/fnote-web:latest
-    build: 
+    build:
       dockerfile: Dockerfile
       context: ./web
     ports:
       - "3000:3000"
     depends_on:
       - server
+    networks:
+      - fnote-network
   admin:
     container_name: fnote-admin
     image: fnote/fnote-admin:latest
@@ -51,3 +57,8 @@ services:
       - "8081:80"
     depends_on:
       - server
+    networks:
+      - fnote-network
+networks:
+  fnote-network:
+    driver: bridge
