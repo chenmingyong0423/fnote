@@ -212,7 +212,7 @@
 </template>
 
 <script lang="ts" setup>
-import { type IPostDetail, getPostsById, likePost } from "~/api/post";
+import {type IPostDetail, getPostsById, likePost, baiduPostIndex} from "~/api/post";
 import type { IResponse, IBaseResponse, IPageData } from "~/api/http";
 import { onMounted, ref } from "vue";
 import { useHomeStore } from "~/store/home";
@@ -244,6 +244,12 @@ const getPostDetail = async () => {
   }
 };
 await getPostDetail();
+
+const bdPush = async (urls : string) => {
+  await baiduPostIndex(urls)
+}
+
+const runtimeConfig = useRuntimeConfig()
 
 const handleCopyCodeSuccess = () => {
   console.log("成功");
@@ -506,21 +512,15 @@ const clearReply2ReplyReq = () => {
   }
 };
 
-let description = post.value?.summary;
-if (post.value?.meta_description) {
-  description = post.value?.meta_description;
-}
+let description = post.value?.meta_description || post.value?.summary;
+
+let keywords = configStore.seo_meta_config.keywords + ',' + post.value?.meta_keywords;
 
 useHead({
   title: `${post.value?.title} - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
   meta: [
     { name: "description", content: description },
-    { name: "keywords", content: configStore.seo_meta_config.keywords },
-    { name: "author", content: configStore.seo_meta_config.author },
-    { name: "robots", content: configStore.seo_meta_config.robots },
-  ],
-  link: [
-    { rel: "icon", type: "image/x-icon", href: configStore.website_info.website_icon },
+    { name: "keywords", content: keywords },
   ],
 });
 useSeoMeta({
@@ -529,6 +529,8 @@ useSeoMeta({
   ogImage: post.value?.cover_img,
   twitterCard: "summary",
 });
+
+bdPush(runtimeConfig.public.domain + route.path)
 </script>
 
 <style scoped>
