@@ -39,6 +39,6 @@ mongodb:
 website:
   base_host: https://chenmingyong.cn # 网站域名，对应前端的 host
 uploader:
-  host: http://localhost:8080 # 后端 host
+  host: https://chenmingyong.cn # 后端 host
 gravatar:
   api: https://dn-qiniu-avatar.qbox.me/avatar/
