@@ -17,6 +17,7 @@ package repository
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -60,6 +61,7 @@ type IWebsiteConfigRepository interface {
 	AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error
 	DeleteTPSVConfigByKey(ctx context.Context, key string) error
 	GetBaiduPushConfig(ctx context.Context) (*domain.Baidu, error)
+	UpdatePushConfigByKey(ctx context.Context, key string, updates map[string]any) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -72,6 +74,10 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) UpdatePushConfigByKey(ctx context.Context, key string, updates map[string]any) error {
+	return r.dao.UpdatePostIndexProps(ctx, update.Set(fmt.Sprintf("props.%s", key), updates))
 }
 
 func (r *WebsiteConfigRepository) GetBaiduPushConfig(ctx context.Context) (*domain.Baidu, error) {

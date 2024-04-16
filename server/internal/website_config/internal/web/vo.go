@@ -116,3 +116,8 @@ type TPSVVO struct {
 	Value       string `json:"value"`
 	Description string `json:"description"`
 }
+
+type BaiduPushConfigVO struct {
+	Site  string `json:"site"`
+	Token string `json:"token"`
+}
