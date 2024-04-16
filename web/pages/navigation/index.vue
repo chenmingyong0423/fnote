@@ -98,12 +98,6 @@ useHead({
       name: "description",
       content: `所有的文章分类和标签，包括${ct.value}等不同主题。`,
     },
-    { name: "keywords", content: configStore.seo_meta_config.keywords },
-    { name: "author", content: configStore.seo_meta_config.author },
-    { name: "robots", content: configStore.seo_meta_config.robots },
-  ],
-  link: [
-    { rel: "icon", type: "image/x-icon", href: configStore.website_info.website_icon },
   ],
 });
 useSeoMeta({

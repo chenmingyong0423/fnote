@@ -133,12 +133,6 @@ useHead({
   title: `${routeParam} - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
   meta: [
     {name: "description", content: `${routeParam}文章列表`},
-    {name: "keywords", content: configStore.seo_meta_config.keywords},
-    {name: "author", content: configStore.seo_meta_config.author},
-    {name: "robots", content: configStore.seo_meta_config.robots},
-  ],
-  link: [
-    {rel: "icon", type: "image/x-icon", href: configStore.website_info.website_icon},
   ],
 });
 useSeoMeta({
