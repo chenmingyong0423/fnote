@@ -61,6 +61,7 @@ type IWebsiteConfigService interface {
 	AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error
 	DeleteTPSVConfigByKey(ctx context.Context, key string) error
 	GetBaiduPushConfig(ctx context.Context) (*domain.Baidu, error)
+	UpdatePushConfigByKey(ctx context.Context, key string, updates map[string]any) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -73,6 +74,10 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) UpdatePushConfigByKey(ctx context.Context, key string, updates map[string]any) error {
+	return s.repo.UpdatePushConfigByKey(ctx, key, updates)
 }
 
 func (s *WebsiteConfigService) GetBaiduPushConfig(ctx context.Context) (*domain.Baidu, error) {

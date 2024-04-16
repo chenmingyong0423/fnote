@@ -15,10 +15,12 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index/internal/domain"
 	httpchain "github.com/chenmingyong0423/go-http-chain"
 	"github.com/spf13/viper"
+	"io"
 )
 
 type BaiduService struct {
@@ -33,7 +35,11 @@ func (s *BaiduService) Push(ctx context.Context, site, token, urls string) (*dom
 	resp, err := s.client.Post(viper.GetString("push.baidu.endpoint")).
 		AddQuery("site", site).AddQuery("token", token).
 		SetHeader(httpchain.HeaderContentType, httpchain.ContentTypeTextPlain).
-		SetBody(urls).Call(ctx).Result()
+		SetBody(urls).SetBodyEncodeFunc(func(body any) (io.Reader, error) {
+		var buf bytes.Buffer
+		buf.WriteString(body.(string))
+		return &buf, nil
+	}).Call(ctx).Result()
 	if err != nil {
 		return nil, err
 	}

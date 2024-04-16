@@ -49,6 +49,7 @@ type IWebsiteConfigDao interface {
 	UpdatePropsByTyp(ctx context.Context, typ string, cfg any, now time.Time) error
 	AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error
 	DeleteTPSVConfigByKey(ctx context.Context, key string) error
+	UpdatePostIndexProps(ctx context.Context, updates bson.D) error
 }
 
 var _ IWebsiteConfigDao = (*WebsiteConfigDao)(nil)
@@ -61,6 +62,17 @@ func NewWebsiteConfigDao(db *mongo.Database) *WebsiteConfigDao {
 
 type WebsiteConfigDao struct {
 	coll *mongox.Collection[WebsiteConfig]
+}
+
+func (d *WebsiteConfigDao) UpdatePostIndexProps(ctx context.Context, updates bson.D) error {
+	updateResult, err := d.coll.Updater().Filter(query.Eq("typ", "post index")).Updates(updates).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to update website_config, typ=post index, updates=%v", updates)
+	}
+	if updateResult.ModifiedCount == 0 {
+		return fmt.Errorf("ModifiedCount=0, fails to update website_config, typ=post index, updates=%v", updates)
+	}
+	return nil
 }
 
 func (d *WebsiteConfigDao) DeleteTPSVConfigByKey(ctx context.Context, key string) error {

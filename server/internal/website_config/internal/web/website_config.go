@@ -86,6 +86,8 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.GET("/third-party-site-verification", apiwrap.Wrap(h.AdminGetTPSVConfig))
 	adminGroup.POST("/third-party-site-verification", apiwrap.WrapWithBody(h.AdminAddTPSVConfig))
 	adminGroup.DELETE("/third-party-site-verification/:key", apiwrap.Wrap(h.AdminDeleteTPSVConfig))
+	adminGroup.GET("/post-index/:key", apiwrap.Wrap(h.AdminGetPushConfigByKey))
+	adminGroup.PUT("/post-index/:key", apiwrap.WrapWithBody(h.AdminUpdatePushConfigByKey))
 
 	engine.POST("/admin/login", apiwrap.WrapWithBody(h.AdminLogin))
 
@@ -480,4 +482,29 @@ func (h *WebsiteConfigHandler) AdminAddTPSVConfig(ctx *gin.Context, req TPSVRequ
 
 func (h *WebsiteConfigHandler) AdminDeleteTPSVConfig(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	return apiwrap.SuccessResponse(), h.serv.DeleteTPSVConfigByKey(ctx, ctx.Param("key"))
+}
+
+func (h *WebsiteConfigHandler) AdminGetPushConfigByKey(ctx *gin.Context) (*apiwrap.ResponseBody[BaiduPushConfigVO], error) {
+	key := ctx.Param("key")
+	var (
+		cfg *domain.Baidu
+		err error
+	)
+	if key == "baidu" {
+		cfg, err = h.serv.GetBaiduPushConfig(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return apiwrap.SuccessResponseWithData(BaiduPushConfigVO{
+		Site:  cfg.Site,
+		Token: cfg.Token,
+	}), nil
+}
+
+func (h *WebsiteConfigHandler) AdminUpdatePushConfigByKey(ctx *gin.Context, req map[string]any) (*apiwrap.ResponseBody[any], error) {
+	if len(req) == 0 {
+		return nil, apiwrap.NewErrorResponseBody(400, "request body is nil.")
+	}
+	return apiwrap.SuccessResponse(), h.serv.UpdatePushConfigByKey(ctx, ctx.Param("key"), req)
 }
