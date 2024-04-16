@@ -44,5 +44,8 @@ func (s *PostIndexService) PushUrls2Baidu(ctx context.Context, urls string) (*do
 	if err != nil {
 		return nil, err
 	}
+	if bdCfg.Token == "" {
+		return nil, nil
+	}
 	return s.baiduServ.Push(ctx, bdCfg.Site, bdCfg.Token, urls)
 }
