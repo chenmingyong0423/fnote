@@ -17,10 +17,11 @@ package service
 import (
 	"bytes"
 	"context"
+	"io"
+
 	"github.com/chenmingyong0423/fnote/server/internal/post_index/internal/domain"
 	httpchain "github.com/chenmingyong0423/go-http-chain"
 	"github.com/spf13/viper"
-	"io"
 )
 
 type BaiduService struct {
@@ -32,9 +33,10 @@ func NewBaiduService() *BaiduService {
 }
 
 func (s *BaiduService) Push(ctx context.Context, site, token, urls string) (*domain.BaiduResponse, error) {
-	resp, err := s.client.Post(viper.GetString("push.baidu.endpoint")).
-		AddQuery("site", site).AddQuery("token", token).
+	resp, err := s.client.Post(viper.GetString("push.baidu.endpoint")+"?site="+site).
+		AddQuery("token", token).
 		SetHeader(httpchain.HeaderContentType, httpchain.ContentTypeTextPlain).
+		SetHeader("host", "data.zz.baidu.com").
 		SetBody(urls).SetBodyEncodeFunc(func(body any) (io.Reader, error) {
 		var buf bytes.Buffer
 		buf.WriteString(body.(string))
