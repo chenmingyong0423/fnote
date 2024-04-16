@@ -1,5 +1,4 @@
 import instance from '@/utils/axios'
-import type { LoginRequest } from '@/interfaces/User'
 
 export interface WebsiteConfig {
   website_name: string
@@ -300,8 +299,7 @@ export const DeleteSocial = (id: string) => {
   })
 }
 
-export interface SocialConfigRequest {
-}
+export interface SocialConfigRequest {}
 
 export const UpdateSocial = (id: string, req: SocialConfigRequest) => {
   return instance({
@@ -346,15 +344,15 @@ export const Init = (req: InitReq) => {
 }
 
 export interface ThirdPartySiteVerification {
-  key: string;
-  value: string;
-  description: string;
+  key: string
+  value: string
+  description: string
 }
 
 export interface ThirdPartySiteVerificationRequest {
-  key: string;
-  value: string;
-  description: string;
+  key: string
+  value: string
+  description: string
 }
 
 export const GetThirdPartySiteVerification = () => {
@@ -376,5 +374,28 @@ export const DeleteThirdPartySiteVerification = (id: string) => {
   return instance({
     url: '/configs/third-party-site-verification/' + id,
     method: 'delete'
+  })
+}
+
+export interface BaiduPushConfig {
+  site: string
+  token: string
+}
+
+export const GetBaiduPushConfig = () => {
+  return instance({
+    url: '/configs/post-index/baidu',
+    method: 'get'
+  })
+}
+
+export const UpdateBaiduPushConfig = (site: string, token: string) => {
+  return instance({
+    url: '/configs/post-index/baidu',
+    method: 'put',
+    data: {
+      site: site,
+      token: token
+    }
   })
 }
