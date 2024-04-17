@@ -54,7 +54,8 @@ import (
 )
 
 func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *website_config.Handler, frdHdr *friendHanlder.FriendHandler, postHdr *postHanlder.PostHandler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *handler4.DataAnalysisHandler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler) (*gin.Engine, error) {
-	engine := gin.Default()
+	engine := gin.New()
+	engine.Use(gin.Recovery())
 
 	// 参数校验器注册
 	if validate, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -105,7 +106,10 @@ func InitMiddlewares(writer io.Writer, isWebsiteInitialized func() bool) []gin.H
 			default:
 				return slog.LevelInfo
 			}
-		}(viper.GetString("logger.level")))),
+		}(viper.GetString("logger.level")), log.WithSkipPaths([]string{"/admin/files/upload"}), log.WithSkipFunc(func(ctx *gin.Context) bool {
+			url := ctx.Request.URL.Path
+			return strings.HasPrefix(url, "/static/")
+		}))),
 		cors.New(cors.Config{
 			AllowCredentials: true,
 			AllowOriginFunc: func(origin string) bool {

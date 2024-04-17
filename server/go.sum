@@ -2,12 +2,12 @@ github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1
 github.com/bytedance/sonic v1.10.0-rc/go.mod h1:ElCzW+ufi8qKqNW0FY314xriJhyJhuoJ3gFZdAHF7NM=
 github.com/bytedance/sonic v1.11.3 h1:jRN+yEjakWh8aK5FzrciUHG8OFXK+4/KrAX/ysEtHAA=
 github.com/bytedance/sonic v1.11.3/go.mod h1:iZcSUejdk5aukTND/Eu/ivjQuEL0Cu9/rf50Hi0u/g4=
-github.com/chenmingyong0423/ginx v0.0.2 h1:WZp24BXOPHQLUFZyUCDSSBq1THVP9CfqaLKvxxw9aa8=
-github.com/chenmingyong0423/ginx v0.0.2/go.mod h1:z950yIFUFE7nA3DJ7b5sD7TnggZS4YOKrE6L021/HY4=
+github.com/chenmingyong0423/ginx v0.1.1 h1:oLlnCDDkT7LEffsKXDG30n58I4xO4PmJCB0sc+1ZFxc=
+github.com/chenmingyong0423/ginx v0.1.1/go.mod h1:z950yIFUFE7nA3DJ7b5sD7TnggZS4YOKrE6L021/HY4=
+github.com/chenmingyong0423/ginx v0.1.2 h1:IiktjoYfSpN8czQeWaB6V8hpXi2cSHPaVkM07uiitwU=
+github.com/chenmingyong0423/ginx v0.1.2/go.mod h1:z950yIFUFE7nA3DJ7b5sD7TnggZS4YOKrE6L021/HY4=
 github.com/chenmingyong0423/gkit v0.5.0 h1:efthAjro7c5ZwHqMUV0+0CFZZFgsbthYnnUrfsSMdx4=
 github.com/chenmingyong0423/gkit v0.5.0/go.mod h1:9MKV0/B3MiBCGf4fssogftFbNIGJk9a4ffm/o3+pkHw=
-github.com/chenmingyong0423/go-http-chain v0.3.3 h1:YHj1ui/rXi9z/qJBnO2amtucJGcU8KBpoSiAlIWf5FY=
-github.com/chenmingyong0423/go-http-chain v0.3.3/go.mod h1:Gg/O7EVrW81VXqElJmkoY+Uo5/LU586fpS7LQkLLxaA=
 github.com/chenmingyong0423/go-http-chain v0.3.4 h1:I/EWPLsYq2fuo3x4HUMSQ0tFj5rMdZxZ1JHTlN1ACp4=
 github.com/chenmingyong0423/go-http-chain v0.3.4/go.mod h1:Gg/O7EVrW81VXqElJmkoY+Uo5/LU586fpS7LQkLLxaA=
 github.com/chenmingyong0423/go-mongox v0.18.0 h1:VnOy5lSiGv6YWRPo4MbXVWGHdQVTIm8YISfkJnH1mR8=
