@@ -2,7 +2,7 @@
   <div class="clearfix">
     <a-upload
       v-model:file-list="fileList"
-      action="http://localhost:8080/admin/files/upload"
+      :action= "serverHost + 'admin/files/upload'"
       list-type="picture-card"
       @preview="handlePreview"
       @change="handleChange"
@@ -34,6 +34,7 @@ const props = defineProps({
   authorization: String
 })
 const emit = defineEmits(['update:imageUrl'])
+const serverHost = import.meta.env.VITE_API_HOST
 
 function getBase64(file: File) {
   return new Promise((resolve, reject) => {

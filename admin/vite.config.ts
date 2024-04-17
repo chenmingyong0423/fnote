@@ -10,7 +10,6 @@ export default defineConfig({
     vue(),
     UnoCSS(),
   ],
-  base: process.env.VITE_BASE_URL || '/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
