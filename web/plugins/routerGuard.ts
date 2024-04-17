@@ -30,7 +30,7 @@ export default defineNuxtPlugin(nuxtApp => {
             const host = runtimeConfig.public.adminHost;
             if (process.client) {
                 // 客户端重定向
-                window.location.href = host;
+                window.location.href = host + '/admin';
                 return;
             }
         }
