@@ -79,7 +79,7 @@ func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 	// 评论回复
 	group.POST("/:commentId/replies", apiwrap.WrapWithBody(h.AddCommentReply))
 
-	adminGroup := engine.Group("/admin/comments")
+	adminGroup := engine.Group("/admin-api/comments")
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetComments))
 	adminGroup.DELETE("/:id", apiwrap.Wrap(h.AdminDeleteComment))
 	adminGroup.PUT("/:id/status", apiwrap.WrapWithBody(h.AdminUpdateCommentStatus))

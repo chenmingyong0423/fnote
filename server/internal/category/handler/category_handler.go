@@ -62,7 +62,7 @@ func (h *CategoryHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group.GET("/route/:route", apiwrap.Wrap(h.GetCategoryByRoute))
 	engine.GET("/menus", apiwrap.Wrap(h.GetMenus))
 
-	adminGroup := engine.Group("/admin/categories")
+	adminGroup := engine.Group("/admin-api/categories")
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetCategories))
 	adminGroup.GET("/select", apiwrap.Wrap(h.AdminGetSelectCategories))
 	adminGroup.POST("", apiwrap.WrapWithBody(h.AdminCreateCategory))

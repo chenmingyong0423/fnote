@@ -60,7 +60,7 @@ func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group.GET("", apiwrap.Wrap(h.GetFriends))
 	group.POST("", apiwrap.WrapWithBody(h.ApplyForFriend))
 
-	adminGroup := engine.Group("/admin/friends")
+	adminGroup := engine.Group("/admin-api/friends")
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetFriends))
 	adminGroup.PUT("/:id", apiwrap.WrapWithBody(h.AdminUpdateFriend))
 	adminGroup.DELETE("/:id", apiwrap.Wrap(h.AdminDeleteFriend))

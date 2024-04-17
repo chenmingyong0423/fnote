@@ -54,7 +54,7 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup.GET("/index", apiwrap.Wrap(h.GetIndexConfig))
 	routerGroup.GET("/check-initialization", apiwrap.Wrap(h.GetInitStatus))
 
-	adminGroup := engine.Group("/admin/configs")
+	adminGroup := engine.Group("/admin-api/configs")
 	adminGroup.GET("/check-initialization", apiwrap.Wrap(h.GetInitStatus))
 	adminGroup.POST("/initialization", apiwrap.WrapWithBody(h.InitializeWebsite))
 	adminGroup.GET("/website", apiwrap.Wrap(h.AdminGetWebsiteConfig))
@@ -89,7 +89,7 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.GET("/post-index/:key", apiwrap.Wrap(h.AdminGetPushConfigByKey))
 	adminGroup.PUT("/post-index/:key", apiwrap.WrapWithBody(h.AdminUpdatePushConfigByKey))
 
-	engine.POST("/admin/login", apiwrap.WrapWithBody(h.AdminLogin))
+	engine.POST("/admin-api/login", apiwrap.WrapWithBody(h.AdminLogin))
 
 }
 

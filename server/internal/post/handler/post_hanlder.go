@@ -74,7 +74,7 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group.POST("/:id/likes", apiwrap.Wrap(h.AddLike))
 	//group.DELETE("/:id/likes", api.Wrap(h.DeleteLike))
 
-	adminGroup := engine.Group("/admin/posts")
+	adminGroup := engine.Group("/admin-api/posts")
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetPosts))
 	adminGroup.GET("/:id", apiwrap.Wrap(h.AdminGetPostById))
 	adminGroup.PUT("", apiwrap.WrapWithBody(h.AdminUpdatePost))

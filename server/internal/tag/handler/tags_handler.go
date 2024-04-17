@@ -54,7 +54,7 @@ func (h *TagHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group.GET("", apiwrap.Wrap(h.GetTags))
 	group.GET("/route/:route", apiwrap.Wrap(h.GetTagByRoute))
 
-	adminGroup := engine.Group("/admin/tags")
+	adminGroup := engine.Group("/admin-api/tags")
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetTags))
 	adminGroup.GET("/select", apiwrap.Wrap(h.AdminGetSelectTags))
 	adminGroup.POST("", apiwrap.WrapWithBody(h.AdminCreateTag))

@@ -39,7 +39,7 @@ type FileHandler struct {
 }
 
 func (h *FileHandler) RegisterGinRoutes(engine *gin.Engine) {
-	adminGroup := engine.Group("/admin/files")
+	adminGroup := engine.Group("/admin-api/files")
 	adminGroup.POST("/upload", apiwrap.Wrap(h.UploadFile))
 }
 
