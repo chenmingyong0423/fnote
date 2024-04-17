@@ -17,7 +17,7 @@
             :authorization="userStore.token"
             @update:imageUrl="(value) => (data.website_icon = value)"
           />
-          <a-image v-else :width="200" :src="apiHost + data.website_icon" />
+          <a-image v-else :width="200" :src="data.website_icon === '' ? '' : apiHost + data.website_icon" />
         </div>
       </a-descriptions-item>
       <a-descriptions-item label="站长昵称">
@@ -48,7 +48,7 @@
             :authorization="userStore.token"
             @update:imageUrl="(value) => (data.website_owner_avatar = value)"
           />
-          <a-image v-else :width="200" :src="apiHost + data.website_owner_avatar" />
+          <a-image v-else :width="200" :src="data.website_owner_avatar === '' ? '' : apiHost + data.website_owner_avatar" />
         </div>
       </a-descriptions-item>
       <a-descriptions-item label="站点运行时间">
