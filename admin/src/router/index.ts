@@ -8,6 +8,12 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/',
+      redirect: () => {
+        return '/admin/home/index'
+      }
+    },
+    {
       path: '/admin',
       redirect: () => {
         return '/admin/home/index'

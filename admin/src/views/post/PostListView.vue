@@ -1,5 +1,5 @@
 <template>
-  <a-button type="primary" @click="router.push('/home/post')">发布文章</a-button>
+  <a-button type="primary" @click="router.push('/admin/home/post')">发布文章</a-button>
   <a-table :columns="columns" :data-source="posts" :pagination="pagination" @change="change">
     <template #headerCell="{ column }">
       <template v-if="column.key === 'name'">
