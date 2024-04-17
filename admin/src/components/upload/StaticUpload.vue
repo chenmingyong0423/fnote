@@ -2,7 +2,7 @@
   <div class="clearfix">
     <a-upload
       v-model:file-list="fileList"
-      :action= "serverHost + 'admin/files/upload'"
+      :action= "serverHost + '/admin-api/files/upload'"
       list-type="picture-card"
       @preview="handlePreview"
       @change="handleChange"
