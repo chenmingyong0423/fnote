@@ -35,7 +35,7 @@ type DataAnalysisHandler struct {
 }
 
 func (h *DataAnalysisHandler) RegisterGinRoutes(engine *gin.Engine) {
-	routerGroup := engine.Group("/admin/data-analysis")
+	routerGroup := engine.Group("/admin-api/data-analysis")
 	routerGroup.GET("", apiwrap.Wrap(h.GetDataAnalysis))
 }
 

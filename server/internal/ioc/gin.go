@@ -106,7 +106,7 @@ func InitMiddlewares(writer io.Writer, isWebsiteInitialized func() bool) []gin.H
 			default:
 				return slog.LevelInfo
 			}
-		}(viper.GetString("logger.level")), log.WithSkipPaths([]string{"/admin/files/upload"}), log.WithSkipFunc(func(ctx *gin.Context) bool {
+		}(viper.GetString("logger.level")), log.WithSkipPaths([]string{"/admin-api/files/upload"}), log.WithSkipFunc(func(ctx *gin.Context) bool {
 			url := ctx.Request.URL.Path
 			return strings.HasPrefix(url, "/static/")
 		}))),
@@ -126,7 +126,7 @@ func InitMiddlewares(writer io.Writer, isWebsiteInitialized func() bool) []gin.H
 		}),
 		func(ctx *gin.Context) {
 			uri := ctx.Request.RequestURI
-			if isWebsiteInitialized() || uri == "/admin/files/upload" || uri == "/admin/configs/initialization" {
+			if isWebsiteInitialized() || uri == "/admin-api/files/upload" || uri == "/admin-api/configs/initialization" {
 				ctx.Next()
 			} else {
 				ctx.JSON(http.StatusServiceUnavailable, nil)

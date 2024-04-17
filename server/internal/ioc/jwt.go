@@ -25,17 +25,17 @@ import (
 func JwtParseMiddleware(isWebsiteInitialized func() bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		uri := ctx.Request.RequestURI
-		if !isWebsiteInitialized() && (uri == "/admin/files/upload" || uri == "/admin/configs/initialization") {
+		if !isWebsiteInitialized() && (uri == "/admin-api/files/upload" || uri == "/admin-api/configs/initialization") {
 			ctx.Next()
 			return
 		}
 		// 非 admin 接口不需要 jwt
-		if !strings.HasPrefix(uri, "/admin") {
+		if !strings.HasPrefix(uri, "/admin-api") {
 			ctx.Next()
 			return
 		}
 		// 登录和初始化接口不需要 jwt
-		if uri == "/admin/login" || uri == "/admin/configs/check-initialization" {
+		if uri == "/admin-api/login" || uri == "/admin-api/configs/check-initialization" {
 			ctx.Next()
 			return
 		}

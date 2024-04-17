@@ -35,7 +35,7 @@ type BackupHandler struct {
 }
 
 func (h *BackupHandler) RegisterGinRoutes(engine *gin.Engine) {
-	adminGroup := engine.Group("/admin")
+	adminGroup := engine.Group("/admin-api")
 
 	adminGroup.GET("/backup", h.GetBackups)
 	adminGroup.POST("/recovery", apiwrap.Wrap(h.Recovery))
