@@ -8,73 +8,73 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: '/admin',
       redirect: () => {
-        return '/home/index'
+        return '/admin/home/index'
       }
     },
     {
-      path: '/init',
+      path: '/admin/init',
       name: 'init',
       component: () => import('../views/initialization/InitView.vue')
     },
     {
-      path: '/login',
+      path: '/admin/login',
       name: 'login',
       component: () => import('../views/login/LoginView.vue')
     },
     {
-      path: '/home',
+      path: '/admin/home',
       name: 'base',
       component: () => import('../views/HomeView.vue'),
       children: [
         {
-          path: '/home/index',
+          path: '/admin/home/index',
           name: 'home',
           component: () => import('../views/IndexView.vue')
         },
         {
-          path: '/home/post/list',
+          path: '/admin/home/post/list',
           name: 'post',
           component: () => import('../views/post/PostListView.vue')
         },
         {
-          path: '/home/post',
+          path: '/admin/home/post',
           name: 'add-post',
           component: () => import('../views/post/AddPostView.vue')
         },
         {
-          path: '/home/drafts/:id',
+          path: '/admin/home/drafts/:id',
           name: 'edit-post',
           component: () => import('../views/post/UpdatePostView.vue')
         },
         {
-          path: '/home/comment',
+          path: '/admin/home/comment',
           name: 'comment',
           component: () => import('../views/comment/CommentView.vue')
         },
         {
-          path: '/home/category',
+          path: '/admin/home/category',
           name: 'category',
           component: () => import('../views/CategoryListView.vue')
         },
         {
-          path: '/home/tag',
+          path: '/admin/home/tag',
           name: 'tag',
           component: () => import('../views/TagListView.vue')
         },
         {
-          path: '/home/friend',
+          path: '/admin/home/friend',
           name: 'friend',
           component: () => import('@/views/friend/FriendView.vue')
         },
         {
-          path: '/home/setting',
+          path: '/admin/home/setting',
           name: 'setting',
           component: () => import('@/views/setting/SettingView.vue')
         },
         {
-          path: '/home/backup',
+          path: '/admin/home/backup',
           name: 'backup',
           component: () => import('@/views/backup/BackupView.vue')
         }

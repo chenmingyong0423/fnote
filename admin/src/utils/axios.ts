@@ -48,7 +48,7 @@ instance.interceptors.response.use(
         message.warn('登录过期，请重新登录').then((r) => r)
         userStore.token = ''
         localStorage.clear()
-        router.push({ path: '/login', replace: true }).then((r) => r)
+        router.push({ path: '/admin/login', replace: true }).then((r) => r)
         break
       case 500:
         if (contentType && contentType.includes('application/json') && error.response.data) {
