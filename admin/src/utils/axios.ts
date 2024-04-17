@@ -5,7 +5,7 @@ import { message } from 'ant-design-vue'
 import router from '@/router'
 
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_HOST + '/admin',
+  baseURL: import.meta.env.VITE_API_HOST + '/admin-api',
   timeout: 99999
 })
 
