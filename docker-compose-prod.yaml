@@ -59,6 +59,7 @@ services:
       - server
     networks:
       - fnote-network
+      - admin
 networks:
   fnote-network:
     driver: bridge
