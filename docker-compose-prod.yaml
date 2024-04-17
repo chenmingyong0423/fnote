@@ -57,9 +57,9 @@ services:
       - "3000:3000"
     depends_on:
       - server
+      - admin
     networks:
       - fnote-network
-      - admin
 networks:
   fnote-network:
     driver: bridge
