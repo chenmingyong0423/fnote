@@ -31,8 +31,8 @@ services:
     depends_on:
       - mongo
     volumes:
-      - /tmp/fnote/logs:/fnote/logs
-      - /tmp/fnote/static:/fnote/static
+      - /fnote/logs:/fnote/logs
+      - /fnote/static:/fnote/static
     networks:
       - fnote-network
   admin:
