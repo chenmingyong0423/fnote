@@ -12,7 +12,7 @@ export default defineConfig({
   ],
   base: `/${process.env.VITE_BUILD_DIR || ""}`,
   build: {
-    outDir: `/${process.env.VITE_BUILD_DIR || ""}`,
+    outDir: `dist/${process.env.VITE_BUILD_DIR || ""}`,
   },
   resolve: {
     alias: {
