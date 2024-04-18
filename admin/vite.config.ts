@@ -11,6 +11,9 @@ export default defineConfig({
     UnoCSS(),
   ],
   base: `/${process.env.VITE_BUILD_DIR || ""}`,
+  build: {
+    outDir: `/${process.env.VITE_BUILD_DIR || ""}`,
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
