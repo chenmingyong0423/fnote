@@ -12,9 +12,11 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
     "build:docker": "run-p type-check \"build-only:docker\" --",
-    "build-only:docker": "VITE_BUILD_DIR=admin vite build --mode docker",
+    "build-only:docker": "vite build --mode docker",
     "build:production": "run-p type-check \"build-only:production\" --",
-    "build-only:production": "VITE_BUILD_DIR=admin vite build --mode production"
+    "build-only:production": "vite build --mode production",
+    "build:nginx": "run-p type-check \"build-only:nginx\" --",
+    "build-only:nginx": "VITE_BUILD_DIR=admin vite build --mode nginx"
   },
   "dependencies": {
     "@iconify-json/bi": "^1.1.22",

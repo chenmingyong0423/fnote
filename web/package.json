@@ -5,6 +5,7 @@
   "scripts": {
     "build:docker": "nuxt build --dotenv .env.docker",
     "build:production": "nuxt build --dotenv .env.production",
+    "build:nginx": "nuxt build --dotenv .env.nginx",
     "build": "nuxt build --dotenv .env.production",
     "dev": "nuxt dev --dotenv .env.local",
     "start": "nuxt start",
