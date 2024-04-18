@@ -10,6 +10,9 @@ export default defineConfig({
     vue(),
     UnoCSS(),
   ],
+  build: {
+    outDir: `dist/${process.env.VITE_BUILD_DIR}`,
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
