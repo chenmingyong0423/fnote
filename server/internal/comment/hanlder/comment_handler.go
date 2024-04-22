@@ -118,7 +118,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiw
 		PostInfo: domain.PostInfo{
 			PostId:    req.PostId,
 			PostTitle: post.Title,
-			PostUrl:   fmt.Sprintf("%s/posts/%s", ctx.Request.Host, req.PostId),
+			PostUrl:   fmt.Sprintf("%s/posts/%s", viper.GetString("website.base_host"), req.PostId),
 		},
 		Content: req.Content,
 		UserInfo: domain.UserInfo{
