@@ -3,7 +3,8 @@
     <div class="flex h-15 items-center">
       <a-input v-model:value="postReq.title" addon-before="标题" class="w-59%" />
       <a-input v-model:value="postReq.author" addon-before="作者" class="w-30% ml-1%" />
-      <a-button type="primary" @click="visible = true" class="w-9% ml-1%">发布</a-button>
+      <a-button type="primary" @click="visible = true" class="w-9% ml-1%">{{ postReq.id =='' ? '发布' : '更新'}}</a-button>
+      <a-button type="primary" @click="saveDraft" class="w-9% ml-1%">保存草稿</a-button>
       <a-modal
         v-model:open="visible"
         title="文章元数据"
@@ -176,7 +177,7 @@ const imageUrl = ref<string>('')
 const formRef = ref<FormInstance>()
 const visible = ref(false)
 const postReq = reactive<PostRequest>(props.req)
-
+console.log(postReq)
 const submit = () => {
   if (formRef.value) {
     formRef.value
@@ -260,5 +261,9 @@ const handleUploadImage = async (event: any, insertImage: any, files: any) => {
   } catch (error) {
     console.log(error)
   }
+}
+
+const saveDraft = () => {
+  console.log(postReq)
 }
 </script>
