@@ -17,12 +17,12 @@ import (
 
 // Injectors from wire.go:
 
-func InitWebsiteConfigModule(mongoDB *mongo.Database) Model {
+func InitWebsiteConfigModule(mongoDB *mongo.Database) *Model {
 	websiteConfigDao := dao.NewWebsiteConfigDao(mongoDB)
 	websiteConfigRepository := repository.NewWebsiteConfigRepository(websiteConfigDao)
 	websiteConfigService := service.NewWebsiteConfigService(websiteConfigRepository)
 	websiteConfigHandler := web.NewWebsiteConfigHandler(websiteConfigService)
-	model := Model{
+	model := &Model{
 		Svc: websiteConfigService,
 		Hdl: websiteConfigHandler,
 	}
