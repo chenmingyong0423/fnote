@@ -30,7 +30,7 @@ var {{.DomainName}}Providers = wire.NewSet(web.New{{.DomainName}}Handler, servic
 	wire.Bind(new(repository.I{{.DomainName}}Repository), new(*repository.{{.DomainName}}Repository)),
 	wire.Bind(new(dao.I{{.DomainName}}Dao), new(*dao.{{.DomainName}}Dao)))
 	
-func Init{{.DomainName}}Module(mongoDB *mongo.Database) Model {
+func Init{{.DomainName}}Module(mongoDB *mongo.Database) *Model {
 	panic(wire.Build(
 		{{.DomainName}}Providers,
 		wire.Struct(new(Model), "Svc", "Hdl"),
