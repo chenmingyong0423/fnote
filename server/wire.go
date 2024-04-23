@@ -19,6 +19,7 @@ package main
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
+	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"github.com/gin-gonic/gin"
@@ -41,6 +42,8 @@ func initializeApp() (*gin.Engine, error) {
 		wire.FieldsOf(new(*website_config.Model), "Hdl"),
 		post_index.InitPostIndexModule,
 		wire.FieldsOf(new(*post_index.Model), "Hdl"),
+		post_draft.InitPostDraftModule,
+		wire.FieldsOf(new(*post_draft.Model), "Hdl"),
 		ioc.FriendProviders,
 		ioc.PostProviders,
 		ioc.VlProviders,
