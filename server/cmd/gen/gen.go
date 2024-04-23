@@ -29,6 +29,12 @@ var (
 	outputDir = flag.String("output", "", "the output directory, e.g. internal/message_template")
 	tableName = flag.String("table_name", "", "the table name, e.g. message_template")
 
+	//go:embed templates/request.tmpl
+	reqTpl embed.FS
+
+	//go:embed templates/vo.tmpl
+	voTpl embed.FS
+
 	//go:embed templates/wire.tmpl
 	wireTpl embed.FS
 
@@ -98,6 +104,18 @@ func main() {
 	}
 
 	err = executeTemplate(web, "templates/web.tmpl", *outputDir+"/internal/web", fmt.Sprintf("/%s.go", gen.UnderlineName), gen)
+	if err != nil {
+		_ = os.RemoveAll(*outputDir)
+		panic(err)
+	}
+
+	err = executeTemplate(reqTpl, "templates/request.tmpl", *outputDir+"/internal/web", "/request.go", gen)
+	if err != nil {
+		_ = os.RemoveAll(*outputDir)
+		panic(err)
+	}
+
+	err = executeTemplate(voTpl, "templates/vo.tmpl", *outputDir+"/internal/web", "/vo.go", gen)
 	if err != nil {
 		_ = os.RemoveAll(*outputDir)
 		panic(err)
