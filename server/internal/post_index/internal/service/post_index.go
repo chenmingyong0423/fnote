@@ -16,6 +16,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/chenmingyong0423/fnote/server/internal/post_index/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 )

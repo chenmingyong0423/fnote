@@ -42,6 +42,7 @@ import (
 	repository5 "github.com/chenmingyong0423/fnote/server/internal/post/repository"
 	dao5 "github.com/chenmingyong0423/fnote/server/internal/post/repository/dao"
 	service5 "github.com/chenmingyong0423/fnote/server/internal/post/service"
+	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index"
 	handler6 "github.com/chenmingyong0423/fnote/server/internal/tag/handler"
 	repository9 "github.com/chenmingyong0423/fnote/server/internal/tag/repository"
@@ -112,7 +113,9 @@ func initializeApp() (*gin.Engine, error) {
 	validators := ioc.InitGinValidators()
 	post_indexModel := post_index.InitPostIndexModule(model)
 	postIndexHandler := post_indexModel.Hdl
-	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v2, validators, postIndexHandler)
+	post_draftModel := post_draft.InitPostDraftModule(database)
+	postDraftHandler := post_draftModel.Hdl
+	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v2, validators, postIndexHandler, postDraftHandler)
 	if err != nil {
 		return nil, err
 	}
