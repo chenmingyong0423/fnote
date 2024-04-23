@@ -85,13 +85,13 @@ func main() {
 		gen.TableName = *tableName
 	}
 
-	err := executeTemplate(wireTpl, "templates/wire.tmpl", *outputDir+"/internal", "/wire.go", gen)
+	err := executeTemplate(wireTpl, "templates/wire.tmpl", *outputDir, "/wire.go", gen)
 	if err != nil {
 		_ = os.RemoveAll(*outputDir)
 		panic(err)
 	}
 
-	err = executeTemplate(module, "templates/module.tmpl", *outputDir+"/internal", "/module.go", gen)
+	err = executeTemplate(module, "templates/module.tmpl", *outputDir, "/module.go", gen)
 	if err != nil {
 		_ = os.RemoveAll(*outputDir)
 		panic(err)
