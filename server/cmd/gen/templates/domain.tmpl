@@ -12,24 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package service
+package domain
 
-import (
-	"github.com/chenmingyong0423/fnote/server/internal/{{.UnderlineName}}/repository"
-)
-
-
-type I{{.DomainName}}Service interface {
-}
-
-var _ I{{.DomainName}}Service = (*{{.DomainName}}Service)(nil)
-
-func New{{.DomainName}}Service(repo repository.I{{.DomainName}}Repository) *{{.DomainName}}Service {
-	return &{{.DomainName}}Service{
-		repo: repo,
-	}
-}
-
-type {{.DomainName}}Service struct {
-	repo repository.I{{.DomainName}}Repository
-}
+type {{.DomainName}} struct {}
