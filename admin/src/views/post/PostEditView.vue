@@ -251,7 +251,7 @@ const handleUploadImage = async (event: any, insertImage: any, files: any) => {
         return
       }
       insertImage({
-        url: import.meta.env.VITE_API_HOST + res.data.data.url,
+        url: res.data.data.url,
         desc: '请在此添加图片描述',
       })
     } catch (error) {
