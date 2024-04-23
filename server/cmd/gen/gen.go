@@ -29,8 +29,17 @@ var (
 	outputDir = flag.String("output", "", "the output directory, e.g. internal/message_template")
 	tableName = flag.String("table_name", "", "the table name, e.g. message_template")
 
-	//go:embed templates/handler.tmpl
-	handler embed.FS
+	//go:embed templates/wire.tmpl
+	wireTpl embed.FS
+
+	//go:embed templates/module.tmpl
+	module embed.FS
+
+	//go:embed templates/domain.tmpl
+	domainTpl embed.FS
+
+	//go:embed templates/web.tmpl
+	web embed.FS
 
 	//go:embed templates/service.tmpl
 	service embed.FS
@@ -70,25 +79,43 @@ func main() {
 		gen.TableName = *tableName
 	}
 
-	err := executeTemplate(handler, "templates/handler.tmpl", *outputDir+"/handler", fmt.Sprintf("/%s_handler.go", gen.UnderlineName), gen)
+	err := executeTemplate(wireTpl, "templates/wire.tmpl", *outputDir+"/internal", "/wire.go", gen)
 	if err != nil {
 		_ = os.RemoveAll(*outputDir)
 		panic(err)
 	}
 
-	err = executeTemplate(service, "templates/service.tmpl", *outputDir+"/service", fmt.Sprintf("/%s_service.go", gen.UnderlineName), gen)
+	err = executeTemplate(module, "templates/module.tmpl", *outputDir+"/internal", "/module.go", gen)
 	if err != nil {
 		_ = os.RemoveAll(*outputDir)
 		panic(err)
 	}
 
-	err = executeTemplate(repository, "templates/repository.tmpl", *outputDir+"/repository", fmt.Sprintf("/%s_repository.go", gen.UnderlineName), gen)
+	err = executeTemplate(domainTpl, "templates/domain.tmpl", *outputDir+"/internal/domain", fmt.Sprintf("/%s.go", gen.UnderlineName), gen)
 	if err != nil {
 		_ = os.RemoveAll(*outputDir)
 		panic(err)
 	}
 
-	err = executeTemplate(dao, "templates/dao.tmpl", *outputDir+"/repository/dao", fmt.Sprintf("/%s_dao.go", gen.UnderlineName), gen)
+	err = executeTemplate(web, "templates/web.tmpl", *outputDir+"/internal/web", fmt.Sprintf("/%s.go", gen.UnderlineName), gen)
+	if err != nil {
+		_ = os.RemoveAll(*outputDir)
+		panic(err)
+	}
+
+	err = executeTemplate(service, "templates/service.tmpl", *outputDir+"/internal/service", fmt.Sprintf("/%s.go", gen.UnderlineName), gen)
+	if err != nil {
+		_ = os.RemoveAll(*outputDir)
+		panic(err)
+	}
+
+	err = executeTemplate(repository, "templates/repository.tmpl", *outputDir+"/internal/repository", fmt.Sprintf("/%s.go", gen.UnderlineName), gen)
+	if err != nil {
+		_ = os.RemoveAll(*outputDir)
+		panic(err)
+	}
+
+	err = executeTemplate(dao, "templates/dao.tmpl", *outputDir+"/internal/repository/dao", fmt.Sprintf("/%s.go", gen.UnderlineName), gen)
 	if err != nil {
 		_ = os.RemoveAll(*outputDir)
 		panic(err)
