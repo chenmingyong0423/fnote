@@ -15,12 +15,12 @@ import (
 
 // Injectors from wire.go:
 
-func InitPostIndexModule(cfgServ *website_config.Model) Model {
+func InitPostIndexModule(cfgServ *website_config.Model) *Model {
 	baiduService := service.NewBaiduService()
 	iWebsiteConfigService := cfgServ.Svc
 	postIndexService := service.NewPostIndexService(baiduService, iWebsiteConfigService)
 	postIndexHandler := web.NewPostIndexHandler(postIndexService)
-	model := Model{
+	model := &Model{
 		Svc: postIndexService,
 		Hdl: postIndexHandler,
 	}
