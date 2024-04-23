@@ -145,7 +145,7 @@ import axios from '@/utils/axios'
 import type { IResponse } from '@/interfaces/Common'
 import type { SelectCategory } from '@/interfaces/Category'
 import type { SelectTag } from '@/interfaces/Tag'
-import type { File } from '@/interfaces/File'
+import { type File, FileUpload } from '@/interfaces/File'
 import { useUserStore } from '@/stores/user'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
 
@@ -238,71 +238,25 @@ defineExpose({
   clearReq
 })
 
-// 封面上传
-function getBase64(img: Blob, callback: (base64Url: string) => void) {
-  const reader = new FileReader()
-  reader.addEventListener('load', () => callback(reader.result as string))
-  reader.readAsDataURL(img)
-}
-
-const fileList = ref([])
-const loading = ref<boolean>(false)
-
-const handleChange = (info: UploadChangeParam) => {
-  if (info.file.status === 'uploading') {
-    loading.value = true
-    return
-  }
-  if (info.file.status === 'done') {
-    // Get this url from response in real world.
-    getBase64(info.file.originFileObj!, (base64Url: string) => {
-      imageUrl.value = base64Url
-      loading.value = false
-      // Get this url from response in real world.
-      postReq.cover_img = info.file.response.data.data.url
-      message.success('上传成功')
-    })
-  }
-  if (info.file.status === 'error') {
-    loading.value = false
-    message.error('upload error')
-  }
-}
-
-// const beforeUpload = (file: UploadProps['fileList'][number]) => { = -!无力吐槽， 官网的写法，ts 无法保证类型安全
-const beforeUpload = (file: any) => {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
-  if (!isJpgOrPng) {
-    message.error('You can only upload JPG file!')
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isLt2M) {
-    message.error('Image must smaller than 2MB!')
-  }
-  return isJpgOrPng && isLt2M
-}
-
 // md 图片上传
 const handleUploadImage = async (event: any, insertImage: any, files: any) => {
   try {
+
     const formData = new FormData()
     formData.append('file', files[0])
-
-    // const response = await axios.post<IResponse<File>>('/admin/files/upload', formData, {
-    //   headers: {
-    //     'Content-Type': 'multipart/form-data'
-    //   }
-    // })
-    // if (response.data.data.code !== 0) {
-    //   message.error(response.data.data.message)
-    //   return
-    // }
-    // insertImage({
-    //   url: response?.data?.data?.url,
-    //   desc: response?.data?.data?.file_name
-    //   // width: 'auto',
-    //   // height: 'auto',
-    // })
+    try {
+      const res : any = await FileUpload(formData)
+      if (res.data.code !== 0) {
+        message.error(res.data.message)
+        return
+      }
+      insertImage({
+        url: import.meta.env.VITE_API_HOST + res.data.data.url,
+        desc: '请在此添加图片描述',
+      })
+    } catch (error) {
+      message.error(error)
+    }
   } catch (error) {
     console.log(error)
   }
