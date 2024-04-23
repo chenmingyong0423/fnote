@@ -23,12 +23,13 @@ import (
 	"github.com/google/wire"
 )
 
-var ConfigProviders = wire.NewSet(web.NewPostIndexHandler, service.NewPostIndexService, service.NewBaiduService,
+var PostIndexProviders = wire.NewSet(web.NewPostIndexHandler, service.NewPostIndexService, service.NewBaiduService,
 	wire.Bind(new(service.IPostIndexService), new(*service.PostIndexService)))
 
-func InitPostIndexModule(cfgServ website_config.Service) Model {
+func InitPostIndexModule(cfgServ *website_config.Model) Model {
 	panic(wire.Build(
-		ConfigProviders,
+		wire.FieldsOf(new(*website_config.Model), "Svc"),
+		PostIndexProviders,
 		wire.Struct(new(Model), "Svc", "Hdl"),
 	))
 }
