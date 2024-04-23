@@ -7,10 +7,10 @@ export interface File {
   url: string
 }
 
-export const UpdatePost = (post: PostRequest) => {
+export const FileUpload = (formData: FormData) => {
   return instance({
-    url: `/files/`,
-    method: 'put',
-    data: post
+    url: `/files/upload`,
+    method: 'post',
+    data: formData
   })
 }
