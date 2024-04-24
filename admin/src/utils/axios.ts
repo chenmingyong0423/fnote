@@ -59,15 +59,6 @@ instance.interceptors.response.use(
           message.error(error.toString()).then((r) => r)
         }
         break
-      case 404:
-        if (contentType && contentType.includes('application/json')) {
-          console.log(error)
-          message.error(error.response.data.message).then((r) => r)
-          return
-        } else {
-          message.error(error.toString()).then((r) => r)
-        }
-        break
     }
     return Promise.reject(error)
   }

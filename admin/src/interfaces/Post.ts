@@ -47,7 +47,12 @@ export type PageRequest = {
   tags?: string[]
 }
 
-export interface PostRequest {
+export interface Post4Edit extends PostRequest{
+  tempCategories: string[]
+  tempTags: string[]
+}
+
+export interface PostRequest{
   id: string
   author: string
   title: string
@@ -55,9 +60,7 @@ export interface PostRequest {
   content: string
   cover_img: string
   categories: Category4Post[]
-  tempCategories: string[]
   tags: Tag4Post[]
-  tempTags: string[]
   is_displayed: boolean
   sticky_weight: number
   meta_description: string
