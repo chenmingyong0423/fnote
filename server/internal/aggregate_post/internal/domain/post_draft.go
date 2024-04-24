@@ -12,22 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package web
+package domain
 
-type PostDraftRequest struct {
-	Id               string               `json:"id"`
+type PostDraft struct {
+	Id               string               `json:"_id"`
 	Author           string               `json:"author"`
 	Title            string               `json:"title"`
 	Summary          string               `json:"summary"`
-	Content          string               `json:"content"`
 	CoverImg         string               `json:"cover_img"`
-	Categories       []Category4PostDraft `json:"categories"`
+	Categories       []Category4PostDraft `json:"category"`
 	Tags             []Tag4PostDraft      `json:"tags"`
+	LikeCount        int                  `json:"like_count"`
 	StickyWeight     int                  `json:"sticky_weight"`
-	IsDisplayed      bool                 `json:"is_displayed"`
+	Content          string               `json:"content"`
 	MetaDescription  string               `json:"meta_description"`
 	MetaKeywords     string               `json:"meta_keywords"`
 	WordCount        int                  `json:"word_count"`
+	IsDisplayed      bool                 `json:"is_displayed"`
 	IsCommentAllowed bool                 `json:"is_comment_allowed"`
 	CreatedAt        int64                `json:"created_at"`
 }

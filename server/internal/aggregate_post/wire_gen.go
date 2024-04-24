@@ -7,7 +7,6 @@
 package aggregate_post
 
 import (
-	service2 "github.com/chenmingyong0423/fnote/server/internal/aggregate_post/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post/internal/web"
 	"github.com/chenmingyong0423/fnote/server/internal/post/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
@@ -18,10 +17,8 @@ import (
 
 func InitAggregatePostModule(postServ service.IPostService, postDraftModel *post_draft.Model) *Model {
 	iPostDraftService := postDraftModel.Svc
-	aggregatePostService := service2.NewAggregatePostService(postServ, iPostDraftService)
-	aggregatePostHandler := web.NewAggregatePostHandler(aggregatePostService)
+	aggregatePostHandler := web.NewAggregatePostHandler(postServ, iPostDraftService)
 	model := &Model{
-		Svc: aggregatePostService,
 		Hdl: aggregatePostHandler,
 	}
 	return model
@@ -29,4 +26,4 @@ func InitAggregatePostModule(postServ service.IPostService, postDraftModel *post
 
 // wire.go:
 
-var AggregatePostProviders = wire.NewSet(web.NewAggregatePostHandler, service2.NewAggregatePostService, wire.Bind(new(service2.IAggregatePostService), new(*service2.AggregatePostService)))
+var AggregatePostProviders = wire.NewSet(web.NewAggregatePostHandler)
