@@ -24,6 +24,7 @@ import (
 type IPostDraftService interface {
 	SavePostDraft(ctx context.Context, postDraft domain.PostDraft) (string, error)
 	GetPostDraftById(ctx context.Context, id string) (*domain.PostDraft, error)
+	DeletePostDraftById(ctx context.Context, id string) (int64, error)
 }
 
 var _ IPostDraftService = (*PostDraftService)(nil)
@@ -36,6 +37,10 @@ func NewPostDraftService(repo repository.IPostDraftRepository) *PostDraftService
 
 type PostDraftService struct {
 	repo repository.IPostDraftRepository
+}
+
+func (s *PostDraftService) DeletePostDraftById(ctx context.Context, id string) (int64, error) {
+	return s.repo.DeleteById(ctx, id)
 }
 
 func (s *PostDraftService) GetPostDraftById(ctx context.Context, id string) (*domain.PostDraft, error) {

@@ -119,7 +119,7 @@ func (d *PostDao) SavePost(ctx context.Context, post *Post) error {
 	if err != nil {
 		return errors.Wrapf(err, "fails to update a post, post=%v", post)
 	}
-	if result.ModifiedCount == 0 {
+	if result.ModifiedCount == 0 && result.UpsertedCount == 0 {
 		return fmt.Errorf("fails to update a post, post=%v", post)
 	}
 	return nil

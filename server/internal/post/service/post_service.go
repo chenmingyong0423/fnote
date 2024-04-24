@@ -24,10 +24,8 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
-	"github.com/chenmingyong0423/gkit/slice"
-	"go.mongodb.org/mongo-driver/mongo"
-
 	service3 "github.com/chenmingyong0423/fnote/server/internal/file/service"
+	"github.com/chenmingyong0423/gkit/slice"
 
 	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
 
@@ -55,9 +53,9 @@ type IPostService interface {
 	DeletePost(ctx context.Context, id string) error
 	DecreaseCommentCount(ctx context.Context, postId string, cnt int) error
 	AdminGetPostById(ctx context.Context, id string) (*domain.Post, error)
-	AdminUpdatePostById(ctx context.Context, savedPost *domain.Post) error
 	UpdatePostIsDisplayed(ctx context.Context, id string, isDisplayed bool) error
 	UpdatePostIsCommentAllowed(ctx context.Context, id string, isCommentAllowed bool) error
+	SavePost(ctx context.Context, originalPost *domain.Post, savedPost *domain.Post, isNewPost bool) error
 }
 
 var _ IPostService = (*PostService)(nil)
@@ -87,23 +85,16 @@ func (s *PostService) UpdatePostIsDisplayed(ctx context.Context, id string, isDi
 	return s.repo.UpdatePostIsDisplayedById(ctx, id, isDisplayed)
 }
 
-func (s *PostService) AdminUpdatePostById(ctx context.Context, savedPost *domain.Post) error {
-	post, err := s.repo.FindPostById(ctx, savedPost.Id)
-	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
-		return err
-	}
-	if post != nil {
-		savedPost.PrimaryPost.CreateTime = post.PrimaryPost.CreateTime
-	}
-	err = s.repo.SavePost(ctx, savedPost)
+func (s *PostService) SavePost(ctx context.Context, originalPost *domain.Post, savedPost *domain.Post, isNewPost bool) error {
+	err := s.repo.SavePost(ctx, savedPost)
 	if err != nil {
 		return err
 	}
 	go func() {
-		if post == nil {
+		if isNewPost {
 			s.addPostCallback(ctx, savedPost)
 		} else {
-			s.updatePostCallback(ctx, post, savedPost)
+			s.updatePostCallback(ctx, originalPost, savedPost)
 		}
 	}()
 	return nil
@@ -215,7 +206,7 @@ func (s *PostService) addPostCallback(ctx context.Context, post *domain.Post) {
 		}
 	}
 	// 封面文件索引
-	fileId, gErr := hex.DecodeString(strings.Split(post.CoverImg[1:], ".")[0])
+	fileId, gErr := hex.DecodeString(strings.Split(post.CoverImg[8:], ".")[0])
 	if gErr != nil {
 		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 		l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))

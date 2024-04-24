@@ -77,7 +77,6 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin-api/posts")
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetPosts))
 	adminGroup.GET("/:id", apiwrap.Wrap(h.AdminGetPostById))
-	adminGroup.PUT("", apiwrap.WrapWithBody(h.AdminUpdatePost))
 	adminGroup.POST("", apiwrap.WrapWithBody(h.AddPost))
 	adminGroup.DELETE("/:id", apiwrap.Wrap(h.DeletePost))
 	adminGroup.PUT("/:id/display", apiwrap.WrapWithBody(h.UpdatePostIsDisplayed))
@@ -306,42 +305,6 @@ func (h *PostHandler) AdminGetPostById(ctx *gin.Context) (*apiwrap.ResponseBody[
 		MetaKeywords:     post.MetaKeywords,
 		IsCommentAllowed: post.IsCommentAllowed,
 	}), nil
-}
-
-func (h *PostHandler) AdminUpdatePost(ctx *gin.Context, req request.PostReq) (*apiwrap.ResponseBody[any], error) {
-	categories := slice.Map[request.Category4Post, domain.Category4Post](req.Categories, func(_ int, c request.Category4Post) domain.Category4Post {
-		return domain.Category4Post{
-			Id:   c.Id,
-			Name: c.Name,
-		}
-	})
-	tags := slice.Map[request.Tag4Post, domain.Tag4Post](req.Tags, func(_ int, t request.Tag4Post) domain.Tag4Post {
-		return domain.Tag4Post{
-			Id:   t.Id,
-			Name: t.Name,
-		}
-	})
-	return apiwrap.SuccessResponse(), h.serv.AdminUpdatePostById(ctx, &domain.Post{
-		PrimaryPost: domain.PrimaryPost{
-			Id:           req.Id,
-			Author:       req.Author,
-			Title:        req.Title,
-			Summary:      req.Summary,
-			CoverImg:     req.CoverImg,
-			Categories:   categories,
-			Tags:         tags,
-			StickyWeight: req.StickyWeight,
-		},
-		ExtraPost: domain.ExtraPost{
-			Content:          req.Content,
-			MetaDescription:  req.MetaDescription,
-			MetaKeywords:     req.MetaKeywords,
-			WordCount:        req.WordCount,
-			IsDisplayed:      req.IsDisplayed,
-			IsCommentAllowed: req.IsCommentAllowed,
-		},
-		Likes: nil,
-	})
 }
 
 func (h *PostHandler) UpdatePostIsDisplayed(ctx *gin.Context, req request.PostDisplayReq) (*apiwrap.ResponseBody[any], error) {

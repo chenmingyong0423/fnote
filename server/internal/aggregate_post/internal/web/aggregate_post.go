@@ -42,6 +42,7 @@ type AggregatePostHandler struct {
 func (h *AggregatePostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin-api")
 	adminGroup.GET("/post-draft/:id", apiwrap.Wrap(h.GetPostDraftById))
+	adminGroup.POST("/post-draft/:id/publish", apiwrap.WrapWithBody(h.AdminPublishDraft))
 }
 
 func (h *AggregatePostHandler) GetPostDraftById(ctx *gin.Context) (*apiwrap.ResponseBody[*PostDraftVO], error) {
@@ -163,4 +164,56 @@ func (h *AggregatePostHandler) postToPostDraftVO(post *domain.Post) *PostDraftVO
 		WordCount:        post.WordCount,
 		IsCommentAllowed: post.IsCommentAllowed,
 	}
+}
+
+func (h *AggregatePostHandler) AdminPublishDraft(ctx *gin.Context, req PostReq) (*apiwrap.ResponseBody[any], error) {
+	var createdAt int64
+	post, err := h.postServ.AdminGetPostById(ctx, req.Id)
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, err
+	}
+	if post != nil {
+		createdAt = post.PrimaryPost.CreateTime
+	}
+	err = h.postServ.SavePost(ctx, post, &domain.Post{
+		PrimaryPost: domain.PrimaryPost{
+			Id:       req.Id,
+			Author:   req.Author,
+			Title:    req.Title,
+			Summary:  req.Summary,
+			CoverImg: req.CoverImg,
+			Categories: slice.Map(req.Categories, func(idx int, c Category4Post) domain.Category4Post {
+				return domain.Category4Post{
+					Id:   c.Id,
+					Name: c.Name,
+				}
+			}),
+			Tags: slice.Map(req.Tags, func(idx int, t Tag4Post) domain.Tag4Post {
+				return domain.Tag4Post{
+					Id:   t.Id,
+					Name: t.Name,
+				}
+			}),
+			StickyWeight: req.StickyWeight,
+			CreateTime:   createdAt,
+		},
+		ExtraPost: domain.ExtraPost{
+			Content:          req.Content,
+			MetaDescription:  req.MetaDescription,
+			MetaKeywords:     req.MetaKeywords,
+			WordCount:        req.WordCount,
+			UpdateTime:       time.Now().Local().Unix(),
+			IsDisplayed:      req.IsDisplayed,
+			IsCommentAllowed: req.IsCommentAllowed,
+		},
+	}, post == nil)
+	if err != nil {
+		return nil, err
+	}
+	// 删除草稿箱
+	_, err = h.postDraftServ.DeletePostDraftById(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponse(), nil
 }
