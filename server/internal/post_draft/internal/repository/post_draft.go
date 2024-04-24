@@ -16,19 +16,18 @@ package repository
 
 import (
 	"context"
+	"github.com/chenmingyong0423/gkit/uuidx"
 	"time"
 
 	"github.com/chenmingyong0423/gkit/slice"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/repository/dao"
-	"github.com/chenmingyong0423/go-mongox"
 )
 
 type IPostDraftRepository interface {
-	Save(ctx context.Context, postDraft domain.PostDraft) error
+	Save(ctx context.Context, postDraft domain.PostDraft) (string, error)
+	GetById(ctx context.Context, id string) (*domain.PostDraft, error)
 }
 
 var _ IPostDraftRepository = (*PostDraftRepository)(nil)
@@ -41,21 +40,25 @@ type PostDraftRepository struct {
 	dao dao.IPostDraftDao
 }
 
-func (r *PostDraftRepository) Save(ctx context.Context, postDraft domain.PostDraft) error {
+func (r *PostDraftRepository) GetById(ctx context.Context, id string) (*domain.PostDraft, error) {
+	postDraft, err := r.dao.GetById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomain(postDraft), nil
+}
+
+func (r *PostDraftRepository) Save(ctx context.Context, postDraft domain.PostDraft) (string, error) {
 	var (
-		objectID  primitive.ObjectID
-		err       error
 		createdAt time.Time
 	)
-	if postDraft.Id != "" {
-		objectID, err = primitive.ObjectIDFromHex(postDraft.Id)
-		if err != nil {
-			return err
-		}
-	}
 
 	if postDraft.CreatedAt != 0 {
 		createdAt = time.Unix(postDraft.CreatedAt, 0).Local()
+	}
+
+	if postDraft.Id == "" {
+		postDraft.Id = uuidx.RearrangeUUID4()
 	}
 
 	categories := slice.Map(postDraft.Categories, func(idx int, c domain.Category4PostDraft) dao.Category4PostDraft {
@@ -71,11 +74,9 @@ func (r *PostDraftRepository) Save(ctx context.Context, postDraft domain.PostDra
 		}
 	})
 
-	return r.dao.Save(ctx, dao.PostDraft{
-		Model: mongox.Model{
-			ID:        objectID,
-			CreatedAt: createdAt,
-		},
+	return r.dao.Save(ctx, &dao.PostDraft{
+		ID:               postDraft.Id,
+		CreatedAt:        createdAt,
 		Author:           postDraft.Author,
 		Title:            postDraft.Title,
 		Summary:          postDraft.Summary,
@@ -90,4 +91,37 @@ func (r *PostDraftRepository) Save(ctx context.Context, postDraft domain.PostDra
 		WordCount:        postDraft.WordCount,
 		IsCommentAllowed: postDraft.IsCommentAllowed,
 	})
+}
+
+func (r *PostDraftRepository) toDomain(postDraft *dao.PostDraft) *domain.PostDraft {
+	categories := slice.Map(postDraft.Categories, func(idx int, c dao.Category4PostDraft) domain.Category4PostDraft {
+		return domain.Category4PostDraft{
+			Id:   c.Id,
+			Name: c.Name,
+		}
+	})
+	tags := slice.Map(postDraft.Tags, func(idx int, t dao.Tag4PostDraft) domain.Tag4PostDraft {
+		return domain.Tag4PostDraft{
+			Id:   t.Id,
+			Name: t.Name,
+		}
+	})
+	return &domain.PostDraft{
+		Id:               postDraft.ID,
+		Author:           postDraft.Author,
+		Title:            postDraft.Title,
+		Summary:          postDraft.Summary,
+		CoverImg:         postDraft.CoverImg,
+		Categories:       categories,
+		Tags:             tags,
+		LikeCount:        postDraft.WordCount,
+		StickyWeight:     postDraft.StickyWeight,
+		Content:          postDraft.Content,
+		MetaDescription:  postDraft.MetaDescription,
+		MetaKeywords:     postDraft.MetaKeywords,
+		WordCount:        postDraft.WordCount,
+		IsDisplayed:      postDraft.IsDisplayed,
+		IsCommentAllowed: postDraft.IsCommentAllowed,
+		CreatedAt:        postDraft.CreatedAt.Unix(),
+	}
 }
