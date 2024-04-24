@@ -2,40 +2,24 @@
   <div>
     <PostEditView
       ref="postEditRef"
-      :req="postReq"
       :categories="categories"
       :tags="tags"
-      @submit="submit"
+      @publish="submit"
+      @saveDraft="saveDraft"
     ></PostEditView>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
-import { AddPost, type PostRequest } from '@/interfaces/Post'
+import { ref } from 'vue'
+import { AddPost, type Post4Edit, type PostRequest } from '@/interfaces/Post'
 import { message } from 'ant-design-vue'
 import { GetSelectedCategories, type SelectCategory } from '@/interfaces/Category'
 import { GetSelectedTags, type SelectTag } from '@/interfaces/Tag'
 import PostEditView from '@/views/post/PostEditView.vue'
 import originalAxios from 'axios'
-
-const postReq = reactive<PostRequest>({
-  id: '',
-  author: '',
-  title: '',
-  summary: '',
-  content: '',
-  cover_img: '',
-  categories: [],
-  tempCategories: [],
-  tags: [],
-  tempTags: [],
-  sticky_weight: 0,
-  meta_description: '',
-  meta_keywords: '',
-  is_comment_allowed: true,
-  is_displayed: true
-})
+import { type PostDraftRequest, SavePostDraft } from '@/interfaces/PostDraft'
+import router from '@/router'
 
 const postEditRef = ref()
 
@@ -43,8 +27,31 @@ const categories = ref<SelectCategory[]>([])
 
 const tags = ref<SelectTag[]>([])
 
-const submit = async (postReq: PostRequest) => {
-  console.log(postReq)
+const saveDraft = async (post4Edit: Post4Edit) => {
+  const postDraftReq = {} as PostDraftRequest
+  Object.assign(postDraftReq, post4Edit)
+  delete (postDraftReq as any).tempCategories
+  delete (postDraftReq as any).tempTags
+  try {
+    const res: any = await SavePostDraft(postDraftReq)
+    if (res.data.code === 0) {
+      console.log(res.data)
+      message.success('保存成功')
+      await router.push(`/home/post/draft/${res.data.data.id}`)
+    } else {
+      message.error(res.data.message)
+    }
+  } catch (error) {
+    message.error(error)
+  }
+}
+
+const submit = async (post4Edit: Post4Edit) => {
+  console.log()
+  const postReq = {} as PostRequest
+  Object.assign(postReq, post4Edit)
+  delete (postReq as any).tempCategories
+  delete (postReq as any).tempTags
   try {
     const response: any = await AddPost(postReq)
     if (response.data.code !== 0) {
