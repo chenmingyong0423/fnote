@@ -17,6 +17,7 @@
 package main
 
 import (
+	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
@@ -44,6 +45,8 @@ func initializeApp() (*gin.Engine, error) {
 		wire.FieldsOf(new(*post_index.Model), "Hdl"),
 		post_draft.InitPostDraftModule,
 		wire.FieldsOf(new(*post_draft.Model), "Hdl"),
+		aggregate_post.InitAggregatePostModule,
+		wire.FieldsOf(new(*aggregate_post.Model), "Hdl"),
 		ioc.FriendProviders,
 		ioc.PostProviders,
 		ioc.VlProviders,
