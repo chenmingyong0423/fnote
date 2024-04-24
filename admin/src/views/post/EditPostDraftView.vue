@@ -45,7 +45,8 @@ const post4Edit = reactive<Post4Edit>({
   meta_keywords: '',
   is_comment_allowed: true,
   tempCategories: [],
-  tempTags: []
+  tempTags: [],
+  created_at: 0
 })
 
 const createdAt = ref<Number>(0)
@@ -99,6 +100,7 @@ const getPostDraftById = async (id: string) => {
       post4Edit.is_displayed = postDraft.is_displayed
       createdAt.value = postDraft.created_at
       post4Edit.tags = postDraft.tags
+      post4Edit.created_at = postDraft.created_at
       postDraft.categories.forEach((item: Category4Post) => {
         post4Edit.tempCategories.push(item.name)
       })

@@ -137,7 +137,7 @@
 </template>
 
 <script lang="ts" setup>
-import { type PropType, reactive, ref, defineEmits, createVNode } from 'vue'
+import { type PropType, reactive, ref, defineEmits } from 'vue'
 import type { Post4Edit } from '@/interfaces/Post'
 import {
   type FormInstance,
@@ -227,9 +227,8 @@ const submit = () => {
 const open = ref<boolean>(false)
 
 const handleOk = (e: MouseEvent) => {
-  if (saveDraft()) {
+  saveDraft()
     open.value = false
-  }
 }
 
 const preSave = () => {
@@ -266,10 +265,8 @@ const saveDraft = () => {
     })
     // 告诉父组件
     emit('saveDraft', post4Edit)
-    return true
   } else {
     message.warning('保存草稿时，标题和作者以及内容必填。')
-    return false
   }
 }
 
