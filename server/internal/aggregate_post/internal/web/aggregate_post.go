@@ -15,20 +15,37 @@
 package web
 
 import (
-	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post/internal/service"
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+	postServ "github.com/chenmingyong0423/fnote/server/internal/post/service"
+	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/gin-gonic/gin"
 )
 
-func NewAggregatePostHandler(serv service.IAggregatePostService) *AggregatePostHandler {
+func NewAggregatePostHandler(postServ postServ.IPostService, postDraftServ post_draft.Service) *AggregatePostHandler {
 	return &AggregatePostHandler{
-		serv: serv,
+		postServ:      postServ,
+		postDraftServ: postDraftServ,
 	}
 }
 
 type AggregatePostHandler struct {
-	serv service.IAggregatePostService
+	postServ      postServ.IPostService
+	postDraftServ post_draft.Service
 }
 
 func (h *AggregatePostHandler) RegisterGinRoutes(engine *gin.Engine) {
+	adminGroup := engine.Group("/admin-api")
+	adminGroup.GET("/post-draft/:id", apiwrap.Wrap(h.GetPostDraftById))
+}
 
+func (h *AggregatePostHandler) GetPostDraftById(ctx *gin.Context) (*apiwrap.ResponseBody[*PostDraftVO], error) {
+	//postDraft, err := h.serv.GetPostDraftById(ctx, ctx.Param("id"))
+	//if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+	//	return nil, err
+	//}
+	//if postDraft == nil {
+	//	return nil, apiwrap.NewErrorResponseBody(404, "post draft not found")
+	//}
+	//return apiwrap.SuccessResponseWithData(h.toVO(postDraft)), nil
+	return nil, nil
 }

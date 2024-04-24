@@ -15,15 +15,12 @@
 package aggregate_post
 
 import (
-	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post/internal/web"
 )
 
 type (
 	Handler = web.AggregatePostHandler
-	Service = service.IAggregatePostService
 	Model   struct {
-		Svc Service
 		Hdl *Handler
 	}
 )
