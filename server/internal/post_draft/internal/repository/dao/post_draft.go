@@ -74,6 +74,7 @@ type Tag4PostDraft struct {
 type IPostDraftDao interface {
 	Save(ctx context.Context, postDraft *PostDraft) (string, error)
 	GetById(ctx context.Context, id string) (*PostDraft, error)
+	DeleteById(ctx context.Context, id string) (int64, error)
 }
 
 var _ IPostDraftDao = (*PostDraftDao)(nil)
@@ -84,6 +85,14 @@ func NewPostDraftDao(db *mongo.Database) *PostDraftDao {
 
 type PostDraftDao struct {
 	coll *mongox.Collection[PostDraft]
+}
+
+func (d *PostDraftDao) DeleteById(ctx context.Context, id string) (int64, error) {
+	deleteResult, err := d.coll.Deleter().Filter(query.Id(id)).DeleteOne(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return deleteResult.DeletedCount, nil
 }
 
 func (d *PostDraftDao) GetById(ctx context.Context, id string) (*PostDraft, error) {

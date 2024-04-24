@@ -29,6 +29,7 @@ import (
 type IPostDraftRepository interface {
 	Save(ctx context.Context, postDraft domain.PostDraft) (string, error)
 	GetById(ctx context.Context, id string) (*domain.PostDraft, error)
+	DeleteById(ctx context.Context, id string) (int64, error)
 }
 
 var _ IPostDraftRepository = (*PostDraftRepository)(nil)
@@ -39,6 +40,10 @@ func NewPostDraftRepository(dao dao.IPostDraftDao) *PostDraftRepository {
 
 type PostDraftRepository struct {
 	dao dao.IPostDraftDao
+}
+
+func (r *PostDraftRepository) DeleteById(ctx context.Context, id string) (int64, error) {
+	return r.dao.DeleteById(ctx, id)
 }
 
 func (r *PostDraftRepository) GetById(ctx context.Context, id string) (*domain.PostDraft, error) {
