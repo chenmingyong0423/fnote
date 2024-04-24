@@ -115,7 +115,6 @@ func (r *PostDraftRepository) toDomain(postDraft *dao.PostDraft) *domain.PostDra
 		CoverImg:         postDraft.CoverImg,
 		Categories:       categories,
 		Tags:             tags,
-		LikeCount:        postDraft.WordCount,
 		StickyWeight:     postDraft.StickyWeight,
 		Content:          postDraft.Content,
 		MetaDescription:  postDraft.MetaDescription,

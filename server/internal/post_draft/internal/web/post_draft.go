@@ -20,8 +20,6 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/service"
 	"github.com/chenmingyong0423/gkit/slice"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func NewPostDraftHandler(serv service.IPostDraftService) *PostDraftHandler {
@@ -37,7 +35,6 @@ type PostDraftHandler struct {
 func (h *PostDraftHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin-api")
 	adminGroup.POST("/post-draft", apiwrap.WrapWithBody(h.SavePostDraft))
-	adminGroup.GET("/post-draft/:id", apiwrap.Wrap(h.GetPostDraftById))
 }
 
 func (h *PostDraftHandler) SavePostDraft(ctx *gin.Context, req PostDraftRequest) (*apiwrap.ResponseBody[map[string]string], error) {
@@ -61,7 +58,6 @@ func (h *PostDraftHandler) SavePostDraft(ctx *gin.Context, req PostDraftRequest)
 		CoverImg:         req.CoverImg,
 		Categories:       categories,
 		Tags:             tags,
-		LikeCount:        req.WordCount,
 		StickyWeight:     req.StickyWeight,
 		Content:          req.Content,
 		MetaDescription:  req.MetaDescription,
@@ -77,47 +73,4 @@ func (h *PostDraftHandler) SavePostDraft(ctx *gin.Context, req PostDraftRequest)
 	return apiwrap.SuccessResponseWithData(map[string]string{
 		"id": id,
 	}), nil
-}
-
-func (h *PostDraftHandler) GetPostDraftById(ctx *gin.Context) (*apiwrap.ResponseBody[*PostDraftVO], error) {
-	postDraft, err := h.serv.GetPostDraftById(ctx, ctx.Param("id"))
-	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, err
-	}
-	if postDraft == nil {
-		return nil, apiwrap.NewErrorResponseBody(404, "post draft not found")
-	}
-	return apiwrap.SuccessResponseWithData(h.toVO(postDraft)), nil
-}
-
-func (h *PostDraftHandler) toVO(postDraft *domain.PostDraft) *PostDraftVO {
-	categories := slice.Map(postDraft.Categories, func(idx int, s domain.Category4PostDraft) Category4PostDraft {
-		return Category4PostDraft{
-			Id:   s.Id,
-			Name: s.Name,
-		}
-	})
-	tags := slice.Map(postDraft.Tags, func(idx int, t domain.Tag4PostDraft) Tag4PostDraft {
-		return Tag4PostDraft{
-			Id:   t.Id,
-			Name: t.Name,
-		}
-	})
-	return &PostDraftVO{
-		Id:               postDraft.Id,
-		Author:           postDraft.Author,
-		Title:            postDraft.Title,
-		Summary:          postDraft.Summary,
-		Content:          postDraft.Content,
-		CoverImg:         postDraft.CoverImg,
-		Categories:       categories,
-		Tags:             tags,
-		StickyWeight:     postDraft.StickyWeight,
-		IsDisplayed:      postDraft.IsDisplayed,
-		MetaDescription:  postDraft.MetaDescription,
-		MetaKeywords:     postDraft.MetaKeywords,
-		WordCount:        postDraft.WordCount,
-		IsCommentAllowed: postDraft.IsCommentAllowed,
-		CreatedAt:        postDraft.CreatedAt,
-	}
 }

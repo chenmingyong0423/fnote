@@ -28,7 +28,7 @@ import (
 
 type PostDraft struct {
 	ID               string               `bson:"_id"`
-	CreatedAt        time.Time            `bson:"created_at"`
+	CreatedAt        time.Time            `bson:"created_at,omitempty"`
 	UpdatedAt        time.Time            `bson:"updated_at"`
 	Author           string               `bson:"author"`
 	Title            string               `bson:"title"`
