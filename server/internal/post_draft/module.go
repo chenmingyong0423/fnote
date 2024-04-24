@@ -15,14 +15,18 @@
 package post_draft
 
 import (
+	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/web"
 )
 
 type (
-	Handler = web.PostDraftHandler
-	Service = service.IPostDraftService
-	Model   struct {
+	Handler            = web.PostDraftHandler
+	Service            = service.IPostDraftService
+	PostDraft          = domain.PostDraft
+	Category4PostDraft = domain.Category4PostDraft
+	Tag4PostDraft      = domain.Tag4PostDraft
+	Model              struct {
 		Svc Service
 		Hdl *Handler
 	}

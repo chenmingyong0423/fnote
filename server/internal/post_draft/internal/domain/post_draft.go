@@ -22,7 +22,6 @@ type PostDraft struct {
 	CoverImg         string               `json:"cover_img"`
 	Categories       []Category4PostDraft `json:"category"`
 	Tags             []Tag4PostDraft      `json:"tags"`
-	LikeCount        int                  `json:"like_count"`
 	StickyWeight     int                  `json:"sticky_weight"`
 	Content          string               `json:"content"`
 	MetaDescription  string               `json:"meta_description"`
