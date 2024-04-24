@@ -50,6 +50,7 @@ export type PageRequest = {
 export interface Post4Edit extends PostRequest{
   tempCategories: string[]
   tempTags: string[]
+  created_at: number
 }
 
 export interface PostRequest{

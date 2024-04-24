@@ -57,7 +57,7 @@
       <template v-else-if="column.dataIndex === 'operation'">
         <div class="flex gap-x-1">
           <span>
-            <a @click="router.push(`/home/drafts/${record.id}`)">编辑</a>
+            <a @click="router.push(`/home/post/draft/${record.id}`)">编辑</a>
           </span>
           <a-popconfirm v-if="posts.length" title="确认删除？" @confirm="deletePost(record)">
             <a>删除</a>
