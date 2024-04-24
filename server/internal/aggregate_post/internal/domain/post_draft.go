@@ -13,32 +13,3 @@
 // limitations under the License.
 
 package domain
-
-type PostDraft struct {
-	Id               string               `json:"_id"`
-	Author           string               `json:"author"`
-	Title            string               `json:"title"`
-	Summary          string               `json:"summary"`
-	CoverImg         string               `json:"cover_img"`
-	Categories       []Category4PostDraft `json:"category"`
-	Tags             []Tag4PostDraft      `json:"tags"`
-	LikeCount        int                  `json:"like_count"`
-	StickyWeight     int                  `json:"sticky_weight"`
-	Content          string               `json:"content"`
-	MetaDescription  string               `json:"meta_description"`
-	MetaKeywords     string               `json:"meta_keywords"`
-	WordCount        int                  `json:"word_count"`
-	IsDisplayed      bool                 `json:"is_displayed"`
-	IsCommentAllowed bool                 `json:"is_comment_allowed"`
-	CreatedAt        int64                `json:"created_at"`
-}
-
-type Category4PostDraft struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type Tag4PostDraft struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
