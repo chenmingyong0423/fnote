@@ -2,12 +2,13 @@
   <div class="clearfix">
     <a-upload
       v-model:file-list="fileList"
-      :action= "serverHost + '/admin-api/files/upload'"
+      :action="serverHost + '/admin-api/files/upload'"
       list-type="picture-card"
       @preview="handlePreview"
       @change="handleChange"
       :before-upload="beforeUpload"
       :headers="{ Authorization: props.authorization }"
+      @remove="removeImg"
       name="file"
     >
       <div v-if="fileList && fileList.length < 1">
@@ -33,6 +34,8 @@ const props = defineProps({
   },
   authorization: String
 })
+
+const imgUrl = ref<string>(props.imageUrl)
 const emit = defineEmits(['update:imageUrl'])
 const serverHost = import.meta.env.VITE_API_HOST
 
@@ -51,6 +54,15 @@ const previewTitle = ref('')
 const loading = ref<boolean>(false)
 
 const fileList = ref<UploadProps['fileList']>([])
+if (imgUrl.value) {
+  fileList.value?.push({
+    uid: imgUrl.value.split('/').pop() || '',
+    name: imgUrl.value.split('/').pop() || '',
+    status: 'done',
+    url: serverHost + imgUrl.value,
+    thumbUrl: serverHost + imgUrl.value
+  })
+}
 
 const handleCancel = () => {
   previewVisible.value = false
@@ -78,6 +90,11 @@ const handleChange = async (info: UploadChangeParam) => {
     loading.value = false
     message.error('upload error')
   }
+}
+
+const removeImg = () => {
+  imgUrl.value = ''
+  emit('update:imageUrl', '')
 }
 
 // const handlePreview = async (file: UploadProps['fileList'][number]) => { = -!无力吐槽， 官网的写法，ts 无法保证类型安全
