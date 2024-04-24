@@ -16,13 +16,13 @@ package service
 
 import (
 	"context"
-
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/repository"
 )
 
 type IPostDraftService interface {
-	SavePostDraft(ctx context.Context, postDraft domain.PostDraft) error
+	SavePostDraft(ctx context.Context, postDraft domain.PostDraft) (string, error)
+	GetPostDraftById(ctx context.Context, id string) (*domain.PostDraft, error)
 }
 
 var _ IPostDraftService = (*PostDraftService)(nil)
@@ -37,6 +37,10 @@ type PostDraftService struct {
 	repo repository.IPostDraftRepository
 }
 
-func (s *PostDraftService) SavePostDraft(ctx context.Context, postDraft domain.PostDraft) error {
+func (s *PostDraftService) GetPostDraftById(ctx context.Context, id string) (*domain.PostDraft, error) {
+	return s.repo.GetById(ctx, id)
+}
+
+func (s *PostDraftService) SavePostDraft(ctx context.Context, postDraft domain.PostDraft) (string, error) {
 	return s.repo.Save(ctx, postDraft)
 }

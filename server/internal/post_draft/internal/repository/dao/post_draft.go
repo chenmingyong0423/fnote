@@ -16,14 +16,19 @@ package dao
 
 import (
 	"context"
-
+	"fmt"
+	"github.com/chenmingyong0423/gkit/uuidx"
 	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
+	"time"
 )
 
 type PostDraft struct {
-	mongox.Model     `bson:",inline"`
+	ID               string               `bson:"_id"`
+	CreatedAt        time.Time            `bson:"created_at"`
+	UpdatedAt        time.Time            `bson:"updated_at"`
 	Author           string               `bson:"author"`
 	Title            string               `bson:"title"`
 	Summary          string               `bson:"summary"`
@@ -39,6 +44,22 @@ type PostDraft struct {
 	IsCommentAllowed bool                 `bson:"is_comment_allowed"`
 }
 
+func (m *PostDraft) DefaultId() {
+	if m.ID == "" {
+		m.ID = uuidx.RearrangeUUID4()
+	}
+}
+
+func (m *PostDraft) DefaultCreatedAt() {
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = time.Now().Local()
+	}
+}
+
+func (m *PostDraft) DefaultUpdatedAt() {
+	m.UpdatedAt = time.Now().Local()
+}
+
 type Category4PostDraft struct {
 	Id   string `bson:"id"`
 	Name string `bson:"name"`
@@ -50,7 +71,8 @@ type Tag4PostDraft struct {
 }
 
 type IPostDraftDao interface {
-	Save(ctx context.Context, postDraft PostDraft) error
+	Save(ctx context.Context, postDraft *PostDraft) (string, error)
+	GetById(ctx context.Context, id string) (*PostDraft, error)
 }
 
 var _ IPostDraftDao = (*PostDraftDao)(nil)
@@ -63,13 +85,24 @@ type PostDraftDao struct {
 	coll *mongox.Collection[PostDraft]
 }
 
-func (d *PostDraftDao) Save(ctx context.Context, postDraft PostDraft) error {
-	updateResult, err := d.coll.Updater().Replacement(postDraft).Upsert(ctx)
+func (d *PostDraftDao) GetById(ctx context.Context, id string) (*PostDraft, error) {
+	postDraft, err := d.coll.Finder().Filter(query.Id(id)).FindOne(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "failed to save post draft: %v", postDraft)
+		return nil, errors.Wrapf(err, "failed to get post draft by id: %s", id)
 	}
-	if updateResult.UpsertedCount == 0 || updateResult.ModifiedCount == 0 {
-		return errors.Wrapf(err, "UpsertedCount=0 || ModifiedCount=0, failed to save post draft: %v", postDraft)
+	return postDraft, nil
+}
+
+func (d *PostDraftDao) Save(ctx context.Context, postDraft *PostDraft) (string, error) {
+	updateResult, err := d.coll.Updater().Filter(query.Id(postDraft.ID)).Replacement(postDraft).Upsert(ctx)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to save post draft: %v", postDraft)
 	}
-	return nil
+	if updateResult.UpsertedCount == 0 && updateResult.ModifiedCount == 0 {
+		return "", fmt.Errorf("UpsertedCount=0 || ModifiedCount=0, failed to save post draft: %v", postDraft)
+	}
+	if id, ok := updateResult.UpsertedID.(string); ok {
+		return id, nil
+	}
+	return postDraft.ID, nil
 }
