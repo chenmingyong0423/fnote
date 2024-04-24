@@ -48,9 +48,9 @@ export type PageRequest = {
 }
 
 export interface Post4Edit extends PostRequest{
-  tempCategories: string[]
-  tempTags: string[]
-  created_at: number
+  tempCategories?: string[]
+  tempTags?: string[]
+  created_at?: number
 }
 
 export interface PostRequest{
@@ -119,10 +119,10 @@ export const GetPostDetail = (id: string) => {
   })
 }
 
-export const UpdatePost = (post: PostRequest) => {
+export const PublishPost = (post: PostRequest) => {
   return instance({
-    url: `/posts`,
-    method: 'put',
+    url: `/post-draft/${post.id}/publish`,
+    method: 'post',
     data: post
   })
 }

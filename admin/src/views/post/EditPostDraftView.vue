@@ -18,7 +18,7 @@ import {
   type Category4Post,
   type Post4Edit, type PostRequest,
   type Tag4Post,
-  UpdatePost
+  PublishPost
 } from '@/interfaces/Post'
 import { message } from 'ant-design-vue'
 import { GetSelectedCategories, type SelectCategory } from '@/interfaces/Category'
@@ -101,11 +101,13 @@ const getPostDraftById = async (id: string) => {
       createdAt.value = postDraft.created_at
       post4Edit.tags = postDraft.tags
       post4Edit.created_at = postDraft.created_at
+      post4Edit.tempCategories = []
       postDraft.categories.forEach((item: Category4Post) => {
-        post4Edit.tempCategories.push(item.name)
+        post4Edit.tempCategories?.push(item.name)
       })
+      post4Edit.tempTags = []
       postDraft.tags.forEach((item: Tag4Post) => {
-        post4Edit.tempTags.push(item.name)
+        post4Edit.tempTags?.push(item.name)
       })
     }
   } catch (error) {
@@ -128,14 +130,17 @@ const getPostDraftById = async (id: string) => {
 
 getPostDraftById(id)
 
-const submit = async (post4Edit: PostRequest) => {
+const submit = async (post4Edit: Post4Edit) => {
   try {
-    const response: any = await UpdatePost(post4Edit)
+    delete post4Edit.tempCategories
+    delete post4Edit.tempTags
+    delete post4Edit.created_at
+    const response: any = await PublishPost(post4Edit)
     if (response.data.code !== 0) {
       message.error(response.data.message)
       return
     }
-    message.success('更新成功')
+    message.success('发布成功')
     postEditRef.value.clearReq()
     await router.push('/home/post/list')
   } catch (error) {
