@@ -358,6 +358,6 @@ db.getCollection("count_stats").insertMany([
     }
 ])
 // post-likes
-db.createCollection("post-likes");
+db.createCollection("post_likes");
 db.post_likes.createIndex({ "postId": 1, "ip": 1 }, { "unique": true })
 EOF
