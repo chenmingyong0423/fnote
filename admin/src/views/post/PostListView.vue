@@ -1,71 +1,81 @@
 <template>
-  <a-button type="primary" @click="router.push('/home/post')" class="mb-3">发布文章</a-button>
-  <a-table :columns="columns" :data-source="posts" :pagination="pagination" @change="change">
-    <template #headerCell="{ column }">
-      <template v-if="column.key === 'name'">
-        <span>
-          <smile-outlined />
-          Name
-        </span>
-      </template>
-    </template>
-
-    <template #bodyCell="{ column, record }">
-      <template v-if="column.key === 'id'">
-        <a :href="baseHost+'/posts/'+record.id" target="_blank">{{ `${baseHost}/posts/${record.id}`}}</a>
-      </template>
-      <template v-if="column.key === 'cover_img'">
-        <a-image :width="200" :src="serverHost + record.cover_img" />
-      </template>
-      <template v-else-if="column.key === 'categories'">
-        <span>
-          <a-tag
-            v-for="category in record.categories"
-            :key="category"
-            :color="category === 'loser' ? 'volcano' : category.length > 5 ? 'geekblue' : 'green'"
-          >
-            {{ category.name.toUpperCase() }}
-          </a-tag>
-        </span>
-      </template>
-      <template v-else-if="column.key === 'tags'">
-        <span>
-          <a-tag
-            v-for="tag in record.tags"
-            :key="tag"
-            :color="tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'"
-          >
-            {{ tag.name.toUpperCase() }}
-          </a-tag>
-        </span>
-      </template>
-      <template v-if="column.key === 'is_displayed'">
-        <a-switch
-          v-model:checked="record.is_displayed"
-          @change="changeDisplayStatus(record.id, record.is_displayed)"
-        />
-      </template>
-      <template v-if="column.key === 'is_comment_allowed'">
-        <a-switch
-          v-model:checked="record.is_comment_allowed"
-          @change="changeCommentAllowedStatus(record.id, record.is_comment_allowed)"
-        />
-      </template>
-      <template v-else-if="column.key === 'create_time' || column.key === 'update_time'">
-        <span>{{ dayjs.unix(record[column.key]).format('YYYY-MM-DD HH:mm:ss') }}</span>
-      </template>
-      <template v-else-if="column.dataIndex === 'operation'">
-        <div class="flex gap-x-1">
+  <a-card title="文章列表">
+    <a-button type="primary" @click="router.push('/home/post')" class="mb-3">发布文章</a-button>
+    <a-table
+      :columns="columns"
+      :data-source="posts"
+      :pagination="pagination"
+      @change="change"
+      bordered
+    >
+      <template #headerCell="{ column }">
+        <template v-if="column.key === 'name'">
           <span>
-            <a @click="router.push(`/home/post/draft/${record.id}`)">编辑</a>
+            <smile-outlined />
+            Name
           </span>
-          <a-popconfirm v-if="posts.length" title="确认删除？" @confirm="deletePost(record)">
-            <a>删除</a>
-          </a-popconfirm>
-        </div>
+        </template>
       </template>
-    </template>
-  </a-table>
+
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'id'">
+          <a :href="baseHost + '/posts/' + record.id" target="_blank">{{
+            `${baseHost}/posts/${record.id}`
+          }}</a>
+        </template>
+        <template v-if="column.key === 'cover_img'">
+          <a-image :width="200" :src="serverHost + record.cover_img" />
+        </template>
+        <template v-else-if="column.key === 'categories'">
+          <span>
+            <a-tag
+              v-for="category in record.categories"
+              :key="category"
+              :color="category === 'loser' ? 'volcano' : category.length > 5 ? 'geekblue' : 'green'"
+            >
+              {{ category.name.toUpperCase() }}
+            </a-tag>
+          </span>
+        </template>
+        <template v-else-if="column.key === 'tags'">
+          <span>
+            <a-tag
+              v-for="tag in record.tags"
+              :key="tag"
+              :color="tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'"
+            >
+              {{ tag.name.toUpperCase() }}
+            </a-tag>
+          </span>
+        </template>
+        <template v-if="column.key === 'is_displayed'">
+          <a-switch
+            v-model:checked="record.is_displayed"
+            @change="changeDisplayStatus(record.id, record.is_displayed)"
+          />
+        </template>
+        <template v-if="column.key === 'is_comment_allowed'">
+          <a-switch
+            v-model:checked="record.is_comment_allowed"
+            @change="changeCommentAllowedStatus(record.id, record.is_comment_allowed)"
+          />
+        </template>
+        <template v-else-if="column.key === 'create_time' || column.key === 'update_time'">
+          <span>{{ dayjs.unix(record[column.key]).format('YYYY-MM-DD HH:mm:ss') }}</span>
+        </template>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <div class="flex gap-x-1">
+            <span>
+              <a @click="router.push(`/home/post/draft/${record.id}`)">编辑</a>
+            </span>
+            <a-popconfirm v-if="posts.length" title="确认删除？" @confirm="deletePost(record)">
+              <a>删除</a>
+            </a-popconfirm>
+          </div>
+        </template>
+      </template>
+    </a-table>
+  </a-card>
 </template>
 <script lang="ts" setup>
 import { SmileOutlined } from '@ant-design/icons-vue'
