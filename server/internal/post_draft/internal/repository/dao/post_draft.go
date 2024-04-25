@@ -17,6 +17,8 @@ package dao
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 
 	"github.com/chenmingyong0423/gkit/uuidx"
@@ -75,6 +77,7 @@ type IPostDraftDao interface {
 	Save(ctx context.Context, postDraft *PostDraft) (string, error)
 	GetById(ctx context.Context, id string) (*PostDraft, error)
 	DeleteById(ctx context.Context, id string) (int64, error)
+	QueryPage(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*PostDraft, int64, error)
 }
 
 var _ IPostDraftDao = (*PostDraftDao)(nil)
@@ -85,6 +88,18 @@ func NewPostDraftDao(db *mongo.Database) *PostDraftDao {
 
 type PostDraftDao struct {
 	coll *mongox.Collection[PostDraft]
+}
+
+func (d *PostDraftDao) QueryPage(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*PostDraft, int64, error) {
+	count, err := d.coll.Finder().Filter(cond).Count(ctx)
+	if err != nil {
+		return nil, 0, errors.Wrapf(err, "failed to query the count of post draft: %v", cond)
+	}
+	postDrafts, err := d.coll.Finder().Filter(cond).Find(ctx, findOptions)
+	if err != nil {
+		return nil, 0, errors.Wrapf(err, "failed to query post draft page: %v, %v", cond, findOptions)
+	}
+	return postDrafts, count, nil
 }
 
 func (d *PostDraftDao) DeleteById(ctx context.Context, id string) (int64, error) {

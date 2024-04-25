@@ -25,6 +25,7 @@ type IPostDraftService interface {
 	SavePostDraft(ctx context.Context, postDraft domain.PostDraft) (string, error)
 	GetPostDraftById(ctx context.Context, id string) (*domain.PostDraft, error)
 	DeletePostDraftById(ctx context.Context, id string) (int64, error)
+	GetPostDraftPage(ctx context.Context, page domain.Page) ([]*domain.PostDraft, int64, error)
 }
 
 var _ IPostDraftService = (*PostDraftService)(nil)
@@ -37,6 +38,16 @@ func NewPostDraftService(repo repository.IPostDraftRepository) *PostDraftService
 
 type PostDraftService struct {
 	repo repository.IPostDraftRepository
+}
+
+func (s *PostDraftService) GetPostDraftPage(ctx context.Context, page domain.Page) ([]*domain.PostDraft, int64, error) {
+	return s.repo.GetPostDraftPage(ctx, domain.PageQuery{
+		Size:    page.PageSize,
+		Skip:    (page.PageNo - 1) * page.PageSize,
+		Keyword: page.Keyword,
+		Field:   page.Field,
+		Order:   page.OrderConvertToInt(),
+	})
 }
 
 func (s *PostDraftService) DeletePostDraftById(ctx context.Context, id string) (int64, error) {

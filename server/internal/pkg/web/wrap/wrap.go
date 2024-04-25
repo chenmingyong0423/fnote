@@ -109,6 +109,12 @@ func (p *PageVO[T]) SetTotalCountAndCalculateTotalPages(totalCount int64) {
 	p.TotalCount = totalCount
 }
 
+func NewPageVO[T any](pageNo, pageSize, totalCount int64, list []T) *PageVO[T] {
+	pageVO := &PageVO[T]{Page: Page{PageNo: pageNo, PageSize: pageSize}, List: list}
+	pageVO.SetTotalCountAndCalculateTotalPages(totalCount)
+	return pageVO
+}
+
 func Wrap[T any](fn func(ctx *gin.Context) (T, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		result, err := fn(ctx)

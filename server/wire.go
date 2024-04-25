@@ -22,6 +22,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index"
+	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
@@ -47,6 +48,8 @@ func initializeApp() (*gin.Engine, error) {
 		wire.FieldsOf(new(*post_draft.Model), "Hdl"),
 		aggregate_post.InitAggregatePostModule,
 		wire.FieldsOf(new(*aggregate_post.Model), "Hdl"),
+		post_like.InitPostLikeModule,
+		wire.FieldsOf(new(*post_like.Model), "Hdl", "Svc"),
 		ioc.FriendProviders,
 		ioc.PostProviders,
 		ioc.VlProviders,

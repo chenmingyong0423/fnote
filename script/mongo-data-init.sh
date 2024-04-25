@@ -357,4 +357,7 @@ db.getCollection("count_stats").insertMany([
         update_time: Math.floor(new Date().getTime() / 1000)
     }
 ])
+// post-likes
+db.createCollection("post-likes");
+db.post_likes.createIndex({ "postId": 1, "ip": 1 }, { "unique": true })
 EOF
