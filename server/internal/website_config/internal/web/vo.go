@@ -53,6 +53,11 @@ type WebsiteConfigVO struct {
 	WebsiteRecords      []string `json:"website_records,omitempty"`
 }
 
+type WebsiteConfigMetaVO struct {
+	WebsiteName string `json:"website_name"`
+	WebsiteIcon string `json:"website_icon"`
+}
+
 type SocialInfoConfigVO struct {
 	SocialInfoList []SocialInfoVO `json:"social_info_list"`
 }
