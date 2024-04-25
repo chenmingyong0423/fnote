@@ -91,6 +91,28 @@ export interface SeoConfigRequest {
   robots: string
 }
 
+export interface WebsiteConfigVO {
+  website_name: string
+  website_icon: string
+  website_owner: string
+  website_owner_profile: string
+  website_owner_avatar: string
+  WebsiteRuntime: number
+  website_records?: string[]
+}
+
+export interface WebsiteConfigMetaVO {
+  website_name: string
+  website_icon: string
+}
+
+export const GetWebSiteMeta = () => {
+  return instance({
+    url: '/configs/website/meta',
+    method: 'get'
+  })
+}
+
 export const GetWebSite = () => {
   return instance({
     url: '/configs/website',
@@ -299,7 +321,8 @@ export const DeleteSocial = (id: string) => {
   })
 }
 
-export interface SocialConfigRequest {}
+export interface SocialConfigRequest {
+}
 
 export const UpdateSocial = (id: string, req: SocialConfigRequest) => {
   return instance({

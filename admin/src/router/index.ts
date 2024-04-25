@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { isInit } from '@/interfaces/Config'
-import { login } from '@/interfaces/User'
 import { message } from 'ant-design-vue'
 
 const router = createRouter({

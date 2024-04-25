@@ -1,4 +1,3 @@
-import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { login, type LoginRequest } from '@/interfaces/User'
 import { message } from 'ant-design-vue'
