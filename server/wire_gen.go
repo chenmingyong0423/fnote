@@ -45,6 +45,7 @@ import (
 	service5 "github.com/chenmingyong0423/fnote/server/internal/post/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index"
+	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	handler6 "github.com/chenmingyong0423/fnote/server/internal/tag/handler"
 	repository9 "github.com/chenmingyong0423/fnote/server/internal/tag/repository"
 	dao9 "github.com/chenmingyong0423/fnote/server/internal/tag/repository/dao"
@@ -79,7 +80,9 @@ func initializeApp() (*gin.Engine, error) {
 	commentService := service4.NewCommentService(commentRepository)
 	postDao := dao5.NewPostDao(database)
 	postRepository := repository5.NewPostRepository(postDao)
-	postService := service5.NewPostService(postRepository, iWebsiteConfigService, countStatsService, fileService)
+	post_likeModel := post_like.InitPostLikeModule(database)
+	iPostLikeService := post_likeModel.Svc
+	postService := service5.NewPostService(postRepository, iWebsiteConfigService, countStatsService, fileService, iPostLikeService)
 	emailService := service6.NewEmailService()
 	msgTplDao := dao6.NewMsgTplDao(database)
 	msgTplRepository := repository6.NewMsgTplRepository(msgTplDao)
@@ -118,7 +121,8 @@ func initializeApp() (*gin.Engine, error) {
 	postDraftHandler := post_draftModel.Hdl
 	aggregate_postModel := aggregate_post.InitAggregatePostModule(postService, post_draftModel)
 	aggregatePostHandler := aggregate_postModel.Hdl
-	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v2, validators, postIndexHandler, postDraftHandler, aggregatePostHandler)
+	postLikeHandler := post_likeModel.Hdl
+	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v2, validators, postIndexHandler, postDraftHandler, aggregatePostHandler, postLikeHandler)
 	if err != nil {
 		return nil, err
 	}

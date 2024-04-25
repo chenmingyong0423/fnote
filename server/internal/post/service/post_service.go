@@ -18,6 +18,8 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/chenmingyong0423/fnote/server/internal/post_like"
+	"github.com/chenmingyong0423/fnote/server/internal/post_likes"
 	"log/slog"
 	"strings"
 	"sync"
@@ -60,21 +62,23 @@ type IPostService interface {
 
 var _ IPostService = (*PostService)(nil)
 
-func NewPostService(repo repository.IPostRepository, cfgService website_config.Service, countStats service2.ICountStatsService, fileService service3.IFileService) *PostService {
+func NewPostService(repo repository.IPostRepository, cfgService website_config.Service, countStats service2.ICountStatsService, fileService service3.IFileService, postLikeServ post_like.Service) *PostService {
 	return &PostService{
-		repo:        repo,
-		cfgService:  cfgService,
-		countStats:  countStats,
-		fileService: fileService,
+		repo:         repo,
+		cfgService:   cfgService,
+		countStats:   countStats,
+		fileService:  fileService,
+		postLikeServ: postLikeServ,
 	}
 }
 
 type PostService struct {
-	repo        repository.IPostRepository
-	cfgService  website_config.Service
-	countStats  service2.ICountStatsService
-	fileService service3.IFileService
-	ipMap       sync.Map
+	repo         repository.IPostRepository
+	cfgService   website_config.Service
+	countStats   service2.ICountStatsService
+	fileService  service3.IFileService
+	postLikeServ post_likes.Service
+	ipMap        sync.Map
 }
 
 func (s *PostService) UpdatePostIsCommentAllowed(ctx context.Context, id string, isCommentAllowed bool) error {
