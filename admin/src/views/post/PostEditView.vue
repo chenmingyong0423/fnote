@@ -1,12 +1,19 @@
 <template>
   <div>
     <div class="flex h-15 items-center">
-      <a-modal v-model:open="open" title="温馨提示" @ok="handleOk" :cancelText="'取消'" :okText="'确认'">
+      <a-modal
+        v-model:open="open"
+        title="温馨提示"
+        @ok="handleOk"
+        :cancelText="'取消'"
+        :okText="'确认'"
+      >
         <p>检测到没有自定义文章 id，保存草稿之后将会自动生成且后续无法修改，是否继续保存？</p>
       </a-modal>
       <a-input v-model:value="post4Edit.title" addon-before="标题" class="w-59%" />
       <a-input v-model:value="post4Edit.author" addon-before="作者" class="w-30% ml-1%" />
-      <a-button type="primary" @click="visible = true" class="w-9% ml-1%">{{ props.isNewPost ? '发布' : '更新' }}
+      <a-button type="primary" @click="visible = true" class="w-9% ml-1%"
+        >{{ props.isNewPost ? '发布' : '更新' }}
       </a-button>
       <a-button type="primary" @click="preSave" class="w-9% ml-1%">保存草稿</a-button>
       <a-modal
@@ -139,10 +146,7 @@
 <script lang="ts" setup>
 import { type PropType, reactive, ref, defineEmits } from 'vue'
 import type { Post4Edit } from '@/interfaces/Post'
-import {
-  type FormInstance,
-  message
-} from 'ant-design-vue'
+import { type FormInstance, message } from 'ant-design-vue'
 import type { SelectCategory } from '@/interfaces/Category'
 import type { SelectTag } from '@/interfaces/Tag'
 import { FileUpload } from '@/interfaces/File'
@@ -181,7 +185,7 @@ const imageUrl = ref<string>('')
 
 const formRef = ref<FormInstance>()
 const visible = ref(false)
-const post4Edit = reactive<Post4Edit>(props.post || {} as Post4Edit)
+const post4Edit = reactive<Post4Edit>(props.post || ({} as Post4Edit))
 const submit = () => {
   if (formRef.value) {
     formRef.value
@@ -223,12 +227,11 @@ const submit = () => {
   }
 }
 
-
 const open = ref<boolean>(false)
 
 const handleOk = (e: MouseEvent) => {
   saveDraft()
-    open.value = false
+  open.value = false
 }
 
 const preSave = () => {
@@ -292,7 +295,6 @@ defineExpose({
 // md 图片上传
 const handleUploadImage = async (event: any, insertImage: any, files: any) => {
   try {
-
     const formData = new FormData()
     formData.append('file', files[0])
     try {
@@ -312,5 +314,4 @@ const handleUploadImage = async (event: any, insertImage: any, files: any) => {
     console.log(error)
   }
 }
-
 </script>

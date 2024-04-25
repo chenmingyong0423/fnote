@@ -1,7 +1,5 @@
 <template>
-  <div class="color-gray">
-    示例：key = baidu_site_verification, value = xxxxxx
-  </div>
+  <div class="color-gray">示例：key = baidu_site_verification, value = xxxxxx</div>
   <a-form
     class="my-4"
     :model="formState"
@@ -11,19 +9,11 @@
     @finish="onFinish"
     @finishFailed="onFinishFailed"
   >
-    <a-form-item
-      label="key"
-      name="key"
-      :rules="[{ required: true, message: '请输入 key!' }]"
-    >
+    <a-form-item label="key" name="key" :rules="[{ required: true, message: '请输入 key!' }]">
       <a-input v-model:value="formState.key"></a-input>
     </a-form-item>
 
-    <a-form-item
-      label="value"
-      name="value"
-      :rules="[{ required: true, message: '请输入 value!' }]"
-    >
+    <a-form-item label="value" name="value" :rules="[{ required: true, message: '请输入 value!' }]">
       <a-input v-model:value="formState.value"></a-input>
     </a-form-item>
 
@@ -58,13 +48,13 @@
 import { reactive, ref } from 'vue'
 import type { Ref } from 'vue'
 import {
-  AddThirdPartySiteVerification, DeleteThirdPartySiteVerification,
+  AddThirdPartySiteVerification,
+  DeleteThirdPartySiteVerification,
   GetThirdPartySiteVerification,
   type ThirdPartySiteVerification,
   type ThirdPartySiteVerificationRequest
 } from '@/interfaces/Config'
 import { message } from 'ant-design-vue'
-
 
 const columns = [
   {
@@ -82,8 +72,8 @@ const columns = [
   },
   {
     title: 'operation',
-    dataIndex: 'operation',
-  },
+    dataIndex: 'operation'
+  }
 ]
 
 const dataSource: Ref<ThirdPartySiteVerification[]> = ref([])

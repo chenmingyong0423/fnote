@@ -47,13 +47,13 @@ export type PageRequest = {
   tags?: string[]
 }
 
-export interface Post4Edit extends PostRequest{
+export interface Post4Edit extends PostRequest {
   tempCategories?: string[]
   tempTags?: string[]
   created_at?: number
 }
 
-export interface PostRequest{
+export interface PostRequest {
   id: string
   author: string
   title: string
@@ -112,17 +112,25 @@ export const ChangeCommentAllowedStatus = (id: string, isCommentAllowed: boolean
   })
 }
 
-export const GetPostDetail = (id: string) => {
-  return instance({
-    url: `/posts/${id}`,
-    method: 'get'
-  })
-}
-
 export const PublishPost = (post: PostRequest) => {
   return instance({
     url: `/post-draft/${post.id}/publish`,
     method: 'post',
     data: post
+  })
+}
+
+export const DeletePostDraftById = (id: string) => {
+  return instance({
+    url: `/post-draft/${id}`,
+    method: 'delete'
+  })
+}
+
+export const GetPostDraft = (pageReq: PageRequest) => {
+  return instance({
+    url: '/post-draft',
+    method: 'get',
+    params: pageReq
   })
 }

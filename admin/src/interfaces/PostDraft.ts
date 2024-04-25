@@ -27,6 +27,12 @@ export interface PostDraftRequest {
   created_at: number
 }
 
+export interface PostDraftBrief {
+  id: string
+  title: string
+  created_at: number
+}
+
 export interface PostDraftDetail {
   id: string
   post_id: string
