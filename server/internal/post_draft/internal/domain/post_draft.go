@@ -41,3 +41,35 @@ type Tag4PostDraft struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
 }
+
+type Page struct {
+	// 当前页
+	PageNo int64
+	// 每页数量
+	PageSize int64
+	// 排序字段
+	Field string
+	// 排序规则
+	Order string
+	// 搜索内容
+	Keyword string
+}
+
+func (p *Page) OrderConvertToInt() int {
+	switch p.Order {
+	case "ASC":
+		return 1
+	case "DESC":
+		return -1
+	default:
+		return -1
+	}
+}
+
+type PageQuery struct {
+	Size    int64
+	Skip    int64
+	Keyword string
+	Field   string
+	Order   int
+}
