@@ -15,8 +15,13 @@
 package handler
 
 import (
+	"fmt"
+	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+	"github.com/chenmingyong0423/fnote/server/internal/post_like"
+	"log/slog"
 	"net/http"
 	"slices"
+	"sync"
 
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
@@ -54,16 +59,21 @@ type SummaryPostVO struct {
 	CreateTime   int64    `json:"create_time"`
 }
 
-func NewPostHandler(serv service.IPostService, cfgService website_config.Service) *PostHandler {
+func NewPostHandler(serv service.IPostService, cfgService website_config.Service, postLikeServ post_like.Service, countStats service2.ICountStatsService) *PostHandler {
 	return &PostHandler{
-		serv:       serv,
-		cfgService: cfgService,
+		serv:         serv,
+		cfgService:   cfgService,
+		postLikeServ: postLikeServ,
+		countStats:   countStats,
 	}
 }
 
 type PostHandler struct {
-	serv       service.IPostService
-	cfgService website_config.Service
+	serv         service.IPostService
+	cfgService   website_config.Service
+	postLikeServ post_like.Service
+	countStats   service2.ICountStatsService
+	ipMap        sync.Map
 }
 
 func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
@@ -72,7 +82,6 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group.GET("", apiwrap.WrapWithBody(h.GetPosts))
 	group.GET("/:id", apiwrap.Wrap(h.GetPostBySug))
 	group.POST("/:id/likes", apiwrap.Wrap(h.AddLike))
-	//group.DELETE("/:id/likes", api.Wrap(h.DeleteLike))
 
 	adminGroup := engine.Group("/admin-api/posts")
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetPosts))
@@ -155,26 +164,46 @@ func (h *PostHandler) GetPostBySug(ctx *gin.Context) (*apiwrap.ResponseBody[doma
 	}), nil
 }
 
-func (h *PostHandler) AddLike(ctx *gin.Context) (body *apiwrap.ResponseBody[any], err error) {
+func (h *PostHandler) AddLike(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	ip := ctx.ClientIP()
 	if ip == "" {
 		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
-	sug := ctx.Param("id")
-	err = h.serv.AddLike(ctx, sug, ip)
-	if err != nil {
-		return nil, err
+	postId := ctx.Param("id")
+	key := fmt.Sprintf("%s:%s", postId, ip)
+	_, isExist := h.ipMap.LoadOrStore(key, struct{}{})
+	if !isExist {
+		defer h.ipMap.Delete(key)
+		id, err := h.postLikeServ.Add(ctx, post_like.PostLike{
+			PostId:    postId,
+			Ip:        ip,
+			UserAgent: ctx.GetHeader("User-Agent"),
+		})
+		if err != nil {
+			// 已点过赞
+			if mongo.IsDuplicateKeyError(err) {
+				return apiwrap.SuccessResponse(), nil
+			}
+			return nil, err
+		}
+		// 文章点赞数自增
+		err = h.serv.IncreasePostLikeCount(ctx, postId)
+		if err != nil {
+			err = h.postLikeServ.DeleteById(ctx, id)
+			if err != nil {
+				return nil, err
+			}
+		}
+		go func() {
+			// 点赞数+1
+			gErr := h.countStats.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeLikeCount.ToString(), domain.CountStatsTypeLikeCount)
+			if gErr != nil {
+				l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+				l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+			}
+		}()
 	}
 	return apiwrap.SuccessResponse(), nil
-}
-
-func (h *PostHandler) DeleteLike(ctx *gin.Context) (r any, err error) {
-	ip := ctx.ClientIP()
-	if ip == "" {
-		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
-	}
-	sug := ctx.Param("id")
-	return r, h.serv.DeleteLike(ctx, sug, ip)
 }
 
 func (h *PostHandler) AdminGetPosts(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.AdminPostVO]], error) {

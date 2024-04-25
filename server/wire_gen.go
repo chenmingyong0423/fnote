@@ -80,9 +80,7 @@ func initializeApp() (*gin.Engine, error) {
 	commentService := service4.NewCommentService(commentRepository)
 	postDao := dao5.NewPostDao(database)
 	postRepository := repository5.NewPostRepository(postDao)
-	post_likeModel := post_like.InitPostLikeModule(database)
-	iPostLikeService := post_likeModel.Svc
-	postService := service5.NewPostService(postRepository, iWebsiteConfigService, countStatsService, fileService, iPostLikeService)
+	postService := service5.NewPostService(postRepository, iWebsiteConfigService, countStatsService, fileService)
 	emailService := service6.NewEmailService()
 	msgTplDao := dao6.NewMsgTplDao(database)
 	msgTplRepository := repository6.NewMsgTplRepository(msgTplDao)
@@ -94,7 +92,9 @@ func initializeApp() (*gin.Engine, error) {
 	friendRepository := repository7.NewFriendRepository(friendDao)
 	friendService := service9.NewFriendService(friendRepository)
 	friendHandler := hanlder2.NewFriendHandler(friendService, messageService, iWebsiteConfigService)
-	postHandler := handler3.NewPostHandler(postService, iWebsiteConfigService)
+	post_likeModel := post_like.InitPostLikeModule(database)
+	iPostLikeService := post_likeModel.Svc
+	postHandler := handler3.NewPostHandler(postService, iWebsiteConfigService, iPostLikeService, countStatsService)
 	visitLogDao := dao8.NewVisitLogDao(database)
 	visitLogRepository := repository8.NewVisitLogRepository(visitLogDao)
 	visitLogService := service10.NewVisitLogService(visitLogRepository)

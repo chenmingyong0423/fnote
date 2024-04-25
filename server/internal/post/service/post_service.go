@@ -18,12 +18,9 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/chenmingyong0423/fnote/server/internal/post_like"
+	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"log/slog"
 	"strings"
-	"sync"
-
-	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
 	service3 "github.com/chenmingyong0423/fnote/server/internal/file/service"
 	"github.com/chenmingyong0423/gkit/slice"
@@ -39,15 +36,12 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/post/repository"
-	"github.com/pkg/errors"
 )
 
 type IPostService interface {
 	GetLatestPosts(ctx context.Context, count int64) ([]*domain.Post, error)
 	GetPosts(ctx context.Context, pageRequest *domain.PostRequest) ([]*domain.Post, int64, error)
 	GetPunishedPostById(ctx context.Context, id string) (*domain.Post, error)
-	AddLike(ctx context.Context, id string, ip string) error
-	DeleteLike(ctx context.Context, id string, ip string) error
 	IncreaseVisitCount(ctx context.Context, id string) error
 	AdminGetPosts(ctx context.Context, pageDTO dto.PageDTO) ([]*domain.Post, int64, error)
 	AddPost(ctx context.Context, post *domain.Post) error
@@ -57,27 +51,29 @@ type IPostService interface {
 	UpdatePostIsDisplayed(ctx context.Context, id string, isDisplayed bool) error
 	UpdatePostIsCommentAllowed(ctx context.Context, id string, isCommentAllowed bool) error
 	SavePost(ctx context.Context, originalPost *domain.Post, savedPost *domain.Post, isNewPost bool) error
+	IncreasePostLikeCount(ctx context.Context, postId string) error
 }
 
 var _ IPostService = (*PostService)(nil)
 
-func NewPostService(repo repository.IPostRepository, cfgService website_config.Service, countStats service2.ICountStatsService, fileService service3.IFileService, postLikeServ post_like.Service) *PostService {
+func NewPostService(repo repository.IPostRepository, cfgService website_config.Service, countStats service2.ICountStatsService, fileService service3.IFileService) *PostService {
 	return &PostService{
-		repo:         repo,
-		cfgService:   cfgService,
-		countStats:   countStats,
-		fileService:  fileService,
-		postLikeServ: postLikeServ,
+		repo:        repo,
+		cfgService:  cfgService,
+		countStats:  countStats,
+		fileService: fileService,
 	}
 }
 
 type PostService struct {
-	repo         repository.IPostRepository
-	cfgService   website_config.Service
-	countStats   service2.ICountStatsService
-	fileService  service3.IFileService
-	postLikeServ post_like.Service
-	ipMap        sync.Map
+	repo        repository.IPostRepository
+	cfgService  website_config.Service
+	countStats  service2.ICountStatsService
+	fileService service3.IFileService
+}
+
+func (s *PostService) IncreasePostLikeCount(ctx context.Context, postId string) error {
+	return s.repo.IncreasePostLikeCount(ctx, postId)
 }
 
 func (s *PostService) UpdatePostIsCommentAllowed(ctx context.Context, id string, isCommentAllowed bool) error {
@@ -227,54 +223,6 @@ func (s *PostService) AdminGetPosts(ctx context.Context, pageDTO dto.PageDTO) ([
 
 func (s *PostService) IncreaseVisitCount(ctx context.Context, id string) error {
 	return s.repo.IncreaseCommentCount(ctx, id)
-}
-
-func (s *PostService) DeleteLike(ctx context.Context, id string, ip string) error {
-	// 先判断是否已经点过赞
-	had, err := s.repo.HadLikePost(ctx, id, ip)
-	if err != nil {
-		return errors.WithMessage(err, "s.repo.HadLikePost failed")
-	}
-	if !had {
-		return nil
-	}
-	_, isExist := s.ipMap.LoadOrStore(ip, struct{}{})
-	if !isExist {
-		defer s.ipMap.Delete(ip)
-		err = s.repo.DeleteLike(ctx, id, ip)
-		if err != nil {
-			return errors.WithMessage(err, "s.repo.DeleteLike")
-		}
-	}
-	return nil
-}
-
-func (s *PostService) AddLike(ctx context.Context, id string, ip string) error {
-	// 先判断是否已经点过赞
-	had, err := s.repo.HadLikePost(ctx, id, ip)
-	if err != nil {
-		return errors.WithMessage(err, "s.repo.HadLikePost failed")
-	}
-	if had {
-		return nil
-	}
-	_, isExist := s.ipMap.LoadOrStore(ip, struct{}{})
-	if !isExist {
-		defer s.ipMap.Delete(ip)
-		err = s.repo.AddLike(ctx, id, ip)
-		if err != nil {
-			return errors.WithMessage(err, "s.repo.AddLike")
-		}
-		go func() {
-			// 点赞数+1
-			gErr := s.countStats.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeLikeCount.ToString(), domain.CountStatsTypeLikeCount)
-			if gErr != nil {
-				l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-				l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-			}
-		}()
-	}
-	return nil
 }
 
 func (s *PostService) GetPunishedPostById(ctx context.Context, id string) (*domain.Post, error) {
