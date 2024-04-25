@@ -15,14 +15,16 @@
 package post_like
 
 import (
+	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/web"
 )
 
 type (
-	Handler = web.PostLikeHandler
-	Service = service.IPostLikeService
-	Model   struct {
+	Handler  = web.PostLikeHandler
+	Service  = service.IPostLikeService
+	PostLike = domain.PostLike
+	Model    struct {
 		Svc Service
 		Hdl *Handler
 	}

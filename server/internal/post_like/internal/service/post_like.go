@@ -15,10 +15,14 @@
 package service
 
 import (
+	"context"
+	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/repository"
 )
 
 type IPostLikeService interface {
+	Add(ctx context.Context, postLike domain.PostLike) (string, error)
+	DeleteById(ctx context.Context, id string) error
 }
 
 var _ IPostLikeService = (*PostLikeService)(nil)
@@ -31,4 +35,12 @@ func NewPostLikeService(repo repository.IPostLikeRepository) *PostLikeService {
 
 type PostLikeService struct {
 	repo repository.IPostLikeRepository
+}
+
+func (s *PostLikeService) Add(ctx context.Context, postLike domain.PostLike) (string, error) {
+	return s.repo.Add(ctx, postLike)
+}
+
+func (s *PostLikeService) DeleteById(ctx context.Context, id string) error {
+	return s.repo.DeleteById(ctx, id)
 }

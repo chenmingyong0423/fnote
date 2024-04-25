@@ -15,10 +15,15 @@
 package repository
 
 import (
+	"context"
+	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/repository/dao"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type IPostLikeRepository interface {
+	Add(ctx context.Context, postLike domain.PostLike) (string, error)
+	DeleteById(ctx context.Context, id string) error
 }
 
 var _ IPostLikeRepository = (*PostLikeRepository)(nil)
@@ -29,4 +34,20 @@ func NewPostLikeRepository(dao dao.IPostLikeDao) *PostLikeRepository {
 
 type PostLikeRepository struct {
 	dao dao.IPostLikeDao
+}
+
+func (r *PostLikeRepository) DeleteById(ctx context.Context, id string) error {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	return r.dao.DeleteById(ctx, objectID)
+}
+
+func (r *PostLikeRepository) Add(ctx context.Context, postLike domain.PostLike) (string, error) {
+	return r.dao.Add(ctx, &dao.PostLike{
+		PostId:    postLike.PostId,
+		Ip:        postLike.Ip,
+		UserAgent: postLike.UserAgent,
+	})
 }

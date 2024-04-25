@@ -14,4 +14,10 @@
 
 package domain
 
-type PostLike struct{}
+type PostLike struct {
+	Id        string
+	PostId    string
+	Ip        string
+	UserAgent string
+	CreatedAt int64
+}
