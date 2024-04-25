@@ -19,7 +19,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
-	"github.com/chenmingyong0423/fnote/server/internal/post_likes"
 	"log/slog"
 	"strings"
 	"sync"
@@ -77,7 +76,7 @@ type PostService struct {
 	cfgService   website_config.Service
 	countStats   service2.ICountStatsService
 	fileService  service3.IFileService
-	postLikeServ post_likes.Service
+	postLikeServ post_like.Service
 	ipMap        sync.Map
 }
 
