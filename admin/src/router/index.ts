@@ -9,7 +9,7 @@ const router = createRouter({
     {
       path: '/',
       redirect: () => {
-        return '/home/index'
+        return '/home/dashboard/traffic-stats'
       }
     },
     {
@@ -28,9 +28,14 @@ const router = createRouter({
       component: () => import('../views/HomeView.vue'),
       children: [
         {
-          path: '/home/index',
-          name: 'home',
-          component: () => import('../views/IndexView.vue')
+          path: '/home/dashboard/traffic-stats',
+          name: 'traffic stats',
+          component: () => import('../views/dashboard/TrafficStatsView.vue')
+        },
+        {
+          path: '/home/dashboard/content-stats',
+          name: 'content stats',
+          component: () => import('../views/dashboard/ContentStatsView.vue')
         },
         {
           path: '/home/post/list',

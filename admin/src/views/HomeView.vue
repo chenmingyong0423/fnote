@@ -2,7 +2,6 @@
   <a-layout>
     <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
       <div class="logo" />
-
       <a-menu
         v-model:openKeys="state.openKeys"
         v-model:selectedKeys="state.selectedKeys"
@@ -35,18 +34,34 @@ import router from '@/router'
 
 import { reactive, watch, h } from 'vue'
 import { MenuFoldOutlined, MenuUnfoldOutlined, PieChartOutlined } from '@ant-design/icons-vue'
+import { useRoute } from 'vue-router'
+const route = useRoute()
+const path = route.path
+
 const state = reactive({
   collapsed: false,
-  selectedKeys: ['1'],
-  openKeys: ['sub1'],
-  preOpenKeys: ['sub1']
+  selectedKeys: [path],
+  openKeys: ['dashboard']
 })
+
 const items = reactive([
   {
-    key: '/home/index',
+    key: 'dashboard',
     icon: () => h(PieChartOutlined),
-    label: '博客总览',
-    title: '博客总览'
+    label: '仪表盘',
+    title: '仪表盘',
+    children: [
+      {
+        key: '/home/dashboard/traffic-stats',
+        label: '流量统计',
+        title: '流量统计'
+      },
+      {
+        key: '/home/dashboard/content-stats',
+        label: '内容发布统计',
+        title: '内容发布统计'
+      }
+    ]
   },
   {
     key: 'sub post',
