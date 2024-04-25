@@ -16,6 +16,11 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"strings"
 	"time"
 
 	"github.com/chenmingyong0423/gkit/uuidx"
@@ -30,6 +35,7 @@ type IPostDraftRepository interface {
 	Save(ctx context.Context, postDraft domain.PostDraft) (string, error)
 	GetById(ctx context.Context, id string) (*domain.PostDraft, error)
 	DeleteById(ctx context.Context, id string) (int64, error)
+	GetPostDraftPage(ctx context.Context, pageQuery domain.PageQuery) ([]*domain.PostDraft, int64, error)
 }
 
 var _ IPostDraftRepository = (*PostDraftRepository)(nil)
@@ -40,6 +46,28 @@ func NewPostDraftRepository(dao dao.IPostDraftDao) *PostDraftRepository {
 
 type PostDraftRepository struct {
 	dao dao.IPostDraftDao
+}
+
+func (r *PostDraftRepository) GetPostDraftPage(ctx context.Context, pageQuery domain.PageQuery) ([]*domain.PostDraft, int64, error) {
+	condBuilder := query.BsonBuilder()
+	if pageQuery.Keyword != "" {
+		condBuilder.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageQuery.Keyword)), "i")
+	}
+	cond := condBuilder.Build()
+
+	findOptions := options.Find()
+	findOptions.SetSkip(pageQuery.Skip).SetLimit(pageQuery.Size)
+	if pageQuery.Field != "" {
+		findOptions.SetSort(bsonx.M(pageQuery.Field, pageQuery.Order))
+	} else {
+		findOptions.SetSort(bsonx.M("create_time", -1))
+	}
+
+	postDrafts, cnt, err := r.dao.QueryPage(ctx, cond, findOptions)
+	if err != nil {
+		return nil, 0, err
+	}
+	return r.toDomains(postDrafts), cnt, nil
 }
 
 func (r *PostDraftRepository) DeleteById(ctx context.Context, id string) (int64, error) {
@@ -129,4 +157,12 @@ func (r *PostDraftRepository) toDomain(postDraft *dao.PostDraft) *domain.PostDra
 		IsCommentAllowed: postDraft.IsCommentAllowed,
 		CreatedAt:        postDraft.CreatedAt.Unix(),
 	}
+}
+
+func (r *PostDraftRepository) toDomains(postDrafts []*dao.PostDraft) []*domain.PostDraft {
+	var result []*domain.PostDraft
+	for _, postDraft := range postDrafts {
+		result = append(result, r.toDomain(postDraft))
+	}
+	return result
 }

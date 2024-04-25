@@ -40,7 +40,6 @@ type Post struct {
 	Categories       []Category4Post `bson:"categories"`
 	Tags             []Tag4Post      `bson:"tags"`
 	IsDisplayed      bool            `bson:"is_displayed"`
-	Likes            []string        `bson:"likes,omitempty"`
 	LikeCount        int             `bson:"like_count,omitempty"`
 	CommentCount     int             `bson:"comment_count,omitempty"`
 	VisitCount       int             `bson:"visit_count,omitempty"`
@@ -78,6 +77,7 @@ type IPostDao interface {
 	SavePost(ctx context.Context, post *Post) error
 	UpdateIsDisplayedById(ctx context.Context, id string, isDisplayed bool) error
 	UpdateIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error
+	IncreasePostLikeCount(ctx context.Context, postId string) error
 }
 
 var _ IPostDao = (*PostDao)(nil)
@@ -90,6 +90,17 @@ func NewPostDao(db *mongo.Database) *PostDao {
 
 type PostDao struct {
 	coll *mongox.Collection[Post]
+}
+
+func (d *PostDao) IncreasePostLikeCount(ctx context.Context, postId string) error {
+	updateResult, err := d.coll.Updater().Filter(query.Id(postId)).Updates(update.Inc("like_count", 1)).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to increase the like_count of post, id=%s", postId)
+	}
+	if updateResult.ModifiedCount == 0 {
+		return fmt.Errorf("updateResult.ModifiedCount = 0, fails to increase the like_count of post, id=%s", postId)
+	}
+	return nil
 }
 
 func (d *PostDao) UpdateIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error {
