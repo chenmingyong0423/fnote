@@ -58,6 +58,7 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.GET("/check-initialization", apiwrap.Wrap(h.GetInitStatus))
 	adminGroup.POST("/initialization", apiwrap.WrapWithBody(h.InitializeWebsite))
 	adminGroup.GET("/website", apiwrap.Wrap(h.AdminGetWebsiteConfig))
+	adminGroup.GET("/website/meta", apiwrap.Wrap(h.AdminGetWebsiteConfig4Meta))
 	adminGroup.PUT("/website", apiwrap.WrapWithBody(h.AdminUpdateWebsiteConfig))
 	adminGroup.POST("/website/records", apiwrap.WrapWithBody(h.AdminAddRecordInWebsiteConfig))
 	adminGroup.DELETE("/website/records", apiwrap.Wrap(h.AdminDeleteRecordInWebsiteConfig))
@@ -507,4 +508,15 @@ func (h *WebsiteConfigHandler) AdminUpdatePushConfigByKey(ctx *gin.Context, req 
 		return nil, apiwrap.NewErrorResponseBody(400, "request body is nil.")
 	}
 	return apiwrap.SuccessResponse(), h.serv.UpdatePushConfigByKey(ctx, ctx.Param("key"), req)
+}
+
+func (h *WebsiteConfigHandler) AdminGetWebsiteConfig4Meta(ctx *gin.Context) (*apiwrap.ResponseBody[WebsiteConfigMetaVO], error) {
+	config, err := h.serv.GetWebSiteConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponseWithData(WebsiteConfigMetaVO{
+		WebsiteName: config.WebsiteName,
+		WebsiteIcon: config.WebsiteIcon,
+	}), nil
 }

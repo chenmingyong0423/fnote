@@ -34,8 +34,8 @@ func JwtParseMiddleware(isWebsiteInitialized func() bool) gin.HandlerFunc {
 			ctx.Next()
 			return
 		}
-		// 登录和初始化接口不需要 jwt
-		if uri == "/admin-api/login" || uri == "/admin-api/configs/check-initialization" {
+		// 这些接口不需要 jwt
+		if uri == "/admin-api/login" || uri == "/admin-api/configs/check-initialization" || uri == "/admin-api/configs/website/meta" {
 			ctx.Next()
 			return
 		}
