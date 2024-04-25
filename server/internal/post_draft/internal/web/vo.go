@@ -31,3 +31,9 @@ type PostDraftVO struct {
 	IsCommentAllowed bool                 `json:"is_comment_allowed"`
 	CreatedAt        int64                `json:"created_at"`
 }
+
+type PostDraftBriefVO struct {
+	Id        string `json:"id"`
+	Title     string `json:"title"`
+	CreatedAt int64  `json:"created_at"`
+}
