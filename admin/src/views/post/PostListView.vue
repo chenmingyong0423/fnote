@@ -12,7 +12,7 @@
 
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'id'">
-        {{ `/${record.id}` }}
+        <a :href="baseHost+'/posts/'+record.id" target="_blank">{{ `${baseHost}/posts/${record.id}`}}</a>
       </template>
       <template v-if="column.key === 'cover_img'">
         <a-image :width="200" :src="serverHost + record.cover_img" />
@@ -139,6 +139,7 @@ const columns = [
   }
 ]
 const serverHost = import.meta.env.VITE_API_HOST
+const baseHost = import.meta.env.VITE_BASE_HOST
 const req = ref<PageRequest>({
   pageNo: 1,
   pageSize: 5,
