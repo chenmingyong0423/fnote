@@ -25,6 +25,7 @@ import (
 type IPostLikeRepository interface {
 	Add(ctx context.Context, postLike domain.PostLike) (string, error)
 	DeleteById(ctx context.Context, id string) error
+	FindByPostIdAndIp(ctx context.Context, postId string, ip string) (*domain.PostLike, error)
 }
 
 var _ IPostLikeRepository = (*PostLikeRepository)(nil)
@@ -35,6 +36,14 @@ func NewPostLikeRepository(dao dao.IPostLikeDao) *PostLikeRepository {
 
 type PostLikeRepository struct {
 	dao dao.IPostLikeDao
+}
+
+func (r *PostLikeRepository) FindByPostIdAndIp(ctx context.Context, postId string, ip string) (*domain.PostLike, error) {
+	postLike, err := r.dao.FindByPostIdAndIp(ctx, postId, ip)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomain(postLike), nil
 }
 
 func (r *PostLikeRepository) DeleteById(ctx context.Context, id string) error {
@@ -51,4 +60,14 @@ func (r *PostLikeRepository) Add(ctx context.Context, postLike domain.PostLike) 
 		Ip:        postLike.Ip,
 		UserAgent: postLike.UserAgent,
 	})
+}
+
+func (r *PostLikeRepository) toDomain(postLike *dao.PostLike) *domain.PostLike {
+	return &domain.PostLike{
+		Id:        postLike.ID.Hex(),
+		PostId:    postLike.PostId,
+		Ip:        postLike.Ip,
+		UserAgent: postLike.UserAgent,
+		CreatedAt: postLike.CreatedAt.UnixMilli(),
+	}
 }

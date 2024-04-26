@@ -19,11 +19,14 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/repository"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type IPostLikeService interface {
 	Add(ctx context.Context, postLike domain.PostLike) (string, error)
 	DeleteById(ctx context.Context, id string) error
+	GetLikeStatus(ctx context.Context, id string, ip string) (bool, error)
 }
 
 var _ IPostLikeService = (*PostLikeService)(nil)
@@ -36,6 +39,14 @@ func NewPostLikeService(repo repository.IPostLikeRepository) *PostLikeService {
 
 type PostLikeService struct {
 	repo repository.IPostLikeRepository
+}
+
+func (s *PostLikeService) GetLikeStatus(ctx context.Context, postId string, ip string) (bool, error) {
+	postLike, err := s.repo.FindByPostIdAndIp(ctx, postId, ip)
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+		return false, err
+	}
+	return postLike != nil, nil
 }
 
 func (s *PostLikeService) Add(ctx context.Context, postLike domain.PostLike) (string, error) {

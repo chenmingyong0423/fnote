@@ -35,6 +35,7 @@ type PostLike struct {
 type IPostLikeDao interface {
 	Add(ctx context.Context, postLike *PostLike) (string, error)
 	DeleteById(ctx context.Context, objectID primitive.ObjectID) error
+	FindByPostIdAndIp(ctx context.Context, postId string, ip string) (*PostLike, error)
 }
 
 var _ IPostLikeDao = (*PostLikeDao)(nil)
@@ -45,6 +46,14 @@ func NewPostLikeDao(db *mongo.Database) *PostLikeDao {
 
 type PostLikeDao struct {
 	coll *mongox.Collection[PostLike]
+}
+
+func (d *PostLikeDao) FindByPostIdAndIp(ctx context.Context, postId string, ip string) (*PostLike, error) {
+	postLike, err := d.coll.Finder().Filter(query.BsonBuilder().Eq("post_id", postId).Eq("ip", ip).Build()).FindOne(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to find post_likes, post_id=%s, ip=%s", postLike, ip)
+	}
+	return postLike, nil
 }
 
 func (d *PostLikeDao) DeleteById(ctx context.Context, objectID primitive.ObjectID) error {
