@@ -19,7 +19,6 @@
     "build-only:nginx": "VITE_BUILD_DIR=admin vite build --mode nginx"
   },
   "dependencies": {
-    "@iconify-json/bi": "^1.1.23",
     "@kangc/v-md-editor": "^2.3.18",
     "ant-design-vue": "^4.0.8",
     "axios": "^1.6.3",
@@ -31,6 +30,8 @@
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
+    "@iconify-json/bi": "^1.1.23",
+    "@iconify-json/fa6-brands": "^1.1.19",
     "@rushstack/eslint-patch": "^1.3.3",
     "@tsconfig/node18": "^18.2.2",
     "@types/lodash-es": "^4.17.12",
