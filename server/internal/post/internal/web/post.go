@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"slices"
 	"sync"
 
 	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
@@ -158,10 +157,15 @@ func (h *PostHandler) GetPostBySug(ctx *gin.Context) (*apiwrap.ResponseBody[doma
 		}
 		return nil, err
 	}
+	// 查询点赞状态
+	liked, err := h.postLikeServ.GetLikeStatus(ctx, post.PrimaryPost.Id, ctx.ClientIP())
+	if err != nil {
+		return nil, err
+	}
 	return apiwrap.SuccessResponseWithData(domain.DetailPostVO{
 		PrimaryPost: post.PrimaryPost,
 		ExtraPost:   post.ExtraPost,
-		IsLiked:     slices.Contains(post.Likes, ctx.ClientIP()),
+		IsLiked:     liked,
 	}), nil
 }
 
@@ -183,6 +187,7 @@ func (h *PostHandler) AddLike(ctx *gin.Context) (*apiwrap.ResponseBody[any], err
 		if err != nil {
 			// 已点过赞
 			if mongo.IsDuplicateKeyError(err) {
+				slog.WarnContext(ctx, "post like", fmt.Sprintf("%+v", err), nil)
 				return apiwrap.SuccessResponse(), nil
 			}
 			return nil, err
