@@ -26,6 +26,7 @@ type IPostLikeRepository interface {
 	Add(ctx context.Context, postLike domain.PostLike) (string, error)
 	DeleteById(ctx context.Context, id string) error
 	FindByPostIdAndIp(ctx context.Context, postId string, ip string) (*domain.PostLike, error)
+	CountOfToday(ctx context.Context) (int64, error)
 }
 
 var _ IPostLikeRepository = (*PostLikeRepository)(nil)
@@ -36,6 +37,10 @@ func NewPostLikeRepository(dao dao.IPostLikeDao) *PostLikeRepository {
 
 type PostLikeRepository struct {
 	dao dao.IPostLikeDao
+}
+
+func (r *PostLikeRepository) CountOfToday(ctx context.Context) (int64, error) {
+	return r.dao.CountOfToday(ctx)
 }
 
 func (r *PostLikeRepository) FindByPostIdAndIp(ctx context.Context, postId string, ip string) (*domain.PostLike, error) {

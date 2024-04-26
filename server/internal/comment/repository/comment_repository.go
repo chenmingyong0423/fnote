@@ -45,6 +45,7 @@ type ICommentRepository interface {
 	FindCommentWithRepliesById(ctx context.Context, id string) (*domain.CommentWithReplies, error)
 	DeleteCommentById(ctx context.Context, id string) error
 	DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error
+	CountOfToday(ctx context.Context) (int64, error)
 }
 
 func NewCommentRepository(dao dao.ICommentDao) *CommentRepository {
@@ -57,6 +58,10 @@ var _ ICommentRepository = (*CommentRepository)(nil)
 
 type CommentRepository struct {
 	dao dao.ICommentDao
+}
+
+func (r *CommentRepository) CountOfToday(ctx context.Context) (int64, error) {
+	return r.dao.CountOfToday(ctx)
 }
 
 func (r *CommentRepository) DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error {

@@ -27,6 +27,7 @@ type IPostLikeService interface {
 	Add(ctx context.Context, postLike domain.PostLike) (string, error)
 	DeleteById(ctx context.Context, id string) error
 	GetLikeStatus(ctx context.Context, id string, ip string) (bool, error)
+	FindLikeCountToday(ctx context.Context) (int64, error)
 }
 
 var _ IPostLikeService = (*PostLikeService)(nil)
@@ -39,6 +40,10 @@ func NewPostLikeService(repo repository.IPostLikeRepository) *PostLikeService {
 
 type PostLikeService struct {
 	repo repository.IPostLikeRepository
+}
+
+func (s *PostLikeService) FindLikeCountToday(ctx context.Context) (int64, error) {
+	return s.repo.CountOfToday(ctx)
 }
 
 func (s *PostLikeService) GetLikeStatus(ctx context.Context, postId string, ip string) (bool, error) {

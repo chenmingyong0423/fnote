@@ -17,6 +17,7 @@ package dao
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/chenmingyong0423/go-mongox"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
@@ -36,6 +37,7 @@ type IPostLikeDao interface {
 	Add(ctx context.Context, postLike *PostLike) (string, error)
 	DeleteById(ctx context.Context, objectID primitive.ObjectID) error
 	FindByPostIdAndIp(ctx context.Context, postId string, ip string) (*PostLike, error)
+	CountOfToday(ctx context.Context) (int64, error)
 }
 
 var _ IPostLikeDao = (*PostLikeDao)(nil)
@@ -46,6 +48,11 @@ func NewPostLikeDao(db *mongo.Database) *PostLikeDao {
 
 type PostLikeDao struct {
 	coll *mongox.Collection[PostLike]
+}
+
+func (d *PostLikeDao) CountOfToday(ctx context.Context) (int64, error) {
+	start, end := d.getBeginAndEndTime()
+	return d.coll.Finder().Filter(query.BsonBuilder().Gte("created_at", start).Lte("created_at", end).Build()).Count(ctx)
 }
 
 func (d *PostLikeDao) FindByPostIdAndIp(ctx context.Context, postId string, ip string) (*PostLike, error) {
@@ -73,4 +80,10 @@ func (d *PostLikeDao) Add(ctx context.Context, postLike *PostLike) (string, erro
 		return "", errors.Wrapf(err, "failed to insert one into post_likes: %v", postLike)
 	}
 	return insertOneResult.InsertedID.(primitive.ObjectID).Hex(), nil
+}
+
+func (d *PostLikeDao) getBeginAndEndTime() (time.Time, time.Time) {
+	now := time.Now()
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0,
+		now.Location()), time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
 }
