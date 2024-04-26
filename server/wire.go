@@ -18,6 +18,7 @@ package main
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
+	"github.com/chenmingyong0423/fnote/server/internal/data_analysis"
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
 	"github.com/chenmingyong0423/fnote/server/internal/post"
@@ -51,6 +52,8 @@ func initializeApp() (*gin.Engine, error) {
 		wire.FieldsOf(new(*aggregate_post.Model), "Hdl"),
 		post_like.InitPostLikeModule,
 		wire.FieldsOf(new(*post_like.Model), "Hdl"),
+		data_analysis.InitDataAnalysisModule,
+		wire.FieldsOf(new(*data_analysis.Module), "Hdl"),
 		post.InitPostModule,
 		wire.FieldsOf(new(*post.Model), "Hdl", "Svc"),
 		ioc.FriendProviders,
@@ -61,7 +64,6 @@ func initializeApp() (*gin.Engine, error) {
 		ioc.CountStatsProviders,
 		ioc.TagProviders,
 		ioc.FileProviders,
-		ioc.DataAnalysisProviders,
 		ioc.BackupProviders,
 	))
 }

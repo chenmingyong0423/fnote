@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handler
+package web
 
 import (
 	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
@@ -37,6 +37,8 @@ type DataAnalysisHandler struct {
 func (h *DataAnalysisHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/admin-api/data-analysis")
 	routerGroup.GET("", apiwrap.Wrap(h.GetDataAnalysis))
+	//routerGroup.GET("/traffic/today", apiwrap.Wrap(h.GetTodayTrafficStats))
+	//routerGroup.GET("/traffic", apiwrap.Wrap(h.GetWebsiteCountStats))
 }
 
 func (h *DataAnalysisHandler) GetDataAnalysis(ctx *gin.Context) (*apiwrap.ResponseBody[vo.DataAnalysis], error) {
@@ -67,3 +69,18 @@ func (h *DataAnalysisHandler) GetDataAnalysis(ctx *gin.Context) (*apiwrap.Respon
 	result.TodayUserVisitCount = todayUserVisitCount
 	return apiwrap.SuccessResponseWithData(result), nil
 }
+
+type TodayTrafficStatsVO struct {
+	ViewCount     int64 `json:"view_count"`
+	UserViewCount int64 `json:"user_view_count"`
+	CommentCount  int64 `json:"comment_count"`
+	LikeCount     int64 `json:"like_count"`
+}
+
+//func (h *DataAnalysisHandler) GetTodayTrafficStats(ctx *gin.Context) (*apiwrap.ResponseBody[TodayTrafficStatsVO], error) {
+//
+//}
+//
+//func (h *DataAnalysisHandler) GetWebsiteCountStats(ctx *gin.Context) (T, error) {
+//
+//}
