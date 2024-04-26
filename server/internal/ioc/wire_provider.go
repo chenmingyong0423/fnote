@@ -29,7 +29,6 @@ import (
 	repository8 "github.com/chenmingyong0423/fnote/server/internal/count_stats/repository"
 	dao8 "github.com/chenmingyong0423/fnote/server/internal/count_stats/repository/dao"
 	service10 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
-	handler10 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/handler"
 	service7 "github.com/chenmingyong0423/fnote/server/internal/email/service"
 	handler9 "github.com/chenmingyong0423/fnote/server/internal/file/handler"
 	repository10 "github.com/chenmingyong0423/fnote/server/internal/file/repository"
@@ -44,10 +43,6 @@ import (
 	repository7 "github.com/chenmingyong0423/fnote/server/internal/message_template/repository"
 	dao7 "github.com/chenmingyong0423/fnote/server/internal/message_template/repository/dao"
 	service9 "github.com/chenmingyong0423/fnote/server/internal/message_template/service"
-	handler5 "github.com/chenmingyong0423/fnote/server/internal/post/handler"
-	repository5 "github.com/chenmingyong0423/fnote/server/internal/post/repository"
-	dao5 "github.com/chenmingyong0423/fnote/server/internal/post/repository/dao"
-	service5 "github.com/chenmingyong0423/fnote/server/internal/post/service"
 	handler8 "github.com/chenmingyong0423/fnote/server/internal/tag/handler"
 	repository9 "github.com/chenmingyong0423/fnote/server/internal/tag/repository"
 	dao9 "github.com/chenmingyong0423/fnote/server/internal/tag/repository/dao"
@@ -74,10 +69,6 @@ var (
 		wire.Bind(new(service4.IFriendService), new(*service4.FriendService)),
 		wire.Bind(new(repository4.IFriendRepository), new(*repository4.FriendRepository)),
 		wire.Bind(new(dao4.IFriendDao), new(*dao4.FriendDao)))
-	PostProviders = wire.NewSet(handler5.NewPostHandler, service5.NewPostService, repository5.NewPostRepository, dao5.NewPostDao,
-		wire.Bind(new(service5.IPostService), new(*service5.PostService)),
-		wire.Bind(new(repository5.IPostRepository), new(*repository5.PostRepository)),
-		wire.Bind(new(dao5.IPostDao), new(*dao5.PostDao)))
 	VlProviders = wire.NewSet(handler6.NewVisitLogHandler, service6.NewVisitLogService, repository6.NewVisitLogRepository, dao6.NewVisitLogDao,
 		wire.Bind(new(service6.IVisitLogService), new(*service6.VisitLogService)),
 		wire.Bind(new(repository6.IVisitLogRepository), new(*repository6.VisitLogRepository)),
@@ -107,8 +98,6 @@ var (
 		wire.Bind(new(repository10.IFileRepository), new(*repository10.FileRepository)),
 		wire.Bind(new(dao10.IFileDao), new(*dao10.FileDao)),
 	)
-
-	DataAnalysisProviders = wire.NewSet(handler10.NewDataAnalysisHandler)
 
 	BackupProviders = wire.NewSet(handler12.NewBackupHandler, service13.NewBackupService,
 		wire.Bind(new(service13.IBackupService), new(*service13.BackupService)),

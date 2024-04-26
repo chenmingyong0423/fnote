@@ -20,7 +20,7 @@ import (
 
 type (
 	Handler = web.AggregatePostHandler
-	Model   struct {
+	Module  struct {
 		Hdl *Handler
 	}
 )

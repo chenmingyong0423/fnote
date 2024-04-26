@@ -26,7 +26,7 @@ type (
 	PostDraft          = domain.PostDraft
 	Category4PostDraft = domain.Category4PostDraft
 	Tag4PostDraft      = domain.Tag4PostDraft
-	Model              struct {
+	Module             struct {
 		Svc Service
 		Hdl *Handler
 	}

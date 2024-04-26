@@ -18,9 +18,11 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"log/slog"
 	"strings"
+
+	"github.com/chenmingyong0423/fnote/server/internal/post/internal/repository"
+	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
 	service3 "github.com/chenmingyong0423/fnote/server/internal/file/service"
 	"github.com/chenmingyong0423/gkit/slice"
@@ -35,7 +37,6 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/server/internal/post/repository"
 )
 
 type IPostService interface {
