@@ -24,7 +24,7 @@ type (
 	Handler  = web.PostLikeHandler
 	Service  = service.IPostLikeService
 	PostLike = domain.PostLike
-	Model    struct {
+	Module   struct {
 		Svc Service
 		Hdl *Handler
 	}

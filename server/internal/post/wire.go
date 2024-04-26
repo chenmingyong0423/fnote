@@ -34,11 +34,11 @@ var PostProviders = wire.NewSet(web.NewPostHandler, service.NewPostService, repo
 	wire.Bind(new(repository.IPostRepository), new(*repository.PostRepository)),
 	wire.Bind(new(dao.IPostDao), new(*dao.PostDao)))
 
-func InitPostModule(mongoDB *mongo.Database, cfgModel *website_config.Model, countStats csServ.ICountStatsService, fileService fServ.IFileService, postLikeModel *post_like.Model) *Model {
+func InitPostModule(mongoDB *mongo.Database, cfgModel *website_config.Module, countStats csServ.ICountStatsService, fileService fServ.IFileService, postLikeModel *post_like.Module) *Module {
 	panic(wire.Build(
 		PostProviders,
-		wire.FieldsOf(new(*website_config.Model), "Svc"),
-		wire.FieldsOf(new(*post_like.Model), "Svc"),
-		wire.Struct(new(Model), "Svc", "Hdl"),
+		wire.FieldsOf(new(*website_config.Module), "Svc"),
+		wire.FieldsOf(new(*post_like.Module), "Svc"),
+		wire.Struct(new(Module), "Svc", "Hdl"),
 	))
 }

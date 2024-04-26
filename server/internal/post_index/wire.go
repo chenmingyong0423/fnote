@@ -26,10 +26,10 @@ import (
 var PostIndexProviders = wire.NewSet(web.NewPostIndexHandler, service.NewPostIndexService, service.NewBaiduService,
 	wire.Bind(new(service.IPostIndexService), new(*service.PostIndexService)))
 
-func InitPostIndexModule(cfgServ *website_config.Model) *Model {
+func InitPostIndexModule(cfgServ *website_config.Module) *Module {
 	panic(wire.Build(
-		wire.FieldsOf(new(*website_config.Model), "Svc"),
+		wire.FieldsOf(new(*website_config.Module), "Svc"),
 		PostIndexProviders,
-		wire.Struct(new(Model), "Svc", "Hdl"),
+		wire.Struct(new(Module), "Svc", "Hdl"),
 	))
 }

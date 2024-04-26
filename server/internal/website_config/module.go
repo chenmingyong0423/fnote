@@ -22,7 +22,7 @@ import (
 type (
 	Handler = web.WebsiteConfigHandler
 	Service = service.IWebsiteConfigService
-	Model   struct {
+	Module  struct {
 		Svc Service
 		Hdl *Handler
 	}

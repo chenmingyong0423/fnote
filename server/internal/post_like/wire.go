@@ -30,9 +30,9 @@ var PostLikeProviders = wire.NewSet(web.NewPostLikeHandler, service.NewPostLikeS
 	wire.Bind(new(repository.IPostLikeRepository), new(*repository.PostLikeRepository)),
 	wire.Bind(new(dao.IPostLikeDao), new(*dao.PostLikeDao)))
 
-func InitPostLikeModule(mongoDB *mongo.Database) *Model {
+func InitPostLikeModule(mongoDB *mongo.Database) *Module {
 	panic(wire.Build(
 		PostLikeProviders,
-		wire.Struct(new(Model), "Svc", "Hdl"),
+		wire.Struct(new(Module), "Svc", "Hdl"),
 	))
 }

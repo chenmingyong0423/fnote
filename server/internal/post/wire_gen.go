@@ -21,18 +21,18 @@ import (
 
 // Injectors from wire.go:
 
-func InitPostModule(mongoDB *mongo.Database, cfgModel *website_config.Model, countStats service.ICountStatsService, fileService service2.IFileService, postLikeModel *post_like.Model) *Model {
+func InitPostModule(mongoDB *mongo.Database, cfgModel *website_config.Module, countStats service.ICountStatsService, fileService service2.IFileService, postLikeModel *post_like.Module) *Module {
 	postDao := dao.NewPostDao(mongoDB)
 	postRepository := repository.NewPostRepository(postDao)
 	iWebsiteConfigService := cfgModel.Svc
 	postService := service3.NewPostService(postRepository, iWebsiteConfigService, countStats, fileService)
 	iPostLikeService := postLikeModel.Svc
 	postHandler := web.NewPostHandler(postService, iWebsiteConfigService, iPostLikeService, countStats)
-	model := &Model{
+	module := &Module{
 		Svc: postService,
 		Hdl: postHandler,
 	}
-	return model
+	return module
 }
 
 // wire.go:

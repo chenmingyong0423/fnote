@@ -30,9 +30,9 @@ var ConfigProviders = wire.NewSet(web.NewWebsiteConfigHandler, service.NewWebsit
 	wire.Bind(new(repository.IWebsiteConfigRepository), new(*repository.WebsiteConfigRepository)),
 	wire.Bind(new(dao.IWebsiteConfigDao), new(*dao.WebsiteConfigDao)))
 
-func InitWebsiteConfigModule(mongoDB *mongo.Database) *Model {
+func InitWebsiteConfigModule(mongoDB *mongo.Database) *Module {
 	panic(wire.Build(
 		ConfigProviders,
-		wire.Struct(new(Model), "Svc", "Hdl"),
+		wire.Struct(new(Module), "Svc", "Hdl"),
 	))
 }
