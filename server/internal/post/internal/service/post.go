@@ -18,9 +18,11 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"log/slog"
 	"strings"
+
+	"github.com/chenmingyong0423/fnote/server/internal/post/internal/repository"
+	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
 	service3 "github.com/chenmingyong0423/fnote/server/internal/file/service"
 	"github.com/chenmingyong0423/gkit/slice"
@@ -35,7 +37,6 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/server/internal/post/repository"
 )
 
 type IPostService interface {
@@ -151,7 +152,7 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
-		gErr = s.fileService.DeleteIndexFileMeta(ctx, fid, id, "post")
+		gErr = s.fileService.DeleteIndexFileMeta(ctx, fid, id, "post_t")
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
@@ -210,7 +211,7 @@ func (s *PostService) addPostCallback(ctx context.Context, post *domain.Post) {
 		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 		l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 	}
-	gErr = s.fileService.IndexFileMeta(ctx, fileId, post.Id, "post")
+	gErr = s.fileService.IndexFileMeta(ctx, fileId, post.Id, "post_t")
 	if gErr != nil {
 		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 		l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))

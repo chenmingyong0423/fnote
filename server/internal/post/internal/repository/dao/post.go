@@ -95,10 +95,10 @@ type PostDao struct {
 func (d *PostDao) IncreasePostLikeCount(ctx context.Context, postId string) error {
 	updateResult, err := d.coll.Updater().Filter(query.Id(postId)).Updates(update.Inc("like_count", 1)).UpdateOne(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fails to increase the like_count of post, id=%s", postId)
+		return errors.Wrapf(err, "fails to increase the like_count of post_t, id=%s", postId)
 	}
 	if updateResult.ModifiedCount == 0 {
-		return fmt.Errorf("updateResult.ModifiedCount = 0, fails to increase the like_count of post, id=%s", postId)
+		return fmt.Errorf("updateResult.ModifiedCount = 0, fails to increase the like_count of post_t, id=%s", postId)
 	}
 	return nil
 }
@@ -106,10 +106,10 @@ func (d *PostDao) IncreasePostLikeCount(ctx context.Context, postId string) erro
 func (d *PostDao) UpdateIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error {
 	result, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("is_comment_allowed", isCommentAllowed).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fails to update the is_comment_allowed of post, id=%s, isCommentAllowed=%v", id, isCommentAllowed)
+		return errors.Wrapf(err, "fails to update the is_comment_allowed of post_t, id=%s, isCommentAllowed=%v", id, isCommentAllowed)
 	}
 	if result.ModifiedCount == 0 {
-		return fmt.Errorf("fails to update the is_comment_allowed of post, id=%s, isCommentAllowed=%v", id, isCommentAllowed)
+		return fmt.Errorf("fails to update the is_comment_allowed of post_t, id=%s, isCommentAllowed=%v", id, isCommentAllowed)
 	}
 	return nil
 }
@@ -117,10 +117,10 @@ func (d *PostDao) UpdateIsCommentAllowedById(ctx context.Context, id string, isC
 func (d *PostDao) UpdateIsDisplayedById(ctx context.Context, id string, isDisplayed bool) error {
 	result, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("is_displayed", isDisplayed).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fails to update the is_displayed of post, id=%s, isDisplayed=%v", id, isDisplayed)
+		return errors.Wrapf(err, "fails to update the is_displayed of post_t, id=%s, isDisplayed=%v", id, isDisplayed)
 	}
 	if result.ModifiedCount == 0 {
-		return fmt.Errorf("fails to update the is_displayed of post, id=%s, isDisplayed=%v", id, isDisplayed)
+		return fmt.Errorf("fails to update the is_displayed of post_t, id=%s, isDisplayed=%v", id, isDisplayed)
 	}
 	return nil
 }
@@ -128,10 +128,10 @@ func (d *PostDao) UpdateIsDisplayedById(ctx context.Context, id string, isDispla
 func (d *PostDao) SavePost(ctx context.Context, post *Post) error {
 	result, err := d.coll.Updater().Filter(query.Id(post.Id)).UpdatesWithOperator("$set", post).UpdateOne(ctx, options.Update().SetUpsert(true))
 	if err != nil {
-		return errors.Wrapf(err, "fails to update a post, post=%v", post)
+		return errors.Wrapf(err, "fails to update a post_t, post_t=%v", post)
 	}
 	if result.ModifiedCount == 0 && result.UpsertedCount == 0 {
-		return fmt.Errorf("fails to update a post, post=%v", post)
+		return fmt.Errorf("fails to update a post_t, post_t=%v", post)
 	}
 	return nil
 }
@@ -141,10 +141,10 @@ func (d *PostDao) DecreaseByField(ctx context.Context, id string, filedName stri
 	u := update.BsonBuilder().Inc(filedName, -cnt).Set("update_time", time.Now().Unix()).Build()
 	result, err := d.coll.Updater().Filter(filter).Updates(u).UpdateOne(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fails to decrease the %s of post, id=%s, cnt=%d", filedName, id, cnt)
+		return errors.Wrapf(err, "fails to decrease the %s of post_t, id=%s, cnt=%d", filedName, id, cnt)
 	}
 	if result.ModifiedCount == 0 {
-		return fmt.Errorf("fails to decrease the %s of post, id=%s, cnt=%d", filedName, id, cnt)
+		return fmt.Errorf("fails to decrease the %s of post_t, id=%s, cnt=%d", filedName, id, cnt)
 	}
 	return nil
 }
@@ -152,7 +152,7 @@ func (d *PostDao) DecreaseByField(ctx context.Context, id string, filedName stri
 func (d *PostDao) FindById(ctx context.Context, id string) (*Post, error) {
 	post, err := d.coll.Finder().Filter(query.Id(id)).FindOne(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fails to find the document from post, id=%s", id)
+		return nil, errors.Wrapf(err, "fails to find the document from post_t, id=%s", id)
 	}
 	return post, nil
 }
@@ -160,10 +160,10 @@ func (d *PostDao) FindById(ctx context.Context, id string) (*Post, error) {
 func (d *PostDao) DeleteById(ctx context.Context, id string) error {
 	result, err := d.coll.Deleter().Filter(query.Id(id)).DeleteOne(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fails to delete a post, id=%s", id)
+		return errors.Wrapf(err, "fails to delete a post_t, id=%s", id)
 	}
 	if result.DeletedCount == 0 {
-		return fmt.Errorf("fails to delete a post, id=%s", id)
+		return fmt.Errorf("fails to delete a post_t, id=%s", id)
 	}
 	return nil
 }
@@ -171,7 +171,7 @@ func (d *PostDao) DeleteById(ctx context.Context, id string) error {
 func (d *PostDao) AddPost(ctx context.Context, post *Post) error {
 	_, err := d.coll.Creator().InsertOne(ctx, post)
 	if err != nil {
-		return errors.Wrapf(err, "fails to insert a post, post=%v", post)
+		return errors.Wrapf(err, "fails to insert a post_t, post_t=%v", post)
 	}
 	return nil
 }
@@ -179,10 +179,10 @@ func (d *PostDao) AddPost(ctx context.Context, post *Post) error {
 func (d *PostDao) IncreaseFieldById(ctx context.Context, id string, field string) error {
 	result, err := d.coll.Updater().Filter(bsonx.Id(id)).Updates(update.Inc(field, 1)).UpdateOne(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fails to increase the %s of post, id=%s", field, id)
+		return errors.Wrapf(err, "fails to increase the %s of post_t, id=%s", field, id)
 	}
 	if result.ModifiedCount == 0 {
-		return fmt.Errorf("fails to increase the %s of post, id=%s", field, id)
+		return fmt.Errorf("fails to increase the %s of post_t, id=%s", field, id)
 	}
 	return nil
 }
@@ -218,7 +218,7 @@ func (d *PostDao) AddLike(ctx context.Context, id string, ip string) error {
 func (d *PostDao) FindByIdAndIp(ctx context.Context, id string, ip string) (*Post, error) {
 	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add("likes", ip).Build()).FindOne(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fails to find the documents from post, id=%s, ip=%s", id, ip)
+		return nil, errors.Wrapf(err, "fails to find the documents from post_t, id=%s, ip=%s", id, ip)
 	}
 	return post, nil
 }
@@ -226,7 +226,7 @@ func (d *PostDao) FindByIdAndIp(ctx context.Context, id string, ip string) (*Pos
 func (d *PostDao) GetPunishedPostById(ctx context.Context, id string) (*Post, error) {
 	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add("is_displayed", true).Build()).FindOne(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fails to find the document from post, id=%s", id)
+		return nil, errors.Wrapf(err, "fails to find the document from post_t, id=%s", id)
 	}
 	return post, nil
 }
@@ -234,11 +234,11 @@ func (d *PostDao) GetPunishedPostById(ctx context.Context, id string) (*Post, er
 func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error) {
 	cnt, err := d.coll.Finder().Filter(con).Count(ctx)
 	if err != nil {
-		return nil, 0, errors.Wrapf(err, "fails to find the count of documents from post, con=%v", con)
+		return nil, 0, errors.Wrapf(err, "fails to find the count of documents from post_t, con=%v", con)
 	}
 	posts, err := d.coll.Finder().Filter(con).Find(ctx, findOptions)
 	if err != nil {
-		return nil, 0, errors.Wrapf(err, "fails to find the documents from post, con=%v, findOptions=%v", con, findOptions)
+		return nil, 0, errors.Wrapf(err, "fails to find the documents from post_t, con=%v, findOptions=%v", con, findOptions)
 	}
 	return posts, cnt, nil
 }
@@ -248,7 +248,7 @@ func (d *PostDao) GetFrontPosts(ctx context.Context, count int64) ([]*Post, erro
 		bsonx.NewD().Add("sticky_weight", -1).Add("create_time", -1).Build()).SetLimit(count)
 	posts, err := d.coll.Finder().Filter(bsonx.M("is_displayed", true)).Find(ctx, findOptions)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fails to find the documents from post, findOptions=%v", findOptions)
+		return nil, errors.Wrapf(err, "fails to find the documents from post_t, findOptions=%v", findOptions)
 	}
 	return posts, nil
 }

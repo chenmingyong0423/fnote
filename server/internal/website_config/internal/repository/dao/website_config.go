@@ -65,12 +65,12 @@ type WebsiteConfigDao struct {
 }
 
 func (d *WebsiteConfigDao) UpdatePostIndexProps(ctx context.Context, updates bson.D) error {
-	updateResult, err := d.coll.Updater().Filter(query.Eq("typ", "post index")).Updates(updates).UpdateOne(ctx)
+	updateResult, err := d.coll.Updater().Filter(query.Eq("typ", "post_t index")).Updates(updates).UpdateOne(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fails to update website_config, typ=post index, updates=%v", updates)
+		return errors.Wrapf(err, "fails to update website_config, typ=post_t index, updates=%v", updates)
 	}
 	if updateResult.ModifiedCount == 0 {
-		return fmt.Errorf("ModifiedCount=0, fails to update website_config, typ=post index, updates=%v", updates)
+		return fmt.Errorf("ModifiedCount=0, fails to update website_config, typ=post_t index, updates=%v", updates)
 	}
 	return nil
 }

@@ -1,4 +1,4 @@
-// Copyright 2023 chenmingyong0423
+// Copyright 2024 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handler
+package web
 
 import (
 	"fmt"
-	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
-	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	"log/slog"
 	"net/http"
 	"slices"
 	"sync"
+
+	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+	"github.com/chenmingyong0423/fnote/server/internal/post/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
@@ -40,7 +42,6 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/server/internal/post/service"
 	"github.com/gin-gonic/gin"
 )
 
