@@ -2,7 +2,11 @@
   <a-card title="今日数据">
     <a-flex gap="middle" horizontal>
       <a-statistic title="今日访问量（PV）" :value="todayTrafficStatsVO.view_count" class="w-25%" />
-      <a-statistic title="今日访问用户" :value="todayTrafficStatsVO.user_view_count" class="w-25%" />
+      <a-statistic
+        title="今日访问用户"
+        :value="todayTrafficStatsVO.user_view_count"
+        class="w-25%"
+      />
       <a-statistic title="今日评论数" :value="todayTrafficStatsVO.comment_count" class="w-25%" />
       <a-statistic title="今日点赞数" :value="todayTrafficStatsVO.like_count" class="w-25%" />
     </a-flex>
@@ -19,7 +23,8 @@
 <script lang="ts" setup>
 import { message } from 'ant-design-vue'
 import {
-  GetTodayTrafficStats, GetTrafficStats,
+  GetTodayTrafficStats,
+  GetTrafficStats,
   type TodayTrafficStatsVO,
   type TrafficStatsVO
 } from '@/interfaces/DataAnalysis'
@@ -53,7 +58,6 @@ const trafficStatsVO = ref<TrafficStatsVO>({
   comment_count: 0,
   like_count: 0
 })
-
 
 const getTrafficStats = async () => {
   try {

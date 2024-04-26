@@ -1,9 +1,7 @@
 <template>
   <a-layout>
     <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <div class="logo text-center text-blue">
-        后台管理
-      </div>
+      <div class="logo text-center text-blue">后台管理</div>
       <a-menu
         v-model:openKeys="state.openKeys"
         v-model:selectedKeys="state.selectedKeys"
@@ -35,7 +33,15 @@ const collapsed = ref<boolean>(false)
 import router from '@/router'
 
 import { reactive, h } from 'vue'
-import { MenuOutlined, DashboardOutlined, BookOutlined, CommentOutlined, TagsOutlined, TeamOutlined, SettingOutlined } from '@ant-design/icons-vue'
+import {
+  MenuOutlined,
+  DashboardOutlined,
+  BookOutlined,
+  CommentOutlined,
+  TagsOutlined,
+  TeamOutlined,
+  SettingOutlined
+} from '@ant-design/icons-vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
 const path = route.path
@@ -154,7 +160,6 @@ const items = reactive([
     ]
   }
 ])
-
 
 const itemClick = (item: any) => {
   router.push(item.key)
