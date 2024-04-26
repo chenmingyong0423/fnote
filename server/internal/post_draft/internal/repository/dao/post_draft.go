@@ -17,9 +17,10 @@ package dao
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"time"
 
 	"github.com/chenmingyong0423/gkit/uuidx"
 	"github.com/chenmingyong0423/go-mongox"
@@ -93,11 +94,11 @@ type PostDraftDao struct {
 func (d *PostDraftDao) QueryPage(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*PostDraft, int64, error) {
 	count, err := d.coll.Finder().Filter(cond).Count(ctx)
 	if err != nil {
-		return nil, 0, errors.Wrapf(err, "failed to query the count of post draft: %v", cond)
+		return nil, 0, errors.Wrapf(err, "failed to query the count of post_t draft: %v", cond)
 	}
 	postDrafts, err := d.coll.Finder().Filter(cond).Find(ctx, findOptions)
 	if err != nil {
-		return nil, 0, errors.Wrapf(err, "failed to query post draft page: %v, %v", cond, findOptions)
+		return nil, 0, errors.Wrapf(err, "failed to query post_t draft page: %v, %v", cond, findOptions)
 	}
 	return postDrafts, count, nil
 }
@@ -113,7 +114,7 @@ func (d *PostDraftDao) DeleteById(ctx context.Context, id string) (int64, error)
 func (d *PostDraftDao) GetById(ctx context.Context, id string) (*PostDraft, error) {
 	postDraft, err := d.coll.Finder().Filter(query.Id(id)).FindOne(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get post draft by id: %s", id)
+		return nil, errors.Wrapf(err, "failed to get post_t draft by id: %s", id)
 	}
 	return postDraft, nil
 }
@@ -121,10 +122,10 @@ func (d *PostDraftDao) GetById(ctx context.Context, id string) (*PostDraft, erro
 func (d *PostDraftDao) Save(ctx context.Context, postDraft *PostDraft) (string, error) {
 	updateResult, err := d.coll.Updater().Filter(query.Id(postDraft.ID)).Replacement(postDraft).Upsert(ctx)
 	if err != nil {
-		return "", errors.Wrapf(err, "failed to save post draft: %v", postDraft)
+		return "", errors.Wrapf(err, "failed to save post_t draft: %v", postDraft)
 	}
 	if updateResult.UpsertedCount == 0 && updateResult.ModifiedCount == 0 {
-		return "", fmt.Errorf("UpsertedCount=0 || ModifiedCount=0, failed to save post draft: %v", postDraft)
+		return "", fmt.Errorf("UpsertedCount=0 || ModifiedCount=0, failed to save post_t draft: %v", postDraft)
 	}
 	if id, ok := updateResult.UpsertedID.(string); ok {
 		return id, nil

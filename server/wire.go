@@ -20,6 +20,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
+	"github.com/chenmingyong0423/fnote/server/internal/post"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
@@ -49,9 +50,10 @@ func initializeApp() (*gin.Engine, error) {
 		aggregate_post.InitAggregatePostModule,
 		wire.FieldsOf(new(*aggregate_post.Model), "Hdl"),
 		post_like.InitPostLikeModule,
-		wire.FieldsOf(new(*post_like.Model), "Hdl", "Svc"),
+		wire.FieldsOf(new(*post_like.Model), "Hdl"),
+		post.InitPostModule,
+		wire.FieldsOf(new(*post.Model), "Hdl", "Svc"),
 		ioc.FriendProviders,
-		ioc.PostProviders,
 		ioc.VlProviders,
 		ioc.EmailProviders,
 		ioc.MsgProviders,
