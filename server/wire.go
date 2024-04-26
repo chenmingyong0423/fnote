@@ -18,8 +18,10 @@ package main
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
+	"github.com/chenmingyong0423/fnote/server/internal/data_analysis"
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
+	"github.com/chenmingyong0423/fnote/server/internal/post"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
@@ -40,18 +42,21 @@ func initializeApp() (*gin.Engine, error) {
 		ioc.CategoryProviders,
 		ioc.CommentProviders,
 		website_config.InitWebsiteConfigModule,
-		wire.FieldsOf(new(*website_config.Model), "Svc"),
-		wire.FieldsOf(new(*website_config.Model), "Hdl"),
+		wire.FieldsOf(new(*website_config.Module), "Svc"),
+		wire.FieldsOf(new(*website_config.Module), "Hdl"),
 		post_index.InitPostIndexModule,
-		wire.FieldsOf(new(*post_index.Model), "Hdl"),
+		wire.FieldsOf(new(*post_index.Module), "Hdl"),
 		post_draft.InitPostDraftModule,
-		wire.FieldsOf(new(*post_draft.Model), "Hdl"),
+		wire.FieldsOf(new(*post_draft.Module), "Hdl"),
 		aggregate_post.InitAggregatePostModule,
-		wire.FieldsOf(new(*aggregate_post.Model), "Hdl"),
+		wire.FieldsOf(new(*aggregate_post.Module), "Hdl"),
 		post_like.InitPostLikeModule,
-		wire.FieldsOf(new(*post_like.Model), "Hdl", "Svc"),
+		wire.FieldsOf(new(*post_like.Module), "Hdl"),
+		data_analysis.InitDataAnalysisModule,
+		wire.FieldsOf(new(*data_analysis.Module), "Hdl"),
+		post.InitPostModule,
+		wire.FieldsOf(new(*post.Module), "Hdl", "Svc"),
 		ioc.FriendProviders,
-		ioc.PostProviders,
 		ioc.VlProviders,
 		ioc.EmailProviders,
 		ioc.MsgProviders,
@@ -59,7 +64,6 @@ func initializeApp() (*gin.Engine, error) {
 		ioc.CountStatsProviders,
 		ioc.TagProviders,
 		ioc.FileProviders,
-		ioc.DataAnalysisProviders,
 		ioc.BackupProviders,
 	))
 }

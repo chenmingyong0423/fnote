@@ -14,22 +14,21 @@
 
 //go:build wireinject
 
-package post_index
+package data_analysis
 
 import (
-	"github.com/chenmingyong0423/fnote/server/internal/post_index/internal/service"
-	"github.com/chenmingyong0423/fnote/server/internal/post_index/internal/web"
-	"github.com/chenmingyong0423/fnote/server/internal/website_config"
+	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+	"github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/web"
+	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
 	"github.com/google/wire"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var PostIndexProviders = wire.NewSet(web.NewPostIndexHandler, service.NewPostIndexService, service.NewBaiduService,
-	wire.Bind(new(service.IPostIndexService), new(*service.PostIndexService)))
+var DataAnalysisProviders = wire.NewSet(web.NewDataAnalysisHandler)
 
-func InitPostIndexModule(cfgServ *website_config.Module) *Module {
+func InitDataAnalysisModule(mongoDB *mongo.Database, vlServ service.IVisitLogService, csServ csServ.ICountStatsService) *Module {
 	panic(wire.Build(
-		wire.FieldsOf(new(*website_config.Module), "Svc"),
-		PostIndexProviders,
-		wire.Struct(new(Module), "Svc", "Hdl"),
+		DataAnalysisProviders,
+		wire.Struct(new(Module), "Hdl"),
 	))
 }

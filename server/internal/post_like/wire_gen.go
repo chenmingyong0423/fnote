@@ -17,16 +17,16 @@ import (
 
 // Injectors from wire.go:
 
-func InitPostLikeModule(mongoDB *mongo.Database) *Model {
+func InitPostLikeModule(mongoDB *mongo.Database) *Module {
 	postLikeDao := dao.NewPostLikeDao(mongoDB)
 	postLikeRepository := repository.NewPostLikeRepository(postLikeDao)
 	postLikeService := service.NewPostLikeService(postLikeRepository)
 	postLikeHandler := web.NewPostLikeHandler(postLikeService)
-	model := &Model{
+	module := &Module{
 		Svc: postLikeService,
 		Hdl: postLikeHandler,
 	}
-	return model
+	return module
 }
 
 // wire.go:

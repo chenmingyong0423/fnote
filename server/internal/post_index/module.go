@@ -22,7 +22,7 @@ import (
 type (
 	Handler = web.PostIndexHandler
 	Service = service.IPostIndexService
-	Model   struct {
+	Module  struct {
 		Svc Service
 		Hdl *Handler
 	}

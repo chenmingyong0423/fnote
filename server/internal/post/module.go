@@ -12,19 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package post_like
+package post
 
 import (
-	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/domain"
-	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/service"
-	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/web"
+	"github.com/chenmingyong0423/fnote/server/internal/post/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/post/internal/web"
 )
 
 type (
-	Handler  = web.PostLikeHandler
-	Service  = service.IPostLikeService
-	PostLike = domain.PostLike
-	Module   struct {
+	Handler = web.PostHandler
+	Service = service.IPostService
+	Module  struct {
 		Svc Service
 		Hdl *Handler
 	}

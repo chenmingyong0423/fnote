@@ -353,7 +353,7 @@ const like = async () => {
   try {
     let likeRes: any = await likePost(id);
     let res: IBaseResponse = likeRes.data.value;
-    if (res?.code === 200) {
+    if (res?.code === 0) {
       post.value!.is_liked = true;
       post.value!.like_count++;
     } else {
