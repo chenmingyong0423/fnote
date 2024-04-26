@@ -18,16 +18,17 @@ package aggregate_post
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post/internal/web"
-	postServ "github.com/chenmingyong0423/fnote/server/internal/post/service"
+	"github.com/chenmingyong0423/fnote/server/internal/post"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/google/wire"
 )
 
 var AggregatePostProviders = wire.NewSet(web.NewAggregatePostHandler)
 
-func InitAggregatePostModule(postServ postServ.IPostService, postDraftModel *post_draft.Model) *Model {
+func InitAggregatePostModule(postModel *post.Model, postDraftModel *post_draft.Model) *Model {
 	panic(wire.Build(
 		wire.FieldsOf(new(*post_draft.Model), "Svc"),
+		wire.FieldsOf(new(*post.Model), "Svc"),
 		AggregatePostProviders,
 		wire.Struct(new(Model), "Hdl"),
 	))

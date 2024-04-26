@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/chenmingyong0423/fnote/server/internal/post"
+
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
@@ -38,13 +40,12 @@ import (
 	msgService "github.com/chenmingyong0423/fnote/server/internal/message/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
-	postServ "github.com/chenmingyong0423/fnote/server/internal/post/service"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NewCommentHandler(serv service.ICommentService, cfgService website_config.Service, postServ postServ.IPostService, msgServ msgService.IMessageService, statsServ csService.ICountStatsService) *CommentHandler {
+func NewCommentHandler(serv service.ICommentService, cfgService website_config.Service, postServ post.Service, msgServ msgService.IMessageService, statsServ csService.ICountStatsService) *CommentHandler {
 	return &CommentHandler{
 		serv:       serv,
 		cfgService: cfgService,
@@ -57,7 +58,7 @@ func NewCommentHandler(serv service.ICommentService, cfgService website_config.S
 type CommentHandler struct {
 	serv       service.ICommentService
 	cfgService website_config.Service
-	postServ   postServ.IPostService
+	postServ   post.Service
 	msgServ    msgService.IMessageService
 	statsServ  csService.ICountStatsService
 }

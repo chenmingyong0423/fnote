@@ -8,16 +8,17 @@ package aggregate_post
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post/internal/web"
-	"github.com/chenmingyong0423/fnote/server/internal/post/service"
+	"github.com/chenmingyong0423/fnote/server/internal/post"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/google/wire"
 )
 
 // Injectors from wire.go:
 
-func InitAggregatePostModule(postServ service.IPostService, postDraftModel *post_draft.Model) *Model {
+func InitAggregatePostModule(postModel *post.Model, postDraftModel *post_draft.Model) *Model {
+	iPostService := postModel.Svc
 	iPostDraftService := postDraftModel.Svc
-	aggregatePostHandler := web.NewAggregatePostHandler(postServ, iPostDraftService)
+	aggregatePostHandler := web.NewAggregatePostHandler(iPostService, iPostDraftService)
 	model := &Model{
 		Hdl: aggregatePostHandler,
 	}
