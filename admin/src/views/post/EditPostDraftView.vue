@@ -16,7 +16,8 @@
 import { reactive, ref } from 'vue'
 import {
   type Category4Post,
-  type Post4Edit, type PostRequest,
+  type Post4Edit,
+  type PostRequest,
   type Tag4Post,
   PublishPost
 } from '@/interfaces/Post'
@@ -25,7 +26,12 @@ import { GetSelectedCategories, type SelectCategory } from '@/interfaces/Categor
 import { GetSelectedTags, type SelectTag } from '@/interfaces/Tag'
 import { useRoute, useRouter } from 'vue-router'
 import PostEditView from '@/views/post/PostEditView.vue'
-import { GetPostDraftDetail, type PostDraftDetail, type PostDraftRequest, SavePostDraft } from '@/interfaces/PostDraft'
+import {
+  GetPostDraftDetail,
+  type PostDraftDetail,
+  type PostDraftRequest,
+  SavePostDraft
+} from '@/interfaces/PostDraft'
 import axios from 'axios'
 
 const route = useRoute()
@@ -84,7 +90,7 @@ const getPostDraftById = async (id: string) => {
       message.error(response.data.message)
       return
     }
-    const postDraft : PostDraftDetail = response.data.data
+    const postDraft: PostDraftDetail = response.data.data
     if (postDraft) {
       post4Edit.id = postDraft.id
       post4Edit.author = postDraft.author
@@ -118,8 +124,8 @@ const getPostDraftById = async (id: string) => {
       }
       switch (error.response.status) {
         case 404:
-          message.error("查询草稿失败，id 不存在")
-          await router.push("/home/post/list")
+          message.error('查询草稿失败，id 不存在')
+          await router.push('/home/post/list')
           break
       }
     } else {

@@ -321,8 +321,7 @@ export const DeleteSocial = (id: string) => {
   })
 }
 
-export interface SocialConfigRequest {
-}
+export interface SocialConfigRequest {}
 
 export const UpdateSocial = (id: string, req: SocialConfigRequest) => {
   return instance({

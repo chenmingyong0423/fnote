@@ -50,7 +50,6 @@
         </div>
       </a-descriptions-item>
       <a-descriptions-item label="分享封面">
-
         <StaticUpload
           v-if="editable"
           :image-url="data.og_image"
@@ -68,8 +67,7 @@
       </div>
     </div>
   </div>
-  <div>
-  </div>
+  <div></div>
 </template>
 <script lang="ts" setup>
 import { GetSeo, type SeoConfig, UpdateSeo } from '@/interfaces/Config'
