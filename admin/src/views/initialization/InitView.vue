@@ -228,6 +228,8 @@ import { useUserStore } from '@/stores/user'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
 import type { NamePath } from 'ant-design-vue/es/form/interface'
 
+document.title = '内容发布统计 - 后台管理'
+
 const userStore = useUserStore()
 
 const formState: UnwrapRef<InitReq> = reactive({

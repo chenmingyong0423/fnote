@@ -92,6 +92,8 @@ import router from '@/router'
 import dayjs from 'dayjs'
 import { message } from 'ant-design-vue'
 
+document.title = '文章列表 - 后台管理'
+
 const columns = [
   {
     title: '封面',

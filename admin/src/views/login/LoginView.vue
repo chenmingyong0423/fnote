@@ -79,6 +79,8 @@ const login = async () => {
     await router.push('/')
   }
 }
+
+document.title = '登录 - 后台管理'
 </script>
 
 <style scoped>

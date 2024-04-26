@@ -1,7 +1,9 @@
 <template>
   <a-layout>
     <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <div class="logo" />
+      <div class="logo text-center text-blue">
+        后台管理
+      </div>
       <a-menu
         v-model:openKeys="state.openKeys"
         v-model:selectedKeys="state.selectedKeys"
@@ -32,8 +34,8 @@ import { ref } from 'vue'
 const collapsed = ref<boolean>(false)
 import router from '@/router'
 
-import { reactive, watch, h } from 'vue'
-import { MenuFoldOutlined, MenuUnfoldOutlined, PieChartOutlined } from '@ant-design/icons-vue'
+import { reactive, h } from 'vue'
+import { MenuOutlined, DashboardOutlined, BookOutlined, CommentOutlined, TagsOutlined, TeamOutlined, SettingOutlined } from '@ant-design/icons-vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
 const path = route.path
@@ -47,7 +49,7 @@ const state = reactive({
 const items = reactive([
   {
     key: 'dashboard',
-    icon: () => h(PieChartOutlined),
+    icon: () => h(DashboardOutlined),
     label: '仪表盘',
     title: '仪表盘',
     children: [
@@ -65,7 +67,7 @@ const items = reactive([
   },
   {
     key: 'sub post',
-    icon: () => h(PieChartOutlined),
+    icon: () => h(BookOutlined),
     label: '文章管理',
     title: '文章管理',
     children: [
@@ -83,7 +85,7 @@ const items = reactive([
   },
   {
     key: 'sub comment',
-    icon: () => h(PieChartOutlined),
+    icon: () => h(CommentOutlined),
     label: '评论管理',
     title: '评论管理',
     children: [
@@ -96,7 +98,7 @@ const items = reactive([
   },
   {
     key: 'sub category',
-    icon: () => h(PieChartOutlined),
+    icon: () => h(MenuOutlined),
     label: '分类管理',
     title: '分类管理',
     children: [
@@ -109,7 +111,7 @@ const items = reactive([
   },
   {
     key: 'sub tag',
-    icon: () => h(PieChartOutlined),
+    icon: () => h(TagsOutlined),
     label: '标签管理',
     title: '标签管理',
     children: [
@@ -122,7 +124,7 @@ const items = reactive([
   },
   {
     key: 'sub friend',
-    icon: () => h(PieChartOutlined),
+    icon: () => h(TeamOutlined),
     label: '友链管理',
     title: '友链管理',
     children: [
@@ -135,7 +137,7 @@ const items = reactive([
   },
   {
     key: 'sub blog',
-    icon: () => h(PieChartOutlined),
+    icon: () => h(SettingOutlined),
     label: '系统',
     title: '系统',
     children: [
@@ -173,6 +175,7 @@ const itemClick = (item: any) => {
 
 .logo {
   height: 32px;
+  line-height: 32px;
   background: rgba(255, 255, 255, 0.3);
   margin: 16px;
 }
