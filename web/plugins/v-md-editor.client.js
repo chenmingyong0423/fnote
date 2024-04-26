@@ -12,7 +12,7 @@ import json from 'highlight.js/lib/languages/json'
 
 // 插件
 import createLineNumberPlugin from "@kangc/v-md-editor/lib/plugins/line-number/index";
-import createCopyCodePreview from "@kangc/v-md-editor/lib/plugins/copy-code/preview";
+import createCopyCodePlugin from '@kangc/v-md-editor/lib/plugins/copy-code/index';
 import createHighlightLinesPlugin from "@kangc/v-md-editor/lib/plugins/highlight-lines/index";
 
 // 样式
@@ -38,7 +38,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       },
     })
       .use(createLineNumberPlugin())
-      .use(createCopyCodePreview())
+      .use(createCopyCodePlugin())
       .use(createHighlightLinesPlugin());
     nuxtApp.vueApp.use(VMdPreview);
   }

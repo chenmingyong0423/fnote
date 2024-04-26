@@ -252,7 +252,7 @@ const bdPush = async (urls : string) => {
 const runtimeConfig = useRuntimeConfig()
 
 const handleCopyCodeSuccess = () => {
-  console.log("成功");
+  toast.showToast("复制成功", 2000);
 };
 
 const htmlContent = ref<string>("");
