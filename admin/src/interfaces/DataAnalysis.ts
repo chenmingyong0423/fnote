@@ -1,6 +1,5 @@
 import instance from '@/utils/axios'
 
-
 export interface TodayTrafficStatsVO {
   view_count: number
   user_view_count: number

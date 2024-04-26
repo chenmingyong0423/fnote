@@ -14,12 +14,7 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
-import {
-  type Category4Post,
-  type Post4Edit,
-  type Tag4Post,
-  PublishPost
-} from '@/interfaces/Post'
+import { type Category4Post, type Post4Edit, type Tag4Post, PublishPost } from '@/interfaces/Post'
 import { message } from 'ant-design-vue'
 import { GetSelectedCategories, type SelectCategory } from '@/interfaces/Category'
 import { GetSelectedTags, type SelectTag } from '@/interfaces/Tag'

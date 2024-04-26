@@ -23,7 +23,6 @@ import router from '@/router'
 
 document.title = '文章发布 - 后台管理'
 
-
 const postEditRef = ref()
 
 const categories = ref<SelectCategory[]>([])
