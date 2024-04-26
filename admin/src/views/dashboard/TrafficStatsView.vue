@@ -33,11 +33,6 @@ const todayTrafficStatsVO = ref<TodayTrafficStatsVO>({
   like_count: 0
 })
 
-const trafficStatsVO = ref<TrafficStatsVO>({
-  view_count: 0,
-  comment_count: 0,
-  like_count: 0
-})
 const getTodayTrafficStats = async () => {
   try {
     const response: any = await GetTodayTrafficStats()
@@ -46,12 +41,18 @@ const getTodayTrafficStats = async () => {
       return
     }
     todayTrafficStatsVO.value = response.data.data || todayTrafficStatsVO.value
-    console.log(trafficStatsVO)
   } catch (error) {
     console.log(error)
   }
 }
 getTodayTrafficStats()
+
+const trafficStatsVO = ref<TrafficStatsVO>({
+  view_count: 0,
+  comment_count: 0,
+  like_count: 0
+})
+
 
 const getTrafficStats = async () => {
   try {

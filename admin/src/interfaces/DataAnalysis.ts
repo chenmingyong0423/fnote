@@ -27,3 +27,16 @@ export const GetTrafficStats = () => {
     method: 'get'
   })
 }
+
+export interface ContentStatsVO {
+  post_count: number
+  category_count: number
+  tag_count: number
+}
+
+export const GetContentStatsVO = () => {
+  return instance({
+    url: '/data-analysis/content',
+    method: 'get'
+  })
+}
