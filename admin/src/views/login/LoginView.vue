@@ -76,7 +76,7 @@ const disabled = computed(() => {
 const login = async () => {
   const success = await userStore.loginIn(loginReq)
   if (success) {
-    await router.push('/home/index')
+    await router.push('/')
   }
 }
 </script>
