@@ -17,9 +17,10 @@ package web
 import (
 	"time"
 
+	postPkg "github.com/chenmingyong0423/fnote/server/internal/post"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
-	postServ "github.com/chenmingyong0423/fnote/server/internal/post/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/chenmingyong0423/gkit/slice"
 	"github.com/gin-gonic/gin"
@@ -27,7 +28,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NewAggregatePostHandler(postServ postServ.IPostService, postDraftServ post_draft.Service) *AggregatePostHandler {
+func NewAggregatePostHandler(postServ postPkg.Service, postDraftServ post_draft.Service) *AggregatePostHandler {
 	return &AggregatePostHandler{
 		postServ:      postServ,
 		postDraftServ: postDraftServ,
@@ -35,7 +36,7 @@ func NewAggregatePostHandler(postServ postServ.IPostService, postDraftServ post_
 }
 
 type AggregatePostHandler struct {
-	postServ      postServ.IPostService
+	postServ      postPkg.Service
 	postDraftServ post_draft.Service
 }
 
@@ -59,9 +60,6 @@ func (h *AggregatePostHandler) GetPostDraftById(ctx *gin.Context) (*apiwrap.Resp
 	if postDraft == nil {
 		// 查询文章是否存在
 		post, err = h.postServ.AdminGetPostById(ctx, id)
-		if err != nil {
-			return nil, err
-		}
 		if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, err
 		}
