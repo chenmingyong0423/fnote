@@ -75,8 +75,8 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/notice", apiwrap.WrapWithBody(h.AdminUpdateNoticeConfig))
 	adminGroup.PUT("/notice/enabled", apiwrap.WrapWithBody(h.AdminUpdateNoticeEnabled))
 
-	adminGroup.GET("/front-post_t-count", apiwrap.Wrap(h.AdminGetFPCConfig))
-	adminGroup.PUT("/front-post_t-count", apiwrap.WrapWithBody(h.AdminUpdateFPCConfig))
+	adminGroup.GET("/front-post-count", apiwrap.Wrap(h.AdminGetFPCConfig))
+	adminGroup.PUT("/front-post-count", apiwrap.WrapWithBody(h.AdminUpdateFPCConfig))
 	adminGroup.GET("/pay", apiwrap.Wrap(h.AdminGetPayConfig))
 	adminGroup.POST("/pay", apiwrap.WrapWithBody(h.AdminAddPayInfo))
 	adminGroup.DELETE("/pay/:name", apiwrap.Wrap(h.AdminDeletePayInfo))
@@ -87,8 +87,8 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.GET("/third-party-site-verification", apiwrap.Wrap(h.AdminGetTPSVConfig))
 	adminGroup.POST("/third-party-site-verification", apiwrap.WrapWithBody(h.AdminAddTPSVConfig))
 	adminGroup.DELETE("/third-party-site-verification/:key", apiwrap.Wrap(h.AdminDeleteTPSVConfig))
-	adminGroup.GET("/post_t-index/:key", apiwrap.Wrap(h.AdminGetPushConfigByKey))
-	adminGroup.PUT("/post_t-index/:key", apiwrap.WrapWithBody(h.AdminUpdatePushConfigByKey))
+	adminGroup.GET("/post-index/:key", apiwrap.Wrap(h.AdminGetPushConfigByKey))
+	adminGroup.PUT("/post-index/:key", apiwrap.WrapWithBody(h.AdminUpdatePushConfigByKey))
 
 	engine.POST("/admin-api/login", apiwrap.WrapWithBody(h.AdminLogin))
 

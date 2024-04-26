@@ -34,9 +34,9 @@ type PostDraftHandler struct {
 
 func (h *PostDraftHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin-api")
-	adminGroup.POST("/post_t-draft", apiwrap.WrapWithBody(h.SavePostDraft))
-	adminGroup.GET("/post_t-draft", apiwrap.WrapWithBody(h.GetPostDraftPage))
-	adminGroup.DELETE("/post_t-draft/:id", apiwrap.Wrap(h.DeletePostDraft))
+	adminGroup.POST("/post-draft", apiwrap.WrapWithBody(h.SavePostDraft))
+	adminGroup.GET("/post-draft", apiwrap.WrapWithBody(h.GetPostDraftPage))
+	adminGroup.DELETE("/post-draft/:id", apiwrap.Wrap(h.DeletePostDraft))
 }
 
 func (h *PostDraftHandler) SavePostDraft(ctx *gin.Context, req PostDraftRequest) (*apiwrap.ResponseBody[map[string]string], error) {

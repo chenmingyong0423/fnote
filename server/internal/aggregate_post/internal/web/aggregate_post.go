@@ -42,8 +42,8 @@ type AggregatePostHandler struct {
 
 func (h *AggregatePostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin-api")
-	adminGroup.GET("/post_t-draft/:id", apiwrap.Wrap(h.GetPostDraftById))
-	adminGroup.POST("/post_t-draft/:id/publish", apiwrap.WrapWithBody(h.AdminPublishDraft))
+	adminGroup.GET("/post-draft/:id", apiwrap.Wrap(h.GetPostDraftById))
+	adminGroup.POST("/post-draft/:id/publish", apiwrap.WrapWithBody(h.AdminPublishDraft))
 }
 
 func (h *AggregatePostHandler) GetPostDraftById(ctx *gin.Context) (*apiwrap.ResponseBody[*PostDraftVO], error) {
@@ -64,7 +64,7 @@ func (h *AggregatePostHandler) GetPostDraftById(ctx *gin.Context) (*apiwrap.Resp
 			return nil, err
 		}
 		if post == nil {
-			return nil, apiwrap.NewErrorResponseBody(404, "post_t draft not found")
+			return nil, apiwrap.NewErrorResponseBody(404, "post draft not found")
 		}
 		// 保存草稿
 		createdAt := time.Now().Local().Unix()
