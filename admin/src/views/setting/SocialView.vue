@@ -25,38 +25,38 @@
         </a-form-item>
         <a-form-item name="css_class" label="图标样式">
           <a-radio-group v-model:value="formState.css_class">
-            <a-radio :value="`i-fa6-brands:x-twitter`">
-              <div class="i-fa6-brands:x-twitter w-5 h-5"></div>
+            <a-radio :value="`i-fa6-brands-x-twitter`">
+              <div class="i-fa6-brands-x-twitter w-5 h-5"></div>
             </a-radio>
-            <a-radio :value="`i-fa6-brands:facebook`">
-              <div class="i-fa6-brands:facebook w-5 h-5"></div>
+            <a-radio :value="`i-fa6-brands-facebook`">
+              <div class="i-fa6-brands-facebook w-5 h-5"></div>
             </a-radio>
-            <a-radio :value="`i-fa6-brands:instagram`">
-              <div class="i-fa6-brands:instagram w-5 h-5"></div>
+            <a-radio :value="`i-fa6-brands-instagram`">
+              <div class="i-fa6-brands-instagram w-5 h-5"></div>
             </a-radio>
-            <a-radio :value="`i-fa6-brands:youtube`">
-              <div class="i-fa6-brands:youtube w-5 h-5"></div>
+            <a-radio :value="`i-fa6-brands-youtube`">
+              <div class="i-fa6-brands-youtube w-5 h-5"></div>
             </a-radio>
-            <a-radio :value="`i-fa6-brands:bilibili`">
-              <div class="i-fa6-brands:bilibili w-5 h-5"></div>
+            <a-radio :value="`i-fa6-brands-bilibili`">
+              <div class="i-fa6-brands-bilibili w-5 h-5"></div>
             </a-radio>
-            <a-radio :value="`i-fa6-brands:qq`">
-              <div class="i-fa6-brands:qq w-5 h-5"></div>
+            <a-radio :value="`i-fa6-brands-qq`">
+              <div class="i-fa6-brands-qq w-5 h-5"></div>
             </a-radio>
-            <a-radio :value="`i-fa6-brands:github`">
-              <div class="i-fa6-brands:github w-5 h-5"></div>
+            <a-radio :value="`i-fa6-brands-github`">
+              <div class="i-fa6-brands-github w-5 h-5"></div>
             </a-radio>
             <a-radio :value="`i-fa6-brands:square-git`">
               <div class="i-fa6-brands:square-git w-5 h-5"></div>
             </a-radio>
-            <a-radio :value="`i-fa6-brands:weixin`">
-              <div class="i-fa6-brands:weixin w-5 h-5"></div>
+            <a-radio :value="`i-fa6-brands-weixin`">
+              <div class="i-fa6-brands-weixin w-5 h-5"></div>
             </a-radio>
-            <a-radio :value="`i-fa6-brands:zhihu`">
-              <div class="i-fa6-brands:zhihu w-5 h-5"></div>
+            <a-radio :value="`i-fa6-brands-zhihu`">
+              <div class="i-fa6-brands-zhihu w-5 h-5"></div>
             </a-radio>
-            <a-radio :value="`i-bi:link-45deg`">
-              <div class="i-bi:link-45deg w-5 h-5"></div>
+            <a-radio :value="`i-bi-link-45deg`">
+              <div class="i-bi-link-45deg w-5 h-5"></div>
             </a-radio>
           </a-radio-group>
         </a-form-item>
@@ -94,38 +94,38 @@
               v-if="editableData[record.id]"
               v-model:value="editableData[record.id][column.dataIndex as keyof SocialConfig]"
             >
-              <a-radio :value="`i-fa6-brands:x-twitter`">
-                <div class="i-fa6-brands:x-twitter w-5 h-5"></div>
+              <a-radio :value="`i-fa6-brands-x-twitter`">
+                <div class="i-fa6-brands-x-twitter w-5 h-5"></div>
               </a-radio>
-              <a-radio :value="`i-fa6-brands:facebook`">
-                <div class="i-fa6-brands:facebook w-5 h-5"></div>
+              <a-radio :value="`i-fa6-brands-facebook`">
+                <div class="i-fa6-brands-facebook w-5 h-5"></div>
               </a-radio>
-              <a-radio :value="`i-fa6-brands:instagram`">
-                <div class="i-fa6-brands:instagram w-5 h-5"></div>
+              <a-radio :value="`i-fa6-brands-instagram`">
+                <div class="i-fa6-brands-instagram w-5 h-5"></div>
               </a-radio>
-              <a-radio :value="`i-fa6-brands:youtube`">
-                <div class="i-fa6-brands:youtube w-5 h-5"></div>
+              <a-radio :value="`i-fa6-brands-youtube`">
+                <div class="i-fa6-brands-youtube w-5 h-5"></div>
               </a-radio>
-              <a-radio :value="`i-fa6-brands:bilibili`">
-                <div class="i-fa6-brands:bilibili w-5 h-5"></div>
+              <a-radio :value="`i-fa6-brands-bilibili`">
+                <div class="i-fa6-brands-bilibili w-5 h-5"></div>
               </a-radio>
-              <a-radio :value="`i-fa6-brands:qq`">
-                <div class="i-fa6-brands:qq w-5 h-5"></div>
+              <a-radio :value="`i-fa6-brands-qq`">
+                <div class="i-fa6-brands-qq w-5 h-5"></div>
               </a-radio>
-              <a-radio :value="`i-fa6-brands:github`">
-                <div class="i-fa6-brands:github w-5 h-5"></div>
+              <a-radio :value="`i-fa6-brands-github`">
+                <div class="i-fa6-brands-github w-5 h-5"></div>
               </a-radio>
               <a-radio :value="`i-fa6-brands:square-git`">
                 <div class="i-fa6-brands:square-git w-5 h-5"></div>
               </a-radio>
-              <a-radio :value="`i-fa6-brands:weixin`">
-                <div class="i-fa6-brands:weixin w-5 h-5"></div>
+              <a-radio :value="`i-fa6-brands-weixin`">
+                <div class="i-fa6-brands-weixin w-5 h-5"></div>
               </a-radio>
-              <a-radio :value="`i-fa6-brands:zhihu`">
-                <div class="i-fa6-brands:zhihu w-5 h-5"></div>
+              <a-radio :value="`i-fa6-brands-zhihu`">
+                <div class="i-fa6-brands-zhihu w-5 h-5"></div>
               </a-radio>
-              <a-radio :value="`i-bi:link-45deg`">
-                <div class="i-bi:link-45deg w-5 h-5"></div>
+              <a-radio :value="`i-bi-link-45deg`">
+                <div class="i-bi-link-45deg w-5 h-5"></div>
               </a-radio>
             </a-radio-group>
             <template v-else>
@@ -297,7 +297,6 @@ const save = async (id: string) => {
 const cancel = (key: string) => {
   delete editableData[key]
 }
-
 </script>
 
 <style scoped>
