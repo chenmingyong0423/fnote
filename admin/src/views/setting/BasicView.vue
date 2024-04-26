@@ -109,6 +109,8 @@ import { message } from 'ant-design-vue'
 import { useUserStore } from '@/stores/user'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
 
+document.title = '博客设置 - 后台管理'
+
 const userStore = useUserStore()
 
 const editable = ref<boolean>(false)

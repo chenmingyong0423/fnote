@@ -130,6 +130,8 @@ import { message } from 'ant-design-vue'
 import { cloneDeep } from 'lodash-es'
 import dayjs from 'dayjs'
 
+document.title = '分类列表 - 后台管理'
+
 const columns = [
   {
     title: '名称',
@@ -221,7 +223,7 @@ const addCategory = () => {
   if (formRef.value) {
     formRef.value
       .validateFields()
-      .then(async (values) => {
+      .then(async () => {
         try {
           const response: any = await AddCategory(formState)
           if (response.data.code !== 0) {

@@ -138,7 +138,7 @@
         height="800px"
         :disabled-menus="[]"
         @upload-image="handleUploadImage"
-      ></v-md-editor>
+      />
     </div>
   </div>
 </template>
@@ -229,7 +229,7 @@ const submit = () => {
 
 const open = ref<boolean>(false)
 
-const handleOk = (e: MouseEvent) => {
+const handleOk = () => {
   saveDraft()
   open.value = false
 }

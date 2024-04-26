@@ -78,6 +78,8 @@ import {
   type TagRequest
 } from '@/interfaces/Tag'
 
+document.title = '标签列表 - 后台管理'
+
 const columns = [
   {
     title: '名称',
@@ -157,7 +159,7 @@ const addTag = () => {
   if (formRef.value) {
     formRef.value
       .validateFields()
-      .then(async (values) => {
+      .then(async () => {
         try {
           const response: any = await AddTag(formState)
           if (response.data.code !== 0) {

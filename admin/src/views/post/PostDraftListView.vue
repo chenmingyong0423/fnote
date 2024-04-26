@@ -36,6 +36,8 @@ import dayjs from 'dayjs'
 import { message } from 'ant-design-vue'
 import type { PostDraftBrief } from '@/interfaces/PostDraft'
 
+document.title = '草稿箱 - 后台管理'
+
 const req = ref<PageRequest>({
   pageNo: 1,
   pageSize: 5,

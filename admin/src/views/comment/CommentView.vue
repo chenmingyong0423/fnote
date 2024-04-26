@@ -78,6 +78,8 @@ import {
 } from '@/interfaces/Comment'
 import { message } from 'ant-design-vue'
 
+document.title = '评论列表 - 后台管理'
+
 const columns = [
   {
     title: '文章',

@@ -25,6 +25,7 @@ import {
 } from '@/interfaces/DataAnalysis'
 import { ref } from 'vue'
 
+document.title = '流量统计 - 后台管理'
 
 const todayTrafficStatsVO = ref<TodayTrafficStatsVO>({
   view_count: 0,

@@ -9,6 +9,8 @@
 import { message } from 'ant-design-vue'
 import { Backup, Recovery } from '@/interfaces/Backup'
 
+document.title = '备份 - 后台管理'
+
 const RecoveryBackup = async () => {
   const input = document.createElement('input')
   input.type = 'file'

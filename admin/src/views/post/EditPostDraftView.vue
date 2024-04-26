@@ -17,7 +17,6 @@ import { reactive, ref } from 'vue'
 import {
   type Category4Post,
   type Post4Edit,
-  type PostRequest,
   type Tag4Post,
   PublishPost
 } from '@/interfaces/Post'
@@ -33,6 +32,8 @@ import {
   SavePostDraft
 } from '@/interfaces/PostDraft'
 import axios from 'axios'
+
+document.title = '编辑草稿 - 后台管理'
 
 const route = useRoute()
 const router = useRouter()
