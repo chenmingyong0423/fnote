@@ -15,6 +15,7 @@
 package ioc
 
 import (
+	"github.com/chenmingyong0423/fnote/server/internal/data_analysis"
 	"io"
 	"log/slog"
 	"net/http"
@@ -35,8 +36,6 @@ import (
 	handler6 "github.com/chenmingyong0423/fnote/server/internal/backup/handler"
 
 	handler5 "github.com/chenmingyong0423/fnote/server/internal/count_stats/handler"
-
-	handler4 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/handler"
 
 	"github.com/spf13/viper"
 
@@ -59,7 +58,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *website_config.Handler, frdHdr *friendHanlder.FriendHandler, postHdr *post.Handler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *handler4.DataAnalysisHandler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler) (*gin.Engine, error) {
+func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *website_config.Handler, frdHdr *friendHanlder.FriendHandler, postHdr *post.Handler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *data_analysis.Handler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler) (*gin.Engine, error) {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 

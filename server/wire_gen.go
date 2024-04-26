@@ -8,7 +8,7 @@ package main
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
-	handler8 "github.com/chenmingyong0423/fnote/server/internal/backup/handler"
+	handler7 "github.com/chenmingyong0423/fnote/server/internal/backup/handler"
 	service11 "github.com/chenmingyong0423/fnote/server/internal/backup/service"
 	handler2 "github.com/chenmingyong0423/fnote/server/internal/category/handler"
 	repository2 "github.com/chenmingyong0423/fnote/server/internal/category/repository"
@@ -18,11 +18,11 @@ import (
 	repository4 "github.com/chenmingyong0423/fnote/server/internal/comment/repository"
 	dao4 "github.com/chenmingyong0423/fnote/server/internal/comment/repository/dao"
 	service4 "github.com/chenmingyong0423/fnote/server/internal/comment/service"
-	handler7 "github.com/chenmingyong0423/fnote/server/internal/count_stats/handler"
+	handler6 "github.com/chenmingyong0423/fnote/server/internal/count_stats/handler"
 	repository3 "github.com/chenmingyong0423/fnote/server/internal/count_stats/repository"
 	dao3 "github.com/chenmingyong0423/fnote/server/internal/count_stats/repository/dao"
 	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
-	handler6 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/handler"
+	"github.com/chenmingyong0423/fnote/server/internal/data_analysis"
 	service5 "github.com/chenmingyong0423/fnote/server/internal/email/service"
 	"github.com/chenmingyong0423/fnote/server/internal/file/handler"
 	"github.com/chenmingyong0423/fnote/server/internal/file/repository"
@@ -99,10 +99,11 @@ func initializeApp() (*gin.Engine, error) {
 	tagRepository := repository8.NewTagRepository(tagDao)
 	tagService := service10.NewTagService(tagRepository, countStatsService)
 	tagHandler := handler5.NewTagHandler(tagService)
-	dataAnalysisHandler := handler6.NewDataAnalysisHandler(visitLogService, countStatsService)
-	countStatsHandler := handler7.NewCountStatsHandler(countStatsService)
+	module := data_analysis.InitDataAnalysisModule(database, visitLogService, countStatsService)
+	dataAnalysisHandler := module.Hdl
+	countStatsHandler := handler6.NewCountStatsHandler(countStatsService)
 	backupService := service11.NewBackupService(database)
-	backupHandler := handler8.NewBackupHandler(backupService)
+	backupHandler := handler7.NewBackupHandler(backupService)
 	writer := ioc.InitLogger()
 	v, err := global.IsWebsiteInitializedFn(database)
 	if err != nil {
