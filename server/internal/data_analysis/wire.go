@@ -17,8 +17,10 @@
 package data_analysis
 
 import (
+	service2 "github.com/chenmingyong0423/fnote/server/internal/comment/service"
 	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/web"
+	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
 	"github.com/google/wire"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,9 +28,10 @@ import (
 
 var DataAnalysisProviders = wire.NewSet(web.NewDataAnalysisHandler)
 
-func InitDataAnalysisModule(mongoDB *mongo.Database, vlServ service.IVisitLogService, csServ csServ.ICountStatsService) *Module {
+func InitDataAnalysisModule(mongoDB *mongo.Database, vlServ service.IVisitLogService, csServ csServ.ICountStatsService, posLikeModule *post_like.Module, commentServ service2.ICommentService) *Module {
 	panic(wire.Build(
 		DataAnalysisProviders,
+		wire.FieldsOf(new(*post_like.Module), "Svc"),
 		wire.Struct(new(Module), "Hdl"),
 	))
 }

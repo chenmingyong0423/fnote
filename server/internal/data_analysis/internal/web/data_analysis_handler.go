@@ -15,86 +15,64 @@
 package web
 
 import (
+	service2 "github.com/chenmingyong0423/fnote/server/internal/comment/service"
 	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
 	"github.com/gin-gonic/gin"
 )
 
-func NewDataAnalysisHandler(vlServ service.IVisitLogService, csServ csServ.ICountStatsService) *DataAnalysisHandler {
+func NewDataAnalysisHandler(vlServ service.IVisitLogService, csServ csServ.ICountStatsService, postLikeServ post_like.Service, commentServ service2.ICommentService) *DataAnalysisHandler {
 	return &DataAnalysisHandler{
-		vlServ: vlServ,
-		csServ: csServ,
+		vlServ:       vlServ,
+		csServ:       csServ,
+		postLikeServ: postLikeServ,
+		commentServ:  commentServ,
 	}
 }
 
 type DataAnalysisHandler struct {
-	vlServ service.IVisitLogService
-	csServ csServ.ICountStatsService
+	vlServ       service.IVisitLogService
+	csServ       csServ.ICountStatsService
+	postLikeServ post_like.Service
+	commentServ  service2.ICommentService
 }
 
 func (h *DataAnalysisHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/admin-api/data-analysis")
-	routerGroup.GET("", apiwrap.Wrap(h.GetDataAnalysis))
 	routerGroup.GET("/traffic/today", apiwrap.Wrap(h.GetTodayTrafficStats))
 	routerGroup.GET("/traffic", apiwrap.Wrap(h.GetWebsiteCountStats))
 }
 
-func (h *DataAnalysisHandler) GetDataAnalysis(ctx *gin.Context) (*apiwrap.ResponseBody[vo.DataAnalysis], error) {
-	// 查询网站统计
-	websiteCountStats, err := h.csServ.GetWebsiteCountStats(ctx)
-	if err != nil {
-		return nil, err
-	}
-	result := vo.DataAnalysis{
-		PostCount:      websiteCountStats.PostCount,
-		CategoryCount:  websiteCountStats.CategoryCount,
-		TagCount:       websiteCountStats.TagCount,
-		LikeCount:      websiteCountStats.LikeCount,
-		TotalViewCount: websiteCountStats.WebsiteViewCount,
-		CommentCount:   websiteCountStats.CommentCount,
-	}
+func (h *DataAnalysisHandler) GetTodayTrafficStats(ctx *gin.Context) (*apiwrap.ResponseBody[TodayTrafficStatsVO], error) {
 	// 查询当日访问量
 	todayViewCount, err := h.vlServ.GetTodayViewCount(ctx)
 	if err != nil {
 		return nil, err
 	}
-	result.TodayViewCount = todayViewCount
 	// 查询当日实际访问用户量
-	todayUserVisitCount, err := h.vlServ.GetTodayUserViewCount(ctx)
+	userViewCount, err := h.vlServ.GetTodayUserViewCount(ctx)
 	if err != nil {
 		return nil, err
 	}
-	result.TodayUserVisitCount = todayUserVisitCount
-	return apiwrap.SuccessResponseWithData(result), nil
-}
 
-type TodayTrafficStatsVO struct {
-	ViewCount     int64 `json:"view_count"`
-	UserViewCount int64 `json:"user_view_count"`
-	CommentCount  int64 `json:"comment_count"`
-	LikeCount     int64 `json:"like_count"`
-}
+	commentCount, err := h.commentServ.FindCommentCountOfToday(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-type TrafficStatsVO struct {
-	ViewCount    int64 `json:"view_count"`
-	CommentCount int64 `json:"comment_count"`
-	LikeCount    int64 `json:"like_count"`
-}
+	likeCount, err := h.postLikeServ.FindLikeCountToday(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-func (h *DataAnalysisHandler) GetTodayTrafficStats(ctx *gin.Context) (*apiwrap.ResponseBody[TodayTrafficStatsVO], error) {
-	//// 查询当日访问量
-	//todayViewCount, err := h.vlServ.GetTodayViewCount(ctx)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//// 查询当日实际访问用户量
-	//userViewCount, err := h.vlServ.GetTodayUserViewCount(ctx)
-	//if err != nil {
-	//	return nil, err
-	//}
-	return nil, nil
+	return apiwrap.SuccessResponseWithData(TodayTrafficStatsVO{
+		ViewCount:     todayViewCount,
+		UserViewCount: userViewCount,
+		CommentCount:  commentCount,
+		LikeCount:     likeCount,
+	}), nil
 }
 
 func (h *DataAnalysisHandler) GetWebsiteCountStats(ctx *gin.Context) (*apiwrap.ResponseBody[TrafficStatsVO], error) {

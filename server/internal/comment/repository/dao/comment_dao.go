@@ -141,6 +141,7 @@ type ICommentDao interface {
 	FindCommentWithRepliesById(ctx context.Context, id string) (*Comment, error)
 	DeleteById(ctx context.Context, id string) error
 	DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error
+	CountOfToday(ctx context.Context) (int64, error)
 }
 
 func NewCommentDao(db *mongo.Database) *CommentDao {
@@ -153,6 +154,11 @@ var _ ICommentDao = (*CommentDao)(nil)
 
 type CommentDao struct {
 	coll *mongox.Collection[Comment]
+}
+
+func (d *CommentDao) CountOfToday(ctx context.Context) (int64, error) {
+	startOfDayUnix, endOfDayUnix := d.getBeginSecondsAndEndSeconds()
+	return d.coll.Finder().Filter(query.BsonBuilder().Gte("create_time", startOfDayUnix).Lte("create_time", endOfDayUnix).Build()).Count(ctx)
 }
 
 func (d *CommentDao) DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error {
@@ -362,4 +368,10 @@ func (d *CommentDao) AddComment(ctx context.Context, comment *Comment) (string, 
 		return "", errors.Wrapf(err, "fails to insert into comment, comment=%v", comment)
 	}
 	return result.InsertedID.(string), nil
+}
+
+func (d *CommentDao) getBeginSecondsAndEndSeconds() (int64, int64) {
+	now := time.Now()
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0,
+		now.Location()).Unix(), time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location()).Unix()
 }

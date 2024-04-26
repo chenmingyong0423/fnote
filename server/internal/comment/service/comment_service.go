@@ -40,6 +40,7 @@ type ICommentService interface {
 	DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error
 	UpdateCommentStatus(ctx context.Context, commentId string, status domain.CommentStatus) error
 	UpdateCommentReplyStatus(ctx context.Context, commentId string, replyId string, commentStatus domain.CommentStatus) error
+	FindCommentCountOfToday(ctx context.Context) (int64, error)
 }
 
 func NewCommentService(repo repository.ICommentRepository) *CommentService {
@@ -52,6 +53,10 @@ var _ ICommentService = (*CommentService)(nil)
 
 type CommentService struct {
 	repo repository.ICommentRepository
+}
+
+func (s *CommentService) FindCommentCountOfToday(ctx context.Context) (int64, error) {
+	return s.repo.CountOfToday(ctx)
 }
 
 func (s *CommentService) UpdateCommentReplyStatus(ctx context.Context, commentId string, replyId string, commentStatus domain.CommentStatus) error {
