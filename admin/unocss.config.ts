@@ -5,7 +5,13 @@ export default defineConfig({
   presets: [
     // 使用预设
     presetUno(),
-    presetIcons(),
+    presetIcons({
+      // 其他选项
+      prefix: 'i-',
+      extraProperties: {
+        display: 'inline-block'
+      }
+    }),
     icons
   ],
   rules: [
