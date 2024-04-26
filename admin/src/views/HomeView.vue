@@ -21,7 +21,7 @@
         />
         <menu-fold-outlined v-else class="trigger" @click="() => (collapsed = !collapsed)" />
       </a-layout-header>
-      <a-layout-content :style="{ margin: '24px 16px', padding: '24px', minHeight: '780px' }">
+      <a-layout-content class="p-5" :style="{ minHeight: '780px' }">
         <RouterView />
       </a-layout-content>
     </a-layout>
@@ -34,18 +34,34 @@ import router from '@/router'
 
 import { reactive, watch, h } from 'vue'
 import { MenuFoldOutlined, MenuUnfoldOutlined, PieChartOutlined } from '@ant-design/icons-vue'
+import { useRoute } from 'vue-router'
+const route = useRoute()
+const path = route.path
+
 const state = reactive({
   collapsed: false,
-  selectedKeys: ['1'],
-  openKeys: ['sub1'],
-  preOpenKeys: ['sub1']
+  selectedKeys: [path],
+  openKeys: ['dashboard']
 })
+
 const items = reactive([
   {
-    key: '/home/index',
+    key: 'dashboard',
     icon: () => h(PieChartOutlined),
-    label: '博客总览',
-    title: '博客总览'
+    label: '仪表盘',
+    title: '仪表盘',
+    children: [
+      {
+        key: '/home/dashboard/traffic-stats',
+        label: '流量统计',
+        title: '流量统计'
+      },
+      {
+        key: '/home/dashboard/content-stats',
+        label: '内容发布统计',
+        title: '内容发布统计'
+      }
+    ]
   },
   {
     key: 'sub post',
@@ -57,6 +73,11 @@ const items = reactive([
         key: '/home/post/list',
         label: '文章列表',
         title: '文章列表'
+      },
+      {
+        key: '/home/post/draft/list',
+        label: '草稿箱',
+        title: '草稿箱'
       }
     ]
   },
@@ -131,23 +152,20 @@ const items = reactive([
     ]
   }
 ])
+
 watch(
   () => state.openKeys,
   (_val, oldVal) => {
     state.preOpenKeys = oldVal
   }
 )
-const toggleCollapsed = () => {
-  state.collapsed = !state.collapsed
-  state.openKeys = state.collapsed ? [] : state.preOpenKeys
-}
 
 const itemClick = (item: any) => {
   router.push(item.key)
 }
 </script>
 <style scoped>
-#components-layout-demo-custom-trigger .trigger {
+.trigger {
   font-size: 18px;
   line-height: 64px;
   padding: 0 24px;
@@ -155,17 +173,13 @@ const itemClick = (item: any) => {
   transition: color 0.3s;
 }
 
-#components-layout-demo-custom-trigger .trigger:hover {
+.trigger:hover {
   color: #1890ff;
 }
 
-#components-layout-demo-custom-trigger .logo {
+.logo {
   height: 32px;
   background: rgba(255, 255, 255, 0.3);
   margin: 16px;
-}
-
-.site-layout .site-layout-background {
-  background: #fff;
 }
 </style>

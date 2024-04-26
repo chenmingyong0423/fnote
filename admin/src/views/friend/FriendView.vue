@@ -36,7 +36,7 @@
             :color="
               record.status === 0 ? 'processing' : record.status === 1 ? 'success' : 'warning'
             "
-          >{{ statusConvert(record.status) }}
+            >{{ statusConvert(record.status) }}
           </a-tag>
         </template>
       </template>
@@ -52,11 +52,7 @@
           >
             <a>接收</a>
           </a-popconfirm>
-          <a-modal
-            v-model:open="rejectionDialog"
-            title="请输入原因"
-            @ok="rejected"
-          >
+          <a-modal v-model:open="rejectionDialog" title="请输入原因" @ok="rejected">
             <a-input v-model:value="reason" placeholder="请输入审核不通过的原因。" />
           </a-modal>
           <span v-if="data.length && record.status === 0" @click="openRejectionDialog(record.id)">
@@ -206,7 +202,7 @@ const rejectionDialog = ref(false)
 const reason = ref('')
 const rejected = async () => {
   try {
-    const response: any = await RejectFriend(updatedId.value,reason.value)
+    const response: any = await RejectFriend(updatedId.value, reason.value)
     if (response.data.code !== 0) {
       message.error(response.data.message)
       return
