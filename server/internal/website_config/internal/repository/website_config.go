@@ -81,7 +81,7 @@ func (r *WebsiteConfigRepository) UpdatePushConfigByKey(ctx context.Context, key
 }
 
 func (r *WebsiteConfigRepository) GetBaiduPushConfig(ctx context.Context) (*domain.Baidu, error) {
-	cfg, err := r.dao.FindByTyp(ctx, "post_t index")
+	cfg, err := r.dao.FindByTyp(ctx, "post index")
 	if err != nil {
 		return nil, err
 	}
@@ -216,7 +216,7 @@ func (r *WebsiteConfigRepository) AddRecordInWebsiteConfig(ctx context.Context, 
 func (r *WebsiteConfigRepository) UpdateFrontPostCountConfig(ctx context.Context, cfg domain.FrontPostCountConfig) error {
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
-		query.Eq("typ", "front-post_t-count"),
+		query.Eq("typ", "front-post-count"),
 		update.BsonBuilder().Set("props.count", cfg.Count).Set("updated_at", time.Now().Unix()).Build(),
 	)
 }

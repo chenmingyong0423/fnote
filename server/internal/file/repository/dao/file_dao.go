@@ -54,7 +54,7 @@ type FileUsage struct {
 type EntityType string
 
 const (
-	EntityTypePost EntityType = "post_t"
+	EntityTypePost EntityType = "post"
 )
 
 type IFileDao interface {

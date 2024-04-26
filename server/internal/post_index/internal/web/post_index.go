@@ -31,7 +31,7 @@ type PostIndexHandler struct {
 }
 
 func (h *PostIndexHandler) RegisterGinRoutes(engine *gin.Engine) {
-	engine.POST("/post_t-index/baidu/push", apiwrap.WrapWithBody(h.BaiduPostIndex))
+	engine.POST("/post-index/baidu/push", apiwrap.WrapWithBody(h.BaiduPostIndex))
 }
 
 func (h *PostIndexHandler) BaiduPostIndex(ctx *gin.Context, req PostIndexRequest) (*apiwrap.ResponseBody[BaiduPushVO], error) {

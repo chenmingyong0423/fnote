@@ -176,7 +176,7 @@ func (s *WebsiteConfigService) UpdateFrontPostCountConfig(ctx context.Context, c
 
 func (s *WebsiteConfigService) GetFrontPostCountConfig(ctx context.Context) (domain.FrontPostCountConfig, error) {
 	cfg := domain.FrontPostCountConfig{}
-	err := s.getConfigAndConvertTo(ctx, "front-post_t-count", &cfg)
+	err := s.getConfigAndConvertTo(ctx, "front-post-count", &cfg)
 	if err != nil {
 		return cfg, err
 	}
@@ -245,7 +245,7 @@ func (s *WebsiteConfigService) GetSeoMetaConfig(ctx context.Context) (*domain.Se
 
 func (s *WebsiteConfigService) GetFrontPostCount(ctx context.Context) (*domain.FrontPostCountConfig, error) {
 	cfg := &domain.FrontPostCountConfig{}
-	err := s.getConfigAndConvertTo(ctx, "front-post_t-count", cfg)
+	err := s.getConfigAndConvertTo(ctx, "front-post-count", cfg)
 	if err != nil {
 		return nil, err
 	}

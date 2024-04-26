@@ -152,7 +152,7 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
-		gErr = s.fileService.DeleteIndexFileMeta(ctx, fid, id, "post_t")
+		gErr = s.fileService.DeleteIndexFileMeta(ctx, fid, id, "post")
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
@@ -211,7 +211,7 @@ func (s *PostService) addPostCallback(ctx context.Context, post *domain.Post) {
 		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 		l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 	}
-	gErr = s.fileService.IndexFileMeta(ctx, fileId, post.Id, "post_t")
+	gErr = s.fileService.IndexFileMeta(ctx, fileId, post.Id, "post")
 	if gErr != nil {
 		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 		l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
