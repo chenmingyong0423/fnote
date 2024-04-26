@@ -153,12 +153,6 @@ const items = reactive([
   }
 ])
 
-watch(
-  () => state.openKeys,
-  (_val, oldVal) => {
-    state.preOpenKeys = oldVal
-  }
-)
 
 const itemClick = (item: any) => {
   router.push(item.key)
