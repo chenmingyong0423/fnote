@@ -26,3 +26,9 @@ type TrafficStatsVO struct {
 	CommentCount int64 `json:"comment_count"`
 	LikeCount    int64 `json:"like_count"`
 }
+
+type ContentStatsVO struct {
+	PostCount     int64 `json:"post_count"`
+	CategoryCount int64 `json:"category_count"`
+	TagCount      int64 `json:"tag_count"`
+}

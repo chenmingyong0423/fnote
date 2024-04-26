@@ -43,6 +43,7 @@ func (h *DataAnalysisHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/admin-api/data-analysis")
 	routerGroup.GET("/traffic/today", apiwrap.Wrap(h.GetTodayTrafficStats))
 	routerGroup.GET("/traffic", apiwrap.Wrap(h.GetWebsiteCountStats))
+	routerGroup.GET("/content", apiwrap.Wrap(h.GetWebsiteContentStats))
 }
 
 func (h *DataAnalysisHandler) GetTodayTrafficStats(ctx *gin.Context) (*apiwrap.ResponseBody[TodayTrafficStatsVO], error) {
@@ -85,5 +86,18 @@ func (h *DataAnalysisHandler) GetWebsiteCountStats(ctx *gin.Context) (*apiwrap.R
 		ViewCount:    websiteCountStats.WebsiteViewCount,
 		CommentCount: websiteCountStats.CommentCount,
 		LikeCount:    websiteCountStats.LikeCount,
+	}), nil
+}
+
+func (h *DataAnalysisHandler) GetWebsiteContentStats(ctx *gin.Context) (*apiwrap.ResponseBody[ContentStatsVO], error) {
+	// 查询网站统计
+	websiteCountStats, err := h.csServ.GetWebsiteCountStats(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponseWithData(ContentStatsVO{
+		PostCount:     websiteCountStats.PostCount,
+		CategoryCount: websiteCountStats.CategoryCount,
+		TagCount:      websiteCountStats.TagCount,
 	}), nil
 }
