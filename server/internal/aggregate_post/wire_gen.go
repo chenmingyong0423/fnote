@@ -15,14 +15,14 @@ import (
 
 // Injectors from wire.go:
 
-func InitAggregatePostModule(postModel *post.Model, postDraftModel *post_draft.Model) *Model {
+func InitAggregatePostModule(postModel *post.Module, postDraftModel *post_draft.Module) *Module {
 	iPostService := postModel.Svc
 	iPostDraftService := postDraftModel.Svc
 	aggregatePostHandler := web.NewAggregatePostHandler(iPostService, iPostDraftService)
-	model := &Model{
+	module := &Module{
 		Hdl: aggregatePostHandler,
 	}
-	return model
+	return module
 }
 
 // wire.go:

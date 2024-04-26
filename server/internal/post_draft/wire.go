@@ -30,9 +30,9 @@ var PostDraftProviders = wire.NewSet(web.NewPostDraftHandler, service.NewPostDra
 	wire.Bind(new(repository.IPostDraftRepository), new(*repository.PostDraftRepository)),
 	wire.Bind(new(dao.IPostDraftDao), new(*dao.PostDraftDao)))
 
-func InitPostDraftModule(mongoDB *mongo.Database) *Model {
+func InitPostDraftModule(mongoDB *mongo.Database) *Module {
 	panic(wire.Build(
 		PostDraftProviders,
-		wire.Struct(new(Model), "Svc", "Hdl"),
+		wire.Struct(new(Module), "Svc", "Hdl"),
 	))
 }
