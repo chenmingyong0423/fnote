@@ -12,13 +12,13 @@
       >
         <a
             v-if="icon.is_link"
-            :class="get(icon.css_class)"
+            :class="icon.css_class"
             :href="icon.social_value"
             target="_blank"
         ></a>
         <span
             v-else
-            :class="get(icon.css_class)"
+            :class="icon.css_class"
             @click="copyExternalLink(icon.social_name + ': ' + icon.social_value)"
         ></span>
       </div>
@@ -49,33 +49,6 @@ const copyExternalLink = async (content: string) => {
 };
 
 const configStore = useConfigStore();
-const get = (icon: string): string => {
-  switch (icon) {
-    case "i-fa6-brands:x-twitter":
-      return "i-fa6-brands:x-twitter";
-    case "i-fa6-brands:facebook":
-      return "i-fa6-brands:facebook";
-    case "i-fa6-brands:instagram":
-      return "i-fa6-brands:instagram";
-    case "i-fa6-brands:youtube":
-      return "i-fa6-brands:youtube";
-    case "i-fa6-brands:bilibili":
-      return "i-fa6-brands:bilibili";
-    case "i-fa6-brands:qq":
-      return "i-fa6-brands:qq";
-    case "i-fa6-brands:github":
-      return "i-fa6-brands:github";
-    case "i-fa6-brands:square-git":
-      return "i-fa6-brands:square-git";
-    case "i-fa6-brands:weixin":
-      return "i-fa6-brands:weixin";
-    case "i-fa6-brands:zhihu":
-      return "i-fa6-brands:zhihu";
-    case "i-bi:link-45deg":
-      return "i-bi:link-45deg";
-  }
-  return "";
-};
 </script>
 
 <style scoped></style>
