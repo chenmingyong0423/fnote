@@ -50,6 +50,8 @@ type IWebsiteConfigDao interface {
 	AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error
 	DeleteTPSVConfigByKey(ctx context.Context, key string) error
 	UpdatePostIndexProps(ctx context.Context, updates bson.D) error
+	PushCarouselConfig(ctx context.Context, carouselElem domain.CarouselElem) error
+	FindByFilter(ctx context.Context, filter bson.D) (*WebsiteConfig, error)
 }
 
 var _ IWebsiteConfigDao = (*WebsiteConfigDao)(nil)
@@ -62,6 +64,21 @@ func NewWebsiteConfigDao(db *mongo.Database) *WebsiteConfigDao {
 
 type WebsiteConfigDao struct {
 	coll *mongox.Collection[WebsiteConfig]
+}
+
+func (d *WebsiteConfigDao) FindByFilter(ctx context.Context, filter bson.D) (*WebsiteConfig, error) {
+	return d.coll.Finder().Filter(filter).FindOne(ctx)
+}
+
+func (d *WebsiteConfigDao) PushCarouselConfig(ctx context.Context, carouselElem domain.CarouselElem) error {
+	updateResult, err := d.coll.Updater().Filter(query.Eq("typ", "carousel")).Updates(update.Push("props.list", carouselElem)).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to push carousel config, carouselElem=%v", carouselElem)
+	}
+	if updateResult.ModifiedCount == 0 {
+		return fmt.Errorf("ModifiedCount=0, fails to push carousel config, carouselElem=%v", carouselElem)
+	}
+	return nil
 }
 
 func (d *WebsiteConfigDao) UpdatePostIndexProps(ctx context.Context, updates bson.D) error {
