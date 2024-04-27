@@ -115,7 +115,7 @@ func InitMiddlewares(writer io.Writer, isWebsiteInitialized func() bool) []gin.H
 			default:
 				return slog.LevelInfo
 			}
-		}(viper.GetString("logger.level")), log.WithSkipPaths([]string{"/admin-api/files/upload"}), log.WithSkipFunc(func(ctx *gin.Context) bool {
+		}(viper.GetString("logger.level")), log.WithSkipPaths([]string{"/admin-api/files/upload", "/admin-api/recovery"}), log.WithSkipFunc(func(ctx *gin.Context) bool {
 			url := ctx.Request.URL.Path
 			return strings.HasPrefix(url, "/static/")
 		}))),
