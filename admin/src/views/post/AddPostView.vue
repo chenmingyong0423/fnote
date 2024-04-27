@@ -67,7 +67,7 @@ const submit = async (post4Edit: Post4Edit) => {
     if (originalAxios.isAxiosError(error)) {
       // 这是一个由 axios 抛出的错误
       if (error.response) {
-        if (error.response.data.status === 409) {
+        if (error.response.status === 409) {
           message.error('id 重复')
           return
         }
