@@ -8,7 +8,7 @@
         >
         </a-input>
         <template v-else>
-          <a-image :width="50" :src="serverHost + record.logo" />
+          <a-image :width="50" :src="record.logo" />
         </template>
       </template>
       <template v-if="['name', 'description'].includes(column.dataIndex)">
