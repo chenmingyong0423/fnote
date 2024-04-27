@@ -29,7 +29,7 @@
   <a-table :columns="columns" :data-source="list">
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'image'">
-        <a-image :width="200" :src="record.image" />
+        <a-image :width="200" :src="serverHost + record.image" />
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
         <a-popconfirm v-if="list.length" title="确认删除？" @confirm="deletePay(record)">
@@ -54,6 +54,7 @@ import StaticUpload from '@/components/upload/StaticUpload.vue'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
+const serverHost = import.meta.env.VITE_API_HOST
 
 const columns = [
   {
