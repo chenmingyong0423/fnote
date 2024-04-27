@@ -211,10 +211,10 @@ func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colNam
 	// 挨个插入到集合中，如果有 dup key，忽略
 	for _, doc := range documents {
 		objectID, err2 := primitive.ObjectIDFromHex(doc["_id"].(string))
-		if err2 != nil {
-			return err2
+		// 部分集合的 id 不是 objectID
+		if err2 == nil {
+			doc["_id"] = objectID
 		}
-		doc["_id"] = objectID
 	}
 	// 先清空数据
 	_, err := col.DeleteMany(ctx, bson.M{})
