@@ -184,6 +184,16 @@ db.getCollection("configs").insertOne({
     updated_at: new Date()
 });
 
+// 轮播图数据
+db.getCollection("configs").insertOne({
+    typ: "carousel",
+    "props": {
+        "list": []
+    },
+    created_at: new Date(),
+    updated_at: new Date()
+});
+
 // friends
 db.createCollection("friends");
 db.getCollection("friends").createIndex({ status: 1, create_time: 1 })
