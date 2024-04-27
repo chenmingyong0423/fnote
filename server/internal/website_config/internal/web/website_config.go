@@ -50,11 +50,21 @@ type WebsiteConfigHandler struct {
 
 func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/configs")
+	adminGroup := engine.Group("/admin-api/configs")
+
 	// 获取首页的配置信息
 	routerGroup.GET("/index", apiwrap.Wrap(h.GetIndexConfig))
+
+	// 轮播图
+	routerGroup.GET("/index/carousel", apiwrap.Wrap(h.GetCarouselConfig))
+	adminGroup.POST("/carousel", apiwrap.WrapWithBody(h.AddCarouselConfig))
+	adminGroup.PUT("/carousel/:id", apiwrap.WrapWithBody(h.UpdateCarouselElem))
+	adminGroup.DELETE("/carousel/:id", apiwrap.Wrap(h.DeleteCarouselElem))
+	adminGroup.GET("/carousel", apiwrap.Wrap(h.AdminGetCarouselConfig))
+	adminGroup.PUT("/carousel/:id/show", apiwrap.WrapWithBody(h.AdminUpdateCarouselShowStatus))
+
 	routerGroup.GET("/check-initialization", apiwrap.Wrap(h.GetInitStatus))
 
-	adminGroup := engine.Group("/admin-api/configs")
 	adminGroup.GET("/check-initialization", apiwrap.Wrap(h.GetInitStatus))
 	adminGroup.POST("/initialization", apiwrap.WrapWithBody(h.InitializeWebsite))
 	adminGroup.GET("/website", apiwrap.Wrap(h.AdminGetWebsiteConfig))
@@ -519,4 +529,83 @@ func (h *WebsiteConfigHandler) AdminGetWebsiteConfig4Meta(ctx *gin.Context) (*ap
 		WebsiteName: config.WebsiteName,
 		WebsiteIcon: config.WebsiteIcon,
 	}), nil
+}
+
+func (h *WebsiteConfigHandler) GetCarouselConfig(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[CarouselVO]], error) {
+	config, err := h.serv.GetCarouselConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(h.toCarouselVO(config.List, func(elem domain.CarouselElem) bool {
+		return elem.Show
+	}))), nil
+}
+
+func (h *WebsiteConfigHandler) toCarouselVO(list []domain.CarouselElem, filterFunc func(elem domain.CarouselElem) bool) []CarouselVO {
+	result := make([]CarouselVO, 0, len(list))
+	for _, elem := range list {
+		if filterFunc(elem) {
+			result = append(result, CarouselVO{
+				Id:        elem.Id,
+				Title:     elem.Title,
+				Summary:   elem.Summary,
+				CoverImg:  elem.CoverImg,
+				Show:      elem.Show,
+				CreatedAt: elem.CreatedAt.Unix(),
+				UpdatedAt: elem.UpdatedAt.Unix(),
+			})
+		}
+	}
+	return result
+}
+
+func (h *WebsiteConfigHandler) AddCarouselConfig(ctx *gin.Context, req CarouselRequest) (*apiwrap.ResponseBody[any], error) {
+	exist, err := h.serv.IsCarouselElemExist(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+	if exist {
+		return nil, apiwrap.NewErrorResponseBody(409, "carousel element already exists")
+	}
+	now := time.Now()
+	return apiwrap.SuccessResponse(), h.serv.AddCarouselConfig(ctx, domain.CarouselElem{
+		Id:        req.Id,
+		Title:     req.Title,
+		Summary:   req.Summary,
+		CoverImg:  req.CoverImg,
+		Show:      req.Show,
+		CreatedAt: now,
+		UpdatedAt: now,
+	})
+}
+
+func (h *WebsiteConfigHandler) AdminGetCarouselConfig(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[CarouselVO]], error) {
+	config, err := h.serv.GetCarouselConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(h.toCarouselVO(config.List, func(_ domain.CarouselElem) bool {
+		return true
+	}))), nil
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateCarouselShowStatus(ctx *gin.Context, req CarouselShowRequest) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.UpdateCarouselShowStatus(ctx, ctx.Param("id"), req.Show)
+}
+
+func (h *WebsiteConfigHandler) UpdateCarouselElem(ctx *gin.Context, req CarouselRequest) (*apiwrap.ResponseBody[any], error) {
+	now := time.Now()
+	return apiwrap.SuccessResponse(), h.serv.UpdateCarouselElem(ctx, domain.CarouselElem{
+		Id:        ctx.Param("id"),
+		Title:     req.Title,
+		Summary:   req.Summary,
+		CoverImg:  req.CoverImg,
+		Show:      req.Show,
+		CreatedAt: now,
+		UpdatedAt: now,
+	})
+}
+
+func (h *WebsiteConfigHandler) DeleteCarouselElem(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.DeleteCarouselElem(ctx, ctx.Param("id"))
 }

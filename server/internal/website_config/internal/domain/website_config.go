@@ -42,6 +42,20 @@ type PayInfoConfig struct {
 	List []PayInfoConfigElem `bson:"list"`
 }
 
+type CarouselConfig struct {
+	List []CarouselElem `bson:"list"`
+}
+
+type CarouselElem struct {
+	Id        string    `bson:"id"`
+	Title     string    `bson:"title"`
+	Summary   string    `bson:"summary"`
+	CoverImg  string    `bson:"cover_img"`
+	Show      bool      `bson:"show"`
+	CreatedAt time.Time `bson:"created_at"`
+	UpdatedAt time.Time `bson:"updated_at"`
+}
+
 type WebsiteConfig struct {
 	WebsiteName         string     `bson:"website_name"`
 	WebsiteIcon         string     `bson:"website_icon"`

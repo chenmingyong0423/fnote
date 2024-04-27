@@ -18,6 +18,8 @@ import (
 	"context"
 	"time"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/domain"
 
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/repository"
@@ -62,6 +64,12 @@ type IWebsiteConfigService interface {
 	DeleteTPSVConfigByKey(ctx context.Context, key string) error
 	GetBaiduPushConfig(ctx context.Context) (*domain.Baidu, error)
 	UpdatePushConfigByKey(ctx context.Context, key string, updates map[string]any) error
+	GetCarouselConfig(ctx context.Context) (*domain.CarouselConfig, error)
+	AddCarouselConfig(ctx context.Context, carouselElem domain.CarouselElem) error
+	UpdateCarouselShowStatus(ctx context.Context, id string, show bool) error
+	UpdateCarouselElem(ctx context.Context, carouselElem domain.CarouselElem) error
+	DeleteCarouselElem(ctx context.Context, id string) error
+	IsCarouselElemExist(ctx context.Context, id string) (bool, error)
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -74,6 +82,39 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) IsCarouselElemExist(ctx context.Context, id string) (bool, error) {
+	cfg, err := s.repo.FindCarouselById(ctx, id)
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+		return false, err
+	}
+	return cfg != nil, nil
+}
+
+func (s *WebsiteConfigService) DeleteCarouselElem(ctx context.Context, id string) error {
+	return s.repo.DeleteCarouselElem(ctx, id)
+}
+
+func (s *WebsiteConfigService) UpdateCarouselElem(ctx context.Context, carouselElem domain.CarouselElem) error {
+	return s.repo.UpdateCarouselElem(ctx, carouselElem)
+}
+
+func (s *WebsiteConfigService) UpdateCarouselShowStatus(ctx context.Context, id string, show bool) error {
+	return s.repo.UpdateCarouselShowStatus(ctx, id, show)
+}
+
+func (s *WebsiteConfigService) AddCarouselConfig(ctx context.Context, carouselElem domain.CarouselElem) error {
+	return s.repo.AddCarouselConfig(ctx, carouselElem)
+}
+
+func (s *WebsiteConfigService) GetCarouselConfig(ctx context.Context) (*domain.CarouselConfig, error) {
+	cfg := &domain.CarouselConfig{}
+	err := s.getConfigAndConvertTo(ctx, "carousel", cfg)
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func (s *WebsiteConfigService) UpdatePushConfigByKey(ctx context.Context, key string, updates map[string]any) error {

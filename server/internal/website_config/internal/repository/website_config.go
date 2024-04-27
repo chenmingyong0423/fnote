@@ -62,6 +62,11 @@ type IWebsiteConfigRepository interface {
 	DeleteTPSVConfigByKey(ctx context.Context, key string) error
 	GetBaiduPushConfig(ctx context.Context) (*domain.Baidu, error)
 	UpdatePushConfigByKey(ctx context.Context, key string, updates map[string]any) error
+	AddCarouselConfig(ctx context.Context, carouselElem domain.CarouselElem) error
+	UpdateCarouselShowStatus(ctx context.Context, id string, show bool) error
+	UpdateCarouselElem(ctx context.Context, carouselElem domain.CarouselElem) error
+	DeleteCarouselElem(ctx context.Context, id string) error
+	FindCarouselById(ctx context.Context, id string) (*domain.Config, error)
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -74,6 +79,33 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) FindCarouselById(ctx context.Context, id string) (*domain.Config, error) {
+	websiteConfig, err := r.dao.FindByFilter(ctx, query.BsonBuilder().Eq("typ", "carousel").Eq("props.list.id", id).Build())
+	if err != nil {
+		return nil, err
+	}
+	return r.toConfig(websiteConfig), nil
+}
+
+func (r *WebsiteConfigRepository) DeleteCarouselElem(ctx context.Context, id string) error {
+	return r.dao.UpdateByConditionAndUpdates(ctx, query.Eq("typ", "carousel"),
+		update.Pull("props.list", bsonx.M("id", id)))
+}
+
+func (r *WebsiteConfigRepository) UpdateCarouselElem(ctx context.Context, carouselElem domain.CarouselElem) error {
+	return r.dao.UpdateByConditionAndUpdates(ctx, query.BsonBuilder().Eq("typ", "carousel").Eq("props.list.id", carouselElem.Id).Build(),
+		update.BsonBuilder().Set("props.list.$", carouselElem).Set("updated_at", carouselElem.UpdatedAt).Build())
+}
+
+func (r *WebsiteConfigRepository) UpdateCarouselShowStatus(ctx context.Context, id string, show bool) error {
+	return r.dao.UpdateByConditionAndUpdates(ctx, query.BsonBuilder().Eq("typ", "carousel").Eq("props.list.id", id).Build(),
+		update.BsonBuilder().Set("props.list.$.show", show).Set("updated_at", time.Now()).Build())
+}
+
+func (r *WebsiteConfigRepository) AddCarouselConfig(ctx context.Context, carouselElem domain.CarouselElem) error {
+	return r.dao.PushCarouselConfig(ctx, carouselElem)
 }
 
 func (r *WebsiteConfigRepository) UpdatePushConfigByKey(ctx context.Context, key string, updates map[string]any) error {
@@ -304,4 +336,8 @@ func (r *WebsiteConfigRepository) toConfigs(configs []*dao.WebsiteConfig) []doma
 		result[i] = domain.Config{Typ: config.Typ, Props: config.Props}
 	}
 	return result
+}
+
+func (r *WebsiteConfigRepository) toConfig(config *dao.WebsiteConfig) *domain.Config {
+	return &domain.Config{Typ: config.Typ, Props: config.Props}
 }

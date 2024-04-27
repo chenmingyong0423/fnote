@@ -123,3 +123,17 @@ type TPSVUpdateRequest struct {
 	Value       string `json:"value" binding:"required"`
 	Description string `json:"description" binding:"required"`
 }
+
+type CarouselRequest struct {
+	Id        string `json:"id"`
+	Title     string `json:"title"`
+	Summary   string `json:"summary"`
+	CoverImg  string `json:"cover_img"`
+	Show      bool   `json:"show"`
+	CreatedAt int64  `json:"created_at"`
+	UpdatedAt int64  `json:"Updated_at"`
+}
+
+type CarouselShowRequest struct {
+	Show bool `json:"show"`
+}
