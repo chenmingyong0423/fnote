@@ -24,7 +24,7 @@
 </template>
 <script lang="ts" setup>
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons-vue'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { message, type UploadChangeParam, type UploadProps } from 'ant-design-vue'
 
 const props = defineProps({
@@ -34,6 +34,23 @@ const props = defineProps({
   },
   authorization: String
 })
+
+watch(
+  () => props.imageUrl,
+  (newVal) => {
+    imgUrl.value = newVal
+    fileList.value = []
+    if (newVal) {
+      fileList.value?.push({
+        uid: newVal.split('/').pop() || '',
+        name: newVal.split('/').pop() || '',
+        status: 'done',
+        url: serverHost + newVal,
+        thumbUrl: serverHost + newVal
+      })
+    }
+  }
+)
 
 const imgUrl = ref<string>(props.imageUrl)
 const emit = defineEmits(['update:imageUrl'])

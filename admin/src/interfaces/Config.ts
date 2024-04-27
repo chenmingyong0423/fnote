@@ -421,3 +421,61 @@ export const UpdateBaiduPushConfig = (site: string, token: string) => {
     }
   })
 }
+
+export interface CarouselVO {
+  id: string
+  title: string
+  summary: string
+  cover_img: string
+  created_at: number
+  updated_at: number
+  show: boolean
+}
+
+export interface CarouselRequest {
+  id: string
+  title: string
+  summary: string
+  cover_img: string
+  show: boolean
+}
+
+export const GetCarousel = () => {
+  return instance({
+    url: '/configs/carousel',
+    method: 'get'
+  })
+}
+
+export const AddCarousel = (data: CarouselRequest) => {
+  return instance({
+    url: '/configs/carousel',
+    method: 'post',
+    data: data
+  })
+}
+
+export const UpdateCarousel = (id: string, data: CarouselRequest) => {
+  return instance({
+    url: `/configs/carousel/${id}`,
+    method: 'put',
+    data: data
+  })
+}
+
+export const DeleteCarousel = (id: string) => {
+  return instance({
+    url: `/configs/carousel/${id}`,
+    method: 'delete'
+  })
+}
+
+export const ChangeCarouselShowStatus = (id: string, show: boolean) => {
+  return instance({
+    url: `/configs/carousel/${id}/show`,
+    method: 'put',
+    data: {
+      show: show
+    }
+  })
+}
