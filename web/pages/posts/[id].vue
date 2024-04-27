@@ -96,7 +96,7 @@
               class="flex align-center items-center justify-center center gap-x-5"
             >
               <img
-                :src="code.image"
+                :src="apiHost + code.image"
                 width="300"
                 height="300"
                 :alt="code.name"
@@ -221,6 +221,8 @@ import VMdPreview from "@kangc/v-md-editor/lib/preview";
 const homeStore = useHomeStore();
 const configStore = useConfigStore();
 const isBlackMode = computed(() => homeStore.isBlackMode);
+const runtimeConfig = useRuntimeConfig()
+const apiHost = runtimeConfig.public.apiHost;
 
 const route = useRoute();
 const path: string = route.path;
@@ -249,7 +251,6 @@ const bdPush = async (urls : string) => {
   await baiduPostIndex(urls)
 }
 
-const runtimeConfig = useRuntimeConfig()
 
 const handleCopyCodeSuccess = () => {
   toast.showToast("复制成功", 2000);
