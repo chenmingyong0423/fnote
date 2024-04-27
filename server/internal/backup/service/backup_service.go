@@ -17,6 +17,7 @@ package service
 import (
 	"archive/tar"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -126,7 +127,18 @@ func (s *BackupService) GetBackups(ctx context.Context) (zipFileName string, err
 		}
 		if len(documents) > 0 {
 			filename := fmt.Sprintf("%s%s_%s.json", viper.GetString("system.static_path"), dbName, collectionName)
-
+			if collectionName == "configs" {
+				for _, document := range documents {
+					if typ, ok := document["typ"]; ok && typ == "social" {
+						props := document["props"].(primitive.M)
+						socialList := props["social_info_list"].(primitive.A)
+						for _, m := range socialList {
+							obj := m.(primitive.M)
+							obj["id"] = hex.EncodeToString(obj["id"].(primitive.Binary).Data)
+						}
+					}
+				}
+			}
 			fileContent, err = json.MarshalIndent(documents, "", "    ")
 			if err != nil {
 				return "", err
@@ -203,17 +215,31 @@ func (s *BackupService) addFileToTar(tarWriter *tar.Writer, filename string) err
 
 func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colName string, content []byte) error {
 	// content 是一个 json 数组，将其插入到集合中
-	var documents []bson.M
+	var documents []map[string]any
 	if err := json.Unmarshal(content, &documents); err != nil {
 		return err
 	}
 	col := s.db.Collection(colName)
-	// 挨个插入到集合中，如果有 dup key，忽略
 	for _, doc := range documents {
 		objectID, err2 := primitive.ObjectIDFromHex(doc["_id"].(string))
 		// 部分集合的 id 不是 objectID
 		if err2 == nil {
 			doc["_id"] = objectID
+		}
+
+		if colName == "configs" {
+			if typ, ok := doc["typ"]; ok && typ == "social" {
+				props := doc["props"].(map[string]any)
+				socialList := props["social_info_list"].([]any)
+				for _, m := range socialList {
+					obj := m.(map[string]any)
+					var err3 error
+					obj["id"], err3 = hex.DecodeString(obj["id"].(string))
+					if err3 != nil {
+						return err3
+					}
+				}
+			}
 		}
 	}
 	// 先清空数据
