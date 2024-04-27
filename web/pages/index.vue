@@ -1,6 +1,9 @@
 <template>
+  <div>
+  </div>
   <div class="flex m-auto h-auto">
     <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
+      <Carousel :carousel="carousel" class="mb-5"/>
       <Notice></Notice>
       <PostListSquareItem :posts="posts"></PostListSquareItem>
       <NuxtLink class="m-auto" to="/navigation">
@@ -25,8 +28,11 @@ import {getLatestPosts} from "~/api/post";
 import type {IPost} from "~/api/post";
 import type {IResponse, IListData} from "~/api/http";
 import {useConfigStore} from "~/store/config";
+import Carousel from "~/components/post/carousel/Carousel.vue";
+import {type CarouselVO, GetCarousel, getInitializationStatus, type InitializationStatusVO} from "~/api/config";
 
 let posts = ref<IPost[]>([]);
+let carousel = ref<CarouselVO[]>([]);
 
 const postInfos = async () => {
   try {
@@ -40,4 +46,20 @@ const postInfos = async () => {
   }
 };
 await postInfos();
+
+const getCarousel = async () => {
+  try {
+    const res: any = await GetCarousel()
+    const apiRes: IResponse<IListData<CarouselVO>> = res.data.value;
+    if (apiRes) {
+      if (apiRes.code === 0) {
+        carousel.value = apiRes.data?.list || []
+      }
+    }
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+await getCarousel()
 </script>
