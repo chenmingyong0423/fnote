@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-full h-85 relative b-rounded-4 overflow-hidden gray_border overflow-hidden bg-#fff dark:text-dtc dark_bg_gray dark:dark_border_2"
+    class="w-full h-85 lt-md:h-65 relative b-rounded-4 overflow-hidden gray_border overflow-hidden bg-#fff dark:text-dtc dark_bg_gray dark:dark_border_2"
     ref="carouselRef"
     @mouseenter="addWheelListener"
     @mouseleave="removeWheelListener"
@@ -30,12 +30,12 @@
             class="w-90% flex flex-col flex-center absolute top-50% left-50% translate--50% translate--50%"
           >
             <div
-              class="text-10 font-bold"
+              class="text-10 font-bold lt-md:text-8"
               :style="{ color: item.color || '#000' }"
             >
               {{ item.title }}
             </div>
-            <div class="text-8" :style="{ color: item.color || '#000' }">
+            <div class="text-8 lt-md:text-6" :style="{ color: item.color || '#000' }">
               {{ item.summary }}
             </div>
           </div>
@@ -62,7 +62,7 @@
       ></button>
     </div>
     <span
-      class="z-99 absolute top--1 left-4 bg-#2db7f5 rounded-b-3 text-white text-5 py-0.2em px-0.8em"
+      class="z-99 absolute top--1 left-4 bg-#2db7f5 rounded-b-3 text-white text-5 lt-md:text-4 py-0.2em px-0.8em"
       >推荐</span
     >
   </div>
