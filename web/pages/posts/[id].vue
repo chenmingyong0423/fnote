@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full slide-up">
+  <div class="flex w-full slide-up" :key="post?.sug">
     <div class="mt-10 w-5% lt-md:hidden">
       <div class="flex flex-col gap-y-3 items-center fixed z-99999">
         <div
@@ -317,8 +317,8 @@ onMounted(() => {
   window.addEventListener("scroll", anchorScroll);
   window.addEventListener("scroll", subscribeTitleFocus);
   link.value = window.location.href;
-  $nextTick(() => {});
 });
+
 onBeforeUnmount(() => {
   window.removeEventListener("scroll", anchorScroll);
   window.removeEventListener("scroll", subscribeTitleFocus);
