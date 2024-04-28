@@ -22,10 +22,10 @@
                 $dayjs(item.created_at * 1000).format("YYYY-MM-DD")
               }}
             </div>
-            <div class="text-8 font-bold">
+            <div class="text-8 font-bold" :style="{color: item.color || '#000'}">
               {{ item.title }}
             </div>
-            <div class="text-6 font-bold">
+            <div class="text-6 font-bold" :style="{color: item.color || '#000'}">
               {{ item.summary }}
             </div>
           </div>
