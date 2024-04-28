@@ -1,12 +1,12 @@
 <template>
-  <div class="w-full h-85 relative b-rounded-4 overflow-hidden bg-#fff dark:text-dtc dark_bg_gray" ref="carouselRef"
+  <div class="w-full h-85 relative b-rounded-4 overflow-hidden  gray_border overflow-hidden bg-#fff dark:text-dtc dark_bg_gray dark:dark_border_2" ref="carouselRef"
        @mouseenter="addWheelListener" @mouseleave="removeWheelListener">
     <div v-if="carousel.length > 0" class="slides w-full h-full absolute flex transition-transform duration-700"
          :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
       <div class="slide w-full h-full relative flex-shrink-0" v-for="(item, index) in props.carousel"
            :key="index">
         <a
-            class="relative h-full slide-up item group flex  b-rounded-4 cursor-pointer ease-linear duration-100 mb-5"
+            class="relative w-full h-full slide-up item group flex cursor-pointer ease-linear duration-100 mb-5"
             :href="baseUrl + '/posts/' +item.id"
             target="_blank"
             :title="item.title"
@@ -17,15 +17,11 @@
               :alt="item.title"
           />
           <div class="w-90% flex flex-col flex-center absolute  top-50% left-50% translate--50% translate--50%">
-            <div class="text-6 font-bold">
-              {{
-                $dayjs(item.created_at * 1000).format("YYYY-MM-DD")
-              }}
-            </div>
-            <div class="text-8 font-bold" :style="{color: item.color || '#000'}">
+
+            <div class="text-10 font-bold" :style="{color: item.color || '#000'}">
               {{ item.title }}
             </div>
-            <div class="text-6 font-bold" :style="{color: item.color || '#000'}">
+            <div class="text-8" :style="{color: item.color || '#000'}">
               {{ item.summary }}
             </div>
           </div>
