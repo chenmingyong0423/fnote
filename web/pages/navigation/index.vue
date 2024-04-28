@@ -1,5 +1,7 @@
 <template>
-  <div class="text-black bg-white p-5 b-rounded-4 dark_bg_gray dark:text-dtc">
+  <div
+    class="slide-up text-black bg-white p-5 b-rounded-4 dark_bg_gray dark:text-dtc"
+  >
     <div class="mb-10">
       <div
         class="line-height-10 text-10 light_border_bottom p-b-5 dark_text_white"
@@ -92,7 +94,11 @@ ct.value = ct.value.substring(0, ct.value.length - 1);
 
 const configStore = useConfigStore();
 useHead({
-  title: `文章分类和标签 - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
+  title: `文章分类和标签 - ${
+    configStore.seo_meta_config.title === ""
+      ? configStore.website_info.website_name
+      : configStore.seo_meta_config.title
+  }`,
   meta: [
     {
       name: "description",
@@ -101,11 +107,29 @@ useHead({
   ],
 });
 useSeoMeta({
-  ogTitle: `文章分类和标签 - ${configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.og_title}`,
+  ogTitle: `文章分类和标签 - ${
+    configStore.seo_meta_config.og_title === ""
+      ? configStore.website_info.website_name
+      : configStore.seo_meta_config.og_title
+  }`,
   ogDescription: `所有的文章分类和标签，包括${ct.value}等不同主题。`,
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+@keyframes slideUp {
+  0% {
+    transform: translateY(+100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease;
+  animation-iteration-count: 1;
+}
+</style>

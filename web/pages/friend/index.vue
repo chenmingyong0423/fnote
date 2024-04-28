@@ -1,25 +1,25 @@
 <template>
-  <div>
+  <div class="slide-up">
     <div class="bg-white b-rounded-4 p-5 mb-5 dark:text-dtc dark_bg_gray">
       <div class="h-10 line-height-10 font-bold text-6 mb-5">友链</div>
       <div class="flex flex-wrap gap-x-4 mb-5 lt-md:flex-col">
         <a
-            :href="friend.url"
-            target="_blank"
-            class="flex mb-5 w-23% custom_border_gray h-[100px] p-2 b-rounded-4 custom_cursor_flow cursor-pointer dark:text-dtc dark_bg_gray custom_shadow lt-md:w-100%"
-            v-for="(friend, index) in friends"
-            :key="index"
+          :href="friend.url"
+          target="_blank"
+          class="flex mb-5 w-23% custom_border_gray h-[100px] p-2 b-rounded-4 custom_cursor_flow cursor-pointer dark:text-dtc dark_bg_gray custom_shadow lt-md:w-100%"
+          v-for="(friend, index) in friends"
+          :key="index"
         >
           <div class="w-15% flex justify-center">
             <img
-                :src="friend.logo"
-                alt=""
-                class="w-15 h-15 border-rounded-50% cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"
-                v-if="friend.logo != ''"
+              :src="friend.logo"
+              alt=""
+              class="w-15 h-15 border-rounded-50% cursor-pointer hover:rotate-360 ease-out duration-1000 lt-lg:mr0"
+              v-if="friend.logo != ''"
             />
             <div
-                class="i-ph-user-circle-duotone w-full h-12 border-rounded-50% lt-lg:mr0 text-gray-4"
-                v-else
+              class="i-ph-user-circle-duotone w-full h-12 border-rounded-50% lt-lg:mr0 text-gray-4"
+              v-else
             ></div>
           </div>
           <div class="w-74% ml-1%">
@@ -39,67 +39,67 @@
       <div class="flex flex-wrap gap-x-5 gap-y-2 lt-md:flex-col">
         <div class="flex w-49% lt-md:w-100%">
           <span
-              class="light_border box-border w-[50px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray"
-          >*昵称</span
+            class="light_border box-border w-[50px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray"
+            >*昵称</span
           >
           <input
-              type="text"
-              placeholder="请输入昵称"
-              v-model="req.name"
-              class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
+            type="text"
+            placeholder="请输入昵称"
+            v-model="req.name"
+            class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
           />
         </div>
         <div class="flex w-49% lt-md:w-100%">
           <span
-              class="light_border box-border w-[50px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray"
-          >邮箱</span
+            class="light_border box-border w-[50px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray"
+            >邮箱</span
           >
           <input
-              type="text"
-              placeholder="请输入邮箱"
-              v-model="req.email"
-              class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
+            type="text"
+            placeholder="请输入邮箱"
+            v-model="req.email"
+            class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
           />
         </div>
         <div class="flex w-49% lt-md:w-100%">
           <span
-              class="light_border box-border w-[100px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray"
-          >*头像链接</span
+            class="light_border box-border w-[100px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray"
+            >*头像链接</span
           >
           <input
-              type="text"
-              placeholder="请输入头像链接"
-              v-model="req.logo"
-              class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
+            type="text"
+            placeholder="请输入头像链接"
+            v-model="req.logo"
+            class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
           />
         </div>
         <div class="flex w-49% lt-md:w-100%">
           <span
-              class="light_border box-border w-[100px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray"
-          >*网站链接</span
+            class="light_border box-border w-[100px] border-rounded-l-2 custom_border_gray bg-#F9F9F9 h-10 line-height-10 text-center dark_bg_gray"
+            >*网站链接</span
           >
           <input
-              type="text"
-              placeholder="请输入网站链接"
-              v-model="req.url"
-              class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
+            type="text"
+            placeholder="请输入网站链接"
+            v-model="req.url"
+            class="w-full outline-none custom_border_gray box-border h-10 border-rounded-l-0 border-l-0 bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
           />
         </div>
         <div class="w-100%">
           <textarea
-              rows="5"
-              class="w-full custom_border_gray bg-#F9F9F9 outline-none focus:custom_border_1E80FF b-rounded-2 p-2 box-border mb-3 dark:text-dtc dark_bg_gray"
-              v-model="req.description"
-              placeholder="*请输入个人简介（不能超出 30 字）"
-              maxlength="200"
+            rows="5"
+            class="w-full custom_border_gray bg-#F9F9F9 outline-none focus:custom_border_1E80FF b-rounded-2 p-2 box-border mb-3 dark:text-dtc dark_bg_gray"
+            v-model="req.description"
+            placeholder="*请输入个人简介（不能超出 30 字）"
+            maxlength="200"
           ></textarea>
         </div>
       </div>
       <div>
         <Button
-            name="提交"
-            class="w-15 h-8 line-height-8 m-auto bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"
-            @click="submit"
+          name="提交"
+          class="w-15 h-8 line-height-8 m-auto bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"
+          @click="submit"
         ></Button>
       </div>
     </div>
@@ -112,10 +112,10 @@ import {
   getFriends,
   applyForFriend,
 } from "~/api/friend";
-import {useAlertStore} from "~/store/toast";
-import type {IBaseResponse, IListData, IResponse} from "~/api/http";
-import {isValidEmail} from "~/utils/email";
-import {useConfigStore} from "~/store/config";
+import { useAlertStore } from "~/store/toast";
+import type { IBaseResponse, IListData, IResponse } from "~/api/http";
+import { isValidEmail } from "~/utils/email";
+import { useConfigStore } from "~/store/config";
 
 const configStore = useConfigStore();
 const friends = ref<IFriend[]>([]);
@@ -206,15 +206,37 @@ const submit = async () => {
 };
 
 useHead({
-  title: `友链 - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
-  meta: [
-    {name: "description", content: "友链列表"},
-  ],
+  title: `友链 - ${
+    configStore.seo_meta_config.title === ""
+      ? configStore.website_info.website_name
+      : configStore.seo_meta_config.title
+  }`,
+  meta: [{ name: "description", content: "友链列表" }],
 });
 useSeoMeta({
-  ogTitle: `友链 - ${configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.og_title}`,
+  ogTitle: `友链 - ${
+    configStore.seo_meta_config.og_title === ""
+      ? configStore.website_info.website_name
+      : configStore.seo_meta_config.og_title
+  }`,
   ogDescription: "友链列表",
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",
 });
 </script>
+
+<style scoped>
+@keyframes slideUp {
+  0% {
+    transform: translateY(+100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease;
+  animation-iteration-count: 1;
+}
+</style>

@@ -212,7 +212,12 @@
 </template>
 
 <script lang="ts" setup>
-import {type IPostDetail, getPostsById, likePost, baiduPostIndex} from "~/api/post";
+import {
+  type IPostDetail,
+  getPostsById,
+  likePost,
+  baiduPostIndex,
+} from "~/api/post";
 import type { IResponse, IBaseResponse, IPageData } from "~/api/http";
 import { onMounted, ref } from "vue";
 import { useHomeStore } from "~/store/home";
@@ -221,7 +226,7 @@ import VMdPreview from "@kangc/v-md-editor/lib/preview";
 const homeStore = useHomeStore();
 const configStore = useConfigStore();
 const isBlackMode = computed(() => homeStore.isBlackMode);
-const runtimeConfig = useRuntimeConfig()
+const runtimeConfig = useRuntimeConfig();
 const apiHost = runtimeConfig.public.apiHost;
 
 const route = useRoute();
@@ -238,8 +243,13 @@ const getPostDetail = async () => {
     let postRes: any = await getPostsById(id);
     let res: IResponse<IPostDetail> = postRes.data.value;
     if (res && res.data) {
-    post.value = res.data;
-    author.value = post.value?.author || "";
+      // 使用正则表达式来匹配 Markdown 中的图片链接路径 "/static/" 并替换为 "${serverHost}/static/"
+      res.data.content = res.data.content.replace(
+        /\]\(\/static\//g,
+        `](${apiHost}/static/`,
+      );
+      post.value = res.data;
+      author.value = post.value?.author || "";
     }
   } catch (error) {
     console.log(error);
@@ -247,10 +257,9 @@ const getPostDetail = async () => {
 };
 await getPostDetail();
 
-const bdPush = async (urls : string) => {
-  await baiduPostIndex(urls)
-}
-
+const bdPush = async (urls: string) => {
+  await baiduPostIndex(urls);
+};
 
 const handleCopyCodeSuccess = () => {
   toast.showToast("复制成功", 2000);
@@ -308,6 +317,7 @@ onMounted(() => {
   window.addEventListener("scroll", anchorScroll);
   window.addEventListener("scroll", subscribeTitleFocus);
   link.value = window.location.href;
+  $nextTick(() => {});
 });
 onBeforeUnmount(() => {
   window.removeEventListener("scroll", anchorScroll);
@@ -401,11 +411,11 @@ const initComments = async () => {
     let commentRes: any = await getComments(id);
     let res: IResponse<IPageData<IComment>> = commentRes.data.value;
     if (res && res.data) {
-    if (res.code !== 0) {
-      toast.showToast(res.message, 2000);
-      return;
-    }
-    comments.value = res.data?.list || [];
+      if (res.code !== 0) {
+        toast.showToast(res.message, 2000);
+        return;
+      }
+      comments.value = res.data?.list || [];
     }
   } catch (error: any) {
     toast.showToast(error.toString(), 2000);
@@ -428,12 +438,12 @@ const submit = async (req: ICommentRequest) => {
     }
     let res: IBaseResponse = commentRes.data.value;
     if (res) {
-    if (res.code !== 0) {
-      toast.showToast(res.message, 2000);
-      return;
-    }
-    toast.showToast("提交评论成功，待站长审核通过后将会通过邮件告知。", 3000);
-    clearCommentReq();
+      if (res.code !== 0) {
+        toast.showToast(res.message, 2000);
+        return;
+      }
+      toast.showToast("提交评论成功，待站长审核通过后将会通过邮件告知。", 3000);
+      clearCommentReq();
     }
   } catch (error: any) {
     toast.showToast(error.toString(), 2000);
@@ -454,12 +464,12 @@ const submitReply = async (req: ICommentReplyRequest, commentId: string) => {
     }
     let res: IBaseResponse = commentRes.data.value;
     if (res) {
-    if (res.code !== 0) {
-      toast.showToast(res.message, 2000);
-      return;
-    }
-    toast.showToast("提交评论成功，待站长审核通过后将会通过邮件告知。", 3000);
-    clearCommentReplyReq();
+      if (res.code !== 0) {
+        toast.showToast(res.message, 2000);
+        return;
+      }
+      toast.showToast("提交评论成功，待站长审核通过后将会通过邮件告知。", 3000);
+      clearCommentReplyReq();
     }
   } catch (error: any) {
     toast.showToast(error.toString(), 2000);
@@ -495,12 +505,12 @@ const submitReply2Reply = async (
     }
     let res: IBaseResponse = commentRes.data.value;
     if (res) {
-    if (res.code !== 0) {
-      toast.showToast(res.message, 2000);
-      return;
-    }
-    toast.showToast("提交评论成功，待站长审核通过后将会通过邮件告知。", 3000);
-    clearReply2ReplyReq();
+      if (res.code !== 0) {
+        toast.showToast(res.message, 2000);
+        return;
+      }
+      toast.showToast("提交评论成功，待站长审核通过后将会通过邮件告知。", 3000);
+      clearReply2ReplyReq();
     }
   } catch (error: any) {
     toast.showToast(error.toString(), 2000);
@@ -515,23 +525,32 @@ const clearReply2ReplyReq = () => {
 
 let description = post.value?.meta_description || post.value?.summary;
 
-let keywords = configStore.seo_meta_config.keywords + ',' + post.value?.meta_keywords;
+let keywords =
+  configStore.seo_meta_config.keywords + "," + post.value?.meta_keywords;
 
 useHead({
-  title: `${post.value?.title} - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
+  title: `${post.value?.title} - ${
+    configStore.seo_meta_config.title === ""
+      ? configStore.website_info.website_name
+      : configStore.seo_meta_config.title
+  }`,
   meta: [
     { name: "description", content: description },
     { name: "keywords", content: keywords },
   ],
 });
 useSeoMeta({
-  ogTitle: `${post.value?.title} - ${configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.og_title}`,
+  ogTitle: `${post.value?.title} - ${
+    configStore.seo_meta_config.og_title === ""
+      ? configStore.website_info.website_name
+      : configStore.seo_meta_config.og_title
+  }`,
   ogDescription: description,
   ogImage: post.value?.cover_img,
   twitterCard: "summary",
 });
 
-bdPush(runtimeConfig.public.domain + route.path)
+bdPush(runtimeConfig.public.domain + route.path);
 </script>
 
 <style scoped>

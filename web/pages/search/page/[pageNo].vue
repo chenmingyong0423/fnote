@@ -123,8 +123,8 @@ const postInfos = async () => {
     let postRes: any = await getPosts(deepCopyReq);
     let res: IResponse<IPageData<IPost>> = postRes.data.value;
     if (res && res.data) {
-    posts.value = res.data?.list || [];
-    totalPosts.value = res.data?.totalCount || 0;
+      posts.value = res.data?.list || [];
+      totalPosts.value = res.data?.totalCount || 0;
     }
   } catch (error) {
     console.log(error);
@@ -177,13 +177,19 @@ watch(
 const configStore = useConfigStore();
 const seo = () => {
   useHead({
-    title: `${keyword.value} - 搜索 - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
-    meta: [
-      { name: "description", content: `${keyword.value} 搜索结果` },
-    ],
+    title: `${keyword.value} - 搜索 - ${
+      configStore.seo_meta_config.title === ""
+        ? configStore.website_info.website_name
+        : configStore.seo_meta_config.title
+    }`,
+    meta: [{ name: "description", content: `${keyword.value} 搜索结果` }],
   });
   useSeoMeta({
-    ogTitle: `${keyword.value} - 搜索 - ${configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.og_title}`,
+    ogTitle: `${keyword.value} - 搜索 - ${
+      configStore.seo_meta_config.og_title === ""
+        ? configStore.website_info.website_name
+        : configStore.seo_meta_config.og_title
+    }`,
     ogDescription: `${keyword.value} 搜索结果`,
     ogImage: configStore.seo_meta_config.og_image,
     twitterCard: "summary",

@@ -1,4 +1,4 @@
-import { visualizer } from 'rollup-plugin-visualizer';
+import { visualizer } from "rollup-plugin-visualizer";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -8,9 +8,9 @@ export default defineNuxtConfig({
         open: true, // 是否在默认浏览器中自动打开报告
         gzipSize: true, // 显示gzip压缩后的大小
         brotliSize: true, // 显示Brotli压缩后的大小
-        filename: 'stats.html' // 输出报告的文件名
-      })
-    ]
+        filename: "stats.html", // 输出报告的文件名
+      }),
+    ],
   },
   devtools: { enabled: true },
   modules: ["@unocss/nuxt", "@pinia/nuxt", "dayjs-nuxt"],
@@ -99,7 +99,19 @@ export default defineNuxtConfig({
       },
       hovers: {},
     },
-    safelist: ['i-fa6-brands-x-twitter', 'i-fa6-brands-facebook', 'i-fa6-brands-instagram', 'i-fa6-brands-youtube', 'i-fa6-brands-bilibili', 'i-fa6-brands-qq', 'i-fa6-brands-github', 'i-fa6-brands:square-git', 'i-fa6-brands-weixin', 'i-fa6-brands-zhihu', 'i-bi-link-45deg'],
+    safelist: [
+      "i-fa6-brands-x-twitter",
+      "i-fa6-brands-facebook",
+      "i-fa6-brands-instagram",
+      "i-fa6-brands-youtube",
+      "i-fa6-brands-bilibili",
+      "i-fa6-brands-qq",
+      "i-fa6-brands-github",
+      "i-fa6-brands:square-git",
+      "i-fa6-brands-weixin",
+      "i-fa6-brands-zhihu",
+      "i-bi-link-45deg",
+    ],
   },
   css: ["@/styles/main.css"],
   plugins: [
@@ -107,6 +119,6 @@ export default defineNuxtConfig({
     "~/plugins/localStorage.client.ts",
     "~/plugins/v-md-editor.client.js",
     "~/plugins/qrcode.client.ts",
-    '~/plugins/routerGuard.ts'
+    "~/plugins/routerGuard.ts",
   ],
 });

@@ -1,15 +1,13 @@
 <template>
-  <div>
-  </div>
-  <div class="flex m-auto h-auto">
+  <div class="flex m-auto h-auto slide-up">
     <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
-      <Carousel :carousel="carousel" class="mb-5"/>
+      <Carousel :carousel="carousel" class="mb-5" />
       <Notice></Notice>
       <PostListSquareItem :posts="posts"></PostListSquareItem>
       <NuxtLink class="m-auto" to="/navigation">
         <Button
-            name="查看更多"
-            class="w-30 h-10 line-height-10 bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"
+          name="查看更多"
+          class="w-30 h-10 line-height-10 bg-#1E80FF text-white hover:bg-#1E80FF/70 duration-200"
         ></Button>
       </NuxtLink>
     </div>
@@ -24,12 +22,17 @@
 </template>
 
 <script lang="ts" setup>
-import {getLatestPosts} from "~/api/post";
-import type {IPost} from "~/api/post";
-import type {IResponse, IListData} from "~/api/http";
-import {useConfigStore} from "~/store/config";
+import { getLatestPosts } from "~/api/post";
+import type { IPost } from "~/api/post";
+import type { IResponse, IListData } from "~/api/http";
+import { useConfigStore } from "~/store/config";
 import Carousel from "~/components/post/carousel/Carousel.vue";
-import {type CarouselVO, GetCarousel, getInitializationStatus, type InitializationStatusVO} from "~/api/config";
+import {
+  type CarouselVO,
+  GetCarousel,
+  getInitializationStatus,
+  type InitializationStatusVO,
+} from "~/api/config";
 
 let posts = ref<IPost[]>([]);
 let carousel = ref<CarouselVO[]>([]);
@@ -49,17 +52,33 @@ await postInfos();
 
 const getCarousel = async () => {
   try {
-    const res: any = await GetCarousel()
+    const res: any = await GetCarousel();
     const apiRes: IResponse<IListData<CarouselVO>> = res.data.value;
     if (apiRes) {
       if (apiRes.code === 0) {
-        carousel.value = apiRes.data?.list || []
+        carousel.value = apiRes.data?.list || [];
       }
     }
   } catch (e) {
-    console.log(e)
+    console.log(e);
+  }
+};
+
+await getCarousel();
+</script>
+
+<style scoped>
+@keyframes slideUp {
+  0% {
+    transform: translateY(+100%);
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 
-await getCarousel()
-</script>
+.slide-up {
+  animation: slideUp 0.5s ease;
+  animation-iteration-count: 1;
+}
+</style>
