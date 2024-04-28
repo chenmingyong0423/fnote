@@ -10,7 +10,7 @@
     >
       <div class="h-2/3 overflow-hidden relative w-full">
         <img
-            class="object-contain w-full h-full group-hover:scale-110 duration-500"
+            class="object-fit w-full h-full group-hover:scale-110 duration-500"
             :src="apiHost + item.cover_img"
             :alt="item.title"
         />
