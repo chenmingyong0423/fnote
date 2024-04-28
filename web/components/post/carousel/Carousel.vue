@@ -36,13 +36,13 @@
     <!-- 圆点导航 -->
     <div class="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex space-x-2">
       <button
-          class="dot h-3 w-3 rounded-full bg-white"
-          v-for="(slide, index) in carousel"
+          class="mx-[3px] box-content h-[3px] w-[30px] flex-initial cursor-pointer border-0 border-y-[10px] border-solid border-transparent bg-white bg-clip-padding p-0 -indent-[999px] transition-opacity duration-[600ms] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] motion-reduce:transition-none"          v-for="(slide, index) in carousel"
           :key="'dot-' + index"
-          :class="{ 'bg-gray-800 w-7': currentSlide === index }"
+          :class="currentSlide === index ? 'opacity-100' : 'opacity-50'"
           @click="setCurrentSlide(index)"
       ></button>
     </div>
+    <span class="z-99 absolute top--1 left-4 bg-#2db7f5 rounded-b-3 text-white text-5 py-0.2em px-0.8em">推荐</span>
   </div>
 </template>
 
