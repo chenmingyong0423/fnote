@@ -141,7 +141,7 @@ const postInfos = async () => {
       let categoryRes: any = await getCategoryByRoute(routeParam);
       let res: IResponse<ICategoryName> = categoryRes.data.value;
       if (res && res.data) {
-      title.value = res.data?.name || "";
+        title.value = res.data?.name || "";
       }
       req.value.categories = [title.value];
     }
@@ -149,8 +149,8 @@ const postInfos = async () => {
     let postRes: any = await getPosts(deepCopyReq);
     let res: IResponse<IPageData<IPost>> = postRes.data.value;
     if (res && res.data) {
-    posts.value = res.data?.list || [];
-    totalPosts.value = res.data?.totalCount || totalPosts.value;
+      posts.value = res.data?.list || [];
+      totalPosts.value = res.data?.totalCount || totalPosts.value;
     }
   } catch (error) {
     console.log(error);
@@ -159,15 +159,20 @@ const postInfos = async () => {
 
 await postInfos();
 
-
 useHead({
-  title: `${title.value} - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
-  meta: [
-    { name: "description", content: `${title.value}文章列表` },
-  ],
+  title: `${title.value} - ${
+    configStore.seo_meta_config.title === ""
+      ? configStore.website_info.website_name
+      : configStore.seo_meta_config.title
+  }`,
+  meta: [{ name: "description", content: `${title.value}文章列表` }],
 });
 useSeoMeta({
-  ogTitle: `${title.value} - ${configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.og_title}`,
+  ogTitle: `${title.value} - ${
+    configStore.seo_meta_config.og_title === ""
+      ? configStore.website_info.website_name
+      : configStore.seo_meta_config.og_title
+  }`,
   ogDescription: `${title.value}文章列表`,
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",

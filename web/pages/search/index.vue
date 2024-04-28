@@ -2,34 +2,34 @@
   <div class="flex-col">
     <div class="mb-10 ml-5 flex gap-x-5 dark:text-dtc">
       <NuxtLink
-          class="p-2 cursor-pointer"
-          :class="
+        class="p-2 cursor-pointer"
+        :class="
           filter === 'latest'
             ? 'custom_bottom_border_1E80FF font-bold'
             : 'hover:custom_bottom_border_1E80FF'
         "
-          :to="path + '?keyword=' + keyword + '&filter=latest'"
-      >最新
+        :to="path + '?keyword=' + keyword + '&filter=latest'"
+        >最新
       </NuxtLink>
       <NuxtLink
-          class="p-2 cursor-pointer"
-          :class="
+        class="p-2 cursor-pointer"
+        :class="
           filter === 'oldest'
             ? 'custom_bottom_border_1E80FF font-bold'
             : 'hover:custom_bottom_border_1E80FF'
         "
-          :to="path + '?keyword=' + keyword + '&filter=oldest'"
-      >最早
+        :to="path + '?keyword=' + keyword + '&filter=oldest'"
+        >最早
       </NuxtLink>
       <NuxtLink
-          class="p-2 cursor-pointer"
-          :class="
+        class="p-2 cursor-pointer"
+        :class="
           filter === 'likes'
             ? 'custom_bottom_border_1E80FF font-bold'
             : 'hover:custom_bottom_border_1E80FF'
         "
-          :to="path + '?keyword=' + keyword + '&filter=likes'"
-      >点赞最多
+        :to="path + '?keyword=' + keyword + '&filter=likes'"
+        >点赞最多
       </NuxtLink>
     </div>
     <div class="flex">
@@ -38,16 +38,16 @@
         <div class="flex flex-col">
           <PostListItem :posts="posts" class="lt-md:hidden"></PostListItem>
           <PostListSquareItem
-              :posts="posts"
-              class="md:hidden"
+            :posts="posts"
+            class="md:hidden"
           ></PostListSquareItem>
           <Pagination
-              :currentPage="req.pageNo"
-              :total="totalPosts"
-              :perPageCount="req.pageSize"
-              :route="path + '/page/'"
-              :extraParams="{ keyword: req.keyword }"
-              :filterCond="filter"
+            :currentPage="req.pageNo"
+            :total="totalPosts"
+            :perPageCount="req.pageSize"
+            :route="path + '/page/'"
+            :extraParams="{ keyword: req.keyword }"
+            :filterCond="filter"
           ></Pagination>
         </div>
       </div>
@@ -59,11 +59,11 @@
 </template>
 
 <script lang="ts" setup>
-import {getPosts} from "~/api/post";
-import type {PageRequest} from "~/api/post";
-import type {IPost} from "~/api/post";
-import type {IResponse, IPageData} from "~/api/http";
-import {useConfigStore} from "~/store/config";
+import { getPosts } from "~/api/post";
+import type { PageRequest } from "~/api/post";
+import type { IPost } from "~/api/post";
+import type { IResponse, IPageData } from "~/api/http";
+import { useConfigStore } from "~/store/config";
 
 const route = useRoute();
 const path = route.path;
@@ -122,48 +122,54 @@ await postInfos();
 const routeQuery = computed(() => route.query);
 
 watch(
-    () => routeQuery,
-    async (newQuery, oldQuery) => {
-      if (
-          newQuery.value.filter &&
-          newQuery.value.filter !== "" &&
-          newQuery.value.filter !== filter.value
-      ) {
-        filter.value = String(newQuery.value.filter);
-        switch (filter.value) {
-          case "oldest":
-            req.value.sortField = "create_time";
-            req.value.sortOrder = "ASC";
-            break;
-          case "likes":
-            req.value.sortField = "like_count";
-            req.value.sortOrder = "DESC";
-            break;
-          default:
-            req.value.sortField = "create_time";
-            req.value.sortOrder = "DESC";
-            break;
-        }
-        await postInfos();
-      } else if (newQuery.value.keyword !== keyword.value) {
-        req.value.keyword = String(route.query.keyword);
-        keyword.value = String(route.query.keyword);
-        await postInfos();
-        seo();
+  () => routeQuery,
+  async (newQuery, oldQuery) => {
+    if (
+      newQuery.value.filter &&
+      newQuery.value.filter !== "" &&
+      newQuery.value.filter !== filter.value
+    ) {
+      filter.value = String(newQuery.value.filter);
+      switch (filter.value) {
+        case "oldest":
+          req.value.sortField = "create_time";
+          req.value.sortOrder = "ASC";
+          break;
+        case "likes":
+          req.value.sortField = "like_count";
+          req.value.sortOrder = "DESC";
+          break;
+        default:
+          req.value.sortField = "create_time";
+          req.value.sortOrder = "DESC";
+          break;
       }
-    },
-    {deep: true},
+      await postInfos();
+    } else if (newQuery.value.keyword !== keyword.value) {
+      req.value.keyword = String(route.query.keyword);
+      keyword.value = String(route.query.keyword);
+      await postInfos();
+      seo();
+    }
+  },
+  { deep: true },
 );
 const configStore = useConfigStore();
 const seo = () => {
   useHead({
-    title: `${keyword.value} - 搜索 - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
-    meta: [
-      {name: "description", content: `${keyword.value} 搜索结果`},
-    ],
+    title: `${keyword.value} - 搜索 - ${
+      configStore.seo_meta_config.title === ""
+        ? configStore.website_info.website_name
+        : configStore.seo_meta_config.title
+    }`,
+    meta: [{ name: "description", content: `${keyword.value} 搜索结果` }],
   });
   useSeoMeta({
-    ogTitle: `${keyword.value} - 搜索 - ${configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.og_title}`,
+    ogTitle: `${keyword.value} - 搜索 - ${
+      configStore.seo_meta_config.og_title === ""
+        ? configStore.website_info.website_name
+        : configStore.seo_meta_config.og_title
+    }`,
     ogDescription: `${keyword.value} 搜索结果`,
     ogImage: configStore.seo_meta_config.og_image,
     twitterCard: "summary",

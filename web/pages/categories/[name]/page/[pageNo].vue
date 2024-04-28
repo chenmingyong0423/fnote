@@ -2,34 +2,34 @@
   <div class="flex-col">
     <div class="mb-10 ml-5 flex gap-x-5 dark:text-dtc">
       <NuxtLink
-          class="p-2 cursor-pointer"
-          :class="
+        class="p-2 cursor-pointer"
+        :class="
           filter === 'latest'
             ? 'custom_bottom_border_1E80FF font-bold'
             : 'hover:custom_bottom_border_1E80FF'
         "
-          :to="path + generateQuery('latest')"
-      >最新
+        :to="path + generateQuery('latest')"
+        >最新
       </NuxtLink>
       <NuxtLink
-          class="p-2 cursor-pointer"
-          :class="
+        class="p-2 cursor-pointer"
+        :class="
           filter === 'oldest'
             ? 'custom_bottom_border_1E80FF font-bold'
             : 'hover:custom_bottom_border_1E80FF'
         "
-          :to="path + generateQuery('oldest')"
-      >最早
+        :to="path + generateQuery('oldest')"
+        >最早
       </NuxtLink>
       <NuxtLink
-          class="p-2 cursor-pointer"
-          :class="
+        class="p-2 cursor-pointer"
+        :class="
           filter === 'likes'
             ? 'custom_bottom_border_1E80FF font-bold'
             : 'hover:custom_bottom_border_1E80FF'
         "
-          :to="path + generateQuery('likes')"
-      >点赞最多
+        :to="path + generateQuery('likes')"
+        >点赞最多
       </NuxtLink>
     </div>
     <div class="flex">
@@ -37,15 +37,15 @@
         <div class="flex flex-col">
           <PostListItem :posts="posts" class="lt-md:hidden"></PostListItem>
           <PostListSquareItem
-              :posts="posts"
-              class="md:hidden"
+            :posts="posts"
+            class="md:hidden"
           ></PostListSquareItem>
           <Pagination
-              :currentPage="req.pageNo"
-              :total="totalPosts"
-              :perPageCount="req.pageSize"
-              :route="`/categories/${routeParam}/page/`"
-              :filterCond="filter"
+            :currentPage="req.pageNo"
+            :total="totalPosts"
+            :perPageCount="req.pageSize"
+            :route="`/categories/${routeParam}/page/`"
+            :filterCond="filter"
           ></Pagination>
         </div>
       </div>
@@ -57,13 +57,13 @@
 </template>
 
 <script lang="ts" setup>
-import {getPosts} from "~/api/post";
-import {getCategoryByRoute} from "~/api/category";
-import type {PageRequest} from "~/api/post";
-import type {IPost} from "~/api/post";
-import type {IResponse, IPageData} from "~/api/http";
-import type {ICategoryName} from "~/api/category";
-import {useConfigStore} from "~/store/config";
+import { getPosts } from "~/api/post";
+import { getCategoryByRoute } from "~/api/category";
+import type { PageRequest } from "~/api/post";
+import type { IPost } from "~/api/post";
+import type { IResponse, IPageData } from "~/api/http";
+import type { ICategoryName } from "~/api/category";
+import { useConfigStore } from "~/store/config";
 
 const route = useRoute();
 const pageNo: number = +route.params.pageNo;
@@ -136,48 +136,54 @@ await postInfos();
 // 创建一个计算属性来追踪 query 对象
 const routeQuery = computed(() => route.query);
 watch(
-    () => routeQuery,
-    async (newQuery, oldQuery) => {
-      const p: number = Number(route.query.pageSize) || -1;
-      if (p != req.value.pageSize && p != -1) {
-        req.value.pageSize = p;
-        pageSize = p;
-        await postInfos();
+  () => routeQuery,
+  async (newQuery, oldQuery) => {
+    const p: number = Number(route.query.pageSize) || -1;
+    if (p != req.value.pageSize && p != -1) {
+      req.value.pageSize = p;
+      pageSize = p;
+      await postInfos();
+    }
+    if (
+      newQuery.value.filter &&
+      newQuery.value.filter !== "" &&
+      newQuery.value.filter !== filter.value
+    ) {
+      filter.value = String(newQuery.value.filter);
+      switch (filter.value) {
+        case "oldest":
+          req.value.sortField = "create_time";
+          req.value.sortOrder = "ASC";
+          break;
+        case "likes":
+          req.value.sortField = "like_count";
+          req.value.sortOrder = "DESC";
+          break;
+        default:
+          req.value.sortField = "create_time";
+          req.value.sortOrder = "DESC";
+          break;
       }
-      if (
-          newQuery.value.filter &&
-          newQuery.value.filter !== "" &&
-          newQuery.value.filter !== filter.value
-      ) {
-        filter.value = String(newQuery.value.filter);
-        switch (filter.value) {
-          case "oldest":
-            req.value.sortField = "create_time";
-            req.value.sortOrder = "ASC";
-            break;
-          case "likes":
-            req.value.sortField = "like_count";
-            req.value.sortOrder = "DESC";
-            break;
-          default:
-            req.value.sortField = "create_time";
-            req.value.sortOrder = "DESC";
-            break;
-        }
-        await postInfos();
-      }
-    },
-    {deep: true},
+      await postInfos();
+    }
+  },
+  { deep: true },
 );
 
 useHead({
-  title: `${title.value} - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
-  meta: [
-    {name: "description", content: `${title.value}文章列表`},
-  ],
+  title: `${title.value} - ${
+    configStore.seo_meta_config.title === ""
+      ? configStore.website_info.website_name
+      : configStore.seo_meta_config.title
+  }`,
+  meta: [{ name: "description", content: `${title.value}文章列表` }],
 });
 useSeoMeta({
-  ogTitle: `${title.value} - ${configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.og_title}`,
+  ogTitle: `${title.value} - ${
+    configStore.seo_meta_config.og_title === ""
+      ? configStore.website_info.website_name
+      : configStore.seo_meta_config.og_title
+  }`,
   ogDescription: `${title.value}文章列表`,
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",

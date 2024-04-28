@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full">
+  <div class="flex w-full slide-up">
     <div class="mt-10 w-5% lt-md:hidden" v-if="existPost">
       <div class="flex flex-col gap-y-3 items-center fixed">
         <div
@@ -491,13 +491,19 @@ const clearReply2ReplyReq = () => {
 };
 
 useHead({
-  title: `${post.value?.title} - ${configStore.seo_meta_config.title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.title}`,
-  meta: [
-    { name: "description", content: description },
-  ],
+  title: `${post.value?.title} - ${
+    configStore.seo_meta_config.title === ""
+      ? configStore.website_info.website_name
+      : configStore.seo_meta_config.title
+  }`,
+  meta: [{ name: "description", content: description }],
 });
 useSeoMeta({
-  ogTitle: `${post.value?.title} - ${configStore.seo_meta_config.og_title === '' ? configStore.website_info.website_name : configStore.seo_meta_config.og_title}`,
+  ogTitle: `${post.value?.title} - ${
+    configStore.seo_meta_config.og_title === ""
+      ? configStore.website_info.website_name
+      : configStore.seo_meta_config.og_title
+  }`,
   ogDescription: description,
   ogImage: configStore.seo_meta_config.og_image,
   twitterCard: "summary",
@@ -624,5 +630,19 @@ useSeoMeta({
   border-style: solid;
   border-color: transparent #b7bbc4 transparent transparent;
   transform: translateY(-50%);
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(+100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease;
+  animation-iteration-count: 1;
 }
 </style>
