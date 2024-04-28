@@ -59,6 +59,9 @@
           <a-form-item name="summary" label="摘要">
             <a-textarea v-model:value="formState.summary" />
           </a-form-item>
+          <a-form-item name="color" label="选择与封面搭配的字体颜色" tooltip="默认黑色">
+            <a-input v-model:value="formState.color" type="color" class="w-30%"/>
+          </a-form-item>
           <a-form-item label="是否显示" name="show" class="collection-create-form_last-form-item">
             <a-radio-group v-model:value="formState.show">
               <a-radio :value="true">true</a-radio>
@@ -91,6 +94,10 @@
               v-if="editableData[record.id]"
             />
             <span v-else>{{ text }}</span>
+          </template>
+          <template v-if="column.dataIndex === 'color'">
+            <a-input v-model:value="editableData[record.id][column.dataIndex as keyof CarouselRequest]" type="color"  v-if="editableData[record.id]"/>
+            <div class="w-full h-3" :style="{'backgroundColor': text}" v-else></div>
           </template>
           <template v-if="column.dataIndex === 'summary'">
             <a-textarea
@@ -181,6 +188,11 @@ const columns = [
     key: 'summary'
   },
   {
+    title: '字体颜色',
+    key: 'color',
+    dataIndex: 'color'
+  },
+  {
     title: '是否显示',
     key: 'show',
     dataIndex: 'show'
@@ -208,6 +220,7 @@ const formState = reactive<CarouselRequest>({
   title: '',
   summary: '',
   cover_img: '',
+  color: '#000',
   show: true
 })
 
@@ -279,6 +292,7 @@ const addCarousel = () => {
           visible.value = false
           if (formRef.value) {
             formRef.value.resetFields()
+            formState.color = '#000'
           }
           await getCarousel()
         } catch (error) {

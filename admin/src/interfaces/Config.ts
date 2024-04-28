@@ -427,6 +427,7 @@ export interface CarouselVO {
   title: string
   summary: string
   cover_img: string
+  color: string
   created_at: number
   updated_at: number
   show: boolean
@@ -437,6 +438,7 @@ export interface CarouselRequest {
   title: string
   summary: string
   cover_img: string
+  color: string
   show: boolean
 }
 
