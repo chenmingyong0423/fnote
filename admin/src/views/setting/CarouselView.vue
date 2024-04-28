@@ -147,7 +147,7 @@
           </template>
           <template v-if="column.dataIndex === 'color'">
             <div class="flex gap-x-1" v-if="editableData[record.id]">
-              <span class="w-8 h-8 inline-block" :style="{'backgroundColor': editableData[record.id][column.dataIndex as keyof CarouselRequest]}"></span>
+              <span class="w-8 h-8 inline-block" :style="{'backgroundColor': editableData[record.id][column.dataIndex as keyof CarouselRequest] as string}"></span>
               <a-button @click="showColorModal4Edit = true">选择字体颜色</a-button>
             </div>
             <div class="w-full h-3" :style="{'backgroundColor': text}" v-else></div>
