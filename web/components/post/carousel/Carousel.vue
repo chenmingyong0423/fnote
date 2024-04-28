@@ -114,16 +114,17 @@ const handleWheel = (event: WheelEvent) => {
   } else if (event.deltaY < 0) {
     prevSlide();
   }
-  startAutoSlide(); // 重启自动轮播，以保持用户体验一致性
 };
 const throttledHandleWheel = throttle(handleWheel, throttleInterval);
 
 const carouselRef = ref<HTMLDivElement>();
 const addWheelListener = () => {
+  stopAutoSlide();
   carouselRef.value?.addEventListener('wheel', throttledHandleWheel);
 };
 
 const removeWheelListener = () => {
+  startAutoSlide()
   carouselRef.value?.removeEventListener('wheel', throttledHandleWheel);
 };
 </script>
