@@ -6,6 +6,9 @@ export default defineConfig({
     presetUno(),
     presetIcons()
   ],
+  shortcuts: [
+    { black_border: "border-solid border-#000 border-1" }
+  ],
   rules: [
     // 自定义规则
   ]
