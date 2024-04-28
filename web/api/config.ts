@@ -75,6 +75,7 @@ export interface CarouselVO {
     title: string;
     summary: string;
     cover_img: string;
+    color: string;
     created_at: number;
 }
 
