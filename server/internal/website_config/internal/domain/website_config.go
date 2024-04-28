@@ -52,6 +52,7 @@ type CarouselElem struct {
 	Summary   string    `bson:"summary"`
 	CoverImg  string    `bson:"cover_img"`
 	Show      bool      `bson:"show"`
+	Color     string    `bson:"color"`
 	CreatedAt time.Time `bson:"created_at"`
 	UpdatedAt time.Time `bson:"updated_at"`
 }

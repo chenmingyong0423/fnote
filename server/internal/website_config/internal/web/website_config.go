@@ -551,6 +551,7 @@ func (h *WebsiteConfigHandler) toCarouselVO(list []domain.CarouselElem, filterFu
 				Summary:   elem.Summary,
 				CoverImg:  elem.CoverImg,
 				Show:      elem.Show,
+				Color:     elem.Color,
 				CreatedAt: elem.CreatedAt.Unix(),
 				UpdatedAt: elem.UpdatedAt.Unix(),
 			})
@@ -574,6 +575,7 @@ func (h *WebsiteConfigHandler) AddCarouselConfig(ctx *gin.Context, req CarouselR
 		Summary:   req.Summary,
 		CoverImg:  req.CoverImg,
 		Show:      req.Show,
+		Color:     req.Color,
 		CreatedAt: now,
 		UpdatedAt: now,
 	})
@@ -601,6 +603,7 @@ func (h *WebsiteConfigHandler) UpdateCarouselElem(ctx *gin.Context, req Carousel
 		Summary:   req.Summary,
 		CoverImg:  req.CoverImg,
 		Show:      req.Show,
+		Color:     req.Color,
 		CreatedAt: now,
 		UpdatedAt: now,
 	})

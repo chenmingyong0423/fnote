@@ -133,6 +133,7 @@ type CarouselVO struct {
 	Summary   string `json:"summary"`
 	CoverImg  string `json:"cover_img"`
 	Show      bool   `json:"show"`
+	Color     string `json:"color"`
 	CreatedAt int64  `json:"created_at"`
 	UpdatedAt int64  `json:"updated_at"`
 }
