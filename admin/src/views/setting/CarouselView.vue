@@ -40,7 +40,7 @@
           </a-form-item>
           <a-form-item
             name="cover_img"
-            label="名称"
+            label="封面"
             :rules="[{ required: true, message: '请选择封面' }]"
           >
             <StaticUpload
@@ -60,7 +60,10 @@
             <a-textarea v-model:value="formState.summary" />
           </a-form-item>
           <a-form-item name="color" label="选择与封面搭配的字体颜色" tooltip="默认黑色">
-            <a-input v-model:value="formState.color" type="color" class="w-30%"/>
+            <div class="flex gap-x-1">
+              <span class="w-8 h-8 inline-block" :style="{'backgroundColor': formState.color}"></span>
+              <a-button @click="showColorModal = true">选择字体颜色</a-button>
+            </div>
           </a-form-item>
           <a-form-item label="是否显示" name="show" class="collection-create-form_last-form-item">
             <a-radio-group v-model:value="formState.show">
@@ -69,15 +72,62 @@
             </a-radio-group>
           </a-form-item>
         </a-form>
+        <a-modal v-model:open="showColorModal" title="请选择字体颜色" :cancel-button-props="{ size: 0 }" @ok="showColorModal = false">
+          <div
+            class="relative w-full h-full slide-up item group flex cursor-pointer ease-linear duration-100 mb-5"
+          >
+            <img
+              class="w-full h-full"
+              :src="serverHost + formState.cover_img"
+              :alt="formState.title"
+            />
+            <div class="w-90% flex flex-col flex-center text-center absolute  top-50% left-50% translate--50% translate--50%">
+
+              <div class="text-10 font-bold" :style="{color: formState.color || '#000'}">
+                {{ formState.title }}
+              </div>
+              <div class="text-8" :style="{color: formState.color || '#000'}">
+                {{ formState.summary }}
+              </div>
+            </div>
+          </div>
+          <a-input v-model:value="formState.color" type="color" class="w-30%" />
+          <template #footer>
+            <a-button key="submit" type="primary" @click="showColorModal = false">确定</a-button>
+          </template>
+        </a-modal>
       </a-modal>
     </div>
     <div>
+      <a-modal v-model:open="showColorModal4Edit" title="请选择字体颜色" :cancel-button-props="{ size: 0 }" @ok="showColorModal4Edit = false">
+        <div
+          class="relative w-full h-full slide-up item group flex cursor-pointer ease-linear duration-100 mb-5"
+        >
+          <img
+            class="w-full h-full"
+            :src="serverHost + editableData[editId]['cover_img']"
+          />
+          <div class="w-90% flex flex-col flex-center text-center absolute  top-50% left-50% translate--50% translate--50%">
+
+            <div class="text-10 font-bold" :style="{color: editableData[editId]['color'] || '#000'}">
+              {{ editableData[editId]['title'] }}
+            </div>
+            <div class="text-8" :style="{color: editableData[editId]['color'] || '#000'}">
+              {{ editableData[editId]['summary'] }}
+            </div>
+          </div>
+        </div>
+        <a-input v-model:value="editableData[editId]['color']" type="color" />
+        <template #footer>
+          <a-button key="submit" type="primary" @click="showColorModal4Edit = false">确定</a-button>
+        </template>
+      </a-modal>
       <a-table :columns="columns" :data-source="data">
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.key === 'id'">
             <a :href="baseHost + '/posts/' + record.id" target="_blank">{{
-              `${baseHost}/posts/${record.id}`
-            }}</a>
+                `${baseHost}/posts/${record.id}`
+              }}</a>
           </template>
           <template v-if="column.key === 'cover_img'">
             <StaticUpload
@@ -96,7 +146,10 @@
             <span v-else>{{ text }}</span>
           </template>
           <template v-if="column.dataIndex === 'color'">
-            <a-input v-model:value="editableData[record.id][column.dataIndex as keyof CarouselRequest]" type="color"  v-if="editableData[record.id]"/>
+            <div class="flex gap-x-1" v-if="editableData[record.id]">
+              <span class="w-8 h-8 inline-block" :style="{'backgroundColor': editableData[record.id][column.dataIndex as keyof CarouselRequest]}"></span>
+              <a-button @click="showColorModal4Edit = true">选择字体颜色</a-button>
+            </div>
             <div class="w-full h-3" :style="{'backgroundColor': text}" v-else></div>
           </template>
           <template v-if="column.dataIndex === 'summary'">
@@ -242,6 +295,7 @@ getCarousel()
 const editableData: UnwrapRef<Record<string, CarouselRequest>> = reactive({})
 const edit = (id: string) => {
   editableData[id] = cloneDeep(data.value.filter((item) => id === item.id)[0])
+  editId.value = id
 }
 
 const save = async (id: string) => {
@@ -254,6 +308,7 @@ const save = async (id: string) => {
     }
     message.success('更新成功')
     delete editableData[id]
+    editId.value = ''
     await getCarousel()
   } catch (error) {
     console.log(error)
@@ -261,6 +316,7 @@ const save = async (id: string) => {
 }
 const cancel = (key: string) => {
   delete editableData[key]
+  editId.value = ''
 }
 
 const deleteCarousel = async (id: string) => {
@@ -388,4 +444,8 @@ const getPosts = async () => {
     console.log(error)
   }
 }
+
+const showColorModal = ref(false)
+const showColorModal4Edit = ref(false)
+const editId = ref('')
 </script>
