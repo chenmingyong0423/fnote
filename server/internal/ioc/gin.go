@@ -135,7 +135,7 @@ func InitMiddlewares(writer io.Writer, isWebsiteInitialized func() bool) []gin.H
 		}),
 		func(ctx *gin.Context) {
 			uri := ctx.Request.RequestURI
-			if isWebsiteInitialized() || uri == "/admin-api/files/upload" || uri == "/admin-api/configs/initialization" {
+			if (isWebsiteInitialized() || strings.HasPrefix(uri, "/static")) || uri == "/admin-api/files/upload" || uri == "/admin-api/configs/initialization" {
 				ctx.Next()
 			} else {
 				ctx.JSON(http.StatusServiceUnavailable, nil)
