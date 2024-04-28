@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full">
+  <div class="flex w-full slide-up">
     <div class="mt-10 w-5% lt-md:hidden">
       <div class="flex flex-col gap-y-3 items-center fixed z-99999">
         <div
@@ -673,5 +673,19 @@ bdPush(runtimeConfig.public.domain + route.path);
   border-style: solid;
   border-color: transparent #b7bbc4 transparent transparent;
   transform: translateY(-50%);
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(+100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease;
+  animation-iteration-count: 1;
 }
 </style>
