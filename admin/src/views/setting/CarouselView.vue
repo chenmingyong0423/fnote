@@ -10,6 +10,14 @@
         @ok="addCarousel"
       >
         <a-modal v-model:open="showPosts" title="请选择文章">
+          <a-input-search
+            v-model:value="req.keyword"
+            placeholder="请输入关键字"
+            class="mb-2 w-200px"
+            @search="searchPost"
+            @pressEnter="searchPost"
+            allow-clear
+          />
           <a-table
             :columns="postColumns"
             :data-source="posts"
@@ -469,6 +477,9 @@ const getPosts = async () => {
   } catch (error) {
     console.log(error)
   }
+}
+const searchPost = () => {
+  getPosts()
 }
 
 const showColorModal = ref(false)
