@@ -1,5 +1,17 @@
 <template>
-  <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
+  <div>
+    <div>
+      状态：<a-select
+      ref="select"
+      v-model:value="pageReq.status"
+      style="width: 120px"
+      :options="[{value: 1, label: '1'}]"
+      @focus="focus"
+      @change="handleChange"
+    ></a-select>
+    </div>
+  </div>
+  <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change" :row-selection="rowSelection">
     <template #bodyCell="{ column, text, record }">
       <template v-if="column.dataIndex === 'post'">
         <a :href="record.post_info.post_url" target="_blank">{{ record.post_info.post_url }}</a>
@@ -112,12 +124,17 @@ const columns = [
   }
 ]
 
-const data = ref<Comment[]>([])
+interface KeyComment extends Comment {
+  key: string
+}
+
+const data = ref<KeyComment[]>([])
 const pageReq = ref<PageRequest>({
   pageNo: 1,
   pageSize: 5,
   sortField: 'create_time',
-  sortOrder: 'desc'
+  sortOrder: 'desc',
+  status: 1
 } as PageRequest)
 
 const total = ref(0)
@@ -132,6 +149,9 @@ const get = async () => {
   try {
     const response: any = await GetComments(pageReq.value)
     data.value = response.data.data?.list || []
+    data.value.forEach((item: KeyComment, index: number) => {
+      item.key = item.id
+    })
     total.value = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
@@ -312,6 +332,27 @@ const deleteReplyById = async (fid: string, id: string) => {
     message.error('删除失败')
   }
 }
+
+const rowSelection = ref({
+  checkStrictly: false,
+  onChange: (selectedRowKeys: (string | number)[], selectedRows: Comment[]) => {
+    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+  },
+  onSelect: (record: Comment, selected: boolean, selectedRows: Comment[]) => {
+    console.log(record, selected, selectedRows);
+  },
+  onSelectAll: (selected: boolean, selectedRows: Comment[], changeRows: Comment[]) => {
+    console.log(selected, selectedRows, changeRows);
+  },
+});
+
+const focus = () => {
+  console.log('focus');
+};
+
+const handleChange = (value: string) => {
+  console.log(`selected ${value}`);
+};
 </script>
 
 <style scoped>

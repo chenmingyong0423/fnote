@@ -27,6 +27,5 @@ export type PageRequest = {
   sortField?: string
   sortOrder?: string
   keyword?: string
-  categories?: string[]
-  tags?: string[]
+  status?: 1
 }
