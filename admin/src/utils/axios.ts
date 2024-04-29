@@ -3,10 +3,21 @@ import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import { message } from 'ant-design-vue'
 import router from '@/router'
+import qs from 'qs'
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_API_HOST + '/admin-api',
-  timeout: 99999
+  timeout: 99999,
+  paramsSerializer: (params) => {
+    // 删除空数组
+    Object.keys(params).forEach((key) => {
+      if (params[key] === null || params[key] === '' || params[key] === undefined) {
+        delete params[key]
+      }
+    })
+    // 使用 qs 来序列化参数
+    return qs.stringify(params, { arrayFormat: 'repeat' })
+  }
 })
 
 // 请求拦截器

@@ -43,8 +43,8 @@ export type PageRequest = {
   sortField?: string
   sortOrder?: string
   keyword?: string
-  categories?: string[]
-  tags?: string[]
+  category_filter?: string[]
+  tag_filter?: string[]
 }
 
 export interface Post4Edit extends PostRequest {
