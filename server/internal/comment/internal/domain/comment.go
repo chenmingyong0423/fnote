@@ -14,4 +14,123 @@
 
 package domain
 
-type Comment struct{}
+// CountStatsTypeCommentCount 评论数量
+var CountStatsTypeCommentCount = "CommentCount"
+
+type Page struct {
+	Size    int64
+	Skip    int64
+	Keyword string
+	Field   string
+	Order   string
+}
+
+func (p *Page) OrderConvertToInt() int {
+	switch p.Order {
+	case "ASC":
+		return 1
+	case "DESC":
+		return -1
+	default:
+		return -1
+	}
+}
+
+type AdminComment struct {
+	Id string
+	// 文章信息
+	PostInfo PostInfo
+	// 评论的内容
+	Content string
+	// 用户信息
+	UserInfo UserInfo4Comment
+
+	// 该评论下的所有回复的内容
+	Replies        []AdminReply
+	ApprovalStatus bool
+	// 评论时间
+	CreatedAt int64
+	// 修改时间
+	UpdatedAt int64
+}
+
+type PostInfo struct {
+	// 文章 ID
+	PostId string
+	// 文章标题字段
+	PostTitle string
+	// 文章链接
+	PostUrl string
+}
+
+type UserInfo4Reply UserInfo
+
+type UserInfo4Comment UserInfo
+
+type UserInfo struct {
+	Name    string
+	Email   string
+	Ip      string
+	Website string
+}
+
+type AdminReply struct {
+	ReplyId string
+	// 回复内容
+	Content string
+	// 被回复的回复 Id
+	ReplyToId string
+	// 用户信息
+	UserInfo UserInfo4Reply
+	// 被回复用户的信息
+	RepliedUserInfo UserInfo4Reply
+	ApprovalStatus  bool
+	// 回复时间
+	CreatedAt int64
+	// 修改时间
+	UpdatedAt int64
+}
+
+type LatestComment struct {
+	PostInfo
+	Name      string
+	Content   string
+	Email     string
+	CreatedAt int64
+}
+
+type CommentWithReplies struct {
+	Comment
+	Replies []CommentReply
+}
+
+type Comment struct {
+	Id string
+	// 文章信息
+	PostInfo PostInfo
+	// 评论的内容
+	Content string
+	// 用户信息
+	UserInfo       UserInfo
+	ApprovalStatus bool
+	CreateTime     int64
+}
+
+type CommentReply struct {
+	ReplyId string
+	// 回复内容
+	Content string
+	// 被回复的回复 Id
+	ReplyToId string
+	// 用户信息
+	UserInfo UserInfo4Reply
+	// 被回复用户的信息
+	RepliedUserInfo UserInfo4Reply
+	ApprovalStatus  bool
+	CreatedAt       int64
+}
+
+type CommentReplyWithPostInfo struct {
+	CommentReply
+	PostInfo PostInfo
+}

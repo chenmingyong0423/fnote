@@ -19,5 +19,5 @@ type DisapproveCommentRequest struct {
 }
 
 type CommentStatusRequest struct {
-	Status int `json:"status" binding:"required"`
+	ApprovalStatus bool `json:"approval_status" binding:"required"`
 }
