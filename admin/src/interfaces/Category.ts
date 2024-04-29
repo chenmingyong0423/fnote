@@ -82,6 +82,12 @@ export const UpdateCategory = (id: string, category: UpdateCategoryRequest) => {
   })
 }
 
+export interface SelectCategory {
+  id: string
+  value: string
+  label: string
+}
+
 export const GetSelectedCategories = () => {
   return instance({
     url: '/categories/select',
