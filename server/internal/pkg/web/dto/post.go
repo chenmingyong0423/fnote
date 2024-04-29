@@ -18,6 +18,6 @@ type PostsQueryDTO struct {
 	Size    int64
 	Skip    int64
 	Keyword string
-	Field   string `form:"sortField,omitempty"`
-	Order   string `form:"sortOrder,omitempty"`
+	Field   string
+	Order   string
 }

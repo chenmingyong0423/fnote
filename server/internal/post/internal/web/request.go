@@ -14,4 +14,18 @@
 
 package web
 
-type PostRequest struct{}
+type PageRequest struct {
+	// 当前页
+	PageNo int64 `form:"pageNo" binding:"required"`
+	// 每页数量
+	PageSize int64 `form:"pageSize" binding:"required"`
+	// 排序字段
+	Field string `form:"sortField,omitempty"`
+	// 排序规则
+	Order string `form:"sortOrder,omitempty"`
+	// 搜索内容
+	Keyword string `form:"keyword,omitempty"`
+
+	CategoryFilter []string `form:"category_filter,omitempty"`
+	TagFilter      []string `form:"tag_filter,omitempty"`
+}
