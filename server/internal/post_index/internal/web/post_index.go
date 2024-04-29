@@ -39,6 +39,9 @@ func (h *PostIndexHandler) BaiduPostIndex(ctx *gin.Context, req PostIndexRequest
 	if err != nil {
 		return nil, err
 	}
+	if baiduResponse == nil {
+		return apiwrap.SuccessResponseWithData(BaiduPushVO{}), nil
+	}
 	return apiwrap.SuccessResponseWithData(BaiduPushVO{
 		Remain:      baiduResponse.Remain,
 		Success:     baiduResponse.Success,
