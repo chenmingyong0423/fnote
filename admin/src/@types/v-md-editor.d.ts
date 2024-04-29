@@ -9,3 +9,5 @@ declare module 'highlight.js/lib/languages/go'
 declare module 'highlight.js/lib/languages/java'
 declare module 'highlight.js/lib/languages/python'
 declare module 'highlight.js/lib/languages/json'
+
+declare module 'qs'

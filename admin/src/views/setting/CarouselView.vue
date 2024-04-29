@@ -10,6 +10,14 @@
         @ok="addCarousel"
       >
         <a-modal v-model:open="showPosts" title="请选择文章">
+          <a-input-search
+            v-model:value="req.keyword"
+            placeholder="请输入关键字"
+            class="mb-2 w-200px"
+            @search="searchPost"
+            @pressEnter="searchPost"
+            allow-clear
+          />
           <a-table
             :columns="postColumns"
             :data-source="posts"
@@ -61,7 +69,10 @@
           </a-form-item>
           <a-form-item name="color" label="选择与封面搭配的字体颜色" tooltip="默认黑色">
             <div class="flex gap-x-1">
-              <span class="w-8 h-8 inline-block black_border" :style="{'backgroundColor': formState.color}"></span>
+              <span
+                class="w-8 h-8 inline-block black_border"
+                :style="{ backgroundColor: formState.color }"
+              ></span>
               <a-button @click="showColorModal = true">选择字体颜色</a-button>
             </div>
           </a-form-item>
@@ -73,7 +84,14 @@
           </a-form-item>
         </a-form>
       </a-modal>
-      <a-modal width="60%" class="h-100 relative ml-auto" v-model:open="showColorModal" title="请选择字体颜色" :cancel-button-props="{ size: 0 }" @ok="showColorModal = false">
+      <a-modal
+        width="60%"
+        class="h-100 relative ml-auto"
+        v-model:open="showColorModal"
+        title="请选择字体颜色"
+        :cancel-button-props="{ size: 0 }"
+        @ok="showColorModal = false"
+      >
         <div
           class="relative w-full h-85 slide-up item group flex cursor-pointer ease-linear duration-100 mb-5"
         >
@@ -82,37 +100,46 @@
             :src="serverHost + formState.cover_img"
             :alt="formState.title"
           />
-          <div class="w-90% flex flex-col flex-center text-center absolute  top-50% left-50% translate--50% translate--50%">
-
-            <div class="text-10 font-bold" :style="{color: formState.color || '#000'}">
+          <div
+            class="w-90% flex flex-col flex-center text-center absolute top-50% left-50% translate--50% translate--50%"
+          >
+            <div class="text-10 font-bold" :style="{ color: formState.color || '#000' }">
               {{ formState.title }}
             </div>
-            <div class="text-8" :style="{color: formState.color || '#000'}">
+            <div class="text-8" :style="{ color: formState.color || '#000' }">
               {{ formState.summary }}
             </div>
           </div>
         </div>
-        <a-input v-model:value="formState.color" type="color"/>
+        <a-input v-model:value="formState.color" type="color" />
         <template #footer>
           <a-button key="submit" type="primary" @click="showColorModal = false">确定</a-button>
         </template>
       </a-modal>
     </div>
     <div>
-      <a-modal width="60%" class="h-100 relative ml-auto" v-model:open="showColorModal4Edit" title="请选择字体颜色" :cancel-button-props="{ size: 0 }" @ok="showColorModal4Edit = false">
+      <a-modal
+        width="60%"
+        class="h-100 relative ml-auto"
+        v-model:open="showColorModal4Edit"
+        title="请选择字体颜色"
+        :cancel-button-props="{ size: 0 }"
+        @ok="showColorModal4Edit = false"
+      >
         <div
           class="relative w-full h-85 slide-up item group flex cursor-pointer ease-linear duration-100 mb-5"
         >
-          <img
-            class="w-full h-full"
-            :src="serverHost + editableData[editId]['cover_img']"
-          />
-          <div class="w-90% flex flex-col flex-center text-center absolute  top-50% left-50% translate--50% translate--50%">
-
-            <div class="text-10 font-bold" :style="{color: editableData[editId]['color'] || '#000'}">
+          <img class="w-full h-full" :src="serverHost + editableData[editId]['cover_img']" />
+          <div
+            class="w-90% flex flex-col flex-center text-center absolute top-50% left-50% translate--50% translate--50%"
+          >
+            <div
+              class="text-10 font-bold"
+              :style="{ color: editableData[editId]['color'] || '#000' }"
+            >
               {{ editableData[editId]['title'] }}
             </div>
-            <div class="text-8" :style="{color: editableData[editId]['color'] || '#000'}">
+            <div class="text-8" :style="{ color: editableData[editId]['color'] || '#000' }">
               {{ editableData[editId]['summary'] }}
             </div>
           </div>
@@ -126,8 +153,8 @@
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.key === 'id'">
             <a :href="baseHost + '/posts/' + record.id" target="_blank">{{
-                `${baseHost}/posts/${record.id}`
-              }}</a>
+              `${baseHost}/posts/${record.id}`
+            }}</a>
           </template>
           <template v-if="column.key === 'cover_img'">
             <StaticUpload
@@ -147,10 +174,17 @@
           </template>
           <template v-if="column.dataIndex === 'color'">
             <div class="flex gap-x-1" v-if="editableData[record.id]">
-              <span class="w-8 h-8 inline-block" :style="{'backgroundColor': editableData[record.id][column.dataIndex as keyof CarouselRequest] as string}"></span>
+              <span
+                class="w-8 h-8 inline-block"
+                :style="{
+                  backgroundColor: editableData[record.id][
+                    column.dataIndex as keyof CarouselRequest
+                  ] as string
+                }"
+              ></span>
               <a-button @click="showColorModal4Edit = true">选择字体颜色</a-button>
             </div>
-            <div class="w-full h-3 black_border" :style="{'backgroundColor': text}" v-else></div>
+            <div class="w-full h-3 black_border" :style="{ backgroundColor: text }" v-else></div>
           </template>
           <template v-if="column.dataIndex === 'summary'">
             <a-textarea
@@ -443,6 +477,9 @@ const getPosts = async () => {
   } catch (error) {
     console.log(error)
   }
+}
+const searchPost = () => {
+  getPosts()
 }
 
 const showColorModal = ref(false)

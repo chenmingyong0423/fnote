@@ -1,6 +1,19 @@
 <template>
   <a-card title="文章列表">
-    <a-button type="primary" @click="router.push('/home/post')" class="mb-3">发布文章</a-button>
+    <div>
+      <div>
+        <a-button type="primary" @click="router.push('/home/post')" class="mb-3">发布文章</a-button>
+        <a-input-search
+          v-model:value="req.keyword"
+          placeholder="请输入关键字"
+          style="width: 200px"
+          @search="searchPost"
+          @pressEnter="searchPost"
+          allow-clear
+          class="float-right"
+        />
+      </div>
+    </div>
     <a-table
       :columns="columns"
       :data-source="posts"
@@ -91,72 +104,86 @@ import {
 import router from '@/router'
 import dayjs from 'dayjs'
 import { message } from 'ant-design-vue'
+import type { TableColumnType, TableProps } from 'ant-design-vue'
+import { GetSelectedCategories, type SelectCategory } from '@/interfaces/Category'
+import { GetSelectedTags, type SelectTag } from '@/interfaces/Tag'
 
 document.title = '文章列表 - 后台管理'
 
-const columns = [
-  {
-    title: '封面',
-    dataIndex: 'cover_img',
-    key: 'cover_img'
-  },
-  {
-    title: '标题',
-    dataIndex: 'title',
-    key: 'title'
-  },
-  {
-    title: 'url',
-    dataIndex: 'id',
-    key: 'id'
-  },
-  {
-    title: '摘要',
-    dataIndex: 'summary',
-    key: 'summary'
-  },
-  {
-    title: '分类',
-    key: 'categories',
-    dataIndex: 'categories'
-  },
-  {
-    title: '标签',
-    key: 'tags',
-    dataIndex: 'tags'
-  },
-  {
-    title: '是否显示',
-    key: 'is_displayed',
-    dataIndex: 'is_displayed'
-  },
-  {
-    title: '是否允许评论',
-    key: 'is_comment_allowed',
-    dataIndex: 'is_comment_allowed'
-  },
-  {
-    title: '发布时间',
-    key: 'create_time',
-    dataIndex: 'create_time'
-  },
-  {
-    title: '最后一次修改的时间',
-    key: 'update_time',
-    dataIndex: 'update_time'
-  },
-  {
-    title: 'operation',
-    dataIndex: 'operation'
-  }
-]
+const showSorterTooltip = ref('点击升序排序')
+const columns = computed<TableColumnType[]>(() => {
+  return [
+    {
+      title: '封面',
+      dataIndex: 'cover_img',
+      key: 'cover_img'
+    },
+    {
+      title: '标题',
+      dataIndex: 'title',
+      key: 'title'
+    },
+    {
+      title: 'url',
+      dataIndex: 'id',
+      key: 'id'
+    },
+    {
+      title: '摘要',
+      dataIndex: 'summary',
+      key: 'summary'
+    },
+    {
+      title: '分类',
+      key: 'categories',
+      dataIndex: 'categories',
+      filters: categories.value
+    },
+    {
+      title: '标签',
+      key: 'tags',
+      dataIndex: 'tags',
+      filters: tags.value
+    },
+    {
+      title: '是否显示',
+      key: 'is_displayed',
+      dataIndex: 'is_displayed'
+    },
+    {
+      title: '是否允许评论',
+      key: 'is_comment_allowed',
+      dataIndex: 'is_comment_allowed'
+    },
+    {
+      title: '发布时间',
+      key: 'create_time',
+      dataIndex: 'create_time',
+      sorter: (p1: IPost, p2: IPost) => p1.create_time - p2.create_time,
+      defaultSortOrder: 'descend',
+      sortDirections: ['descend', 'ascend'],
+      showSorterTooltip: { title: showSorterTooltip.value }
+    },
+    {
+      title: '最后一次修改的时间',
+      key: 'update_time',
+      dataIndex: 'update_time'
+    },
+    {
+      title: 'operation',
+      dataIndex: 'operation'
+    }
+  ]
+})
+
 const serverHost = import.meta.env.VITE_API_HOST
 const baseHost = import.meta.env.VITE_BASE_HOST
 const req = ref<PageRequest>({
   pageNo: 1,
   pageSize: 5,
   sortField: 'create_time',
-  sortOrder: 'desc'
+  sortOrder: 'desc',
+  keyword: ''
 } as PageRequest)
 
 const posts = ref<IPost[]>([])
@@ -169,9 +196,31 @@ const pagination = computed(() => ({
   pageSize: req.value.pageSize
 }))
 
-const change = (pg: any) => {
-  req.value.pageNo = pg.current
-  req.value.pageSize = pg.pageSize
+const change: TableProps<IPost>['onChange'] = (
+  pg,
+  filters,
+  sorter: { field: string; order: string | undefined }
+) => {
+  req.value.pageNo = <number>pg.current
+  req.value.pageSize = <number>pg.pageSize
+  req.value.sortField = sorter.field
+  switch (sorter.order) {
+    case 'ascend':
+      req.value.sortOrder = 'asc'
+      showSorterTooltip.value = '点击默认排序'
+      break
+    case 'descend':
+      req.value.sortOrder = 'desc'
+      showSorterTooltip.value = '点击升序排序'
+      break
+    default:
+      showSorterTooltip.value = '点击降序排序'
+      req.value.sortOrder = 'desc'
+  }
+  console.log(filters)
+  req.value.category_filter = filters.categories as string[]
+  req.value.tag_filter = filters.tags as string[]
+  console.log(req.value)
   getPosts()
 }
 
@@ -229,4 +278,46 @@ const changeCommentAllowedStatus = async (id: string, is_comment_allowed: boolea
     console.log(error)
   }
 }
+
+const searchPost = () => {
+  getPosts()
+}
+
+interface Filter {
+  text: string
+  value: string
+}
+
+const categories = ref<Filter[]>([])
+
+const getCategories = async () => {
+  try {
+    const response = await GetSelectedCategories()
+    response.data.data?.list.forEach((item: SelectCategory) => {
+      categories.value?.push({
+        text: item.label,
+        value: item.value
+      })
+    })
+  } catch (error) {
+    console.log(error)
+  }
+}
+getCategories()
+
+const tags = ref<Filter[]>([])
+const getTags = async () => {
+  try {
+    const response = await GetSelectedTags()
+    response.data.data?.list.forEach((item: SelectTag) => {
+      tags.value?.push({
+        text: item.label,
+        value: item.value
+      })
+    })
+  } catch (error) {
+    console.log(error)
+  }
+}
+getTags()
 </script>
