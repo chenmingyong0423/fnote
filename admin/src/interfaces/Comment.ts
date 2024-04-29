@@ -1,22 +1,25 @@
 import instance from '@/utils/axios'
 import type { PageRequest } from '@/interfaces/Common'
 
-export interface Comment {
+export interface AdminCommentVO {
   id: string
-  post_info: {
-    post_id: string
-    post_title: string
-    post_url: string
-  }
+  post_info: PostInfo
   content: string
-  user_info: {
-    username: string
-    email: string
-    website?: string
-    ip: string
-  }
+  user_info: UserInfo4Comment
+  replies: AdminCommentVO[]
+  approval_status: boolean
+  created_at: number
+  updated_at: number
+  reply_to_id: string
+  type: string
+  key?: string
   fid?: string
-  type: number
+}
+
+export interface PostInfo {
+  post_id: string
+  post_title: string
+  post_url: string
 }
 
 export const GetComments = (req: PageRequest) => {
@@ -25,6 +28,14 @@ export const GetComments = (req: PageRequest) => {
     method: 'get',
     params: req
   })
+}
+
+export interface UserInfo4Comment {
+  name: string
+  email: string
+  ip: string
+  website: string
+  picture: string
 }
 
 export const ApproveCommentById = (id: string) => {
@@ -38,46 +49,6 @@ export const ApproveReplyById = (fid: string, id: string) => {
   return instance({
     url: `/comments/${fid}/replies/${id}/approval`,
     method: 'put'
-  })
-}
-
-export const DisapproveCommentById = (id: string, reason: string) => {
-  return instance({
-    url: `/comments/${id}/disapproval`,
-    method: 'put',
-    data: {
-      reason: reason
-    }
-  })
-}
-
-export const DisapproveReplyById = (fid: string, id: string, reason: string) => {
-  return instance({
-    url: `/comments/${fid}/replies/${id}/disapproval`,
-    method: 'put',
-    data: {
-      reason: reason
-    }
-  })
-}
-
-export const UpdateCommentStatusById = (id: string, status: number) => {
-  return instance({
-    url: `/comments/${id}/status`,
-    method: 'put',
-    data: {
-      status: status
-    }
-  })
-}
-
-export const UpdateReplyStatusById = (fid: string, id: string, status: number) => {
-  return instance({
-    url: `/comments/${fid}/replies/${id}/status`,
-    method: 'put',
-    data: {
-      status: status
-    }
   })
 }
 
