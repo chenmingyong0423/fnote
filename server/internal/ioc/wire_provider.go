@@ -21,10 +21,6 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/category/repository"
 	"github.com/chenmingyong0423/fnote/server/internal/category/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/category/service"
-	handler2 "github.com/chenmingyong0423/fnote/server/internal/comment/hanlder"
-	repository2 "github.com/chenmingyong0423/fnote/server/internal/comment/repository"
-	dao2 "github.com/chenmingyong0423/fnote/server/internal/comment/repository/dao"
-	service2 "github.com/chenmingyong0423/fnote/server/internal/comment/service"
 	handler11 "github.com/chenmingyong0423/fnote/server/internal/count_stats/handler"
 	repository8 "github.com/chenmingyong0423/fnote/server/internal/count_stats/repository"
 	dao8 "github.com/chenmingyong0423/fnote/server/internal/count_stats/repository/dao"
@@ -60,10 +56,6 @@ var (
 		wire.Bind(new(repository.ICategoryRepository), new(*repository.CategoryRepository)),
 		wire.Bind(new(dao.ICategoryDao), new(*dao.CategoryDao)),
 	)
-	CommentProviders = wire.NewSet(handler2.NewCommentHandler, service2.NewCommentService, repository2.NewCommentRepository, dao2.NewCommentDao,
-		wire.Bind(new(service2.ICommentService), new(*service2.CommentService)),
-		wire.Bind(new(repository2.ICommentRepository), new(*repository2.CommentRepository)),
-		wire.Bind(new(dao2.ICommentDao), new(*dao2.CommentDao)))
 
 	FriendProviders = wire.NewSet(handler4.NewFriendHandler, service4.NewFriendService, repository4.NewFriendRepository, dao4.NewFriendDao,
 		wire.Bind(new(service4.IFriendService), new(*service4.FriendService)),

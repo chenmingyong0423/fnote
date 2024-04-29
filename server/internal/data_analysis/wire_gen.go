@@ -7,7 +7,7 @@
 package data_analysis
 
 import (
-	service3 "github.com/chenmingyong0423/fnote/server/internal/comment/service"
+	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/web"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
@@ -18,9 +18,10 @@ import (
 
 // Injectors from wire.go:
 
-func InitDataAnalysisModule(mongoDB *mongo.Database, vlServ service.IVisitLogService, csServ service2.ICountStatsService, posLikeModule *post_like.Module, commentServ service3.ICommentService) *Module {
+func InitDataAnalysisModule(mongoDB *mongo.Database, vlServ service.IVisitLogService, csServ service2.ICountStatsService, posLikeModule *post_like.Module, commentModule *comment.Module) *Module {
 	iPostLikeService := posLikeModule.Svc
-	dataAnalysisHandler := web.NewDataAnalysisHandler(vlServ, csServ, iPostLikeService, commentServ)
+	iCommentService := commentModule.Svc
+	dataAnalysisHandler := web.NewDataAnalysisHandler(vlServ, csServ, iPostLikeService, iCommentService)
 	module := &Module{
 		Hdl: dataAnalysisHandler,
 	}
