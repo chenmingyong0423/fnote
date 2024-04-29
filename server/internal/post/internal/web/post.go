@@ -16,10 +16,11 @@ package web
 
 import (
 	"fmt"
-	domain2 "github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
 	"log/slog"
 	"net/http"
 	"sync"
+
+	domain2 "github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
 
 	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/service"

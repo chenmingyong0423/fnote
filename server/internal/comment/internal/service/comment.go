@@ -17,10 +17,10 @@ package service
 import (
 	"context"
 
+	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/domain"
+
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/repository"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/pkg/errors"
 )
 
@@ -29,18 +29,15 @@ type ICommentService interface {
 	AddReply(ctx context.Context, cmtId string, postId string, commentReply domain.CommentReply) (string, error)
 	FineLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error)
 	FindCommentsByPostId(ctx context.Context, postId string) ([]domain.CommentWithReplies, error)
-	AdminGetComments(ctx context.Context, pageDTO dto.PageDTO) ([]domain.AdminComment, int64, error)
+	AdminGetComments(ctx context.Context, page domain.Page) ([]domain.AdminComment, int64, error)
 	AdminApproveComment(ctx context.Context, id string) error
 	FindCommentById(ctx context.Context, id string) (*domain.Comment, error)
-	AdminDisapproveComment(ctx context.Context, id string) error
 	FindReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) (*domain.CommentReplyWithPostInfo, error)
 	AdminApproveCommentReply(ctx context.Context, commentId string, replyId string) error
-	AdminDisapproveCommentReply(ctx context.Context, commentId string, replyId string) error
 	FindCommentWithRepliesById(ctx context.Context, id string) (*domain.CommentWithReplies, error)
 	DeleteCommentById(ctx context.Context, id string) error
 	DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error
-	UpdateCommentStatus(ctx context.Context, commentId string, status domain.CommentStatus) error
-	UpdateCommentReplyStatus(ctx context.Context, commentId string, replyId string, commentStatus domain.CommentStatus) error
+	UpdateCommentReplyStatus(ctx context.Context, commentId string, replyId string, approvalStatus bool) error
 	FindCommentCountOfToday(ctx context.Context) (int64, error)
 }
 
@@ -60,12 +57,8 @@ func (s *CommentService) FindCommentCountOfToday(ctx context.Context) (int64, er
 	return s.repo.CountOfToday(ctx)
 }
 
-func (s *CommentService) UpdateCommentReplyStatus(ctx context.Context, commentId string, replyId string, commentStatus domain.CommentStatus) error {
-	return s.repo.UpdateCommentReplyStatus(ctx, commentId, replyId, commentStatus)
-}
-
-func (s *CommentService) UpdateCommentStatus(ctx context.Context, commentId string, status domain.CommentStatus) error {
-	return s.repo.UpdateCommentStatus(ctx, commentId, status)
+func (s *CommentService) UpdateCommentReplyStatus(ctx context.Context, commentId string, replyId string, approvalStatus bool) error {
+	return s.repo.UpdateCommentReplyStatus(ctx, commentId, replyId, approvalStatus)
 }
 
 func (s *CommentService) DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error {
@@ -80,20 +73,12 @@ func (s *CommentService) FindCommentWithRepliesById(ctx context.Context, id stri
 	return s.repo.FindCommentWithRepliesById(ctx, id)
 }
 
-func (s *CommentService) AdminDisapproveCommentReply(ctx context.Context, commentId string, replyId string) error {
-	return s.repo.UpdateCommentReplyStatus(ctx, commentId, replyId, domain.CommentStatusDisapproved)
-}
-
 func (s *CommentService) AdminApproveCommentReply(ctx context.Context, commentId string, replyId string) error {
-	return s.repo.UpdateCommentReplyStatus(ctx, commentId, replyId, domain.CommentStatusApproved)
+	return s.repo.UpdateCommentReplyStatus(ctx, commentId, replyId, true)
 }
 
 func (s *CommentService) FindReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) (*domain.CommentReplyWithPostInfo, error) {
 	return s.repo.FindReplyByCIdAndRId(ctx, commentId, replyId)
-}
-
-func (s *CommentService) AdminDisapproveComment(ctx context.Context, id string) error {
-	return s.repo.UpdateCommentStatus(ctx, id, domain.CommentStatusDisapproved)
 }
 
 func (s *CommentService) FindCommentById(ctx context.Context, id string) (*domain.Comment, error) {
@@ -101,15 +86,15 @@ func (s *CommentService) FindCommentById(ctx context.Context, id string) (*domai
 }
 
 func (s *CommentService) AdminApproveComment(ctx context.Context, id string) error {
-	return s.repo.UpdateCommentStatus(ctx, id, domain.CommentStatusApproved)
+	return s.repo.UpdateCommentStatus2True(ctx, id)
 }
 
-func (s *CommentService) AdminGetComments(ctx context.Context, pageDTO dto.PageDTO) ([]domain.AdminComment, int64, error) {
-	return s.repo.FindPage(ctx, pageDTO)
+func (s *CommentService) AdminGetComments(ctx context.Context, page domain.Page) ([]domain.AdminComment, int64, error) {
+	return s.repo.AdminFindCommentsWithPagination(ctx, page)
 }
 
 func (s *CommentService) FindCommentsByPostId(ctx context.Context, postId string) ([]domain.CommentWithReplies, error) {
-	return s.repo.FindCommentsByPostIdAndCmtStatus(ctx, postId, domain.CommentStatusApproved)
+	return s.repo.FindCommentsByPostIdAndCmtStatus(ctx, postId)
 }
 
 func (s *CommentService) FineLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error) {
@@ -134,7 +119,7 @@ func (s *CommentService) AddReply(ctx context.Context, cmtId string, postId stri
 	if commentReply.ReplyToId != "" {
 		isExist := false
 		for _, reply := range commentWithReplies.Replies {
-			if reply.ReplyId == commentReply.ReplyToId && reply.Status == domain.CommentStatusApproved {
+			if reply.ReplyId == commentReply.ReplyToId && reply.ApprovalStatus {
 				commentReply.RepliedUserInfo.Name, commentReply.RepliedUserInfo.Email, commentReply.RepliedUserInfo.Website, commentReply.RepliedUserInfo.Ip = reply.UserInfo.Name, reply.UserInfo.Email, reply.UserInfo.Website, reply.UserInfo.Ip
 				isExist = true
 				break

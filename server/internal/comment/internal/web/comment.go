@@ -22,6 +22,10 @@ import (
 	"net/http"
 	"strings"
 
+	domain2 "github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+
+	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/domain"
+
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/service"
 
 	"github.com/chenmingyong0423/fnote/server/internal/post"
@@ -32,15 +36,10 @@ import (
 
 	csService "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
 	"github.com/spf13/viper"
-
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/vo"
 
 	msgService "github.com/chenmingyong0423/fnote/server/internal/message/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -76,14 +75,10 @@ func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin-api/comments")
 	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetComments))
 	adminGroup.DELETE("/:id", apiwrap.Wrap(h.AdminDeleteComment))
-	adminGroup.PUT("/:id/status", apiwrap.WrapWithBody(h.AdminUpdateCommentStatus))
 	adminGroup.PUT("/:id/approval", apiwrap.Wrap(h.AdminApproveComment))
-	adminGroup.PUT("/:id/disapproval", apiwrap.WrapWithBody(h.AdminDisapproveComment))
 
 	adminGroup.DELETE("/:id/replies/:rid", apiwrap.Wrap(h.AdminDeleteCommentReply))
-	adminGroup.PUT("/:id/replies/:rid/status", apiwrap.WrapWithBody(h.AdminUpdateReplyStatus))
 	adminGroup.PUT("/:id/replies/:rid/approval", apiwrap.Wrap(h.AdminApproveCommentReply))
-	adminGroup.PUT("/:id/replies/:rid/disapproval", apiwrap.WrapWithBody(h.AdminDisapproveCommentReply))
 }
 
 func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiwrap.ResponseBody[api.IdVO], error) {
@@ -101,17 +96,17 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiw
 	if !switchConfig.EnableComment {
 		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
-	post, err := h.postServ.GetPunishedPostById(ctx, req.PostId)
+	p, err := h.postServ.GetPunishedPostById(ctx, req.PostId)
 	if err != nil {
 		return nil, err
 	}
-	if !post.IsCommentAllowed {
+	if !p.IsCommentAllowed {
 		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
 	id, err := h.serv.AddComment(ctx, domain.Comment{
 		PostInfo: domain.PostInfo{
 			PostId:    req.PostId,
-			PostTitle: post.Title,
+			PostTitle: p.Title,
 			PostUrl:   fmt.Sprintf("%s/posts/%s", viper.GetString("website.base_host"), req.PostId),
 		},
 		Content: req.Content,
@@ -136,7 +131,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiw
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 		// 统计评论数
-		gErr = h.statsServ.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount.ToString(), domain.CountStatsTypeCommentCount)
+		gErr = h.statsServ.IncreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
@@ -171,14 +166,14 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*a
 	if !switchConfig.EnableComment {
 		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
-	post, err := h.postServ.GetPunishedPostById(ctx, req.PostId)
+	p, err := h.postServ.GetPunishedPostById(ctx, req.PostId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, api.NewErrorResponseBody(http.StatusForbidden, "The postId does not exist.")
 		}
 		return nil, err
 	}
-	if !post.IsCommentAllowed {
+	if !p.IsCommentAllowed {
 		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
 	id, err := h.serv.AddReply(ctx, commentId, req.PostId, domain.CommentReply{
@@ -205,7 +200,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*a
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 		// 统计评论数
-		gErr = h.statsServ.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount.ToString(), domain.CountStatsTypeCommentCount)
+		gErr = h.statsServ.IncreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
@@ -213,40 +208,40 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*a
 	return apiwrap.SuccessResponseWithData(api.IdVO{Id: id}), nil
 }
 
-func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[vo.LatestCommentVO]], error) {
+func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[LatestCommentVO]], error) {
 	latestComments, err := h.serv.FineLatestCommentAndReply(ctx)
 	if err != nil {
 		return nil, err
 	}
-	lc := make([]vo.LatestCommentVO, 0, len(latestComments))
+	lc := make([]LatestCommentVO, 0, len(latestComments))
 	for _, latestComment := range latestComments {
 		picture := ""
 		if latestComment.Email != "" {
 			hash := md5.Sum([]byte(strings.ToLower(latestComment.Email)))
 			picture = viper.GetString("gravatar.api") + hex.EncodeToString(hash[:])
 		}
-		lc = append(lc, vo.LatestCommentVO{
-			PostInfo:   vo.PostInfo(latestComment.PostInfo),
-			Name:       latestComment.Name,
-			Content:    latestComment.Content,
-			Picture:    picture,
-			CreateTime: latestComment.CreateTime,
+		lc = append(lc, LatestCommentVO{
+			PostInfo:  PostInfo(latestComment.PostInfo),
+			Name:      latestComment.Name,
+			Content:   latestComment.Content,
+			Picture:   picture,
+			CreatedAt: latestComment.CreatedAt,
 		})
 	}
 	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(lc)), nil
 }
 
-func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[vo.PostCommentVO]], error) {
+func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[PostCommentVO]], error) {
 	postId := ctx.Param("id")
 	comments, err := h.serv.FindCommentsByPostId(ctx, postId)
 	if err != nil {
 		return nil, err
 	}
-	pc := make([]vo.PostCommentVO, 0, len(comments))
+	pc := make([]PostCommentVO, 0, len(comments))
 	for _, comment := range comments {
-		replies := make([]vo.PostCommentReplyVO, 0, len(comment.Replies))
+		replies := make([]PostCommentReplyVO, 0, len(comment.Replies))
 		for _, reply := range comment.Replies {
-			if reply.Status != domain.CommentStatusApproved {
+			if !reply.ApprovalStatus {
 				continue
 			}
 			picture := ""
@@ -254,7 +249,7 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (*apiwrap.Respons
 				hash := md5.Sum([]byte(strings.ToLower(reply.UserInfo.Email)))
 				picture = viper.GetString("gravatar.api") + hex.EncodeToString(hash[:])
 			}
-			replies = append(replies, vo.PostCommentReplyVO{
+			replies = append(replies, PostCommentReplyVO{
 				Id:        reply.ReplyId,
 				CommentId: comment.Id,
 				Content:   reply.Content,
@@ -263,7 +258,7 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (*apiwrap.Respons
 				Website:   reply.UserInfo.Website,
 				ReplyToId: reply.ReplyToId,
 				ReplyTo:   reply.RepliedUserInfo.Name,
-				ReplyTime: reply.CreateTime,
+				ReplyTime: reply.CreatedAt,
 			})
 		}
 		picture := ""
@@ -271,7 +266,7 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (*apiwrap.Respons
 			hash := md5.Sum([]byte(strings.ToLower(comment.UserInfo.Email)))
 			picture = viper.GetString("gravatar.api") + hex.EncodeToString(hash[:])
 		}
-		pc = append(pc, vo.PostCommentVO{
+		pc = append(pc, PostCommentVO{
 			Id:          comment.Id,
 			Content:     comment.Content,
 			Name:        comment.UserInfo.Name,
@@ -284,37 +279,69 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (*apiwrap.Respons
 	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(pc)), nil
 }
 
-func (h *CommentHandler) AdminGetComments(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[apiwrap.PageVO[vo.AdminCommentVO]], error) {
-	friends, total, err := h.serv.AdminGetComments(ctx, dto.PageDTO{
-		PageNo:   req.PageNo,
-		PageSize: req.PageSize,
-		Field:    req.Field,
-		Order:    req.Order,
-		Keyword:  req.Keyword,
+func (h *CommentHandler) AdminGetComments(ctx *gin.Context, req PageRequest) (*apiwrap.ResponseBody[*apiwrap.PageVO[AdminCommentVO]], error) {
+	comments, total, err := h.serv.AdminGetComments(ctx, domain.Page{
+		Size:    req.PageSize,
+		Skip:    (req.PageNo - 1) * req.PageSize,
+		Field:   req.Field,
+		Order:   req.Order,
+		Keyword: req.Keyword,
 	})
 	if err != nil {
 		return nil, err
 	}
-	pageVO := apiwrap.PageVO[vo.AdminCommentVO]{}
-	pageVO.PageNo = req.PageNo
-	pageVO.PageSize = req.PageSize
-	pageVO.List = h.toAdminCommentVO(friends)
-	pageVO.SetTotalCountAndCalculateTotalPages(total)
-	return apiwrap.SuccessResponseWithData(pageVO), nil
+	return apiwrap.SuccessResponseWithData(apiwrap.NewPageVO(req.PageNo, req.PageSize, total, h.toAdminCommentVO(comments))), nil
 }
 
-func (h *CommentHandler) toAdminCommentVO(friends []domain.AdminComment) []vo.AdminCommentVO {
-	result := make([]vo.AdminCommentVO, 0, len(friends))
-	for _, friend := range friends {
-		result = append(result, vo.AdminCommentVO{
-			Id:         friend.Id,
-			PostInfo:   vo.PostInfo(friend.PostInfo),
-			Content:    friend.Content,
-			UserInfo:   vo.AdminUserInfoVO(friend.UserInfo),
-			Fid:        friend.Fid,
-			Type:       friend.Type,
-			Status:     friend.Status,
-			CreateTime: friend.CreateTime,
+func (h *CommentHandler) toAdminCommentVO(comments []domain.AdminComment) []AdminCommentVO {
+	result := make([]AdminCommentVO, 0, len(comments))
+	for _, comment := range comments {
+		replies := make([]AdminCommentVO, 0, len(comment.Replies))
+		for _, reply := range comment.Replies {
+			var picture string
+			if reply.UserInfo.Email != "" {
+				hash := md5.Sum([]byte(strings.ToLower(reply.UserInfo.Email)))
+				picture = viper.GetString("gravatar.api") + hex.EncodeToString(hash[:])
+			}
+			replies = append(replies, AdminCommentVO{
+				Id:        reply.ReplyId,
+				PostInfo:  PostInfo(comment.PostInfo),
+				ReplyToId: reply.ReplyToId,
+				Content:   reply.Content,
+				UserInfo: UserInfo4Comment{
+					Name:    reply.UserInfo.Name,
+					Email:   reply.UserInfo.Email,
+					Ip:      reply.UserInfo.Ip,
+					Website: reply.UserInfo.Website,
+					Picture: picture,
+				},
+				ApprovalStatus: reply.ApprovalStatus,
+				Type:           "reply",
+				CreatedAt:      reply.CreatedAt,
+				UpdatedAt:      reply.UpdatedAt,
+			})
+		}
+		var picture string
+		if comment.UserInfo.Email != "" {
+			hash := md5.Sum([]byte(strings.ToLower(comment.UserInfo.Email)))
+			picture = viper.GetString("gravatar.api") + hex.EncodeToString(hash[:])
+		}
+		result = append(result, AdminCommentVO{
+			Id:       comment.Id,
+			PostInfo: PostInfo(comment.PostInfo),
+			Content:  comment.Content,
+			UserInfo: UserInfo4Comment{
+				Name:    comment.UserInfo.Name,
+				Email:   comment.UserInfo.Email,
+				Ip:      comment.UserInfo.Ip,
+				Website: comment.UserInfo.Website,
+				Picture: picture,
+			},
+			Replies:        replies,
+			ApprovalStatus: comment.ApprovalStatus,
+			Type:           "comment",
+			CreatedAt:      comment.CreatedAt,
+			UpdatedAt:      comment.UpdatedAt,
 		})
 	}
 	return result
@@ -329,7 +356,7 @@ func (h *CommentHandler) AdminApproveComment(ctx *gin.Context) (*apiwrap.Respons
 		}
 		return nil, err
 	}
-	if comment.IsApproved() {
+	if comment.ApprovalStatus {
 		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Comment has been approved.")
 	}
 	err = h.serv.AdminApproveComment(ctx, commentId)
@@ -347,34 +374,6 @@ func (h *CommentHandler) AdminApproveComment(ctx *gin.Context) (*apiwrap.Respons
 	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *CommentHandler) AdminDisapproveComment(ctx *gin.Context, req request.DisapproveCommentRequest) (*apiwrap.ResponseBody[any], error) {
-	commentId := ctx.Param("id")
-	comment, err := h.serv.FindCommentById(ctx, commentId)
-	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, api.NewErrorResponseBody(http.StatusNotFound, "Comment not found.")
-		}
-		return nil, err
-	}
-	if comment.IsDisapproved() {
-		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Comment has been disapproved.")
-	}
-
-	err = h.serv.AdminDisapproveComment(ctx, commentId)
-	if err != nil {
-		return nil, err
-	}
-	go func() {
-		// 通知用户评论未通过
-		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
-		gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-disapproval", comment.UserInfo.Email, "text/plain", comment.PostInfo.PostUrl, req.Reason)
-		if gErr != nil {
-			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-		}
-	}()
-	return apiwrap.SuccessResponse(), nil
-}
-
 func (h *CommentHandler) AdminApproveCommentReply(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	commentId := ctx.Param("id")
 	replyId := ctx.Param("rid")
@@ -385,7 +384,7 @@ func (h *CommentHandler) AdminApproveCommentReply(ctx *gin.Context) (*apiwrap.Re
 		}
 		return nil, err
 	}
-	if commentReplyWithPostInfo.IsApproved() {
+	if commentReplyWithPostInfo.ApprovalStatus {
 		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Comment reply has been approved.")
 	}
 	err = h.serv.AdminApproveCommentReply(ctx, commentId, replyId)
@@ -401,34 +400,6 @@ func (h *CommentHandler) AdminApproveCommentReply(ctx *gin.Context) (*apiwrap.Re
 		}
 		// 通知被回复的用户接收到了回复
 		gErr = h.msgServ.SendEmailWithEmail(ctx, "user-comment-reply", commentReplyWithPostInfo.RepliedUserInfo.Email, "text/plain", commentReplyWithPostInfo.PostInfo.PostUrl)
-		if gErr != nil {
-			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-		}
-	}()
-	return apiwrap.SuccessResponse(), nil
-}
-
-func (h *CommentHandler) AdminDisapproveCommentReply(ctx *gin.Context, req request.DisapproveCommentRequest) (*apiwrap.ResponseBody[any], error) {
-	commentId := ctx.Param("id")
-	replyId := ctx.Param("rid")
-	commentReplyWithPostInfo, err := h.serv.FindReplyByCIdAndRId(ctx, commentId, replyId)
-	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, api.NewErrorResponseBody(http.StatusNotFound, "Comment reply not found.")
-		}
-		return nil, err
-	}
-	if commentReplyWithPostInfo.IsDisapproved() {
-		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Comment reply has been disapproved.")
-	}
-	err = h.serv.AdminDisapproveCommentReply(ctx, commentId, replyId)
-	if err != nil {
-		return nil, err
-	}
-	go func() {
-		// 通知用户评论未通过
-		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
-		gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-disapproval", commentReplyWithPostInfo.UserInfo.Email, "text/plain", commentReplyWithPostInfo.PostInfo.PostUrl, req.Reason)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
@@ -458,7 +429,7 @@ func (h *CommentHandler) AdminDeleteComment(ctx *gin.Context) (*apiwrap.Response
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 		// 减少评论数
-		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount.ToString(), domain.CountStatsTypeCommentCount)
+		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
@@ -488,29 +459,10 @@ func (h *CommentHandler) AdminDeleteCommentReply(ctx *gin.Context) (*apiwrap.Res
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 		// 减少评论数
-		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount.ToString(), domain.CountStatsTypeCommentCount)
+		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return apiwrap.SuccessResponse(), nil
-}
-
-func (h *CommentHandler) AdminUpdateCommentStatus(ctx *gin.Context, req request.CommentStatusRequest) (*apiwrap.ResponseBody[any], error) {
-	commentId := ctx.Param("id")
-	err := h.serv.UpdateCommentStatus(ctx, commentId, domain.CommentStatus(req.Status))
-	if err != nil {
-		return nil, err
-	}
-	return apiwrap.SuccessResponse(), nil
-}
-
-func (h *CommentHandler) AdminUpdateReplyStatus(ctx *gin.Context, req request.CommentStatusRequest) (*apiwrap.ResponseBody[any], error) {
-	commentId := ctx.Param("id")
-	replyId := ctx.Param("rid")
-	err := h.serv.UpdateCommentReplyStatus(ctx, commentId, replyId, domain.CommentStatus(req.Status))
-	if err != nil {
-		return nil, err
-	}
 	return apiwrap.SuccessResponse(), nil
 }
