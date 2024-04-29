@@ -14,4 +14,13 @@
 
 package domain
 
-type Post struct{}
+type Page struct {
+	Size    int64
+	Skip    int64
+	Keyword string
+	Field   string
+	Order   string
+
+	CategoryFilter []string
+	TagFilter      []string
+}

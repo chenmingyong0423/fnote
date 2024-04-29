@@ -16,6 +16,7 @@ package web
 
 import (
 	"fmt"
+	domain2 "github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
 	"log/slog"
 	"net/http"
 	"sync"
@@ -29,8 +30,6 @@ import (
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
 	"github.com/chenmingyong0423/gkit/slice"
-
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
 
@@ -212,13 +211,15 @@ func (h *PostHandler) AddLike(ctx *gin.Context) (*apiwrap.ResponseBody[any], err
 	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *PostHandler) AdminGetPosts(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.AdminPostVO]], error) {
-	posts, total, err := h.serv.AdminGetPosts(ctx, dto.PageDTO{
-		PageNo:   req.PageNo,
-		PageSize: req.PageSize,
-		Field:    req.Field,
-		Order:    req.Order,
-		Keyword:  req.Keyword,
+func (h *PostHandler) AdminGetPosts(ctx *gin.Context, req PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.AdminPostVO]], error) {
+	posts, total, err := h.serv.AdminGetPosts(ctx, domain2.Page{
+		Size:           req.PageSize,
+		Skip:           (req.PageNo - 1) * req.PageSize,
+		Field:          req.Field,
+		Order:          req.Order,
+		Keyword:        req.Keyword,
+		CategoryFilter: req.CategoryFilter,
+		TagFilter:      req.TagFilter,
 	})
 	if err != nil {
 		return nil, err

@@ -17,14 +17,13 @@ package repository
 import (
 	"context"
 	"fmt"
+	domain2 "github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
 	"strings"
 	"time"
 
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/repository/dao"
 
 	"github.com/chenmingyong0423/gkit/slice"
-
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
@@ -41,7 +40,7 @@ type IPostRepository interface {
 	IncreaseVisitCount(ctx context.Context, id string) error
 	HadLikePost(ctx context.Context, id string, ip string) (bool, error)
 	IncreaseCommentCount(ctx context.Context, id string) error
-	QueryAdminPostsPage(ctx context.Context, postsQueryDTO dto.PostsQueryDTO) ([]*domain.Post, int64, error)
+	QueryAdminPostsPage(ctx context.Context, page domain2.Page) ([]*domain.Post, int64, error)
 	AddPost(ctx context.Context, post *domain.Post) error
 	DeletePost(ctx context.Context, id string) error
 	FindPostById(ctx context.Context, id string) (*domain.Post, error)
@@ -175,17 +174,24 @@ func (r *PostRepository) AddPost(ctx context.Context, post *domain.Post) error {
 	return nil
 }
 
-func (r *PostRepository) QueryAdminPostsPage(ctx context.Context, postsQueryDTO dto.PostsQueryDTO) ([]*domain.Post, int64, error) {
+func (r *PostRepository) QueryAdminPostsPage(ctx context.Context, page domain2.Page) ([]*domain.Post, int64, error) {
 	condBuilder := query.BsonBuilder()
-	if postsQueryDTO.Keyword != "" {
-		condBuilder.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(postsQueryDTO.Keyword)), "i")
+	if page.Keyword != "" {
+		condBuilder.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(page.Keyword)), "i")
 	}
+	if len(page.CategoryFilter) > 0 {
+		condBuilder.ElemMatch("categories", query.In("name", page.CategoryFilter...))
+	}
+	if len(page.TagFilter) > 0 {
+		condBuilder.ElemMatch("tags", query.In("name", page.TagFilter...))
+	}
+
 	con := condBuilder.Build()
 
 	findOptions := options.Find()
-	findOptions.SetSkip(postsQueryDTO.Skip).SetLimit(postsQueryDTO.Size)
-	if postsQueryDTO.Field != "" && postsQueryDTO.Order != "" {
-		findOptions.SetSort(bsonx.M(postsQueryDTO.Field, orderConvertToInt(postsQueryDTO.Order)))
+	findOptions.SetSkip(page.Skip).SetLimit(page.Size)
+	if page.Field != "" && page.Order != "" {
+		findOptions.SetSort(bsonx.M(page.Field, orderConvertToInt(page.Order)))
 	} else {
 		findOptions.SetSort(bsonx.M("create_time", -1))
 	}

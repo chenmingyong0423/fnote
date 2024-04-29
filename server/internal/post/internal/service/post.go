@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	domain2 "github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
 	"log/slog"
 	"strings"
 
@@ -31,8 +32,6 @@ import (
 
 	"github.com/chenmingyong0423/gkit/uuidx"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
-
 	"github.com/gin-gonic/gin"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
@@ -44,7 +43,7 @@ type IPostService interface {
 	GetPosts(ctx context.Context, pageRequest *domain.PostRequest) ([]*domain.Post, int64, error)
 	GetPunishedPostById(ctx context.Context, id string) (*domain.Post, error)
 	IncreaseVisitCount(ctx context.Context, id string) error
-	AdminGetPosts(ctx context.Context, pageDTO dto.PageDTO) ([]*domain.Post, int64, error)
+	AdminGetPosts(ctx context.Context, page domain2.Page) ([]*domain.Post, int64, error)
 	AddPost(ctx context.Context, post *domain.Post) error
 	DeletePost(ctx context.Context, id string) error
 	DecreaseCommentCount(ctx context.Context, postId string, cnt int) error
@@ -218,8 +217,8 @@ func (s *PostService) addPostCallback(ctx context.Context, post *domain.Post) {
 	}
 }
 
-func (s *PostService) AdminGetPosts(ctx context.Context, pageDTO dto.PageDTO) ([]*domain.Post, int64, error) {
-	return s.repo.QueryAdminPostsPage(ctx, dto.PostsQueryDTO{Size: pageDTO.PageSize, Skip: (pageDTO.PageNo - 1) * pageDTO.PageSize, Keyword: pageDTO.Keyword})
+func (s *PostService) AdminGetPosts(ctx context.Context, page domain2.Page) ([]*domain.Post, int64, error) {
+	return s.repo.QueryAdminPostsPage(ctx, page)
 }
 
 func (s *PostService) IncreaseVisitCount(ctx context.Context, id string) error {
