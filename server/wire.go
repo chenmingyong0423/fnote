@@ -18,6 +18,7 @@ package main
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
+	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis"
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
@@ -40,7 +41,6 @@ func initializeApp() (*gin.Engine, error) {
 		global.IsWebsiteInitializedFn,
 
 		ioc.CategoryProviders,
-		ioc.CommentProviders,
 		website_config.InitWebsiteConfigModule,
 		wire.FieldsOf(new(*website_config.Module), "Svc"),
 		wire.FieldsOf(new(*website_config.Module), "Hdl"),
@@ -55,7 +55,9 @@ func initializeApp() (*gin.Engine, error) {
 		data_analysis.InitDataAnalysisModule,
 		wire.FieldsOf(new(*data_analysis.Module), "Hdl"),
 		post.InitPostModule,
-		wire.FieldsOf(new(*post.Module), "Hdl", "Svc"),
+		wire.FieldsOf(new(*post.Module), "Hdl"),
+		comment.InitCommentModule,
+		wire.FieldsOf(new(*comment.Module), "Hdl"),
 		ioc.FriendProviders,
 		ioc.VlProviders,
 		ioc.EmailProviders,

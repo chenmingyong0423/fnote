@@ -22,6 +22,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/comment"
+
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis"
 
 	"github.com/chenmingyong0423/fnote/server/internal/post"
@@ -50,7 +52,6 @@ import (
 	"github.com/gin-contrib/cors"
 
 	ctgHandler "github.com/chenmingyong0423/fnote/server/internal/category/handler"
-	commentHandler "github.com/chenmingyong0423/fnote/server/internal/comment/hanlder"
 	friendHanlder "github.com/chenmingyong0423/fnote/server/internal/friend/hanlder"
 	myValidator "github.com/chenmingyong0423/fnote/server/internal/pkg/validator"
 	vlHandler "github.com/chenmingyong0423/fnote/server/internal/visit_log/handler"
@@ -59,7 +60,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *commentHandler.CommentHandler, cfgHdr *website_config.Handler, frdHdr *friendHanlder.FriendHandler, postHdr *post.Handler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *data_analysis.Handler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler) (*gin.Engine, error) {
+func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *comment.Handler, cfgHdr *website_config.Handler, frdHdr *friendHanlder.FriendHandler, postHdr *post.Handler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *data_analysis.Handler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler) (*gin.Engine, error) {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 

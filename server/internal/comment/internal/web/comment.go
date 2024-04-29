@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package hanlder
+package web
 
 import (
 	"crypto/md5"
@@ -21,6 +21,8 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+
+	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/service"
 
 	"github.com/chenmingyong0423/fnote/server/internal/post"
 
@@ -36,7 +38,6 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/vo"
 
-	"github.com/chenmingyong0423/fnote/server/internal/comment/service"
 	msgService "github.com/chenmingyong0423/fnote/server/internal/message/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
@@ -61,14 +62,6 @@ type CommentHandler struct {
 	postServ   post.Service
 	msgServ    msgService.IMessageService
 	statsServ  csService.ICountStatsService
-}
-
-type CommentRequest struct {
-	PostId   string `json:"postId" binding:"required"`
-	UserName string `json:"username" binding:"required"`
-	Email    string `json:"email" binding:"required,validateEmailFormat"`
-	Website  string `json:"website"`
-	Content  string `json:"content" binding:"required,max=200"`
 }
 
 func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {

@@ -15,7 +15,7 @@
 package web
 
 import (
-	service2 "github.com/chenmingyong0423/fnote/server/internal/comment/service"
+	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
@@ -23,7 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewDataAnalysisHandler(vlServ service.IVisitLogService, csServ csServ.ICountStatsService, postLikeServ post_like.Service, commentServ service2.ICommentService) *DataAnalysisHandler {
+func NewDataAnalysisHandler(vlServ service.IVisitLogService, csServ csServ.ICountStatsService, postLikeServ post_like.Service, commentServ comment.Service) *DataAnalysisHandler {
 	return &DataAnalysisHandler{
 		vlServ:       vlServ,
 		csServ:       csServ,
@@ -36,7 +36,7 @@ type DataAnalysisHandler struct {
 	vlServ       service.IVisitLogService
 	csServ       csServ.ICountStatsService
 	postLikeServ post_like.Service
-	commentServ  service2.ICommentService
+	commentServ  comment.Service
 }
 
 func (h *DataAnalysisHandler) RegisterGinRoutes(engine *gin.Engine) {
