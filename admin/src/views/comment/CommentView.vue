@@ -1,92 +1,92 @@
 <template>
-  <div>
+  <a-card title="评论列表">
     <div>
-      状态：<a-select
-      ref="select"
-      v-model:value="pageReq.status"
-      style="width: 120px"
-      :options="[{value: 1, label: '1'}]"
-      @focus="focus"
-      @change="handleChange"
-    ></a-select>
+      <div>
+        状态：
+        <a-select
+          ref="select"
+          v-model:value="pageReq.status"
+          style="width: 120px"
+          :options="[{ value: 1, label: '1' }]"
+          @focus="focus"
+          @change="handleChange"
+        ></a-select>
+      </div>
     </div>
-  </div>
-  <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change" :row-selection="rowSelection">
-    <template #bodyCell="{ column, text, record }">
-      <template v-if="column.dataIndex === 'post'">
-        <a :href="record.post_info.post_url" target="_blank">{{ record.post_info.post_url }}</a>
+    <a-table
+      :columns="columns"
+      :data-source="data"
+      :pagination="pagination"
+      @change="change"
+      :row-selection="rowSelection"
+      childrenColumnName="replies"
+    >
+      <template #bodyCell="{ column, text, record }">
+        <template v-if="column.dataIndex === 'user_info'">
+          <div class="flex gap-x-3">
+            <div>
+              <a-avatar :src="record.user_info.picture" />
+            </div>
+            <div class="flex-col">
+              <div>
+                <a
+                  :href="record.user_info.website"
+                  target="_blank"
+                  v-if="record.user_info.website"
+                  >{{ record.user_info.name }}</a
+                >
+                <span class="font-bold" v-else>{{ record.user_info.name }}</span>
+              </div>
+              <div class="text-gray-5">{{ record.user_info.email }}</div>
+            </div>
+          </div>
+        </template>
+        <template v-if="column.dataIndex === 'post.post_url'">
+          <a :href="record.post_info.post_url" target="_blank">{{ record.post_info.post_title }}</a>
+        </template>
+        <template v-if="column.dataIndex === 'content'">
+          {{ text }}
+        </template>
+        <template v-if="column.dataIndex === 'approval_status'">
+          <a-tag :color="record.approval_status ? 'success' : 'processing'"
+            >{{ text ? '审核通过' : '未审核' }}
+          </a-tag>
+        </template>
+        <template v-if="column.dataIndex === 'type'">
+          <a-tag color="success">{{ record.type === 'comment' ? '评论' : '回复' }}</a-tag>
+        </template>
+        <template v-if="['created_at', 'updated_at'].includes(column.dataIndex)">
+          {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
+        </template>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <div class="editable-row-operations">
+            <a-popconfirm
+              v-if="data.length && !record.approval_status"
+              title="确认通过？"
+              @confirm="approveComment(record)"
+            >
+              <a>通过</a>
+            </a-popconfirm>
+            <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteById(record)">
+              <a>删除</a>
+            </a-popconfirm>
+          </div>
+        </template>
       </template>
-      <template v-if="column.dataIndex === 'type'">
-        <a-tag color="success">{{ record.type == 0 ? '评论' : '回复' }}</a-tag>
-      </template>
-      <template v-if="column.dataIndex === 'replied_content'">
-        {{ record.replied_content }}
-      </template>
-      <template v-if="column.dataIndex === 'status'">
-        <a-tag
-          :color="record.status === 0 ? 'processing' : record.status === 1 ? 'success' : 'warning'"
-          >{{ statusConvert(record.status) }}
-        </a-tag>
-      </template>
-      <template v-if="column.dataIndex === 'create_time'">
-        {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
-      </template>
-      <template v-else-if="column.dataIndex === 'operation'">
-        <div class="editable-row-operations">
-          <a-popconfirm
-            v-if="data.length && record.status === 0"
-            title="确认通过？"
-            @confirm="approveComment(record)"
-          >
-            <a>通过</a>
-          </a-popconfirm>
-          <a-popconfirm
-            v-if="data.length && record.status === 0"
-            title="确认驳回？"
-            @confirm="openDisapproveDialog(record)"
-          >
-            <a>驳回</a>
-          </a-popconfirm>
-          <a-popconfirm
-            v-if="data.length && record.status === 2"
-            title="确认显示？"
-            @confirm="updateStatus(record, 1)"
-          >
-            <a>显示</a>
-          </a-popconfirm>
-          <a-popconfirm
-            v-if="data.length && record.status === 1"
-            title="确认隐藏？"
-            @confirm="updateStatus(record, 2)"
-          >
-            <a>隐藏</a>
-          </a-popconfirm>
-          <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteById(record)">
-            <a>删除</a>
-          </a-popconfirm>
-        </div>
-      </template>
-    </template>
-  </a-table>
-  <a-modal v-model:open="disapproveDialog" title="驳回原因" @ok="disapproveComment">
-    <a-input v-model:value="reason" placeholder="请输入审核不通过的原因。" />
-  </a-modal>
+    </a-table>
+  </a-card>
 </template>
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import { computed, ref } from 'vue'
-import type { PageRequest } from '@/interfaces/Common'
+import type { IPageData, IResponse, PageRequest } from '@/interfaces/Common'
 import {
   ApproveCommentById,
   ApproveReplyById,
-  type Comment,
+  type AdminCommentVO,
   DeleteCommentById,
   DeleteReplyById,
-  DisapproveCommentById,
-  DisapproveReplyById,
-  GetComments,
-  UpdateCommentStatusById,
-  UpdateReplyStatusById
+  GetComments
 } from '@/interfaces/Comment'
 import { message } from 'ant-design-vue'
 
@@ -94,14 +94,14 @@ document.title = '评论列表 - 后台管理'
 
 const columns = [
   {
-    title: '文章',
-    dataIndex: 'post',
-    key: 'post'
+    title: '用户',
+    dataIndex: 'user_info',
+    key: 'user_info'
   },
   {
-    title: '类型',
-    key: 'type',
-    dataIndex: 'type'
+    title: '文章',
+    dataIndex: 'post.post_url',
+    key: 'post.post_url'
   },
   {
     title: '内容',
@@ -110,13 +110,23 @@ const columns = [
   },
   {
     title: '状态',
-    key: 'status',
-    dataIndex: 'status'
+    key: 'approval_status',
+    dataIndex: 'approval_status'
+  },
+  {
+    title: '类型',
+    key: 'type',
+    dataIndex: 'type'
   },
   {
     title: '提交时间',
-    key: 'create_time',
-    dataIndex: 'create_time'
+    key: 'created_at',
+    dataIndex: 'created_at'
+  },
+  {
+    title: '更新时间',
+    key: 'updated_at',
+    dataIndex: 'updated_at'
   },
   {
     title: 'operation',
@@ -124,11 +134,7 @@ const columns = [
   }
 ]
 
-interface KeyComment extends Comment {
-  key: string
-}
-
-const data = ref<KeyComment[]>([])
+const data = ref<AdminCommentVO[]>([])
 const pageReq = ref<PageRequest>({
   pageNo: 1,
   pageSize: 5,
@@ -148,11 +154,19 @@ const pagination = computed(() => ({
 const get = async () => {
   try {
     const response: any = await GetComments(pageReq.value)
-    data.value = response.data.data?.list || []
-    data.value.forEach((item: KeyComment, index: number) => {
-      item.key = item.id
-    })
-    total.value = response.data.data?.totalCount || 0
+    const result: IResponse<IPageData<AdminCommentVO>> = response.data
+    if (result.code === 0) {
+      data.value = response.data.data?.list || []
+      data.value.forEach((commentVO: AdminCommentVO) => {
+        commentVO.key = commentVO.id
+        commentVO.replies?.forEach((replyVO: AdminCommentVO) => {
+          replyVO.fid = commentVO.id
+          replyVO.key = replyVO.id
+        })
+      })
+      total.value = response.data.data?.totalCount || 0
+      console.log(data.value)
+    }
   } catch (error) {
     console.log(error)
   }
@@ -163,21 +177,9 @@ const change = (pg: any) => {
   pageReq.value.pageSize = pg.pageSize
   get()
 }
-const statusConvert = (status: number) => {
-  switch (status) {
-    case 0:
-      return '未审核'
-    case 1:
-      return '显示'
-    case 2:
-      return '隐藏'
-    default:
-      return '审核不通过'
-  }
-}
 
-const approveComment = (record: Comment) => {
-  if (record.type === 0) {
+const approveComment = (record: AdminCommentVO) => {
+  if (record.type === 'comment') {
     approveCommentById(record.id)
   } else {
     approveReplyById(record.fid || '', record.id)
@@ -212,92 +214,8 @@ const approveReplyById = async (fid: string, id: string) => {
   }
 }
 
-const disapproveDialog = ref(false)
-const comment = ref<Comment>()
-const reason = ref('')
-
-const openDisapproveDialog = (record: Comment) => {
-  disapproveDialog.value = true
-  comment.value = record
-}
-const disapproveComment = () => {
-  if (comment.value?.type === 0) {
-    disapproveCommentById(comment.value.id!)
-  } else {
-    disapproveReplyById(comment.value?.fid || '', comment.value?.id!)
-  }
-}
-
-const disapproveCommentById = async (id: string) => {
-  try {
-    const response: any = await DisapproveCommentById(id, reason.value)
-    if (response.data.code !== 0) {
-      message.error(response.data.message)
-      return
-    }
-    message.success('驳回成功')
-    await get()
-    reason.value = ''
-    disapproveDialog.value = false
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-const disapproveReplyById = async (fid: string, id: string) => {
-  try {
-    const response: any = await DisapproveReplyById(fid, id, reason.value)
-    if (response.data.code !== 0) {
-      message.error(response.data.message)
-      return
-    }
-    message.success('驳回成功')
-    await get()
-    reason.value = ''
-    disapproveDialog.value = false
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-const updateStatus = (record: Comment, status: number) => {
-  if (record.type === 0) {
-    updateStatusById(record.id, status)
-  } else {
-    updateReplyStatusById(record.fid || '', record.id, status)
-  }
-}
-
-const updateStatusById = async (id: string, status: number) => {
-  try {
-    const response: any = await UpdateCommentStatusById(id, status)
-    if (response.data.code !== 0) {
-      message.error(response.data.message)
-      return
-    }
-    message.success('更新成功')
-    await get()
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-const updateReplyStatusById = async (fid: string, id: string, status: number) => {
-  try {
-    const response: any = await UpdateReplyStatusById(fid, id, status)
-    if (response.data.code !== 0) {
-      message.error(response.data.message)
-      return
-    }
-    message.success('更新成功')
-    await get()
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-const deleteById = (record: Comment) => {
-  if (record.type === 0) {
+const deleteById = (record: AdminCommentVO) => {
+  if (record.type === 'comment') {
     deleteCommentById(record.id)
   } else {
     deleteReplyById(record.fid || '', record.id)
@@ -336,23 +254,23 @@ const deleteReplyById = async (fid: string, id: string) => {
 const rowSelection = ref({
   checkStrictly: false,
   onChange: (selectedRowKeys: (string | number)[], selectedRows: Comment[]) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
   },
   onSelect: (record: Comment, selected: boolean, selectedRows: Comment[]) => {
-    console.log(record, selected, selectedRows);
+    console.log(record, selected, selectedRows)
   },
   onSelectAll: (selected: boolean, selectedRows: Comment[], changeRows: Comment[]) => {
-    console.log(selected, selectedRows, changeRows);
-  },
-});
+    console.log(selected, selectedRows, changeRows)
+  }
+})
 
 const focus = () => {
-  console.log('focus');
-};
+  console.log('focus')
+}
 
 const handleChange = (value: string) => {
-  console.log(`selected ${value}`);
-};
+  console.log(`selected ${value}`)
+}
 </script>
 
 <style scoped>
