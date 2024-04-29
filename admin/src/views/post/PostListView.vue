@@ -196,13 +196,9 @@ const pagination = computed(() => ({
   pageSize: req.value.pageSize
 }))
 
-const change: TableProps<IPost>['onChange'] = (
-  pg,
-  filters,
-  sorter: { field: string; order: string | undefined }
-) => {
-  req.value.pageNo = <number>pg.current
-  req.value.pageSize = <number>pg.pageSize
+const change: TableProps<IPost>['onChange'] = (pagination, filters, sorter: any) => {
+  req.value.pageNo = <number>pagination.current
+  req.value.pageSize = <number>pagination.pageSize
   req.value.sortField = sorter.field
   switch (sorter.order) {
     case 'ascend':
