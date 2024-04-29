@@ -26,7 +26,7 @@
         <div class="flex flex-col items-start ml-3">
           <span class="text-5">{{ item.name }}</span>
           <span class="text-gray-5 text-3">{{
-            $dayjs(item.create_time * 1000).format("YYYY-MM-DD HH:mm:ss")
+            $dayjs(item.created_at * 1000).format("YYYY-MM-DD HH:mm:ss")
           }}</span>
         </div>
       </div>

@@ -6,7 +6,7 @@ export interface ILatestComment {
   picture: string;
   name: string;
   content: string;
-  create_time: number;
+  created_at: number;
 }
 
 export interface IReply {

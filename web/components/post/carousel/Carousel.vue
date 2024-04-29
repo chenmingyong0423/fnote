@@ -35,7 +35,10 @@
             >
               {{ item.title }}
             </div>
-            <div class="text-8 lt-md:text-6" :style="{ color: item.color || '#000' }">
+            <div
+              class="text-8 lt-md:text-6"
+              :style="{ color: item.color || '#000' }"
+            >
               {{ item.summary }}
             </div>
           </div>
