@@ -12,7 +12,6 @@
         :model="formState"
         name="normal_login"
         class="login-form"
-        @finish="submit"
         @finishFailed="onFinishFailed"
         :labelCol="{ span: labelCols[step - 1] }"
       >
@@ -261,10 +260,6 @@ const onFinishFailed = (errorInfo: any) => {
   message.error('初始化失败')
 }
 
-const submit = async () => {
-  message.success('初始化成功')
-}
-
 const formRef = ref()
 const handleWebsiteIcon = (value: string) => {
   formState.website_icon = value
@@ -292,6 +287,7 @@ const initWebsite = () => {
         return
       }
       userStore.initialization = true
+      message.success('初始化成功')
       await router.push('/login')
     })
     .catch((error: any) => {

@@ -66,7 +66,7 @@ export const DeleteReplyById = (fid: string, id: string) => {
   })
 }
 
-export interface BatchApprovedCommentRequest{
+export interface BatchApprovedCommentRequest {
   comment_ids: string[]
   replies: {
     [key: string]: string[]
@@ -77,8 +77,6 @@ export const batchApproved = (req: BatchApprovedCommentRequest) => {
   return instance({
     url: `/comments/batch-approval`,
     method: 'put',
-    data: {
-      comments: req,
-    }
+    data: req
   })
 }
