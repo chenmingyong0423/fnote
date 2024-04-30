@@ -182,7 +182,7 @@ const req = ref<PageRequest>({
   pageNo: 1,
   pageSize: 5,
   sortField: 'create_time',
-  sortOrder: 'desc',
+  sortOrder: 'DESC',
   keyword: ''
 } as PageRequest)
 
@@ -202,16 +202,16 @@ const change: TableProps<IPost>['onChange'] = (pagination, filters, sorter: any)
   req.value.sortField = sorter.field
   switch (sorter.order) {
     case 'ascend':
-      req.value.sortOrder = 'asc'
+      req.value.sortOrder = 'ASC'
       showSorterTooltip.value = '点击默认排序'
       break
     case 'descend':
-      req.value.sortOrder = 'desc'
+      req.value.sortOrder = 'DESC'
       showSorterTooltip.value = '点击升序排序'
       break
     default:
       showSorterTooltip.value = '点击降序排序'
-      req.value.sortOrder = 'desc'
+      req.value.sortOrder = 'DESC'
   }
   console.log(filters)
   req.value.category_filter = filters.categories as string[]
