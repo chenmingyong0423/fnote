@@ -134,3 +134,13 @@ type CommentReplyWithPostInfo struct {
 	CommentReply
 	PostInfo PostInfo
 }
+
+type EmailInfo struct {
+	Email   string
+	PostUrl string
+}
+
+type ReplyWithCId struct {
+	CommentId string
+	ReplyIds  []string
+}
