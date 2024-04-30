@@ -36,7 +36,7 @@ type PageRequest struct {
 }
 
 type BatchApprovedCommentRequest struct {
-	CommentIds []string `json:"comment_ids" binding:"required,lt=0"`
+	CommentIds []string `json:"comment_ids"`
 	// key 为 commentId, value 为 reply_ids
 	Replies map[string][]string `json:"replies"`
 }

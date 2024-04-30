@@ -16,12 +16,11 @@ package service
 
 import (
 	"context"
+
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/domain"
 	"github.com/chenmingyong0423/gkit/slice"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/sync/errgroup"
-	"log/slog"
-	"slices"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/repository"
 
@@ -71,42 +70,52 @@ func (s *CommentService) BatchApproveComments(ctx context.Context, commentIds []
 		commentObjectIDs[i] = objectID
 	}
 	var eg errgroup.Group
-	eg.Go(func() error {
-		approvedIds, err := s.repo.UpdateCommentStatus2TrueByIds(ctx, commentObjectIDs)
-		if err != nil {
-			return err
-		}
-		comments, err := s.repo.FindCommentByObjectIDs(ctx, approvedIds)
-		if err != nil {
-			slog.Error("comment-approval", "message", "approve successfully but not send email, ids=%v", approvedIds)
-			return err
-		}
-		for _, comment := range comments {
-			approvalEmails = append(approvalEmails, domain.EmailInfo{
-				Email:   comment.UserInfo.Email,
-				PostUrl: comment.PostInfo.PostUrl,
+	if len(commentObjectIDs) > 0 {
+		eg.Go(func() error {
+			// 查询未被审核的评论
+			comments, err := s.repo.FindDisapprovedCommentByObjectIDs(ctx, commentObjectIDs)
+			if err != nil {
+				return err
+			}
+			commentObjectIDs = slice.Map(comments, func(_ int, c domain.AdminComment) primitive.ObjectID {
+				ojbId, _ := primitive.ObjectIDFromHex(c.Id)
+				return ojbId
 			})
-		}
-		return nil
-	})
+			if len(commentObjectIDs) == 0 {
+				return nil
+			}
+			err = s.repo.UpdateCommentStatus2TrueByIds(ctx, commentObjectIDs)
+			if err != nil {
+				return err
+			}
+
+			for _, comment := range comments {
+				approvalEmails = append(approvalEmails, domain.EmailInfo{
+					Email:   comment.UserInfo.Email,
+					PostUrl: comment.PostInfo.PostUrl,
+				})
+			}
+			return nil
+		})
+	}
 	for _, reply := range replies {
 		eg.Go(func() error {
-			err := s.repo.UpdateCReplyStatus2TrueByCidAndRIds(ctx, reply.CommentId, reply.ReplyIds)
+			comment, err := s.repo.FindCommentWithDisapprovedReplyByCidAndRIds(ctx, reply.CommentId, reply.ReplyIds)
 			if err != nil {
 				return err
 			}
-			comment, err := s.repo.FindCommentWithRepliesById(ctx, reply.CommentId)
-			if err != nil {
-				slog.Error("comment-reply-approval", "message", "approve successfully but not send email, ids=%v", reply.ReplyIds)
-				return err
-			}
-			approvalReplies := slice.FilterMap(comment.Replies, func(_ int, c domain.CommentReply) (domain.CommentReply, bool) {
-				if slices.Contains(reply.ReplyIds, c.ReplyId) {
-					return c, true
-				}
-				return domain.CommentReply{}, false
+			reply.ReplyIds = slice.Map(comment.Replies, func(_ int, r domain.AdminReply) string {
+				return r.ReplyId
 			})
-			for _, ar := range approvalReplies {
+			if len(reply.ReplyIds) == 0 {
+				return nil
+			}
+			err = s.repo.UpdateCReplyStatus2TrueByCidAndRIds(ctx, reply.CommentId, reply.ReplyIds)
+			if err != nil {
+				return err
+			}
+
+			for _, ar := range comment.Replies {
 				approvalEmails = append(approvalEmails, domain.EmailInfo{
 					Email:   ar.UserInfo.Email,
 					PostUrl: comment.PostInfo.PostUrl,
@@ -114,6 +123,11 @@ func (s *CommentService) BatchApproveComments(ctx context.Context, commentIds []
 				if ar.ReplyToId != "" && ar.RepliedUserInfo.Email != "" {
 					repliedEmails = append(repliedEmails, domain.EmailInfo{
 						Email:   ar.RepliedUserInfo.Email,
+						PostUrl: comment.PostInfo.PostUrl,
+					})
+				} else {
+					repliedEmails = append(repliedEmails, domain.EmailInfo{
+						Email:   comment.UserInfo.Email,
 						PostUrl: comment.PostInfo.PostUrl,
 					})
 				}

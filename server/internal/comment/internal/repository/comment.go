@@ -26,7 +26,6 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/repository/dao"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -40,7 +39,6 @@ type ICommentRepository interface {
 	AddReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) (string, error)
 	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]domain.LatestComment, error)
 	FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string) ([]domain.CommentWithReplies, error)
-	FindPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.AdminComment, int64, error)
 	FindCommentById(ctx context.Context, id string) (*domain.Comment, error)
 	UpdateCommentStatus2True(ctx context.Context, id string) error
 	FindReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) (*domain.CommentReplyWithPostInfo, error)
@@ -50,9 +48,11 @@ type ICommentRepository interface {
 	DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error
 	CountOfToday(ctx context.Context) (int64, error)
 	AdminFindCommentsWithPagination(ctx context.Context, page domain.Page) ([]domain.AdminComment, int64, error)
-	UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) ([]primitive.ObjectID, error)
+	UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) error
 	FindCommentByObjectIDs(ctx context.Context, ids []primitive.ObjectID) ([]domain.AdminComment, error)
 	UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentId string, replyIds []string) error
+	FindCommentWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentId string, replyIds []string) (*domain.AdminComment, error)
+	FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]domain.AdminComment, error)
 }
 
 func NewCommentRepository(dao dao.ICommentDao) *CommentRepository {
@@ -65,6 +65,27 @@ var _ ICommentRepository = (*CommentRepository)(nil)
 
 type CommentRepository struct {
 	dao dao.ICommentDao
+}
+
+func (r *CommentRepository) FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]domain.AdminComment, error) {
+	comments, err := r.dao.FindDisapprovedCommentByObjectIDs(ctx, commentObjectIDs)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainAdminComments(comments), nil
+}
+
+func (r *CommentRepository) FindCommentWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentId string, replyIds []string) (*domain.AdminComment, error) {
+	commentObjID, err := primitive.ObjectIDFromHex(commentId)
+	if err != nil {
+		return nil, err
+	}
+	comment, err := r.dao.FindWithDisapprovedReplyByCidAndRIds(ctx, commentObjID, replyIds)
+	if err != nil {
+		return nil, err
+	}
+	adminComment := r.toDomainAdminComment(comment)
+	return &adminComment, nil
 }
 
 func (r *CommentRepository) UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentId string, replyIds []string) error {
@@ -80,10 +101,10 @@ func (r *CommentRepository) FindCommentByObjectIDs(ctx context.Context, ids []pr
 	if err != nil {
 		return nil, err
 	}
-	return r.toDomainAdminCommentsV2(comments), nil
+	return r.toDomainAdminComments(comments), nil
 }
 
-func (r *CommentRepository) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) ([]primitive.ObjectID, error) {
+func (r *CommentRepository) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) error {
 	return r.dao.UpdateCommentStatus2TrueByIds(ctx, ids)
 }
 
@@ -105,7 +126,7 @@ func (r *CommentRepository) AdminFindCommentsWithPagination(ctx context.Context,
 	if err != nil {
 		return nil, 0, err
 	}
-	return r.toDomainAdminCommentsV2(comments), total, nil
+	return r.toDomainAdminComments(comments), total, nil
 }
 
 func (r *CommentRepository) CountOfToday(ctx context.Context) (int64, error) {
@@ -189,24 +210,6 @@ func (r *CommentRepository) FindCommentById(ctx context.Context, id string) (*do
 		return nil, err
 	}
 	return r.toDomainComment(comment), nil
-}
-
-func (r *CommentRepository) FindPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.AdminComment, int64, error) {
-	condBuilder := query.BsonBuilder()
-	if pageDTO.Keyword != "" {
-		condBuilder.RegexOptions("content", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageDTO.Keyword)), "i")
-	}
-	cond := condBuilder.Build()
-
-	findOptions := options.Find()
-	findOptions.SetSkip((pageDTO.PageNo - 1) * pageDTO.PageSize).SetLimit(pageDTO.PageSize)
-	if pageDTO.Field != "" && pageDTO.Order != "" {
-		findOptions.SetSort(bsonx.M(pageDTO.Field, pageDTO.OrderConvertToInt()))
-	} else {
-		findOptions.SetSort(bsonx.M("create_time", 1))
-	}
-	friends, total, err := r.dao.AggregationQuerySkipAndSetLimit(ctx, cond, findOptions)
-	return r.toDomainAdminComments(friends), total, err
 }
 
 func (r *CommentRepository) FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string) ([]domain.CommentWithReplies, error) {
@@ -331,47 +334,36 @@ func (r *CommentRepository) toDomainComments(comments []*dao.Comment) []domain.C
 	return result
 }
 
-func (r *CommentRepository) toDomainAdminComments(friends []dao.AdminComment) []domain.AdminComment {
-	result := make([]domain.AdminComment, 0, len(friends))
-	for _, friend := range friends {
-		result = append(result, domain.AdminComment{
-			Id:             friend.Id,
-			PostInfo:       domain.PostInfo(friend.PostInfo),
-			Content:        friend.Content,
-			UserInfo:       domain.UserInfo4Comment(friend.UserInfo),
-			ApprovalStatus: friend.ApprovalStatus,
-			CreatedAt:      friend.CreateTime,
+func (r *CommentRepository) toDomainAdminComment(comment *dao.Comment) domain.AdminComment {
+	replies := make([]domain.AdminReply, 0, len(comment.Replies))
+	for _, commentReply := range comment.Replies {
+		replies = append(replies, domain.AdminReply{
+			ReplyId:         commentReply.ReplyId,
+			Content:         commentReply.Content,
+			ReplyToId:       commentReply.ReplyToId,
+			UserInfo:        domain.UserInfo4Reply(commentReply.UserInfo),
+			RepliedUserInfo: domain.UserInfo4Reply(commentReply.RepliedUserInfo),
+			ApprovalStatus:  commentReply.ApprovalStatus,
+			CreatedAt:       commentReply.CreatedAt.Unix(),
+			UpdatedAt:       commentReply.UpdatedAt.Unix(),
 		})
 	}
-	return result
+	return domain.AdminComment{
+		Id:             comment.ID.Hex(),
+		PostInfo:       domain.PostInfo(comment.PostInfo),
+		Content:        comment.Content,
+		UserInfo:       domain.UserInfo4Comment(comment.UserInfo),
+		Replies:        replies,
+		ApprovalStatus: comment.ApprovalStatus,
+		CreatedAt:      comment.CreatedAt.Unix(),
+		UpdatedAt:      comment.UpdatedAt.Unix(),
+	}
 }
 
-func (r *CommentRepository) toDomainAdminCommentsV2(comments []*dao.Comment) []domain.AdminComment {
+func (r *CommentRepository) toDomainAdminComments(comments []*dao.Comment) []domain.AdminComment {
 	result := make([]domain.AdminComment, 0, len(comments))
 	for _, comment := range comments {
-		replies := make([]domain.AdminReply, 0, len(comment.Replies))
-		for _, commentReply := range comment.Replies {
-			replies = append(replies, domain.AdminReply{
-				ReplyId:         commentReply.ReplyId,
-				Content:         commentReply.Content,
-				ReplyToId:       commentReply.ReplyToId,
-				UserInfo:        domain.UserInfo4Reply(commentReply.UserInfo),
-				RepliedUserInfo: domain.UserInfo4Reply(commentReply.RepliedUserInfo),
-				ApprovalStatus:  commentReply.ApprovalStatus,
-				CreatedAt:       commentReply.CreatedAt.Unix(),
-				UpdatedAt:       commentReply.UpdatedAt.Unix(),
-			})
-		}
-		result = append(result, domain.AdminComment{
-			Id:             comment.ID.Hex(),
-			PostInfo:       domain.PostInfo(comment.PostInfo),
-			Content:        comment.Content,
-			UserInfo:       domain.UserInfo4Comment(comment.UserInfo),
-			Replies:        replies,
-			ApprovalStatus: comment.ApprovalStatus,
-			CreatedAt:      comment.CreatedAt.Unix(),
-			UpdatedAt:      comment.UpdatedAt.Unix(),
-		})
+		result = append(result, r.toDomainAdminComment(comment))
 	}
 	return result
 }
