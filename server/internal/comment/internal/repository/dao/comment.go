@@ -128,9 +128,11 @@ type ICommentDao interface {
 	DeleteReplyByCIdAndRId(ctx context.Context, objectID primitive.ObjectID, replyId string) error
 	CountOfToday(ctx context.Context) (int64, error)
 	Find(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Comment, int64, error)
-	UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) ([]primitive.ObjectID, error)
+	UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) error
 	FindByObjectIDs(ctx context.Context, ids []primitive.ObjectID) ([]*Comment, error)
 	UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentObjectID primitive.ObjectID, replyIds []string) error
+	FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentObjID primitive.ObjectID, replyIds []string) (*Comment, error)
+	FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]*Comment, error)
 }
 
 func NewCommentDao(db *mongo.Database) *CommentDao {
@@ -145,14 +147,51 @@ type CommentDao struct {
 	coll *mongox.Collection[Comment]
 }
 
+func (d *CommentDao) FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]*Comment, error) {
+	anyIds := make([]any, 0, len(commentObjectIDs))
+	for _, objectID := range commentObjectIDs {
+		anyIds = append(anyIds, objectID)
+	}
+	return d.coll.Finder().Filter(query.BsonBuilder().In("_id", anyIds...).Eq("approval_status", false).Build()).Find(ctx)
+}
+
+func (d *CommentDao) FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentObjID primitive.ObjectID, replyIds []string) (*Comment, error) {
+	pipeline := aggregation.StageBsonBuilder().
+		Match(query.Id(commentObjID)).
+		Project(
+			bsonx.NewD().
+				Add("_id", 1).
+				Add("created_at", 1).
+				Add("updated_at", 1).
+				Add("post_info", 1).
+				Add("content", 1).
+				Add("user_info", 1).
+				Add("approval_status", 1).
+				Add("replies", aggregation.FilterWithoutKey("$replies",
+					aggregation.AndWithoutKey(
+						bsonx.D("$in", bsonx.A("$$reply.reply_id", replyIds)),
+						aggregation.EqWithoutKey("$$reply.approval_status", false),
+					), &types.FilterOptions{As: "reply"})).Build(),
+		).Build()
+	comments, err := d.coll.Aggregator().Pipeline(pipeline).Aggregate(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to find comment by id=%s, pipeline=%v", commentObjID, pipeline)
+	}
+	if len(comments) == 0 {
+		return nil, errors.Wrapf(mongo.ErrNoDocuments, "failed to find comment by id=%s", commentObjID)
+	}
+	return comments[0], nil
+}
+
 func (d *CommentDao) UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentObjectID primitive.ObjectID, replyIds []string) error {
+	now := time.Now()
 	updateResult, err := d.coll.Updater().Filter(query.Id(commentObjectID)).
-		Updates(update.Set("replies.$[elem].approval_status", true)).
+		Updates(update.BsonBuilder().Set("updated_at", now).Set("replies.$[elem].approval_status", true).Set("replies.$[elem].updated_at", now).Build()).
 		UpdateMany(ctx, options.Update().SetArrayFilters(options.ArrayFilters{Filters: []any{query.In("elem.reply_id", replyIds...)}}))
 	if err != nil {
 		return errors.Wrapf(err, "failed to update reply approval_status, commentId=%s, replyIds=%v", commentObjectID, replyIds)
 	}
-	if updateResult.UpsertedCount == 0 {
+	if updateResult.ModifiedCount == 0 {
 		return fmt.Errorf("UpsertedCount=0, failed to update reply approval_status, commentId=%s, replyIds=%v", commentObjectID, replyIds)
 	}
 	return nil
@@ -162,19 +201,19 @@ func (d *CommentDao) FindByObjectIDs(ctx context.Context, ids []primitive.Object
 	return d.coll.Finder().Filter(query.In("_id", ids...)).Find(ctx)
 }
 
-func (d *CommentDao) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) ([]primitive.ObjectID, error) {
+func (d *CommentDao) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) error {
 	anyIds := make([]any, 0, len(ids))
 	for _, objectID := range ids {
 		anyIds = append(anyIds, objectID)
 	}
 	updateResult, err := d.coll.Updater().Filter(query.BsonBuilder().In("_id", anyIds...).Eq("approval_status", false).Build()).Updates(update.BsonBuilder().Set("approval_status", true).Set("updated_at", time.Now()).Build()).UpdateMany(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to update approval_status of comments, ids=%v", ids)
+		return errors.Wrapf(err, "failed to update approval_status of comments, ids=%v", ids)
 	}
 	if updateResult.ModifiedCount == 0 {
-		return nil, fmt.Errorf("ModifiedCount=0, failed to update approval_status of comments, ids=%v", ids)
+		return fmt.Errorf("ModifiedCount=0, failed to update approval_status of comments, ids=%v", ids)
 	}
-	return updateResult.UpsertedID.([]primitive.ObjectID), nil
+	return nil
 }
 
 func (d *CommentDao) Find(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Comment, int64, error) {

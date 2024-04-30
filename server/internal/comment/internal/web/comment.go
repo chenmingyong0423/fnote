@@ -18,7 +18,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/chenmingyong0423/gkit/slice"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -470,12 +469,16 @@ func (h *CommentHandler) AdminDeleteCommentReply(ctx *gin.Context) (*apiwrap.Res
 }
 
 func (h *CommentHandler) AdminBatchApproveComments(ctx *gin.Context, req BatchApprovedCommentRequest) (*apiwrap.ResponseBody[any], error) {
-	replies := slice.Map(req.Replies, func(_ int, r ReplyWithCId) domain.ReplyWithCId {
-		return domain.ReplyWithCId{
-			CommentId: r.CommentId,
-			ReplyIds:  r.ReplyIds,
-		}
-	})
+	if len(req.CommentIds) == 0 && len(req.Replies) == 0 {
+		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "CommentIds and Replies cannot be empty.")
+	}
+	replies := make([]domain.ReplyWithCId, 0, len(req.Replies))
+	for k, v := range req.Replies {
+		replies = append(replies, domain.ReplyWithCId{
+			CommentId: k,
+			ReplyIds:  v,
+		})
+	}
 	approvalEmailInfos, repliedEmailInfos, err := h.serv.BatchApproveComments(ctx, req.CommentIds, replies)
 	if err != nil {
 		return nil, err
@@ -483,6 +486,8 @@ func (h *CommentHandler) AdminBatchApproveComments(ctx *gin.Context, req BatchAp
 	go func() {
 		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 		// 通知用户评论已通过
+		l.InfoContext(ctx, fmt.Sprintf("approvalEmailInfos=%v", approvalEmailInfos))
+		l.InfoContext(ctx, fmt.Sprintf("repliedEmailInfos=%v", repliedEmailInfos))
 		for _, approvalEmailInfo := range approvalEmailInfos {
 			gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-approval", []string{approvalEmailInfo.Email}, "text/plain", approvalEmailInfo.PostUrl)
 			if gErr != nil {

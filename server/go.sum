@@ -4,8 +4,6 @@ github.com/bytedance/sonic v1.11.3 h1:jRN+yEjakWh8aK5FzrciUHG8OFXK+4/KrAX/ysEtHA
 github.com/bytedance/sonic v1.11.3/go.mod h1:iZcSUejdk5aukTND/Eu/ivjQuEL0Cu9/rf50Hi0u/g4=
 github.com/chenmingyong0423/ginx v0.1.2 h1:IiktjoYfSpN8czQeWaB6V8hpXi2cSHPaVkM07uiitwU=
 github.com/chenmingyong0423/ginx v0.1.2/go.mod h1:z950yIFUFE7nA3DJ7b5sD7TnggZS4YOKrE6L021/HY4=
-github.com/chenmingyong0423/gkit v0.5.0 h1:efthAjro7c5ZwHqMUV0+0CFZZFgsbthYnnUrfsSMdx4=
-github.com/chenmingyong0423/gkit v0.5.0/go.mod h1:9MKV0/B3MiBCGf4fssogftFbNIGJk9a4ffm/o3+pkHw=
 github.com/chenmingyong0423/gkit v0.6.0 h1:dJofj3V+fQekT9OaxmaQKJFkSd9BzrtP1JFWoM3fgoY=
 github.com/chenmingyong0423/gkit v0.6.0/go.mod h1:9MKV0/B3MiBCGf4fssogftFbNIGJk9a4ffm/o3+pkHw=
 github.com/chenmingyong0423/go-http-chain v0.3.4 h1:I/EWPLsYq2fuo3x4HUMSQ0tFj5rMdZxZ1JHTlN1ACp4=
