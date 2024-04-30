@@ -34,3 +34,9 @@ type PageRequest struct {
 	// 搜索内容
 	Keyword string `form:"keyword,omitempty"`
 }
+
+type BatchApprovedCommentRequest struct {
+	CommentIds []string `json:"comment_ids" binding:"required,lt=0"`
+	// key 为 commentId, value 为 reply_ids
+	Replies map[string][]string `json:"replies"`
+}
