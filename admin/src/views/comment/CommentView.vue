@@ -89,7 +89,9 @@ import {
   type AdminCommentVO,
   DeleteCommentById,
   DeleteReplyById,
-  GetComments, batchApproved, type BatchApprovedCommentRequest
+  GetComments,
+  batchApproved,
+  type BatchApprovedCommentRequest
 } from '@/interfaces/Comment'
 import { message } from 'ant-design-vue'
 
@@ -141,7 +143,7 @@ const data = ref<AdminCommentVO[]>([])
 const pageReq = ref<PageRequest>({
   pageNo: 1,
   pageSize: 5,
-  sortField: 'create_time',
+  sortField: 'created_at',
   sortOrder: 'desc',
   status: 1
 } as PageRequest)
@@ -259,8 +261,8 @@ const selectedComments = ref<BatchApprovedCommentRequest>({
   replies: {}
 })
 
-type Key = string | number;
-const selectedRowKeys = ref<Key[]>([]);
+type Key = string | number
+const selectedRowKeys = ref<Key[]>([])
 
 const onChange = (srks: Key[], selectedRows: AdminCommentVO[]) => {
   selectedRowKeys.value = srks
@@ -271,9 +273,9 @@ const onChange = (srks: Key[], selectedRows: AdminCommentVO[]) => {
       if (row.key.includes('~')) {
         // 如果字符串包含 '~'，按第二种数据处理
         // 假设需要分割存储两部分的数据
-        const parts = row.key.split('~');
-        const commentId = parts[0];
-        const replyId = parts[1];
+        const parts = row.key.split('~')
+        const commentId = parts[0]
+        const replyId = parts[1]
         if (selectedComments.value.replies[commentId]) {
           selectedComments.value.replies[commentId].push(replyId)
         } else {
@@ -284,24 +286,25 @@ const onChange = (srks: Key[], selectedRows: AdminCommentVO[]) => {
       }
     }
   })
+  console.log(selectedComments.value)
 }
 const batchApproveComment = async () => {
-    try {
-      const apiResponse = await batchApproved(selectedComments.value)
-      if (apiResponse.data?.code === 0) {
-        message.success('批量审核成功')
-        await get()
-        selectedRowKeys.value = []
-        return true
-      } else {
-        message.error('批量审核失败')
-        return false
-      }
-    } catch (error) {
-      console.log(error)
-      message.error("批量审核失败")
+  try {
+    const apiResponse = await batchApproved(selectedComments.value)
+    if (apiResponse.data?.code === 0) {
+      message.success('批量审核成功')
+      await get()
+      selectedRowKeys.value = []
+      return true
+    } else {
+      message.error('批量审核失败')
       return false
     }
+  } catch (error) {
+    console.log(error)
+    message.error('批量审核失败')
+    return false
+  }
 }
 
 const handleChange = (value: string) => {
