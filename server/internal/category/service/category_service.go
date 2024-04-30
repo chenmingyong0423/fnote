@@ -94,7 +94,7 @@ func (s *CategoryService) DeleteCategory(ctx context.Context, id string) error {
 	}
 	go func() {
 		// 更新分类数量
-		gErr := s.countStatsService.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount)
+		gErr := s.countStatsService.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount, 1)
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))

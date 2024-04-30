@@ -45,7 +45,7 @@ type ICountStatsDao interface {
 	DeleteByReferenceIdAndType(ctx context.Context, referenceId string, statsType string) error
 	DecreaseByReferenceIdsAndType(ctx context.Context, ids []string, statsType string) error
 	IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, statsType string) error
-	DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string) error
+	DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string, count int) error
 	IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string) error
 	GetByFilter(ctx context.Context, filter bson.D) ([]*CountStats, error)
 }
@@ -81,8 +81,8 @@ func (d *CountStatsDao) IncreaseByReferenceIdAndType(ctx context.Context, refere
 	return nil
 }
 
-func (d *CountStatsDao) DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string) error {
-	oneResult, err := d.coll.Updater().Filter(query.BsonBuilder().Eq("reference_id", referenceId).Eq("type", statsType).Build()).Updates(update.Inc("count", -1)).UpdateOne(ctx)
+func (d *CountStatsDao) DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string, count int) error {
+	oneResult, err := d.coll.Updater().Filter(query.BsonBuilder().Eq("reference_id", referenceId).Eq("type", statsType).Build()).Updates(update.Inc("count", -count)).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "decrease count stats error, referenceId=%s, type=%s", referenceId, statsType)
 	}

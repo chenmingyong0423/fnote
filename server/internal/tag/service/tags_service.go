@@ -83,7 +83,7 @@ func (s *TagService) DeleteTag(ctx context.Context, id string) error {
 	}
 	go func() {
 		// 分类数量 -1
-		gErr := s.countStatsService.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount)
+		gErr := s.countStatsService.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount, 1)
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))

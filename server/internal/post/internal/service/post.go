@@ -119,7 +119,7 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 	}
 	go func() {
 		// 网站文章数-1
-		gErr := s.countStats.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCountInWebsite.ToString(), domain.CountStatsTypePostCountInWebsite)
+		gErr := s.countStats.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCountInWebsite.ToString(), domain.CountStatsTypePostCountInWebsite, 1)
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
