@@ -1,14 +1,17 @@
 <template>
   <a-card title="评论列表">
-    <div>
-      <div>
+    <div class="flex mb-3">
+      <div class="flex gap-x-2" v-if="selectedRowKeys.length > 0">
+        <a-button type="primary" @click="batchApproveComment">通过所选</a-button>
+        <a-button type="primary" danger>删除所选</a-button>
+      </div>
+      <div class="ml-auto">
         状态：
         <a-select
           ref="select"
+          class="w-120px"
           v-model:value="pageReq.status"
-          style="width: 120px"
           :options="[{ value: 1, label: '1' }]"
-          @focus="focus"
           @change="handleChange"
         ></a-select>
       </div>
@@ -18,7 +21,7 @@
       :data-source="data"
       :pagination="pagination"
       @change="change"
-      :row-selection="rowSelection"
+      :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onChange }"
       childrenColumnName="replies"
     >
       <template #bodyCell="{ column, text, record }">
@@ -86,7 +89,7 @@ import {
   type AdminCommentVO,
   DeleteCommentById,
   DeleteReplyById,
-  GetComments
+  GetComments, batchApproved, type BatchApprovedCommentRequest
 } from '@/interfaces/Comment'
 import { message } from 'ant-design-vue'
 
@@ -161,7 +164,7 @@ const get = async () => {
         commentVO.key = commentVO.id
         commentVO.replies?.forEach((replyVO: AdminCommentVO) => {
           replyVO.fid = commentVO.id
-          replyVO.key = replyVO.id
+          replyVO.key = commentVO.id + '~' + replyVO.id
         })
       })
       total.value = response.data.data?.totalCount || 0
@@ -251,21 +254,54 @@ const deleteReplyById = async (fid: string, id: string) => {
   }
 }
 
-const rowSelection = ref({
-  checkStrictly: false,
-  onChange: (selectedRowKeys: (string | number)[], selectedRows: Comment[]) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
-  },
-  onSelect: (record: Comment, selected: boolean, selectedRows: Comment[]) => {
-    console.log(record, selected, selectedRows)
-  },
-  onSelectAll: (selected: boolean, selectedRows: Comment[], changeRows: Comment[]) => {
-    console.log(selected, selectedRows, changeRows)
-  }
+const selectedComments = ref<BatchApprovedCommentRequest>({
+  comment_ids: [],
+  replies: {}
 })
 
-const focus = () => {
-  console.log('focus')
+type Key = string | number;
+const selectedRowKeys = ref<Key[]>([]);
+
+const onChange = (srks: Key[], selectedRows: AdminCommentVO[]) => {
+  selectedRowKeys.value = srks
+  selectedComments.value.comment_ids = []
+  selectedComments.value.replies = {}
+  selectedRows.forEach((row) => {
+    if (row.key) {
+      if (row.key.includes('~')) {
+        // 如果字符串包含 '~'，按第二种数据处理
+        // 假设需要分割存储两部分的数据
+        const parts = row.key.split('~');
+        const commentId = parts[0];
+        const replyId = parts[1];
+        if (selectedComments.value.replies[commentId]) {
+          selectedComments.value.replies[commentId].push(replyId)
+        } else {
+          selectedComments.value.replies[commentId] = [replyId]
+        }
+      } else {
+        selectedComments.value.comment_ids.push(row.key)
+      }
+    }
+  })
+}
+const batchApproveComment = async () => {
+    try {
+      const apiResponse = await batchApproved(selectedComments.value)
+      if (apiResponse.data?.code === 0) {
+        message.success('批量审核成功')
+        await get()
+        selectedRowKeys.value = []
+        return true
+      } else {
+        message.error('批量审核失败')
+        return false
+      }
+    } catch (error) {
+      console.log(error)
+      message.error("批量审核失败")
+      return false
+    }
 }
 
 const handleChange = (value: string) => {
