@@ -16,8 +16,12 @@ package service
 
 import (
 	"context"
-
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/domain"
+	"github.com/chenmingyong0423/gkit/slice"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/sync/errgroup"
+	"log/slog"
+	"slices"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/repository"
 
@@ -39,6 +43,7 @@ type ICommentService interface {
 	DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error
 	UpdateCommentReplyStatus(ctx context.Context, commentId string, replyId string, approvalStatus bool) error
 	FindCommentCountOfToday(ctx context.Context) (int64, error)
+	BatchApproveComments(ctx context.Context, commentIds []string, replies []domain.ReplyWithCId) ([]domain.EmailInfo, []domain.EmailInfo, error)
 }
 
 func NewCommentService(repo repository.ICommentRepository) *CommentService {
@@ -51,6 +56,77 @@ var _ ICommentService = (*CommentService)(nil)
 
 type CommentService struct {
 	repo repository.ICommentRepository
+}
+
+func (s *CommentService) BatchApproveComments(ctx context.Context, commentIds []string, replies []domain.ReplyWithCId) ([]domain.EmailInfo, []domain.EmailInfo, error) {
+	approvalEmails := make([]domain.EmailInfo, 0, len(commentIds)+len(replies))
+	// 评论被回复的邮件
+	repliedEmails := make([]domain.EmailInfo, 0)
+	commentObjectIDs := make([]primitive.ObjectID, len(commentIds))
+	for i, commentId := range commentIds {
+		objectID, err := primitive.ObjectIDFromHex(commentId)
+		if err != nil {
+			return nil, nil, err
+		}
+		commentObjectIDs[i] = objectID
+	}
+	var eg errgroup.Group
+	eg.Go(func() error {
+		approvedIds, err := s.repo.UpdateCommentStatus2TrueByIds(ctx, commentObjectIDs)
+		if err != nil {
+			return err
+		}
+		comments, err := s.repo.FindCommentByObjectIDs(ctx, approvedIds)
+		if err != nil {
+			slog.Error("comment-approval", "message", "approve successfully but not send email, ids=%v", approvedIds)
+			return err
+		}
+		for _, comment := range comments {
+			approvalEmails = append(approvalEmails, domain.EmailInfo{
+				Email:   comment.UserInfo.Email,
+				PostUrl: comment.PostInfo.PostUrl,
+			})
+		}
+		return nil
+	})
+	for _, reply := range replies {
+		eg.Go(func() error {
+			err := s.repo.UpdateCReplyStatus2TrueByCidAndRIds(ctx, reply.CommentId, reply.ReplyIds)
+			if err != nil {
+				return err
+			}
+			comment, err := s.repo.FindCommentWithRepliesById(ctx, reply.CommentId)
+			if err != nil {
+				slog.Error("comment-reply-approval", "message", "approve successfully but not send email, ids=%v", reply.ReplyIds)
+				return err
+			}
+			approvalReplies := slice.FilterMap(comment.Replies, func(_ int, c domain.CommentReply) (domain.CommentReply, bool) {
+				if slices.Contains(reply.ReplyIds, c.ReplyId) {
+					return c, true
+				}
+				return domain.CommentReply{}, false
+			})
+			for _, ar := range approvalReplies {
+				approvalEmails = append(approvalEmails, domain.EmailInfo{
+					Email:   ar.UserInfo.Email,
+					PostUrl: comment.PostInfo.PostUrl,
+				})
+				if ar.ReplyToId != "" && ar.RepliedUserInfo.Email != "" {
+					repliedEmails = append(repliedEmails, domain.EmailInfo{
+						Email:   ar.RepliedUserInfo.Email,
+						PostUrl: comment.PostInfo.PostUrl,
+					})
+				}
+			}
+			return nil
+		})
+	}
+
+	err := eg.Wait()
+	if err != nil {
+		return approvalEmails, repliedEmails, err
+	}
+	return approvalEmails, repliedEmails, nil
 }
 
 func (s *CommentService) FindCommentCountOfToday(ctx context.Context) (int64, error) {

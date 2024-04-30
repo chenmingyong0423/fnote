@@ -25,7 +25,7 @@ import (
 )
 
 type IMessageService interface {
-	SendEmailWithEmail(ctx context.Context, msgTplName, email, contentType string, args ...any) error
+	SendEmailWithEmail(ctx context.Context, msgTplName string, email []string, contentType string, args ...any) error
 	SendEmailToWebmaster(ctx context.Context, msgTplName, contentType string) error
 }
 
@@ -48,10 +48,10 @@ type MessageService struct {
 }
 
 func (s *MessageService) SendEmailToWebmaster(ctx context.Context, msgTplName, contentType string) error {
-	return s.sendEmail(ctx, msgTplName, contentType, 0, "")
+	return s.sendEmail(ctx, msgTplName, contentType, 0, nil)
 }
 
-func (s *MessageService) sendEmail(ctx context.Context, msgTplName, contentType string, recipientType uint, email string, args ...any) error {
+func (s *MessageService) sendEmail(ctx context.Context, msgTplName, contentType string, recipientType uint, email []string, args ...any) error {
 	emailCfg, err := s.configServ.GetEmailConfig(ctx)
 	if err != nil {
 		return err
@@ -60,8 +60,8 @@ func (s *MessageService) sendEmail(ctx context.Context, msgTplName, contentType 
 	if err != nil {
 		return err
 	}
-	if email == "" {
-		email = emailCfg.Email
+	if email == nil {
+		email = []string{emailCfg.Email}
 	}
 	msgTpl, err := s.msgTplService.FindMsgTplByNameAndRcpType(ctx, msgTplName, recipientType)
 	if err != nil {
@@ -76,13 +76,13 @@ func (s *MessageService) sendEmail(ctx context.Context, msgTplName, contentType 
 		Username:    emailCfg.Username,
 		Password:    emailCfg.Password,
 		Name:        webNMasterCfg.WebsiteName,
-		To:          []string{email},
+		To:          email,
 		Subject:     msgTpl.Title,
 		Body:        msgTpl.Content,
 		ContentType: contentType,
 	})
 }
 
-func (s *MessageService) SendEmailWithEmail(ctx context.Context, msgTplName string, email, contentType string, args ...any) error {
+func (s *MessageService) SendEmailWithEmail(ctx context.Context, msgTplName string, email []string, contentType string, args ...any) error {
 	return s.sendEmail(ctx, msgTplName, contentType, 1, email, args...)
 }

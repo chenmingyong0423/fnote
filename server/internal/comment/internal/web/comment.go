@@ -18,6 +18,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/chenmingyong0423/gkit/slice"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -79,6 +80,7 @@ func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 
 	adminGroup.DELETE("/:id/replies/:rid", apiwrap.Wrap(h.AdminDeleteCommentReply))
 	adminGroup.PUT("/:id/replies/:rid/approval", apiwrap.Wrap(h.AdminApproveCommentReply))
+	adminGroup.PUT("/batch-approval", apiwrap.WrapWithBody(h.AdminBatchApproveComments))
 }
 
 func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiwrap.ResponseBody[api.IdVO], error) {
@@ -366,7 +368,7 @@ func (h *CommentHandler) AdminApproveComment(ctx *gin.Context) (*apiwrap.Respons
 	go func() {
 		// 通知用户评论已通过
 		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
-		gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-approval", comment.UserInfo.Email, "text/plain", comment.PostInfo.PostUrl)
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-approval", []string{comment.UserInfo.Email}, "text/plain", comment.PostInfo.PostUrl)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
@@ -394,12 +396,12 @@ func (h *CommentHandler) AdminApproveCommentReply(ctx *gin.Context) (*apiwrap.Re
 	go func() {
 		// 通知用户评论已通过
 		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
-		gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-approval", commentReplyWithPostInfo.UserInfo.Email, "text/plain", commentReplyWithPostInfo.PostInfo.PostUrl)
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-approval", []string{commentReplyWithPostInfo.UserInfo.Email}, "text/plain", commentReplyWithPostInfo.PostInfo.PostUrl)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 		// 通知被回复的用户接收到了回复
-		gErr = h.msgServ.SendEmailWithEmail(ctx, "user-comment-reply", commentReplyWithPostInfo.RepliedUserInfo.Email, "text/plain", commentReplyWithPostInfo.PostInfo.PostUrl)
+		gErr = h.msgServ.SendEmailWithEmail(ctx, "user-comment-reply", []string{commentReplyWithPostInfo.RepliedUserInfo.Email}, "text/plain", commentReplyWithPostInfo.PostInfo.PostUrl)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
@@ -462,6 +464,38 @@ func (h *CommentHandler) AdminDeleteCommentReply(ctx *gin.Context) (*apiwrap.Res
 		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+		}
+	}()
+	return apiwrap.SuccessResponse(), nil
+}
+
+func (h *CommentHandler) AdminBatchApproveComments(ctx *gin.Context, req BatchApprovedCommentRequest) (*apiwrap.ResponseBody[any], error) {
+	replies := slice.Map(req.Replies, func(_ int, r ReplyWithCId) domain.ReplyWithCId {
+		return domain.ReplyWithCId{
+			CommentId: r.CommentId,
+			ReplyIds:  r.ReplyIds,
+		}
+	})
+	approvalEmailInfos, repliedEmailInfos, err := h.serv.BatchApproveComments(ctx, req.CommentIds, replies)
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+		// 通知用户评论已通过
+		for _, approvalEmailInfo := range approvalEmailInfos {
+			gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-approval", []string{approvalEmailInfo.Email}, "text/plain", approvalEmailInfo.PostUrl)
+			if gErr != nil {
+				l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+			}
+		}
+
+		// 通知被回复的用户接收到了回复
+		for _, repliedEmailInfo := range repliedEmailInfos {
+			gErr := h.msgServ.SendEmailWithEmail(ctx, "user-comment-reply", []string{repliedEmailInfo.Email}, "text/plain", repliedEmailInfo.PostUrl)
+			if gErr != nil {
+				l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+			}
 		}
 	}()
 	return apiwrap.SuccessResponse(), nil

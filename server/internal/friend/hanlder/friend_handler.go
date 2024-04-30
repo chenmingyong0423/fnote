@@ -198,7 +198,7 @@ func (h *FriendHandler) AdminApproveFriend(ctx *gin.Context) (*apiwrap.ResponseB
 	}
 	// 发送邮件通知朋友
 	go func() {
-		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-approval", email, "text/plain", viper.GetString("website.base_host")+"/friend")
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-approval", []string{email}, "text/plain", viper.GetString("website.base_host")+"/friend")
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
@@ -214,7 +214,7 @@ func (h *FriendHandler) AdminRejectFriend(ctx *gin.Context, req request.FriendRe
 	}
 	// 发送邮件通知朋友
 	go func() {
-		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-rejection", email, "text/plain", viper.GetString("website.base_host")+"/friend", req.Reason)
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-rejection", []string{email}, "text/plain", viper.GetString("website.base_host")+"/friend", req.Reason)
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))

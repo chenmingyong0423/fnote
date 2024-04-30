@@ -50,6 +50,23 @@ type Comment struct {
 	ApprovalStatus bool    `bson:"approval_status"`
 }
 
+type Reply struct {
+	ReplyId string `bson:"reply_id"`
+	// 回复内容
+	Content string `bson:"content"`
+	// 被回复的回复 Id
+	ReplyToId string `bson:"reply_to_id"`
+	// 用户信息
+	UserInfo UserInfo4Reply `bson:"user_info"`
+	// 被回复用户的信息
+	RepliedUserInfo UserInfo4Reply `bson:"replied_user_info"`
+	ApprovalStatus  bool           `bson:"approval_status"`
+	// 回复时间
+	CreatedAt time.Time `bson:"created_at"`
+	// 修改时间
+	UpdatedAt time.Time `bson:"updated_at"`
+}
+
 type UserInfo4Reply UserInfo
 
 type UserInfo4Comment UserInfo
@@ -76,23 +93,6 @@ type LatestComment struct {
 	Email     string    `bson:"email"`
 	Content   string    `bson:"content"`
 	CreatedAt time.Time `bson:"created_at"`
-}
-
-type Reply struct {
-	ReplyId string `bson:"reply_id"`
-	// 回复内容
-	Content string `bson:"content"`
-	// 被回复的回复 Id
-	ReplyToId string `bson:"reply_to_id"`
-	// 用户信息
-	UserInfo UserInfo4Reply `bson:"user_info"`
-	// 被回复用户的信息
-	RepliedUserInfo UserInfo4Reply `bson:"replied_user_info"`
-	ApprovalStatus  bool           `bson:"approval_status"`
-	// 回复时间
-	CreatedAt time.Time `bson:"created_at"`
-	// 修改时间
-	UpdatedAt time.Time `bson:"updated_at"`
 }
 
 type ReplyWithPostInfo struct {
@@ -128,6 +128,9 @@ type ICommentDao interface {
 	DeleteReplyByCIdAndRId(ctx context.Context, objectID primitive.ObjectID, replyId string) error
 	CountOfToday(ctx context.Context) (int64, error)
 	Find(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Comment, int64, error)
+	UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) ([]primitive.ObjectID, error)
+	FindByObjectIDs(ctx context.Context, ids []primitive.ObjectID) ([]*Comment, error)
+	UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentObjectID primitive.ObjectID, replyIds []string) error
 }
 
 func NewCommentDao(db *mongo.Database) *CommentDao {
@@ -140,6 +143,38 @@ var _ ICommentDao = (*CommentDao)(nil)
 
 type CommentDao struct {
 	coll *mongox.Collection[Comment]
+}
+
+func (d *CommentDao) UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentObjectID primitive.ObjectID, replyIds []string) error {
+	updateResult, err := d.coll.Updater().Filter(query.Id(commentObjectID)).
+		Updates(update.Set("replies.$[elem].approval_status", true)).
+		UpdateMany(ctx, options.Update().SetArrayFilters(options.ArrayFilters{Filters: []any{query.In("elem.reply_id", replyIds...)}}))
+	if err != nil {
+		return errors.Wrapf(err, "failed to update reply approval_status, commentId=%s, replyIds=%v", commentObjectID, replyIds)
+	}
+	if updateResult.UpsertedCount == 0 {
+		return fmt.Errorf("UpsertedCount=0, failed to update reply approval_status, commentId=%s, replyIds=%v", commentObjectID, replyIds)
+	}
+	return nil
+}
+
+func (d *CommentDao) FindByObjectIDs(ctx context.Context, ids []primitive.ObjectID) ([]*Comment, error) {
+	return d.coll.Finder().Filter(query.In("_id", ids...)).Find(ctx)
+}
+
+func (d *CommentDao) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) ([]primitive.ObjectID, error) {
+	anyIds := make([]any, 0, len(ids))
+	for _, objectID := range ids {
+		anyIds = append(anyIds, objectID)
+	}
+	updateResult, err := d.coll.Updater().Filter(query.BsonBuilder().In("_id", anyIds...).Eq("approval_status", false).Build()).Updates(update.BsonBuilder().Set("approval_status", true).Set("updated_at", time.Now()).Build()).UpdateMany(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to update approval_status of comments, ids=%v", ids)
+	}
+	if updateResult.ModifiedCount == 0 {
+		return nil, fmt.Errorf("ModifiedCount=0, failed to update approval_status of comments, ids=%v", ids)
+	}
+	return updateResult.UpsertedID.([]primitive.ObjectID), nil
 }
 
 func (d *CommentDao) Find(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Comment, int64, error) {
