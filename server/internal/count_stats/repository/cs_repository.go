@@ -30,7 +30,7 @@ type ICountStatsRepository interface {
 	DeleteByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType) error
 	DecreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error
 	IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error
-	DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType) error
+	DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, count int) error
 	IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType) error
 	GetWebsiteCountStats(ctx context.Context, countStatsTypes []domain.CountStatsType) ([]domain.CountStats, error)
 }
@@ -63,8 +63,8 @@ func (r *CountStatsRepository) IncreaseByReferenceIdAndType(ctx context.Context,
 	return r.dao.IncreaseByReferenceIdAndType(ctx, referenceId, countStatsType.ToString())
 }
 
-func (r *CountStatsRepository) DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType) error {
-	return r.dao.DecreaseByReferenceIdAndType(ctx, referenceId, countStatsType.ToString())
+func (r *CountStatsRepository) DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, count int) error {
+	return r.dao.DecreaseByReferenceIdAndType(ctx, referenceId, countStatsType.ToString(), count)
 }
 
 func (r *CountStatsRepository) IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error {

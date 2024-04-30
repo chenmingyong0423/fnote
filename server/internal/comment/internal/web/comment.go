@@ -430,7 +430,7 @@ func (h *CommentHandler) AdminDeleteComment(ctx *gin.Context) (*apiwrap.Response
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 		// 减少评论数
-		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount)
+		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount, cnt)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
@@ -460,7 +460,7 @@ func (h *CommentHandler) AdminDeleteCommentReply(ctx *gin.Context) (*apiwrap.Res
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 		// 减少评论数
-		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount)
+		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount, 1)
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}

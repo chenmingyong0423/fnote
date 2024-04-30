@@ -27,7 +27,7 @@ type ICountStatsService interface {
 	DeleteByReferenceIdAndType(ctx context.Context, referenceId string, statsType domain.CountStatsType) error
 	DecreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error
 	IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error
-	DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType) error
+	DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, count int) error
 	IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType) error
 	GetWebsiteCountStats(ctx context.Context) (domain.WebsiteCountStats, error)
 }
@@ -67,8 +67,8 @@ func (s *CountStatsService) IncreaseByReferenceIdAndType(ctx context.Context, re
 	return s.repo.IncreaseByReferenceIdAndType(ctx, referenceId, countStatsType)
 }
 
-func (s *CountStatsService) DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType) error {
-	return s.repo.DecreaseByReferenceIdAndType(ctx, referenceId, countStatsType)
+func (s *CountStatsService) DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, count int) error {
+	return s.repo.DecreaseByReferenceIdAndType(ctx, referenceId, countStatsType, count)
 }
 
 func (s *CountStatsService) IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error {
