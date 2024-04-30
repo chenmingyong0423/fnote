@@ -50,6 +50,9 @@ type ICommentRepository interface {
 	DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error
 	CountOfToday(ctx context.Context) (int64, error)
 	AdminFindCommentsWithPagination(ctx context.Context, page domain.Page) ([]domain.AdminComment, int64, error)
+	UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) ([]primitive.ObjectID, error)
+	FindCommentByObjectIDs(ctx context.Context, ids []primitive.ObjectID) ([]domain.AdminComment, error)
+	UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentId string, replyIds []string) error
 }
 
 func NewCommentRepository(dao dao.ICommentDao) *CommentRepository {
@@ -62,6 +65,26 @@ var _ ICommentRepository = (*CommentRepository)(nil)
 
 type CommentRepository struct {
 	dao dao.ICommentDao
+}
+
+func (r *CommentRepository) UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentId string, replyIds []string) error {
+	objectID, err := primitive.ObjectIDFromHex(commentId)
+	if err != nil {
+		return err
+	}
+	return r.dao.UpdateCReplyStatus2TrueByCidAndRIds(ctx, objectID, replyIds)
+}
+
+func (r *CommentRepository) FindCommentByObjectIDs(ctx context.Context, ids []primitive.ObjectID) ([]domain.AdminComment, error) {
+	comments, err := r.dao.FindByObjectIDs(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainAdminCommentsV2(comments), nil
+}
+
+func (r *CommentRepository) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) ([]primitive.ObjectID, error) {
+	return r.dao.UpdateCommentStatus2TrueByIds(ctx, ids)
 }
 
 func (r *CommentRepository) AdminFindCommentsWithPagination(ctx context.Context, page domain.Page) ([]domain.AdminComment, int64, error) {

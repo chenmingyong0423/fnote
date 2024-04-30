@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	github.com/chenmingyong0423/ginx v0.1.2
-	github.com/chenmingyong0423/gkit v0.5.0
+	github.com/chenmingyong0423/gkit v0.6.0
 	github.com/chenmingyong0423/go-http-chain v0.3.4
 	github.com/chenmingyong0423/go-mongox v0.18.0
 	github.com/gin-contrib/cors v1.7.1
