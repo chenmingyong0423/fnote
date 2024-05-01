@@ -338,6 +338,7 @@ func (h *CommentHandler) toAdminCommentVO(comments []domain.AdminComment) []Admi
 				Website: comment.UserInfo.Website,
 				Picture: picture,
 			},
+			ReplyCount:     len(replies),
 			Replies:        replies,
 			ApprovalStatus: comment.ApprovalStatus,
 			Type:           "comment",

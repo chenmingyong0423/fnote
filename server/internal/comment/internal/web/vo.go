@@ -69,6 +69,8 @@ type AdminCommentVO struct {
 	// 用户信息
 	UserInfo UserInfo4Comment `json:"user_info"`
 
+	ReplyCount int `json:"reply_count"`
+
 	// 该评论下的所有回复的内容
 	Replies        []AdminCommentVO `json:"replies,omitempty"`
 	ApprovalStatus bool             `json:"approval_status"`
