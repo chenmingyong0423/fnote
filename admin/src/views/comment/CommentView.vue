@@ -113,6 +113,7 @@ import { ReloadOutlined } from '@ant-design/icons-vue'
 import originalAxios from 'axios'
 
 document.title = '评论列表 - 后台管理'
+const showSorterTooltip = ref('点击升序排序')
 
 const columns = [
   {
@@ -148,7 +149,11 @@ const columns = [
   {
     title: '提交时间',
     key: 'created_at',
-    dataIndex: 'created_at'
+    dataIndex: 'created_at',
+    sorter: (c1: AdminCommentVO, c2: AdminCommentVO) => c1.created_at - c2.created_at,
+    defaultSortOrder: 'descend',
+    sortDirections: ['descend', 'ascend'],
+    showSorterTooltip: { title: showSorterTooltip.value }
   },
   {
     title: '更新时间',
@@ -177,15 +182,17 @@ const pagination = computed(() => ({
 
 const loading = ref(false)
 
-const generateSort = () => {
-  return '-created_at'
+const generateDefaultSort = () => {
+  if (!pageReq.value.sort || pageReq.value.sort.length === 0) {
+    pageReq.value.sort = '-created_at'
+  }
 }
 
 const commentMap: Map<string, AdminCommentVO> = new Map<string, AdminCommentVO>()
 
 const get = async () => {
   try {
-    pageReq.value.sort = generateSort()
+    generateDefaultSort()
     loading.value = true
     const response: any = await GetComments(pageReq.value)
     const result: IResponse<IPageData<AdminCommentVO>> = response.data
@@ -210,10 +217,24 @@ const get = async () => {
   }
 }
 get()
-const change = (pg: any) => {
-  pageReq.value.pageNo = pg.current
-  pageReq.value.pageSize = pg.pageSize
+
+const change = (pagination:any, _filters:any, sorter: any) => {
+  pageReq.value.pageNo = pagination.current
+  pageReq.value.pageSize = pagination.pageSize
   expandedRowKeys.value = []
+  switch (sorter.order) {
+    case 'ascend':
+      pageReq.value.sort = '+created_at'
+      showSorterTooltip.value = '点击默认排序'
+      break
+    case 'descend':
+      pageReq.value.sort = '-created_at'
+      showSorterTooltip.value = '点击升序排序'
+      break
+    default:
+      pageReq.value.sort = '-created_at'
+      showSorterTooltip.value = '点击降序排序'
+  }
   get()
 }
 
@@ -381,7 +402,7 @@ const selection = computed(() => {
         key: 'approval',
         text: '选中审核',
         onSelect: (changableRowKeys: string[]) => {
-          let newSelectedRowKeys = []
+          let newSelectedRowKeys: string[]
           newSelectedRowKeys = changableRowKeys.filter((_key: string) => {
             return commentMap.get(_key)?.approval_status
           })
@@ -392,7 +413,7 @@ const selection = computed(() => {
         key: 'disapproval',
         text: '选中未审核',
         onSelect: (changableRowKeys: string[]) => {
-          let newSelectedRowKeys = []
+          let newSelectedRowKeys : string[]
           newSelectedRowKeys = changableRowKeys.filter((_key) => {
             return !commentMap.get(_key)?.approval_status
           })
