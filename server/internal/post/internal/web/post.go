@@ -39,7 +39,6 @@ import (
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
 )
@@ -153,7 +152,7 @@ func (h *PostHandler) GetPostBySug(ctx *gin.Context) (*apiwrap.ResponseBody[doma
 	post, err := h.serv.GetPunishedPostById(ctx, sug)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, api.NewErrorResponseBody(http.StatusBadRequest, "The postId does not exist.")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "The postId does not exist.")
 		}
 		return nil, err
 	}
@@ -172,7 +171,7 @@ func (h *PostHandler) GetPostBySug(ctx *gin.Context) (*apiwrap.ResponseBody[doma
 func (h *PostHandler) AddLike(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	ip := ctx.ClientIP()
 	if ip == "" {
-		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
 	postId := ctx.Param("id")
 	key := fmt.Sprintf("%s:%s", postId, ip)

@@ -16,10 +16,14 @@ package repository
 
 import (
 	"context"
-	"fmt"
-	"strings"
+	"sort"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
+
+	"github.com/chenmingyong0423/go-mongox/types"
+
+	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/domain"
@@ -27,7 +31,6 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/repository/dao"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/google/uuid"
@@ -109,24 +112,88 @@ func (r *CommentRepository) UpdateCommentStatus2TrueByIds(ctx context.Context, i
 }
 
 func (r *CommentRepository) AdminFindCommentsWithPagination(ctx context.Context, page domain.Page) ([]domain.AdminComment, int64, error) {
-	condBuilder := query.BsonBuilder()
-	if page.Keyword != "" {
-		condBuilder.RegexOptions("content", fmt.Sprintf(".*%s.*", strings.TrimSpace(page.Keyword)), "i")
-	}
-	cond := condBuilder.Build()
+	var (
+		comments []*dao.Comment
+		total    int64
+		err      error
+	)
+	sortBson := page.SortToBson()
 
+	if page.ApprovalStatus == nil {
+		comments, total, err = r.find(ctx, page, sortBson)
+		if err != nil {
+			return nil, 0, err
+		}
+	} else {
+		// 如果是根据关键字 approvalStatus 查询的话，使用聚合操作
+		approvalStatus := *page.ApprovalStatus
+		pipelineBuilder := aggregation.StageBsonBuilder()
+		if approvalStatus {
+			pipelineBuilder.Match(bsonx.M("approval_status", true)).
+				Project(
+					aggregation.BsonBuilder().
+						AddKeyValues("content", 1).
+						AddKeyValues("post_info", 1).
+						AddKeyValues("user_info", 1).
+						AddKeyValues("approval_status", 1).
+						AddKeyValues("created_at", 1).
+						Filter("replies", "$replies", aggregation.EqWithoutKey("$$reply.approval_status", true), &types.FilterOptions{As: "reply"}).Build(),
+				)
+		} else {
+			pipelineBuilder.Match(
+				aggregation.OrWithoutKey(
+					bsonx.M("approval_status", false),
+					bsonx.NewD().
+						Add("approval_status", true).
+						Add("replies.approval_status", false).
+						Build()),
+			).Project(
+				aggregation.BsonBuilder().
+					AddKeyValues("content", 1).
+					AddKeyValues("post_info", 1).
+					AddKeyValues("user_info", 1).
+					AddKeyValues("approval_status", 1).
+					AddKeyValues("created_at", 1).
+					Cond("replies",
+						aggregation.EqWithoutKey("$approval_status", true),
+						aggregation.FilterWithoutKey("$replies", aggregation.EqWithoutKey("$$reply.approval_status", false), &types.FilterOptions{As: "reply"}),
+						"$replies",
+					).Build(),
+			)
+		}
+		if len(sortBson) > 0 {
+			pipelineBuilder.Sort(sortBson)
+		}
+		pipelineBuilder.Skip(page.Skip).Limit(page.Size)
+		comments, err = r.dao.FindByAggregation(ctx, pipelineBuilder.Build())
+		if err != nil {
+			return nil, 0, err
+		}
+	}
+	// 对 replies 进行排序
+	for _, comment := range comments {
+		if len(comment.Replies) > 0 {
+			sort.Slice(comment.Replies, func(i, j int) bool {
+				return comment.Replies[i].CreatedAt.After(comment.Replies[j].CreatedAt)
+			})
+		}
+	}
+	return r.toDomainAdminComments(comments), total, nil
+}
+
+func (r *CommentRepository) find(ctx context.Context, page domain.Page, sortBson bson.D) ([]*dao.Comment, int64, error) {
 	findOptions := options.Find()
 	findOptions.SetSkip(page.Skip).SetLimit(page.Size)
-	if page.Field != "" && page.Order != "" {
-		findOptions.SetSort(bsonx.M(page.Field, page.OrderConvertToInt()))
+	if len(sortBson) > 0 {
+		findOptions.SetSort(sortBson)
 	} else {
-		findOptions.SetSort(bsonx.M("create_time", 1))
+		findOptions.SetSort(bsonx.M("created_at", -1))
 	}
-	comments, total, err := r.dao.Find(ctx, cond, findOptions)
+	comments, total, err := r.dao.Find(ctx, findOptions)
 	if err != nil {
 		return nil, 0, err
 	}
-	return r.toDomainAdminComments(comments), total, nil
+	return comments, total, nil
 }
 
 func (r *CommentRepository) CountOfToday(ctx context.Context) (int64, error) {

@@ -32,7 +32,7 @@ type ICommentService interface {
 	AddReply(ctx context.Context, cmtId string, postId string, commentReply domain.CommentReply) (string, error)
 	FineLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error)
 	FindCommentsByPostId(ctx context.Context, postId string) ([]domain.CommentWithReplies, error)
-	AdminGetComments(ctx context.Context, page domain.Page) ([]domain.AdminComment, int64, error)
+	AdminFindCommentsWithPagination(ctx context.Context, page domain.Page) ([]domain.AdminComment, int64, error)
 	AdminApproveComment(ctx context.Context, id string) error
 	FindCommentById(ctx context.Context, id string) (*domain.Comment, error)
 	FindReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) (*domain.CommentReplyWithPostInfo, error)
@@ -179,7 +179,7 @@ func (s *CommentService) AdminApproveComment(ctx context.Context, id string) err
 	return s.repo.UpdateCommentStatus2True(ctx, id)
 }
 
-func (s *CommentService) AdminGetComments(ctx context.Context, page domain.Page) ([]domain.AdminComment, int64, error) {
+func (s *CommentService) AdminFindCommentsWithPagination(ctx context.Context, page domain.Page) ([]domain.AdminComment, int64, error) {
 	return s.repo.AdminFindCommentsWithPagination(ctx, page)
 }
 

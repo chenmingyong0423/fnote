@@ -35,7 +35,6 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/friend/service"
 	msgService "github.com/chenmingyong0423/fnote/server/internal/message/service"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
 )
@@ -124,7 +123,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (*ap
 	})
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key error") {
-			return nil, api.NewErrorResponseBody(http.StatusTooManyRequests, "Already applied for")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusTooManyRequests, "Already applied for")
 		}
 		return nil, err
 	}

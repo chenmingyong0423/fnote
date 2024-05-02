@@ -14,26 +14,34 @@
 
 package domain
 
-// CountStatsTypeCommentCount 评论数量
-var CountStatsTypeCommentCount = "CommentCount"
+import (
+	"strings"
+
+	"go.mongodb.org/mongo-driver/bson"
+)
 
 type Page struct {
-	Size    int64
-	Skip    int64
-	Keyword string
-	Field   string
-	Order   string
+	Size           int64
+	Skip           int64
+	Sort           string
+	ApprovalStatus *bool
 }
 
-func (p *Page) OrderConvertToInt() int {
-	switch p.Order {
-	case "ASC":
-		return 1
-	case "DESC":
-		return -1
-	default:
-		return -1
+func (p *Page) SortToBson() bson.D {
+	sort := p.Sort
+	if p.Sort == "" {
+		return nil
 	}
+	split := strings.Split(sort, ",")
+	var sortBson bson.D
+	for _, s := range split {
+		if strings.HasPrefix(s, "+") {
+			sortBson = append(sortBson, bson.E{Key: strings.TrimLeft(s, "-"), Value: 1})
+		} else {
+			sortBson = append(sortBson, bson.E{Key: s, Value: -1})
+		}
+	}
+	return sortBson
 }
 
 type AdminComment struct {

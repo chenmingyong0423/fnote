@@ -73,7 +73,7 @@ func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group.POST("/:commentId/replies", apiwrap.WrapWithBody(h.AddCommentReply))
 
 	adminGroup := engine.Group("/admin-api/comments")
-	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminGetComments))
+	adminGroup.GET("", apiwrap.WrapWithBody(h.AdminFindCommentsWithPagination))
 	adminGroup.DELETE("/:id", apiwrap.Wrap(h.AdminDeleteComment))
 	adminGroup.PUT("/:id/approval", apiwrap.Wrap(h.AdminApproveComment))
 
@@ -85,24 +85,24 @@ func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiwrap.ResponseBody[api.IdVO], error) {
 	ip := ctx.ClientIP()
 	if ip == "" {
-		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
 	if req.Website != "" && !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
-		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
 	}
 	switchConfig, err := h.cfgService.GetCommentConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if !switchConfig.EnableComment {
-		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
 	p, err := h.postServ.GetPunishedPostById(ctx, req.PostId)
 	if err != nil {
 		return nil, err
 	}
 	if !p.IsCommentAllowed {
-		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
 	id, err := h.serv.AddComment(ctx, domain.Comment{
 		PostInfo: domain.PostInfo{
@@ -155,27 +155,27 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*a
 	commentId := ctx.Param("commentId")
 	ip := ctx.ClientIP()
 	if ip == "" {
-		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
 	if req.Website != "" && !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
-		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
 	}
 	switchConfig, err := h.cfgService.GetCommentConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if !switchConfig.EnableComment {
-		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
 	p, err := h.postServ.GetPunishedPostById(ctx, req.PostId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, api.NewErrorResponseBody(http.StatusForbidden, "The postId does not exist.")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "The postId does not exist.")
 		}
 		return nil, err
 	}
 	if !p.IsCommentAllowed {
-		return nil, api.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
 	id, err := h.serv.AddReply(ctx, commentId, req.PostId, domain.CommentReply{
 		Content:   req.Content,
@@ -280,13 +280,12 @@ func (h *CommentHandler) GetCommentsByPostId(ctx *gin.Context) (*apiwrap.Respons
 	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(pc)), nil
 }
 
-func (h *CommentHandler) AdminGetComments(ctx *gin.Context, req PageRequest) (*apiwrap.ResponseBody[*apiwrap.PageVO[AdminCommentVO]], error) {
-	comments, total, err := h.serv.AdminGetComments(ctx, domain.Page{
-		Size:    req.PageSize,
-		Skip:    (req.PageNo - 1) * req.PageSize,
-		Field:   req.Field,
-		Order:   req.Order,
-		Keyword: req.Keyword,
+func (h *CommentHandler) AdminFindCommentsWithPagination(ctx *gin.Context, req PageRequest) (*apiwrap.ResponseBody[*apiwrap.PageVO[AdminCommentVO]], error) {
+	comments, total, err := h.serv.AdminFindCommentsWithPagination(ctx, domain.Page{
+		Size:           req.PageSize,
+		Skip:           (req.PageNo - 1) * req.PageSize,
+		Sort:           req.Sort,
+		ApprovalStatus: req.ApprovalStatus,
 	})
 	if err != nil {
 		return nil, err
@@ -354,12 +353,12 @@ func (h *CommentHandler) AdminApproveComment(ctx *gin.Context) (*apiwrap.Respons
 	comment, err := h.serv.FindCommentById(ctx, commentId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, api.NewErrorResponseBody(http.StatusNotFound, "Comment not found.")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusNotFound, "Comment not found.")
 		}
 		return nil, err
 	}
 	if comment.ApprovalStatus {
-		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Comment has been approved.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "Comment has been approved.")
 	}
 	err = h.serv.AdminApproveComment(ctx, commentId)
 	if err != nil {
@@ -382,12 +381,12 @@ func (h *CommentHandler) AdminApproveCommentReply(ctx *gin.Context) (*apiwrap.Re
 	commentReplyWithPostInfo, err := h.serv.FindReplyByCIdAndRId(ctx, commentId, replyId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, api.NewErrorResponseBody(http.StatusNotFound, "Comment reply not found.")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusNotFound, "Comment reply not found.")
 		}
 		return nil, err
 	}
 	if commentReplyWithPostInfo.ApprovalStatus {
-		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "Comment reply has been approved.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "Comment reply has been approved.")
 	}
 	err = h.serv.AdminApproveCommentReply(ctx, commentId, replyId)
 	if err != nil {
@@ -414,7 +413,7 @@ func (h *CommentHandler) AdminDeleteComment(ctx *gin.Context) (*apiwrap.Response
 	commentWithReplies, err := h.serv.FindCommentWithRepliesById(ctx, commentId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, api.NewErrorResponseBody(http.StatusNotFound, "Comment not found.")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusNotFound, "Comment not found.")
 		}
 		return nil, err
 	}
@@ -445,7 +444,7 @@ func (h *CommentHandler) AdminDeleteCommentReply(ctx *gin.Context) (*apiwrap.Res
 	commentReplyWithPostInfo, err := h.serv.FindReplyByCIdAndRId(ctx, commentId, replyId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, api.NewErrorResponseBody(http.StatusNotFound, "Comment reply not found.")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusNotFound, "Comment reply not found.")
 		}
 		return nil, err
 	}
@@ -471,7 +470,7 @@ func (h *CommentHandler) AdminDeleteCommentReply(ctx *gin.Context) (*apiwrap.Res
 
 func (h *CommentHandler) AdminBatchApproveComments(ctx *gin.Context, req BatchApprovedCommentRequest) (*apiwrap.ResponseBody[any], error) {
 	if len(req.CommentIds) == 0 && len(req.Replies) == 0 {
-		return nil, api.NewErrorResponseBody(http.StatusBadRequest, "CommentIds and Replies cannot be empty.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "CommentIds and Replies cannot be empty.")
 	}
 	replies := make([]domain.ReplyWithCId, 0, len(req.Replies))
 	for k, v := range req.Replies {

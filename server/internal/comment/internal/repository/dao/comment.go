@@ -127,12 +127,13 @@ type ICommentDao interface {
 	DeleteById(ctx context.Context, objectID primitive.ObjectID) error
 	DeleteReplyByCIdAndRId(ctx context.Context, objectID primitive.ObjectID, replyId string) error
 	CountOfToday(ctx context.Context) (int64, error)
-	Find(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Comment, int64, error)
+	Find(ctx context.Context, findOptions *options.FindOptions) ([]*Comment, int64, error)
 	UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) error
 	FindByObjectIDs(ctx context.Context, ids []primitive.ObjectID) ([]*Comment, error)
 	UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentObjectID primitive.ObjectID, replyIds []string) error
 	FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentObjID primitive.ObjectID, replyIds []string) (*Comment, error)
 	FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]*Comment, error)
+	FindByAggregation(ctx context.Context, pipeline mongo.Pipeline) ([]*Comment, error)
 }
 
 func NewCommentDao(db *mongo.Database) *CommentDao {
@@ -145,6 +146,10 @@ var _ ICommentDao = (*CommentDao)(nil)
 
 type CommentDao struct {
 	coll *mongox.Collection[Comment]
+}
+
+func (d *CommentDao) FindByAggregation(ctx context.Context, pipeline mongo.Pipeline) ([]*Comment, error) {
+	return d.coll.Aggregator().Pipeline(pipeline).Aggregate(ctx)
 }
 
 func (d *CommentDao) FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]*Comment, error) {
@@ -216,14 +221,14 @@ func (d *CommentDao) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []pr
 	return nil
 }
 
-func (d *CommentDao) Find(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Comment, int64, error) {
-	count, err := d.coll.Finder().Filter(cond).Count(ctx)
+func (d *CommentDao) Find(ctx context.Context, findOptions *options.FindOptions) ([]*Comment, int64, error) {
+	count, err := d.coll.Finder().Filter(bson.D{}).Count(ctx)
 	if err != nil {
-		return nil, 0, errors.Wrapf(err, "failed to count from comment, cond=%v", cond)
+		return nil, 0, errors.Wrapf(err, "failed to count from comment, cond={}, findOptions=%v", findOptions)
 	}
-	comments, err := d.coll.Finder().Filter(cond).Find(ctx, findOptions)
+	comments, err := d.coll.Finder().Filter(bson.D{}).Find(ctx, findOptions)
 	if err != nil {
-		return nil, 0, errors.Wrapf(err, "failed to find from comment, cond=%v", cond)
+		return nil, 0, errors.Wrapf(err, "failed to find from comment, cond={}, findOptions=%v", findOptions)
 	}
 	return comments, count, nil
 }
