@@ -1,6 +1,11 @@
 <template>
   <a-card title="评论列表">
-    <div class="flex mb-3">
+    <div class="flex mb-3 gap-x-2">
+      <div class="flex gap-x-2">
+        <a-button @click="expandOrHideRows">{{
+          expandedRowKeys.length === 0 ? '全部展开' : '全部折叠'
+        }}</a-button>
+      </div>
       <div class="flex gap-x-2" v-if="selectedRowKeys.length > 0">
         <a-button type="primary" @click="batchApproveComment">通过所选</a-button>
         <a-button type="primary" danger>删除所选</a-button>
@@ -10,10 +15,15 @@
         <a-select
           ref="select"
           class="w-120px"
-          v-model:value="pageReq.status"
-          :options="[{ value: 1, label: '1' }]"
+          v-model:value="approveStatus"
+          :options="statusList"
           @change="handleChange"
         ></a-select>
+      </div>
+      <div>
+        <a-tooltip title="刷新数据">
+          <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="get" />
+        </a-tooltip>
       </div>
     </div>
     <a-table
@@ -21,8 +31,10 @@
       :data-source="data"
       :pagination="pagination"
       @change="change"
-      :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onChange }"
+      :row-selection="selection"
       childrenColumnName="replies"
+      v-model:expandedRowKeys="expandedRowKeys"
+      @expandedRowsChange="expandedRowsChange"
     >
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'user_info'">
@@ -94,6 +106,10 @@ import {
   type BatchApprovedCommentRequest
 } from '@/interfaces/Comment'
 import { message } from 'ant-design-vue'
+import { Table } from 'ant-design-vue'
+import { h } from 'vue'
+import { ReloadOutlined } from '@ant-design/icons-vue'
+import originalAxios from 'axios'
 
 document.title = '评论列表 - 后台管理'
 
@@ -112,6 +128,11 @@ const columns = [
     title: '内容',
     dataIndex: 'content',
     key: 'content'
+  },
+  {
+    title: '回复数',
+    dataIndex: 'reply_count',
+    key: 'reply_count'
   },
   {
     title: '状态',
@@ -142,10 +163,7 @@ const columns = [
 const data = ref<AdminCommentVO[]>([])
 const pageReq = ref<PageRequest>({
   pageNo: 1,
-  pageSize: 5,
-  sortField: 'created_at',
-  sortOrder: 'desc',
-  status: 1
+  pageSize: 5
 } as PageRequest)
 
 const total = ref(0)
@@ -156,24 +174,38 @@ const pagination = computed(() => ({
   pageSize: pageReq.value.pageSize
 }))
 
+const loading = ref(false)
+
+const generateSort = () => {
+  return '-created_at'
+}
+
+const commentMap: Map<string, AdminCommentVO> = new Map<string, AdminCommentVO>()
+
 const get = async () => {
   try {
+    pageReq.value.sort = generateSort()
+    loading.value = true
     const response: any = await GetComments(pageReq.value)
     const result: IResponse<IPageData<AdminCommentVO>> = response.data
     if (result.code === 0) {
+      commentMap.clear()
       data.value = response.data.data?.list || []
       data.value.forEach((commentVO: AdminCommentVO) => {
         commentVO.key = commentVO.id
         commentVO.replies?.forEach((replyVO: AdminCommentVO) => {
           replyVO.fid = commentVO.id
           replyVO.key = commentVO.id + '~' + replyVO.id
+          commentMap.set(replyVO.key, replyVO)
         })
+        commentMap.set(commentVO.key, commentVO)
       })
       total.value = response.data.data?.totalCount || 0
-      console.log(data.value)
     }
   } catch (error) {
     console.log(error)
+  } finally {
+    loading.value = false
   }
 }
 get()
@@ -301,14 +333,85 @@ const batchApproveComment = async () => {
       return false
     }
   } catch (error) {
-    console.log(error)
-    message.error('批量审核失败')
+    if (originalAxios.isAxiosError(error)) {
+      // 这是一个由 axios 抛出的错误
+      if (error.response) {
+        if (error.response.status === 400) {
+          message.error('请选中需要审核的评论或回复')
+          return
+        }
+      } else if (error.request) {
+        // 请求已发出，但没有收到响应
+        console.log('No response received:', error.request)
+      } else {
+        // 在设置请求时触发了一个错误
+        console.log('Error Message:', error.message)
+      }
+    } else {
+      console.log(error)
+      message.error('未知错误，批量审核失败')
+    }
     return false
   }
 }
 
-const handleChange = (value: string) => {
-  console.log(`selected ${value}`)
+const approveStatus = ref(-1)
+
+const statusList = [
+  { label: '全部', value: -1 },
+  { label: '待审核', value: 0 },
+  { label: '已审核', value: 1 }
+]
+const handleChange = (value: number) => {
+  pageReq.value.approvalStatus = value === -1 ? undefined : value !== 0
+  get()
+}
+
+const selection = computed(() => {
+  return {
+    selectedRowKeys: selectedRowKeys,
+    onChange: onChange,
+    hideDefaultSelections: true,
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_NONE,
+      {
+        key: 'approval',
+        text: '选中审核',
+        onSelect: (changableRowKeys: string[]) => {
+          let newSelectedRowKeys = []
+          newSelectedRowKeys = changableRowKeys.filter((_key: string) => {
+            return commentMap.get(_key)?.approval_status
+          })
+          selectedRowKeys.value = newSelectedRowKeys
+        }
+      },
+      {
+        key: 'disapproval',
+        text: '选中未审核',
+        onSelect: (changableRowKeys: string[]) => {
+          let newSelectedRowKeys = []
+          newSelectedRowKeys = changableRowKeys.filter((_key) => {
+            return !commentMap.get(_key)?.approval_status
+          })
+          selectedRowKeys.value = newSelectedRowKeys
+        }
+      }
+    ]
+  }
+})
+
+const expandedRowKeys = ref<String[]>([])
+const expandedRowsChange = (rowKeys: String[]) => {
+  expandedRowKeys.value = rowKeys
+}
+
+const expandOrHideRows = () => {
+  if (expandedRowKeys.value?.length === 0) {
+    expandedRowKeys.value = data.value.map((item) => item.key || '')
+  } else {
+    expandedRowKeys.value = []
+  }
 }
 </script>
 
