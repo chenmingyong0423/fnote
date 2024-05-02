@@ -212,6 +212,7 @@ get()
 const change = (pg: any) => {
   pageReq.value.pageNo = pg.current
   pageReq.value.pageSize = pg.pageSize
+  expandedRowKeys.value = []
   get()
 }
 
