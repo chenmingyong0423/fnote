@@ -8,7 +8,7 @@
       </div>
       <div class="flex gap-x-2" v-if="selectedRowKeys.length > 0">
         <a-button type="primary" @click="batchApproveComment">通过所选</a-button>
-        <a-button type="primary" danger>删除所选</a-button>
+        <a-button type="primary" danger @click="batchDeleteComment">删除所选</a-button>
       </div>
       <div class="ml-auto">
         状态：
@@ -22,7 +22,7 @@
       </div>
       <div>
         <a-tooltip title="刷新数据">
-          <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="get" />
+          <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="refresh" />
         </a-tooltip>
       </div>
     </div>
@@ -103,7 +103,8 @@ import {
   DeleteReplyById,
   GetComments,
   batchApproved,
-  type BatchApprovedCommentRequest
+  type BatchApprovedCommentRequest,
+  batchDelete
 } from '@/interfaces/Comment'
 import { message } from 'ant-design-vue'
 import { Table } from 'ant-design-vue'
@@ -413,6 +414,55 @@ const expandOrHideRows = () => {
   } else {
     expandedRowKeys.value = []
   }
+}
+
+const batchDeleteComment = async () => {
+  const deleteRequest: BatchApprovedCommentRequest = JSON.parse(
+    JSON.stringify(selectedComments.value)
+  )
+  deleteRequest.comment_ids.forEach((commentId: string) => {
+    if (selectedComments.value.replies[commentId]) {
+      delete selectedComments.value.replies[commentId]
+    }
+  })
+  try {
+    const apiResponse = await batchDelete(deleteRequest)
+    if (apiResponse.data?.code === 0) {
+      message.success('批量删除成功')
+      await get()
+      selectedRowKeys.value = []
+      return true
+    } else {
+      message.error('批量删除失败')
+      return false
+    }
+  } catch (error) {
+    if (originalAxios.isAxiosError(error)) {
+      // 这是一个由 axios 抛出的错误
+      if (error.response) {
+        if (error.response.status === 400) {
+          message.error('请选中需要删除的评论或回复')
+          return
+        }
+      } else if (error.request) {
+        // 请求已发出，但没有收到响应
+        console.log('No response received:', error.request)
+      } else {
+        // 在设置请求时触发了一个错误
+        console.log('Error Message:', error.message)
+      }
+    } else {
+      console.log(error)
+      message.error('未知错误，批量删除失败')
+    }
+    return false
+  }
+}
+
+const refresh = () => {
+  get()
+  selectedRowKeys.value = []
+  expandedRowKeys.value = []
 }
 </script>
 
