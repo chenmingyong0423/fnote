@@ -81,3 +81,11 @@ export const batchApproved = (req: BatchApprovedCommentRequest) => {
     data: req
   })
 }
+
+export const batchDelete = (req: BatchApprovedCommentRequest) => {
+  return instance({
+    url: `/comments/batch-approval`,
+    method: 'delete',
+    data: req
+  })
+}
