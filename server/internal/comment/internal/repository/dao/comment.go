@@ -134,6 +134,8 @@ type ICommentDao interface {
 	FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentObjID primitive.ObjectID, replyIds []string) (*Comment, error)
 	FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]*Comment, error)
 	FindByAggregation(ctx context.Context, pipeline mongo.Pipeline) ([]*Comment, error)
+	DeleteByIds(ctx context.Context, ids []primitive.ObjectID) error
+	PullReplyByCIdAndRIds(ctx context.Context, commentId primitive.ObjectID, replyIds []string) error
 }
 
 func NewCommentDao(db *mongo.Database) *CommentDao {
@@ -146,6 +148,29 @@ var _ ICommentDao = (*CommentDao)(nil)
 
 type CommentDao struct {
 	coll *mongox.Collection[Comment]
+}
+
+func (d *CommentDao) PullReplyByCIdAndRIds(ctx context.Context, commentObjID primitive.ObjectID, replyIds []string) error {
+	updateResult, err := d.coll.Updater().Filter(query.Id(commentObjID)).
+		Updates(update.Pull("replies", query.In("reply_id", replyIds...))).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "failed to pull reply by comment id: %v, reply ids: %v", commentObjID.Hex(), replyIds)
+	}
+	if updateResult.ModifiedCount == 0 {
+		return fmt.Errorf("ModifiedCount=0, failed to pull reply by comment id: %v, reply ids: %v", commentObjID.Hex(), replyIds)
+	}
+	return nil
+}
+
+func (d *CommentDao) DeleteByIds(ctx context.Context, ids []primitive.ObjectID) error {
+	deleteResult, err := d.coll.Deleter().Filter(query.In("_id", ids...)).DeleteMany(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "failed to delete comment by ids: %v", ids)
+	}
+	if deleteResult.DeletedCount == 0 {
+		return fmt.Errorf("DeletedCount=0, failed to delete comment by ids: %v", ids)
+	}
+	return nil
 }
 
 func (d *CommentDao) FindByAggregation(ctx context.Context, pipeline mongo.Pipeline) ([]*Comment, error) {

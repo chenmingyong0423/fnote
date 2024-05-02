@@ -56,6 +56,8 @@ type ICommentRepository interface {
 	UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentId string, replyIds []string) error
 	FindCommentWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentId string, replyIds []string) (*domain.AdminComment, error)
 	FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]domain.AdminComment, error)
+	DeleteCommentByIds(ctx context.Context, ids []primitive.ObjectID) error
+	PullReplyByCIdAndRIds(ctx context.Context, commentId string, replyIds []string) error
 }
 
 func NewCommentRepository(dao dao.ICommentDao) *CommentRepository {
@@ -68,6 +70,18 @@ var _ ICommentRepository = (*CommentRepository)(nil)
 
 type CommentRepository struct {
 	dao dao.ICommentDao
+}
+
+func (r *CommentRepository) PullReplyByCIdAndRIds(ctx context.Context, commentId string, replyIds []string) error {
+	objectID, err := primitive.ObjectIDFromHex(commentId)
+	if err != nil {
+		return err
+	}
+	return r.dao.PullReplyByCIdAndRIds(ctx, objectID, replyIds)
+}
+
+func (r *CommentRepository) DeleteCommentByIds(ctx context.Context, ids []primitive.ObjectID) error {
+	return r.dao.DeleteByIds(ctx, ids)
 }
 
 func (r *CommentRepository) FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]domain.AdminComment, error) {
