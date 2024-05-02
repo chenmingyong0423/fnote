@@ -1,7 +1,7 @@
 <template>
   <a-card title="评论列表">
     <div class="flex mb-3 gap-x-2">
-      <div class="flex gap-x-2">
+      <div class="flex gap-x-2"  v-if="data.length > 0">
         <a-button @click="expandOrHideRows">{{
           expandedRowKeys.length === 0 ? '全部展开' : '全部折叠'
         }}</a-button>
