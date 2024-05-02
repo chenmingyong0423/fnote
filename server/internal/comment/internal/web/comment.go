@@ -518,5 +518,50 @@ func (h *CommentHandler) AdminBatchDeleteComments(ctx *gin.Context, req BatchApp
 			ReplyIds:  v,
 		})
 	}
-	return apiwrap.SuccessResponse(), h.serv.BatchDeleteComments(ctx, req.CommentIds, replies)
+
+	comments, err := h.serv.FindCommentByIds(ctx, req.CommentIds)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.serv.BatchDeleteComments(ctx, req.CommentIds, replies)
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
+		l.InfoContext(ctx, "comment-decrease-operation", "commentIds", req.CommentIds, "replies", req.Replies)
+
+		// 减少的评论数
+		totalCnt := len(comments)
+		for _, comment := range comments {
+			replyCnt := len(comment.Replies)
+			gErr := h.postServ.DecreaseCommentCount(ctx, comment.PostInfo.PostId, replyCnt+1)
+			if gErr != nil {
+				l.WarnContext(ctx, "comment-decrease-operation", "failed to DecreaseCommentCount", gErr)
+			}
+			totalCnt += replyCnt
+		}
+		for commentId, r := range req.Replies {
+			replyCnt := len(r)
+			comment, gErr := h.serv.FindCommentById(ctx, commentId)
+			if gErr != nil {
+				l.WarnContext(ctx, "comment-decrease-operation", "failed to FindCommentById", gErr)
+			}
+			gErr = h.postServ.DecreaseCommentCount(ctx, comment.PostInfo.PostId, replyCnt)
+			if gErr != nil {
+				l.WarnContext(ctx, "comment-decrease-operation", "failed to DecreaseCommentCount", gErr)
+			}
+			totalCnt += replyCnt
+		}
+
+		// 减少评论数
+		if totalCnt > 0 {
+			gErr := h.statsServ.DecreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount, totalCnt)
+			if gErr != nil {
+				l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
+			}
+		}
+	}()
+	return apiwrap.SuccessResponse(), nil
 }
