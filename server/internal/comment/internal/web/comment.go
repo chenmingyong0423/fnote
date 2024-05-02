@@ -80,6 +80,7 @@ func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.DELETE("/:id/replies/:rid", apiwrap.Wrap(h.AdminDeleteCommentReply))
 	adminGroup.PUT("/:id/replies/:rid/approval", apiwrap.Wrap(h.AdminApproveCommentReply))
 	adminGroup.PUT("/batch-approval", apiwrap.WrapWithBody(h.AdminBatchApproveComments))
+	adminGroup.DELETE("/batch-approval", apiwrap.WrapWithBody(h.AdminBatchDeleteComments))
 }
 
 func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiwrap.ResponseBody[api.IdVO], error) {
@@ -504,4 +505,18 @@ func (h *CommentHandler) AdminBatchApproveComments(ctx *gin.Context, req BatchAp
 		}
 	}()
 	return apiwrap.SuccessResponse(), nil
+}
+
+func (h *CommentHandler) AdminBatchDeleteComments(ctx *gin.Context, req BatchApprovedCommentRequest) (*apiwrap.ResponseBody[any], error) {
+	if len(req.CommentIds) == 0 && len(req.Replies) == 0 {
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "CommentIds and Replies cannot be empty.")
+	}
+	replies := make([]domain.ReplyWithCId, 0, len(req.Replies))
+	for k, v := range req.Replies {
+		replies = append(replies, domain.ReplyWithCId{
+			CommentId: k,
+			ReplyIds:  v,
+		})
+	}
+	return apiwrap.SuccessResponse(), h.serv.BatchDeleteComments(ctx, req.CommentIds, replies)
 }

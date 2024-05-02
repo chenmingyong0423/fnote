@@ -43,6 +43,7 @@ type ICommentService interface {
 	UpdateCommentReplyStatus(ctx context.Context, commentId string, replyId string, approvalStatus bool) error
 	FindCommentCountOfToday(ctx context.Context) (int64, error)
 	BatchApproveComments(ctx context.Context, commentIds []string, replies []domain.ReplyWithCId) ([]domain.EmailInfo, []domain.EmailInfo, error)
+	BatchDeleteComments(ctx context.Context, commentIds []string, replies []domain.ReplyWithCId) error
 }
 
 func NewCommentService(repo repository.ICommentRepository) *CommentService {
@@ -55,6 +56,42 @@ var _ ICommentService = (*CommentService)(nil)
 
 type CommentService struct {
 	repo repository.ICommentRepository
+}
+
+func (s *CommentService) BatchDeleteComments(ctx context.Context, commentIds []string, replies []domain.ReplyWithCId) error {
+	var eg errgroup.Group
+	if len(commentIds) > 0 {
+		eg.Go(func() error {
+			var err error
+			objectIDs := slice.Map(commentIds, func(i int, id string) primitive.ObjectID {
+				var objectID primitive.ObjectID
+				objectID, err = primitive.ObjectIDFromHex(id)
+				return objectID
+			})
+			if err != nil {
+				return errors.Wrap(err, "primitive.ObjectIDFromHex")
+			}
+			err = s.repo.DeleteCommentByIds(ctx, objectIDs)
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+	}
+	for _, reply := range replies {
+		eg.Go(func() error {
+			err := s.repo.PullReplyByCIdAndRIds(ctx, reply.CommentId, reply.ReplyIds)
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+	}
+	err := eg.Wait()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *CommentService) BatchApproveComments(ctx context.Context, commentIds []string, replies []domain.ReplyWithCId) ([]domain.EmailInfo, []domain.EmailInfo, error) {
