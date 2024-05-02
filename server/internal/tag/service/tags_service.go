@@ -20,10 +20,11 @@ import (
 	"log/slog"
 	"net/http"
 
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/fnote/server/internal/tag/repository"
@@ -64,7 +65,7 @@ func (s *TagService) DeleteTag(ctx context.Context, id string) error {
 	tag, err := s.repo.GetTagById(ctx, id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return api.NewErrorResponseBody(http.StatusNotFound, "tag not found")
+			return apiwrap.NewErrorResponseBody(http.StatusNotFound, "tag not found")
 		}
 		return err
 	}

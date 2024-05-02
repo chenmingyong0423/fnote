@@ -19,9 +19,10 @@ import (
 	"net/http"
 	"os"
 
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+
 	"github.com/chenmingyong0423/gkit/uuidx"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -70,7 +71,7 @@ func (s *FileService) Upload(ctx context.Context, fileDTO dto.FileDTO) (*domain.
 			return nil, err
 		}
 		if file != nil {
-			return nil, api.NewErrorResponseBody(http.StatusConflict, "file already exists")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusConflict, "file already exists")
 		}
 	} else {
 		filename = fileId + fileDTO.FileExt

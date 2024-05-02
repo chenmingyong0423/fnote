@@ -20,13 +20,14 @@ import (
 	"log/slog"
 	"net/http"
 
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/chenmingyong0423/fnote/server/internal/category/repository"
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/gkit/slice"
@@ -75,7 +76,7 @@ func (s *CategoryService) DeleteCategory(ctx context.Context, id string) error {
 	category, err := s.repo.GetCategoryById(ctx, id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return api.NewErrorResponseBody(http.StatusNotFound, "category not found")
+			return apiwrap.NewErrorResponseBody(http.StatusNotFound, "category not found")
 		}
 		return err
 	}
