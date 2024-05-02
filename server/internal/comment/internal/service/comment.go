@@ -44,6 +44,7 @@ type ICommentService interface {
 	FindCommentCountOfToday(ctx context.Context) (int64, error)
 	BatchApproveComments(ctx context.Context, commentIds []string, replies []domain.ReplyWithCId) ([]domain.EmailInfo, []domain.EmailInfo, error)
 	BatchDeleteComments(ctx context.Context, commentIds []string, replies []domain.ReplyWithCId) error
+	FindCommentByIds(ctx context.Context, commentIds []string) ([]domain.AdminComment, error)
 }
 
 func NewCommentService(repo repository.ICommentRepository) *CommentService {
@@ -56,6 +57,19 @@ var _ ICommentService = (*CommentService)(nil)
 
 type CommentService struct {
 	repo repository.ICommentRepository
+}
+
+func (s *CommentService) FindCommentByIds(ctx context.Context, commentIds []string) ([]domain.AdminComment, error) {
+	var err error
+	objectIDs := slice.Map(commentIds, func(i int, id string) primitive.ObjectID {
+		var objectID primitive.ObjectID
+		objectID, err = primitive.ObjectIDFromHex(id)
+		return objectID
+	})
+	if err != nil {
+		return nil, err
+	}
+	return s.repo.FindCommentByObjectIDs(ctx, objectIDs)
 }
 
 func (s *CommentService) BatchDeleteComments(ctx context.Context, commentIds []string, replies []domain.ReplyWithCId) error {
