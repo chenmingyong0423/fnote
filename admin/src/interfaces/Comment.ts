@@ -6,6 +6,7 @@ export interface AdminCommentVO {
   post_info: PostInfo
   content: string
   user_info: UserInfo4Comment
+  reply_count: number
   replies: AdminCommentVO[]
   approval_status: boolean
   created_at: number

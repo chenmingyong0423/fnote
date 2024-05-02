@@ -24,8 +24,6 @@ export interface IResponse<T> {
 export type PageRequest = {
   pageNo: number
   pageSize: number
-  sortField?: string
-  sortOrder?: string
-  keyword?: string
-  status?: 1
+  approvalStatus?: boolean
+  sort?: string
 }

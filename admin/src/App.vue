@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useWebsiteStore } from '@/stores/website'
 import { GetWebSiteMeta, type WebsiteConfigMetaVO } from '@/interfaces/Config'
+import zhCN from 'ant-design-vue/es/locale/zh_CN'
 
 const websiteStore = useWebsiteStore()
 const initWebsiteStore = async () => {
@@ -21,7 +22,9 @@ initWebsiteStore()
 </script>
 
 <template>
-  <RouterView />
+  <a-config-provider :locale="zhCN">
+    <RouterView />
+  </a-config-provider>
 </template>
 
 <style scoped></style>
