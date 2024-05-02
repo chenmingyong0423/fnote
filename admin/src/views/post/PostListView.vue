@@ -210,8 +210,8 @@ const change: TableProps<IPost>['onChange'] = (pagination, filters, sorter: any)
       showSorterTooltip.value = '点击升序排序'
       break
     default:
-      showSorterTooltip.value = '点击降序排序'
       req.value.sortOrder = 'DESC'
+      showSorterTooltip.value = '点击降序排序'
   }
   console.log(filters)
   req.value.category_filter = filters.categories as string[]
