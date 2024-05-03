@@ -183,7 +183,7 @@ func (h *WebsiteConfigHandler) AdminUpdateWebsiteConfig(ctx *gin.Context, req Up
 		WebsiteOwnerProfile: req.WebsiteOwnerProfile,
 		WebsiteOwnerAvatar:  req.WebsiteOwnerAvatar,
 		WebsiteRuntime:      gkit.ToPtr(time.Unix(req.WebsiteRuntime, 0).Local()),
-	}, time.Now())
+	}, time.Now().Local())
 }
 
 func (h *WebsiteConfigHandler) AdminGetSeoConfig(ctx *gin.Context) (*apiwrap.ResponseBody[SeoMetaConfigVO], error) {
@@ -568,7 +568,7 @@ func (h *WebsiteConfigHandler) AddCarouselConfig(ctx *gin.Context, req CarouselR
 	if exist {
 		return nil, apiwrap.NewErrorResponseBody(409, "carousel element already exists")
 	}
-	now := time.Now()
+	now := time.Now().Local()
 	return apiwrap.SuccessResponse(), h.serv.AddCarouselConfig(ctx, domain.CarouselElem{
 		Id:        req.Id,
 		Title:     req.Title,
@@ -596,7 +596,7 @@ func (h *WebsiteConfigHandler) AdminUpdateCarouselShowStatus(ctx *gin.Context, r
 }
 
 func (h *WebsiteConfigHandler) UpdateCarouselElem(ctx *gin.Context, req CarouselRequest) (*apiwrap.ResponseBody[any], error) {
-	now := time.Now()
+	now := time.Now().Local()
 	return apiwrap.SuccessResponse(), h.serv.UpdateCarouselElem(ctx, domain.CarouselElem{
 		Id:        ctx.Param("id"),
 		Title:     req.Title,

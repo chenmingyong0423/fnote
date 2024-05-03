@@ -320,7 +320,7 @@ func (r *CommentRepository) FineLatestCommentAndReply(ctx context.Context, cnt i
 }
 
 func (r *CommentRepository) AddReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) (string, error) {
-	now := time.Now()
+	now := time.Now().Local()
 	id := uuid.NewString()
 	objectID, err := primitive.ObjectIDFromHex(cmtId)
 	if err != nil {

@@ -80,7 +80,7 @@ func (r *CountStatsRepository) DeleteByReferenceIdAndType(ctx context.Context, r
 }
 
 func (r *CountStatsRepository) Create(ctx context.Context, countStats domain.CountStats) (string, error) {
-	unix := time.Now().Unix()
+	unix := time.Now().Local().Unix()
 	return r.dao.Create(ctx, &dao.CountStats{
 		Type:        countStats.Type.ToString(),
 		ReferenceId: countStats.ReferenceId,

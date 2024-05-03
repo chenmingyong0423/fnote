@@ -99,7 +99,7 @@ func (d *TagDao) GetById(ctx context.Context, id primitive.ObjectID) (*Tags, err
 }
 
 func (d *TagDao) ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("enabled", enabled).Set("update_time", time.Now().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("enabled", enabled).Set("update_time", time.Now().Local().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}

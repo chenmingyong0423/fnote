@@ -133,7 +133,7 @@ func (r *CategoryRepository) ModifyCategoryEnabled(ctx context.Context, id strin
 }
 
 func (r *CategoryRepository) CreateCategory(ctx context.Context, category domain.Category) (string, error) {
-	now := time.Now().Unix()
+	now := time.Now().Local().Unix()
 	return r.dao.Create(ctx, &dao.Category{Name: category.Name, Route: category.Route, Description: category.Description, ShowInNav: category.ShowInNav, Enabled: category.Enabled, CreateTime: now, UpdateTime: now})
 }
 

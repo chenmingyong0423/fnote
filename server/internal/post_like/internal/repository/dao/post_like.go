@@ -83,7 +83,7 @@ func (d *PostLikeDao) Add(ctx context.Context, postLike *PostLike) (string, erro
 }
 
 func (d *PostLikeDao) getBeginAndEndTime() (time.Time, time.Time) {
-	now := time.Now()
+	now := time.Now().Local()
 	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0,
 		now.Location()), time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
 }

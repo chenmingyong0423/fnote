@@ -214,7 +214,7 @@ func (d *CommentDao) FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, c
 }
 
 func (d *CommentDao) UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentObjectID primitive.ObjectID, replyIds []string) error {
-	now := time.Now()
+	now := time.Now().Local()
 	updateResult, err := d.coll.Updater().Filter(query.Id(commentObjectID)).
 		Updates(update.BsonBuilder().Set("updated_at", now).Set("replies.$[elem].approval_status", true).Set("replies.$[elem].updated_at", now).Build()).
 		UpdateMany(ctx, options.Update().SetArrayFilters(options.ArrayFilters{Filters: []any{query.In("elem.reply_id", replyIds...)}}))
@@ -236,7 +236,7 @@ func (d *CommentDao) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []pr
 	for _, objectID := range ids {
 		anyIds = append(anyIds, objectID)
 	}
-	updateResult, err := d.coll.Updater().Filter(query.BsonBuilder().In("_id", anyIds...).Eq("approval_status", false).Build()).Updates(update.BsonBuilder().Set("approval_status", true).Set("updated_at", time.Now()).Build()).UpdateMany(ctx)
+	updateResult, err := d.coll.Updater().Filter(query.BsonBuilder().In("_id", anyIds...).Eq("approval_status", false).Build()).Updates(update.BsonBuilder().Set("approval_status", true).Set("updated_at", time.Now().Local()).Build()).UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to update approval_status of comments, ids=%v", ids)
 	}
@@ -295,7 +295,7 @@ func (d *CommentDao) FindCommentWithRepliesById(ctx context.Context, objectID pr
 
 func (d *CommentDao) UpdateCommentReplyStatus(ctx context.Context, objectID primitive.ObjectID, replyId string, commentStatus bool) error {
 	filter := query.BsonBuilder().Id(objectID).Add("replies.reply_id", replyId).Build()
-	updates := update.BsonBuilder().Set("replies.$.approval_status", commentStatus).Set("replies.$.update_time", time.Now().Unix()).Build()
+	updates := update.BsonBuilder().Set("replies.$.approval_status", commentStatus).Set("replies.$.update_time", time.Now().Local().Unix()).Build()
 	result, err := d.coll.Updater().Filter(filter).Updates(updates).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update one from comment, filter=%v, update=%v", filter, updates)
@@ -325,7 +325,7 @@ func (d *CommentDao) FindReplyByCIdAndRId(ctx context.Context, objectCommentID p
 }
 
 func (d *CommentDao) UpdateCommentStatus2True(ctx context.Context, objectID primitive.ObjectID) error {
-	result, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.BsonBuilder().Set("approval_status", true).Set("updated_at", time.Now()).Build()).UpdateOne(ctx)
+	result, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.BsonBuilder().Set("approval_status", true).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update one from comment, id=%s, commentStatus=%v", objectID.Hex(), true)
 	}
@@ -473,7 +473,7 @@ func (d *CommentDao) AddComment(ctx context.Context, comment *Comment) (string, 
 }
 
 func (d *CommentDao) getBeginSecondsAndEndSeconds() (int64, int64) {
-	now := time.Now()
+	now := time.Now().Local()
 	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0,
 		now.Location()).Unix(), time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location()).Unix()
 }

@@ -138,7 +138,7 @@ func (s *WebsiteConfigService) GetTPSVConfig(ctx context.Context) (*domain.TPSVC
 }
 
 func (s *WebsiteConfigService) InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfig domain.WebsiteConfig, emailConfig domain.EmailConfig) error {
-	now := time.Now()
+	now := time.Now().Local()
 	err := s.UpdateAdminConfig(ctx, adminConfig, now)
 	if err != nil {
 		return err
@@ -242,7 +242,7 @@ func (s *WebsiteConfigService) GetNoticeConfig(ctx context.Context) (domain.Noti
 }
 
 func (s *WebsiteConfigService) UpdateEmailConfig(ctx context.Context, emailCfg *domain.EmailConfig) error {
-	return s.repo.UpdateEmailConfig(ctx, emailCfg, time.Now())
+	return s.repo.UpdateEmailConfig(ctx, emailCfg, time.Now().Local())
 }
 
 func (s *WebsiteConfigService) UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error {

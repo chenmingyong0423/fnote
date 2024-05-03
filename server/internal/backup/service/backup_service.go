@@ -152,7 +152,7 @@ func (s *BackupService) GetBackups(ctx context.Context) (zipFileName string, err
 	if len(files) == 0 {
 		return "", nil
 	}
-	zipFileName = fmt.Sprintf("%sbackup_%s.zip", viper.GetString("system.static_path"), time.Now().Format(time.DateOnly))
+	zipFileName = fmt.Sprintf("%sbackup_%s.zip", viper.GetString("system.static_path"), time.Now().Local().Format(time.DateOnly))
 	if err = s.createTar(zipFileName, files); err != nil {
 		return "", err
 	}

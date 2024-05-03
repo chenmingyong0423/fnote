@@ -77,7 +77,7 @@ func (r *PostRepository) UpdatePostIsDisplayedById(ctx context.Context, id strin
 }
 
 func (r *PostRepository) SavePost(ctx context.Context, post *domain.Post) error {
-	unix := time.Now().Unix()
+	unix := time.Now().Local().Unix()
 	categories := r.toDaoCategory4Post(post.Categories)
 	tags := r.toDaoTags4Post(post.Tags)
 	return r.dao.SavePost(ctx, &dao.Post{
@@ -133,7 +133,7 @@ func (r *PostRepository) DeletePost(ctx context.Context, id string) error {
 }
 
 func (r *PostRepository) AddPost(ctx context.Context, post *domain.Post) error {
-	unix := time.Now().Unix()
+	unix := time.Now().Local().Unix()
 	categories := make([]dao.Category4Post, 0, len(post.Categories))
 	for _, category := range post.Categories {
 		categories = append(categories, dao.Category4Post{

@@ -22,3 +22,8 @@ type VisitHistory struct {
 	Type      string
 	Referer   string
 }
+
+type TendencyData struct {
+	Timestamp int64
+	ViewCount int64
+}
