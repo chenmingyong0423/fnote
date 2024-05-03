@@ -15,7 +15,8 @@
     "build-only:docker": "vite build --mode docker",
     "build:production": "run-p type-check \"build-only:production\" --",
     "build-only:production": "vite build --mode production",
-    "build:nginx": "run-p type-check \"build-only:nginx\" --",
+    "build:nginx": "run-s type-check \"build-only:nginx\" --",
+    "build:nginx-p": "run-p type-check \"build-only:nginx\" --",
     "build-only:nginx": "VITE_BUILD_DIR=admin vite build --mode nginx"
   },
   "dependencies": {
