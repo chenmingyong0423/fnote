@@ -1,7 +1,7 @@
 <template>
   <a-card title="评论列表">
     <div class="flex mb-3 gap-x-2">
-      <div class="flex gap-x-2"  v-if="data.length > 0">
+      <div class="flex gap-x-2" v-if="data.length > 0">
         <a-button @click="expandOrHideRows">{{
           expandedRowKeys.length === 0 ? '全部展开' : '全部折叠'
         }}</a-button>
@@ -218,7 +218,7 @@ const get = async () => {
 }
 get()
 
-const change = (pagination:any, _filters:any, sorter: any) => {
+const change = (pagination: any, _filters: any, sorter: any) => {
   pageReq.value.pageNo = pagination.current
   pageReq.value.pageSize = pagination.pageSize
   expandedRowKeys.value = []
@@ -413,7 +413,7 @@ const selection = computed(() => {
         key: 'disapproval',
         text: '选中未审核',
         onSelect: (changableRowKeys: string[]) => {
-          let newSelectedRowKeys : string[]
+          let newSelectedRowKeys: string[]
           newSelectedRowKeys = changableRowKeys.filter((_key) => {
             return !commentMap.get(_key)?.approval_status
           })
