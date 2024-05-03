@@ -116,7 +116,7 @@ db.getCollection("configs").insertOne({
     typ: "friend",
     props: {
         enable_friend_commit: false,
-        summary: ''
+        introduction: ''
     },
     created_at: new Date(),
     updated_at: new Date()
