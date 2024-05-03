@@ -38,10 +38,10 @@ const DownloadBackup = async () => {
     if (contentType.includes('application/json')) {
       message.error(response.message)
     } else {
-      console.log(response.headers)
       // 提取文件名
-      const currentDate = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-      const filename = `backup_${currentDate}.tar`
+      const contentDisposition = response.headers.get('Content-Disposition')
+      console.log(contentDisposition)
+      const filename = contentDisposition.split('filename=')[1].replace(/"/g, '')
       // 创建一个URL指向返回的Blob对象
       console.log(response.data)
       const fileBlob = new Blob([response.data], { type: 'application/tar' })
