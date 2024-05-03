@@ -56,7 +56,7 @@ func (m *PostDraft) DefaultId() {
 
 func (m *PostDraft) DefaultCreatedAt() {
 	if m.CreatedAt.IsZero() {
-		m.CreatedAt = time.Now().Local()
+		m.CreatedAt = time.Now().Local().Local()
 	}
 }
 

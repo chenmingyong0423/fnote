@@ -104,7 +104,7 @@ func (r *TagRepository) ModifyTagEnabled(ctx context.Context, id string, enabled
 }
 
 func (r *TagRepository) CreateTag(ctx context.Context, tag domain.Tag) (string, error) {
-	now := time.Now().Unix()
+	now := time.Now().Local().Unix()
 	return r.dao.Create(ctx, &dao.Tags{Name: tag.Name, Route: tag.Route, Enabled: tag.Enabled, CreateTime: now, UpdateTime: now})
 
 }

@@ -32,3 +32,8 @@ type ContentStatsVO struct {
 	CategoryCount int64 `json:"category_count"`
 	TagCount      int64 `json:"tag_count"`
 }
+
+type TendencyDataVO struct {
+	Timestamp int64 `json:"timestamp"`
+	ViewCount int64 `json:"view_count"`
+}

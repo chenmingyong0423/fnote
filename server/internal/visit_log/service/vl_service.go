@@ -26,12 +26,22 @@ type IVisitLogService interface {
 	CollectVisitLog(ctx context.Context, visitHistory domain.VisitHistory) error
 	GetTodayViewCount(ctx context.Context) (int64, error)
 	GetTodayUserViewCount(ctx context.Context) (int64, error)
+	GetViewTendencyStats4PV(ctx context.Context, days int) ([]domain.TendencyData, error)
+	GetViewTendencyStats4UV(ctx context.Context, days int) ([]domain.TendencyData, error)
 }
 
 var _ IVisitLogService = (*VisitLogService)(nil)
 
 type VisitLogService struct {
 	repo repository.IVisitLogRepository
+}
+
+func (s *VisitLogService) GetViewTendencyStats4UV(ctx context.Context, days int) ([]domain.TendencyData, error) {
+	return s.repo.GetViewTendencyStats4UV(ctx, days)
+}
+
+func (s *VisitLogService) GetViewTendencyStats4PV(ctx context.Context, days int) ([]domain.TendencyData, error) {
+	return s.repo.GetViewTendencyStats4PV(ctx, days)
 }
 
 func (s *VisitLogService) GetTodayUserViewCount(ctx context.Context) (int64, error) {

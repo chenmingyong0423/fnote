@@ -17,6 +17,7 @@ package web
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
@@ -44,6 +45,7 @@ func (h *DataAnalysisHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup.GET("/traffic/today", apiwrap.Wrap(h.GetTodayTrafficStats))
 	routerGroup.GET("/traffic", apiwrap.Wrap(h.GetWebsiteCountStats))
 	routerGroup.GET("/content", apiwrap.Wrap(h.GetWebsiteContentStats))
+	routerGroup.GET("/tendency", apiwrap.Wrap(h.GetTendencyStats))
 }
 
 func (h *DataAnalysisHandler) GetTodayTrafficStats(ctx *gin.Context) (*apiwrap.ResponseBody[TodayTrafficStatsVO], error) {
@@ -100,4 +102,40 @@ func (h *DataAnalysisHandler) GetWebsiteContentStats(ctx *gin.Context) (*apiwrap
 		CategoryCount: websiteCountStats.CategoryCount,
 		TagCount:      websiteCountStats.TagCount,
 	}), nil
+}
+
+func (h *DataAnalysisHandler) GetTendencyStats(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[TendencyDataVO]], error) {
+
+	var (
+		tendencyData []domain.TendencyData
+		typ, period  = ctx.Query("type"), ctx.Query("period")
+		days         = 7
+		err          error
+	)
+	if period == "month" {
+		days = 30
+	}
+	if typ == "pv" {
+		tendencyData, err = h.vlServ.GetViewTendencyStats4PV(ctx, days)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		tendencyData, err = h.vlServ.GetViewTendencyStats4UV(ctx, days)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(h.tdToVO(tendencyData))), nil
+}
+
+func (h *DataAnalysisHandler) tdToVO(data []domain.TendencyData) []TendencyDataVO {
+	voList := make([]TendencyDataVO, 0, len(data))
+	for _, td := range data {
+		voList = append(voList, TendencyDataVO{
+			Timestamp: td.Timestamp,
+			ViewCount: td.ViewCount,
+		})
+	}
+	return voList
 }

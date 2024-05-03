@@ -28,12 +28,30 @@ type IVisitLogRepository interface {
 	Add(ctx context.Context, visitHistory domain.VisitHistory) error
 	CountOfToday(ctx context.Context) (int64, error)
 	CountOfTodayByIp(ctx context.Context) (int64, error)
+	GetViewTendencyStats4PV(ctx context.Context, days int) ([]domain.TendencyData, error)
+	GetViewTendencyStats4UV(ctx context.Context, days int) ([]domain.TendencyData, error)
 }
 
 var _ IVisitLogRepository = (*VisitLogRepository)(nil)
 
 type VisitLogRepository struct {
 	dao dao.IVisitLogDao
+}
+
+func (r *VisitLogRepository) GetViewTendencyStats4UV(ctx context.Context, days int) ([]domain.TendencyData, error) {
+	tendencyData, err := r.dao.GetViewTendencyStats4UV(ctx, days)
+	if err != nil {
+		return nil, err
+	}
+	return r.tdToDomain(tendencyData), nil
+}
+
+func (r *VisitLogRepository) GetViewTendencyStats4PV(ctx context.Context, days int) ([]domain.TendencyData, error) {
+	tendencyData, err := r.dao.GetViewTendencyStats4PV(ctx, days)
+	if err != nil {
+		return nil, err
+	}
+	return r.tdToDomain(tendencyData), nil
 }
 
 func (r *VisitLogRepository) CountOfTodayByIp(ctx context.Context) (int64, error) {
@@ -45,11 +63,19 @@ func (r *VisitLogRepository) CountOfToday(ctx context.Context) (int64, error) {
 }
 
 func (r *VisitLogRepository) Add(ctx context.Context, visitHistory domain.VisitHistory) error {
-	err := r.dao.Add(ctx, &dao.VisitHistory{Id: uuid.NewString(), Url: visitHistory.Url, Ip: visitHistory.Ip, UserAgent: visitHistory.UserAgent, Origin: visitHistory.Origin, Referer: visitHistory.Referer, CreateTime: time.Now().Unix()})
+	err := r.dao.Add(ctx, &dao.VisitHistory{Id: uuid.NewString(), Url: visitHistory.Url, Ip: visitHistory.Ip, UserAgent: visitHistory.UserAgent, Origin: visitHistory.Origin, Referer: visitHistory.Referer, CreatedAt: time.Now().Local()})
 	if err != nil {
 		return errors.WithMessage(err, "r.dao.Add failed")
 	}
 	return nil
+}
+
+func (r *VisitLogRepository) tdToDomain(data []*dao.TendencyData) []domain.TendencyData {
+	var result []domain.TendencyData
+	for _, d := range data {
+		result = append(result, domain.TendencyData{Timestamp: d.Date.Unix(), ViewCount: d.ViewCount})
+	}
+	return result
 }
 
 func NewVisitLogRepository(dao dao.IVisitLogDao) *VisitLogRepository {

@@ -18,6 +18,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
+
+	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
 	"github.com/chenmingyong0423/go-mongox"
@@ -27,25 +30,85 @@ import (
 )
 
 type VisitHistory struct {
-	Id         string `bson:"_id"`
-	Url        string `bson:"url"`
-	Ip         string `bson:"ip"`
-	UserAgent  string `bson:"user_agent"`
-	Origin     string `bson:"origin"`
-	Referer    string `bson:"referer"`
-	CreateTime int64  `bson:"create_time"`
+	Id        string    `bson:"_id"`
+	Url       string    `bson:"url"`
+	Ip        string    `bson:"ip"`
+	UserAgent string    `bson:"user_agent"`
+	Origin    string    `bson:"origin"`
+	Referer   string    `bson:"referer"`
+	CreatedAt time.Time `bson:"created_at"`
+}
+
+type TendencyData struct {
+	Date      time.Time `bson:"_id"`
+	ViewCount int64     `bson:"view_count"`
 }
 
 type IVisitLogDao interface {
 	Add(ctx context.Context, visitHistory *VisitHistory) error
 	CountOfToday(ctx context.Context) (int64, error)
 	CountOfTodayByIp(ctx context.Context) (int64, error)
+	GetViewTendencyStats4PV(ctx context.Context, days int) ([]*TendencyData, error)
+	GetViewTendencyStats4UV(ctx context.Context, days int) ([]*TendencyData, error)
 }
 
 var _ IVisitLogDao = (*VisitLogDao)(nil)
 
 type VisitLogDao struct {
 	coll *mongox.Collection[VisitHistory]
+}
+
+func (d *VisitLogDao) GetViewTendencyStats4UV(ctx context.Context, days int) ([]*TendencyData, error) {
+	// {
+	//		// 过滤出最近七天的数据
+	//		{{"$match", bson.M{"created_at": bson.M{"$gte": sevenDaysAgo}}}},
+	//		// 将created_at截断到当天的开始
+	//		{{"$set", bson.M{
+	//			"dayStart": bson.M{"$dateTrunc": bson.M{"date": "$created_at", "unit": "day"}},
+	//		}}},
+	//		// 按截断后的created_at分组，并将ip地址加入到一个集合中
+	//		{{"$group", bson.M{
+	//			"_id": "$dayStart",
+	//			"ips": bson.M{"$addToSet": "$ip"},
+	//		}}},
+	//		// 计算每天的独立用户数
+	//		{{"$project", bson.M{
+	//			"date": "$_id",
+	//			"uniqueVisitors": bson.M{"$size": "$ips"},
+	//		}}},
+	//		// 按日期排序
+	//		{{"$sort", bson.M{"date": 1}}},
+	//	}
+	daysAgo := time.Now().Local().AddDate(0, 0, -days).Truncate(24 * time.Hour)
+	pipeline := aggregation.StageBsonBuilder().
+		Match(query.Gte("created_at", daysAgo)).
+		Set(bsonx.M("dayStart", bsonx.M("$dateTrunc", bsonx.NewD().Add("date", "$created_at").Add("unit", "day").Build()))).
+		Group("$dayStart", bsonx.E("ips", bsonx.M("$addToSet", "$ip"))).
+		Project(aggregation.BsonBuilder().AddKeyValues("_id", "$_id").Size("view_count", "$ips").Build()).
+		Sort(bsonx.M("_id", 1)).
+		Build()
+	var result []*TendencyData
+	err := d.coll.Aggregator().Pipeline(pipeline).AggregateWithParse(ctx, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (d *VisitLogDao) GetViewTendencyStats4PV(ctx context.Context, days int) ([]*TendencyData, error) {
+	daysAgo := time.Now().Local().AddDate(0, 0, -days).Truncate(24 * time.Hour)
+	pipeline := aggregation.StageBsonBuilder().
+		Match(query.Gte("created_at", daysAgo)).
+		Set(bsonx.M("dayStart", bsonx.M("$dateTrunc", bsonx.NewD().Add("date", "$created_at").Add("unit", "day").Build()))).
+		Group("$dayStart", aggregation.Sum("view_count", 1)...).
+		Sort(bsonx.M("_id", 1)).
+		Build()
+	var result []*TendencyData
+	err := d.coll.Aggregator().Pipeline(pipeline).AggregateWithParse(ctx, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (d *VisitLogDao) CountOfTodayByIp(ctx context.Context) (int64, error) {
@@ -58,7 +121,7 @@ func (d *VisitLogDao) CountOfTodayByIp(ctx context.Context) (int64, error) {
 }
 
 func (d *VisitLogDao) getBeginSecondsAndEndSeconds() (int64, int64) {
-	now := time.Now()
+	now := time.Now().Local()
 	// 获取当日0点的时间
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	// 获取当日23:59:59的时间

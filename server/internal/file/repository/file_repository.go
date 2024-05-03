@@ -64,7 +64,7 @@ func (r *FileRepository) PushIntoUsedIn(ctx context.Context, fileId []byte, enti
 }
 
 func (r *FileRepository) Save(ctx context.Context, file *domain.File) error {
-	unix := time.Now().Unix()
+	unix := time.Now().Local().Unix()
 	fileId, err := hex.DecodeString(file.FileId)
 	if err != nil {
 		return err

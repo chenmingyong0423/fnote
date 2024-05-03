@@ -38,7 +38,7 @@ func init() {
 
 // GenerateJwt 生成 JWT
 func GenerateJwt() (string, int64, error) {
-	now := time.Now()
+	now := time.Now().Local()
 	exp := now.Add(time.Hour * 12)
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    "https://github.com/chenmingyong0423/fnote",
