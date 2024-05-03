@@ -26,14 +26,14 @@ import (
 )
 
 type PostVisit struct {
-	Id        string    `bson:"_id"`
-	PostId    string    `bson:"post_id"`
-	Ip        string    `bson:"ip"`
-	UserAgent string    `bson:"user_agent"`
-	Origin    string    `bson:"origin"`
-	Referer   string    `bson:"referer"`
-	StayTime  int64     `bson:"stay_time"`
-	VisitAt   time.Time `bson:"visit_at"`
+	Id        primitive.ObjectID `bson:"_id"`
+	PostId    string             `bson:"post_id"`
+	Ip        string             `bson:"ip"`
+	UserAgent string             `bson:"user_agent"`
+	Origin    string             `bson:"origin"`
+	Referer   string             `bson:"referer"`
+	StayTime  int64              `bson:"stay_time"`
+	VisitAt   time.Time          `bson:"visit_at"`
 }
 
 type IPostVisitDao interface {
