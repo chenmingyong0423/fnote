@@ -112,26 +112,26 @@ func (d *VisitLogDao) GetViewTendencyStats4PV(ctx context.Context, days int) ([]
 }
 
 func (d *VisitLogDao) CountOfTodayByIp(ctx context.Context) (int64, error) {
-	startOfDayUnix, endOfDayUnix := d.getBeginSecondsAndEndSeconds()
-	distinct, err := d.coll.Collection().Distinct(ctx, "ip", query.BsonBuilder().Gte("create_time", startOfDayUnix).Lte("create_time", endOfDayUnix).Build())
+	startOfDayUnix, endOfDayUnix := d.getBeginSecondsAndEnd()
+	distinct, err := d.coll.Collection().Distinct(ctx, "ip", query.BsonBuilder().Gte("created_at", startOfDayUnix).Lte("created_at", endOfDayUnix).Build())
 	if err != nil {
 		return 0, errors.Wrap(err, "fails to find the count of today from visit_logs")
 	}
 	return int64(len(distinct)), nil
 }
 
-func (d *VisitLogDao) getBeginSecondsAndEndSeconds() (int64, int64) {
+func (d *VisitLogDao) getBeginSecondsAndEnd() (time.Time, time.Time) {
 	now := time.Now().Local()
 	// 获取当日0点的时间
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	// 获取当日23:59:59的时间
 	endOfDay := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
-	return startOfDay.Unix(), endOfDay.Unix()
+	return startOfDay, endOfDay
 }
 
 func (d *VisitLogDao) CountOfToday(ctx context.Context) (int64, error) {
-	startOfDayUnix, endOfDayUnix := d.getBeginSecondsAndEndSeconds()
-	count, err := d.coll.Finder().Filter(query.BsonBuilder().Gte("create_time", startOfDayUnix).Lte("create_time", endOfDayUnix).Build()).Count(ctx)
+	startOfDayUnix, endOfDayUnix := d.getBeginSecondsAndEnd()
+	count, err := d.coll.Finder().Filter(query.BsonBuilder().Gte("created_at", startOfDayUnix).Lte("created_at", endOfDayUnix).Build()).Count(ctx)
 	if err != nil {
 		return 0, errors.Wrap(err, "fails to find the count of today from visit_logs")
 	}
