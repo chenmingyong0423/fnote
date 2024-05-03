@@ -134,9 +134,10 @@ func InitMiddlewares(writer io.Writer, isWebsiteInitialized func() bool) []gin.H
 					return strings.Contains(origin, s)
 				})
 			},
-			AllowMethods: viper.GetStringSlice("gin.allowed_methods"),
-			AllowHeaders: viper.GetStringSlice("gin.allowed_headers"),
-			MaxAge:       12 * time.Hour,
+			AllowMethods:  viper.GetStringSlice("gin.allowed_methods"),
+			AllowHeaders:  viper.GetStringSlice("gin.allowed_headers"),
+			ExposeHeaders: viper.GetStringSlice("gin.exposed_headers"),
+			MaxAge:        12 * time.Hour,
 		}),
 		func(ctx *gin.Context) {
 			uri := ctx.Request.RequestURI
