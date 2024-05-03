@@ -24,10 +24,6 @@ export interface CommentConfig {
   enable_comment: boolean
 }
 
-export interface FriendConfig {
-  enable_friend_commit: boolean
-}
-
 export interface EmailConfig {
   host: string
   port: number
@@ -186,13 +182,30 @@ export const GetFriend = () => {
   })
 }
 
-export interface FriendConfigRequest {
+export interface FriendConfigSwitchRequest {
   enable_friend_commit: boolean
 }
 
-export const UpdateFriend = (req: FriendConfigRequest) => {
+export interface FriendConfigVO {
+  enable_friend_commit: boolean
+  introduction: string
+}
+
+export const UpdateFriendSwitch = (req: FriendConfigSwitchRequest) => {
   return instance({
-    url: '/configs/friend',
+    url: '/configs/friend/switch',
+    method: 'put',
+    data: req
+  })
+}
+
+export interface FriendConfigIntroductionRequest {
+  introduction: string
+}
+
+export const UpdateFriendIntroduction = (req: FriendConfigIntroductionRequest) => {
+  return instance({
+    url: '/configs/friend/introduction',
     method: 'put',
     data: req
   })
