@@ -104,35 +104,33 @@ func (h *DataAnalysisHandler) GetWebsiteContentStats(ctx *gin.Context) (*apiwrap
 	}), nil
 }
 
-func (h *DataAnalysisHandler) GetTendencyStats(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[TendencyDataVO]], error) {
-
+func (h *DataAnalysisHandler) GetTendencyStats(ctx *gin.Context) (*apiwrap.ResponseBody[TendencyDataVO], error) {
 	var (
-		tendencyData []domain.TendencyData
-		typ, period  = ctx.Query("type"), ctx.Query("period")
-		days         = 7
-		err          error
+		period = ctx.Query("period")
+		days   = 7
 	)
 	if period == "month" {
 		days = 30
 	}
-	if typ == "pv" {
-		tendencyData, err = h.vlServ.GetViewTendencyStats4PV(ctx, days)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		tendencyData, err = h.vlServ.GetViewTendencyStats4UV(ctx, days)
-		if err != nil {
-			return nil, err
-		}
+	tendencyData4PV, err := h.vlServ.GetViewTendencyStats4PV(ctx, days)
+	if err != nil {
+		return nil, err
 	}
-	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(h.tdToVO(tendencyData))), nil
+	tendencyData4UV, err := h.vlServ.GetViewTendencyStats4UV(ctx, days)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiwrap.SuccessResponseWithData(TendencyDataVO{
+		PV: h.tdToVO(tendencyData4PV),
+		UV: h.tdToVO(tendencyData4UV),
+	}), nil
 }
 
-func (h *DataAnalysisHandler) tdToVO(data []domain.TendencyData) []TendencyDataVO {
-	voList := make([]TendencyDataVO, 0, len(data))
+func (h *DataAnalysisHandler) tdToVO(data []domain.TendencyData) []TendencyData {
+	voList := make([]TendencyData, 0, len(data))
 	for _, td := range data {
-		voList = append(voList, TendencyDataVO{
+		voList = append(voList, TendencyData{
 			Timestamp: td.Timestamp,
 			ViewCount: td.ViewCount,
 		})
