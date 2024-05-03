@@ -397,6 +397,7 @@ import {
 } from "~/api/comment";
 import type { IPayInfo } from "~/api/config";
 import { useConfigStore } from "~/store/config";
+import { CollectPostVisit, type PostVisitRequest } from "~/api/post_visit";
 
 const toast = useAlertStore();
 
@@ -551,6 +552,37 @@ useSeoMeta({
 });
 
 bdPush(runtimeConfig.public.domain + route.path);
+
+const postVisitRequest = ref<PostVisitRequest>({
+  post_id: id,
+  stay_time: 0,
+  visit_at: 0,
+});
+const dataSent = ref(false);
+
+const collectPostVisit = async () => {
+  if (enterTime.value && !dataSent.value) {
+    postVisitRequest.value.stay_time =
+      new Date().getSeconds() - enterTime.value?.getSeconds();
+    dataSent.value = true;
+    // 发送数据到服务器
+    await CollectPostVisit(postVisitRequest.value);
+  }
+};
+
+const enterTime = ref<Date>();
+
+onMounted(() => {
+  enterTime.value = new Date();
+  postVisitRequest.value.visit_at = new Date().getTime();
+
+  window.addEventListener("beforeunload", collectPostVisit);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("beforeunload", collectPostVisit);
+  collectPostVisit(); // 确保在组件卸载时也发送数据
+});
 </script>
 
 <style scoped>
