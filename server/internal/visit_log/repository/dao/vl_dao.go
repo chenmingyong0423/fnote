@@ -59,26 +59,6 @@ type VisitLogDao struct {
 }
 
 func (d *VisitLogDao) GetViewTendencyStats4UV(ctx context.Context, days int) ([]*TendencyData, error) {
-	// {
-	//		// 过滤出最近七天的数据
-	//		{{"$match", bson.M{"created_at": bson.M{"$gte": sevenDaysAgo}}}},
-	//		// 将created_at截断到当天的开始
-	//		{{"$set", bson.M{
-	//			"dayStart": bson.M{"$dateTrunc": bson.M{"date": "$created_at", "unit": "day"}},
-	//		}}},
-	//		// 按截断后的created_at分组，并将ip地址加入到一个集合中
-	//		{{"$group", bson.M{
-	//			"_id": "$dayStart",
-	//			"ips": bson.M{"$addToSet": "$ip"},
-	//		}}},
-	//		// 计算每天的独立用户数
-	//		{{"$project", bson.M{
-	//			"date": "$_id",
-	//			"uniqueVisitors": bson.M{"$size": "$ips"},
-	//		}}},
-	//		// 按日期排序
-	//		{{"$sort", bson.M{"date": 1}}},
-	//	}
 	daysAgo := time.Now().Local().AddDate(0, 0, -days).Truncate(24 * time.Hour)
 	pipeline := aggregation.StageBsonBuilder().
 		Match(query.Gte("created_at", daysAgo)).
