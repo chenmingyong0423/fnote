@@ -40,6 +40,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
+	"github.com/chenmingyong0423/fnote/server/internal/post_visit"
 	handler5 "github.com/chenmingyong0423/fnote/server/internal/tag/handler"
 	repository7 "github.com/chenmingyong0423/fnote/server/internal/tag/repository"
 	dao7 "github.com/chenmingyong0423/fnote/server/internal/tag/repository/dao"
@@ -112,7 +113,9 @@ func initializeApp() (*gin.Engine, error) {
 	aggregate_postModule := aggregate_post.InitAggregatePostModule(postModule, post_draftModule)
 	aggregatePostHandler := aggregate_postModule.Hdl
 	postLikeHandler := post_likeModule.Hdl
-	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v2, validators, postIndexHandler, postDraftHandler, aggregatePostHandler, postLikeHandler)
+	post_visitModule := post_visit.InitPostVisitModule(database)
+	postVisitHandler := post_visitModule.Hdl
+	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, msgTplHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v2, validators, postIndexHandler, postDraftHandler, aggregatePostHandler, postLikeHandler, postVisitHandler)
 	if err != nil {
 		return nil, err
 	}

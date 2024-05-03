@@ -22,6 +22,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/post_visit"
+
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
 
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis"
@@ -60,7 +62,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *comment.Handler, cfgHdr *website_config.Handler, frdHdr *friendHanlder.FriendHandler, postHdr *post.Handler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *data_analysis.Handler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler) (*gin.Engine, error) {
+func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *comment.Handler, cfgHdr *website_config.Handler, frdHdr *friendHanlder.FriendHandler, postHdr *post.Handler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *data_analysis.Handler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler, postVisitHdr *post_visit.Handler) (*gin.Engine, error) {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 
@@ -95,6 +97,7 @@ func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHand
 		postDraftHdr.RegisterGinRoutes(engine)
 		aggregatePostHdr.RegisterGinRoutes(engine)
 		postLikesHdr.RegisterGinRoutes(engine)
+		postVisitHdr.RegisterGinRoutes(engine)
 	}
 	return engine, nil
 }
