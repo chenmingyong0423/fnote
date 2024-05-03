@@ -23,6 +23,7 @@
     "ant-design-vue": "^4.0.8",
     "axios": "^1.6.3",
     "dayjs": "^1.11.10",
+    "echarts": "^5.5.0",
     "lodash-es": "^4.17.21",
     "pinia": "^2.1.7",
     "prismjs": "^1.29.0",
