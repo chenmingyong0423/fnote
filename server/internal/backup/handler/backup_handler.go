@@ -17,6 +17,7 @@ package handler
 import (
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
@@ -60,7 +61,7 @@ func (h *BackupHandler) GetBackups(ctx *gin.Context) {
 		ctx.JSON(404, gin.H{"message": "empty data"})
 		return
 	}
-	ctx.File(zipFileName)
+	ctx.FileAttachment(zipFileName, filepath.Base(zipFileName))
 }
 
 func (h *BackupHandler) Recovery(ctx *gin.Context) (any, error) {
