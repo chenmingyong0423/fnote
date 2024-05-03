@@ -72,12 +72,17 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/website", apiwrap.WrapWithBody(h.AdminUpdateWebsiteConfig))
 	adminGroup.POST("/website/records", apiwrap.WrapWithBody(h.AdminAddRecordInWebsiteConfig))
 	adminGroup.DELETE("/website/records", apiwrap.Wrap(h.AdminDeleteRecordInWebsiteConfig))
+	// seo
 	adminGroup.GET("/seo", apiwrap.Wrap(h.AdminGetSeoConfig))
 	adminGroup.PUT("/seo", apiwrap.WrapWithBody(h.AdminUpdateSeoConfig))
+	// 评论
 	adminGroup.GET("/comment", apiwrap.Wrap(h.AdminGetCommentConfig))
 	adminGroup.PUT("/comment", apiwrap.WrapWithBody(h.AdminUpdateCommentConfig))
+	// 友链
 	adminGroup.GET("/friend", apiwrap.Wrap(h.AdminGetFriendConfig))
-	adminGroup.PUT("/friend", apiwrap.WrapWithBody(h.AdminUpdateFriendConfig))
+	adminGroup.PUT("/friend/switch", apiwrap.WrapWithBody(h.AdminUpdateSwitch4FriendConfig))
+	adminGroup.PUT("/friend/introduction", apiwrap.WrapWithBody(h.AdminUpdateIntroduction4FriendConfig))
+	// 邮件配置
 	adminGroup.GET("/email", apiwrap.Wrap(h.AdminGetEmailConfig))
 	adminGroup.PUT("/email", apiwrap.WrapWithBody(h.AdminUpdateEmailConfig))
 
@@ -238,13 +243,12 @@ func (h *WebsiteConfigHandler) AdminGetFriendConfig(ctx *gin.Context) (*apiwrap.
 func (h *WebsiteConfigHandler) toFriendConfigVO(config domain.FriendConfig) FriendConfigVO {
 	return FriendConfigVO{
 		EnableFriendCommit: config.EnableFriendCommit,
+		Introduction:       config.Introduction,
 	}
 }
 
-func (h *WebsiteConfigHandler) AdminUpdateFriendConfig(ctx *gin.Context, req UpdateFriendConfigReq) (*apiwrap.ResponseBody[any], error) {
-	return apiwrap.SuccessResponse(), h.serv.UpdateFriendConfig(ctx, domain.FriendConfig{
-		EnableFriendCommit: gkit.GetValueOrDefault(req.EnableFriendCommit),
-	})
+func (h *WebsiteConfigHandler) AdminUpdateSwitch4FriendConfig(ctx *gin.Context, req UpdateFriendSwitchConfigReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.UpdateSwitch4FriendConfig(ctx, gkit.GetValueOrDefault(req.EnableFriendCommit))
 }
 
 func (h *WebsiteConfigHandler) AdminGetEmailConfig(ctx *gin.Context) (*apiwrap.ResponseBody[EmailConfigVO], error) {
@@ -611,4 +615,8 @@ func (h *WebsiteConfigHandler) UpdateCarouselElem(ctx *gin.Context, req Carousel
 
 func (h *WebsiteConfigHandler) DeleteCarouselElem(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	return apiwrap.SuccessResponse(), h.serv.DeleteCarouselElem(ctx, ctx.Param("id"))
+}
+
+func (h *WebsiteConfigHandler) AdminUpdateIntroduction4FriendConfig(ctx *gin.Context, req UpdateFriendIntroConfigReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.UpdateIntroduction4FriendConfig(ctx, gkit.GetValueOrDefault(req.Introduction))
 }

@@ -43,7 +43,7 @@ type IWebsiteConfigRepository interface {
 	Decrease(ctx context.Context, field string) error
 	UpdateSeoMetaConfig(ctx context.Context, cfg *domain.SeoMetaConfig) error
 	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
-	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
+	UpdateSwitch4FriendConfig(ctx context.Context, enableFriendCommit bool) error
 	UpdateEmailConfig(ctx context.Context, emailConfig *domain.EmailConfig, now time.Time) error
 	UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error
 	UpdateNoticeConfigEnabled(ctx context.Context, enabled bool) error
@@ -67,6 +67,7 @@ type IWebsiteConfigRepository interface {
 	UpdateCarouselElem(ctx context.Context, carouselElem domain.CarouselElem) error
 	DeleteCarouselElem(ctx context.Context, id string) error
 	FindCarouselById(ctx context.Context, id string) (*domain.Config, error)
+	UpdateIntroduction4FriendConfig(ctx context.Context, introduction string) error
 }
 
 func NewWebsiteConfigRepository(dao dao.IWebsiteConfigDao) *WebsiteConfigRepository {
@@ -79,6 +80,10 @@ var _ IWebsiteConfigRepository = (*WebsiteConfigRepository)(nil)
 
 type WebsiteConfigRepository struct {
 	dao dao.IWebsiteConfigDao
+}
+
+func (r *WebsiteConfigRepository) UpdateIntroduction4FriendConfig(ctx context.Context, introduction string) error {
+	return r.dao.UpdateByConditionAndUpdates(ctx, query.Eq("typ", "friend"), update.BsonBuilder().Set("props.introduction", introduction).Set("updated_at", time.Now().Local()).Build())
 }
 
 func (r *WebsiteConfigRepository) FindCarouselById(ctx context.Context, id string) (*domain.Config, error) {
@@ -273,11 +278,11 @@ func (r *WebsiteConfigRepository) UpdateEmailConfig(ctx context.Context, emailCo
 	return r.dao.UpdatePropsByTyp(ctx, "email", emailConfig, now)
 }
 
-func (r *WebsiteConfigRepository) UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error {
+func (r *WebsiteConfigRepository) UpdateSwitch4FriendConfig(ctx context.Context, enableFriendCommit bool) error {
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "friend"),
-		update.BsonBuilder().Set("props.enable_friend_commit", friendConfig.EnableFriendCommit).Set("updated_at", time.Now().Local()).Build(),
+		update.BsonBuilder().Set("props.enable_friend_commit", enableFriendCommit).Set("updated_at", time.Now().Local()).Build(),
 	)
 }
 

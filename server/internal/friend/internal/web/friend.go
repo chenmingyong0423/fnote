@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package hanlder
+package web
 
 import (
 	"fmt"
@@ -20,6 +20,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/service"
 
 	"github.com/spf13/viper"
 
@@ -33,7 +35,6 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
 
-	"github.com/chenmingyong0423/fnote/server/internal/friend/service"
 	msgService "github.com/chenmingyong0423/fnote/server/internal/message/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
@@ -57,6 +58,7 @@ type FriendHandler struct {
 func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/friends")
 	group.GET("", apiwrap.Wrap(h.GetFriends))
+	group.GET("/summary", apiwrap.Wrap(h.GetFriendSummary))
 	group.POST("", apiwrap.WrapWithBody(h.ApplyForFriend))
 
 	adminGroup := engine.Group("/admin-api/friends")
@@ -67,7 +69,7 @@ func (h *FriendHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.PUT("/:id/rejection", apiwrap.WrapWithBody(h.AdminRejectFriend))
 }
 
-func (h *FriendHandler) GetFriends(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[vo.FriendVO]], error) {
+func (h *FriendHandler) GetFriends(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[FriendVO]], error) {
 	friends, err := h.serv.GetFriends(ctx)
 	if err != nil {
 		return nil, err
@@ -75,28 +77,20 @@ func (h *FriendHandler) GetFriends(ctx *gin.Context) (*apiwrap.ResponseBody[apiw
 	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(h.toFriendVOs(friends))), nil
 }
 
-func (h *FriendHandler) toFriendVOs(friends []domain.Friend) []vo.FriendVO {
-	result := make([]vo.FriendVO, 0, len(friends))
+func (h *FriendHandler) toFriendVOs(friends []domain.Friend) []FriendVO {
+	result := make([]FriendVO, 0, len(friends))
 	for _, friend := range friends {
 		result = append(result, h.toFriendVO(friend))
 	}
 	return result
 }
-func (h *FriendHandler) toFriendVO(friend domain.Friend) vo.FriendVO {
-	return vo.FriendVO{
+func (h *FriendHandler) toFriendVO(friend domain.Friend) FriendVO {
+	return FriendVO{
 		Name:        friend.Name,
 		Url:         friend.Url,
 		Logo:        friend.Logo,
 		Description: friend.Description,
 	}
-}
-
-type FriendRequest struct {
-	Name        string `json:"name" binding:"required"`
-	Url         string `json:"url" binding:"required"`
-	Logo        string `json:"logo" binding:"required"`
-	Description string `json:"description" binding:"required,max=30"`
-	Email       string `json:"email"`
 }
 
 func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (*apiwrap.ResponseBody[any], error) {
@@ -140,7 +134,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (*ap
 	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *FriendHandler) AdminGetFriends(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.AdminFriendVO]], error) {
+func (h *FriendHandler) AdminGetFriends(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[vo.PageVO[AdminFriendVO]], error) {
 	friends, total, err := h.serv.AdminGetFriends(ctx, dto.PageDTO{
 		PageNo:   req.PageNo,
 		PageSize: req.PageSize,
@@ -151,7 +145,7 @@ func (h *FriendHandler) AdminGetFriends(ctx *gin.Context, req request.PageReques
 	if err != nil {
 		return nil, err
 	}
-	pageVO := vo.PageVO[vo.AdminFriendVO]{}
+	pageVO := vo.PageVO[AdminFriendVO]{}
 	pageVO.PageNo = req.PageNo
 	pageVO.PageSize = req.PageSize
 	pageVO.List = h.friendToAdminVO(friends)
@@ -159,10 +153,10 @@ func (h *FriendHandler) AdminGetFriends(ctx *gin.Context, req request.PageReques
 	return apiwrap.SuccessResponseWithData(pageVO), nil
 }
 
-func (h *FriendHandler) friendToAdminVO(friends []domain.Friend) []vo.AdminFriendVO {
-	result := make([]vo.AdminFriendVO, 0, len(friends))
+func (h *FriendHandler) friendToAdminVO(friends []domain.Friend) []AdminFriendVO {
+	result := make([]AdminFriendVO, 0, len(friends))
 	for _, friend := range friends {
-		result = append(result, vo.AdminFriendVO{
+		result = append(result, AdminFriendVO{
 			Id:          friend.Id,
 			Name:        friend.Name,
 			Url:         friend.Url,
@@ -220,4 +214,12 @@ func (h *FriendHandler) AdminRejectFriend(ctx *gin.Context, req request.FriendRe
 		}
 	}()
 	return apiwrap.SuccessResponse(), nil
+}
+
+func (h *FriendHandler) GetFriendSummary(ctx *gin.Context) (*apiwrap.ResponseBody[FriendSummaryVO], error) {
+	friendConfig, err := h.cfgService.GetFriendConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponseWithData(FriendSummaryVO{Introduction: friendConfig.Introduction}), nil
 }

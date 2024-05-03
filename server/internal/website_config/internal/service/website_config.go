@@ -40,7 +40,7 @@ type IWebsiteConfigService interface {
 	GetCommentConfig(ctx context.Context) (domain.CommentConfig, error)
 	UpdateCommentConfig(ctx context.Context, commentConfig domain.CommentConfig) error
 	GetFriendConfig(ctx context.Context) (domain.FriendConfig, error)
-	UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error
+	UpdateSwitch4FriendConfig(ctx context.Context, enableFriendCommit bool) error
 	UpdateEmailConfig(ctx context.Context, emailCfg *domain.EmailConfig) error
 	GetNoticeConfig(ctx context.Context) (domain.NoticeConfig, error)
 	UpdateNoticeConfig(ctx context.Context, noticeCfg *domain.NoticeConfig) error
@@ -70,6 +70,7 @@ type IWebsiteConfigService interface {
 	UpdateCarouselElem(ctx context.Context, carouselElem domain.CarouselElem) error
 	DeleteCarouselElem(ctx context.Context, id string) error
 	IsCarouselElemExist(ctx context.Context, id string) (bool, error)
+	UpdateIntroduction4FriendConfig(ctx context.Context, introduction string) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -82,6 +83,10 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) UpdateIntroduction4FriendConfig(ctx context.Context, introduction string) error {
+	return s.repo.UpdateIntroduction4FriendConfig(ctx, introduction)
 }
 
 func (s *WebsiteConfigService) IsCarouselElemExist(ctx context.Context, id string) (bool, error) {
@@ -245,8 +250,8 @@ func (s *WebsiteConfigService) UpdateEmailConfig(ctx context.Context, emailCfg *
 	return s.repo.UpdateEmailConfig(ctx, emailCfg, time.Now().Local())
 }
 
-func (s *WebsiteConfigService) UpdateFriendConfig(ctx context.Context, friendConfig domain.FriendConfig) error {
-	return s.repo.UpdateFriendConfig(ctx, friendConfig)
+func (s *WebsiteConfigService) UpdateSwitch4FriendConfig(ctx context.Context, enableFriendCommit bool) error {
+	return s.repo.UpdateSwitch4FriendConfig(ctx, enableFriendCommit)
 }
 
 func (s *WebsiteConfigService) GetFriendConfig(ctx context.Context) (domain.FriendConfig, error) {

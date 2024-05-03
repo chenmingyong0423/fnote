@@ -12,13 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package vo
+package web
 
 type FriendVO struct {
 	Name        string `json:"name"`
 	Url         string `json:"url"`
 	Logo        string `json:"logo"`
 	Description string `json:"description"`
+}
+
+type FriendSummaryVO struct {
+	Introduction string `json:"introduction"`
 }
 
 type AdminFriendVO struct {

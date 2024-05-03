@@ -20,6 +20,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis"
+	"github.com/chenmingyong0423/fnote/server/internal/friend"
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
 	"github.com/chenmingyong0423/fnote/server/internal/post"
@@ -61,7 +62,8 @@ func initializeApp() (*gin.Engine, error) {
 		wire.FieldsOf(new(*comment.Module), "Hdl"),
 		post_visit.InitPostVisitModule,
 		wire.FieldsOf(new(*post_visit.Module), "Hdl"),
-		ioc.FriendProviders,
+		friend.InitFriendModule,
+		wire.FieldsOf(new(*friend.Module), "Hdl"),
 		ioc.VlProviders,
 		ioc.EmailProviders,
 		ioc.MsgProviders,
