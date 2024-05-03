@@ -18,11 +18,12 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/repository"
+
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/chenmingyong0423/fnote/server/internal/friend/repository"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/pkg/errors"

@@ -90,7 +90,8 @@ type CommentConfigVO struct {
 }
 
 type FriendConfigVO struct {
-	EnableFriendCommit bool `json:"enable_friend_commit"`
+	EnableFriendCommit bool   `json:"enable_friend_commit"`
+	Introduction       string `json:"introduction"`
 }
 
 type EmailConfigVO struct {

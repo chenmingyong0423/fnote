@@ -85,7 +85,8 @@ type CommentConfig struct {
 }
 
 type FriendConfig struct {
-	EnableFriendCommit bool `bson:"enable_friend_commit" json:"enable_friend_commit"`
+	EnableFriendCommit bool   `bson:"enable_friend_commit,omitempty" json:"enable_friend_commit"`
+	Introduction       string `bson:"introduction,omitempty" json:"introduction"`
 }
 
 type EmailConfig struct {

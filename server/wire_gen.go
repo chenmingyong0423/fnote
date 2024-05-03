@@ -9,7 +9,7 @@ package main
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
 	handler7 "github.com/chenmingyong0423/fnote/server/internal/backup/handler"
-	service10 "github.com/chenmingyong0423/fnote/server/internal/backup/service"
+	service9 "github.com/chenmingyong0423/fnote/server/internal/backup/service"
 	handler2 "github.com/chenmingyong0423/fnote/server/internal/category/handler"
 	repository2 "github.com/chenmingyong0423/fnote/server/internal/category/repository"
 	dao2 "github.com/chenmingyong0423/fnote/server/internal/category/repository/dao"
@@ -25,10 +25,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/file/repository"
 	"github.com/chenmingyong0423/fnote/server/internal/file/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/file/service"
-	"github.com/chenmingyong0423/fnote/server/internal/friend/hanlder"
-	repository5 "github.com/chenmingyong0423/fnote/server/internal/friend/repository"
-	dao5 "github.com/chenmingyong0423/fnote/server/internal/friend/repository/dao"
-	service7 "github.com/chenmingyong0423/fnote/server/internal/friend/service"
+	"github.com/chenmingyong0423/fnote/server/internal/friend"
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
 	service6 "github.com/chenmingyong0423/fnote/server/internal/message/service"
@@ -42,13 +39,13 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	"github.com/chenmingyong0423/fnote/server/internal/post_visit"
 	handler5 "github.com/chenmingyong0423/fnote/server/internal/tag/handler"
-	repository7 "github.com/chenmingyong0423/fnote/server/internal/tag/repository"
-	dao7 "github.com/chenmingyong0423/fnote/server/internal/tag/repository/dao"
-	service9 "github.com/chenmingyong0423/fnote/server/internal/tag/service"
+	repository6 "github.com/chenmingyong0423/fnote/server/internal/tag/repository"
+	dao6 "github.com/chenmingyong0423/fnote/server/internal/tag/repository/dao"
+	service8 "github.com/chenmingyong0423/fnote/server/internal/tag/service"
 	handler3 "github.com/chenmingyong0423/fnote/server/internal/visit_log/handler"
-	repository6 "github.com/chenmingyong0423/fnote/server/internal/visit_log/repository"
-	dao6 "github.com/chenmingyong0423/fnote/server/internal/visit_log/repository/dao"
-	service8 "github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
+	repository5 "github.com/chenmingyong0423/fnote/server/internal/visit_log/repository"
+	dao5 "github.com/chenmingyong0423/fnote/server/internal/visit_log/repository/dao"
+	service7 "github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"github.com/gin-gonic/gin"
 )
@@ -80,24 +77,22 @@ func initializeApp() (*gin.Engine, error) {
 	commentModule := comment.InitCommentModule(database, messageService, countStatsService, module, postModule)
 	commentHandler := commentModule.Hdl
 	websiteConfigHandler := module.Hdl
-	friendDao := dao5.NewFriendDao(database)
-	friendRepository := repository5.NewFriendRepository(friendDao)
-	friendService := service7.NewFriendService(friendRepository)
-	friendHandler := hanlder.NewFriendHandler(friendService, messageService, iWebsiteConfigService)
+	friendModule := friend.InitFriendModule(database, messageService, module)
+	friendHandler := friendModule.Hdl
 	postHandler := postModule.Hdl
-	visitLogDao := dao6.NewVisitLogDao(database)
-	visitLogRepository := repository6.NewVisitLogRepository(visitLogDao)
-	visitLogService := service8.NewVisitLogService(visitLogRepository)
+	visitLogDao := dao5.NewVisitLogDao(database)
+	visitLogRepository := repository5.NewVisitLogRepository(visitLogDao)
+	visitLogService := service7.NewVisitLogService(visitLogRepository)
 	visitLogHandler := handler3.NewVisitLogHandler(visitLogService, countStatsService)
 	msgTplHandler := handler4.NewMsgTplHandler(msgTplService)
-	tagDao := dao7.NewTagDao(database)
-	tagRepository := repository7.NewTagRepository(tagDao)
-	tagService := service9.NewTagService(tagRepository, countStatsService)
+	tagDao := dao6.NewTagDao(database)
+	tagRepository := repository6.NewTagRepository(tagDao)
+	tagService := service8.NewTagService(tagRepository, countStatsService)
 	tagHandler := handler5.NewTagHandler(tagService)
 	data_analysisModule := data_analysis.InitDataAnalysisModule(database, visitLogService, countStatsService, post_likeModule, commentModule)
 	dataAnalysisHandler := data_analysisModule.Hdl
 	countStatsHandler := handler6.NewCountStatsHandler(countStatsService)
-	backupService := service10.NewBackupService(database)
+	backupService := service9.NewBackupService(database)
 	backupHandler := handler7.NewBackupHandler(backupService)
 	writer := ioc.InitLogger()
 	v, err := global.IsWebsiteInitializedFn(database)

@@ -30,10 +30,6 @@ import (
 	repository10 "github.com/chenmingyong0423/fnote/server/internal/file/repository"
 	dao10 "github.com/chenmingyong0423/fnote/server/internal/file/repository/dao"
 	service12 "github.com/chenmingyong0423/fnote/server/internal/file/service"
-	handler4 "github.com/chenmingyong0423/fnote/server/internal/friend/hanlder"
-	repository4 "github.com/chenmingyong0423/fnote/server/internal/friend/repository"
-	dao4 "github.com/chenmingyong0423/fnote/server/internal/friend/repository/dao"
-	service4 "github.com/chenmingyong0423/fnote/server/internal/friend/service"
 	service8 "github.com/chenmingyong0423/fnote/server/internal/message/service"
 	handler7 "github.com/chenmingyong0423/fnote/server/internal/message_template/handler"
 	repository7 "github.com/chenmingyong0423/fnote/server/internal/message_template/repository"
@@ -57,10 +53,6 @@ var (
 		wire.Bind(new(dao.ICategoryDao), new(*dao.CategoryDao)),
 	)
 
-	FriendProviders = wire.NewSet(handler4.NewFriendHandler, service4.NewFriendService, repository4.NewFriendRepository, dao4.NewFriendDao,
-		wire.Bind(new(service4.IFriendService), new(*service4.FriendService)),
-		wire.Bind(new(repository4.IFriendRepository), new(*repository4.FriendRepository)),
-		wire.Bind(new(dao4.IFriendDao), new(*dao4.FriendDao)))
 	VlProviders = wire.NewSet(handler6.NewVisitLogHandler, service6.NewVisitLogService, repository6.NewVisitLogRepository, dao6.NewVisitLogDao,
 		wire.Bind(new(service6.IVisitLogService), new(*service6.VisitLogService)),
 		wire.Bind(new(repository6.IVisitLogRepository), new(*repository6.VisitLogRepository)),
