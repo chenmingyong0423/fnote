@@ -1,7 +1,22 @@
 <template>
   <div class="slide-up">
+    <div
+      class="flex-col mb-5 bg-white b-rounded-4 dark:text-dtc dark_bg_gray p-5"
+      v-if="introduction !== ''"
+    >
+      <div class="h-10 line-height-10 font-bold text-6 mb-5">友情链接</div>
+      <div>
+        <client-only>
+          <v-md-preview
+            :text="introduction"
+            class="lt-lg:important:p0"
+            :class="{ dark: isBlackMode }"
+          ></v-md-preview>
+        </client-only>
+      </div>
+    </div>
     <div class="bg-white b-rounded-4 p-5 mb-5 dark:text-dtc dark_bg_gray">
-      <div class="h-10 line-height-10 font-bold text-6 mb-5">友链</div>
+      <div class="h-10 line-height-10 font-bold text-6 mb-5">友链列表</div>
       <div class="flex flex-wrap gap-x-4 mb-5 lt-md:flex-col">
         <a
           :href="friend.url"
@@ -111,15 +126,21 @@ import {
   type FriendReq,
   getFriends,
   applyForFriend,
+  GetFriendIntroduction,
+  type FriendIntroductionVO,
 } from "~/api/friend";
 import { useAlertStore } from "~/store/toast";
 import type { IBaseResponse, IListData, IResponse } from "~/api/http";
 import { isValidEmail } from "~/utils/email";
 import { useConfigStore } from "~/store/config";
+import VMdPreview from "@kangc/v-md-editor/lib/preview";
+import { useHomeStore } from "~/store/home";
 
 const configStore = useConfigStore();
 const friends = ref<IFriend[]>([]);
 const toast = useAlertStore();
+const homeStore = useHomeStore();
+const isBlackMode = computed(() => homeStore.isBlackMode);
 
 const req = ref<FriendReq>({
   name: "",
@@ -204,6 +225,30 @@ const submit = async () => {
     toast.showToast(error.toString(), 2000);
   }
 };
+
+const introduction = ref("");
+
+const getIntroduction = async () => {
+  try {
+    let httpRes: any = await GetFriendIntroduction();
+    if (httpRes.data.value === null) {
+      toast.showToast(httpRes.error.value.statusMessage, 2000);
+      return;
+    }
+    let res: IResponse<FriendIntroductionVO> = httpRes.data.value;
+    if (res && res.data) {
+      if (res.code !== 0) {
+        toast.showToast(res.message, 2000);
+        return;
+      }
+      introduction.value = res.data.introduction || "";
+    }
+  } catch (error: any) {
+    toast.showToast(error.toString(), 2000);
+  }
+};
+
+getIntroduction();
 
 useHead({
   title: `友链 - ${

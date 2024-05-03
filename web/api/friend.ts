@@ -20,3 +20,9 @@ const prefix = "/friends";
 export const getFriends = () => httpRequest.get(`${prefix}`);
 export const applyForFriend = (req: FriendReq) =>
   httpRequest.post(`${prefix}`, req);
+
+export interface FriendIntroductionVO {
+  introduction: string;
+}
+
+export const GetFriendIntroduction = () => httpRequest.get(`${prefix}/summary`);
