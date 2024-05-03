@@ -40,17 +40,21 @@ export const GetContentStatsVO = () => {
   })
 }
 
-export interface TendencyDataVO {
+export interface TendencyData {
   timestamp: number
   view_count: number
 }
 
-export const GetTendencyStats = (type: string, period: string) => {
+export interface TendencyDataVO {
+  pv: TendencyData[]
+  uv: TendencyData[]
+}
+
+export const GetTendencyStats = (period: string) => {
   return instance({
     url: '/data-analysis/tendency',
     method: 'get',
     params: {
-      type: type,
       period: period
     }
   })
