@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"flag"
 	"os"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -32,6 +33,15 @@ func main() {
 	err := initViper(*configPath)
 	if err != nil {
 		panic(err)
+	}
+	// 设置默认时区为东八区，例如北京时间
+	timeZone := viper.GetString("system.time_zone")
+	if timeZone != "" {
+		loc, err := time.LoadLocation(timeZone)
+		if err != nil {
+			panic(err)
+		}
+		time.Local = loc
 	}
 	staticPath := viper.GetString("system.static_path")
 	if staticPath != "" {

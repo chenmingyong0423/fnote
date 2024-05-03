@@ -1,6 +1,7 @@
 system:
   # 存放静态文件的目录，例如文章封面，建议 /fnote/static/
   static_path: /fnote/static/
+  time_zone: Asia/Shanghai
 gin:
   # 跨域配置，默认 “*“
   allowed_origins:
