@@ -34,6 +34,11 @@ type ContentStatsVO struct {
 }
 
 type TendencyDataVO struct {
+	PV []TendencyData `json:"pv"`
+	UV []TendencyData `json:"uv"`
+}
+
+type TendencyData struct {
 	Timestamp int64 `json:"timestamp"`
 	ViewCount int64 `json:"view_count"`
 }
