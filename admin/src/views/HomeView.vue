@@ -1,26 +1,33 @@
 <template>
   <a-layout>
-    <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <div class="logo text-center text-blue">后台管理</div>
-      <a-menu
-        v-model:openKeys="state.openKeys"
-        v-model:selectedKeys="state.selectedKeys"
-        mode="inline"
-        theme="dark"
-        :inline-collapsed="state.collapsed"
-        :items="items"
-        @click="itemClick"
-      ></a-menu>
-    </a-layout-sider>
+    <a-layout-header style="background: #fff" class="drop-shadow-xl mb-3 flex items-center">
+      <div class="w-32 h-32px lh-32px bg-black/5 text-center text-blue">后台管理</div>
+    </a-layout-header>
     <a-layout>
-      <a-layout-header style="background: #fff; padding: 0">
-        <menu-unfold-outlined
-          v-if="collapsed"
-          class="trigger"
-          @click="() => (collapsed = !collapsed)"
-        />
-        <menu-fold-outlined v-else class="trigger" @click="() => (collapsed = !collapsed)" />
-      </a-layout-header>
+      <a-layout-sider
+        v-model:collapsed="collapsed"
+        collapsible
+        :trigger="null"
+        style="background: #fff"
+      >
+        <div class="flex justify-center p-5">
+          <menu-unfold-outlined
+            v-if="collapsed"
+            class="trigger"
+            @click="() => (collapsed = !collapsed)"
+          />
+          <menu-fold-outlined v-else class="trigger" @click="() => (collapsed = !collapsed)" />
+        </div>
+        <a-menu
+          v-model:openKeys="state.openKeys"
+          v-model:selectedKeys="state.selectedKeys"
+          mode="inline"
+          theme="light"
+          :inline-collapsed="state.collapsed"
+          :items="items"
+          @click="itemClick"
+        ></a-menu>
+      </a-layout-sider>
       <a-layout-content class="p-5" :style="{ minHeight: '780px' }">
         <RouterView />
       </a-layout-content>
@@ -40,7 +47,9 @@ import {
   CommentOutlined,
   TagsOutlined,
   TeamOutlined,
-  SettingOutlined
+  SettingOutlined,
+  MenuUnfoldOutlined,
+  MenuFoldOutlined
 } from '@ant-design/icons-vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
@@ -176,12 +185,5 @@ const itemClick = (item: any) => {
 
 .trigger:hover {
   color: #1890ff;
-}
-
-.logo {
-  height: 32px;
-  line-height: 32px;
-  background: rgba(255, 255, 255, 0.3);
-  margin: 16px;
 }
 </style>
