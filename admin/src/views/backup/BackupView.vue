@@ -14,7 +14,7 @@ document.title = '备份 - 后台管理'
 const RecoveryBackup = async () => {
   const input = document.createElement('input')
   input.type = 'file'
-  input.accept = '.tar'
+  input.accept = '.zip'
   input.onchange = async (e: any) => {
     const file = e.target.files[0]
     const formData = new FormData()
