@@ -96,12 +96,10 @@ func (s *BackupService) Recovery(ctx context.Context, file *multipart.FileHeader
 func (s *BackupService) GetBackups(ctx context.Context) (zipFileName string, err error) {
 	var files []string
 	defer func() {
-		if err == nil {
-			for _, file := range files {
-				err2 := os.Remove(file)
-				if err2 != nil {
-					slog.Error("remote file: %s failed, error: %v", file, err2)
-				}
+		for _, file := range files {
+			fErr := os.Remove(file)
+			if fErr != nil {
+				slog.Error("remove file: %s failed, error: %v", file, fErr)
 			}
 		}
 	}()
@@ -161,13 +159,25 @@ func (s *BackupService) GetBackups(ctx context.Context) (zipFileName string, err
 
 // createTar 创建一个tar文件，并将files列表中的文件添加到这个tar文件中。
 func (s *BackupService) createTar(tarFileName string, files []string) error {
+	createSuccess := false
 	// 创建tar文件
 	newTarFile, err := os.Create(tarFileName)
 	if err != nil {
 		return err
 	}
-	defer newTarFile.Close()
-
+	defer func() {
+		fErr := newTarFile.Close()
+		if fErr != nil {
+			slog.Error("close file: %s failed, error: %v", tarFileName, fErr)
+		}
+		if err != nil && createSuccess {
+			fErr = os.Remove(tarFileName)
+			if fErr != nil {
+				slog.Error("remove file: %s failed, error: %v", tarFileName, fErr)
+			}
+		}
+	}()
+	createSuccess = true
 	// 创建一个tar的写入器
 	tarWriter := tar.NewWriter(newTarFile)
 	defer tarWriter.Close()
@@ -221,9 +231,9 @@ func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colNam
 	}
 	col := s.db.Collection(colName)
 	for _, doc := range documents {
-		objectID, err2 := primitive.ObjectIDFromHex(doc["_id"].(string))
+		objectID, fErr := primitive.ObjectIDFromHex(doc["_id"].(string))
 		// 部分集合的 id 不是 objectID
-		if err2 == nil {
+		if fErr == nil {
 			doc["_id"] = objectID
 		}
 
@@ -233,13 +243,64 @@ func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colNam
 				socialList := props["social_info_list"].([]any)
 				for _, m := range socialList {
 					obj := m.(map[string]any)
-					var err3 error
-					obj["id"], err3 = hex.DecodeString(obj["id"].(string))
-					if err3 != nil {
-						return err3
+					var fErr2 error
+					obj["id"], fErr2 = hex.DecodeString(obj["id"].(string))
+					if fErr2 != nil {
+						return fErr2
 					}
 				}
 			}
+			if typ, ok := doc["typ"]; ok && typ == "website" {
+				props := doc["props"].(map[string]any)
+				websiteRunTime := props["website_runtime"].(string)
+				parse, fErr2 := time.Parse(time.RFC3339, websiteRunTime)
+				if fErr2 != nil {
+					return fErr2
+				}
+				props["website_runtime"] = parse
+			}
+			if typ, ok := doc["typ"]; ok && typ == "notice" {
+				props := doc["props"].(map[string]any)
+				publishTime := props["publish_time"].(string)
+				parse, fErr2 := time.Parse(time.RFC3339, publishTime)
+				if fErr2 != nil {
+					return fErr2
+				}
+				props["publish_time"] = parse
+			}
+			if typ, ok := doc["typ"]; ok && typ == "carousel" {
+				props := doc["props"].(map[string]any)
+				list := props["list"].([]any)
+				for _, m := range list {
+					obj := m.(map[string]any)
+					createdAt := obj["created_at"].(string)
+					parse, fErr2 := time.Parse(time.RFC3339, createdAt)
+					if fErr2 != nil {
+						return fErr2
+					}
+					obj["created_at"] = parse
+					updatedAt := obj["updated_at"].(string)
+					parse, fErr2 = time.Parse(time.RFC3339, updatedAt)
+					if fErr2 != nil {
+						return fErr2
+					}
+					obj["updated_at"] = parse
+				}
+			}
+		}
+		if createdAt, ok := doc["created_at"].(string); ok {
+			parse, fErr2 := time.Parse(time.RFC3339, createdAt)
+			if fErr2 != nil {
+				return fErr2
+			}
+			doc["created_at"] = parse
+		}
+		if updatedAt, ok := doc["updated_at"].(string); ok {
+			parse, fErr2 := time.Parse(time.RFC3339, updatedAt)
+			if fErr2 != nil {
+				return fErr2
+			}
+			doc["updated_at"] = parse
 		}
 	}
 	// 先清空数据
