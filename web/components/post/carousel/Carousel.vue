@@ -16,7 +16,7 @@
         :key="index"
       >
         <a
-          class="relative w-full h-full slide-up item group flex cursor-pointer ease-linear duration-100 mb-5"
+          class="relative w-full h-full slide-up item group flex cursor-pointer ease-linear duration-100 mb-5 text-center"
           :href="baseUrl + '/posts/' + item.id"
           target="_blank"
           :title="item.title"
