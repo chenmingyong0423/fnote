@@ -16,9 +16,11 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/repository"
+	"github.com/chenmingyong0423/gkit/slice"
 	"github.com/pkg/errors"
 )
 
@@ -28,12 +30,23 @@ type IVisitLogService interface {
 	GetTodayUserViewCount(ctx context.Context) (int64, error)
 	GetViewTendencyStats4PV(ctx context.Context, days int) ([]domain.TendencyData, error)
 	GetViewTendencyStats4UV(ctx context.Context, days int) ([]domain.TendencyData, error)
+	GetIpsByDate(ctx context.Context, start time.Time, end time.Time) ([]string, error)
 }
 
 var _ IVisitLogService = (*VisitLogService)(nil)
 
 type VisitLogService struct {
 	repo repository.IVisitLogRepository
+}
+
+func (s *VisitLogService) GetIpsByDate(ctx context.Context, start time.Time, end time.Time) ([]string, error) {
+	visitHistories, err := s.repo.GetByDate(ctx, start, end)
+	if err != nil {
+		return nil, err
+	}
+	return slice.Map(visitHistories, func(_ int, vh domain.VisitHistory) string {
+		return vh.Ip
+	}), nil
 }
 
 func (s *VisitLogService) GetViewTendencyStats4UV(ctx context.Context, days int) ([]domain.TendencyData, error) {

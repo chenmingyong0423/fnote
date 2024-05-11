@@ -15,8 +15,12 @@
 package web
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+	service2 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
@@ -24,12 +28,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewDataAnalysisHandler(vlServ service.IVisitLogService, csServ csServ.ICountStatsService, postLikeServ post_like.Service, commentServ comment.Service) *DataAnalysisHandler {
+func NewDataAnalysisHandler(vlServ service.IVisitLogService, csServ csServ.ICountStatsService, postLikeServ post_like.Service, commentServ comment.Service, ipAPiServ service2.IIpApiService) *DataAnalysisHandler {
 	return &DataAnalysisHandler{
 		vlServ:       vlServ,
 		csServ:       csServ,
 		postLikeServ: postLikeServ,
 		commentServ:  commentServ,
+		ipAPiServ:    ipAPiServ,
 	}
 }
 
@@ -38,6 +43,7 @@ type DataAnalysisHandler struct {
 	csServ       csServ.ICountStatsService
 	postLikeServ post_like.Service
 	commentServ  comment.Service
+	ipAPiServ    service2.IIpApiService
 }
 
 func (h *DataAnalysisHandler) RegisterGinRoutes(engine *gin.Engine) {
@@ -46,6 +52,7 @@ func (h *DataAnalysisHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup.GET("/traffic", apiwrap.Wrap(h.GetWebsiteCountStats))
 	routerGroup.GET("/content", apiwrap.Wrap(h.GetWebsiteContentStats))
 	routerGroup.GET("/tendency", apiwrap.Wrap(h.GetTendencyStats))
+	routerGroup.GET("/user-distribution", apiwrap.Wrap(h.GetUserDistributionStats))
 }
 
 func (h *DataAnalysisHandler) GetTodayTrafficStats(ctx *gin.Context) (*apiwrap.ResponseBody[TodayTrafficStatsVO], error) {
@@ -136,4 +143,47 @@ func (h *DataAnalysisHandler) tdToVO(data []domain.TendencyData) []TendencyData 
 		})
 	}
 	return voList
+}
+
+func (h *DataAnalysisHandler) GetUserDistributionStats(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[UserDistributionVO]], error) {
+	var (
+		now   = time.Now()
+		err   error
+		start = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+		end   = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
+	)
+	startParam := ctx.Query("start")
+	endParam := ctx.Query("end")
+	if startParam != "" {
+		start, err = time.Parse(time.DateTime, startParam)
+		if err != nil {
+			return nil, apiwrap.NewErrorResponseBody(400, "invalid date")
+		}
+	}
+	if endParam != "" {
+		end, err = time.Parse(time.DateTime, endParam)
+		if err != nil {
+			return nil, apiwrap.NewErrorResponseBody(400, "invalid date")
+		}
+	}
+	ips, err := h.vlServ.GetIpsByDate(ctx, start, end)
+	if err != nil {
+		return nil, err
+	}
+	userInfos, err := h.ipAPiServ.BatchGetLocation(ctx, ips)
+	if err != nil {
+		return nil, err
+	}
+	mp := make(map[string]int64, len(userInfos))
+	for _, userInfo := range userInfos {
+		mp[fmt.Sprintf("%s-%s", userInfo.Country, userInfo.City)]++
+	}
+	result := make([]UserDistributionVO, 0, len(mp))
+	for k, v := range mp {
+		result = append(result, UserDistributionVO{
+			UserCount: v,
+			Location:  k,
+		})
+	}
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(result)), nil
 }
