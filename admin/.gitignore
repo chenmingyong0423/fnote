@@ -28,3 +28,6 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+components.d.ts
+stats.html
