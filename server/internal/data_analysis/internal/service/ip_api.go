@@ -32,7 +32,7 @@ func NewIpApiService() *IpApiService {
 	return &IpApiService{
 		host: "http://ip-api.com",
 		client: httpchain.NewWithClient(&http.Client{
-			Timeout: time.Second * 5,
+			Timeout: time.Second * 10,
 		}),
 	}
 }
