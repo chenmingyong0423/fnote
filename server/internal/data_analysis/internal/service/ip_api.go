@@ -19,6 +19,8 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"net/http"
+	"time"
 
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/domain"
 	"github.com/chenmingyong0423/gkit/slice"
@@ -28,8 +30,10 @@ import (
 
 func NewIpApiService() *IpApiService {
 	return &IpApiService{
-		host:   "http://ip-api.com",
-		client: httpchain.NewDefault(),
+		host: "http://ip-api.com",
+		client: httpchain.NewWithClient(&http.Client{
+			Timeout: time.Second * 5,
+		}),
 	}
 }
 
