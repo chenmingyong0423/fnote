@@ -25,21 +25,23 @@
     </div>
   </a-card>
   <a-card title="用户分布图" class="mt-5">
-    <div>
-      <div class="flex justify-end mb-5">
-        <div class="flex gap-x-3">
-          <a-range-picker v-model:value="datetime" show-time @change="datetimeChanged" />
-          <a-tooltip title="刷新数据">
-            <a-button
-              shape="circle"
-              :icon="h(ReloadOutlined)"
-              :loading="userDistributionLoading"
-              @click="getUserDistribution"
-            />
-          </a-tooltip>
-        </div>
+    <template #extra class="flex justify-end items-center mb-5">
+      <div class="flex gap-x-3">
+        <a-range-picker v-model:value="datetime" show-time @change="datetimeChanged" />
+        <a-tooltip title="刷新数据">
+          <a-button
+            shape="circle"
+            :icon="h(ReloadOutlined)"
+            :loading="userDistributionLoading"
+            @click="getUserDistribution"
+          />
+        </a-tooltip>
       </div>
-      <div id="user-distribution" class="w-full h-120" />
+    </template>
+    <div>
+      <a-spin :spinning="userDistributionLoading">
+        <div id="user-distribution" class="w-full h-120" />
+      </a-spin>
     </div>
   </a-card>
 </template>
@@ -324,15 +326,6 @@ const initUserDistribution = () => {
       }
     ]
   })
-
-  // 计算属性
-  watch(
-    () => userDistributionData,
-    () => {
-      initUserDistribution()
-    },
-    { deep: true }
-  )
 }
 
 type RangeValue = [Dayjs, Dayjs]
@@ -347,6 +340,8 @@ const datetime = ref<RangeValue>([
 const datetimeChanged = () => {
   getUserDistribution()
 }
+
+const userDistributionLoading = ref(false)
 
 const getUserDistribution = async () => {
   try {
@@ -375,5 +370,12 @@ const getUserDistribution = async () => {
 
 getUserDistribution()
 
-const userDistributionLoading = ref(false)
+// 计算属性
+watch(
+  () => userDistributionData,
+  () => {
+    initUserDistribution()
+  },
+  { deep: true }
+)
 </script>
