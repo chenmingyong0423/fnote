@@ -1,4 +1,5 @@
 import * as echarts from 'echarts/core'
+
 import { BarChart, LineChart, PieChart } from 'echarts/charts'
 import {
   TitleComponent,
