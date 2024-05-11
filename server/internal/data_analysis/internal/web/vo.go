@@ -42,3 +42,8 @@ type TendencyData struct {
 	Timestamp int64 `json:"timestamp"`
 	ViewCount int64 `json:"view_count"`
 }
+
+type UserDistributionVO struct {
+	UserCount int64  `json:"user_count"`
+	Location  string `json:"location"`
+}

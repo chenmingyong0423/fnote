@@ -50,12 +50,22 @@ type IVisitLogDao interface {
 	CountOfTodayByIp(ctx context.Context) (int64, error)
 	GetViewTendencyStats4PV(ctx context.Context, days int) ([]*TendencyData, error)
 	GetViewTendencyStats4UV(ctx context.Context, days int) ([]*TendencyData, error)
+	GetByDate(ctx context.Context, start time.Time, end time.Time) ([]*VisitHistory, error)
 }
 
 var _ IVisitLogDao = (*VisitLogDao)(nil)
 
 type VisitLogDao struct {
 	coll *mongox.Collection[VisitHistory]
+}
+
+func (d *VisitLogDao) GetByDate(ctx context.Context, start time.Time, end time.Time) ([]*VisitHistory, error) {
+	return d.coll.Finder().
+		Filter(query.BsonBuilder().
+			Gte("created_at", start).
+			Lte("created_at", end).
+			Build()).
+		Find(ctx)
 }
 
 func (d *VisitLogDao) GetViewTendencyStats4UV(ctx context.Context, days int) ([]*TendencyData, error) {
