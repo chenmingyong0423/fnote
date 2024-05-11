@@ -59,3 +59,19 @@ export const GetTendencyStats = (period: string) => {
     }
   })
 }
+
+export interface UserDistributionVO {
+  user_count: number
+  location: string
+}
+
+export const GetUserDistributionStats = (start: string, end: string) => {
+  return instance({
+    url: '/data-analysis/user-distribution',
+    method: 'get',
+    params: {
+      start: start,
+      end: end
+    }
+  })
+}
