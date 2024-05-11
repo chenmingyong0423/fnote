@@ -155,35 +155,47 @@ func (h *DataAnalysisHandler) GetUserDistributionStats(ctx *gin.Context) (*apiwr
 	startParam := ctx.Query("start")
 	endParam := ctx.Query("end")
 	if startParam != "" {
-		start, err = time.Parse(time.DateTime, startParam)
+		start, err = time.ParseInLocation(time.DateTime, startParam, time.Local)
 		if err != nil {
 			return nil, apiwrap.NewErrorResponseBody(400, "invalid date")
 		}
+		start = start.Local()
 	}
 	if endParam != "" {
-		end, err = time.Parse(time.DateTime, endParam)
+		end, err = time.ParseInLocation(time.DateTime, endParam, time.Local)
 		if err != nil {
 			return nil, apiwrap.NewErrorResponseBody(400, "invalid date")
 		}
+		end = end.Local()
 	}
 	ips, err := h.vlServ.GetIpsByDate(ctx, start, end)
 	if err != nil {
 		return nil, err
 	}
-	userInfos, err := h.ipAPiServ.BatchGetLocation(ctx, ips)
-	if err != nil {
-		return nil, err
-	}
-	mp := make(map[string]int64, len(userInfos))
-	for _, userInfo := range userInfos {
-		mp[fmt.Sprintf("%s-%s", userInfo.Country, userInfo.City)]++
-	}
-	result := make([]UserDistributionVO, 0, len(mp))
-	for k, v := range mp {
-		result = append(result, UserDistributionVO{
-			UserCount: v,
-			Location:  k,
-		})
+	var result []UserDistributionVO
+	if len(ips) != 0 {
+		userInfos, err := h.ipAPiServ.BatchGetLocation(ctx, ips)
+		if err != nil {
+			return nil, err
+		}
+		mp := make(map[string]int64, len(userInfos))
+		for _, userInfo := range userInfos {
+			mp[fmt.Sprintf("%s-%s", withDefault(userInfo.Country, "未知"), withDefault(userInfo.City, "未知"))]++
+		}
+		result = make([]UserDistributionVO, 0, len(mp))
+		for k, v := range mp {
+			result = append(result, UserDistributionVO{
+				UserCount: v,
+				Location:  k,
+			})
+		}
 	}
 	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(result)), nil
+}
+
+func withDefault(src string, dft string) string {
+	if src == "" {
+		return dft
+	}
+	return src
 }
