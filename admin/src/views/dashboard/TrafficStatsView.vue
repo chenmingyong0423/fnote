@@ -1,28 +1,68 @@
 <template>
   <a-card title="今日数据">
-    <a-flex gap="middle" horizontal>
-      <a-statistic title="今日访问量（PV）" :value="todayTrafficStatsVO.view_count" class="w-25%" />
-      <a-statistic
-        title="今日访问用户"
-        :value="todayTrafficStatsVO.user_view_count"
-        class="w-25%"
-      />
-      <a-statistic title="今日评论数" :value="todayTrafficStatsVO.comment_count" class="w-25%" />
-      <a-statistic title="今日点赞数" :value="todayTrafficStatsVO.like_count" class="w-25%" />
-    </a-flex>
+    <template #extra>
+      <a-tooltip title="刷新数据">
+        <a-button
+          shape="circle"
+          :icon="h(ReloadOutlined)"
+          :loading="todayTrafficLoading"
+          @click="getTodayTrafficStats"
+        />
+      </a-tooltip>
+    </template>
+    <a-spin :spinning="todayTrafficLoading">
+      <a-flex gap="middle" horizontal>
+        <a-statistic
+          title="今日访问量（PV）"
+          :value="todayTrafficStatsVO.view_count"
+          class="w-25%"
+        />
+        <a-statistic
+          title="今日访问用户"
+          :value="todayTrafficStatsVO.user_view_count"
+          class="w-25%"
+        />
+        <a-statistic title="今日评论数" :value="todayTrafficStatsVO.comment_count" class="w-25%" />
+        <a-statistic title="今日点赞数" :value="todayTrafficStatsVO.like_count" class="w-25%" />
+      </a-flex>
+    </a-spin>
   </a-card>
   <a-card title="总数据" class="mt-5">
-    <a-flex gap="middle" horizontal>
-      <a-statistic title="总访问量" :value="trafficStatsVO.view_count" class="w-33%" />
-      <a-statistic title="总评论数" :value="trafficStatsVO.comment_count" class="w-33%" />
-      <a-statistic title="总点赞数" :value="trafficStatsVO.like_count" class="w-33%" />
-    </a-flex>
+    <template #extra>
+      <a-tooltip title="刷新数据">
+        <a-button
+          shape="circle"
+          :icon="h(ReloadOutlined)"
+          :loading="trafficStatsLoading"
+          @click="getTrafficStats"
+        />
+      </a-tooltip>
+    </template>
+    <a-spin :spinning="trafficStatsLoading">
+      <a-flex gap="middle" horizontal>
+        <a-statistic title="总访问量" :value="trafficStatsVO.view_count" class="w-33%" />
+        <a-statistic title="总评论数" :value="trafficStatsVO.comment_count" class="w-33%" />
+        <a-statistic title="总点赞数" :value="trafficStatsVO.like_count" class="w-33%" />
+      </a-flex>
+    </a-spin>
   </a-card>
   <a-card title="趋势图" class="mt-5">
-    <div>
-      <div id="user-analysis-4-week" class="w-full h-120" />
-      <div id="user-analysis-4-month" class="w-full h-120" />
-    </div>
+    <template #extra>
+      <a-tooltip title="刷新数据">
+        <a-button
+          shape="circle"
+          :icon="h(ReloadOutlined)"
+          :loading="tendencyLoading"
+          @click="getTendencyStats4Week"
+        />
+      </a-tooltip>
+    </template>
+    <a-spin :spinning="tendencyLoading">
+      <div>
+        <div id="user-analysis-4-week" class="w-full h-120" />
+        <div id="user-analysis-4-month" class="w-full h-120" />
+      </div>
+    </a-spin>
   </a-card>
   <a-card title="用户分布图" class="mt-5">
     <template #extra class="flex justify-end items-center mb-5">
@@ -62,9 +102,13 @@ import {
 import { h, onMounted, reactive, ref, watch } from 'vue'
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
+import { echarts } from '@/utils/echarts-setup'
+import type { IListData, IResponse } from '@/interfaces/Common'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 document.title = '流量统计 - 后台管理'
 
+const todayTrafficLoading = ref<boolean>(false)
 const todayTrafficStatsVO = ref<TodayTrafficStatsVO>({
   view_count: 0,
   user_view_count: 0,
@@ -74,6 +118,7 @@ const todayTrafficStatsVO = ref<TodayTrafficStatsVO>({
 
 const getTodayTrafficStats = async () => {
   try {
+    todayTrafficLoading.value = true
     const response: any = await GetTodayTrafficStats()
     if (response.data.code !== 0) {
       message.error(response.data.data.message)
@@ -82,6 +127,8 @@ const getTodayTrafficStats = async () => {
     todayTrafficStatsVO.value = response.data.data || todayTrafficStatsVO.value
   } catch (error) {
     console.log(error)
+  } finally {
+    todayTrafficLoading.value = false
   }
 }
 getTodayTrafficStats()
@@ -92,8 +139,11 @@ const trafficStatsVO = ref<TrafficStatsVO>({
   like_count: 0
 })
 
+const trafficStatsLoading = ref<boolean>(false)
+
 const getTrafficStats = async () => {
   try {
+    trafficStatsLoading.value = true
     const response: any = await GetTrafficStats()
     if (response.data.code !== 0) {
       message.error(response.data.data.message)
@@ -102,19 +152,19 @@ const getTrafficStats = async () => {
     trafficStatsVO.value = response.data.data || trafficStatsVO.value
   } catch (error) {
     console.log(error)
+  } finally {
+    trafficStatsLoading.value = false
   }
 }
 getTrafficStats()
-
-import { echarts } from '@/utils/echarts-setup'
-import type { IListData, IResponse } from '@/interfaces/Common'
-import { ReloadOutlined } from '@ant-design/icons-vue' // 确保路径正确
 
 onMounted(() => {
   initUserAnalysis4Week()
   initUserAnalysis4Month()
   initUserDistribution()
 })
+
+const tendencyLoading = ref<boolean>(false)
 
 const tendencyData4Week = reactive<{ pv: number[][]; uv: number[][] }>({
   pv: [],
@@ -131,6 +181,7 @@ watch(
 
 const getTendencyStats4Week = async () => {
   try {
+    tendencyLoading.value = true
     const response: any = await GetTendencyStats('week')
     const apiResponse: IResponse<TendencyDataVO> = response.data
     if (apiResponse.code !== 0) {
@@ -147,6 +198,8 @@ const getTendencyStats4Week = async () => {
     })
   } catch (error) {
     console.log(error)
+  } finally {
+    tendencyLoading.value = false
   }
 }
 
