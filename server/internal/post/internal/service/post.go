@@ -18,9 +18,10 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/chenmingyong0423/go-eventbus"
 	"log/slog"
 	"strings"
+
+	"github.com/chenmingyong0423/go-eventbus"
 
 	domain2 "github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
 

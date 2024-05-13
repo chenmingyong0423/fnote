@@ -5,6 +5,7 @@ go 1.22.0
 require (
 	github.com/chenmingyong0423/ginx v0.1.2
 	github.com/chenmingyong0423/gkit v0.6.0
+	github.com/chenmingyong0423/go-eventbus v0.1.0
 	github.com/chenmingyong0423/go-http-chain v0.3.4
 	github.com/chenmingyong0423/go-mongox v0.18.0
 	github.com/gin-contrib/cors v1.7.1
@@ -24,7 +25,6 @@ require (
 
 require (
 	github.com/bytedance/sonic v1.11.3 // indirect
-	github.com/chenmingyong0423/go-eventbus v0.1.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect

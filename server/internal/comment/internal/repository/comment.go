@@ -58,6 +58,7 @@ type ICommentRepository interface {
 	FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]domain.AdminComment, error)
 	DeleteCommentByIds(ctx context.Context, ids []primitive.ObjectID) error
 	PullReplyByCIdAndRIds(ctx context.Context, commentId string, replyIds []string) error
+	DeleteManyByPostId(ctx context.Context, postId string) error
 }
 
 func NewCommentRepository(dao dao.ICommentDao) *CommentRepository {
@@ -70,6 +71,10 @@ var _ ICommentRepository = (*CommentRepository)(nil)
 
 type CommentRepository struct {
 	dao dao.ICommentDao
+}
+
+func (r *CommentRepository) DeleteManyByPostId(ctx context.Context, postId string) error {
+	return r.dao.DeleteManyByPostId(ctx, postId)
 }
 
 func (r *CommentRepository) PullReplyByCIdAndRIds(ctx context.Context, commentId string, replyIds []string) error {
