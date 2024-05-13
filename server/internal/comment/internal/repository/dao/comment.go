@@ -136,6 +136,7 @@ type ICommentDao interface {
 	FindByAggregation(ctx context.Context, pipeline mongo.Pipeline) ([]*Comment, error)
 	DeleteByIds(ctx context.Context, ids []primitive.ObjectID) error
 	PullReplyByCIdAndRIds(ctx context.Context, commentId primitive.ObjectID, replyIds []string) error
+	DeleteManyByPostId(ctx context.Context, postId string) error
 }
 
 func NewCommentDao(db *mongo.Database) *CommentDao {
@@ -148,6 +149,17 @@ var _ ICommentDao = (*CommentDao)(nil)
 
 type CommentDao struct {
 	coll *mongox.Collection[Comment]
+}
+
+func (d *CommentDao) DeleteManyByPostId(ctx context.Context, postId string) error {
+	deleteResult, err := d.coll.Deleter().Filter(query.Eq("post_info.post_id", postId)).DeleteMany(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "failed to delete comments, postId: %s", postId)
+	}
+	if deleteResult.DeletedCount == 0 {
+		return fmt.Errorf("DeletedCount=0, failed to delete comments, postId: %s", postId)
+	}
+	return nil
 }
 
 func (d *CommentDao) PullReplyByCIdAndRIds(ctx context.Context, commentObjID primitive.ObjectID, replyIds []string) error {
