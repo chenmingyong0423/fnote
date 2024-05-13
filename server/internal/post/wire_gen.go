@@ -15,17 +15,18 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/web"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
+	"github.com/chenmingyong0423/go-eventbus"
 	"github.com/google/wire"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Injectors from wire.go:
 
-func InitPostModule(mongoDB *mongo.Database, cfgModel *website_config.Module, countStats service.ICountStatsService, fileService service2.IFileService, postLikeModel *post_like.Module) *Module {
+func InitPostModule(mongoDB *mongo.Database, cfgModel *website_config.Module, countStats service.ICountStatsService, fileService service2.IFileService, postLikeModel *post_like.Module, eventBus *eventbus.EventBus) *Module {
 	postDao := dao.NewPostDao(mongoDB)
 	postRepository := repository.NewPostRepository(postDao)
 	iWebsiteConfigService := cfgModel.Svc
-	postService := service3.NewPostService(postRepository, iWebsiteConfigService, countStats, fileService)
+	postService := service3.NewPostService(postRepository, iWebsiteConfigService, countStats, fileService, eventBus)
 	iPostLikeService := postLikeModel.Svc
 	postHandler := web.NewPostHandler(postService, iWebsiteConfigService, iPostLikeService, countStats)
 	module := &Module{
