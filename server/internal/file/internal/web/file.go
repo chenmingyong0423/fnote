@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handler
+package web
 
 import (
 	"io"
 	"path/filepath"
+
+	"github.com/chenmingyong0423/fnote/server/internal/file/internal/service"
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
@@ -24,7 +26,6 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 
-	"github.com/chenmingyong0423/fnote/server/internal/file/service"
 	"github.com/gin-gonic/gin"
 )
 

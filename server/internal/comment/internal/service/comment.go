@@ -287,37 +287,24 @@ func (s *CommentService) AddComment(ctx context.Context, comment domain.Comment)
 }
 
 func (s *CommentService) SubscribePostDeletedEvent() {
-	type PostInfo struct {
-		PostId string `json:"post_id"`
-	}
-	rid := uuid.NewString()
-	ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
-	l := slog.Default().With("X-Request-ID", rid)
-	var postInfo PostInfo
-
 	eventChan := s.eventBus.Subscribe("post-delete")
 	for event := range eventChan {
-		l.InfoContext(ctx, "post-delete", "payload", event.Payload)
-		if payload, ok := event.Payload.(map[string]any); ok {
-			marshal, err := json.Marshal(payload)
-			if err != nil {
-				l.ErrorContext(ctx, "post-delete: invalid payload", "payload", event.Payload)
-				continue
-			}
-			err = json.Unmarshal(marshal, &postInfo)
-			if err != nil {
-				l.ErrorContext(ctx, "post-delete: json.Unmarshal failed", "payload", event.Payload, "error", err)
-				continue
-			}
-			err = s.DeleteAllCommentByPostId(ctx, postInfo.PostId)
-			if err != nil {
-				l.ErrorContext(ctx, "post-delete: failed to delete all comment", "postId", postInfo.PostId, "error", err)
-				continue
-			}
-			l.InfoContext(ctx, "post-delete: delete all comment success", "postId", postInfo.PostId)
-		} else {
-			l.ErrorContext(ctx, "post-delete: invalid payload", "payload", event.Payload)
+		rid := uuid.NewString()
+		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
+		l := slog.Default().With("X-Request-ID", rid)
+		l.InfoContext(ctx, "post-delete", "payload", string(event.Payload))
+		var postEvent domain.PostEvent
+		err := json.Unmarshal(event.Payload, &postEvent)
+		if err != nil {
+			l.ErrorContext(ctx, "post-delete: failed to json.Unmarshal", "err", err)
+			continue
 		}
+		err = s.DeleteAllCommentByPostId(ctx, postEvent.PostId)
+		if err != nil {
+			l.ErrorContext(ctx, "post-delete: failed to delete all comment", "postId", postEvent.PostId, "error", err)
+			continue
+		}
+		l.InfoContext(ctx, "post-delete: delete all comment successfully", "postId", postEvent.PostId)
 	}
 }
 

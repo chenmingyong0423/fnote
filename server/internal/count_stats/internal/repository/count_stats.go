@@ -18,8 +18,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/chenmingyong0423/fnote/server/internal/count_stats/repository/dao"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/repository/dao"
+
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 )

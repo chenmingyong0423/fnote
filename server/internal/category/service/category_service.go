@@ -20,6 +20,10 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/chenmingyong0423/fnote/server/internal/count_stats"
+
+	"github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/service"
+
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
@@ -27,7 +31,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/chenmingyong0423/fnote/server/internal/category/repository"
-	"github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/gkit/slice"
@@ -50,7 +53,7 @@ type ICategoryService interface {
 
 var _ ICategoryService = (*CategoryService)(nil)
 
-func NewCategoryService(repo repository.ICategoryRepository, countStatsService service.ICountStatsService, configService website_config.Service) *CategoryService {
+func NewCategoryService(repo repository.ICategoryRepository, countStatsService count_stats.Service, configService website_config.Service) *CategoryService {
 	return &CategoryService{
 		countStatsService: countStatsService,
 		configService:     configService,

@@ -19,7 +19,9 @@ package main
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
+	"github.com/chenmingyong0423/fnote/server/internal/count_stats"
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis"
+	"github.com/chenmingyong0423/fnote/server/internal/file"
 	"github.com/chenmingyong0423/fnote/server/internal/friend"
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
@@ -65,13 +67,16 @@ func initializeApp() (*gin.Engine, error) {
 		wire.FieldsOf(new(*post_visit.Module), "Hdl"),
 		friend.InitFriendModule,
 		wire.FieldsOf(new(*friend.Module), "Hdl"),
+		count_stats.InitCountStatsModule,
+		wire.FieldsOf(new(*count_stats.Module), "Hdl"),
+		wire.FieldsOf(new(*count_stats.Module), "Svc"),
+		file.InitFileModule,
+		wire.FieldsOf(new(*file.Module), "Hdl"),
 		ioc.VlProviders,
 		ioc.EmailProviders,
 		ioc.MsgProviders,
 		ioc.MsgTplProviders,
-		ioc.CountStatsProviders,
 		ioc.TagProviders,
-		ioc.FileProviders,
 		ioc.BackupProviders,
 	))
 }

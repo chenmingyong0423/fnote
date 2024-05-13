@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handler
+package web
 
 import (
-	"github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+	"github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/gin-gonic/gin"

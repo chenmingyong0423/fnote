@@ -22,6 +22,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/file"
+
+	"github.com/chenmingyong0423/fnote/server/internal/count_stats"
+
 	"github.com/chenmingyong0423/fnote/server/internal/friend"
 
 	"github.com/chenmingyong0423/fnote/server/internal/post_visit"
@@ -42,11 +46,7 @@ import (
 
 	handler6 "github.com/chenmingyong0423/fnote/server/internal/backup/handler"
 
-	handler5 "github.com/chenmingyong0423/fnote/server/internal/count_stats/handler"
-
 	"github.com/spf13/viper"
-
-	handler3 "github.com/chenmingyong0423/fnote/server/internal/file/handler"
 
 	handler2 "github.com/chenmingyong0423/fnote/server/internal/tag/handler"
 
@@ -63,7 +63,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(fileHdr *handler3.FileHandler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *comment.Handler, cfgHdr *website_config.Handler, frdHdr *friend.Handler, postHdr *post.Handler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *data_analysis.Handler, csHandler *handler5.CountStatsHandler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler, postVisitHdr *post_visit.Handler) (*gin.Engine, error) {
+func NewGinEngine(fileHdr *file.Handler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *comment.Handler, cfgHdr *website_config.Handler, frdHdr *friend.Handler, postHdr *post.Handler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *data_analysis.Handler, csHandler *count_stats.Handler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler, postVisitHdr *post_visit.Handler) (*gin.Engine, error) {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 

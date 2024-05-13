@@ -19,8 +19,10 @@ import (
 	"encoding/hex"
 	"time"
 
-	"github.com/chenmingyong0423/fnote/server/internal/file/repository/dao"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/file/internal/domain"
+
+	"github.com/chenmingyong0423/fnote/server/internal/file/internal/repository/dao"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

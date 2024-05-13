@@ -8,6 +8,8 @@ github.com/chenmingyong0423/gkit v0.6.0 h1:dJofj3V+fQekT9OaxmaQKJFkSd9BzrtP1JFWo
 github.com/chenmingyong0423/gkit v0.6.0/go.mod h1:9MKV0/B3MiBCGf4fssogftFbNIGJk9a4ffm/o3+pkHw=
 github.com/chenmingyong0423/go-eventbus v0.1.0 h1:EEokj9RWO3YftkWatCOwS19yn+gLBJQqonlcC3gl7s0=
 github.com/chenmingyong0423/go-eventbus v0.1.0/go.mod h1:xbHdi38mLnhtQBnZLaRBRiZqxzmBe+nKFLHqhzL62Lg=
+github.com/chenmingyong0423/go-eventbus v0.2.0 h1:oiR8cFbMFJGyWS2tXwwUe+U7692+HEI3BlvS34JFj74=
+github.com/chenmingyong0423/go-eventbus v0.2.0/go.mod h1:89Yoh2hBVD0eoq1LbY13fAXGurCdRrs0yOhoaY1SnXA=
 github.com/chenmingyong0423/go-http-chain v0.3.4 h1:I/EWPLsYq2fuo3x4HUMSQ0tFj5rMdZxZ1JHTlN1ACp4=
 github.com/chenmingyong0423/go-http-chain v0.3.4/go.mod h1:Gg/O7EVrW81VXqElJmkoY+Uo5/LU586fpS7LQkLLxaA=
 github.com/chenmingyong0423/go-mongox v0.18.0 h1:VnOy5lSiGv6YWRPo4MbXVWGHdQVTIm8YISfkJnH1mR8=

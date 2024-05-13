@@ -17,8 +17,6 @@
 package post
 
 import (
-	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
-	fServ "github.com/chenmingyong0423/fnote/server/internal/file/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/repository"
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/service"
@@ -35,7 +33,7 @@ var PostProviders = wire.NewSet(web.NewPostHandler, service.NewPostService, repo
 	wire.Bind(new(repository.IPostRepository), new(*repository.PostRepository)),
 	wire.Bind(new(dao.IPostDao), new(*dao.PostDao)))
 
-func InitPostModule(mongoDB *mongo.Database, cfgModel *website_config.Module, countStats csServ.ICountStatsService, fileService fServ.IFileService, postLikeModel *post_like.Module, eventBus *eventbus.EventBus) *Module {
+func InitPostModule(mongoDB *mongo.Database, cfgModel *website_config.Module, postLikeModel *post_like.Module, eventBus *eventbus.EventBus) *Module {
 	panic(wire.Build(
 		PostProviders,
 		wire.FieldsOf(new(*website_config.Module), "Svc"),
