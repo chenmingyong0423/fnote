@@ -35,6 +35,7 @@ import (
 
 func initializeApp() (*gin.Engine, error) {
 	panic(wire.Build(
+		ioc.NewEventBus,
 		ioc.InitLogger,
 		ioc.NewMongoDB,
 		ioc.InitMiddlewares,

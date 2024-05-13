@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/chenmingyong0423/go-eventbus"
 	"log/slog"
 	"strings"
 
@@ -57,12 +58,13 @@ type IPostService interface {
 
 var _ IPostService = (*PostService)(nil)
 
-func NewPostService(repo repository.IPostRepository, cfgService website_config.Service, countStats service2.ICountStatsService, fileService service3.IFileService) *PostService {
+func NewPostService(repo repository.IPostRepository, cfgService website_config.Service, countStats service2.ICountStatsService, fileService service3.IFileService, eventBus *eventbus.EventBus) *PostService {
 	return &PostService{
 		repo:        repo,
 		cfgService:  cfgService,
 		countStats:  countStats,
 		fileService: fileService,
+		eventBus:    eventBus,
 	}
 }
 
@@ -71,6 +73,7 @@ type PostService struct {
 	cfgService  website_config.Service
 	countStats  service2.ICountStatsService
 	fileService service3.IFileService
+	eventBus    *eventbus.EventBus
 }
 
 func (s *PostService) IncreasePostLikeCount(ctx context.Context, postId string) error {

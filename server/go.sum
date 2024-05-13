@@ -6,6 +6,8 @@ github.com/chenmingyong0423/ginx v0.1.2 h1:IiktjoYfSpN8czQeWaB6V8hpXi2cSHPaVkM07
 github.com/chenmingyong0423/ginx v0.1.2/go.mod h1:z950yIFUFE7nA3DJ7b5sD7TnggZS4YOKrE6L021/HY4=
 github.com/chenmingyong0423/gkit v0.6.0 h1:dJofj3V+fQekT9OaxmaQKJFkSd9BzrtP1JFWoM3fgoY=
 github.com/chenmingyong0423/gkit v0.6.0/go.mod h1:9MKV0/B3MiBCGf4fssogftFbNIGJk9a4ffm/o3+pkHw=
+github.com/chenmingyong0423/go-eventbus v0.1.0 h1:EEokj9RWO3YftkWatCOwS19yn+gLBJQqonlcC3gl7s0=
+github.com/chenmingyong0423/go-eventbus v0.1.0/go.mod h1:xbHdi38mLnhtQBnZLaRBRiZqxzmBe+nKFLHqhzL62Lg=
 github.com/chenmingyong0423/go-http-chain v0.3.4 h1:I/EWPLsYq2fuo3x4HUMSQ0tFj5rMdZxZ1JHTlN1ACp4=
 github.com/chenmingyong0423/go-http-chain v0.3.4/go.mod h1:Gg/O7EVrW81VXqElJmkoY+Uo5/LU586fpS7LQkLLxaA=
 github.com/chenmingyong0423/go-mongox v0.18.0 h1:VnOy5lSiGv6YWRPo4MbXVWGHdQVTIm8YISfkJnH1mR8=

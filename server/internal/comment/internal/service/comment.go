@@ -16,6 +16,7 @@ package service
 
 import (
 	"context"
+	"github.com/chenmingyong0423/go-eventbus"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/domain"
 	"github.com/chenmingyong0423/gkit/slice"
@@ -47,7 +48,7 @@ type ICommentService interface {
 	FindCommentByIds(ctx context.Context, commentIds []string) ([]domain.AdminComment, error)
 }
 
-func NewCommentService(repo repository.ICommentRepository) *CommentService {
+func NewCommentService(repo repository.ICommentRepository, eventBus *eventbus.EventBus) *CommentService {
 	return &CommentService{
 		repo: repo,
 	}
@@ -56,7 +57,8 @@ func NewCommentService(repo repository.ICommentRepository) *CommentService {
 var _ ICommentService = (*CommentService)(nil)
 
 type CommentService struct {
-	repo repository.ICommentRepository
+	repo     repository.ICommentRepository
+	eventBus *eventbus.EventBus
 }
 
 func (s *CommentService) FindCommentByIds(ctx context.Context, commentIds []string) ([]domain.AdminComment, error) {
