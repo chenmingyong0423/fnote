@@ -14,6 +14,10 @@
 
 package domain
 
+import (
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
+)
+
 type Page struct {
 	Size    int64
 	Skip    int64
@@ -23,4 +27,92 @@ type Page struct {
 
 	CategoryFilter []string
 	TagFilter      []string
+}
+
+type PostsQueryCondition struct {
+	Size int64
+	Skip int64
+
+	Keyword *string
+
+	api.Sorting
+
+	Categories []string
+	Tags       []string
+}
+
+type PostRequest struct {
+	api.PageRequest
+	Categories []string `form:"categories"`
+	Tags       []string `form:"tags"`
+}
+
+type DetailPostVO struct {
+	PrimaryPost
+	ExtraPost
+	IsLiked bool `json:"is_liked"`
+}
+
+type Post struct {
+	PrimaryPost
+	ExtraPost
+	Likes []string `json:"-"`
+}
+
+type ExtraPost struct {
+	Content          string `json:"content"`
+	MetaDescription  string `json:"meta_description"`
+	MetaKeywords     string `json:"meta_keywords"`
+	WordCount        int    `json:"word_count"`
+	UpdateTime       int64  `json:"update_time"`
+	IsDisplayed      bool   `json:"is_displayed"`
+	IsCommentAllowed bool   `json:"is_comment_allowed"`
+}
+
+type PrimaryPost struct {
+	Id           string          `json:"_id"`
+	Author       string          `json:"author"`
+	Title        string          `json:"title"`
+	Summary      string          `json:"summary"`
+	CoverImg     string          `json:"cover_img"`
+	Categories   []Category4Post `json:"category"`
+	Tags         []Tag4Post      `json:"tags"`
+	LikeCount    int             `json:"like_count"`
+	CommentCount int             `json:"comment_count"`
+	VisitCount   int             `json:"visit_count"`
+	StickyWeight int             `json:"sticky_weight"`
+	CreateTime   int64           `json:"create_time"`
+}
+
+type Category4Post struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type Tag4Post struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type PostStatus uint
+
+type PostEvent struct {
+	PostId     string   `json:"post_id"`
+	CategoryId []string `json:"category_id"`
+	TagId      []string `json:"tag_id"`
+	FileId     string   `json:"file_id"`
+}
+
+type UpdatedPostEvent struct {
+	PostId            string   `json:"post_id"`
+	AddedCategoryId   []string `json:"added_category_id"`
+	DeletedCategoryId []string `json:"deleted_category_id"`
+	AddedTagId        []string `json:"added_tag_id"`
+	DeletedTagId      []string `json:"deleted_tag_id"`
+	NewFileId         string   `json:"new_file_id"`
+	OldFileId         string   `json:"old_file_id"`
+}
+
+type LikePostEvent struct {
+	PostId string `json:"post_id"`
 }

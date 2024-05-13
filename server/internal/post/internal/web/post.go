@@ -15,14 +15,16 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"sync"
 
-	domain2 "github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
+	"github.com/chenmingyong0423/go-eventbus"
 
-	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+	"github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
+
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 
@@ -39,7 +41,6 @@ import (
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
 )
 
@@ -58,12 +59,12 @@ type SummaryPostVO struct {
 	CreateTime   int64    `json:"create_time"`
 }
 
-func NewPostHandler(serv service.IPostService, cfgService website_config.Service, postLikeServ post_like.Service, countStats service2.ICountStatsService) *PostHandler {
+func NewPostHandler(serv service.IPostService, cfgService website_config.Service, postLikeServ post_like.Service, eventBus *eventbus.EventBus) *PostHandler {
 	return &PostHandler{
 		serv:         serv,
 		cfgService:   cfgService,
 		postLikeServ: postLikeServ,
-		countStats:   countStats,
+		eventBus:     eventBus,
 	}
 }
 
@@ -71,8 +72,8 @@ type PostHandler struct {
 	serv         service.IPostService
 	cfgService   website_config.Service
 	postLikeServ post_like.Service
-	countStats   service2.ICountStatsService
 	ipMap        sync.Map
+	eventBus     *eventbus.EventBus
 }
 
 func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
@@ -178,6 +179,12 @@ func (h *PostHandler) AddLike(ctx *gin.Context) (*apiwrap.ResponseBody[any], err
 	_, isExist := h.ipMap.LoadOrStore(key, struct{}{})
 	if !isExist {
 		defer h.ipMap.Delete(key)
+		var likePostEvent = domain.LikePostEvent{PostId: postId}
+		marshal, err := json.Marshal(likePostEvent)
+		if err != nil {
+			return nil, err
+		}
+
 		id, err := h.postLikeServ.Add(ctx, post_like.PostLike{
 			PostId:    postId,
 			Ip:        ip,
@@ -199,20 +206,14 @@ func (h *PostHandler) AddLike(ctx *gin.Context) (*apiwrap.ResponseBody[any], err
 				return nil, err
 			}
 		}
-		go func() {
-			// 点赞数+1
-			gErr := h.countStats.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeLikeCount.ToString(), domain.CountStatsTypeLikeCount)
-			if gErr != nil {
-				l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
-				l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-			}
-		}()
+
+		h.eventBus.Publish("post-like", eventbus.Event{Payload: marshal})
 	}
 	return apiwrap.SuccessResponse(), nil
 }
 
 func (h *PostHandler) AdminGetPosts(ctx *gin.Context, req PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.AdminPostVO]], error) {
-	posts, total, err := h.serv.AdminGetPosts(ctx, domain2.Page{
+	posts, total, err := h.serv.AdminGetPosts(ctx, domain.Page{
 		Size:           req.PageSize,
 		Skip:           (req.PageNo - 1) * req.PageSize,
 		Field:          req.Field,

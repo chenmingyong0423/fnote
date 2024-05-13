@@ -20,13 +20,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
 	domain2 "github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
 
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/repository/dao"
 
 	"github.com/chenmingyong0423/gkit/slice"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/pkg/errors"

@@ -11,7 +11,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/repository/dao"
 	service3 "github.com/chenmingyong0423/fnote/server/internal/comment/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/web"
-	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/message/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"

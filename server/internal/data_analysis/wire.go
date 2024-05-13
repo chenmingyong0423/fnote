@@ -18,7 +18,7 @@ package data_analysis
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
-	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/service"
+	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/service"
 	service2 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/web"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
