@@ -14,4 +14,20 @@
 
 package web
 
-type CategoryVO struct{}
+type CategoryVO struct {
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Route       string `json:"route"`
+	Description string `json:"description"`
+	PostCount   int64  `json:"post_count"`
+	Enabled     bool   `json:"enabled"`
+	ShowInNav   bool   `json:"show_in_nav"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
+type SelectCategoryVO struct {
+	Id    string `json:"id"`
+	Value string `json:"value"`
+	Label string `json:"label"`
+}

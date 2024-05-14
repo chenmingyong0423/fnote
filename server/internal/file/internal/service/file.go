@@ -38,12 +38,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/spf13/viper"
-
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 )
 
 type IFileService interface {
-	Upload(ctx context.Context, fileDTO dto.FileDTO) (*domain.File, error)
+	Upload(ctx context.Context, fileDTO domain.FileDTO) (*domain.File, error)
 	IndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	DeleteIndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error
 }
@@ -72,7 +70,7 @@ func (s *FileService) IndexFileMeta(ctx context.Context, fileId []byte, entityId
 	return s.repo.PushIntoUsedIn(ctx, fileId, entityId, entityType)
 }
 
-func (s *FileService) Upload(ctx context.Context, fileDTO dto.FileDTO) (*domain.File, error) {
+func (s *FileService) Upload(ctx context.Context, fileDTO domain.FileDTO) (*domain.File, error) {
 	var (
 		filename string
 	)

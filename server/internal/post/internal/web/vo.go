@@ -14,4 +14,41 @@
 
 package web
 
-type PostVO struct{}
+type AdminPostVO struct {
+	Id               string            `json:"id"`
+	CoverImg         string            `json:"cover_img"`
+	Title            string            `json:"title"`
+	Summary          string            `json:"summary"`
+	Categories       []Category4PostVO `json:"categories"`
+	Tags             []Tag4PostVO      `json:"tags"`
+	IsDisplayed      bool              `json:"is_displayed"`
+	IsCommentAllowed bool              `json:"is_comment_allowed"`
+	CreatedAt        int64             `json:"created_at"`
+	UpdatedAt        int64             `json:"updated_at"`
+}
+
+type Category4PostVO struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type Tag4PostVO struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type PostDetailVO struct {
+	Id               string            `json:"id"`
+	Author           string            `json:"author"`
+	Title            string            `json:"title"`
+	Summary          string            `json:"summary"`
+	Content          string            `json:"content"`
+	CoverImg         string            `json:"cover_img"`
+	Categories       []Category4PostVO `json:"categories"`
+	Tags             []Tag4PostVO      `json:"tags"`
+	IsDisplayed      bool              `json:"is_displayed"`
+	StickyWeight     int               `json:"sticky_weight"`
+	MetaDescription  string            `json:"meta_description"`
+	MetaKeywords     string            `json:"meta_keywords"`
+	IsCommentAllowed bool              `json:"is_comment_allowed"`
+}

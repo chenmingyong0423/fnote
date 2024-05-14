@@ -14,4 +14,11 @@
 
 package web
 
-type CountStatsVO struct{}
+type WebsiteCountStatsVO struct {
+	PostCount        int64 `json:"post_count"`
+	CategoryCount    int64 `json:"category_count"`
+	TagCount         int64 `json:"tag_count"`
+	CommentCount     int64 `json:"comment_count"`
+	LikeCount        int64 `json:"like_count"`
+	WebsiteViewCount int64 `json:"website_view_count"`
+}

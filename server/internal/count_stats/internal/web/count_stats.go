@@ -16,7 +16,6 @@ package web
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/service"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/gin-gonic/gin"
 )
@@ -36,13 +35,13 @@ func (h *CountStatsHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup.GET("", apiwrap.Wrap(h.GetWebsiteCountStats))
 }
 
-func (h *CountStatsHandler) GetWebsiteCountStats(ctx *gin.Context) (*apiwrap.ResponseBody[vo.WebsiteCountStatsVO], error) {
+func (h *CountStatsHandler) GetWebsiteCountStats(ctx *gin.Context) (*apiwrap.ResponseBody[WebsiteCountStatsVO], error) {
 	// 查询网站的统计数据
 	websiteCountStats, err := h.serv.GetWebsiteCountStats(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return apiwrap.SuccessResponseWithData(vo.WebsiteCountStatsVO{
+	return apiwrap.SuccessResponseWithData(WebsiteCountStatsVO{
 		PostCount:        websiteCountStats.PostCount,
 		CategoryCount:    websiteCountStats.CategoryCount,
 		TagCount:         websiteCountStats.TagCount,

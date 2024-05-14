@@ -24,9 +24,6 @@ import (
 
 	"github.com/chenmingyong0423/gkit"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -111,12 +108,12 @@ func (h *CategoryHandler) GetCategoryByRoute(ctx *gin.Context) (*apiwrap.Respons
 	return apiwrap.SuccessResponseWithData(CategoryNameVO{Name: category.Name}), nil
 }
 
-func (h *CategoryHandler) AdminGetCategories(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.Category]], error) {
-	categories, total, err := h.serv.AdminGetCategories(ctx, dto.PageDTO{PageNo: req.PageNo, PageSize: req.PageSize, Field: req.Field, Order: req.Order, Keyword: req.Keyword})
+func (h *CategoryHandler) AdminGetCategories(ctx *gin.Context, req PageRequest) (*apiwrap.ResponseBody[apiwrap.PageVO[CategoryVO]], error) {
+	categories, total, err := h.serv.AdminGetCategories(ctx, domain.PageDTO{PageNo: req.PageNo, PageSize: req.PageSize, Field: req.Field, Order: req.Order, Keyword: req.Keyword})
 	if err != nil {
 		return nil, err
 	}
-	pageVO := vo.PageVO[vo.Category]{}
+	pageVO := apiwrap.PageVO[CategoryVO]{}
 	pageVO.PageNo = req.PageNo
 	pageVO.PageSize = req.PageSize
 	pageVO.List = h.categoriesToVO(categories)
@@ -124,10 +121,10 @@ func (h *CategoryHandler) AdminGetCategories(ctx *gin.Context, req request.PageR
 	return apiwrap.SuccessResponseWithData(pageVO), nil
 }
 
-func (h *CategoryHandler) categoriesToVO(categories []domain.Category) []vo.Category {
-	categoryVOs := make([]vo.Category, len(categories))
+func (h *CategoryHandler) categoriesToVO(categories []domain.Category) []CategoryVO {
+	categoryVOs := make([]CategoryVO, len(categories))
 	for i, category := range categories {
-		categoryVOs[i] = vo.Category{
+		categoryVOs[i] = CategoryVO{
 			Id:          category.Id,
 			Name:        category.Name,
 			Route:       category.Route,
@@ -135,14 +132,14 @@ func (h *CategoryHandler) categoriesToVO(categories []domain.Category) []vo.Cate
 			ShowInNav:   category.ShowInNav,
 			Description: category.Description,
 			PostCount:   category.PostCount,
-			CreateTime:  category.CreatedAt,
-			UpdateTime:  category.UpdatedAt,
+			CreatedAt:   category.CreatedAt,
+			UpdatedAt:   category.UpdatedAt,
 		}
 	}
 	return categoryVOs
 }
 
-func (h *CategoryHandler) AdminCreateCategory(ctx *gin.Context, req request.CreateCategoryRequest) (*apiwrap.ResponseBody[any], error) {
+func (h *CategoryHandler) AdminCreateCategory(ctx *gin.Context, req CreateCategoryRequest) (*apiwrap.ResponseBody[any], error) {
 	err := h.serv.AdminCreateCategory(ctx, domain.Category{
 		Name:        req.Name,
 		Route:       req.Route,
@@ -159,12 +156,12 @@ func (h *CategoryHandler) AdminCreateCategory(ctx *gin.Context, req request.Crea
 	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *CategoryHandler) AdminModifyCategoryEnabled(ctx *gin.Context, req request.CategoryEnabledRequest) (*apiwrap.ResponseBody[any], error) {
+func (h *CategoryHandler) AdminModifyCategoryEnabled(ctx *gin.Context, req CategoryEnabledRequest) (*apiwrap.ResponseBody[any], error) {
 	id := ctx.Param("id")
 	return apiwrap.SuccessResponse(), h.serv.ModifyCategoryEnabled(ctx, id, gkit.GetValueOrDefault(req.Enabled))
 }
 
-func (h *CategoryHandler) AdminModifyCategory(ctx *gin.Context, req request.UpdateCategoryRequest) (*apiwrap.ResponseBody[any], error) {
+func (h *CategoryHandler) AdminModifyCategory(ctx *gin.Context, req UpdateCategoryRequest) (*apiwrap.ResponseBody[any], error) {
 	id := ctx.Param("id")
 	return apiwrap.SuccessResponse(), h.serv.ModifyCategory(ctx, id, req.Description)
 }
@@ -174,24 +171,24 @@ func (h *CategoryHandler) AdminDeleteCategory(ctx *gin.Context) (*apiwrap.Respon
 	return apiwrap.SuccessResponse(), h.serv.DeleteCategory(ctx, id)
 }
 
-func (h *CategoryHandler) AdminModifyCategoryNavigation(ctx *gin.Context, req request.CategoryNavRequest) (*apiwrap.ResponseBody[any], error) {
+func (h *CategoryHandler) AdminModifyCategoryNavigation(ctx *gin.Context, req CategoryNavRequest) (*apiwrap.ResponseBody[any], error) {
 	id := ctx.Param("id")
 	return apiwrap.SuccessResponse(), h.serv.ModifyCategoryNavigation(ctx, id, gkit.GetValueOrDefault(req.ShowInNav))
 }
 
-func (h *CategoryHandler) AdminGetSelectCategories(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[vo.SelectCategory]], error) {
+func (h *CategoryHandler) AdminGetSelectCategories(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[SelectCategoryVO]], error) {
 	categories, err := h.serv.AdminGetSelectCategories(ctx)
 	if err != nil {
 		return nil, err
 	}
 	list := h.categoriesToSelectVO(categories)
-	return apiwrap.SuccessResponseWithData(apiwrap.ListVO[vo.SelectCategory]{List: list}), nil
+	return apiwrap.SuccessResponseWithData(apiwrap.ListVO[SelectCategoryVO]{List: list}), nil
 }
 
-func (h *CategoryHandler) categoriesToSelectVO(categories []domain.Category) []vo.SelectCategory {
-	result := make([]vo.SelectCategory, len(categories))
+func (h *CategoryHandler) categoriesToSelectVO(categories []domain.Category) []SelectCategoryVO {
+	result := make([]SelectCategoryVO, len(categories))
 	for i, category := range categories {
-		result[i] = vo.SelectCategory{Id: category.Id, Value: category.Name, Label: category.Name}
+		result[i] = SelectCategoryVO{Id: category.Id, Value: category.Name, Label: category.Name}
 	}
 	return result
 }

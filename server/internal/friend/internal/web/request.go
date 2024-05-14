@@ -21,3 +21,27 @@ type FriendRequest struct {
 	Description string `json:"description" binding:"required,max=30"`
 	Email       string `json:"email"`
 }
+
+type FriendReq struct {
+	Name        string `json:"name" binding:"required"`
+	Logo        string `json:"logo" binding:"required"`
+	Description string `json:"description" binding:"required"`
+	Status      int    `json:"status" binding:"required"`
+}
+
+type FriendRejectReq struct {
+	Reason string `json:"reason" binding:"required"`
+}
+
+type PageRequest struct {
+	// 当前页
+	PageNo int64 `form:"pageNo" binding:"required"`
+	// 每页数量
+	PageSize int64 `form:"pageSize" binding:"required"`
+	// 排序字段
+	Field string `form:"sortField,omitempty"`
+	// 排序规则
+	Order string `form:"sortOrder,omitempty"`
+	// 搜索内容
+	Keyword string `form:"keyword,omitempty"`
+}

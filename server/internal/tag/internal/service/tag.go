@@ -29,7 +29,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/gkit/slice"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -47,7 +46,7 @@ func NewTagService(repo repository.ITagRepository, eventBus *eventbus.EventBus) 
 type ITagService interface {
 	GetTags(ctx context.Context) ([]domain.TagWithCount, error)
 	GetTagByRoute(ctx context.Context, route string) (domain.Tag, error)
-	AdminGetTags(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Tag, int64, error)
+	AdminGetTags(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Tag, int64, error)
 	AdminCreateTag(ctx context.Context, tag domain.Tag) error
 	ModifyTagEnabled(ctx context.Context, id string, enabled bool) error
 	DeleteTag(ctx context.Context, id string) error
@@ -112,7 +111,7 @@ func (s *TagService) AdminCreateTag(ctx context.Context, tag domain.Tag) error {
 	return nil
 }
 
-func (s *TagService) AdminGetTags(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Tag, int64, error) {
+func (s *TagService) AdminGetTags(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Tag, int64, error) {
 	tags, total, err := s.QueryTagsPage(ctx, pageDTO)
 	if err != nil {
 		return nil, 0, err
@@ -138,7 +137,7 @@ func (s *TagService) GetTags(ctx context.Context) ([]domain.TagWithCount, error)
 	}), nil
 }
 
-func (s *TagService) QueryTagsPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Tag, int64, error) {
+func (s *TagService) QueryTagsPage(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Tag, int64, error) {
 	return s.repo.QueryTagsPage(ctx, pageDTO)
 }
 

@@ -199,7 +199,7 @@ func (h *AggregatePostHandler) AdminPublishDraft(ctx *gin.Context, req PostReq) 
 			MetaDescription:  req.MetaDescription,
 			MetaKeywords:     req.MetaKeywords,
 			WordCount:        req.WordCount,
-			UpdateTime:       time.Now().Local().Unix(),
+			UpdatedAt:        time.Now().Local().Unix(),
 			IsDisplayed:      req.IsDisplayed,
 			IsCommentAllowed: req.IsCommentAllowed,
 		},

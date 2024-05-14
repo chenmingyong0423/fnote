@@ -14,10 +14,6 @@
 
 package domain
 
-import (
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
-)
-
 type Page struct {
 	Size    int64
 	Skip    int64
@@ -35,16 +31,10 @@ type PostsQueryCondition struct {
 
 	Keyword *string
 
-	api.Sorting
+	Sorting
 
 	Categories []string
 	Tags       []string
-}
-
-type PostRequest struct {
-	api.PageRequest
-	Categories []string `form:"categories"`
-	Tags       []string `form:"tags"`
 }
 
 type DetailPostVO struct {
@@ -64,7 +54,7 @@ type ExtraPost struct {
 	MetaDescription  string `json:"meta_description"`
 	MetaKeywords     string `json:"meta_keywords"`
 	WordCount        int    `json:"word_count"`
-	UpdateTime       int64  `json:"update_time"`
+	UpdatedAt        int64  `json:"updated_at"`
 	IsDisplayed      bool   `json:"is_displayed"`
 	IsCommentAllowed bool   `json:"is_comment_allowed"`
 }
@@ -94,17 +84,37 @@ type Tag4Post struct {
 	Name string `json:"name"`
 }
 
-type PostEvent struct {
-	PostId            string   `json:"post_id"`
-	AddedCategoryId   []string `json:"added_category_id,omitempty"`
-	DeletedCategoryId []string `json:"deleted_category_id,omitempty"`
-	AddedTagId        []string `json:"added_tag_id,omitempty"`
-	DeletedTagId      []string `json:"deleted_tag_id,omitempty"`
-	NewFileId         string   `json:"new_file_id,omitempty"`
-	OldFileId         string   `json:"old_file_id,omitempty"`
-	Type              string   `json:"type"`
+type PostRequest struct {
+	PageRequest
+	Categories []string `form:"categories"`
+	Tags       []string `form:"tags"`
 }
 
-type LikePostEvent struct {
-	PostId string `json:"post_id"`
+type PageRequest struct {
+	Page2
+	// 排序字段
+	Sorting
+	// 搜索内容
+	Keyword *string `form:"keyword,omitempty"`
+}
+
+func (p *PageRequest) ValidateAndSetDefault() {
+	if p.PageNo <= 0 {
+		p.PageNo = 1
+	}
+	if p.PageSize <= 0 {
+		p.PageSize = 10
+	}
+}
+
+type Sorting struct {
+	Field *string `form:"sortField,omitempty"`
+	Order *string `form:"sortOrder,omitempty"`
+}
+
+type Page2 struct {
+	// 当前页
+	PageNo int64 `form:"pageNo" binding:"required"`
+	// 每页数量
+	PageSize int64 `form:"pageSize" binding:"required"`
 }

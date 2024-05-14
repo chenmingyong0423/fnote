@@ -14,4 +14,19 @@
 
 package web
 
-type TagVO struct{}
+type TagVO struct {
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Route       string `json:"route"`
+	Description string `json:"description"`
+	PostCount   int64  `json:"post_count"`
+	Enabled     bool   `json:"enabled"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
+type SelectTagVO struct {
+	Id    string `json:"id"`
+	Value string `json:"value"`
+	Label string `json:"label"`
+}

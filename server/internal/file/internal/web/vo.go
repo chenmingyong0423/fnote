@@ -14,4 +14,8 @@
 
 package web
 
-type FileVO struct{}
+type FileVO struct {
+	FileId   string `json:"file_id"`
+	FileName string `json:"file_name"`
+	Url      string `json:"url"`
+}
