@@ -135,8 +135,8 @@ func (h *CategoryHandler) categoriesToVO(categories []domain.Category) []vo.Cate
 			ShowInNav:   category.ShowInNav,
 			Description: category.Description,
 			PostCount:   category.PostCount,
-			CreateTime:  category.CreateTime,
-			UpdateTime:  category.UpdateTime,
+			CreateTime:  category.CreatedAt,
+			UpdateTime:  category.UpdatedAt,
 		}
 	}
 	return categoryVOs

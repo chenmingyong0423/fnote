@@ -22,8 +22,8 @@ type Category struct {
 	Enabled     bool   `json:"enabled"`
 	ShowInNav   bool   `json:"show_in_nav"`
 	Sort        int64  `json:"sort"`
-	CreateTime  int64  `json:"create_time"`
-	UpdateTime  int64  `json:"update_time"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
 	PostCount   int64  `json:"post_count"`
 }
 

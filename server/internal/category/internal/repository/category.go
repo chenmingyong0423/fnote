@@ -20,6 +20,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chenmingyong0423/go-mongox"
+
 	"github.com/chenmingyong0423/fnote/server/internal/category/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/category/internal/repository/dao"
 	"github.com/chenmingyong0423/gkit/slice"
@@ -99,15 +101,16 @@ func (r *CategoryRepository) GetSelectCategories(ctx context.Context) ([]domain.
 
 func (r *CategoryRepository) RecoverCategory(ctx context.Context, category domain.Category) error {
 	return r.dao.RecoverCategory(ctx, &dao.Category{
-		Id:          primitive.ObjectID{},
 		Name:        category.Name,
 		Route:       category.Route,
 		Description: category.Description,
 		Sort:        category.Sort,
 		Enabled:     category.Enabled,
 		ShowInNav:   category.ShowInNav,
-		CreateTime:  category.CreateTime,
-		UpdateTime:  category.UpdateTime,
+		Model: mongox.Model{
+			CreatedAt: time.Unix(category.CreatedAt, 0),
+			UpdatedAt: time.Unix(category.UpdatedAt, 0),
+		},
 	})
 }
 
@@ -164,8 +167,7 @@ func (r *CategoryRepository) ModifyCategoryEnabled(ctx context.Context, id strin
 }
 
 func (r *CategoryRepository) CreateCategory(ctx context.Context, category domain.Category) (string, error) {
-	now := time.Now().Local().Unix()
-	return r.dao.Create(ctx, &dao.Category{Name: category.Name, Route: category.Route, Description: category.Description, ShowInNav: category.ShowInNav, Enabled: category.Enabled, CreateTime: now, UpdateTime: now})
+	return r.dao.Create(ctx, &dao.Category{Name: category.Name, Route: category.Route, Description: category.Description, ShowInNav: category.ShowInNav, Enabled: category.Enabled})
 }
 
 func (r *CategoryRepository) QueryCategoriesPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error) {
@@ -203,7 +205,7 @@ func (r *CategoryRepository) GetCategoryByRoute(ctx context.Context, route strin
 }
 
 func (r *CategoryRepository) toDomainCategory(category *dao.Category) domain.Category {
-	return domain.Category{Id: category.Id.Hex(), Name: category.Name, Route: category.Route, Description: category.Description, Enabled: category.Enabled, ShowInNav: category.ShowInNav, PostCount: category.PostCount, Sort: category.Sort, CreateTime: category.CreateTime, UpdateTime: category.UpdateTime}
+	return domain.Category{Id: category.ID.Hex(), Name: category.Name, Route: category.Route, Description: category.Description, Enabled: category.Enabled, ShowInNav: category.ShowInNav, PostCount: category.PostCount, Sort: category.Sort, CreatedAt: category.CreatedAt.Unix(), UpdatedAt: category.UpdatedAt.Unix()}
 }
 
 func (r *CategoryRepository) GetAll(ctx context.Context) ([]domain.Category, error) {
