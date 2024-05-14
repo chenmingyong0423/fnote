@@ -54,10 +54,9 @@ func (s CountStatsType) Valid() error {
 }
 
 type CountStats struct {
-	Id          string
-	Type        CountStatsType
-	ReferenceId string
-	Count       int64
+	Id    string
+	Type  CountStatsType
+	Count int64
 }
 
 type WebsiteCountStats struct {
