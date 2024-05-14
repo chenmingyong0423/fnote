@@ -61,7 +61,7 @@ func (r *PostDraftRepository) GetPostDraftPage(ctx context.Context, pageQuery do
 	if pageQuery.Field != "" {
 		findOptions.SetSort(bsonx.M(pageQuery.Field, pageQuery.Order))
 	} else {
-		findOptions.SetSort(bsonx.M("create_time", -1))
+		findOptions.SetSort(bsonx.M("created_at", -1))
 	}
 
 	postDrafts, cnt, err := r.dao.QueryPage(ctx, cond, findOptions)
