@@ -33,17 +33,15 @@ import (
 )
 
 type File struct {
-	Id               primitive.ObjectID `bson:"_id,omitempty"`
-	FileId           []byte             `bson:"file_id"`
-	FileName         string             `bson:"file_name"`
-	OriginalFileName string             `bson:"original_file_name"`
-	FileType         string             `bson:"file_type"`
-	FileSize         int64              `bson:"size"`
-	FilePath         string             `bson:"file_path"`
-	Url              string             `bson:"url"`
-	UsedIn           []FileUsage        `bson:"used_in"`
-	CreateTime       int64              `bson:"create_time"`
-	UpdateTime       int64              `bson:"update_time"`
+	mongox.Model     `bson:",inline"`
+	FileId           []byte      `bson:"file_id"`
+	FileName         string      `bson:"file_name"`
+	OriginalFileName string      `bson:"original_file_name"`
+	FileType         string      `bson:"file_type"`
+	FileSize         int64       `bson:"size"`
+	FilePath         string      `bson:"file_path"`
+	Url              string      `bson:"url"`
+	UsedIn           []FileUsage `bson:"used_in"`
 }
 
 type FileUsage struct {

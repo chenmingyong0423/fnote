@@ -24,8 +24,8 @@ type File struct {
 	FilePath         string
 	Url              string
 	UsedIn           []FileUsage
-	CreateTime       int64
-	UpdateTime       int64
+	CreatedAt        int64
+	UpdatedAt        int64
 }
 
 type FileUsage struct {

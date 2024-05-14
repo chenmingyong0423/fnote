@@ -17,13 +17,10 @@ package repository
 import (
 	"context"
 	"encoding/hex"
-	"time"
 
 	"github.com/chenmingyong0423/fnote/server/internal/file/internal/domain"
 
 	"github.com/chenmingyong0423/fnote/server/internal/file/internal/repository/dao"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type IFileRepository interface {
@@ -66,13 +63,11 @@ func (r *FileRepository) PushIntoUsedIn(ctx context.Context, fileId []byte, enti
 }
 
 func (r *FileRepository) Save(ctx context.Context, file *domain.File) error {
-	unix := time.Now().Local().Unix()
 	fileId, err := hex.DecodeString(file.FileId)
 	if err != nil {
 		return err
 	}
 	_, err = r.dao.Save(ctx, &dao.File{
-		Id:               primitive.ObjectID{},
 		FileId:           fileId,
 		FileName:         file.FileName,
 		OriginalFileName: file.OriginalFileName,
@@ -81,8 +76,6 @@ func (r *FileRepository) Save(ctx context.Context, file *domain.File) error {
 		FilePath:         file.FilePath,
 		Url:              file.Url,
 		UsedIn:           make([]dao.FileUsage, 0),
-		CreateTime:       unix,
-		UpdateTime:       unix,
 	})
 	if err != nil {
 		return err
@@ -92,7 +85,7 @@ func (r *FileRepository) Save(ctx context.Context, file *domain.File) error {
 
 func (r *FileRepository) toDomainFile(file *dao.File) *domain.File {
 	return &domain.File{
-		Id:               file.Id.Hex(),
+		Id:               file.ID.Hex(),
 		FileId:           hex.EncodeToString(file.FileId),
 		FileName:         file.FileName,
 		OriginalFileName: file.OriginalFileName,
@@ -110,7 +103,7 @@ func (r *FileRepository) toDomainFile(file *dao.File) *domain.File {
 			}
 			return usedIn
 		}(),
-		CreateTime: file.CreateTime,
-		UpdateTime: file.UpdateTime,
+		CreatedAt: file.CreatedAt.Unix(),
+		UpdatedAt: file.UpdatedAt.Unix(),
 	}
 }
