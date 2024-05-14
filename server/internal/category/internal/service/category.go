@@ -79,7 +79,7 @@ func (s *CategoryService) DeleteCategory(ctx context.Context, id string) error {
 		}
 		return err
 	}
-	var categoryEvent = domain.CategoryEvent{CategoryId: id}
+	var categoryEvent = domain.CategoryEvent{CategoryId: id, Type: "delete"}
 	marshal, err := json.Marshal(&categoryEvent)
 	if err != nil {
 		return err
@@ -88,7 +88,7 @@ func (s *CategoryService) DeleteCategory(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	go s.eventBus.Publish("category-delete", eventbus.Event{Payload: marshal})
+	go s.eventBus.Publish("category", eventbus.Event{Payload: marshal})
 	return nil
 }
 
@@ -105,7 +105,7 @@ func (s *CategoryService) AdminCreateCategory(ctx context.Context, category doma
 	if err != nil {
 		return err
 	}
-	var categoryEvent = domain.CategoryEvent{CategoryId: id}
+	var categoryEvent = domain.CategoryEvent{CategoryId: id, Type: "create"}
 	marshal, err := json.Marshal(&categoryEvent)
 	if err != nil {
 		return err
@@ -118,7 +118,7 @@ func (s *CategoryService) AdminCreateCategory(ctx context.Context, category doma
 		return err
 	}
 
-	go s.eventBus.Publish("category-addition", eventbus.Event{Payload: marshal})
+	go s.eventBus.Publish("category", eventbus.Event{Payload: marshal})
 	return nil
 }
 
