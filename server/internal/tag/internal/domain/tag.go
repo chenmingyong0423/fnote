@@ -15,13 +15,13 @@
 package domain
 
 type Tag struct {
-	Id         string
-	Name       string
-	Route      string
-	PostCount  int64
-	Enabled    bool
-	CreateTime int64
-	UpdateTime int64
+	Id        string
+	Name      string
+	Route     string
+	PostCount int64
+	Enabled   bool
+	CreatedAt int64
+	UpdatedAt int64
 }
 
 type TagWithCount struct {
