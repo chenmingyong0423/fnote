@@ -197,7 +197,7 @@ db.getCollection("configs").insertOne({
 
 // friends
 db.createCollection("friends");
-db.getCollection("friends").createIndex({ status: 1, create_time: 1 })
+db.getCollection("friends").createIndex({ status: 1, created_at: 1 })
 db.getCollection("friends").createIndex({
     url: NumberInt("1")
 }, {
@@ -220,8 +220,8 @@ db.getCollection("message_templates").insertOne({
     name: "comment",
     title: "文章评论通知",
     content: "您好，您在文章有新的评论，详情请前往后台进行查看。",
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000),
+    created_at: new Date(),
+    updated_at: new Date()
     recipient_type: 0,
     active: 1
 });
@@ -230,8 +230,8 @@ db.getCollection("message_templates").insertOne({
     name: "user-comment-approval",
     title: "评论审核通过通知",
     content: "您好，您在 %s 文章中发表的评论已通过审核。",
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000),
+    created_at: new Date(),
+    updated_at: new Date()
     recipient_type: 1,
     active: 1
 });
@@ -240,8 +240,8 @@ db.getCollection("message_templates").insertOne({
     name: "user-comment-disapproval",
     title: "评论被驳回通知",
     content: "您好，您在 %s 文章中发表的评论未通过审核，原因：%s",
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000),
+    created_at: new Date(),
+    updated_at: new Date()
     recipient_type: 1,
     active: 1
 });
@@ -250,8 +250,8 @@ db.getCollection("message_templates").insertOne({
     name: "user-comment-reply",
     title: "评论被回复通知",
     content: "您好，您在 %s 文章中发表的评论有新的回复。",
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000),
+    created_at: new Date(),
+    updated_at: new Date()
     recipient_type: 1,
     active: 1
 });
@@ -260,8 +260,8 @@ db.getCollection("message_templates").insertOne({
     name: "friend",
     title: "友链申请通知",
     content: "您好，您的网站有了新的友链申请，详情可前往后台查看。",
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000),
+    created_at: new Date(),
+    updated_at: new Date()
     active: 1,
     recipient_type: 0
 });
@@ -270,8 +270,8 @@ db.getCollection("message_templates").insertOne({
     name: "friend-approval",
     title: "友链申请通过通知",
     content: "您好，您在 %s 网站里提交的友链申请已通过审核并展示在页面上。",
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000),
+    created_at: new Date(),
+    updated_at: new Date()
     recipient_type: 1,
     active: 1
 });
@@ -280,18 +280,18 @@ db.getCollection("message_templates").insertOne({
     name: "friend-rejection",
     title: "友链申请不通过通知",
     content: "您好，您在 %s 网站里提交的友链申请未通过审核，原因：%s",
-    create_time: Math.floor(new Date().getTime() / 1000),
-    update_time: Math.floor(new Date().getTime() / 1000),
+    created_at: new Date(),
+    updated_at: new Date()
     recipient_type: 1,
     active: 1
 });
 
 // posts
 db.createCollection("posts");
-// 创建 create_time 降序索引
-db.getCollection("posts").createIndex({ "create_time": -1 });
-// 创建 create_time 升序索引
-db.getCollection("posts").createIndex({ "create_time": 1 });
+// 创建 created_at 降序索引
+db.getCollection("posts").createIndex({ "created_at": -1 });
+// 创建 created_at 升序索引
+db.getCollection("posts").createIndex({ "created_at": 1 });
 // 创建 category 单字段索引
 db.getCollection("posts").createIndex({ "categories": 1 });
 // 创建 tags 单字段索引
@@ -301,8 +301,8 @@ db.getCollection("posts").createIndex({ "title": "text" });
 
 // visit_logs
 db.createCollection("visit_logs");
-// 创建 create_time 降序索引
-db.getCollection("visit_logs").createIndex({ "create_time": -1 });
+// 创建 created_at 降序索引
+db.getCollection("visit_logs").createIndex({ "created_at": -1 });
 
 // file_meta
 db.createCollection("file_meta");
@@ -316,56 +316,48 @@ db.getCollection("file_meta").createIndex({
 
 // count_stats
 db.createCollection("count_stats")
-db.getCollection("count_stats").createIndex({ reference_id: 1, type: 1})
 db.getCollection("count_stats").createIndex({
     type: NumberInt("1"),
-    reference_id: NumberInt("1"),
 }, {
-    name: "unique_type_reference_id",
+    name: "unique_type",
     unique: true
 });
 db.getCollection("count_stats").insertMany([
     {
-        "type": "PostCountInWebsite",
-        "reference_id": "PostCountInWebsite",
+        "type": "PostCount",
         "count": 0,
-        create_time: Math.floor(new Date().getTime() / 1000),
-        update_time: Math.floor(new Date().getTime() / 1000)
+        created_at: new Date(),
+        updated_at: new Date()
     },
     {
         "type": "CategoryCount",
-        "reference_id": "CategoryCount",
         "count": 0,
-        create_time: Math.floor(new Date().getTime() / 1000),
-        update_time: Math.floor(new Date().getTime() / 1000)
+        created_at: new Date(),
+        updated_at: new Date()
     },
     {
         "type": "TagCount",
-        "reference_id": "TagCount",
         "count": 0,
-        create_time: Math.floor(new Date().getTime() / 1000),
-        update_time: Math.floor(new Date().getTime() / 1000)
+        created_at: new Date(),
+        updated_at: new Date()
     },
     {
         "type": "CommentCount",
-        "reference_id": "CommentCount",
         "count": 0,
-        create_time: Math.floor(new Date().getTime() / 1000),
-        update_time: Math.floor(new Date().getTime() / 1000)
+        created_at: new Date(),
+        updated_at: new Date()
     },
     {
         "type": "LikeCount",
-        "reference_id": "LikeCount",
         "count": 0,
-        create_time: Math.floor(new Date().getTime() / 1000),
-        update_time: Math.floor(new Date().getTime() / 1000)
+        created_at: new Date(),
+        updated_at: new Date()
     },
     {
         "type": "WebsiteViewCount",
-        "reference_id": "WebsiteViewCount",
         "count": 0,
-        create_time: Math.floor(new Date().getTime() / 1000),
-        update_time: Math.floor(new Date().getTime() / 1000)
+        created_at: new Date(),
+        updated_at: new Date()
     }
 ])
 // post-likes
