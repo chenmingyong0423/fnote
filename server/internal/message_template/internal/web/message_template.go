@@ -12,16 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package domain
+package web
 
-import "fmt"
+import (
+	"github.com/chenmingyong0423/fnote/server/internal/message_template/internal/service"
+	"github.com/gin-gonic/gin"
+)
 
-type MessageTemplate struct {
-	Name    string
-	Title   string
-	Content string
+func NewMessageTemplateHandler(serv service.IMessageTemplateService) *MessageTemplateHandler {
+	return &MessageTemplateHandler{
+		serv: serv,
+	}
 }
 
-func (mt *MessageTemplate) FormatContent(args ...any) {
-	mt.Content = fmt.Sprintf(mt.Content, args...)
+type MessageTemplateHandler struct {
+	serv service.IMessageTemplateService
+}
+
+func (h *MessageTemplateHandler) RegisterGinRoutes(engine *gin.Engine) {
+
 }

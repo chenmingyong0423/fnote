@@ -37,21 +37,21 @@ type MessageTemplate struct {
 	UpdateTime    int64 `bson:"update_time"`
 }
 
-type IMsgTplDao interface {
+type IMessageTemplateDao interface {
 	FindMsgTplByName(ctx context.Context, name string, recipientType uint) (*MessageTemplate, error)
 }
 
-var _ IMsgTplDao = (*MsgTplDao)(nil)
+var _ IMessageTemplateDao = (*MessageTemplateDao)(nil)
 
-func NewMsgTplDao(db *mongo.Database) *MsgTplDao {
-	return &MsgTplDao{coll: mongox.NewCollection[MessageTemplate](db.Collection("message_templates"))}
+func NewMessageTemplateDao(db *mongo.Database) *MessageTemplateDao {
+	return &MessageTemplateDao{coll: mongox.NewCollection[MessageTemplate](db.Collection("message_templates"))}
 }
 
-type MsgTplDao struct {
+type MessageTemplateDao struct {
 	coll *mongox.Collection[MessageTemplate]
 }
 
-func (d *MsgTplDao) FindMsgTplByName(ctx context.Context, name string, recipientType uint) (*MessageTemplate, error) {
+func (d *MessageTemplateDao) FindMsgTplByName(ctx context.Context, name string, recipientType uint) (*MessageTemplate, error) {
 	msgTpl, err := d.coll.Finder().Filter(
 		query.BsonBuilder().Eq("name", name).Eq("active", 1).Eq("recipient_type", recipientType).Build(),
 	).FindOne(ctx)
