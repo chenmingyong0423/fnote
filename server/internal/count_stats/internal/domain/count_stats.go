@@ -28,8 +28,8 @@ const (
 	CountStatsTypePostCountInCategory CountStatsType = "PostCountInCategory"
 	// CountStatsTypePostCountInTag 标签下的文章数量
 	CountStatsTypePostCountInTag CountStatsType = "PostCountInTag"
-	// CountStatsTypePostCountInWebsite 网站的文章数量
-	CountStatsTypePostCountInWebsite CountStatsType = "PostCountInWebsite"
+	// CountStatsTypePostCount 网站的文章数量
+	CountStatsTypePostCount CountStatsType = "PostCount"
 	// CountStatsTypeCategoryCount 分类数量
 	CountStatsTypeCategoryCount CountStatsType = "CategoryCount"
 	// CountStatsTypeTagCount 标签数量
@@ -71,7 +71,7 @@ type WebsiteCountStats struct {
 
 func (wcs *WebsiteCountStats) SetCountByType(typ CountStatsType, count int64) {
 	switch typ {
-	case CountStatsTypePostCountInWebsite:
+	case CountStatsTypePostCount:
 		wcs.PostCount = count
 	case CountStatsTypeCategoryCount:
 		wcs.CategoryCount = count

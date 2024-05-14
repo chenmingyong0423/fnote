@@ -65,7 +65,7 @@ type CountStatsService struct {
 func (s *CountStatsService) GetWebsiteCountStats(ctx context.Context) (domain.WebsiteCountStats, error) {
 	var result = new(domain.WebsiteCountStats)
 	countStatsSlice, err := s.repo.GetWebsiteCountStats(ctx, []domain.CountStatsType{
-		domain.CountStatsTypePostCountInWebsite,
+		domain.CountStatsTypePostCount,
 		domain.CountStatsTypeCategoryCount,
 		domain.CountStatsTypeTagCount,
 		domain.CountStatsTypeCommentCount,
@@ -314,7 +314,7 @@ func (s *CountStatsService) SubscribePostEvent() {
 			// todo 后面可以考虑使用事务
 			{
 				// 网站文章数 +1
-				err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCountInWebsite.ToString(), domain.CountStatsTypePostCountInWebsite, 1)
+				err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCount.ToString(), domain.CountStatsTypePostCount, 1)
 				if err != nil {
 					l.ErrorContext(ctx, "CountStats: post event: failed to increase the count of post in website", "count", 1, "err", err)
 				}
@@ -327,7 +327,7 @@ func (s *CountStatsService) SubscribePostEvent() {
 		case "delete":
 			// todo 后面可以考虑使用事务
 			// 网站文章数 -1
-			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCountInWebsite.ToString(), domain.CountStatsTypePostCountInWebsite, 1)
+			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCount.ToString(), domain.CountStatsTypePostCount, 1)
 			if err != nil {
 				l.ErrorContext(ctx, "CountStats: post event: failed to decrease the count of post in website", "count", 1, "err", err)
 			}
