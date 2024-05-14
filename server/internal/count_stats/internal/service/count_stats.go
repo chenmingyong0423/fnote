@@ -266,7 +266,7 @@ func (s *CountStatsService) SubscribeWebsiteVisitEvent() {
 }
 
 func (s *CountStatsService) subscribeTagEvent() {
-	eventChan := s.eventBus.Subscribe("website visit")
+	eventChan := s.eventBus.Subscribe("tag")
 	for event := range eventChan {
 		rid := uuid.NewString()
 		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
