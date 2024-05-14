@@ -9,12 +9,12 @@ package main
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
 	"github.com/chenmingyong0423/fnote/server/internal/backup/handler"
-	service2 "github.com/chenmingyong0423/fnote/server/internal/backup/service"
+	"github.com/chenmingyong0423/fnote/server/internal/backup/service"
 	"github.com/chenmingyong0423/fnote/server/internal/category"
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats"
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis"
-	"github.com/chenmingyong0423/fnote/server/internal/email/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/email"
 	"github.com/chenmingyong0423/fnote/server/internal/file"
 	"github.com/chenmingyong0423/fnote/server/internal/friend"
 	"github.com/chenmingyong0423/fnote/server/internal/global"
@@ -41,10 +41,10 @@ func initializeApp() (*gin.Engine, error) {
 	fileHandler := module.Hdl
 	categoryModule := category.InitCategoryModule(database, eventBus)
 	categoryHandler := categoryModule.Hdl
-	emailService := service.NewEmailService()
+	emailModule := email.InitEmailModule(database)
 	message_templateModule := message_template.InitMessageTemplateModule(database)
 	website_configModule := website_config.InitWebsiteConfigModule(database)
-	messageModule := message.InitMessageModule(emailService, message_templateModule, website_configModule)
+	messageModule := message.InitMessageModule(emailModule, message_templateModule, website_configModule)
 	post_likeModule := post_like.InitPostLikeModule(database)
 	postModule := post.InitPostModule(database, website_configModule, post_likeModule, eventBus)
 	commentModule := comment.InitCommentModule(database, messageModule, website_configModule, postModule, eventBus)
@@ -62,7 +62,7 @@ func initializeApp() (*gin.Engine, error) {
 	data_analysisModule := data_analysis.InitDataAnalysisModule(database, count_statsModule, post_likeModule, commentModule, visit_logModule)
 	dataAnalysisHandler := data_analysisModule.Hdl
 	countStatsHandler := count_statsModule.Hdl
-	backupService := service2.NewBackupService(database)
+	backupService := service.NewBackupService(database)
 	backupHandler := handler.NewBackupHandler(backupService)
 	writer := ioc.InitLogger()
 	v, err := global.IsWebsiteInitializedFn(database)

@@ -17,11 +17,12 @@ package service
 import (
 	"context"
 
+	"github.com/chenmingyong0423/fnote/server/internal/email"
+	emailPkg "github.com/chenmingyong0423/fnote/server/internal/email"
+
 	"github.com/chenmingyong0423/fnote/server/internal/message_template"
 
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
-
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 )
 
 type IMessageService interface {
@@ -33,7 +34,7 @@ var (
 	_ IMessageService = (*MessageService)(nil)
 )
 
-func NewMessageService(configServ website_config.Service, emailServ service.IEmailService, msgTplService message_template.Service) *MessageService {
+func NewMessageService(configServ website_config.Service, emailServ email.Service, msgTplService message_template.Service) *MessageService {
 	return &MessageService{
 		configServ:    configServ,
 		emailServ:     emailServ,
@@ -43,7 +44,7 @@ func NewMessageService(configServ website_config.Service, emailServ service.IEma
 
 type MessageService struct {
 	configServ    website_config.Service
-	emailServ     service.IEmailService
+	emailServ     email.Service
 	msgTplService message_template.Service
 }
 
@@ -70,7 +71,7 @@ func (s *MessageService) sendEmail(ctx context.Context, msgTplName, contentType 
 	if len(args) > 0 {
 		msgTpl.FormatContent(args...)
 	}
-	return s.emailServ.SendEmail(ctx, domain.Email{
+	return s.emailServ.SendEmail(ctx, emailPkg.Email{
 		Host:        emailCfg.Host,
 		Port:        emailCfg.Port,
 		Username:    emailCfg.Username,

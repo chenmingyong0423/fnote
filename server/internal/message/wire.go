@@ -17,7 +17,7 @@
 package message
 
 import (
-	emailServ "github.com/chenmingyong0423/fnote/server/internal/email/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/email"
 	"github.com/chenmingyong0423/fnote/server/internal/message/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/message_template"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
@@ -28,11 +28,12 @@ var MessageProviders = wire.NewSet(service.NewMessageService,
 	wire.Bind(new(service.IMessageService), new(*service.MessageService)),
 )
 
-func InitMessageModule(emailServ emailServ.IEmailService, messageTemplateModule *message_template.Module, websiteConfigModule *website_config.Module) *Module {
+func InitMessageModule(emailModule *email.Module, messageTemplateModule *message_template.Module, websiteConfigModule *website_config.Module) *Module {
 	panic(wire.Build(
 		MessageProviders,
 		wire.FieldsOf(new(*message_template.Module), "Svc"),
 		wire.FieldsOf(new(*website_config.Module), "Svc"),
+		wire.FieldsOf(new(*email.Module), "Svc"),
 		wire.Struct(new(Module), "Svc"),
 	))
 }
