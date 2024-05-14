@@ -1,4 +1,4 @@
-// Copyright 2023 chenmingyong0423
+// Copyright 2024 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ioc
+package message
 
 import (
-	handler12 "github.com/chenmingyong0423/fnote/server/internal/backup/handler"
-	service13 "github.com/chenmingyong0423/fnote/server/internal/backup/service"
-	"github.com/google/wire"
+	"github.com/chenmingyong0423/fnote/server/internal/message/internal/service"
 )
 
-var (
-	BackupProviders = wire.NewSet(handler12.NewBackupHandler, service13.NewBackupService,
-		wire.Bind(new(service13.IBackupService), new(*service13.BackupService)),
-	)
+type (
+	Service = service.IMessageService
+	Module  struct {
+		Svc Service
+	}
 )

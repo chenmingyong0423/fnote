@@ -9,9 +9,9 @@ package friend
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/repository"
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/repository/dao"
-	service2 "github.com/chenmingyong0423/fnote/server/internal/friend/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/web"
-	"github.com/chenmingyong0423/fnote/server/internal/message/service"
+	"github.com/chenmingyong0423/fnote/server/internal/message"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"github.com/google/wire"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,12 +19,13 @@ import (
 
 // Injectors from wire.go:
 
-func InitFriendModule(mongoDB *mongo.Database, msgServ service.IMessageService, cfgModule *website_config.Module) *Module {
+func InitFriendModule(mongoDB *mongo.Database, messageModule *message.Module, cfgModule *website_config.Module) *Module {
 	friendDao := dao.NewFriendDao(mongoDB)
 	friendRepository := repository.NewFriendRepository(friendDao)
-	friendService := service2.NewFriendService(friendRepository)
+	friendService := service.NewFriendService(friendRepository)
+	iMessageService := messageModule.Svc
 	iWebsiteConfigService := cfgModule.Svc
-	friendHandler := web.NewFriendHandler(friendService, msgServ, iWebsiteConfigService)
+	friendHandler := web.NewFriendHandler(friendService, iMessageService, iWebsiteConfigService)
 	module := &Module{
 		Svc: friendService,
 		Hdl: friendHandler,
@@ -34,4 +35,4 @@ func InitFriendModule(mongoDB *mongo.Database, msgServ service.IMessageService, 
 
 // wire.go:
 
-var FriendProviders = wire.NewSet(web.NewFriendHandler, service2.NewFriendService, repository.NewFriendRepository, dao.NewFriendDao, wire.Bind(new(service2.IFriendService), new(*service2.FriendService)), wire.Bind(new(repository.IFriendRepository), new(*repository.FriendRepository)), wire.Bind(new(dao.IFriendDao), new(*dao.FriendDao)))
+var FriendProviders = wire.NewSet(web.NewFriendHandler, service.NewFriendService, repository.NewFriendRepository, dao.NewFriendDao, wire.Bind(new(service.IFriendService), new(*service.FriendService)), wire.Bind(new(repository.IFriendRepository), new(*repository.FriendRepository)), wire.Bind(new(dao.IFriendDao), new(*dao.FriendDao)))

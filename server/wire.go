@@ -26,6 +26,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/friend"
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/fnote/server/internal/ioc"
+	"github.com/chenmingyong0423/fnote/server/internal/message"
 	"github.com/chenmingyong0423/fnote/server/internal/message_template"
 	"github.com/chenmingyong0423/fnote/server/internal/post"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
@@ -50,7 +51,6 @@ func initializeApp() (*gin.Engine, error) {
 		global.IsWebsiteInitializedFn,
 
 		website_config.InitWebsiteConfigModule,
-		wire.FieldsOf(new(*website_config.Module), "Svc"),
 		wire.FieldsOf(new(*website_config.Module), "Hdl"),
 		post_index.InitPostIndexModule,
 		wire.FieldsOf(new(*post_index.Module), "Hdl"),
@@ -80,11 +80,10 @@ func initializeApp() (*gin.Engine, error) {
 		wire.FieldsOf(new(*tag.Module), "Hdl"),
 		message_template.InitMessageTemplateModule,
 		wire.FieldsOf(new(*message_template.Module), "Hdl"),
-		wire.FieldsOf(new(*message_template.Module), "Svc"),
 		visit_log.InitVisitLogModule,
 		wire.FieldsOf(new(*visit_log.Module), "Hdl"),
+		message.InitMessageModule,
 		ioc.EmailProviders,
-		ioc.MsgProviders,
 		ioc.BackupProviders,
 	))
 }

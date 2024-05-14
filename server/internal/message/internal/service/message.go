@@ -21,7 +21,6 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
-	emailServ "github.com/chenmingyong0423/fnote/server/internal/email/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 )
 
@@ -34,7 +33,7 @@ var (
 	_ IMessageService = (*MessageService)(nil)
 )
 
-func NewMessageService(configServ website_config.Service, emailServ emailServ.IEmailService, msgTplService message_template.Service) *MessageService {
+func NewMessageService(configServ website_config.Service, emailServ service.IEmailService, msgTplService message_template.Service) *MessageService {
 	return &MessageService{
 		configServ:    configServ,
 		emailServ:     emailServ,
@@ -44,7 +43,7 @@ func NewMessageService(configServ website_config.Service, emailServ emailServ.IE
 
 type MessageService struct {
 	configServ    website_config.Service
-	emailServ     emailServ.IEmailService
+	emailServ     service.IEmailService
 	msgTplService message_template.Service
 }
 

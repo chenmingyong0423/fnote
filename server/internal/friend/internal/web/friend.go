@@ -21,6 +21,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/chenmingyong0423/fnote/server/internal/message"
+
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/service"
 
 	"github.com/spf13/viper"
@@ -35,12 +37,11 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
 
-	msgService "github.com/chenmingyong0423/fnote/server/internal/message/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/gin-gonic/gin"
 )
 
-func NewFriendHandler(serv service.IFriendService, msgServ msgService.IMessageService, cfgService website_config.Service) *FriendHandler {
+func NewFriendHandler(serv service.IFriendService, msgServ message.Service, cfgService website_config.Service) *FriendHandler {
 	return &FriendHandler{
 		serv:       serv,
 		msgServ:    msgServ,
@@ -51,7 +52,7 @@ func NewFriendHandler(serv service.IFriendService, msgServ msgService.IMessageSe
 
 type FriendHandler struct {
 	serv       service.IFriendService
-	msgServ    msgService.IMessageService
+	msgServ    message.Service
 	cfgService website_config.Service
 }
 
