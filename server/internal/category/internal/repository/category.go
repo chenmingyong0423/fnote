@@ -182,7 +182,7 @@ func (r *CategoryRepository) QueryCategoriesPage(ctx context.Context, pageDTO dt
 	if pageDTO.Field != "" && pageDTO.Order != "" {
 		findOptions.SetSort(bsonx.M(pageDTO.Field, pageDTO.OrderConvertToInt()))
 	} else {
-		findOptions.SetSort(bsonx.M("create_time", -1))
+		findOptions.SetSort(bsonx.M("created_at", -1))
 	}
 	categories, total, err := r.dao.QuerySkipAndSetLimit(ctx, cond, findOptions)
 	return r.toDomainCategories(categories), total, err
