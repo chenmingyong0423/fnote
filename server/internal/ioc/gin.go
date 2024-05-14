@@ -22,6 +22,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/visit_log"
+
 	"github.com/chenmingyong0423/fnote/server/internal/message_template"
 
 	"github.com/chenmingyong0423/fnote/server/internal/category"
@@ -58,13 +60,12 @@ import (
 	"github.com/gin-contrib/cors"
 
 	myValidator "github.com/chenmingyong0423/fnote/server/internal/pkg/validator"
-	vlHandler "github.com/chenmingyong0423/fnote/server/internal/visit_log/handler"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(fileHdr *file.Handler, ctgHdr *category.Handler, cmtHdr *comment.Handler, cfgHdr *website_config.Handler, frdHdr *friend.Handler, postHdr *post.Handler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *message_template.Handler, tagsHandler *tag.Handler, daHandler *data_analysis.Handler, csHandler *count_stats.Handler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler, postVisitHdr *post_visit.Handler) (*gin.Engine, error) {
+func NewGinEngine(fileHdr *file.Handler, ctgHdr *category.Handler, cmtHdr *comment.Handler, cfgHdr *website_config.Handler, frdHdr *friend.Handler, postHdr *post.Handler, vlHdr *visit_log.Handler, msgTplHandler *message_template.Handler, tagsHandler *tag.Handler, daHandler *data_analysis.Handler, csHandler *count_stats.Handler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler, postVisitHdr *post_visit.Handler) (*gin.Engine, error) {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 

@@ -18,18 +18,18 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/visit_log"
+
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	service2 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/service"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
-	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
 	"github.com/gin-gonic/gin"
 )
 
-func NewDataAnalysisHandler(vlServ service.IVisitLogService, csServ count_stats.Service, postLikeServ post_like.Service, commentServ comment.Service, ipAPiServ service2.IIpApiService) *DataAnalysisHandler {
+func NewDataAnalysisHandler(vlServ visit_log.Service, csServ count_stats.Service, postLikeServ post_like.Service, commentServ comment.Service, ipAPiServ service2.IIpApiService) *DataAnalysisHandler {
 	return &DataAnalysisHandler{
 		vlServ:       vlServ,
 		csServ:       csServ,
@@ -40,7 +40,7 @@ func NewDataAnalysisHandler(vlServ service.IVisitLogService, csServ count_stats.
 }
 
 type DataAnalysisHandler struct {
-	vlServ       service.IVisitLogService
+	vlServ       visit_log.Service
 	csServ       count_stats.Service
 	postLikeServ post_like.Service
 	commentServ  comment.Service
@@ -135,7 +135,7 @@ func (h *DataAnalysisHandler) GetTendencyStats(ctx *gin.Context) (*apiwrap.Respo
 	}), nil
 }
 
-func (h *DataAnalysisHandler) tdToVO(data []domain.TendencyData) []TendencyData {
+func (h *DataAnalysisHandler) tdToVO(data []visit_log.TendencyData) []TendencyData {
 	voList := make([]TendencyData, 0, len(data))
 	for _, td := range data {
 		voList = append(voList, TendencyData{

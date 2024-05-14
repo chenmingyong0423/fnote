@@ -1,4 +1,4 @@
-// Copyright 2023 chenmingyong0423
+// Copyright 2024 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,3 +13,27 @@
 // limitations under the License.
 
 package domain
+
+type VisitLog struct{}
+
+type WebsiteVisitEvent struct {
+	Url       string `json:"url"`
+	Ip        string `json:"ip"`
+	UserAgent string `json:"user_agent"`
+	Origin    string `json:"origin"`
+	Referer   string `json:"referer"`
+}
+
+type VisitHistory struct {
+	Url       string
+	Ip        string
+	UserAgent string
+	Origin    string
+	Type      string
+	Referer   string
+}
+
+type TendencyData struct {
+	Timestamp int64
+	ViewCount int64
+}

@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handler
+package web
 
 import (
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+	"github.com/chenmingyong0423/fnote/server/internal/visit_log/internal/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/visit_log/internal/service"
 	"github.com/chenmingyong0423/go-eventbus"
 	jsoniter "github.com/json-iterator/go"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,28 +41,12 @@ func (h *VisitLogHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup.POST("", apiwrap.WrapWithBody(h.CollectVisitLog))
 }
 
-type VisitLogReq struct {
-	Url       string `json:"url" bind:"required"`
-	Ip        string `json:"ip"`
-	UserAgent string `json:"user_agent"`
-	Origin    string `json:"origin"`
-	Referer   string `json:"referer"`
-}
-
-type WebsiteVisitEvent struct {
-	Url       string `json:"url"`
-	Ip        string `json:"ip"`
-	UserAgent string `json:"user_agent"`
-	Origin    string `json:"origin"`
-	Referer   string `json:"referer"`
-}
-
 func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context, req VisitLogReq) (*apiwrap.ResponseBody[any], error) {
 	req.Ip = ctx.ClientIP()
 	req.UserAgent = ctx.GetHeader("User-Agent")
 	req.Origin = ctx.GetHeader("Origin")
 	req.Referer = ctx.GetHeader("Referer")
-	websiteEvent := WebsiteVisitEvent(req)
+	websiteEvent := domain.WebsiteVisitEvent(req)
 	marshal, err := jsoniter.Marshal(websiteEvent)
 	if err != nil {
 		return nil, err
