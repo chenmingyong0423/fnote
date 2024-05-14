@@ -307,7 +307,7 @@ func (d *CommentDao) FindCommentWithRepliesById(ctx context.Context, objectID pr
 
 func (d *CommentDao) UpdateCommentReplyStatus(ctx context.Context, objectID primitive.ObjectID, replyId string, commentStatus bool) error {
 	filter := query.BsonBuilder().Id(objectID).Add("replies.reply_id", replyId).Build()
-	updates := update.BsonBuilder().Set("replies.$.approval_status", commentStatus).Set("replies.$.update_time", time.Now().Local().Unix()).Build()
+	updates := update.BsonBuilder().Set("replies.$.approval_status", commentStatus).Set("replies.$.updated_at", time.Now().Local()).Build()
 	result, err := d.coll.Updater().Filter(filter).Updates(updates).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update one from comment, filter=%v, update=%v", filter, updates)
