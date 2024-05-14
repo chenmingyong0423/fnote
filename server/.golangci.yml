@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-run:
-  go: '1.21.0'
-  skip-dirs:
+issues:
+  go: '1.22.0'
+  exclude-dirs:
     - .idea

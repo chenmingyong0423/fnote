@@ -119,9 +119,11 @@ func (s *CountStatsService) GetByReferenceIdsAndType(ctx context.Context, refere
 
 func (s *CountStatsService) SubscribePostLikedEvent() {
 	eventChan := s.eventBus.Subscribe("post-like")
+	type contextKey string
 	for event := range eventChan {
 		rid := uuid.NewString()
-		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
+		var key contextKey = "X-Request-ID"
+		ctx := context.WithValue(context.Background(), key, rid)
 		l := slog.Default().With("X-Request-ID", rid)
 		l.InfoContext(ctx, "post-like", "payload", string(event.Payload))
 		var postEvent domain.LikePostEvent
@@ -143,9 +145,11 @@ func (s *CountStatsService) SubscribePostLikedEvent() {
 
 func (s *CountStatsService) SubscribeCategoryAddedEvent() {
 	eventChan := s.eventBus.Subscribe("category-addition")
+	type contextKey string
 	for event := range eventChan {
 		rid := uuid.NewString()
-		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
+		var key contextKey = "X-Request-ID"
+		ctx := context.WithValue(context.Background(), key, rid)
 		l := slog.Default().With("X-Request-ID", rid)
 		l.InfoContext(ctx, "category-addition", "payload", string(event.Payload))
 		var e domain.CategoryEvent
@@ -178,9 +182,11 @@ func (s *CountStatsService) SubscribeCategoryAddedEvent() {
 
 func (s *CountStatsService) SubscribeCategoryDeletedEvent() {
 	eventChan := s.eventBus.Subscribe("category-delete")
+	type contextKey string
 	for event := range eventChan {
 		rid := uuid.NewString()
-		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
+		var key contextKey = "X-Request-ID"
+		ctx := context.WithValue(context.Background(), key, rid)
 		l := slog.Default().With("X-Request-ID", rid)
 		l.InfoContext(ctx, "category-delete event", "payload", string(event.Payload))
 		var e domain.CategoryEvent
@@ -213,9 +219,11 @@ func (s *CountStatsService) SubscribeCategoryDeletedEvent() {
 
 func (s *CountStatsService) SubscribeCommentEvent() {
 	eventChan := s.eventBus.Subscribe("comment")
+	type contextKey string
 	for event := range eventChan {
 		rid := uuid.NewString()
-		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
+		var key contextKey = "X-Request-ID"
+		ctx := context.WithValue(context.Background(), key, rid)
 		l := slog.Default().With("X-Request-ID", rid)
 		l.InfoContext(ctx, "CountStats: comment event", "payload", string(event.Payload))
 		var e domain.CommentEvent
@@ -245,9 +253,11 @@ func (s *CountStatsService) SubscribeCommentEvent() {
 
 func (s *CountStatsService) SubscribeWebsiteVisitEvent() {
 	eventChan := s.eventBus.Subscribe("website visit")
+	type contextKey string
 	for event := range eventChan {
 		rid := uuid.NewString()
-		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
+		var key contextKey = "X-Request-ID"
+		ctx := context.WithValue(context.Background(), key, rid)
 		l := slog.Default().With("X-Request-ID", rid)
 		l.InfoContext(ctx, "CountStats: website visit event", "payload", string(event.Payload))
 		var e domain.CommentEvent
@@ -267,10 +277,12 @@ func (s *CountStatsService) SubscribeWebsiteVisitEvent() {
 
 func (s *CountStatsService) subscribeTagEvent() {
 	eventChan := s.eventBus.Subscribe("tag")
+	type contextKey string
 	for event := range eventChan {
 		rid := uuid.NewString()
-		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
-		l := slog.Default().With("X-Request-ID", rid)
+		var key contextKey = "X-Request-ID"
+		ctx := context.WithValue(context.Background(), key, rid)
+		l := slog.Default().With(slog.Any("X-Request-ID", rid))
 		l.InfoContext(ctx, "CountStats: tag event", "payload", string(event.Payload))
 		var e domain.TagEvent
 		err := json.Unmarshal(event.Payload, &e)
@@ -298,9 +310,11 @@ func (s *CountStatsService) subscribeTagEvent() {
 
 func (s *CountStatsService) SubscribePostEvent() {
 	eventChan := s.eventBus.Subscribe("post-delete")
+	type contextKey string
 	for event := range eventChan {
 		rid := uuid.NewString()
-		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
+		var key contextKey = "X-Request-ID"
+		ctx := context.WithValue(context.Background(), key, rid)
 		l := slog.Default().With("X-Request-ID", rid)
 		l.InfoContext(ctx, "CountStats: post", "payload", string(event.Payload))
 		var e domain.PostEvent

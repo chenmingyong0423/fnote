@@ -425,9 +425,11 @@ func (s *CommentService) AddComment(ctx context.Context, comment domain.Comment)
 
 func (s *CommentService) subscribePostEvent() {
 	eventChan := s.eventBus.Subscribe("post")
+	type contextKey string
 	for event := range eventChan {
 		rid := uuid.NewString()
-		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
+		var key contextKey = "X-Request-ID"
+		ctx := context.WithValue(context.Background(), key, rid)
 		l := slog.Default().With("X-Request-ID", rid)
 		l.InfoContext(ctx, "Comment: post event", "payload", string(event.Payload))
 		var e domain.PostEvent

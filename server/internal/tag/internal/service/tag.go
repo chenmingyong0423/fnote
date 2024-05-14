@@ -144,9 +144,11 @@ func (s *TagService) QueryTagsPage(ctx context.Context, pageDTO dto.PageDTO) ([]
 
 func (s *TagService) subscribePostEvent() {
 	eventChan := s.eventBus.Subscribe("post")
+	type contextKey string
 	for event := range eventChan {
 		rid := uuid.NewString()
-		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
+		var key contextKey = "X-Request-ID"
+		ctx := context.WithValue(context.Background(), key, rid)
 		l := slog.Default().With("X-Request-ID", rid)
 		l.InfoContext(ctx, "Tag: post event", "payload", string(event.Payload))
 		var e domain.PostEvent
