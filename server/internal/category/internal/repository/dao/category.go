@@ -37,16 +37,14 @@ import (
 )
 
 type Category struct {
-	Id          primitive.ObjectID `bson:"_id,omitempty"`
-	Name        string             `bson:"name"`
-	Route       string             `bson:"route"`
-	Description string             `bson:"description"`
-	Sort        int64              `bson:"sort"`
-	Enabled     bool               `bson:"enabled"`
-	ShowInNav   bool               `bson:"show_in_nav"`
-	PostCount   int64              `bson:"post_count"`
-	CreateTime  int64              `bson:"create_time"`
-	UpdateTime  int64              `bson:"update_time"`
+	mongox.Model `bson:",inline"`
+	Name         string `bson:"name"`
+	Route        string `bson:"route"`
+	Description  string `bson:"description"`
+	Sort         int64  `bson:"sort"`
+	Enabled      bool   `bson:"enabled"`
+	ShowInNav    bool   `bson:"show_in_nav"`
+	PostCount    int64  `bson:"post_count"`
 }
 
 type ICategoryDao interface {
@@ -79,7 +77,7 @@ type CategoryDao struct {
 }
 
 func (d *CategoryDao) DecreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error {
-	updateResult, err := d.coll.Updater().Filter(query.In("_id", categoryObjectIds...)).Updates(update.BsonBuilder().Inc("post_count", -1).Set("update_time", time.Now().Local().Unix()).Build()).UpdateMany(ctx)
+	updateResult, err := d.coll.Updater().Filter(query.In("_id", categoryObjectIds...)).Updates(update.BsonBuilder().Inc("post_count", -1).Set("updated_at", time.Now().Local()).Build()).UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to decrease post count by ids, ids=%+v", categoryObjectIds)
 	}
@@ -90,7 +88,7 @@ func (d *CategoryDao) DecreasePostCountByIds(ctx context.Context, categoryObject
 }
 
 func (d *CategoryDao) IncreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error {
-	updateResult, err := d.coll.Updater().Filter(query.In("_id", categoryObjectIds...)).Updates(update.BsonBuilder().Inc("post_count", 1).Set("update_time", time.Now().Local().Unix()).Build()).UpdateMany(ctx)
+	updateResult, err := d.coll.Updater().Filter(query.In("_id", categoryObjectIds...)).Updates(update.BsonBuilder().Inc("post_count", 1).Set("updated_at", time.Now().Local()).Build()).UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to increase post count by ids, ids=%+v", categoryObjectIds)
 	}
@@ -125,7 +123,7 @@ func (d *CategoryDao) GetById(ctx context.Context, id primitive.ObjectID) (*Cate
 }
 
 func (d *CategoryDao) ModifyCategoryNavigation(ctx context.Context, id primitive.ObjectID, showInNav bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("show_in_nav", showInNav).Set("update_time", time.Now().Local().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("show_in_nav", showInNav).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "Modify category navigation failed, id=%s, showInNav=%v", id, showInNav)
 	}
@@ -155,7 +153,7 @@ func (d *CategoryDao) DeleteById(ctx context.Context, id primitive.ObjectID) err
 }
 
 func (d *CategoryDao) ModifyCategory(ctx context.Context, id primitive.ObjectID, description string) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("description", description).Set("update_time", time.Now().Local().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("description", description).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}
@@ -166,7 +164,7 @@ func (d *CategoryDao) ModifyCategory(ctx context.Context, id primitive.ObjectID,
 }
 
 func (d *CategoryDao) ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("enabled", enabled).Set("update_time", time.Now().Local().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("enabled", enabled).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}
