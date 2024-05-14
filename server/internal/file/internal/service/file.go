@@ -122,9 +122,11 @@ func (s *FileService) Upload(ctx context.Context, fileDTO dto.FileDTO) (*domain.
 
 func (s *FileService) subscribePostEvent() {
 	eventChan := s.eventBus.Subscribe("post")
+	type contextKey string
 	for event := range eventChan {
 		rid := uuid.NewString()
-		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
+		var key contextKey = "X-Request-ID"
+		ctx := context.WithValue(context.Background(), key, rid)
 		l := slog.Default().With("X-Request-ID", rid)
 		l.InfoContext(ctx, "File: post event", "payload", string(event.Payload))
 		var e domain.PostEvent
