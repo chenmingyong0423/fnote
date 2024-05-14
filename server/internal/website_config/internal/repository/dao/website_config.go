@@ -120,7 +120,7 @@ func (d *WebsiteConfigDao) AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) 
 }
 
 func (d *WebsiteConfigDao) UpdatePropsByTyp(ctx context.Context, typ string, cfg any, now time.Time) error {
-	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", typ)).Updates(update.BsonBuilder().Set("props", cfg).Set("update_time", now).Build()).UpdateOne(ctx)
+	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", typ)).Updates(update.BsonBuilder().Set("props", cfg).Set("updated_at", now).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update %s config, updates=%v", typ, cfg)
 	}
