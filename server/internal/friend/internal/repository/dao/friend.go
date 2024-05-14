@@ -37,17 +37,15 @@ import (
 )
 
 type Friend struct {
-	Id          primitive.ObjectID `bson:"_id,omitempty"`
-	Name        string             `bson:"name"`
-	Url         string             `bson:"url"`
-	Logo        string             `bson:"logo"`
-	Description string             `bson:"description"`
-	Email       string             `bson:"email"`
-	Priority    int                `bson:"priority"`
-	Ip          string             `bson:"ip"`
-	Status      FriendStatus       `bson:"status"`
-	CreateTime  int64              `bson:"create_time"`
-	UpdateTime  int64              `bson:"update_time"`
+	mongox.Model `bson:",inline"`
+	Name         string       `bson:"name"`
+	Url          string       `bson:"url"`
+	Logo         string       `bson:"logo"`
+	Description  string       `bson:"description"`
+	Email        string       `bson:"email"`
+	Priority     int          `bson:"priority"`
+	Ip           string       `bson:"ip"`
+	Status       FriendStatus `bson:"status"`
 }
 
 type FriendStatus int

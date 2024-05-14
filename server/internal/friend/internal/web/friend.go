@@ -163,7 +163,7 @@ func (h *FriendHandler) friendToAdminVO(friends []domain.Friend) []AdminFriendVO
 			Logo:        friend.Logo,
 			Description: friend.Description,
 			Status:      friend.Status,
-			CreateTime:  friend.CreateTime,
+			CreateTime:  friend.CreatedAt,
 		})
 	}
 	return result
