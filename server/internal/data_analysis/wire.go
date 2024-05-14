@@ -22,7 +22,7 @@ import (
 	service2 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/web"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
-	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
+	"github.com/chenmingyong0423/fnote/server/internal/visit_log"
 	"github.com/google/wire"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -30,12 +30,13 @@ import (
 var DataAnalysisProviders = wire.NewSet(web.NewDataAnalysisHandler, service2.NewIpApiService,
 	wire.Bind(new(service2.IIpApiService), new(*service2.IpApiService)))
 
-func InitDataAnalysisModule(mongoDB *mongo.Database, vlServ service.IVisitLogService, countStatsModule *count_stats.Module, posLikeModule *post_like.Module, commentModule *comment.Module) *Module {
+func InitDataAnalysisModule(mongoDB *mongo.Database, countStatsModule *count_stats.Module, posLikeModule *post_like.Module, commentModule *comment.Module, visitLogModule *visit_log.Module) *Module {
 	panic(wire.Build(
 		DataAnalysisProviders,
 		wire.FieldsOf(new(*post_like.Module), "Svc"),
 		wire.FieldsOf(new(*comment.Module), "Svc"),
 		wire.FieldsOf(new(*count_stats.Module), "Svc"),
+		wire.FieldsOf(new(*visit_log.Module), "Svc"),
 		wire.Struct(new(Module), "Hdl"),
 	))
 }

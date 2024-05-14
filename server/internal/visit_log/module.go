@@ -1,4 +1,4 @@
-// Copyright 2023 chenmingyong0423
+// Copyright 2024 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,4 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package domain
+package visit_log
+
+import (
+	"github.com/chenmingyong0423/fnote/server/internal/visit_log/internal/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/visit_log/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/visit_log/internal/web"
+)
+
+type (
+	Handler      = web.VisitLogHandler
+	Service      = service.IVisitLogService
+	TendencyData = domain.TendencyData
+	Module       struct {
+		Svc Service
+		Hdl *Handler
+	}
+)

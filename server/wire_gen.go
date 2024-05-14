@@ -8,8 +8,8 @@ package main
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
-	handler2 "github.com/chenmingyong0423/fnote/server/internal/backup/handler"
-	service4 "github.com/chenmingyong0423/fnote/server/internal/backup/service"
+	"github.com/chenmingyong0423/fnote/server/internal/backup/handler"
+	service3 "github.com/chenmingyong0423/fnote/server/internal/backup/service"
 	"github.com/chenmingyong0423/fnote/server/internal/category"
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats"
@@ -27,10 +27,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	"github.com/chenmingyong0423/fnote/server/internal/post_visit"
 	"github.com/chenmingyong0423/fnote/server/internal/tag"
-	"github.com/chenmingyong0423/fnote/server/internal/visit_log/handler"
-	"github.com/chenmingyong0423/fnote/server/internal/visit_log/repository"
-	"github.com/chenmingyong0423/fnote/server/internal/visit_log/repository/dao"
-	service3 "github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
+	"github.com/chenmingyong0423/fnote/server/internal/visit_log"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"github.com/gin-gonic/gin"
 )
@@ -58,19 +55,17 @@ func initializeApp() (*gin.Engine, error) {
 	friendModule := friend.InitFriendModule(database, messageService, website_configModule)
 	friendHandler := friendModule.Hdl
 	postHandler := postModule.Hdl
-	visitLogDao := dao.NewVisitLogDao(database)
-	visitLogRepository := repository.NewVisitLogRepository(visitLogDao)
-	visitLogService := service3.NewVisitLogService(visitLogRepository)
-	visitLogHandler := handler.NewVisitLogHandler(visitLogService, eventBus)
+	visit_logModule := visit_log.InitVisitLogModule(database, eventBus)
+	visitLogHandler := visit_logModule.Hdl
 	messageTemplateHandler := message_templateModule.Hdl
 	tagModule := tag.InitTagModule(database, eventBus)
 	tagHandler := tagModule.Hdl
 	count_statsModule := count_stats.InitCountStatsModule(database, eventBus)
-	data_analysisModule := data_analysis.InitDataAnalysisModule(database, visitLogService, count_statsModule, post_likeModule, commentModule)
+	data_analysisModule := data_analysis.InitDataAnalysisModule(database, count_statsModule, post_likeModule, commentModule, visit_logModule)
 	dataAnalysisHandler := data_analysisModule.Hdl
 	countStatsHandler := count_statsModule.Hdl
-	backupService := service4.NewBackupService(database)
-	backupHandler := handler2.NewBackupHandler(backupService)
+	backupService := service3.NewBackupService(database)
+	backupHandler := handler.NewBackupHandler(backupService)
 	writer := ioc.InitLogger()
 	v, err := global.IsWebsiteInitializedFn(database)
 	if err != nil {
