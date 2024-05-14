@@ -16,7 +16,6 @@ package repository
 
 import (
 	"context"
-	"time"
 
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/repository/dao"
@@ -81,12 +80,9 @@ func (r *CountStatsRepository) DeleteByReferenceIdAndType(ctx context.Context, r
 }
 
 func (r *CountStatsRepository) Create(ctx context.Context, countStats domain.CountStats) (string, error) {
-	unix := time.Now().Local().Unix()
 	return r.dao.Create(ctx, &dao.CountStats{
 		Type:        countStats.Type.ToString(),
 		ReferenceId: countStats.ReferenceId,
-		CreateTime:  unix,
-		UpdateTime:  unix,
 	})
 }
 
@@ -103,7 +99,7 @@ func (r *CountStatsRepository) toDomainCountStats(stats []*dao.CountStats) []dom
 	var countStats []domain.CountStats
 	for _, stat := range stats {
 		countStats = append(countStats, domain.CountStats{
-			Id:          stat.Id.Hex(),
+			Id:          stat.ID.Hex(),
 			Type:        domain.CountStatsType(stat.Type),
 			ReferenceId: stat.ReferenceId,
 			Count:       stat.Count,

@@ -32,12 +32,10 @@ import (
 )
 
 type CountStats struct {
-	Id          primitive.ObjectID `bson:"_id,omitempty"`
-	Type        string             `bson:"type"`
-	ReferenceId string             `bson:"reference_id"`
-	Count       int64              `bson:"count"`
-	CreateTime  int64              `bson:"create_time"`
-	UpdateTime  int64              `bson:"update_time"`
+	mongox.Model `bson:",inline"`
+	Type         string `bson:"type"`
+	ReferenceId  string `bson:"reference_id"`
+	Count        int64  `bson:"count"`
 }
 
 type ICountStatsDao interface {
