@@ -30,11 +30,6 @@ import (
 )
 
 type ICountStatsService interface {
-	GetByReferenceIdsAndType(ctx context.Context, referenceIds []string, countStatsType domain.CountStatsType) ([]domain.CountStats, error)
-	Create(ctx context.Context, countStats domain.CountStats) error
-	DeleteByReferenceIdAndType(ctx context.Context, referenceId string, statsType domain.CountStatsType) error
-	DecreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error
-	IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error
 	DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, count int) error
 	IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, delta int) error
 	GetWebsiteCountStats(ctx context.Context) (domain.WebsiteCountStats, error)
@@ -89,34 +84,6 @@ func (s *CountStatsService) DecreaseByReferenceIdAndType(ctx context.Context, re
 	return s.repo.DecreaseByReferenceIdAndType(ctx, referenceId, countStatsType, count)
 }
 
-func (s *CountStatsService) IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error {
-	return s.repo.IncreaseByReferenceIdsAndType(ctx, ids, countStatsType)
-}
-
-func (s *CountStatsService) DecreaseByReferenceIdsAndType(ctx context.Context, ids []string, countStatsType domain.CountStatsType) error {
-	return s.repo.DecreaseByReferenceIdsAndType(ctx, ids, countStatsType)
-}
-
-func (s *CountStatsService) DeleteByReferenceIdAndType(ctx context.Context, referenceId string, statsType domain.CountStatsType) error {
-	return s.repo.DeleteByReferenceIdAndType(ctx, referenceId, statsType)
-}
-
-func (s *CountStatsService) Create(ctx context.Context, countStats domain.CountStats) error {
-	err := countStats.Type.Valid()
-	if err != nil {
-		return err
-	}
-	_, err = s.repo.Create(ctx, countStats)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *CountStatsService) GetByReferenceIdsAndType(ctx context.Context, referenceIds []string, countStatsType domain.CountStatsType) ([]domain.CountStats, error) {
-	return s.repo.GetByReferenceIdAndType(ctx, referenceIds, countStatsType)
-}
-
 func (s *CountStatsService) SubscribePostLikedEvent() {
 	eventChan := s.eventBus.Subscribe("post-like")
 	type contextKey string
@@ -161,15 +128,6 @@ func (s *CountStatsService) SubscribeCategoryAddedEvent() {
 
 		// todo 后面可以考虑使用事务
 		{
-			countStats := domain.CountStats{
-				Type:        domain.CountStatsTypePostCountInCategory,
-				ReferenceId: e.CategoryId,
-			}
-			err = s.Create(ctx, countStats)
-			if err != nil {
-				l.ErrorContext(ctx, "category-addition: failed to create count stats", "countStats", countStats, "err", err)
-				continue
-			}
 			err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount, 1)
 			if err != nil {
 				l.ErrorContext(ctx, "category-addition: failed to increase the count of category in website", "count", 1, "err", err)
@@ -198,15 +156,6 @@ func (s *CountStatsService) SubscribeCategoryDeletedEvent() {
 
 		// todo 后面可以考虑使用事务
 		{
-			countStats := domain.CountStats{
-				Type:        domain.CountStatsTypePostCountInCategory,
-				ReferenceId: e.CategoryId,
-			}
-			err = s.repo.DeleteByReferenceIdAndType(ctx, e.CategoryId, domain.CountStatsTypePostCountInCategory)
-			if err != nil {
-				l.ErrorContext(ctx, "category-delete event: failed to delete count stats", "countStats", countStats, "err", err)
-				continue
-			}
 			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount, 1)
 			if err != nil {
 				l.ErrorContext(ctx, "category-delete event: failed to decrease the count of category in website", "count", 1, "err", err)
@@ -268,7 +217,7 @@ func (s *CountStatsService) SubscribeWebsiteVisitEvent() {
 		}
 		err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeWebsiteViewCount.ToString(), domain.CountStatsTypeWebsiteViewCount, 1)
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats: website visit event: failed to increase the count of website visit", "count", 1)
+			l.ErrorContext(ctx, "CountStats: website visit event: failed to increase the count of website visit", "count", 1, "err", err)
 			continue
 		}
 		l.InfoContext(ctx, "CountStats: website visit event: handle successfully ")
