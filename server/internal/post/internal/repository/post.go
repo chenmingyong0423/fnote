@@ -194,7 +194,7 @@ func (r *PostRepository) QueryAdminPostsPage(ctx context.Context, page domain2.P
 	if page.Field != "" && page.Order != "" {
 		findOptions.SetSort(bsonx.M(page.Field, orderConvertToInt(page.Order)))
 	} else {
-		findOptions.SetSort(bsonx.M("create_time", -1))
+		findOptions.SetSort(bsonx.M("created_at", -1))
 	}
 
 	posts, cnt, err := r.dao.QueryPostsPage(ctx, con, findOptions)
