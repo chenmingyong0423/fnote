@@ -25,16 +25,14 @@ import (
 )
 
 type MessageTemplate struct {
-	Id      string `bson:"_id"`
-	Name    string `bson:"name"`
-	Title   string `bson:"title"`
-	Content string `bson:"content"`
+	mongox.Model `bson:",inline"`
+	Name         string `bson:"name"`
+	Title        string `bson:"title"`
+	Content      string `bson:"content"`
 	// 0 未激活，1 激活
 	Active uint `bson:"active"`
 	// 0 webmaster 站长， 1 user 用户
-	RecipientType uint  `bson:"recipient_type"`
-	CreateTime    int64 `bson:"create_time"`
-	UpdateTime    int64 `bson:"update_time"`
+	RecipientType uint `bson:"recipient_type"`
 }
 
 type IMessageTemplateDao interface {
