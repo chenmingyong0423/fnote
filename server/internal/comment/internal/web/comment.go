@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/chenmingyong0423/fnote/server/internal/message"
+
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/domain"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/service"
@@ -34,14 +36,13 @@ import (
 
 	"github.com/spf13/viper"
 
-	msgService "github.com/chenmingyong0423/fnote/server/internal/message/service"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NewCommentHandler(serv service.ICommentService, cfgService website_config.Service, postServ post.Service, msgServ msgService.IMessageService) *CommentHandler {
+func NewCommentHandler(serv service.ICommentService, cfgService website_config.Service, postServ post.Service, msgServ message.Service) *CommentHandler {
 	return &CommentHandler{
 		serv:       serv,
 		cfgService: cfgService,
@@ -54,7 +55,7 @@ type CommentHandler struct {
 	serv       service.ICommentService
 	cfgService website_config.Service
 	postServ   post.Service
-	msgServ    msgService.IMessageService
+	msgServ    message.Service
 }
 
 func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {

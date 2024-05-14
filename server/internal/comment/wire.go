@@ -21,7 +21,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/web"
-	msgService "github.com/chenmingyong0423/fnote/server/internal/message/service"
+	"github.com/chenmingyong0423/fnote/server/internal/message"
 	"github.com/chenmingyong0423/fnote/server/internal/post"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"github.com/chenmingyong0423/go-eventbus"
@@ -34,11 +34,12 @@ var CommentProviders = wire.NewSet(web.NewCommentHandler, service.NewCommentServ
 	wire.Bind(new(repository.ICommentRepository), new(*repository.CommentRepository)),
 	wire.Bind(new(dao.ICommentDao), new(*dao.CommentDao)))
 
-func InitCommentModule(mongoDB *mongo.Database, msgServ msgService.IMessageService, cfgModule *website_config.Module, postModule *post.Module, eventBus *eventbus.EventBus) *Module {
+func InitCommentModule(mongoDB *mongo.Database, messageModule *message.Module, cfgModule *website_config.Module, postModule *post.Module, eventBus *eventbus.EventBus) *Module {
 	panic(wire.Build(
 		CommentProviders,
 		wire.FieldsOf(new(*website_config.Module), "Svc"),
 		wire.FieldsOf(new(*post.Module), "Svc"),
+		wire.FieldsOf(new(*message.Module), "Svc"),
 		wire.Struct(new(Module), "Svc", "Hdl"),
 	))
 }
