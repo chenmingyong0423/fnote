@@ -18,21 +18,20 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/repository"
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/pkg/errors"
 )
 
 type IFriendService interface {
 	GetFriends(ctx context.Context) ([]domain.Friend, error)
 	ApplyForFriend(ctx context.Context, friend domain.Friend) error
-	AdminGetFriends(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Friend, int64, error)
+	AdminGetFriends(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Friend, int64, error)
 	AdminUpdateFriend(ctx context.Context, friend domain.Friend) error
 	AdminDeleteFriend(ctx context.Context, id string) error
 	AdminApproveFriend(ctx context.Context, id string) (string, error)
@@ -109,7 +108,7 @@ func (s *FriendService) AdminUpdateFriend(ctx context.Context, friend domain.Fri
 	return s.repo.UpdateById(ctx, friend)
 }
 
-func (s *FriendService) AdminGetFriends(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Friend, int64, error) {
+func (s *FriendService) AdminGetFriends(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Friend, int64, error) {
 	return s.repo.FindAll(ctx, pageDTO)
 }
 

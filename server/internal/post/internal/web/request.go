@@ -29,3 +29,38 @@ type PageRequest struct {
 	CategoryFilter []string `form:"category_filter,omitempty"`
 	TagFilter      []string `form:"tag_filter,omitempty"`
 }
+type PostDisplayReq struct {
+	IsDisplayed bool `json:"is_displayed"`
+}
+
+type PostCommentAllowedReq struct {
+	IsCommentAllowed bool `json:"is_comment_allowed"`
+}
+
+type PostReq struct {
+	Id               string                 `json:"id"`
+	Author           string                 `json:"author"`
+	Title            string                 `json:"title"`
+	Summary          string                 `json:"summary"`
+	Content          string                 `json:"content"`
+	CoverImg         string                 `json:"cover_img"`
+	Categories       []Category4PostRequest `json:"categories"`
+	Tags             []Tag4PostRequest      `json:"tags"`
+	StickyWeight     int                    `json:"sticky_weight"`
+	IsDisplayed      bool                   `json:"is_displayed"`
+	MetaDescription  string                 `json:"meta_description"`
+	MetaKeywords     string                 `json:"meta_keywords"`
+	WordCount        int                    `json:"word_count"`
+	IsCommentAllowed bool                   `json:"is_comment_allowed"`
+	ReferenceIds     []string               `json:"reference_ids"`
+}
+
+type Category4PostRequest struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type Tag4PostRequest struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}

@@ -121,3 +121,7 @@ type UserInfoVO struct {
 	Ip      string `json:"ip"`
 	Website string `json:"website"`
 }
+
+type IdVO struct {
+	Id string `json:"id"`
+}

@@ -28,7 +28,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -37,7 +36,7 @@ import (
 type ICategoryRepository interface {
 	GetAll(ctx context.Context) ([]domain.Category, error)
 	GetCategoryByRoute(ctx context.Context, route string) (domain.Category, error)
-	QueryCategoriesPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error)
+	QueryCategoriesPage(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Category, int64, error)
 	CreateCategory(ctx context.Context, category domain.Category) (string, error)
 	ModifyCategoryEnabled(ctx context.Context, id string, enabled bool) error
 	ModifyCategory(ctx context.Context, id string, description string) error
@@ -170,7 +169,7 @@ func (r *CategoryRepository) CreateCategory(ctx context.Context, category domain
 	return r.dao.Create(ctx, &dao.Category{Name: category.Name, Route: category.Route, Description: category.Description, ShowInNav: category.ShowInNav, Enabled: category.Enabled})
 }
 
-func (r *CategoryRepository) QueryCategoriesPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error) {
+func (r *CategoryRepository) QueryCategoriesPage(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Category, int64, error) {
 	condBuilder := query.BsonBuilder()
 	if pageDTO.Keyword != "" {
 		condBuilder.RegexOptions("name", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageDTO.Keyword)), "i")

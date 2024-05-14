@@ -34,10 +34,6 @@ import (
 
 	"github.com/chenmingyong0423/gkit/slice"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
-
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
-
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -56,7 +52,7 @@ type SummaryPostVO struct {
 	CommentCount int      `json:"comment_count"`
 	VisitCount   int      `json:"visit_count"`
 	StickyWeight int      `json:"sticky_weight"`
-	CreateTime   int64    `json:"create_time"`
+	CreatedAt    int64    `json:"created_at"`
 }
 
 func NewPostHandler(serv service.IPostService, cfgService website_config.Service, postLikeServ post_like.Service, eventBus *eventbus.EventBus) *PostHandler {
@@ -125,7 +121,7 @@ func (h *PostHandler) postsToPostVOs(posts []*domain.Post) []*SummaryPostVO {
 			CommentCount: post.PrimaryPost.CommentCount,
 			VisitCount:   post.PrimaryPost.VisitCount,
 			StickyWeight: post.PrimaryPost.StickyWeight,
-			CreateTime:   post.PrimaryPost.CreatedAt,
+			CreatedAt:    post.PrimaryPost.CreatedAt,
 		})
 	}
 	return postVOs
@@ -139,8 +135,8 @@ func (h *PostHandler) GetPosts(ctx *gin.Context, req *domain.PostRequest) (*apiw
 	}
 	pageVO := apiwrap.PageVO[*SummaryPostVO]{
 		Page: apiwrap.Page{
-			PageNo:   req.Page.PageNo,
-			PageSize: req.Page.PageSize,
+			PageNo:   req.Page2.PageNo,
+			PageSize: req.Page2.PageSize,
 		},
 		List: h.postsToPostVOs(posts),
 	}
@@ -212,7 +208,7 @@ func (h *PostHandler) AddLike(ctx *gin.Context) (*apiwrap.ResponseBody[any], err
 	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *PostHandler) AdminGetPosts(ctx *gin.Context, req PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.AdminPostVO]], error) {
+func (h *PostHandler) AdminGetPosts(ctx *gin.Context, req PageRequest) (*apiwrap.ResponseBody[apiwrap.PageVO[AdminPostVO]], error) {
 	posts, total, err := h.serv.AdminGetPosts(ctx, domain.Page{
 		Size:           req.PageSize,
 		Skip:           (req.PageNo - 1) * req.PageSize,
@@ -225,7 +221,7 @@ func (h *PostHandler) AdminGetPosts(ctx *gin.Context, req PageRequest) (*apiwrap
 	if err != nil {
 		return nil, err
 	}
-	pageVO := vo.PageVO[vo.AdminPostVO]{}
+	pageVO := apiwrap.PageVO[AdminPostVO]{}
 	pageVO.PageNo = req.PageNo
 	pageVO.PageSize = req.PageSize
 	pageVO.List = h.postsToAdminPost(posts)
@@ -233,22 +229,22 @@ func (h *PostHandler) AdminGetPosts(ctx *gin.Context, req PageRequest) (*apiwrap
 	return apiwrap.SuccessResponseWithData(pageVO), nil
 }
 
-func (h *PostHandler) postsToAdminPost(posts []*domain.Post) []vo.AdminPostVO {
-	adminPostVOs := make([]vo.AdminPostVO, len(posts))
+func (h *PostHandler) postsToAdminPost(posts []*domain.Post) []AdminPostVO {
+	adminPostVOs := make([]AdminPostVO, len(posts))
 	for i, post := range posts {
-		categories := slice.Map[domain.Category4Post, vo.Category4Post](post.PrimaryPost.Categories, func(_ int, c domain.Category4Post) vo.Category4Post {
-			return vo.Category4Post{
+		categories := slice.Map[domain.Category4Post, Category4PostVO](post.PrimaryPost.Categories, func(_ int, c domain.Category4Post) Category4PostVO {
+			return Category4PostVO{
 				Id:   c.Id,
 				Name: c.Name,
 			}
 		})
-		tags := slice.Map[domain.Tag4Post, vo.Tag4Post](post.PrimaryPost.Tags, func(_ int, t domain.Tag4Post) vo.Tag4Post {
-			return vo.Tag4Post{
+		tags := slice.Map[domain.Tag4Post, Tag4PostVO](post.PrimaryPost.Tags, func(_ int, t domain.Tag4Post) Tag4PostVO {
+			return Tag4PostVO{
 				Id:   t.Id,
 				Name: t.Name,
 			}
 		})
-		adminPostVOs[i] = vo.AdminPostVO{
+		adminPostVOs[i] = AdminPostVO{
 			Id:               post.Id,
 			CoverImg:         post.CoverImg,
 			Title:            post.Title,
@@ -257,14 +253,14 @@ func (h *PostHandler) postsToAdminPost(posts []*domain.Post) []vo.AdminPostVO {
 			Tags:             tags,
 			IsDisplayed:      post.IsDisplayed,
 			IsCommentAllowed: post.IsCommentAllowed,
-			CreateTime:       post.CreatedAt,
-			UpdateTime:       post.UpdateTime,
+			CreatedAt:        post.CreatedAt,
+			UpdatedAt:        post.UpdatedAt,
 		}
 	}
 	return adminPostVOs
 }
 
-func (h *PostHandler) AddPost(ctx *gin.Context, req request.PostReq) (*apiwrap.ResponseBody[any], error) {
+func (h *PostHandler) AddPost(ctx *gin.Context, req PostReq) (*apiwrap.ResponseBody[any], error) {
 	existPost, err := h.serv.AdminGetPostById(ctx, req.Id)
 	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, err
@@ -272,13 +268,13 @@ func (h *PostHandler) AddPost(ctx *gin.Context, req request.PostReq) (*apiwrap.R
 	if existPost != nil {
 		return nil, apiwrap.NewErrorResponseBody(http.StatusConflict, "The postId already exists.")
 	}
-	categories := slice.Map[request.Category4Post, domain.Category4Post](req.Categories, func(_ int, c request.Category4Post) domain.Category4Post {
+	categories := slice.Map(req.Categories, func(_ int, c Category4PostRequest) domain.Category4Post {
 		return domain.Category4Post{
 			Id:   c.Id,
 			Name: c.Name,
 		}
 	})
-	tags := slice.Map[request.Tag4Post, domain.Tag4Post](req.Tags, func(_ int, t request.Tag4Post) domain.Tag4Post {
+	tags := slice.Map(req.Tags, func(_ int, t Tag4PostRequest) domain.Tag4Post {
 		return domain.Tag4Post{
 			Id:   t.Id,
 			Name: t.Name,
@@ -310,24 +306,24 @@ func (h *PostHandler) DeletePost(ctx *gin.Context) (*apiwrap.ResponseBody[any], 
 	return apiwrap.SuccessResponse(), h.serv.DeletePost(ctx, ctx.Param("id"))
 }
 
-func (h *PostHandler) AdminGetPostById(ctx *gin.Context) (*apiwrap.ResponseBody[vo.PostDetailVO], error) {
+func (h *PostHandler) AdminGetPostById(ctx *gin.Context) (*apiwrap.ResponseBody[PostDetailVO], error) {
 	post, err := h.serv.AdminGetPostById(ctx, ctx.Param("id"))
 	if err != nil {
 		return nil, err
 	}
-	categories := slice.Map[domain.Category4Post, vo.Category4Post](post.PrimaryPost.Categories, func(_ int, c domain.Category4Post) vo.Category4Post {
-		return vo.Category4Post{
+	categories := slice.Map[domain.Category4Post, Category4PostVO](post.PrimaryPost.Categories, func(_ int, c domain.Category4Post) Category4PostVO {
+		return Category4PostVO{
 			Id:   c.Id,
 			Name: c.Name,
 		}
 	})
-	tags := slice.Map[domain.Tag4Post, vo.Tag4Post](post.PrimaryPost.Tags, func(_ int, t domain.Tag4Post) vo.Tag4Post {
-		return vo.Tag4Post{
+	tags := slice.Map[domain.Tag4Post, Tag4PostVO](post.PrimaryPost.Tags, func(_ int, t domain.Tag4Post) Tag4PostVO {
+		return Tag4PostVO{
 			Id:   t.Id,
 			Name: t.Name,
 		}
 	})
-	return apiwrap.SuccessResponseWithData(vo.PostDetailVO{
+	return apiwrap.SuccessResponseWithData(PostDetailVO{
 		Id:               post.Id,
 		Author:           post.Author,
 		Title:            post.Title,
@@ -344,10 +340,10 @@ func (h *PostHandler) AdminGetPostById(ctx *gin.Context) (*apiwrap.ResponseBody[
 	}), nil
 }
 
-func (h *PostHandler) UpdatePostIsDisplayed(ctx *gin.Context, req request.PostDisplayReq) (*apiwrap.ResponseBody[any], error) {
+func (h *PostHandler) UpdatePostIsDisplayed(ctx *gin.Context, req PostDisplayReq) (*apiwrap.ResponseBody[any], error) {
 	return apiwrap.SuccessResponse(), h.serv.UpdatePostIsDisplayed(ctx, ctx.Param("id"), req.IsDisplayed)
 }
 
-func (h *PostHandler) UpdatePostIsCommentAllowed(ctx *gin.Context, req request.PostCommentAllowedReq) (*apiwrap.ResponseBody[any], error) {
+func (h *PostHandler) UpdatePostIsCommentAllowed(ctx *gin.Context, req PostCommentAllowedReq) (*apiwrap.ResponseBody[any], error) {
 	return apiwrap.SuccessResponse(), h.serv.UpdatePostIsCommentAllowed(ctx, ctx.Param("id"), req.IsCommentAllowed)
 }

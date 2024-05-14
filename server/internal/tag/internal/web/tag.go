@@ -22,9 +22,6 @@ import (
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
 	"github.com/chenmingyong0423/gkit"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -88,12 +85,12 @@ func (h *TagHandler) GetTagByRoute(ctx *gin.Context) (*apiwrap.ResponseBody[TagN
 	return apiwrap.SuccessResponseWithData(TagNameVO{Name: tag.Name}), nil
 }
 
-func (h *TagHandler) AdminGetTags(ctx *gin.Context, req request.PageRequest) (*apiwrap.ResponseBody[vo.PageVO[vo.Tag]], error) {
-	tags, total, err := h.serv.AdminGetTags(ctx, dto.PageDTO{PageNo: req.PageNo, PageSize: req.PageSize, Field: req.Field, Order: req.Order, Keyword: req.Keyword})
+func (h *TagHandler) AdminGetTags(ctx *gin.Context, req PageRequest) (*apiwrap.ResponseBody[apiwrap.PageVO[TagVO]], error) {
+	tags, total, err := h.serv.AdminGetTags(ctx, domain.PageDTO{PageNo: req.PageNo, PageSize: req.PageSize, Field: req.Field, Order: req.Order, Keyword: req.Keyword})
 	if err != nil {
 		return nil, err
 	}
-	pageVO := vo.PageVO[vo.Tag]{}
+	pageVO := apiwrap.PageVO[TagVO]{}
 	pageVO.PageNo = req.PageNo
 	pageVO.PageSize = req.PageSize
 	pageVO.List = h.tagsToVO(tags)
@@ -101,23 +98,23 @@ func (h *TagHandler) AdminGetTags(ctx *gin.Context, req request.PageRequest) (*a
 	return apiwrap.SuccessResponseWithData(pageVO), nil
 }
 
-func (h *TagHandler) tagsToVO(tags []domain.Tag) []vo.Tag {
-	result := make([]vo.Tag, 0, len(tags))
+func (h *TagHandler) tagsToVO(tags []domain.Tag) []TagVO {
+	result := make([]TagVO, 0, len(tags))
 	for _, tag := range tags {
-		result = append(result, vo.Tag{
-			Id:         tag.Id,
-			Name:       tag.Name,
-			Route:      tag.Route,
-			PostCount:  tag.PostCount,
-			Enabled:    tag.Enabled,
-			CreateTime: tag.CreatedAt,
-			UpdateTime: tag.UpdatedAt,
+		result = append(result, TagVO{
+			Id:        tag.Id,
+			Name:      tag.Name,
+			Route:     tag.Route,
+			PostCount: tag.PostCount,
+			Enabled:   tag.Enabled,
+			CreatedAt: tag.CreatedAt,
+			UpdatedAt: tag.UpdatedAt,
 		})
 	}
 	return result
 }
 
-func (h *TagHandler) AdminCreateTag(ctx *gin.Context, req request.CreateTagRequest) (*apiwrap.ResponseBody[any], error) {
+func (h *TagHandler) AdminCreateTag(ctx *gin.Context, req CreateTagRequest) (*apiwrap.ResponseBody[any], error) {
 	err := h.serv.AdminCreateTag(ctx, domain.Tag{
 		Name:    req.Name,
 		Route:   req.Route,
@@ -132,7 +129,7 @@ func (h *TagHandler) AdminCreateTag(ctx *gin.Context, req request.CreateTagReque
 	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *TagHandler) AdminModifyTagEnabled(ctx *gin.Context, req request.TagEnabledRequest) (*apiwrap.ResponseBody[any], error) {
+func (h *TagHandler) AdminModifyTagEnabled(ctx *gin.Context, req TagEnabledRequest) (*apiwrap.ResponseBody[any], error) {
 	id := ctx.Param("id")
 	return apiwrap.SuccessResponse(), h.serv.ModifyTagEnabled(ctx, id, gkit.GetValueOrDefault(req.Enabled))
 }
@@ -142,19 +139,19 @@ func (h *TagHandler) AdminDeleteTag(ctx *gin.Context) (*apiwrap.ResponseBody[any
 	return apiwrap.SuccessResponse(), h.serv.DeleteTag(ctx, id)
 }
 
-func (h *TagHandler) AdminGetSelectTags(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[vo.SelectTag]], error) {
+func (h *TagHandler) AdminGetSelectTags(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[SelectTagVO]], error) {
 	tags, err := h.serv.GetSelectTags(ctx)
 	if err != nil {
 		return nil, err
 	}
 	list := h.tagsToSelectVO(tags)
-	return apiwrap.SuccessResponseWithData(apiwrap.ListVO[vo.SelectTag]{List: list}), nil
+	return apiwrap.SuccessResponseWithData(apiwrap.ListVO[SelectTagVO]{List: list}), nil
 }
 
-func (h *TagHandler) tagsToSelectVO(tags []domain.Tag) []vo.SelectTag {
-	result := make([]vo.SelectTag, len(tags))
+func (h *TagHandler) tagsToSelectVO(tags []domain.Tag) []SelectTagVO {
+	result := make([]SelectTagVO, len(tags))
 	for i, tag := range tags {
-		result[i] = vo.SelectTag{
+		result[i] = SelectTagVO{
 			Id:    tag.Id,
 			Value: tag.Name,
 			Label: tag.Name,

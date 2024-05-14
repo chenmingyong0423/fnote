@@ -28,7 +28,6 @@ import (
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/gkit/slice"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -38,7 +37,7 @@ type ICategoryService interface {
 	GetCategories(ctx context.Context) ([]domain.CategoryWithCount, error)
 	GetMenus(ctx context.Context) ([]domain.Category, error)
 	GetCategoryByRoute(ctx context.Context, route string) (domain.Category, error)
-	AdminGetCategories(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error)
+	AdminGetCategories(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Category, int64, error)
 	AdminCreateCategory(ctx context.Context, category domain.Category) error
 	ModifyCategoryEnabled(ctx context.Context, id string, enabled bool) error
 	ModifyCategory(ctx context.Context, id string, description string) error
@@ -122,7 +121,7 @@ func (s *CategoryService) AdminCreateCategory(ctx context.Context, category doma
 	return nil
 }
 
-func (s *CategoryService) AdminGetCategories(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error) {
+func (s *CategoryService) AdminGetCategories(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Category, int64, error) {
 	categories, total, err := s.QueryCategoriesPage(ctx, pageDTO)
 	if err != nil {
 		return nil, 0, err
@@ -160,7 +159,7 @@ func (s *CategoryService) GetCategories(ctx context.Context) ([]domain.CategoryW
 	}), nil
 }
 
-func (s *CategoryService) QueryCategoriesPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Category, int64, error) {
+func (s *CategoryService) QueryCategoriesPage(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Category, int64, error) {
 	return s.repo.QueryCategoriesPage(ctx, pageDTO)
 }
 

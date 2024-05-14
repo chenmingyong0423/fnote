@@ -14,4 +14,47 @@
 
 package domain
 
-type Friend struct{}
+type Friend struct {
+	Id          string
+	Name        string
+	Url         string
+	Logo        string
+	Description string
+	Email       string
+	Priority    int
+	Status      int
+	Ip          string
+	CreatedAt   int64
+}
+
+func (f Friend) IsApproved() bool {
+	return f.Status == 1 || f.Status == 2
+}
+
+func (f Friend) IsRejected() bool {
+	return f.Status == 3
+}
+
+type PageDTO struct {
+	// 当前页
+	PageNo int64 `form:"pageNo" binding:"required"`
+	// 每页数量
+	PageSize int64 `form:"pageSize" binding:"required"`
+	// 排序字段
+	Field string `form:"sortField,omitempty"`
+	// 排序规则
+	Order string `form:"sortOrder,omitempty"`
+	// 搜索内容
+	Keyword string `form:"keyword,omitempty"`
+}
+
+func (p *PageDTO) OrderConvertToInt() int {
+	switch p.Order {
+	case "ASC":
+		return 1
+	case "DESC":
+		return -1
+	default:
+		return -1
+	}
+}

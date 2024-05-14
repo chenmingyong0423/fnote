@@ -36,7 +36,6 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -78,7 +77,7 @@ func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.DELETE("/batch-approval", apiwrap.WrapWithBody(h.AdminBatchDeleteComments))
 }
 
-func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiwrap.ResponseBody[api.IdVO], error) {
+func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiwrap.ResponseBody[IdVO], error) {
 	ip := ctx.ClientIP()
 	if ip == "" {
 		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
@@ -126,7 +125,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiw
 		}
 
 	}()
-	return apiwrap.SuccessResponseWithData(api.IdVO{Id: id}), nil
+	return apiwrap.SuccessResponseWithData(IdVO{Id: id}), nil
 }
 
 type ReplyRequest struct {
@@ -139,7 +138,7 @@ type ReplyRequest struct {
 	Content   string `json:"content" binding:"required,max=200"`
 }
 
-func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*apiwrap.ResponseBody[api.IdVO], error) {
+func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*apiwrap.ResponseBody[IdVO], error) {
 	// 根评论的 id
 	commentId := ctx.Param("commentId")
 	ip := ctx.ClientIP()
@@ -187,7 +186,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*a
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
 	}()
-	return apiwrap.SuccessResponseWithData(api.IdVO{Id: id}), nil
+	return apiwrap.SuccessResponseWithData(IdVO{Id: id}), nil
 }
 
 func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[LatestCommentVO]], error) {

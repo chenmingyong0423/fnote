@@ -32,5 +32,5 @@ type AdminFriendVO struct {
 	Logo        string `json:"logo"`
 	Description string `json:"description"`
 	Status      int    `json:"status"`
-	CreateTime  int64  `json:"create_time"`
+	CreatedAt   int64  `json:"created_at"`
 }

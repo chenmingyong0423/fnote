@@ -37,8 +37,6 @@ import (
 	"github.com/chenmingyong0423/gkit/uuidx"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/api"
 )
 
 type IPostService interface {
@@ -277,7 +275,7 @@ func (s *PostService) GetPunishedPostById(ctx context.Context, id string) (*doma
 }
 
 func (s *PostService) GetPosts(ctx context.Context, pageRequest *domain.PostRequest) ([]*domain.Post, int64, error) {
-	return s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageRequest.PageSize, Skip: (pageRequest.PageNo - 1) * pageRequest.PageSize, Keyword: pageRequest.Keyword, Sorting: api.Sorting{
+	return s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: pageRequest.PageSize, Skip: (pageRequest.PageNo - 1) * pageRequest.PageSize, Keyword: pageRequest.Keyword, Sorting: domain.Sorting{
 		Field: pageRequest.Sorting.Field,
 		Order: pageRequest.Sorting.Order,
 	}, Categories: pageRequest.Categories, Tags: pageRequest.Tags})

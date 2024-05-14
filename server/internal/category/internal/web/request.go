@@ -14,4 +14,60 @@
 
 package web
 
-type CategoryRequest struct{}
+type CreateCategoryRequest struct {
+	Name        string `json:"name" binding:"required"`
+	Route       string `json:"route" binding:"required"`
+	Description string `json:"description"`
+	ShowInNav   bool   `json:"show_in_nav"`
+	Enabled     bool   `json:"enabled"`
+}
+
+type CategoryEnabledRequest struct {
+	Enabled *bool `json:"enabled" binding:"required"`
+}
+
+type CategoryNavRequest struct {
+	ShowInNav *bool `json:"show_in_nav" binding:"required"`
+}
+
+type UpdateCategoryRequest struct {
+	Description string `json:"description" binding:"required"`
+}
+
+type PageVO[T any] struct {
+	// 当前页
+	PageNo int64 `json:"pageNo"`
+	// 每页数量
+	PageSize int64 `json:"pageSize"`
+	// 总页数
+	TotalPages int64 `json:"totalPages"`
+	// 总数量
+	TotalCount int64 `json:"totalCount"`
+	List       []T   `json:"list"`
+}
+
+func (p *PageVO[T]) SetTotalCountAndCalculateTotalPages(totalCount int64) {
+	if p.PageSize == 0 {
+		p.TotalPages = 0
+	} else {
+		p.TotalPages = (totalCount + p.PageSize - 1) / p.PageSize
+	}
+	p.TotalCount = totalCount
+}
+
+type PageRequest struct {
+	// 当前页
+	PageNo int64 `form:"pageNo" binding:"required"`
+	// 每页数量
+	PageSize int64 `form:"pageSize" binding:"required"`
+	// 排序字段
+	Field string `form:"sortField,omitempty"`
+	// 排序规则
+	Order string `form:"sortOrder,omitempty"`
+	// 搜索内容
+	Keyword string `form:"keyword,omitempty"`
+}
+
+type LinkRequest struct {
+	Link string `form:"link" binding:"required"`
+}

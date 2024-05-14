@@ -19,16 +19,15 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/repository/dao"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/pkg/errors"
 )
 
@@ -36,7 +35,7 @@ type IFriendRepository interface {
 	FindDisplaying(ctx context.Context) ([]domain.Friend, error)
 	Add(ctx context.Context, friend domain.Friend) error
 	FindByUrl(ctx context.Context, url string) (domain.Friend, error)
-	FindAll(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Friend, int64, error)
+	FindAll(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Friend, int64, error)
 	UpdateById(ctx context.Context, friend domain.Friend) error
 	DeleteById(ctx context.Context, id string) error
 	FindById(ctx context.Context, id string) (domain.Friend, error)
@@ -105,7 +104,7 @@ func (r *FriendRepository) UpdateById(ctx context.Context, friend domain.Friend)
 	})
 }
 
-func (r *FriendRepository) FindAll(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Friend, int64, error) {
+func (r *FriendRepository) FindAll(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Friend, int64, error) {
 	condBuilder := query.BsonBuilder()
 	if pageDTO.Keyword != "" {
 		condBuilder.RegexOptions("name", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageDTO.Keyword)), "i")

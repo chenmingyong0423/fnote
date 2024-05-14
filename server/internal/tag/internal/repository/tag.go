@@ -23,7 +23,6 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/repository/dao"
 	"github.com/chenmingyong0423/gkit/slice"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -33,7 +32,7 @@ import (
 type ITagRepository interface {
 	GetTags(ctx context.Context) ([]domain.Tag, error)
 	GetTagByRoute(ctx context.Context, route string) (domain.Tag, error)
-	QueryTagsPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Tag, int64, error)
+	QueryTagsPage(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Tag, int64, error)
 	CreateTag(ctx context.Context, tag domain.Tag) (string, error)
 	ModifyTagEnabled(ctx context.Context, id string, enabled bool) error
 	GetTagById(ctx context.Context, id string) (domain.Tag, error)
@@ -121,7 +120,7 @@ func (r *TagRepository) CreateTag(ctx context.Context, tag domain.Tag) (string, 
 	return r.dao.Create(ctx, &dao.Tags{Name: tag.Name, Route: tag.Route, Enabled: tag.Enabled})
 }
 
-func (r *TagRepository) QueryTagsPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Tag, int64, error) {
+func (r *TagRepository) QueryTagsPage(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Tag, int64, error) {
 	condBuilder := query.BsonBuilder()
 	if pageDTO.Keyword != "" {
 		condBuilder.RegexOptions("name", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageDTO.Keyword)), "i")
