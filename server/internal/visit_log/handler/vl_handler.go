@@ -62,13 +62,7 @@ func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context, req VisitLogReq) (*a
 	req.UserAgent = ctx.GetHeader("User-Agent")
 	req.Origin = ctx.GetHeader("Origin")
 	req.Referer = ctx.GetHeader("Referer")
-	websiteEvent := WebsiteVisitEvent{
-		Url:       req.Url,
-		Ip:        req.Ip,
-		UserAgent: req.UserAgent,
-		Origin:    req.Origin,
-		Referer:   req.Referer,
-	}
+	websiteEvent := WebsiteVisitEvent(req)
 	marshal, err := jsoniter.Marshal(websiteEvent)
 	if err != nil {
 		return nil, err

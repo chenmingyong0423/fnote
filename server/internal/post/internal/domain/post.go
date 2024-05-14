@@ -81,7 +81,7 @@ type PrimaryPost struct {
 	CommentCount int             `json:"comment_count"`
 	VisitCount   int             `json:"visit_count"`
 	StickyWeight int             `json:"sticky_weight"`
-	CreateTime   int64           `json:"create_time"`
+	CreatedAt    int64           `json:"created_at"`
 }
 
 type Category4Post struct {

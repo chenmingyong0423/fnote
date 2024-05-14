@@ -170,7 +170,7 @@ func (h *AggregatePostHandler) AdminPublishDraft(ctx *gin.Context, req PostReq) 
 		return nil, err
 	}
 	if post != nil {
-		createdAt = post.PrimaryPost.CreateTime
+		createdAt = post.PrimaryPost.CreatedAt
 	}
 	err = h.postServ.SavePost(ctx, post, &postPkg.Post{
 		PrimaryPost: postPkg.PrimaryPost{
@@ -192,7 +192,7 @@ func (h *AggregatePostHandler) AdminPublishDraft(ctx *gin.Context, req PostReq) 
 				}
 			}),
 			StickyWeight: req.StickyWeight,
-			CreateTime:   createdAt,
+			CreatedAt:    createdAt,
 		},
 		ExtraPost: postPkg.ExtraPost{
 			Content:          req.Content,
