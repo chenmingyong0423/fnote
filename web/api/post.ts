@@ -12,7 +12,7 @@ export interface IPost {
   comment_count: number;
   visit_count: number;
   sticky_weight: number;
-  create_time: number;
+  created_at: number;
 }
 
 export type PageRequest = {
@@ -37,12 +37,12 @@ export interface IPostDetail {
   comment_count: number;
   visit_count: number;
   sticky_weight: number;
-  create_time: number;
+  created_at: number;
   content: string;
   meta_description: string;
   meta_keywords: string;
   word_count: number;
-  update_time: number;
+  updated_at: number;
   is_liked: boolean;
 }
 
