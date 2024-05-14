@@ -25,12 +25,7 @@ type PostEvent struct {
 	Type              string   `json:"type"`
 }
 
-type UpdatedPostEvent struct {
-	PostId            string   `json:"post_id"`
-	AddedCategoryId   []string `json:"added_category_id"`
-	DeletedCategoryId []string `json:"deleted_category_id"`
-	AddedTagId        []string `json:"added_tag_id"`
-	DeletedTagId      []string `json:"deleted_tag_id"`
-	NewFileId         string   `json:"new_file_id"`
-	OldFileId         string   `json:"old_file_id"`
+type CategoryEvent struct {
+	CategoryId string `json:"category_id"`
+	Type       string `json:"type"`
 }

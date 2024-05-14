@@ -33,7 +33,3 @@ type CategoryWithCount struct {
 	Description string `json:"description"`
 	Count       int64  `json:"count"`
 }
-
-type CategoryEvent struct {
-	CategoryId string `json:"category_id"`
-}
