@@ -24,7 +24,7 @@ type Friend struct {
 	Priority    int
 	Status      int
 	Ip          string
-	CreateTime  int64
+	CreatedAt   int64
 }
 
 func (f Friend) IsApproved() bool {

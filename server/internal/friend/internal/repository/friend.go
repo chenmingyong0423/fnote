@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/repository/dao"
 
@@ -134,7 +133,6 @@ func (r *FriendRepository) FindByUrl(ctx context.Context, url string) (friend do
 }
 
 func (r *FriendRepository) Add(ctx context.Context, friend domain.Friend) error {
-	unix := time.Now().Local().Unix()
 	err := r.dao.Add(ctx, &dao.Friend{
 		Name:        friend.Name,
 		Url:         friend.Url,
@@ -143,8 +141,6 @@ func (r *FriendRepository) Add(ctx context.Context, friend domain.Friend) error 
 		Email:       friend.Email,
 		Ip:          friend.Ip,
 		Status:      dao.FriendStatusPending,
-		CreateTime:  unix,
-		UpdateTime:  unix,
 	})
 	if err != nil {
 		return errors.WithMessage(err, "r.dao.Add failed")
@@ -170,7 +166,7 @@ func (r *FriendRepository) toDomainFriends(friends []*dao.Friend) []domain.Frien
 
 func (r *FriendRepository) toDomainFriend(friend *dao.Friend) domain.Friend {
 	return domain.Friend{
-		Id:          friend.Id.Hex(),
+		Id:          friend.ID.Hex(),
 		Name:        friend.Name,
 		Url:         friend.Url,
 		Logo:        friend.Logo,
@@ -179,6 +175,6 @@ func (r *FriendRepository) toDomainFriend(friend *dao.Friend) domain.Friend {
 		Priority:    friend.Priority,
 		Email:       friend.Email,
 		Ip:          friend.Ip,
-		CreateTime:  friend.CreateTime,
+		CreatedAt:   friend.CreatedAt.Unix(),
 	}
 }
