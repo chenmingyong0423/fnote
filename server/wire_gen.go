@@ -8,8 +8,7 @@ package main
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
-	"github.com/chenmingyong0423/fnote/server/internal/backup/handler"
-	"github.com/chenmingyong0423/fnote/server/internal/backup/service"
+	"github.com/chenmingyong0423/fnote/server/internal/backup"
 	"github.com/chenmingyong0423/fnote/server/internal/category"
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats"
@@ -62,8 +61,8 @@ func initializeApp() (*gin.Engine, error) {
 	data_analysisModule := data_analysis.InitDataAnalysisModule(database, count_statsModule, post_likeModule, commentModule, visit_logModule)
 	dataAnalysisHandler := data_analysisModule.Hdl
 	countStatsHandler := count_statsModule.Hdl
-	backupService := service.NewBackupService(database)
-	backupHandler := handler.NewBackupHandler(backupService)
+	backupModule := backup.InitBackupModule(database)
+	backupHandler := backupModule.Hdl
 	writer := ioc.InitLogger()
 	v, err := global.IsWebsiteInitializedFn(database)
 	if err != nil {

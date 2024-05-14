@@ -18,6 +18,7 @@ package main
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
+	"github.com/chenmingyong0423/fnote/server/internal/backup"
 	"github.com/chenmingyong0423/fnote/server/internal/category"
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats"
@@ -85,6 +86,7 @@ func initializeApp() (*gin.Engine, error) {
 		wire.FieldsOf(new(*visit_log.Module), "Hdl"),
 		message.InitMessageModule,
 		email.InitEmailModule,
-		ioc.BackupProviders,
+		backup.InitBackupModule,
+		wire.FieldsOf(new(*backup.Module), "Hdl"),
 	))
 }
