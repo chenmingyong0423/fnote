@@ -1,4 +1,4 @@
-// Copyright 2024 chenmingyong0423
+// Copyright 2023 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,19 @@
 
 package domain
 
-type PostEvent struct {
-	PostId            string   `json:"post_id"`
-	AddedCategoryId   []string `json:"added_category_id,omitempty"`
-	DeletedCategoryId []string `json:"deleted_category_id,omitempty"`
-	AddedTagId        []string `json:"added_tag_id,omitempty"`
-	DeletedTagId      []string `json:"deleted_tag_id,omitempty"`
-	NewFileId         string   `json:"new_file_id,omitempty"`
-	OldFileId         string   `json:"old_file_id,omitempty"`
-	Type              string   `json:"type"`
+type TagEvent struct {
+	TagId string `json:"tag_id"`
+	Type  string `json:"type"`
+}
+
+type CommentEvent struct {
+	PostId    string   `json:"post_id"`
+	CommentId string   `json:"comment_id"`
+	RepliesId []string `json:"replies_id"`
+	Count     int      `json:"count"`
+	Type      string   `json:"type"`
+}
+
+type CategoryEvent struct {
+	CategoryId string `json:"category_id"`
 }

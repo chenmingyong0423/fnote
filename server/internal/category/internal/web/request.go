@@ -1,4 +1,4 @@
-// Copyright 2023 chenmingyong0423
+// Copyright 2024 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package domain
+package web
 
-type Tag struct {
-	Id         string
-	Name       string
-	Route      string
-	PostCount  int64
-	Enabled    bool
-	CreateTime int64
-	UpdateTime int64
-}
-
-type TagWithCount struct {
-	Name  string
-	Route string
-	Count int64
-}
+type CategoryRequest struct{}

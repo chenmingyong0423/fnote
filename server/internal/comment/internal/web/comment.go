@@ -22,10 +22,6 @@ import (
 	"net/http"
 	"strings"
 
-	csService "github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/service"
-
-	domain2 "github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
-
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/domain"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/service"
@@ -45,13 +41,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NewCommentHandler(serv service.ICommentService, cfgService website_config.Service, postServ post.Service, msgServ msgService.IMessageService, statsServ csService.ICountStatsService) *CommentHandler {
+func NewCommentHandler(serv service.ICommentService, cfgService website_config.Service, postServ post.Service, msgServ msgService.IMessageService) *CommentHandler {
 	return &CommentHandler{
 		serv:       serv,
 		cfgService: cfgService,
 		postServ:   postServ,
 		msgServ:    msgServ,
-		statsServ:  statsServ,
 	}
 }
 
@@ -60,7 +55,6 @@ type CommentHandler struct {
 	cfgService website_config.Service
 	postServ   post.Service
 	msgServ    msgService.IMessageService
-	statsServ  csService.ICountStatsService
 }
 
 func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
@@ -123,20 +117,13 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiw
 		return nil, err
 	}
 	go func() {
+		// todo 考虑邮件服务订阅事件发送邮件
 		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
-		gErr := h.postServ.IncreaseVisitCount(ctx, req.PostId)
+		gErr := h.msgServ.SendEmailToWebmaster(ctx, "comment", "text/plain")
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
-		gErr = h.msgServ.SendEmailToWebmaster(ctx, "comment", "text/plain")
-		if gErr != nil {
-			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-		}
-		// 统计评论数
-		gErr = h.statsServ.IncreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount)
-		if gErr != nil {
-			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-		}
+
 	}()
 	return apiwrap.SuccessResponseWithData(api.IdVO{Id: id}), nil
 }
@@ -192,17 +179,9 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*a
 		return nil, err
 	}
 	go func() {
+		// todo 考虑邮件服务订阅事件发送邮件
 		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
-		gErr := h.postServ.IncreaseVisitCount(ctx, req.PostId)
-		if gErr != nil {
-			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-		}
-		gErr = h.msgServ.SendEmailToWebmaster(ctx, "comment", "text/plain")
-		if gErr != nil {
-			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-		}
-		// 统计评论数
-		gErr = h.statsServ.IncreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount)
+		gErr := h.msgServ.SendEmailToWebmaster(ctx, "comment", "text/plain")
 		if gErr != nil {
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
 		}
@@ -411,31 +390,10 @@ func (h *CommentHandler) AdminApproveCommentReply(ctx *gin.Context) (*apiwrap.Re
 
 func (h *CommentHandler) AdminDeleteComment(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	commentId := ctx.Param("id")
-	commentWithReplies, err := h.serv.FindCommentWithRepliesById(ctx, commentId)
-	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, apiwrap.NewErrorResponseBody(http.StatusNotFound, "Comment not found.")
-		}
-		return nil, err
-	}
-	err = h.serv.DeleteCommentById(ctx, commentId)
+	err := h.serv.DeleteCommentById(ctx, commentId)
 	if err != nil {
 		return nil, err
 	}
-	// 统计删除的评论数
-	go func() {
-		cnt := 1 + len(commentWithReplies.Replies)
-		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
-		gErr := h.postServ.DecreaseCommentCount(ctx, commentWithReplies.PostInfo.PostId, cnt)
-		if gErr != nil {
-			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-		}
-		// 减少评论数
-		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount, cnt)
-		if gErr != nil {
-			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-		}
-	}()
 	return apiwrap.SuccessResponse(), nil
 }
 
@@ -449,23 +407,10 @@ func (h *CommentHandler) AdminDeleteCommentReply(ctx *gin.Context) (*apiwrap.Res
 		}
 		return nil, err
 	}
-	err = h.serv.DeleteReplyByCIdAndRId(ctx, commentId, replyId)
+	err = h.serv.DeleteReplyByCIdAndRId(ctx, commentReplyWithPostInfo.PostInfo.PostId, commentId, replyId)
 	if err != nil {
 		return nil, err
 	}
-
-	go func() {
-		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
-		gErr := h.postServ.DecreaseCommentCount(ctx, commentReplyWithPostInfo.PostInfo.PostId, 1)
-		if gErr != nil {
-			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-		}
-		// 减少评论数
-		gErr = h.statsServ.DecreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount, 1)
-		if gErr != nil {
-			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-		}
-	}()
 	return apiwrap.SuccessResponse(), nil
 }
 
@@ -518,50 +463,10 @@ func (h *CommentHandler) AdminBatchDeleteComments(ctx *gin.Context, req BatchApp
 			ReplyIds:  v,
 		})
 	}
-
-	comments, err := h.serv.FindCommentByIds(ctx, req.CommentIds)
+	err := h.serv.BatchDeleteComments(ctx, req.CommentIds, replies)
 	if err != nil {
 		return nil, err
 	}
 
-	err = h.serv.BatchDeleteComments(ctx, req.CommentIds, replies)
-	if err != nil {
-		return nil, err
-	}
-	go func() {
-		l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
-		l.InfoContext(ctx, "comment-decrease-operation", "commentIds", req.CommentIds, "replies", req.Replies)
-
-		// 减少的评论数
-		totalCnt := len(comments)
-		for _, comment := range comments {
-			replyCnt := len(comment.Replies)
-			gErr := h.postServ.DecreaseCommentCount(ctx, comment.PostInfo.PostId, replyCnt+1)
-			if gErr != nil {
-				l.WarnContext(ctx, "comment-decrease-operation", "failed to DecreaseCommentCount", gErr)
-			}
-			totalCnt += replyCnt
-		}
-		for commentId, r := range req.Replies {
-			replyCnt := len(r)
-			comment, gErr := h.serv.FindCommentById(ctx, commentId)
-			if gErr != nil {
-				l.WarnContext(ctx, "comment-decrease-operation", "failed to FindCommentById", gErr)
-			}
-			gErr = h.postServ.DecreaseCommentCount(ctx, comment.PostInfo.PostId, replyCnt)
-			if gErr != nil {
-				l.WarnContext(ctx, "comment-decrease-operation", "failed to DecreaseCommentCount", gErr)
-			}
-			totalCnt += replyCnt
-		}
-
-		// 减少评论数
-		if totalCnt > 0 {
-			gErr := h.statsServ.DecreaseByReferenceIdAndType(ctx, domain2.CountStatsTypeCommentCount.ToString(), domain2.CountStatsTypeCommentCount, totalCnt)
-			if gErr != nil {
-				l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-			}
-		}
-	}()
 	return apiwrap.SuccessResponse(), nil
 }

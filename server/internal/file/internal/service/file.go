@@ -17,10 +17,11 @@ package service
 import (
 	"context"
 	"encoding/hex"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"os"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/google/uuid"
 
@@ -54,9 +55,7 @@ func NewFileService(repo repository.IFileRepository, eventbus *eventbus.EventBus
 		repo:     repo,
 		eventBus: eventbus,
 	}
-	go s.SubscribePostDeletedEvent()
-	go s.SubscribePostAddedEvent()
-	go s.SubscribePostUpdatedEvent()
+	go s.subscribePostEvent()
 	return s
 }
 
@@ -121,98 +120,54 @@ func (s *FileService) Upload(ctx context.Context, fileDTO dto.FileDTO) (*domain.
 	return file, nil
 }
 
-func (s *FileService) SubscribePostDeletedEvent() {
-	eventChan := s.eventBus.Subscribe("post-delete")
+func (s *FileService) subscribePostEvent() {
+	eventChan := s.eventBus.Subscribe("post")
 	for event := range eventChan {
 		rid := uuid.NewString()
 		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
 		l := slog.Default().With("X-Request-ID", rid)
-		l.InfoContext(ctx, "post-delete", "payload", string(event.Payload))
-		var postEvent domain.PostEvent
-		err := json.Unmarshal(event.Payload, &postEvent)
+		l.InfoContext(ctx, "File: post event", "payload", string(event.Payload))
+		var e domain.PostEvent
+		err := jsoniter.Unmarshal(event.Payload, &e)
 		if err != nil {
-			l.ErrorContext(ctx, "post-delete: failed to json.Unmarshal", "err", err)
+			l.ErrorContext(ctx, "File: post event: failed to json.Unmarshal", "err", err)
 			continue
 		}
-		fid, err := hex.DecodeString(postEvent.FileId)
-		if err != nil {
-			l.ErrorContext(ctx, "post-delete: failed to hex.DecodeString", "fileId", postEvent.FileId, "err", err)
-			continue
+		switch e.Type {
+		case "create":
+			s.createIndexFileMeta4PostEvent(ctx, e.NewFileId, e.PostId, l)
+		case "update":
+			if e.NewFileId != e.OldFileId {
+				s.createIndexFileMeta4PostEvent(ctx, e.NewFileId, e.PostId, l)
+				s.deleteIndexFileMeta4PostEvent(ctx, e.OldFileId, e.PostId, l)
+			}
+		case "delete":
+			s.deleteIndexFileMeta4PostEvent(ctx, e.OldFileId, e.PostId, l)
 		}
-		err = s.DeleteIndexFileMeta(ctx, fid, postEvent.PostId, "post")
-		if err != nil {
-			l.ErrorContext(ctx, "post-delete: failed to delete the file-meta index", "fileId", postEvent.FileId, "postId", postEvent.PostId, "err", err)
-			continue
-		}
-		l.InfoContext(ctx, "post-delete: successfully delete the file-meta index", "fileId", postEvent.FileId, "postId", postEvent.PostId)
+		l.InfoContext(ctx, "File: post event: handle successfully")
 	}
 }
 
-func (s *FileService) SubscribePostAddedEvent() {
-	eventChan := s.eventBus.Subscribe("post-addition")
-	for event := range eventChan {
-		rid := uuid.NewString()
-		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
-		l := slog.Default().With("X-Request-ID", rid)
-		l.InfoContext(ctx, "post-addition", "payload", string(event.Payload))
-		var postEvent domain.PostEvent
-		err := json.Unmarshal(event.Payload, &postEvent)
-		if err != nil {
-			l.ErrorContext(ctx, "post-addition: failed to json.Unmarshal", "err", err)
-			continue
-		}
-		fid, err := hex.DecodeString(postEvent.FileId)
-		if err != nil {
-			l.ErrorContext(ctx, "post-addition: failed to hex.DecodeString", "fileId", postEvent.FileId, "err", err)
-			continue
-		}
-		err = s.IndexFileMeta(ctx, fid, postEvent.PostId, "post")
-		if err != nil {
-			l.ErrorContext(ctx, "post-addition: failed to index the file-meta ", "fileId", postEvent.FileId, "postId", postEvent.PostId, "err", err)
-			continue
-		}
-		l.InfoContext(ctx, "post-addition: successfully index the file-meta ", "fileId", postEvent.FileId, "postId", postEvent.PostId)
+func (s *FileService) deleteIndexFileMeta4PostEvent(ctx context.Context, oldFileId string, postId string, l *slog.Logger) {
+	fid, sErr := hex.DecodeString(oldFileId)
+	if sErr != nil {
+		l.ErrorContext(ctx, "File: post event: failed to hex.DecodeString", "fileId", oldFileId, "err", sErr)
+		return
 	}
-
+	sErr = s.DeleteIndexFileMeta(ctx, fid, postId, "post")
+	if sErr != nil {
+		l.ErrorContext(ctx, "File: post event: failed to delete the index of file-meta ", "fileId", oldFileId, "postId", postId, "err", sErr)
+	}
 }
 
-func (s *FileService) SubscribePostUpdatedEvent() {
-	eventChan := s.eventBus.Subscribe("post-update")
-	for event := range eventChan {
-		rid := uuid.NewString()
-		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
-		l := slog.Default().With("X-Request-ID", rid)
-		l.InfoContext(ctx, "post-update", "payload", string(event.Payload))
-		var postEvent domain.UpdatedPostEvent
-		err := json.Unmarshal(event.Payload, &postEvent)
-		if err != nil {
-			l.ErrorContext(ctx, "post-update: failed to json.Unmarshal", "err", err)
-			continue
-		}
-		if postEvent.NewFileId != postEvent.OldFileId {
-			oldFid, err2 := hex.DecodeString(postEvent.OldFileId)
-			if err != nil {
-				l.ErrorContext(ctx, "post-update: failed to hex.DecodeString", "fileId", postEvent.OldFileId, "err", err2)
-				continue
-			}
-			err2 = s.DeleteIndexFileMeta(ctx, oldFid, postEvent.PostId, "post")
-			if err2 != nil {
-				l.ErrorContext(ctx, "post-update: failed to delete the file-meta index", "fileId", postEvent.OldFileId, "postId", postEvent.PostId, "err", err2)
-				continue
-			}
-			newFid, err2 := hex.DecodeString(postEvent.NewFileId)
-			if err2 != nil {
-				l.ErrorContext(ctx, "post-update: failed to hex.DecodeString", "fileId", postEvent.NewFileId, "err", err2)
-				continue
-			}
-			err2 = s.IndexFileMeta(ctx, newFid, postEvent.PostId, "post")
-			if err2 != nil {
-				l.ErrorContext(ctx, "post-update: failed to index the file-meta ", "fileId", postEvent.NewFileId, "postId", postEvent.PostId, "err", err2)
-				continue
-			}
-			l.InfoContext(ctx, "post-update: successfully update the index of file-meta ", "newFileId", postEvent.NewFileId, "oldFileId", postEvent.OldFileId, "postId", postEvent.PostId)
-		} else {
-			l.InfoContext(ctx, "post-update: file not changed", "fileId", postEvent.OldFileId, "postId", postEvent.PostId)
-		}
+func (s *FileService) createIndexFileMeta4PostEvent(ctx context.Context, newFileId string, postId string, l *slog.Logger) {
+	fid, sErr := hex.DecodeString(newFileId)
+	if sErr != nil {
+		l.ErrorContext(ctx, "File: post event: failed to hex.DecodeString", "fileId", newFileId, "err", sErr)
+		return
+	}
+	sErr = s.IndexFileMeta(ctx, fid, postId, "post")
+	if sErr != nil {
+		l.ErrorContext(ctx, "File: post event: failed to index the file-meta ", "fileId", newFileId, "postId", postId, "err", sErr)
 	}
 }

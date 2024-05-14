@@ -15,14 +15,20 @@
 package post
 
 import (
+	"github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/web"
 )
 
 type (
-	Handler = web.PostHandler
-	Service = service.IPostService
-	Module  struct {
+	Handler       = web.PostHandler
+	Service       = service.IPostService
+	Post          = domain.Post
+	PrimaryPost   = domain.PrimaryPost
+	ExtraPost     = domain.ExtraPost
+	Category4Post = domain.Category4Post
+	Tag4Post      = domain.Tag4Post
+	Module        struct {
 		Svc Service
 		Hdl *Handler
 	}

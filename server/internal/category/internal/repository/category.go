@@ -20,15 +20,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/category/internal/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/category/internal/repository/dao"
+	"github.com/chenmingyong0423/gkit/slice"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/chenmingyong0423/fnote/server/internal/category/repository/dao"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 )
 
 type ICategoryRepository interface {
@@ -44,6 +45,8 @@ type ICategoryRepository interface {
 	GetCategoryById(ctx context.Context, id string) (domain.Category, error)
 	RecoverCategory(ctx context.Context, category domain.Category) error
 	GetSelectCategories(ctx context.Context) ([]domain.Category, error)
+	IncreasePostCountByIds(ctx context.Context, categoryIds []string) error
+	DecreasePostCountByIds(ctx context.Context, categoryIds []string) error
 }
 
 var _ ICategoryRepository = (*CategoryRepository)(nil)
@@ -56,6 +59,34 @@ func NewCategoryRepository(dao dao.ICategoryDao) *CategoryRepository {
 
 type CategoryRepository struct {
 	dao dao.ICategoryDao
+}
+
+func (r *CategoryRepository) DecreasePostCountByIds(ctx context.Context, categoryIds []string) (err error) {
+	categoryObjectIds := slice.Map(categoryIds, func(_ int, id string) (ojbId primitive.ObjectID) {
+		if err != nil {
+			return ojbId
+		}
+		ojbId, err = primitive.ObjectIDFromHex(id)
+		return ojbId
+	})
+	if err != nil {
+		return
+	}
+	return r.dao.DecreasePostCountByIds(ctx, categoryObjectIds)
+}
+
+func (r *CategoryRepository) IncreasePostCountByIds(ctx context.Context, categoryIds []string) (err error) {
+	categoryObjectIds := slice.Map(categoryIds, func(_ int, id string) (ojbId primitive.ObjectID) {
+		if err != nil {
+			return ojbId
+		}
+		ojbId, err = primitive.ObjectIDFromHex(id)
+		return ojbId
+	})
+	if err != nil {
+		return
+	}
+	return r.dao.IncreasePostCountByIds(ctx, categoryObjectIds)
 }
 
 func (r *CategoryRepository) GetSelectCategories(ctx context.Context) ([]domain.Category, error) {
@@ -172,7 +203,7 @@ func (r *CategoryRepository) GetCategoryByRoute(ctx context.Context, route strin
 }
 
 func (r *CategoryRepository) toDomainCategory(category *dao.Category) domain.Category {
-	return domain.Category{Id: category.Id.Hex(), Name: category.Name, Route: category.Route, Description: category.Description, Enabled: category.Enabled, ShowInNav: category.ShowInNav, Sort: category.Sort, CreateTime: category.CreateTime, UpdateTime: category.UpdateTime}
+	return domain.Category{Id: category.Id.Hex(), Name: category.Name, Route: category.Route, Description: category.Description, Enabled: category.Enabled, ShowInNav: category.ShowInNav, PostCount: category.PostCount, Sort: category.Sort, CreateTime: category.CreateTime, UpdateTime: category.UpdateTime}
 }
 
 func (r *CategoryRepository) GetAll(ctx context.Context) ([]domain.Category, error) {

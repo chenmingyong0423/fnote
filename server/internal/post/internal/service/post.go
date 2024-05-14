@@ -21,6 +21,8 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/google/uuid"
+
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
 
 	"github.com/chenmingyong0423/go-eventbus"
@@ -56,11 +58,13 @@ type IPostService interface {
 var _ IPostService = (*PostService)(nil)
 
 func NewPostService(repo repository.IPostRepository, cfgService website_config.Service, eventBus *eventbus.EventBus) *PostService {
-	return &PostService{
+	s := &PostService{
 		repo:       repo,
 		cfgService: cfgService,
 		eventBus:   eventBus,
 	}
+	go s.SubscribeCommentEvent()
+	return s
 }
 
 type PostService struct {
@@ -105,9 +109,9 @@ func (s *PostService) SavePost(ctx context.Context, originalPost *domain.Post, s
 
 	go func() {
 		if isNewPost {
-			s.eventBus.Publish("post-addition", eventbus.Event{Payload: marshal})
+			s.eventBus.Publish("post", eventbus.Event{Payload: marshal})
 		} else {
-			s.eventBus.Publish("post-update", eventbus.Event{Payload: marshal})
+			s.eventBus.Publish("post", eventbus.Event{Payload: marshal})
 		}
 	}()
 	return nil
@@ -157,14 +161,15 @@ func (s *PostService) marshalUpdatePostEvent(post *domain.Post, savedPost *domai
 		})
 	}
 
-	postEvent := domain.UpdatedPostEvent{
+	postEvent := domain.PostEvent{
 		PostId:            savedPost.Id,
 		AddedCategoryId:   addedCategoryIds,
 		DeletedCategoryId: removedCategoryIds,
 		AddedTagId:        addedTagIds,
 		DeletedTagId:      removedTagIds,
-		NewFileId:         strings.Split(post.CoverImg[8:], ".")[0],
+		NewFileId:         strings.Split(savedPost.CoverImg[8:], ".")[0],
 		OldFileId:         strings.Split(post.CoverImg[1:], ".")[0],
+		Type:              "update",
 	}
 	return json.Marshal(postEvent)
 }
@@ -185,13 +190,14 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 
 	postInfo := domain.PostEvent{
 		PostId: id,
-		CategoryId: slice.Map[domain.Category4Post, string](post.Categories, func(_ int, c domain.Category4Post) string {
+		DeletedCategoryId: slice.Map[domain.Category4Post, string](post.Categories, func(_ int, c domain.Category4Post) string {
 			return c.Id
 		}),
-		TagId: slice.Map[domain.Tag4Post, string](post.Tags, func(_ int, t domain.Tag4Post) string {
+		DeletedTagId: slice.Map[domain.Tag4Post, string](post.Tags, func(_ int, t domain.Tag4Post) string {
 			return t.Id
 		}),
-		FileId: strings.Split(post.CoverImg[1:], ".")[0],
+		OldFileId: strings.Split(post.CoverImg[1:], ".")[0],
+		Type:      "delete",
 	}
 	marshal, err := json.Marshal(postInfo)
 	if err != nil {
@@ -203,7 +209,7 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 		return err
 	}
 
-	s.eventBus.Publish("post-delete", eventbus.Event{Payload: marshal})
+	s.eventBus.Publish("post", eventbus.Event{Payload: marshal})
 	return nil
 }
 
@@ -221,20 +227,21 @@ func (s *PostService) AddPost(ctx context.Context, post *domain.Post) error {
 	if err != nil {
 		return err
 	}
-	s.eventBus.Publish("post-addition", eventbus.Event{Payload: marshal})
+	s.eventBus.Publish("post", eventbus.Event{Payload: marshal})
 	return nil
 }
 
 func (s *PostService) marshalPostEvent(post *domain.Post) ([]byte, error) {
 	postInfo := domain.PostEvent{
 		PostId: post.Id,
-		CategoryId: slice.Map[domain.Category4Post, string](post.Categories, func(_ int, c domain.Category4Post) string {
+		AddedCategoryId: slice.Map[domain.Category4Post, string](post.Categories, func(_ int, c domain.Category4Post) string {
 			return c.Id
 		}),
-		TagId: slice.Map[domain.Tag4Post, string](post.Tags, func(_ int, t domain.Tag4Post) string {
+		AddedTagId: slice.Map[domain.Tag4Post, string](post.Tags, func(_ int, t domain.Tag4Post) string {
 			return t.Id
 		}),
-		FileId: strings.Split(post.CoverImg[8:], ".")[0],
+		NewFileId: strings.Split(post.CoverImg[8:], ".")[0],
+		Type:      "create",
 	}
 	marshal, err := json.Marshal(postInfo)
 	if err != nil {
@@ -277,4 +284,36 @@ func (s *PostService) GetPosts(ctx context.Context, pageRequest *domain.PostRequ
 
 func (s *PostService) GetLatestPosts(ctx context.Context, count int64) ([]*domain.Post, error) {
 	return s.repo.GetLatest5Posts(ctx, count)
+}
+
+func (s *PostService) SubscribeCommentEvent() {
+	eventChan := s.eventBus.Subscribe("comment")
+	for event := range eventChan {
+		rid := uuid.NewString()
+		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
+		l := slog.Default().With("X-Request-ID", rid)
+		l.InfoContext(ctx, "Post: comment event", "payload", string(event.Payload))
+		var e domain.CommentEvent
+		err := json.Unmarshal(event.Payload, &e)
+		if err != nil {
+			l.ErrorContext(ctx, "Post: comment event: failed to json.Unmarshal", "err", err)
+			continue
+		}
+
+		switch e.Type {
+		case "addition":
+			err = s.repo.IncreaseCommentCount(ctx, e.PostId)
+			if err != nil {
+				l.ErrorContext(ctx, "Post: comment event: failed to increase the count of comment in post", "count", 1)
+				continue
+			}
+		case "delete":
+			err = s.repo.DecreaseCommentCount(ctx, e.PostId, e.Count)
+			if err != nil {
+				l.ErrorContext(ctx, "Post: comment event: failed to increase the count of comment in post", "count", e.Count)
+				continue
+			}
+		}
+		l.InfoContext(ctx, "Post: comment event: handle successfully ")
+	}
 }

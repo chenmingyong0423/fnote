@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package domain
+package tag
 
-type PostEvent struct {
-	PostId            string   `json:"post_id"`
-	AddedCategoryId   []string `json:"added_category_id,omitempty"`
-	DeletedCategoryId []string `json:"deleted_category_id,omitempty"`
-	AddedTagId        []string `json:"added_tag_id,omitempty"`
-	DeletedTagId      []string `json:"deleted_tag_id,omitempty"`
-	NewFileId         string   `json:"new_file_id,omitempty"`
-	OldFileId         string   `json:"old_file_id,omitempty"`
-	Type              string   `json:"type"`
-}
+import (
+	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/web"
+)
 
-type LikePostEvent struct {
-	PostId string `json:"post_id"`
-}
+type (
+	Handler = web.TagHandler
+	Service = service.ITagService
+	Module  struct {
+		Svc Service
+		Hdl *Handler
+	}
+)

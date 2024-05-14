@@ -9,9 +9,8 @@ package comment
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/repository"
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/repository/dao"
-	service3 "github.com/chenmingyong0423/fnote/server/internal/comment/internal/service"
+	service2 "github.com/chenmingyong0423/fnote/server/internal/comment/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/web"
-	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/message/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
@@ -22,13 +21,13 @@ import (
 
 // Injectors from wire.go:
 
-func InitCommentModule(mongoDB *mongo.Database, msgServ service.IMessageService, statsServ service2.ICountStatsService, cfgModule *website_config.Module, postModule *post.Module, eventBus *eventbus.EventBus) *Module {
+func InitCommentModule(mongoDB *mongo.Database, msgServ service.IMessageService, cfgModule *website_config.Module, postModule *post.Module, eventBus *eventbus.EventBus) *Module {
 	commentDao := dao.NewCommentDao(mongoDB)
 	commentRepository := repository.NewCommentRepository(commentDao)
-	commentService := service3.NewCommentService(commentRepository, eventBus)
+	commentService := service2.NewCommentService(commentRepository, eventBus)
 	iWebsiteConfigService := cfgModule.Svc
 	iPostService := postModule.Svc
-	commentHandler := web.NewCommentHandler(commentService, iWebsiteConfigService, iPostService, msgServ, statsServ)
+	commentHandler := web.NewCommentHandler(commentService, iWebsiteConfigService, iPostService, msgServ)
 	module := &Module{
 		Svc: commentService,
 		Hdl: commentHandler,
@@ -38,4 +37,4 @@ func InitCommentModule(mongoDB *mongo.Database, msgServ service.IMessageService,
 
 // wire.go:
 
-var CommentProviders = wire.NewSet(web.NewCommentHandler, service3.NewCommentService, repository.NewCommentRepository, dao.NewCommentDao, wire.Bind(new(service3.ICommentService), new(*service3.CommentService)), wire.Bind(new(repository.ICommentRepository), new(*repository.CommentRepository)), wire.Bind(new(dao.ICommentDao), new(*dao.CommentDao)))
+var CommentProviders = wire.NewSet(web.NewCommentHandler, service2.NewCommentService, repository.NewCommentRepository, dao.NewCommentDao, wire.Bind(new(service2.ICommentService), new(*service2.CommentService)), wire.Bind(new(repository.ICommentRepository), new(*repository.CommentRepository)), wire.Bind(new(dao.ICommentDao), new(*dao.CommentDao)))

@@ -37,6 +37,7 @@ type Tags struct {
 	Name       string             `bson:"name"`
 	Route      string             `bson:"route"`
 	Enabled    bool               `bson:"enabled"`
+	PostCount  int64              `bson:"post_count"`
 	CreateTime int64              `bson:"create_time"`
 	UpdateTime int64              `bson:"update_time"`
 }
@@ -51,6 +52,8 @@ type ITagDao interface {
 	DeleteById(ctx context.Context, id primitive.ObjectID) error
 	RecoverTag(ctx context.Context, tag *Tags) error
 	GetEnabled(ctx context.Context) ([]*Tags, error)
+	IncreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error
+	DecreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error
 }
 
 var _ ITagDao = (*TagDao)(nil)
@@ -61,6 +64,34 @@ func NewTagDao(db *mongo.Database) *TagDao {
 
 type TagDao struct {
 	coll *mongox.Collection[Tags]
+}
+
+func (d *TagDao) DecreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error {
+	updateResult, err := d.coll.Updater().
+		Filter(query.In("_id", tagObjectIds)).
+		Updates(update.BsonBuilder().Inc("post_count", -1).Set("update_time", time.Now().Local().Unix()).Build()).
+		UpdateMany(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "failed to decrease post count by ids, ids: %+v", tagObjectIds)
+	}
+	if updateResult.MatchedCount == 0 {
+		return fmt.Errorf("MatchedCount=0, decrease post count failed, ids: %+v", tagObjectIds)
+	}
+	return nil
+}
+
+func (d *TagDao) IncreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error {
+	updateResult, err := d.coll.Updater().
+		Filter(query.In("_id", tagObjectIds)).
+		Updates(update.BsonBuilder().Inc("post_count", 1).Set("update_time", time.Now().Local().Unix()).Build()).
+		UpdateMany(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "failed to increase post count by ids, ids: %+v", tagObjectIds)
+	}
+	if updateResult.MatchedCount == 0 {
+		return fmt.Errorf("MatchedCount=0, increase post count failed, ids: %+v", tagObjectIds)
+	}
+	return nil
 }
 
 func (d *TagDao) GetEnabled(ctx context.Context) ([]*Tags, error) {

@@ -14,17 +14,23 @@
 
 package domain
 
-type PostEvent struct {
-	PostId            string   `json:"post_id"`
-	AddedCategoryId   []string `json:"added_category_id,omitempty"`
-	DeletedCategoryId []string `json:"deleted_category_id,omitempty"`
-	AddedTagId        []string `json:"added_tag_id,omitempty"`
-	DeletedTagId      []string `json:"deleted_tag_id,omitempty"`
-	NewFileId         string   `json:"new_file_id,omitempty"`
-	OldFileId         string   `json:"old_file_id,omitempty"`
-	Type              string   `json:"type"`
+type Tag struct {
+	Id         string
+	Name       string
+	Route      string
+	PostCount  int64
+	Enabled    bool
+	CreateTime int64
+	UpdateTime int64
 }
 
-type LikePostEvent struct {
-	PostId string `json:"post_id"`
+type TagWithCount struct {
+	Name  string
+	Route string
+	Count int64
+}
+
+type TagEvent struct {
+	TagId string `json:"tag_id"`
+	Type  string `json:"type"`
 }

@@ -16,9 +16,8 @@ package web
 
 import (
 	"fmt"
+	"github.com/chenmingyong0423/fnote/server/internal/count_stats"
 	"time"
-
-	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/service"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	service2 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/service"
@@ -29,7 +28,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewDataAnalysisHandler(vlServ service.IVisitLogService, csServ csServ.ICountStatsService, postLikeServ post_like.Service, commentServ comment.Service, ipAPiServ service2.IIpApiService) *DataAnalysisHandler {
+func NewDataAnalysisHandler(vlServ service.IVisitLogService, csServ count_stats.Service, postLikeServ post_like.Service, commentServ comment.Service, ipAPiServ service2.IIpApiService) *DataAnalysisHandler {
 	return &DataAnalysisHandler{
 		vlServ:       vlServ,
 		csServ:       csServ,
@@ -41,7 +40,7 @@ func NewDataAnalysisHandler(vlServ service.IVisitLogService, csServ csServ.ICoun
 
 type DataAnalysisHandler struct {
 	vlServ       service.IVisitLogService
-	csServ       csServ.ICountStatsService
+	csServ       count_stats.Service
 	postLikeServ post_like.Service
 	commentServ  comment.Service
 	ipAPiServ    service2.IIpApiService

@@ -19,7 +19,6 @@ import (
 
 	postPkg "github.com/chenmingyong0423/fnote/server/internal/post"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/chenmingyong0423/gkit/slice"
@@ -49,7 +48,7 @@ func (h *AggregatePostHandler) RegisterGinRoutes(engine *gin.Engine) {
 func (h *AggregatePostHandler) GetPostDraftById(ctx *gin.Context) (*apiwrap.ResponseBody[*PostDraftVO], error) {
 	var (
 		postDraft *post_draft.PostDraft
-		post      *domain.Post
+		post      *postPkg.Post
 		err       error
 	)
 	id := ctx.Param("id")
@@ -74,13 +73,13 @@ func (h *AggregatePostHandler) GetPostDraftById(ctx *gin.Context) (*apiwrap.Resp
 			Title:    post.Title,
 			Summary:  post.Summary,
 			CoverImg: post.CoverImg,
-			Categories: slice.Map(post.Categories, func(idx int, c domain.Category4Post) post_draft.Category4PostDraft {
+			Categories: slice.Map(post.Categories, func(idx int, c postPkg.Category4Post) post_draft.Category4PostDraft {
 				return post_draft.Category4PostDraft{
 					Id:   c.Id,
 					Name: c.Name,
 				}
 			}),
-			Tags: slice.Map(post.Tags, func(idx int, t domain.Tag4Post) post_draft.Tag4PostDraft {
+			Tags: slice.Map(post.Tags, func(idx int, t postPkg.Tag4Post) post_draft.Tag4PostDraft {
 				return post_draft.Tag4PostDraft{
 					Id:   t.Id,
 					Name: t.Name,
@@ -135,7 +134,7 @@ func (h *AggregatePostHandler) postDraftToPostDraftVO(postDraft *post_draft.Post
 	}
 }
 
-func (h *AggregatePostHandler) postToPostDraftVO(post *domain.Post) *PostDraftVO {
+func (h *AggregatePostHandler) postToPostDraftVO(post *postPkg.Post) *PostDraftVO {
 	return &PostDraftVO{
 		Id:       post.Id,
 		Author:   post.Author,
@@ -143,13 +142,13 @@ func (h *AggregatePostHandler) postToPostDraftVO(post *domain.Post) *PostDraftVO
 		Summary:  post.Summary,
 		Content:  post.Content,
 		CoverImg: post.CoverImg,
-		Categories: slice.Map(post.Categories, func(idx int, c domain.Category4Post) Category4PostDraft {
+		Categories: slice.Map(post.Categories, func(idx int, c postPkg.Category4Post) Category4PostDraft {
 			return Category4PostDraft{
 				Id:   c.Id,
 				Name: c.Name,
 			}
 		}),
-		Tags: slice.Map(post.Tags, func(idx int, c domain.Tag4Post) Tag4PostDraft {
+		Tags: slice.Map(post.Tags, func(idx int, c postPkg.Tag4Post) Tag4PostDraft {
 			return Tag4PostDraft{
 				Id:   c.Id,
 				Name: c.Name,
@@ -173,21 +172,21 @@ func (h *AggregatePostHandler) AdminPublishDraft(ctx *gin.Context, req PostReq) 
 	if post != nil {
 		createdAt = post.PrimaryPost.CreateTime
 	}
-	err = h.postServ.SavePost(ctx, post, &domain.Post{
-		PrimaryPost: domain.PrimaryPost{
+	err = h.postServ.SavePost(ctx, post, &postPkg.Post{
+		PrimaryPost: postPkg.PrimaryPost{
 			Id:       req.Id,
 			Author:   req.Author,
 			Title:    req.Title,
 			Summary:  req.Summary,
 			CoverImg: req.CoverImg,
-			Categories: slice.Map(req.Categories, func(idx int, c Category4Post) domain.Category4Post {
-				return domain.Category4Post{
+			Categories: slice.Map(req.Categories, func(idx int, c Category4Post) postPkg.Category4Post {
+				return postPkg.Category4Post{
 					Id:   c.Id,
 					Name: c.Name,
 				}
 			}),
-			Tags: slice.Map(req.Tags, func(idx int, t Tag4Post) domain.Tag4Post {
-				return domain.Tag4Post{
+			Tags: slice.Map(req.Tags, func(idx int, t Tag4Post) postPkg.Tag4Post {
+				return postPkg.Tag4Post{
 					Id:   t.Id,
 					Name: t.Name,
 				}
@@ -195,7 +194,7 @@ func (h *AggregatePostHandler) AdminPublishDraft(ctx *gin.Context, req PostReq) 
 			StickyWeight: req.StickyWeight,
 			CreateTime:   createdAt,
 		},
-		ExtraPost: domain.ExtraPost{
+		ExtraPost: postPkg.ExtraPost{
 			Content:          req.Content,
 			MetaDescription:  req.MetaDescription,
 			MetaKeywords:     req.MetaKeywords,

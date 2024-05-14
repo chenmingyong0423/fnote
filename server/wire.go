@@ -18,6 +18,7 @@ package main
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
+	"github.com/chenmingyong0423/fnote/server/internal/category"
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats"
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis"
@@ -30,6 +31,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post_index"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	"github.com/chenmingyong0423/fnote/server/internal/post_visit"
+	"github.com/chenmingyong0423/fnote/server/internal/tag"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
@@ -45,7 +47,6 @@ func initializeApp() (*gin.Engine, error) {
 		ioc.NewGinEngine,
 		global.IsWebsiteInitializedFn,
 
-		ioc.CategoryProviders,
 		website_config.InitWebsiteConfigModule,
 		wire.FieldsOf(new(*website_config.Module), "Svc"),
 		wire.FieldsOf(new(*website_config.Module), "Hdl"),
@@ -69,14 +70,16 @@ func initializeApp() (*gin.Engine, error) {
 		wire.FieldsOf(new(*friend.Module), "Hdl"),
 		count_stats.InitCountStatsModule,
 		wire.FieldsOf(new(*count_stats.Module), "Hdl"),
-		wire.FieldsOf(new(*count_stats.Module), "Svc"),
 		file.InitFileModule,
 		wire.FieldsOf(new(*file.Module), "Hdl"),
+		category.InitCategoryModule,
+		wire.FieldsOf(new(*category.Module), "Hdl"),
+		tag.InitTagModule,
+		wire.FieldsOf(new(*tag.Module), "Hdl"),
 		ioc.VlProviders,
 		ioc.EmailProviders,
 		ioc.MsgProviders,
 		ioc.MsgTplProviders,
-		ioc.TagProviders,
 		ioc.BackupProviders,
 	))
 }

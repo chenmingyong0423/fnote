@@ -20,14 +20,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/repository/dao"
+	"github.com/chenmingyong0423/gkit/slice"
+
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
-	"github.com/chenmingyong0423/fnote/server/internal/tag/repository/dao"
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 )
 
 type ITagRepository interface {
@@ -40,6 +41,8 @@ type ITagRepository interface {
 	DeleteTagById(ctx context.Context, id string) error
 	RecoverTag(ctx context.Context, tag domain.Tag) error
 	GetSelectTags(ctx context.Context) ([]domain.Tag, error)
+	IncreasePostCountByIds(ctx context.Context, tagIds []string) error
+	DecreasePostCountByIds(ctx context.Context, tagIds []string) error
 }
 
 var _ ITagRepository = (*TagRepository)(nil)
@@ -50,6 +53,34 @@ func NewTagRepository(dao dao.ITagDao) *TagRepository {
 
 type TagRepository struct {
 	dao dao.ITagDao
+}
+
+func (r *TagRepository) DecreasePostCountByIds(ctx context.Context, tagIds []string) (err error) {
+	tagObjectIds := slice.Map(tagIds, func(_ int, t string) (objId primitive.ObjectID) {
+		if err != nil {
+			return objId
+		}
+		objId, err = primitive.ObjectIDFromHex(t)
+		return objId
+	})
+	if err != nil {
+		return err
+	}
+	return r.dao.DecreasePostCountByIds(ctx, tagObjectIds)
+}
+
+func (r *TagRepository) IncreasePostCountByIds(ctx context.Context, tagIds []string) (err error) {
+	tagObjectIds := slice.Map(tagIds, func(_ int, t string) (objId primitive.ObjectID) {
+		if err != nil {
+			return objId
+		}
+		objId, err = primitive.ObjectIDFromHex(t)
+		return objId
+	})
+	if err != nil {
+		return err
+	}
+	return r.dao.IncreasePostCountByIds(ctx, tagObjectIds)
 }
 
 func (r *TagRepository) GetSelectTags(ctx context.Context) ([]domain.Tag, error) {
@@ -70,6 +101,7 @@ func (r *TagRepository) RecoverTag(ctx context.Context, tag domain.Tag) error {
 		Name:       tag.Name,
 		Route:      tag.Route,
 		Enabled:    tag.Enabled,
+		PostCount:  tag.PostCount,
 		CreateTime: tag.CreateTime,
 		UpdateTime: tag.UpdateTime,
 	})
@@ -141,6 +173,7 @@ func (r *TagRepository) toDomainTag(tag *dao.Tags) domain.Tag {
 		Name:       tag.Name,
 		Route:      tag.Route,
 		Enabled:    tag.Enabled,
+		PostCount:  tag.PostCount,
 		CreateTime: tag.CreateTime,
 		UpdateTime: tag.UpdateTime,
 	}

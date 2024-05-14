@@ -18,6 +18,12 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
+	"net/http"
+
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+	"github.com/gin-gonic/gin"
+	jsoniter "github.com/json-iterator/go"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/chenmingyong0423/go-eventbus"
 	"github.com/google/uuid"
@@ -44,7 +50,7 @@ type ICommentService interface {
 	AdminApproveCommentReply(ctx context.Context, commentId string, replyId string) error
 	FindCommentWithRepliesById(ctx context.Context, id string) (*domain.CommentWithReplies, error)
 	DeleteCommentById(ctx context.Context, id string) error
-	DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error
+	DeleteReplyByCIdAndRId(ctx context.Context, postId string, commentId string, replyId string) error
 	UpdateCommentReplyStatus(ctx context.Context, commentId string, replyId string, approvalStatus bool) error
 	FindCommentCountOfToday(ctx context.Context) (int64, error)
 	BatchApproveComments(ctx context.Context, commentIds []string, replies []domain.ReplyWithCId) ([]domain.EmailInfo, []domain.EmailInfo, error)
@@ -57,7 +63,7 @@ func NewCommentService(repo repository.ICommentRepository, eventBus *eventbus.Ev
 		repo:     repo,
 		eventBus: eventBus,
 	}
-	go s.SubscribePostDeletedEvent()
+	go s.subscribePostEvent()
 	return s
 }
 
@@ -82,38 +88,91 @@ func (s *CommentService) FindCommentByIds(ctx context.Context, commentIds []stri
 }
 
 func (s *CommentService) BatchDeleteComments(ctx context.Context, commentIds []string, replies []domain.ReplyWithCId) error {
+	comments, err := s.FindCommentByIds(ctx, commentIds)
+	if err != nil {
+		return err
+	}
 	var eg errgroup.Group
-	if len(commentIds) > 0 {
+	if len(comments) > 0 {
 		eg.Go(func() error {
-			var err error
+			var gErr error
 			objectIDs := slice.Map(commentIds, func(i int, id string) primitive.ObjectID {
 				var objectID primitive.ObjectID
-				objectID, err = primitive.ObjectIDFromHex(id)
+				objectID, gErr = primitive.ObjectIDFromHex(id)
 				return objectID
 			})
-			if err != nil {
-				return errors.Wrap(err, "primitive.ObjectIDFromHex")
+			if gErr != nil {
+				return errors.Wrap(gErr, "primitive.ObjectIDFromHex")
 			}
-			err = s.repo.DeleteCommentByIds(ctx, objectIDs)
-			if err != nil {
-				return err
+			gErr = s.repo.DeleteCommentByIds(ctx, objectIDs)
+			if gErr != nil {
+				return gErr
 			}
 			return nil
 		})
 	}
 	for _, reply := range replies {
 		eg.Go(func() error {
-			err := s.repo.PullReplyByCIdAndRIds(ctx, reply.CommentId, reply.ReplyIds)
-			if err != nil {
-				return err
+			gErr := s.repo.PullReplyByCIdAndRIds(ctx, reply.CommentId, reply.ReplyIds)
+			if gErr != nil {
+				return gErr
 			}
 			return nil
 		})
 	}
-	err := eg.Wait()
+	err = eg.Wait()
 	if err != nil {
 		return err
 	}
+
+	go func() {
+		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+		commentEvents := make([]domain.CommentEvent, 0, len(comments)+len(replies))
+		if len(comments) > 0 {
+			commentEvents = append(commentEvents, slice.Map(comments, func(_ int, c domain.AdminComment) domain.CommentEvent {
+				return domain.CommentEvent{
+					PostId:    c.PostInfo.PostId,
+					CommentId: c.Id,
+					RepliesId: slice.Map(c.Replies, func(_ int, r domain.AdminReply) string {
+						return r.ReplyId
+					}),
+					Count: 1 + len(c.Replies),
+					Type:  "delete",
+				}
+			})...)
+		}
+		if len(replies) > 0 {
+			comments2, gErr := s.FindCommentByIds(ctx, slice.Map(replies, func(_ int, r domain.ReplyWithCId) string {
+				return r.CommentId
+			}))
+			if gErr != nil {
+				l.ErrorContext(ctx, "BatchDeleteComments: comment event: failed to FindCommentById", "err", gErr)
+			} else {
+				commentMp := make(map[string]domain.AdminComment, len(comments2))
+				for _, c := range comments2 {
+					commentMp[c.Id] = c
+				}
+				for _, cr := range replies {
+					comment := commentMp[cr.CommentId]
+					commentEvents = append(commentEvents, domain.CommentEvent{
+						PostId:    comment.PostInfo.PostId,
+						CommentId: cr.CommentId,
+						RepliesId: cr.ReplyIds,
+						Count:     len(cr.ReplyIds),
+						Type:      "delete",
+					})
+				}
+			}
+		}
+		for _, commentEvent := range commentEvents {
+			marshal, fErr := json.Marshal(commentEvent)
+			if fErr != nil {
+				l.ErrorContext(ctx, "BatchDeleteComments: comment event: failed to marshal comment event", "err", fErr)
+				continue
+			}
+			s.eventBus.Publish("comment", eventbus.Event{Payload: marshal})
+		}
+	}()
 	return nil
 }
 
@@ -211,12 +270,54 @@ func (s *CommentService) UpdateCommentReplyStatus(ctx context.Context, commentId
 	return s.repo.UpdateCommentReplyStatus(ctx, commentId, replyId, approvalStatus)
 }
 
-func (s *CommentService) DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error {
-	return s.repo.DeleteReplyByCIdAndRId(ctx, commentId, replyId)
+func (s *CommentService) DeleteReplyByCIdAndRId(ctx context.Context, postId string, commentId string, replyId string) error {
+	commentEvent := domain.CommentEvent{
+		PostId:    postId,
+		CommentId: commentId,
+		RepliesId: []string{replyId},
+		Count:     1,
+		Type:      "delete",
+	}
+	marshal, err := json.Marshal(&commentEvent)
+	if err != nil {
+		return err
+	}
+	err = s.repo.DeleteReplyByCIdAndRId(ctx, commentId, replyId)
+	if err != nil {
+		return err
+	}
+	s.eventBus.Publish("comment", eventbus.Event{Payload: marshal})
+	return nil
 }
 
-func (s *CommentService) DeleteCommentById(ctx context.Context, id string) error {
-	return s.repo.DeleteCommentById(ctx, id)
+func (s *CommentService) DeleteCommentById(ctx context.Context, commentId string) error {
+	commentWithReplies, err := s.repo.FindCommentWithRepliesById(ctx, commentId)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return apiwrap.NewErrorResponseBody(http.StatusNotFound, "Comment not found.")
+		}
+		return err
+	}
+
+	commentEvent := domain.CommentEvent{
+		PostId:    commentWithReplies.PostInfo.PostId,
+		CommentId: commentId,
+		RepliesId: slice.Map(commentWithReplies.Replies, func(_ int, r domain.CommentReply) string {
+			return r.ReplyId
+		}),
+		Count: 1 + len(commentWithReplies.Replies),
+		Type:  "delete",
+	}
+	marshal, err := json.Marshal(&commentEvent)
+	if err != nil {
+		return err
+	}
+	err = s.repo.DeleteCommentById(ctx, commentId)
+	if err != nil {
+		return err
+	}
+	s.eventBus.Publish("comment", eventbus.Event{Payload: marshal})
+	return nil
 }
 
 func (s *CommentService) FindCommentWithRepliesById(ctx context.Context, id string) (*domain.CommentWithReplies, error) {
@@ -279,32 +380,71 @@ func (s *CommentService) AddReply(ctx context.Context, cmtId string, postId stri
 			return "", errors.New("The replyToId does not exist.")
 		}
 	}
-	return s.repo.AddReply(ctx, cmtId, commentReply)
+	rid, err := s.repo.AddReply(ctx, cmtId, commentReply)
+	if err != nil {
+		return "", err
+	}
+	commentEvent := domain.CommentEvent{
+		PostId:    postId,
+		CommentId: cmtId,
+		RepliesId: []string{rid},
+		Count:     1,
+		Type:      "addition",
+	}
+	marshal, err := json.Marshal(&commentEvent)
+	if err != nil {
+		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+		l.ErrorContext(ctx, "AddReply: comment event: failed to marshal comment event")
+		return rid, nil
+	}
+	s.eventBus.Publish("comment", eventbus.Event{Payload: marshal})
+	return rid, nil
 }
 
 func (s *CommentService) AddComment(ctx context.Context, comment domain.Comment) (string, error) {
-	return s.repo.AddComment(ctx, comment)
+	commentId, err := s.repo.AddComment(ctx, comment)
+	if err != nil {
+		return "", err
+	}
+	commentEvent := domain.CommentEvent{
+		PostId:    comment.PostInfo.PostId,
+		CommentId: commentId,
+		RepliesId: nil,
+		Count:     1,
+		Type:      "addition",
+	}
+	marshal, err := json.Marshal(&commentEvent)
+	if err != nil {
+		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+		l.ErrorContext(ctx, "AddComment: comment event: failed to marshal comment event")
+		return commentId, nil
+	}
+	s.eventBus.Publish("comment", eventbus.Event{Payload: marshal})
+	return commentId, nil
 }
 
-func (s *CommentService) SubscribePostDeletedEvent() {
-	eventChan := s.eventBus.Subscribe("post-delete")
+func (s *CommentService) subscribePostEvent() {
+	eventChan := s.eventBus.Subscribe("post")
 	for event := range eventChan {
 		rid := uuid.NewString()
 		ctx := context.WithValue(context.Background(), "X-Request-ID", rid)
 		l := slog.Default().With("X-Request-ID", rid)
-		l.InfoContext(ctx, "post-delete", "payload", string(event.Payload))
-		var postEvent domain.PostEvent
-		err := json.Unmarshal(event.Payload, &postEvent)
+		l.InfoContext(ctx, "Comment: post event", "payload", string(event.Payload))
+		var e domain.PostEvent
+		err := jsoniter.Unmarshal(event.Payload, &e)
 		if err != nil {
-			l.ErrorContext(ctx, "post-delete: failed to json.Unmarshal", "err", err)
+			l.ErrorContext(ctx, "Comment: post event: failed to json.Unmarshal", "err", err)
 			continue
 		}
-		err = s.DeleteAllCommentByPostId(ctx, postEvent.PostId)
-		if err != nil {
-			l.ErrorContext(ctx, "post-delete: failed to delete all comment", "postId", postEvent.PostId, "error", err)
-			continue
+		switch e.Type {
+		case "delete":
+			err = s.DeleteAllCommentByPostId(ctx, e.PostId)
+			if err != nil {
+				l.ErrorContext(ctx, "Comment: post event: failed to delete all comment", "postId", e.PostId, "error", err)
+				continue
+			}
 		}
-		l.InfoContext(ctx, "post-delete: delete all comment successfully", "postId", postEvent.PostId)
+		l.InfoContext(ctx, "Comment: post event: handle successfully")
 	}
 }
 
