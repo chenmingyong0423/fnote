@@ -7,8 +7,8 @@
 package message
 
 import (
-	"github.com/chenmingyong0423/fnote/server/internal/email/internal/service"
-	service2 "github.com/chenmingyong0423/fnote/server/internal/message/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/email"
+	"github.com/chenmingyong0423/fnote/server/internal/message/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/message_template"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"github.com/google/wire"
@@ -16,10 +16,11 @@ import (
 
 // Injectors from wire.go:
 
-func InitMessageModule(emailServ service.IEmailService, messageTemplateModule *message_template.Module, websiteConfigModule *website_config.Module) *Module {
+func InitMessageModule(emailModule *email.Module, messageTemplateModule *message_template.Module, websiteConfigModule *website_config.Module) *Module {
 	iWebsiteConfigService := websiteConfigModule.Svc
+	iEmailService := emailModule.Svc
 	iMessageTemplateService := messageTemplateModule.Svc
-	messageService := service2.NewMessageService(iWebsiteConfigService, emailServ, iMessageTemplateService)
+	messageService := service.NewMessageService(iWebsiteConfigService, iEmailService, iMessageTemplateService)
 	module := &Module{
 		Svc: messageService,
 	}
@@ -28,4 +29,4 @@ func InitMessageModule(emailServ service.IEmailService, messageTemplateModule *m
 
 // wire.go:
 
-var MessageProviders = wire.NewSet(service2.NewMessageService, wire.Bind(new(service2.IMessageService), new(*service2.MessageService)))
+var MessageProviders = wire.NewSet(service.NewMessageService, wire.Bind(new(service.IMessageService), new(*service.MessageService)))

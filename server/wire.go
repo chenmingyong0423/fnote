@@ -22,6 +22,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats"
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis"
+	"github.com/chenmingyong0423/fnote/server/internal/email"
 	"github.com/chenmingyong0423/fnote/server/internal/file"
 	"github.com/chenmingyong0423/fnote/server/internal/friend"
 	"github.com/chenmingyong0423/fnote/server/internal/global"
@@ -83,7 +84,7 @@ func initializeApp() (*gin.Engine, error) {
 		visit_log.InitVisitLogModule,
 		wire.FieldsOf(new(*visit_log.Module), "Hdl"),
 		message.InitMessageModule,
-		ioc.EmailProviders,
+		email.InitEmailModule,
 		ioc.BackupProviders,
 	))
 }
