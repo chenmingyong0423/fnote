@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/repository/dao"
@@ -39,7 +38,6 @@ type ITagRepository interface {
 	ModifyTagEnabled(ctx context.Context, id string, enabled bool) error
 	GetTagById(ctx context.Context, id string) (domain.Tag, error)
 	DeleteTagById(ctx context.Context, id string) error
-	RecoverTag(ctx context.Context, tag domain.Tag) error
 	GetSelectTags(ctx context.Context) ([]domain.Tag, error)
 	IncreasePostCountByIds(ctx context.Context, tagIds []string) error
 	DecreasePostCountByIds(ctx context.Context, tagIds []string) error
@@ -91,22 +89,6 @@ func (r *TagRepository) GetSelectTags(ctx context.Context) ([]domain.Tag, error)
 	return r.toDomainTags(tags), nil
 }
 
-func (r *TagRepository) RecoverTag(ctx context.Context, tag domain.Tag) error {
-	id, err := primitive.ObjectIDFromHex(tag.Id)
-	if err != nil {
-		return err
-	}
-	return r.dao.RecoverTag(ctx, &dao.Tags{
-		Id:         id,
-		Name:       tag.Name,
-		Route:      tag.Route,
-		Enabled:    tag.Enabled,
-		PostCount:  tag.PostCount,
-		CreateTime: tag.CreateTime,
-		UpdateTime: tag.UpdateTime,
-	})
-}
-
 func (r *TagRepository) DeleteTagById(ctx context.Context, id string) error {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -136,9 +118,7 @@ func (r *TagRepository) ModifyTagEnabled(ctx context.Context, id string, enabled
 }
 
 func (r *TagRepository) CreateTag(ctx context.Context, tag domain.Tag) (string, error) {
-	now := time.Now().Local().Unix()
-	return r.dao.Create(ctx, &dao.Tags{Name: tag.Name, Route: tag.Route, Enabled: tag.Enabled, CreateTime: now, UpdateTime: now})
-
+	return r.dao.Create(ctx, &dao.Tags{Name: tag.Name, Route: tag.Route, Enabled: tag.Enabled})
 }
 
 func (r *TagRepository) QueryTagsPage(ctx context.Context, pageDTO dto.PageDTO) ([]domain.Tag, int64, error) {
@@ -153,7 +133,7 @@ func (r *TagRepository) QueryTagsPage(ctx context.Context, pageDTO dto.PageDTO) 
 	if pageDTO.Field != "" && pageDTO.Order != "" {
 		findOptions.SetSort(bsonx.M(pageDTO.Field, pageDTO.OrderConvertToInt()))
 	} else {
-		findOptions.SetSort(bsonx.M("create_time", -1))
+		findOptions.SetSort(bsonx.M("created_at", -1))
 	}
 	categories, total, err := r.dao.QuerySkipAndSetLimit(ctx, cond, findOptions)
 	return r.toDomainTags(categories), total, err
@@ -169,13 +149,13 @@ func (r *TagRepository) GetTagByRoute(ctx context.Context, route string) (domain
 
 func (r *TagRepository) toDomainTag(tag *dao.Tags) domain.Tag {
 	return domain.Tag{
-		Id:         tag.Id.Hex(),
-		Name:       tag.Name,
-		Route:      tag.Route,
-		Enabled:    tag.Enabled,
-		PostCount:  tag.PostCount,
-		CreateTime: tag.CreateTime,
-		UpdateTime: tag.UpdateTime,
+		Id:        tag.ID.Hex(),
+		Name:      tag.Name,
+		Route:     tag.Route,
+		Enabled:   tag.Enabled,
+		PostCount: tag.PostCount,
+		CreatedAt: tag.CreatedAt.Unix(),
+		UpdatedAt: tag.UpdatedAt.Unix(),
 	}
 }
 

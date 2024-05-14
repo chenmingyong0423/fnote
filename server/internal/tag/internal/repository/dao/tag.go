@@ -33,13 +33,11 @@ import (
 )
 
 type Tags struct {
-	Id         primitive.ObjectID `bson:"_id,omitempty"`
-	Name       string             `bson:"name"`
-	Route      string             `bson:"route"`
-	Enabled    bool               `bson:"enabled"`
-	PostCount  int64              `bson:"post_count"`
-	CreateTime int64              `bson:"create_time"`
-	UpdateTime int64              `bson:"update_time"`
+	mongox.Model `bson:",inline"`
+	Name         string `bson:"name"`
+	Route        string `bson:"route"`
+	Enabled      bool   `bson:"enabled"`
+	PostCount    int64  `bson:"post_count"`
 }
 
 type ITagDao interface {
@@ -69,7 +67,7 @@ type TagDao struct {
 func (d *TagDao) DecreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error {
 	updateResult, err := d.coll.Updater().
 		Filter(query.In("_id", tagObjectIds)).
-		Updates(update.BsonBuilder().Inc("post_count", -1).Set("update_time", time.Now().Local().Unix()).Build()).
+		Updates(update.BsonBuilder().Inc("post_count", -1).Set("updated_at", time.Now().Local()).Build()).
 		UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to decrease post count by ids, ids: %+v", tagObjectIds)
@@ -83,7 +81,7 @@ func (d *TagDao) DecreasePostCountByIds(ctx context.Context, tagObjectIds []prim
 func (d *TagDao) IncreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error {
 	updateResult, err := d.coll.Updater().
 		Filter(query.In("_id", tagObjectIds)).
-		Updates(update.BsonBuilder().Inc("post_count", 1).Set("update_time", time.Now().Local().Unix()).Build()).
+		Updates(update.BsonBuilder().Inc("post_count", 1).Set("updated_at", time.Now().Local()).Build()).
 		UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to increase post count by ids, ids: %+v", tagObjectIds)
@@ -130,7 +128,7 @@ func (d *TagDao) GetById(ctx context.Context, id primitive.ObjectID) (*Tags, err
 }
 
 func (d *TagDao) ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("enabled", enabled).Set("update_time", time.Now().Local().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("enabled", enabled).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}
