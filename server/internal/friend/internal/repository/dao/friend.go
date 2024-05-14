@@ -86,7 +86,7 @@ type FriendDao struct {
 }
 
 func (d *FriendDao) UpdateRejected(ctx context.Context, id primitive.ObjectID) error {
-	updateOne, err := d.coll.Updater().Filter(query.BsonBuilder().Id(id).Ne("status", FriendStatusRejected).Build()).Updates(update.BsonBuilder().Set("status", FriendStatusRejected).Set("update_time", time.Now().Local().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.BsonBuilder().Id(id).Ne("status", FriendStatusRejected).Build()).Updates(update.BsonBuilder().Set("status", FriendStatusRejected).Set("updated_at", time.Now().Local).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the document from friends, id=%s", id.Hex())
 	}
@@ -97,7 +97,7 @@ func (d *FriendDao) UpdateRejected(ctx context.Context, id primitive.ObjectID) e
 }
 
 func (d *FriendDao) UpdateApproved(ctx context.Context, objectID primitive.ObjectID) error {
-	updateOne, err := d.coll.Updater().Filter(query.BsonBuilder().Id(objectID).Ne("status", FriendStatusApproved).Build()).Updates(update.BsonBuilder().Set("status", FriendStatusApproved).Set("update_time", time.Now().Local().Unix()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.BsonBuilder().Id(objectID).Ne("status", FriendStatusApproved).Build()).Updates(update.BsonBuilder().Set("status", FriendStatusApproved).Set("updated_at", time.Now().Local).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the document from friends, id=%s", objectID.Hex())
 	}
@@ -128,7 +128,7 @@ func (d *FriendDao) DeleteById(ctx context.Context, objectID primitive.ObjectID)
 
 func (d *FriendDao) UpdateById(ctx context.Context, objectID primitive.ObjectID, friend Friend) error {
 	updateOne, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(
-		update.BsonBuilder().Set("name", friend.Name).Set("logo", friend.Logo).Set("description", friend.Description).Set("status", friend.Status).Set("update_time", time.Now().Local().Unix()).Build(),
+		update.BsonBuilder().Set("name", friend.Name).Set("logo", friend.Logo).Set("description", friend.Description).Set("status", friend.Status).Set("updated_at", time.Now().Local).Build(),
 	).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the document from friends, id=%s, friend=%v", objectID.Hex(), friend)
@@ -171,7 +171,7 @@ func (d *FriendDao) Add(ctx context.Context, friend *Friend) error {
 }
 
 func (d *FriendDao) FindDisplaying(ctx context.Context) ([]*Friend, error) {
-	friends, err := d.coll.Finder().Filter(query.Eq("status", FriendStatusApproved)).Find(ctx, options.Find().SetSort(bsonx.NewD().Add("priority", -1).Add("create_time", 1).Build()))
+	friends, err := d.coll.Finder().Filter(query.Eq("status", FriendStatusApproved)).Find(ctx, options.Find().SetSort(bsonx.NewD().Add("priority", -1).Add("created_at", 1).Build()))
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from friends")
 	}
