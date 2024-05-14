@@ -40,11 +40,11 @@
     <div>
       <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
         <template #bodyCell="{ column, text, record }">
-          <template v-if="column.dataIndex === 'create_time'">
+          <template v-if="column.dataIndex === 'created_at'">
             {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
           </template>
 
-          <template v-if="column.dataIndex === 'update_time'">
+          <template v-if="column.dataIndex === 'updated_at'">
             {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
           </template>
 
@@ -103,13 +103,13 @@ const columns = [
   },
   {
     title: '创建时间',
-    key: 'create_time',
-    dataIndex: 'create_time'
+    key: 'created_at',
+    dataIndex: 'created_at'
   },
   {
     title: '最后一次修改的时间',
-    key: 'update_time',
-    dataIndex: 'update_time'
+    key: 'updated_at',
+    dataIndex: 'updated_at'
   },
   {
     title: 'operation',
@@ -122,7 +122,7 @@ const data = ref<Tag[]>([])
 const pageReq = ref<PageRequest>({
   pageNo: 1,
   pageSize: 5,
-  sortField: 'create_time',
+  sortField: 'created_at',
   sortOrder: 'desc'
 } as PageRequest)
 

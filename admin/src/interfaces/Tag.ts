@@ -7,8 +7,8 @@ export interface Tag {
   route: string
   post_count: number
   enabled: boolean
-  create_time: number
-  update_time: number
+  created_at: number
+  updated_at: number
 }
 
 export interface TagRequest {

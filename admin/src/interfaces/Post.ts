@@ -7,8 +7,8 @@ export interface IPost {
   summary: string
   categories: Category4Post[]
   tags: Tag4Post[]
-  create_time: number
-  update_time: number
+  created_at: number
+  updated_at: number
 }
 
 export interface PostDetailVO {
