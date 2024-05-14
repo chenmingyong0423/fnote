@@ -19,10 +19,6 @@ import (
 	service13 "github.com/chenmingyong0423/fnote/server/internal/backup/service"
 	service7 "github.com/chenmingyong0423/fnote/server/internal/email/service"
 	service8 "github.com/chenmingyong0423/fnote/server/internal/message/service"
-	handler7 "github.com/chenmingyong0423/fnote/server/internal/message_template/handler"
-	repository7 "github.com/chenmingyong0423/fnote/server/internal/message_template/repository"
-	dao7 "github.com/chenmingyong0423/fnote/server/internal/message_template/repository/dao"
-	service9 "github.com/chenmingyong0423/fnote/server/internal/message_template/service"
 	handler6 "github.com/chenmingyong0423/fnote/server/internal/visit_log/handler"
 	repository6 "github.com/chenmingyong0423/fnote/server/internal/visit_log/repository"
 	dao6 "github.com/chenmingyong0423/fnote/server/internal/visit_log/repository/dao"
@@ -39,11 +35,6 @@ var (
 	EmailProviders = wire.NewSet(service7.NewEmailService, wire.Bind(new(service7.IEmailService), new(*service7.EmailService)))
 
 	MsgProviders = wire.NewSet(service8.NewMessageService, wire.Bind(new(service8.IMessageService), new(*service8.MessageService)))
-
-	MsgTplProviders = wire.NewSet(handler7.NewMsgTplHandler, service9.NewMsgTplService, repository7.NewMsgTplRepository, dao7.NewMsgTplDao,
-		wire.Bind(new(service9.IMsgTplService), new(*service9.MsgTplService)),
-		wire.Bind(new(repository7.IMsgTplRepository), new(*repository7.MsgTplRepository)),
-		wire.Bind(new(dao7.IMsgTplDao), new(*dao7.MsgTplDao)))
 
 	BackupProviders = wire.NewSet(handler12.NewBackupHandler, service13.NewBackupService,
 		wire.Bind(new(service13.IBackupService), new(*service13.BackupService)),

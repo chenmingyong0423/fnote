@@ -17,7 +17,8 @@ package service
 import (
 	"context"
 
-	"github.com/chenmingyong0423/fnote/server/internal/message_template/service"
+	"github.com/chenmingyong0423/fnote/server/internal/message_template"
+
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
 	emailServ "github.com/chenmingyong0423/fnote/server/internal/email/service"
@@ -33,7 +34,7 @@ var (
 	_ IMessageService = (*MessageService)(nil)
 )
 
-func NewMessageService(configServ website_config.Service, emailServ emailServ.IEmailService, msgTplService service.IMsgTplService) *MessageService {
+func NewMessageService(configServ website_config.Service, emailServ emailServ.IEmailService, msgTplService message_template.Service) *MessageService {
 	return &MessageService{
 		configServ:    configServ,
 		emailServ:     emailServ,
@@ -44,7 +45,7 @@ func NewMessageService(configServ website_config.Service, emailServ emailServ.IE
 type MessageService struct {
 	configServ    website_config.Service
 	emailServ     emailServ.IEmailService
-	msgTplService service.IMsgTplService
+	msgTplService message_template.Service
 }
 
 func (s *MessageService) SendEmailToWebmaster(ctx context.Context, msgTplName, contentType string) error {

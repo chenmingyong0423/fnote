@@ -1,4 +1,4 @@
-// Copyright 2023 chenmingyong0423
+// Copyright 2024 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,23 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handler
+package web
 
-import (
-	"github.com/chenmingyong0423/fnote/server/internal/message_template/service"
-	"github.com/gin-gonic/gin"
-)
-
-func NewMsgTplHandler(serv service.IMsgTplService) *MsgTplHandler {
-	return &MsgTplHandler{
-		serv: serv,
-	}
-}
-
-type MsgTplHandler struct {
-	serv service.IMsgTplService
-}
-
-func (h *MsgTplHandler) RegisterGinRoutes(engine *gin.Engine) {
-
-}
+type MessageTemplateRequest struct{}

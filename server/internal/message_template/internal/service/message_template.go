@@ -17,24 +17,25 @@ package service
 import (
 	"context"
 
-	"github.com/chenmingyong0423/fnote/server/internal/message_template/repository"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/message_template/internal/domain"
+
+	"github.com/chenmingyong0423/fnote/server/internal/message_template/internal/repository"
 )
 
-type IMsgTplService interface {
+type IMessageTemplateService interface {
 	FindMsgTplByNameAndRcpType(ctx context.Context, name string, recipientType uint) (*domain.MessageTemplate, error)
 }
 
-var _ IMsgTplService = (*MsgTplService)(nil)
+var _ IMessageTemplateService = (*MessageTemplateService)(nil)
 
-type MsgTplService struct {
-	repo repository.IMsgTplRepository
+type MessageTemplateService struct {
+	repo repository.IMessageTemplateRepository
 }
 
-func (s *MsgTplService) FindMsgTplByNameAndRcpType(ctx context.Context, name string, recipientType uint) (*domain.MessageTemplate, error) {
-	return s.repo.FindMsgTplByNameAndRcpType(ctx, name, recipientType)
+func (s *MessageTemplateService) FindMsgTplByNameAndRcpType(ctx context.Context, name string, recipientType uint) (*domain.MessageTemplate, error) {
+	return s.repo.FindMessageTemplateByNameAndRcpType(ctx, name, recipientType)
 }
 
-func NewMsgTplService(repo repository.IMsgTplRepository) *MsgTplService {
-	return &MsgTplService{repo: repo}
+func NewMessageTemplateService(repo repository.IMessageTemplateRepository) *MessageTemplateService {
+	return &MessageTemplateService{repo: repo}
 }
