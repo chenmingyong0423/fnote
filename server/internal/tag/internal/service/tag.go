@@ -105,7 +105,7 @@ func (s *TagService) AdminCreateTag(ctx context.Context, tag domain.Tag) error {
 	marshal, err := jsoniter.Marshal(tagEvent)
 	if err != nil {
 		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-		l.WarnContext(ctx, "AdminCreateTag: tag event: failed to jsoniter.Marshal", "err", err)
+		l.WarnContext(ctx, "AdminCreateTag: tag event: failed to jsoniter.Marshal", "error", err)
 		return nil
 	}
 	s.eventBus.Publish("tag", eventbus.Event{Payload: marshal})
@@ -154,7 +154,7 @@ func (s *TagService) subscribePostEvent() {
 		var e domain.PostEvent
 		err := jsoniter.Unmarshal(event.Payload, &e)
 		if err != nil {
-			l.ErrorContext(ctx, "Tag: post event: failed to json.Unmarshal", "err", err)
+			l.ErrorContext(ctx, "Tag: post event: failed to json.Unmarshal", "error", err)
 			continue
 		}
 		switch e.Type {
@@ -163,7 +163,7 @@ func (s *TagService) subscribePostEvent() {
 			if len(e.AddedTagId) > 0 {
 				err = s.repo.IncreasePostCountByIds(ctx, e.AddedTagId)
 				if err != nil {
-					l.ErrorContext(ctx, "Tag: post event: failed to increase the count of post in tag", "err", err)
+					l.ErrorContext(ctx, "Tag: post event: failed to increase the count of post in tag", "error", err)
 					continue
 				}
 			}
@@ -172,7 +172,7 @@ func (s *TagService) subscribePostEvent() {
 				// 对应标签的文章数量 -1
 				err = s.repo.DecreasePostCountByIds(ctx, e.DeletedTagId)
 				if err != nil {
-					l.ErrorContext(ctx, "Tag: post event: failed to decrease the count of post in tag", "err", err)
+					l.ErrorContext(ctx, "Tag: post event: failed to decrease the count of post in tag", "error", err)
 					continue
 				}
 			}
@@ -180,7 +180,7 @@ func (s *TagService) subscribePostEvent() {
 			if len(e.AddedTagId) > 0 {
 				err = s.repo.IncreasePostCountByIds(ctx, e.AddedTagId)
 				if err != nil {
-					l.ErrorContext(ctx, "Tag: post event: failed to increase the count of post in tag", "err", err)
+					l.ErrorContext(ctx, "Tag: post event: failed to increase the count of post in tag", "error", err)
 					if len(e.DeletedTagId) == 0 {
 						continue
 					}
@@ -189,7 +189,7 @@ func (s *TagService) subscribePostEvent() {
 			if len(e.DeletedTagId) > 0 {
 				err = s.repo.DecreasePostCountByIds(ctx, e.DeletedTagId)
 				if err != nil {
-					l.ErrorContext(ctx, "Tag: post event: failed to decrease the count of post in tag", "err", err)
+					l.ErrorContext(ctx, "Tag: post event: failed to decrease the count of post in tag", "error", err)
 					continue
 				}
 			}

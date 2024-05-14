@@ -176,7 +176,7 @@ func (s *CategoryService) subscribePostEvent() {
 		var e domain.PostEvent
 		err := jsoniter.Unmarshal(event.Payload, &e)
 		if err != nil {
-			l.ErrorContext(ctx, "Category: post event: failed to json.Unmarshal", "err", err)
+			l.ErrorContext(ctx, "Category: post event: failed to unmarshal", "error", err)
 			continue
 		}
 		switch e.Type {
@@ -185,7 +185,7 @@ func (s *CategoryService) subscribePostEvent() {
 			if len(e.AddedCategoryId) > 0 {
 				err = s.repo.IncreasePostCountByIds(ctx, e.AddedCategoryId)
 				if err != nil {
-					l.ErrorContext(ctx, "Category: post event: failed to increase post count", "categoryIds", e.AddedCategoryId, "err", err)
+					l.ErrorContext(ctx, "Category: post event: failed to increase post count", "categoryIds", e.AddedCategoryId, "error", err)
 					continue
 				}
 			}
@@ -194,7 +194,7 @@ func (s *CategoryService) subscribePostEvent() {
 			if len(e.DeletedCategoryId) > 0 {
 				err = s.repo.DecreasePostCountByIds(ctx, e.DeletedCategoryId)
 				if err != nil {
-					l.ErrorContext(ctx, "Category: post event: failed to decrease post count", "categoryIds", e.DeletedCategoryId, "err", err)
+					l.ErrorContext(ctx, "Category: post event: failed to decrease post count", "categoryIds", e.DeletedCategoryId, "error", err)
 					continue
 				}
 			}
@@ -203,7 +203,7 @@ func (s *CategoryService) subscribePostEvent() {
 			if len(e.AddedCategoryId) > 0 {
 				err = s.repo.IncreasePostCountByIds(ctx, e.AddedCategoryId)
 				if err != nil {
-					l.ErrorContext(ctx, "Category: post event: failed to increase post count", "categoryIds", e.AddedCategoryId, "err", err)
+					l.ErrorContext(ctx, "Category: post event: failed to increase post count", "categoryIds", e.AddedCategoryId, "error", err)
 					continue
 				}
 			}
@@ -211,7 +211,7 @@ func (s *CategoryService) subscribePostEvent() {
 			if len(e.DeletedCategoryId) > 0 {
 				err = s.repo.DecreasePostCountByIds(ctx, e.DeletedCategoryId)
 				if err != nil {
-					l.ErrorContext(ctx, "Category: post event: failed to decrease post count", "categoryIds", e.DeletedCategoryId, "err", err)
+					l.ErrorContext(ctx, "Category: post event: failed to decrease post count", "categoryIds", e.DeletedCategoryId, "error", err)
 					continue
 				}
 			}
