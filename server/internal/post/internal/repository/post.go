@@ -260,12 +260,12 @@ func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition
 	findOptions.SetSkip(postsQueryCondition.Skip).SetLimit(postsQueryCondition.Size)
 	if postsQueryCondition.Sorting.Field != nil && postsQueryCondition.Sorting.Order != nil {
 		sortBuilder := bsonx.NewD().Add(*postsQueryCondition.Sorting.Field, orderConvertToInt(*postsQueryCondition.Sorting.Order))
-		if *postsQueryCondition.Sorting.Field != "create_time" {
-			sortBuilder.Add("create_time", -1)
+		if *postsQueryCondition.Sorting.Field != "created_at" {
+			sortBuilder.Add("created_at", -1)
 		}
 		findOptions.SetSort(sortBuilder.Build())
 	} else {
-		findOptions.SetSort(bsonx.M("create_time", -1))
+		findOptions.SetSort(bsonx.M("created_at", -1))
 	}
 
 	posts, cnt, err := r.dao.QueryPostsPage(ctx, con, findOptions)

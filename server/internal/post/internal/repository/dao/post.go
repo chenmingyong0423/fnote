@@ -104,7 +104,7 @@ func (d *PostDao) IncreasePostLikeCount(ctx context.Context, postId string) erro
 }
 
 func (d *PostDao) UpdateIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error {
-	result, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("is_comment_allowed", isCommentAllowed).Set("update_time", time.Now().Local().Unix()).Build()).UpdateOne(ctx)
+	result, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("is_comment_allowed", isCommentAllowed).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the is_comment_allowed of post, id=%s, isCommentAllowed=%v", id, isCommentAllowed)
 	}
@@ -115,7 +115,7 @@ func (d *PostDao) UpdateIsCommentAllowedById(ctx context.Context, id string, isC
 }
 
 func (d *PostDao) UpdateIsDisplayedById(ctx context.Context, id string, isDisplayed bool) error {
-	result, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("is_displayed", isDisplayed).Set("update_time", time.Now().Local().Unix()).Build()).UpdateOne(ctx)
+	result, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("is_displayed", isDisplayed).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the is_displayed of post, id=%s, isDisplayed=%v", id, isDisplayed)
 	}
@@ -138,7 +138,7 @@ func (d *PostDao) SavePost(ctx context.Context, post *Post) error {
 
 func (d *PostDao) DecreaseByField(ctx context.Context, id string, filedName string, cnt int) error {
 	filter := query.Id(id)
-	u := update.BsonBuilder().Inc(filedName, -cnt).Set("update_time", time.Now().Local().Unix()).Build()
+	u := update.BsonBuilder().Inc(filedName, -cnt).Set("updated_at", time.Now().Local()).Build()
 	result, err := d.coll.Updater().Filter(filter).Updates(u).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to decrease the %s of post, id=%s, cnt=%d", filedName, id, cnt)
@@ -245,7 +245,7 @@ func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *o
 
 func (d *PostDao) GetFrontPosts(ctx context.Context, count int64) ([]*Post, error) {
 	findOptions := options.Find().SetSort(
-		bsonx.NewD().Add("sticky_weight", -1).Add("create_time", -1).Build()).SetLimit(count)
+		bsonx.NewD().Add("sticky_weight", -1).Add("created_at", -1).Build()).SetLimit(count)
 	posts, err := d.coll.Finder().Filter(bsonx.M("is_displayed", true)).Find(ctx, findOptions)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from post, findOptions=%v", findOptions)
