@@ -152,3 +152,11 @@ type ReplyWithCId struct {
 	CommentId string
 	ReplyIds  []string
 }
+
+type CommentEvent struct {
+	PostId    string   `json:"post_id"`
+	CommentId string   `json:"comment_id"`
+	RepliesId []string `json:"replies_id"`
+	Count     int      `json:"count"`
+	Type      string   `json:"type"`
+}

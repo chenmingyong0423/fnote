@@ -15,18 +15,12 @@
 package domain
 
 type PostEvent struct {
-	PostId     string   `json:"post_id"`
-	CategoryId []string `json:"category_id"`
-	TagId      []string `json:"tag_id"`
-	FileId     string   `json:"file_id"`
-}
-
-type UpdatedPostEvent struct {
 	PostId            string   `json:"post_id"`
-	AddedCategoryId   []string `json:"added_category_id"`
-	DeletedCategoryId []string `json:"deleted_category_id"`
-	AddedTagId        []string `json:"added_tag_id"`
-	DeletedTagId      []string `json:"deleted_tag_id"`
-	NewFileId         string   `json:"new_file_id"`
-	OldFileId         string   `json:"old_file_id"`
+	AddedCategoryId   []string `json:"added_category_id,omitempty"`
+	DeletedCategoryId []string `json:"deleted_category_id,omitempty"`
+	AddedTagId        []string `json:"added_tag_id,omitempty"`
+	DeletedTagId      []string `json:"deleted_tag_id,omitempty"`
+	NewFileId         string   `json:"new_file_id,omitempty"`
+	OldFileId         string   `json:"old_file_id,omitempty"`
+	Type              string   `json:"type"`
 }

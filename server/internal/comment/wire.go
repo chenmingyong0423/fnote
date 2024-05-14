@@ -21,7 +21,6 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/web"
-	csService "github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/service"
 	msgService "github.com/chenmingyong0423/fnote/server/internal/message/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
@@ -35,7 +34,7 @@ var CommentProviders = wire.NewSet(web.NewCommentHandler, service.NewCommentServ
 	wire.Bind(new(repository.ICommentRepository), new(*repository.CommentRepository)),
 	wire.Bind(new(dao.ICommentDao), new(*dao.CommentDao)))
 
-func InitCommentModule(mongoDB *mongo.Database, msgServ msgService.IMessageService, statsServ csService.ICountStatsService, cfgModule *website_config.Module, postModule *post.Module, eventBus *eventbus.EventBus) *Module {
+func InitCommentModule(mongoDB *mongo.Database, msgServ msgService.IMessageService, cfgModule *website_config.Module, postModule *post.Module, eventBus *eventbus.EventBus) *Module {
 	panic(wire.Build(
 		CommentProviders,
 		wire.FieldsOf(new(*website_config.Module), "Svc"),

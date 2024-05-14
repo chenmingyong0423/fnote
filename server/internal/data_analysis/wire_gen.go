@@ -8,8 +8,8 @@ package data_analysis
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
-	service2 "github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/service"
-	service3 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/count_stats"
+	service2 "github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/web"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
@@ -19,11 +19,12 @@ import (
 
 // Injectors from wire.go:
 
-func InitDataAnalysisModule(mongoDB *mongo.Database, vlServ service.IVisitLogService, csServ service2.ICountStatsService, posLikeModule *post_like.Module, commentModule *comment.Module) *Module {
+func InitDataAnalysisModule(mongoDB *mongo.Database, vlServ service.IVisitLogService, countStatsModule *count_stats.Module, posLikeModule *post_like.Module, commentModule *comment.Module) *Module {
+	iCountStatsService := countStatsModule.Svc
 	iPostLikeService := posLikeModule.Svc
 	iCommentService := commentModule.Svc
-	ipApiService := service3.NewIpApiService()
-	dataAnalysisHandler := web.NewDataAnalysisHandler(vlServ, csServ, iPostLikeService, iCommentService, ipApiService)
+	ipApiService := service2.NewIpApiService()
+	dataAnalysisHandler := web.NewDataAnalysisHandler(vlServ, iCountStatsService, iPostLikeService, iCommentService, ipApiService)
 	module := &Module{
 		Hdl: dataAnalysisHandler,
 	}
@@ -32,4 +33,4 @@ func InitDataAnalysisModule(mongoDB *mongo.Database, vlServ service.IVisitLogSer
 
 // wire.go:
 
-var DataAnalysisProviders = wire.NewSet(web.NewDataAnalysisHandler, service3.NewIpApiService, wire.Bind(new(service3.IIpApiService), new(*service3.IpApiService)))
+var DataAnalysisProviders = wire.NewSet(web.NewDataAnalysisHandler, service2.NewIpApiService, wire.Bind(new(service2.IIpApiService), new(*service2.IpApiService)))

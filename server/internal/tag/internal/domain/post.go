@@ -14,22 +14,13 @@
 
 package domain
 
-type Category struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	Route       string `json:"route"`
-	Description string `json:"description"`
-	Enabled     bool   `json:"enabled"`
-	ShowInNav   bool   `json:"show_in_nav"`
-	Sort        int64  `json:"sort"`
-	CreateTime  int64  `json:"create_time"`
-	UpdateTime  int64  `json:"update_time"`
-	PostCount   int64
-}
-
-type CategoryWithCount struct {
-	Name        string `json:"name"`
-	Route       string `json:"route"`
-	Description string `json:"description"`
-	Count       int64  `json:"count"`
+type PostEvent struct {
+	PostId            string   `json:"post_id"`
+	AddedCategoryId   []string `json:"added_category_id,omitempty"`
+	DeletedCategoryId []string `json:"deleted_category_id,omitempty"`
+	AddedTagId        []string `json:"added_tag_id,omitempty"`
+	DeletedTagId      []string `json:"deleted_tag_id,omitempty"`
+	NewFileId         string   `json:"new_file_id,omitempty"`
+	OldFileId         string   `json:"old_file_id,omitempty"`
+	Type              string   `json:"type"`
 }

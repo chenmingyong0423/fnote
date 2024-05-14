@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handler
+package web
 
 import (
 	"net/http"
 
+	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/service"
+
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
-	"github.com/chenmingyong0423/fnote/server/internal/tag/service"
 	"github.com/chenmingyong0423/gkit"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"

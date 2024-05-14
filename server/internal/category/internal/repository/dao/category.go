@@ -44,6 +44,7 @@ type Category struct {
 	Sort        int64              `bson:"sort"`
 	Enabled     bool               `bson:"enabled"`
 	ShowInNav   bool               `bson:"show_in_nav"`
+	PostCount   int64              `bson:"post_count"`
 	CreateTime  int64              `bson:"create_time"`
 	UpdateTime  int64              `bson:"update_time"`
 }
@@ -61,6 +62,8 @@ type ICategoryDao interface {
 	GetById(ctx context.Context, id primitive.ObjectID) (*Category, error)
 	RecoverCategory(ctx context.Context, category *Category) error
 	GetEnabled(ctx context.Context) ([]*Category, error)
+	IncreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error
+	DecreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error
 }
 
 var _ ICategoryDao = (*CategoryDao)(nil)
@@ -73,6 +76,28 @@ func NewCategoryDao(db *mongo.Database) *CategoryDao {
 
 type CategoryDao struct {
 	coll *mongox.Collection[Category]
+}
+
+func (d *CategoryDao) DecreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error {
+	updateResult, err := d.coll.Updater().Filter(query.In("_id", categoryObjectIds...)).Updates(update.BsonBuilder().Inc("post_count", -1).Set("update_time", time.Now().Local().Unix()).Build()).UpdateMany(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "failed to decrease post count by ids, ids=%+v", categoryObjectIds)
+	}
+	if updateResult.MatchedCount == 0 {
+		return fmt.Errorf("MatchedCount=0, decrease post count failed, ids: %+v", categoryObjectIds)
+	}
+	return nil
+}
+
+func (d *CategoryDao) IncreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error {
+	updateResult, err := d.coll.Updater().Filter(query.In("_id", categoryObjectIds...)).Updates(update.BsonBuilder().Inc("post_count", 1).Set("update_time", time.Now().Local().Unix()).Build()).UpdateMany(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "failed to increase post count by ids, ids=%+v", categoryObjectIds)
+	}
+	if updateResult.MatchedCount == 0 {
+		return fmt.Errorf("MatchedCount=0, increase post count failed, ids: %+v", categoryObjectIds)
+	}
+	return nil
 }
 
 func (d *CategoryDao) GetEnabled(ctx context.Context) ([]*Category, error) {

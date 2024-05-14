@@ -17,6 +17,7 @@ package dao
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 
@@ -46,7 +47,7 @@ type ICountStatsDao interface {
 	DecreaseByReferenceIdsAndType(ctx context.Context, ids []string, statsType string) error
 	IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, statsType string) error
 	DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string, count int) error
-	IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string) error
+	IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string, delta int) error
 	GetByFilter(ctx context.Context, filter bson.D) ([]*CountStats, error)
 }
 
@@ -70,8 +71,8 @@ func (d *CountStatsDao) GetByFilter(ctx context.Context, filter bson.D) ([]*Coun
 	return countStats, nil
 }
 
-func (d *CountStatsDao) IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string) error {
-	oneResult, err := d.coll.Updater().Filter(query.BsonBuilder().Eq("reference_id", referenceId).Eq("type", statsType).Build()).Updates(update.Inc("count", 1)).UpdateOne(ctx)
+func (d *CountStatsDao) IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string, delta int) error {
+	oneResult, err := d.coll.Updater().Filter(query.BsonBuilder().Eq("reference_id", referenceId).Eq("type", statsType).Build()).Updates(update.BsonBuilder().Inc("count", delta).Set("update_time", time.Now().Local().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "iucrease count stats error, referenceId=%s, type=%s", referenceId, statsType)
 	}
@@ -82,7 +83,7 @@ func (d *CountStatsDao) IncreaseByReferenceIdAndType(ctx context.Context, refere
 }
 
 func (d *CountStatsDao) DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string, count int) error {
-	oneResult, err := d.coll.Updater().Filter(query.BsonBuilder().Eq("reference_id", referenceId).Eq("type", statsType).Build()).Updates(update.Inc("count", -count)).UpdateOne(ctx)
+	oneResult, err := d.coll.Updater().Filter(query.BsonBuilder().Eq("reference_id", referenceId).Eq("type", statsType).Build()).Updates(update.BsonBuilder().Inc("count", -count).Set("update_time", time.Now().Local().Unix()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "decrease count stats error, referenceId=%s, type=%s", referenceId, statsType)
 	}
@@ -94,7 +95,7 @@ func (d *CountStatsDao) DecreaseByReferenceIdAndType(ctx context.Context, refere
 
 func (d *CountStatsDao) IncreaseByReferenceIdsAndType(ctx context.Context, ids []string, statsType string) error {
 	manyResult, err := d.coll.Updater().Filter(query.BsonBuilder().InString("reference_id", ids...).Eq("type", statsType).Build()).Updates(
-		update.Inc("count", 1),
+		update.BsonBuilder().Inc("count", 1).Set("update_time", time.Now().Local().Unix()).Build(),
 	).UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "increase count stats error, referenceIds=%v, type=%s", ids, statsType)
@@ -107,7 +108,7 @@ func (d *CountStatsDao) IncreaseByReferenceIdsAndType(ctx context.Context, ids [
 
 func (d *CountStatsDao) DecreaseByReferenceIdsAndType(ctx context.Context, ids []string, statsType string) error {
 	manyResult, err := d.coll.Updater().Filter(query.BsonBuilder().InString("reference_id", ids...).Eq("type", statsType).Build()).Updates(
-		update.Inc("count", -1),
+		update.BsonBuilder().Inc("count", -1).Set("update_time", time.Now().Local().Unix()).Build(),
 	).UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "decrease count stats error, referenceIds=%v, type=%s", ids, statsType)

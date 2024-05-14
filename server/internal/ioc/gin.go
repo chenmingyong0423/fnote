@@ -15,6 +15,8 @@
 package ioc
 
 import (
+	"github.com/chenmingyong0423/fnote/server/internal/category"
+	"github.com/chenmingyong0423/fnote/server/internal/tag"
 	"io"
 	"log/slog"
 	"net/http"
@@ -48,14 +50,11 @@ import (
 
 	"github.com/spf13/viper"
 
-	handler2 "github.com/chenmingyong0423/fnote/server/internal/tag/handler"
-
 	"github.com/chenmingyong0423/fnote/server/internal/message_template/handler"
 	"github.com/chenmingyong0423/ginx/middlewares/id"
 	"github.com/chenmingyong0423/ginx/middlewares/log"
 	"github.com/gin-contrib/cors"
 
-	ctgHandler "github.com/chenmingyong0423/fnote/server/internal/category/handler"
 	myValidator "github.com/chenmingyong0423/fnote/server/internal/pkg/validator"
 	vlHandler "github.com/chenmingyong0423/fnote/server/internal/visit_log/handler"
 	"github.com/gin-gonic/gin"
@@ -63,7 +62,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(fileHdr *file.Handler, ctgHdr *ctgHandler.CategoryHandler, cmtHdr *comment.Handler, cfgHdr *website_config.Handler, frdHdr *friend.Handler, postHdr *post.Handler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *handler2.TagHandler, daHandler *data_analysis.Handler, csHandler *count_stats.Handler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler, postVisitHdr *post_visit.Handler) (*gin.Engine, error) {
+func NewGinEngine(fileHdr *file.Handler, ctgHdr *category.Handler, cmtHdr *comment.Handler, cfgHdr *website_config.Handler, frdHdr *friend.Handler, postHdr *post.Handler, vlHdr *vlHandler.VisitLogHandler, msgTplHandler *handler.MsgTplHandler, tagsHandler *tag.Handler, daHandler *data_analysis.Handler, csHandler *count_stats.Handler, backupHandler *handler6.BackupHandler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler, postVisitHdr *post_visit.Handler) (*gin.Engine, error) {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 

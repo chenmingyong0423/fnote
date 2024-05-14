@@ -15,28 +15,25 @@
 package handler
 
 import (
-	"fmt"
-	"log/slog"
-
-	csServ "github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/service"
-
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
+	"github.com/chenmingyong0423/go-eventbus"
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/service"
 	"github.com/gin-gonic/gin"
 )
 
-func NewVisitLogHandler(serv service.IVisitLogService, csServ csServ.ICountStatsService) *VisitLogHandler {
+func NewVisitLogHandler(serv service.IVisitLogService, eventBus *eventbus.EventBus) *VisitLogHandler {
 	return &VisitLogHandler{
-		serv:   serv,
-		csServ: csServ,
+		serv:     serv,
+		eventBus: eventBus,
 	}
 }
 
 type VisitLogHandler struct {
-	serv   service.IVisitLogService
-	csServ csServ.ICountStatsService
+	serv     service.IVisitLogService
+	eventBus *eventbus.EventBus
 }
 
 func (h *VisitLogHandler) RegisterGinRoutes(engine *gin.Engine) {
@@ -52,21 +49,34 @@ type VisitLogReq struct {
 	Referer   string `json:"referer"`
 }
 
+type WebsiteVisitEvent struct {
+	Url       string `json:"url"`
+	Ip        string `json:"ip"`
+	UserAgent string `json:"user_agent"`
+	Origin    string `json:"origin"`
+	Referer   string `json:"referer"`
+}
+
 func (h *VisitLogHandler) CollectVisitLog(ctx *gin.Context, req VisitLogReq) (*apiwrap.ResponseBody[any], error) {
 	req.Ip = ctx.ClientIP()
 	req.UserAgent = ctx.GetHeader("User-Agent")
 	req.Origin = ctx.GetHeader("Origin")
 	req.Referer = ctx.GetHeader("Referer")
-	err := h.serv.CollectVisitLog(ctx, domain.VisitHistory{Url: req.Url, Ip: req.Ip, UserAgent: req.UserAgent, Origin: req.UserAgent, Referer: req.Referer})
+	websiteEvent := WebsiteVisitEvent{
+		Url:       req.Url,
+		Ip:        req.Ip,
+		UserAgent: req.UserAgent,
+		Origin:    req.Origin,
+		Referer:   req.Referer,
+	}
+	marshal, err := jsoniter.Marshal(websiteEvent)
 	if err != nil {
 		return nil, err
 	}
-	go func() {
-		gErr := h.csServ.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeWebsiteViewCount.ToString(), domain.CountStatsTypeWebsiteViewCount)
-		if gErr != nil {
-			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
-			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
-		}
-	}()
+	err = h.serv.CollectVisitLog(ctx, domain.VisitHistory{Url: req.Url, Ip: req.Ip, UserAgent: req.UserAgent, Origin: req.UserAgent, Referer: req.Referer})
+	if err != nil {
+		return nil, err
+	}
+	h.eventBus.Publish("website visit", eventbus.Event{Payload: marshal})
 	return apiwrap.SuccessResponse(), nil
 }

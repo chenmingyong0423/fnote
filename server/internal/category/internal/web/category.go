@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handler
+package web
 
 import (
 	"net/http"
+
+	"github.com/chenmingyong0423/fnote/server/internal/category/internal/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/category/internal/service"
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
 	"github.com/chenmingyong0423/gkit"
 
-	"github.com/chenmingyong0423/fnote/server/internal/category/service"
-	"github.com/chenmingyong0423/fnote/server/internal/pkg/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/dto"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/request"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/web/vo"
