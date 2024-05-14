@@ -77,7 +77,7 @@ func (r *PostRepository) UpdatePostIsDisplayedById(ctx context.Context, id strin
 }
 
 func (r *PostRepository) SavePost(ctx context.Context, post *domain.Post) error {
-	unix := time.Now().Local().Unix()
+	now := time.Now().Local()
 	categories := r.toDaoCategory4Post(post.Categories)
 	tags := r.toDaoTags4Post(post.Tags)
 	return r.dao.SavePost(ctx, &dao.Post{
@@ -95,14 +95,14 @@ func (r *PostRepository) SavePost(ctx context.Context, post *domain.Post) error 
 		MetaKeywords:     post.MetaKeywords,
 		WordCount:        post.WordCount,
 		IsCommentAllowed: post.IsCommentAllowed,
-		CreateTime: func() int64 {
-			if post.CreateTime == 0 {
-				return unix
+		CreatedAt: func() time.Time {
+			if post.CreatedAt == 0 {
+				return now
 			} else {
-				return post.CreateTime
+				return time.Unix(post.CreatedAt, 0)
 			}
 		}(),
-		UpdateTime: unix,
+		UpdatedAt: now,
 	})
 }
 
@@ -133,7 +133,7 @@ func (r *PostRepository) DeletePost(ctx context.Context, id string) error {
 }
 
 func (r *PostRepository) AddPost(ctx context.Context, post *domain.Post) error {
-	unix := time.Now().Local().Unix()
+	now := time.Now().Local()
 	categories := make([]dao.Category4Post, 0, len(post.Categories))
 	for _, category := range post.Categories {
 		categories = append(categories, dao.Category4Post{
@@ -166,8 +166,8 @@ func (r *PostRepository) AddPost(ctx context.Context, post *domain.Post) error {
 		MetaKeywords:     post.MetaKeywords,
 		WordCount:        0,
 		IsCommentAllowed: post.IsCommentAllowed,
-		CreateTime:       unix,
-		UpdateTime:       unix,
+		CreatedAt:        now,
+		UpdatedAt:        now,
 	})
 	if err != nil {
 		return err
@@ -314,7 +314,7 @@ func (r *PostRepository) daoPostToDomainPost(post *dao.Post) *domain.Post {
 			Name: t.Name,
 		}
 	})
-	return &domain.Post{PrimaryPost: domain.PrimaryPost{Id: post.Id, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Categories: categories, Tags: tags, LikeCount: post.LikeCount, CommentCount: post.CommentCount, VisitCount: post.VisitCount, StickyWeight: post.StickyWeight, CreateTime: post.CreateTime}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, WordCount: post.WordCount, UpdateTime: post.UpdateTime, IsCommentAllowed: post.IsCommentAllowed, IsDisplayed: post.IsDisplayed}}
+	return &domain.Post{PrimaryPost: domain.PrimaryPost{Id: post.Id, Author: post.Author, Title: post.Title, Summary: post.Summary, CoverImg: post.CoverImg, Categories: categories, Tags: tags, LikeCount: post.LikeCount, CommentCount: post.CommentCount, VisitCount: post.VisitCount, StickyWeight: post.StickyWeight, CreatedAt: post.CreatedAt.Unix()}, ExtraPost: domain.ExtraPost{Content: post.Content, MetaDescription: post.MetaDescription, MetaKeywords: post.MetaKeywords, WordCount: post.WordCount, UpdateTime: post.UpdatedAt.Unix(), IsCommentAllowed: post.IsCommentAllowed, IsDisplayed: post.IsDisplayed}}
 }
 
 func (r *PostRepository) toDaoTags4Post(ts []domain.Tag4Post) []dao.Tag4Post {

@@ -125,7 +125,7 @@ func (h *PostHandler) postsToPostVOs(posts []*domain.Post) []*SummaryPostVO {
 			CommentCount: post.PrimaryPost.CommentCount,
 			VisitCount:   post.PrimaryPost.VisitCount,
 			StickyWeight: post.PrimaryPost.StickyWeight,
-			CreateTime:   post.PrimaryPost.CreateTime,
+			CreateTime:   post.PrimaryPost.CreatedAt,
 		})
 	}
 	return postVOs
@@ -257,7 +257,7 @@ func (h *PostHandler) postsToAdminPost(posts []*domain.Post) []vo.AdminPostVO {
 			Tags:             tags,
 			IsDisplayed:      post.IsDisplayed,
 			IsCommentAllowed: post.IsCommentAllowed,
-			CreateTime:       post.CreateTime,
+			CreateTime:       post.CreatedAt,
 			UpdateTime:       post.UpdateTime,
 		}
 	}

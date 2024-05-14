@@ -48,8 +48,8 @@ type Post struct {
 	MetaKeywords     string          `bson:"meta_keywords"`
 	WordCount        int             `bson:"word_count"`
 	IsCommentAllowed bool            `bson:"is_comment_allowed"`
-	CreateTime       int64           `bson:"create_time"`
-	UpdateTime       int64           `bson:"update_time"`
+	CreatedAt        time.Time       `bson:"create_time"`
+	UpdatedAt        time.Time       `bson:"update_time"`
 }
 
 type Category4Post struct {
