@@ -94,14 +94,14 @@ func (s *CountStatsService) subscribePostLikedEvent() {
 		var postEvent domain.LikePostEvent
 		err := jsoniter.Unmarshal(event.Payload, &postEvent)
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats post-like event: failed to unmarshal", "err", err)
+			l.ErrorContext(ctx, "CountStats post-like event: failed to unmarshal", "error", err)
 			continue
 		}
 
 		// 点赞数+1
 		err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeLikeCount.ToString(), domain.CountStatsTypeLikeCount, 1)
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats post-like event: failed to increase the count of like in website", "count", 1, "err", err)
+			l.ErrorContext(ctx, "CountStats post-like event: failed to increase the count of like in website", "count", 1, "error", err)
 			continue
 		}
 		l.InfoContext(ctx, "CountStats post-like event: handle successfully")
@@ -120,21 +120,21 @@ func (s *CountStatsService) subscribeCommentEvent() {
 		var e domain.CommentEvent
 		err := jsoniter.Unmarshal(event.Payload, &e)
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats: comment event: failed to unmarshal", "err", err)
+			l.ErrorContext(ctx, "CountStats: comment event: failed to unmarshal", "error", err)
 			continue
 		}
 
 		switch e.Type {
-		case "addition":
+		case "create":
 			err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount.ToString(), domain.CountStatsTypeCommentCount, e.Count)
 			if err != nil {
-				l.ErrorContext(ctx, "CountStats: comment event: failed to increase the count of comment", "count", e.Count, "err", err)
+				l.ErrorContext(ctx, "CountStats: comment event: failed to increase the count of comment", "count", e.Count, "error", err)
 				continue
 			}
 		case "delete":
 			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount.ToString(), domain.CountStatsTypeCommentCount, e.Count)
 			if err != nil {
-				l.ErrorContext(ctx, "CountStats: comment event: failed to decrease the count of comment", "count", e.Count, "err", err)
+				l.ErrorContext(ctx, "CountStats: comment event: failed to decrease the count of comment", "count", e.Count, "error", err)
 				continue
 			}
 		}
@@ -154,15 +154,15 @@ func (s *CountStatsService) subscribeWebsiteVisitEvent() {
 		var e domain.CommentEvent
 		err := jsoniter.Unmarshal(event.Payload, &e)
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats: website visit event: failed to unmarshal", "err", err)
+			l.ErrorContext(ctx, "CountStats: website visit event: failed to unmarshal", "error", err)
 			continue
 		}
 		err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeWebsiteViewCount.ToString(), domain.CountStatsTypeWebsiteViewCount, 1)
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats: website visit event: failed to increase the count of website visit", "count", 1, "err", err)
+			l.ErrorContext(ctx, "CountStats: website visit event: failed to increase the count of website visit", "count", 1, "error", err)
 			continue
 		}
-		l.InfoContext(ctx, "CountStats: website visit event: handle successfully ")
+		l.InfoContext(ctx, "CountStats: website visit event: handle successfully")
 	}
 }
 
@@ -178,20 +178,20 @@ func (s *CountStatsService) subscribeTagEvent() {
 		var e domain.TagEvent
 		err := jsoniter.Unmarshal(event.Payload, &e)
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats: tag event: failed to unmarshal", "err", err)
+			l.ErrorContext(ctx, "CountStats: tag event: failed to unmarshal", "error", err)
 			continue
 		}
 		switch e.Type {
 		case "create":
 			err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount, 1)
 			if err != nil {
-				l.ErrorContext(ctx, "CountStats: tag event: failed to increase the count of tag", "count", 1, "err", err)
+				l.ErrorContext(ctx, "CountStats: tag event: failed to increase the count of tag", "count", 1, "error", err)
 				continue
 			}
 		case "delete":
 			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount, 1)
 			if err != nil {
-				l.ErrorContext(ctx, "CountStats: tag event: failed to decrease the count of tag", "count", 1, "err", err)
+				l.ErrorContext(ctx, "CountStats: tag event: failed to decrease the count of tag", "count", 1, "error", err)
 				continue
 			}
 		}
@@ -211,7 +211,7 @@ func (s *CountStatsService) subscribePostEvent() {
 		var e domain.PostEvent
 		err := jsoniter.Unmarshal(event.Payload, &e)
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats: post event: failed to unmarshal", "err", err)
+			l.ErrorContext(ctx, "CountStats: post event: failed to unmarshal", "error", err)
 			continue
 		}
 		switch e.Type {
@@ -221,7 +221,7 @@ func (s *CountStatsService) subscribePostEvent() {
 				// 网站文章数 +1
 				err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCount.ToString(), domain.CountStatsTypePostCount, 1)
 				if err != nil {
-					l.ErrorContext(ctx, "CountStats: post event: failed to increase the count of post in website", "count", 1, "err", err)
+					l.ErrorContext(ctx, "CountStats: post event: failed to increase the count of post in website", "count", 1, "error", err)
 				}
 				s.increaseCategoryOrTagCount4PostEvent(ctx, e.AddedCategoryId, e.AddedTagId, l)
 			}
@@ -234,7 +234,7 @@ func (s *CountStatsService) subscribePostEvent() {
 			// 网站文章数 -1
 			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCount.ToString(), domain.CountStatsTypePostCount, 1)
 			if err != nil {
-				l.ErrorContext(ctx, "CountStats: post event: failed to decrease the count of post in website", "count", 1, "err", err)
+				l.ErrorContext(ctx, "CountStats: post event: failed to decrease the count of post in website", "count", 1, "error", err)
 			}
 			s.decreaseCategoryOrTagCount4PostEvent(ctx, e.DeletedCategoryId, e.DeletedTagId, l)
 		}
@@ -247,14 +247,14 @@ func (s *CountStatsService) increaseCategoryOrTagCount4PostEvent(ctx context.Con
 	if len(addedCategoryIds) > 0 {
 		err := s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount, len(addedCategoryIds))
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats:  post event: failed to increase the count of category", "count", len(addedCategoryIds), "err", err)
+			l.ErrorContext(ctx, "CountStats:  post event: failed to increase the count of category", "count", len(addedCategoryIds), "error", err)
 		}
 	}
 	// 增加标签数
 	if len(addedTagIds) > 0 {
 		err := s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount, len(addedTagIds))
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats: post event: failed to increase the count of tag", "count", len(addedTagIds), "err", err)
+			l.ErrorContext(ctx, "CountStats: post event: failed to increase the count of tag", "count", len(addedTagIds), "error", err)
 		}
 	}
 }
@@ -264,14 +264,14 @@ func (s *CountStatsService) decreaseCategoryOrTagCount4PostEvent(ctx context.Con
 	if len(deletedCategoryIds) > 0 {
 		err := s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount, len(deletedCategoryIds))
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats:  post event: failed to decrease the count of category", "count", len(deletedCategoryIds), "err", err)
+			l.ErrorContext(ctx, "CountStats:  post event: failed to decrease the count of category", "count", len(deletedCategoryIds), "error", err)
 		}
 	}
 	// 减少标签数
 	if len(deletedTagIds) > 0 {
 		err := s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount, len(deletedTagIds))
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats: post event: failed to decrease the count of tag", "count", len(deletedTagIds), "err", err)
+			l.ErrorContext(ctx, "CountStats: post event: failed to decrease the count of tag", "count", len(deletedTagIds), "error", err)
 		}
 	}
 }
@@ -288,20 +288,20 @@ func (s *CountStatsService) subscribeCategoryEvent() {
 		var e domain.CategoryEvent
 		err := jsoniter.Unmarshal(event.Payload, &e)
 		if err != nil {
-			l.ErrorContext(ctx, "CountStats category event: failed to unmarshal", "err", err)
+			l.ErrorContext(ctx, "CountStats category event: failed to unmarshal", "error", err)
 			continue
 		}
 		switch e.Type {
 		case "create":
 			err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount, 1)
 			if err != nil {
-				l.ErrorContext(ctx, "CountStats category event: failed to increase the count of category", "count", 1, "err", err)
+				l.ErrorContext(ctx, "CountStats category event: failed to increase the count of category", "count", 1, "error", err)
 				continue
 			}
 		case "delete":
 			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount, 1)
 			if err != nil {
-				l.ErrorContext(ctx, "CountStats category event: failed to decrease the count of category", "count", 1, "err", err)
+				l.ErrorContext(ctx, "CountStats category event: failed to decrease the count of category", "count", 1, "error", err)
 				continue
 			}
 		}

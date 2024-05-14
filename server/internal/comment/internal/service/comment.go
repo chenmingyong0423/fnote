@@ -146,7 +146,7 @@ func (s *CommentService) BatchDeleteComments(ctx context.Context, commentIds []s
 				return r.CommentId
 			}))
 			if gErr != nil {
-				l.ErrorContext(ctx, "BatchDeleteComments: comment event: failed to FindCommentById", "err", gErr)
+				l.ErrorContext(ctx, "BatchDeleteComments: comment event: failed to FindCommentById", "error", gErr)
 			} else {
 				commentMp := make(map[string]domain.AdminComment, len(comments2))
 				for _, c := range comments2 {
@@ -167,7 +167,7 @@ func (s *CommentService) BatchDeleteComments(ctx context.Context, commentIds []s
 		for _, commentEvent := range commentEvents {
 			marshal, fErr := json.Marshal(commentEvent)
 			if fErr != nil {
-				l.ErrorContext(ctx, "BatchDeleteComments: comment event: failed to marshal comment event", "err", fErr)
+				l.ErrorContext(ctx, "BatchDeleteComments: comment event: failed to marshal comment event", "error", fErr)
 				continue
 			}
 			s.eventBus.Publish("comment", eventbus.Event{Payload: marshal})
@@ -389,9 +389,9 @@ func (s *CommentService) AddReply(ctx context.Context, cmtId string, postId stri
 		CommentId: cmtId,
 		RepliesId: []string{rid},
 		Count:     1,
-		Type:      "addition",
+		Type:      "create",
 	}
-	marshal, err := json.Marshal(&commentEvent)
+	marshal, err := jsoniter.Marshal(&commentEvent)
 	if err != nil {
 		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
 		l.ErrorContext(ctx, "AddReply: comment event: failed to marshal comment event")
@@ -411,12 +411,12 @@ func (s *CommentService) AddComment(ctx context.Context, comment domain.Comment)
 		CommentId: commentId,
 		RepliesId: nil,
 		Count:     1,
-		Type:      "addition",
+		Type:      "create",
 	}
-	marshal, err := json.Marshal(&commentEvent)
+	marshal, err := jsoniter.Marshal(&commentEvent)
 	if err != nil {
 		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-		l.ErrorContext(ctx, "AddComment: comment event: failed to marshal comment event")
+		l.ErrorContext(ctx, "AddComment: comment event: failed to marshal comment event", "error", err)
 		return commentId, nil
 	}
 	s.eventBus.Publish("comment", eventbus.Event{Payload: marshal})
@@ -435,7 +435,7 @@ func (s *CommentService) subscribePostEvent() {
 		var e domain.PostEvent
 		err := jsoniter.Unmarshal(event.Payload, &e)
 		if err != nil {
-			l.ErrorContext(ctx, "Comment: post event: failed to json.Unmarshal", "err", err)
+			l.ErrorContext(ctx, "Comment: post event: failed to unmarshal", "error", err)
 			continue
 		}
 		switch e.Type {

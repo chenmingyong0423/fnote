@@ -21,6 +21,8 @@ import (
 	"log/slog"
 	"strings"
 
+	jsoniter "github.com/json-iterator/go"
+
 	"github.com/google/uuid"
 
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
@@ -63,7 +65,7 @@ func NewPostService(repo repository.IPostRepository, cfgService website_config.S
 		cfgService: cfgService,
 		eventBus:   eventBus,
 	}
-	go s.SubscribeCommentEvent()
+	go s.subscribeCommentEvent()
 	return s
 }
 
@@ -286,7 +288,7 @@ func (s *PostService) GetLatestPosts(ctx context.Context, count int64) ([]*domai
 	return s.repo.GetLatest5Posts(ctx, count)
 }
 
-func (s *PostService) SubscribeCommentEvent() {
+func (s *PostService) subscribeCommentEvent() {
 	eventChan := s.eventBus.Subscribe("comment")
 	type contextKey string
 	for event := range eventChan {
@@ -296,26 +298,25 @@ func (s *PostService) SubscribeCommentEvent() {
 		l := slog.Default().With("X-Request-ID", rid)
 		l.InfoContext(ctx, "Post: comment event", "payload", string(event.Payload))
 		var e domain.CommentEvent
-		err := json.Unmarshal(event.Payload, &e)
+		err := jsoniter.Unmarshal(event.Payload, &e)
 		if err != nil {
-			l.ErrorContext(ctx, "Post: comment event: failed to json.Unmarshal", "err", err)
+			l.ErrorContext(ctx, "Post: comment event: failed to unmarshal", "error", err)
 			continue
 		}
-
 		switch e.Type {
-		case "addition":
+		case "create":
 			err = s.repo.IncreaseCommentCount(ctx, e.PostId)
 			if err != nil {
-				l.ErrorContext(ctx, "Post: comment event: failed to increase the count of comment in post", "count", 1)
+				l.ErrorContext(ctx, "Post: comment event: failed to increase the count of comment in post", "count", 1, "error", err)
 				continue
 			}
 		case "delete":
 			err = s.repo.DecreaseCommentCount(ctx, e.PostId, e.Count)
 			if err != nil {
-				l.ErrorContext(ctx, "Post: comment event: failed to increase the count of comment in post", "count", e.Count)
+				l.ErrorContext(ctx, "Post: comment event: failed to increase the count of comment in post", "count", e.Count, "error", err)
 				continue
 			}
 		}
-		l.InfoContext(ctx, "Post: comment event: handle successfully ")
+		l.InfoContext(ctx, "Post: comment event: handle successfully")
 	}
 }
