@@ -8,7 +8,7 @@ export interface Friend {
   logo: string
   description: string
   status: number
-  create_time: number
+  created_at: number
 }
 
 export interface FriendReq {

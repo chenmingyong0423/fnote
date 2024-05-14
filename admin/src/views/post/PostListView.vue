@@ -73,7 +73,7 @@
             @change="changeCommentAllowedStatus(record.id, record.is_comment_allowed)"
           />
         </template>
-        <template v-else-if="column.key === 'create_time' || column.key === 'update_time'">
+        <template v-else-if="column.key === 'created_at' || column.key === 'updated_at'">
           <span>{{ dayjs.unix(record[column.key]).format('YYYY-MM-DD HH:mm:ss') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
@@ -157,17 +157,17 @@ const columns = computed<TableColumnType[]>(() => {
     },
     {
       title: '发布时间',
-      key: 'create_time',
-      dataIndex: 'create_time',
-      sorter: (p1: IPost, p2: IPost) => p1.create_time - p2.create_time,
+      key: 'created_at',
+      dataIndex: 'created_at',
+      sorter: (p1: IPost, p2: IPost) => p1.created_at - p2.created_at,
       defaultSortOrder: 'descend',
       sortDirections: ['descend', 'ascend'],
       showSorterTooltip: { title: showSorterTooltip.value }
     },
     {
       title: '最后一次修改的时间',
-      key: 'update_time',
-      dataIndex: 'update_time'
+      key: 'updated_at',
+      dataIndex: 'updated_at'
     },
     {
       title: 'operation',
@@ -181,7 +181,7 @@ const baseHost = import.meta.env.VITE_BASE_HOST
 const req = ref<PageRequest>({
   pageNo: 1,
   pageSize: 5,
-  sortField: 'create_time',
+  sortField: 'created_at',
   sortOrder: 'DESC',
   keyword: ''
 } as PageRequest)

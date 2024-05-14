@@ -9,8 +9,8 @@ export interface ICategory {
   enabled: boolean
   show_in_nav: boolean
   post_count: number
-  create_time: number
-  update_time: number
+  created_at: number
+  updated_at: number
 }
 
 export interface CategoryRequest {

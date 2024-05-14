@@ -40,7 +40,7 @@
           </a-tag>
         </template>
       </template>
-      <template v-if="column.dataIndex === 'create_time'">
+      <template v-if="column.dataIndex === 'created_at'">
         {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
@@ -124,20 +124,19 @@ const columns = [
   },
   {
     title: '提交时间',
-    key: 'create_time',
-    dataIndex: 'create_time'
+    key: 'created_at',
+    dataIndex: 'created_at'
   },
   {
     title: 'operation',
     dataIndex: 'operation'
   }
 ]
-const serverHost = import.meta.env.VITE_API_HOST
 const data = ref<Friend[]>([])
 const pageReq = ref<PageRequest>({
   pageNo: 1,
   pageSize: 5,
-  sortField: 'create_time',
+  sortField: 'created_at',
   sortOrder: 'desc'
 } as PageRequest)
 
