@@ -203,12 +203,12 @@ const post = ref<IPostDetail>({
   comment_count: 0,
   visit_count: 0,
   sticky_weight: 0,
-  create_time: 0,
+  created_at: 0,
   content: "暂无介绍。",
   meta_description: "",
   meta_keywords: "",
   word_count: 0,
-  update_time: 0,
+  updated_at: 0,
   is_liked: false,
 });
 const author = ref<string>("");

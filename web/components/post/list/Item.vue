@@ -52,7 +52,7 @@
           </div>
           <div class="ml-auto flex gap-x-1 items-center">
             <span>{{
-              $dayjs(item.create_time * 1000).format("YYYY-MM-DD")
+              $dayjs(item.created_at * 1000).format("YYYY-MM-DD")
             }}</span>
           </div>
         </div>

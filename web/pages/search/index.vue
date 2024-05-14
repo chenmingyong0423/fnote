@@ -76,7 +76,7 @@ let posts = ref<IPost[]>([]);
 let req = ref<PageRequest>({
   pageNo: 1,
   pageSize: pageSize,
-  sortField: "create_time",
+  sortField: "created_at",
   sortOrder: "desc",
   keyword: keyword.value,
 } as PageRequest);
@@ -88,7 +88,7 @@ if (route.query.filter && route.query.filter !== "") {
     filter.value = String(route.query.filter);
     switch (filter.value) {
       case "oldest":
-        req.value.sortField = "create_time";
+        req.value.sortField = "created_at";
         req.value.sortOrder = "ASC";
         break;
       case "likes":
@@ -96,7 +96,7 @@ if (route.query.filter && route.query.filter !== "") {
         req.value.sortOrder = "DESC";
         break;
       default:
-        req.value.sortField = "create_time";
+        req.value.sortField = "created_at";
         req.value.sortOrder = "DESC";
         break;
     }
@@ -132,7 +132,7 @@ watch(
       filter.value = String(newQuery.value.filter);
       switch (filter.value) {
         case "oldest":
-          req.value.sortField = "create_time";
+          req.value.sortField = "created_at";
           req.value.sortOrder = "ASC";
           break;
         case "likes":
@@ -140,7 +140,7 @@ watch(
           req.value.sortOrder = "DESC";
           break;
         default:
-          req.value.sortField = "create_time";
+          req.value.sortField = "created_at";
           req.value.sortOrder = "DESC";
           break;
       }

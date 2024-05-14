@@ -118,7 +118,7 @@
         >
           <div>{{ post?.author }}</div>
           <div>
-            {{ $dayjs(post?.create_time * 1000).format("YYYY-MM-DD HH:mm:ss") }}
+            {{ $dayjs(post?.created_at * 1000).format("YYYY-MM-DD HH:mm:ss") }}
           </div>
           <div>阅读 {{ post?.visit_count }}</div>
         </div>
