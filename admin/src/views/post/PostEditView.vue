@@ -138,6 +138,7 @@
         height="800px"
         :disabled-menus="[]"
         @upload-image="handleUploadImage"
+        @save="saveDraft"
       />
     </div>
   </div>
