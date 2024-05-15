@@ -47,7 +47,10 @@
         <Button
           name="回复"
           class="w-15 h-8 line-height-8 hover:bg-gray-1 ml-auto"
-          @click="activeCommentIndex = rpy.id"
+          @click="
+            activeCommentIndex = rpy.id;
+            console.log(rpy.id);
+          "
         ></Button>
       </div>
       <div>
@@ -67,7 +70,7 @@
         <CommentForm
           class="m-auto"
           @submit="submitReply"
-          ref="commentReplyForm"
+          ref="replyReplyForm"
           :commentId="rpy.id"
         ></CommentForm>
         <Button
@@ -81,7 +84,6 @@
 </template>
 
 <script setup lang="ts">
-import CryptoJS from "crypto-js";
 import { useHomeStore } from "~/store/home";
 import type {
   ICommentReplyRequest,
@@ -131,10 +133,10 @@ const submitReply = (req: ICommentRequest, replyToId: string) => {
   emit("submitReply2Reply", req4Reply, props.commentId);
 };
 
-const commentReplyForm = ref();
+const replyReplyForm = ref();
 const clearReplyReq = () => {
-  if (commentReplyForm.value) {
-    commentReplyForm.value[0].clearReq();
+  if (replyReplyForm.value) {
+    replyReplyForm.value[0].clearReq();
     activeCommentIndex.value = "";
   }
 };

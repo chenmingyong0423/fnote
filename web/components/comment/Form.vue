@@ -71,7 +71,7 @@
         <div class="w-30% relative lt-md:w-100%">
           <input
             type="text"
-            placeholder="个人站点，以 http:// 或 https:// 开头"
+            placeholder="个人站点，以 https:// 开头"
             v-model="commentReq.website"
             class="w-full outline-none custom_border_gray bg-#F9F9F9 focus:custom_border_1E80FF b-rounded-2 p-2 box-border dark:text-dtc dark_bg_gray"
             @focusin="showWebsiteTip = true"
@@ -154,7 +154,6 @@ const submit = () => {
   }
   if (
     commentReq.value.website !== "" &&
-    !commentReq.value.website?.startsWith(`http://`) &&
     !commentReq.value.website?.startsWith(`https://`)
   ) {
     toast.showToast("个人站点格式不正确！", 1000);
@@ -188,7 +187,6 @@ defineExpose({
 
 const calculateMD54Email = () => {
   showEmailTip.value = false;
-  console.log(commentReq.value.email);
   if (commentReq.value.email !== "") {
     pic.value =
       "https://1.gravatar.com/avatar/" +
