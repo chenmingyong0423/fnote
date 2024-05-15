@@ -85,7 +85,6 @@ func (d *FileDao) PullUsedIn(ctx context.Context, fileId []byte, fileUsage FileU
 		return fmt.Errorf("pull used in error, file id: %s, file usage: %+v", fileId, fileUsage)
 	}
 	return nil
-
 }
 
 func (d *FileDao) PushIntoUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error {

@@ -25,8 +25,8 @@ import (
 )
 
 type ICountStatsRepository interface {
-	DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, count int) error
-	IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, delta int) error
+	DecreaseByReferenceIdAndType(ctx context.Context, countStatsType domain.CountStatsType, count int) error
+	IncreaseByReferenceIdAndType(ctx context.Context, countStatsType domain.CountStatsType, delta int) error
 	GetWebsiteCountStats(ctx context.Context, countStatsTypes []domain.CountStatsType) ([]domain.CountStats, error)
 }
 
@@ -45,7 +45,7 @@ type CountStatsRepository struct {
 func (r *CountStatsRepository) GetWebsiteCountStats(ctx context.Context, countStatsTypes []domain.CountStatsType) ([]domain.CountStats, error) {
 	ds := make([]any, 0, len(countStatsTypes))
 	for _, statsType := range countStatsTypes {
-		ds = append(ds, bsonx.NewD().Add("reference_id", statsType.ToString()).Add("type", statsType.ToString()).Build())
+		ds = append(ds, bsonx.NewD().Add("type", statsType.ToString()).Add("type", statsType.ToString()).Build())
 	}
 	countStats, err := r.dao.GetByFilter(ctx, query.Or(ds...))
 	if err != nil {
@@ -54,12 +54,12 @@ func (r *CountStatsRepository) GetWebsiteCountStats(ctx context.Context, countSt
 	return r.toDomainCountStats(countStats), nil
 }
 
-func (r *CountStatsRepository) IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, delta int) error {
-	return r.dao.IncreaseByReferenceIdAndType(ctx, referenceId, countStatsType.ToString(), delta)
+func (r *CountStatsRepository) IncreaseByReferenceIdAndType(ctx context.Context, countStatsType domain.CountStatsType, delta int) error {
+	return r.dao.IncreaseByReferenceIdAndType(ctx, countStatsType.ToString(), delta)
 }
 
-func (r *CountStatsRepository) DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, count int) error {
-	return r.dao.DecreaseByReferenceIdAndType(ctx, referenceId, countStatsType.ToString(), count)
+func (r *CountStatsRepository) DecreaseByReferenceIdAndType(ctx context.Context, countStatsType domain.CountStatsType, count int) error {
+	return r.dao.DecreaseByReferenceIdAndType(ctx, countStatsType.ToString(), count)
 }
 
 func (r *CountStatsRepository) toDomainCountStats(stats []*dao.CountStats) []domain.CountStats {

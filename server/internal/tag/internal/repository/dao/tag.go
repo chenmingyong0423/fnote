@@ -66,7 +66,7 @@ type TagDao struct {
 
 func (d *TagDao) DecreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error {
 	updateResult, err := d.coll.Updater().
-		Filter(query.In("_id", tagObjectIds)).
+		Filter(query.In("_id", tagObjectIds...)).
 		Updates(update.BsonBuilder().Inc("post_count", -1).Set("updated_at", time.Now().Local()).Build()).
 		UpdateMany(ctx)
 	if err != nil {
@@ -80,7 +80,7 @@ func (d *TagDao) DecreasePostCountByIds(ctx context.Context, tagObjectIds []prim
 
 func (d *TagDao) IncreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error {
 	updateResult, err := d.coll.Updater().
-		Filter(query.In("_id", tagObjectIds)).
+		Filter(query.In("_id", tagObjectIds...)).
 		Updates(update.BsonBuilder().Inc("post_count", 1).Set("updated_at", time.Now().Local()).Build()).
 		UpdateMany(ctx)
 	if err != nil {

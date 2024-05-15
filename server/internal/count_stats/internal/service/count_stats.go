@@ -29,8 +29,6 @@ import (
 )
 
 type ICountStatsService interface {
-	DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, count int) error
-	IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, delta int) error
 	GetWebsiteCountStats(ctx context.Context) (domain.WebsiteCountStats, error)
 }
 
@@ -74,14 +72,6 @@ func (s *CountStatsService) GetWebsiteCountStats(ctx context.Context) (domain.We
 	return *result, nil
 }
 
-func (s *CountStatsService) IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, delta int) error {
-	return s.repo.IncreaseByReferenceIdAndType(ctx, referenceId, countStatsType, delta)
-}
-
-func (s *CountStatsService) DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, countStatsType domain.CountStatsType, count int) error {
-	return s.repo.DecreaseByReferenceIdAndType(ctx, referenceId, countStatsType, count)
-}
-
 func (s *CountStatsService) subscribePostLikedEvent() {
 	eventChan := s.eventBus.Subscribe("post-like")
 	type contextKey string
@@ -99,7 +89,7 @@ func (s *CountStatsService) subscribePostLikedEvent() {
 		}
 
 		// 点赞数+1
-		err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeLikeCount.ToString(), domain.CountStatsTypeLikeCount, 1)
+		err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeLikeCount, 1)
 		if err != nil {
 			l.ErrorContext(ctx, "CountStats post-like event: failed to increase the count of like in website", "count", 1, "error", err)
 			continue
@@ -126,13 +116,13 @@ func (s *CountStatsService) subscribeCommentEvent() {
 
 		switch e.Type {
 		case "create":
-			err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount.ToString(), domain.CountStatsTypeCommentCount, e.Count)
+			err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount, e.Count)
 			if err != nil {
 				l.ErrorContext(ctx, "CountStats: comment event: failed to increase the count of comment", "count", e.Count, "error", err)
 				continue
 			}
 		case "delete":
-			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount.ToString(), domain.CountStatsTypeCommentCount, e.Count)
+			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount, e.Count)
 			if err != nil {
 				l.ErrorContext(ctx, "CountStats: comment event: failed to decrease the count of comment", "count", e.Count, "error", err)
 				continue
@@ -157,7 +147,7 @@ func (s *CountStatsService) subscribeWebsiteVisitEvent() {
 			l.ErrorContext(ctx, "CountStats: website visit event: failed to unmarshal", "error", err)
 			continue
 		}
-		err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeWebsiteViewCount.ToString(), domain.CountStatsTypeWebsiteViewCount, 1)
+		err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeWebsiteViewCount, 1)
 		if err != nil {
 			l.ErrorContext(ctx, "CountStats: website visit event: failed to increase the count of website visit", "count", 1, "error", err)
 			continue
@@ -183,13 +173,13 @@ func (s *CountStatsService) subscribeTagEvent() {
 		}
 		switch e.Type {
 		case "create":
-			err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount, 1)
+			err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount, 1)
 			if err != nil {
 				l.ErrorContext(ctx, "CountStats: tag event: failed to increase the count of tag", "count", 1, "error", err)
 				continue
 			}
 		case "delete":
-			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount, 1)
+			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount, 1)
 			if err != nil {
 				l.ErrorContext(ctx, "CountStats: tag event: failed to decrease the count of tag", "count", 1, "error", err)
 				continue
@@ -216,63 +206,30 @@ func (s *CountStatsService) subscribePostEvent() {
 		}
 		switch e.Type {
 		case "create":
-			// todo 后面可以考虑使用事务
 			{
 				// 网站文章数 +1
-				err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCount.ToString(), domain.CountStatsTypePostCount, 1)
+				err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCount, 1)
 				if err != nil {
-					l.ErrorContext(ctx, "CountStats: post event: failed to increase the count of post in website", "count", 1, "error", err)
+					l.ErrorContext(ctx, "CountStats: post event: failed to increase the count of post", "count", 1, "error", err)
 				}
-				s.increaseCategoryOrTagCount4PostEvent(ctx, e.AddedCategoryId, e.AddedTagId, l)
 			}
 		case "update":
-			// todo 后面可以考虑使用事务
-			s.increaseCategoryOrTagCount4PostEvent(ctx, e.AddedCategoryId, e.AddedTagId, l)
-			s.decreaseCategoryOrTagCount4PostEvent(ctx, e.DeletedCategoryId, e.DeletedTagId, l)
 		case "delete":
-			// todo 后面可以考虑使用事务
 			// 网站文章数 -1
-			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCount.ToString(), domain.CountStatsTypePostCount, 1)
+			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypePostCount, 1)
 			if err != nil {
-				l.ErrorContext(ctx, "CountStats: post event: failed to decrease the count of post in website", "count", 1, "error", err)
+				l.ErrorContext(ctx, "CountStats: post event: failed to decrease the count of post", "count", 1, "error", err)
+				continue
 			}
-			s.decreaseCategoryOrTagCount4PostEvent(ctx, e.DeletedCategoryId, e.DeletedTagId, l)
+			// 删除评论数
+			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCommentCount, e.CommentCount)
+			if err != nil {
+				l.ErrorContext(ctx, "CountStats: post event: failed to decrease the count of comment", "count", e.CommentCount, "error", err)
+				continue
+			}
+
 		}
 		l.InfoContext(ctx, "CountStats: post: handle successfully")
-	}
-}
-
-func (s *CountStatsService) increaseCategoryOrTagCount4PostEvent(ctx context.Context, addedCategoryIds []string, addedTagIds []string, l *slog.Logger) {
-	// 增加分类数
-	if len(addedCategoryIds) > 0 {
-		err := s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount, len(addedCategoryIds))
-		if err != nil {
-			l.ErrorContext(ctx, "CountStats:  post event: failed to increase the count of category", "count", len(addedCategoryIds), "error", err)
-		}
-	}
-	// 增加标签数
-	if len(addedTagIds) > 0 {
-		err := s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount, len(addedTagIds))
-		if err != nil {
-			l.ErrorContext(ctx, "CountStats: post event: failed to increase the count of tag", "count", len(addedTagIds), "error", err)
-		}
-	}
-}
-
-func (s *CountStatsService) decreaseCategoryOrTagCount4PostEvent(ctx context.Context, deletedCategoryIds []string, deletedTagIds []string, l *slog.Logger) {
-	// 减少分类数
-	if len(deletedCategoryIds) > 0 {
-		err := s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount, len(deletedCategoryIds))
-		if err != nil {
-			l.ErrorContext(ctx, "CountStats:  post event: failed to decrease the count of category", "count", len(deletedCategoryIds), "error", err)
-		}
-	}
-	// 减少标签数
-	if len(deletedTagIds) > 0 {
-		err := s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeTagCount.ToString(), domain.CountStatsTypeTagCount, len(deletedTagIds))
-		if err != nil {
-			l.ErrorContext(ctx, "CountStats: post event: failed to decrease the count of tag", "count", len(deletedTagIds), "error", err)
-		}
 	}
 }
 
@@ -293,13 +250,13 @@ func (s *CountStatsService) subscribeCategoryEvent() {
 		}
 		switch e.Type {
 		case "create":
-			err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount, 1)
+			err = s.repo.IncreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount, 1)
 			if err != nil {
 				l.ErrorContext(ctx, "CountStats category event: failed to increase the count of category", "count", 1, "error", err)
 				continue
 			}
 		case "delete":
-			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount.ToString(), domain.CountStatsTypeCategoryCount, 1)
+			err = s.repo.DecreaseByReferenceIdAndType(ctx, domain.CountStatsTypeCategoryCount, 1)
 			if err != nil {
 				l.ErrorContext(ctx, "CountStats category event: failed to decrease the count of category", "count", 1, "error", err)
 				continue

@@ -30,7 +30,9 @@ type PostEvent struct {
 	DeletedTagId      []string `json:"deleted_tag_id,omitempty"`
 	NewFileId         string   `json:"new_file_id,omitempty"`
 	OldFileId         string   `json:"old_file_id,omitempty"`
-	Type              string   `json:"type"`
+	// 删除文章时，需要传入文章的评论数，用于更新网站的评论数
+	CommentCount int    `json:"comment_count,omitempty"`
+	Type         string `json:"type"`
 }
 
 type LikePostEvent struct {

@@ -301,8 +301,8 @@ func (r *WebsiteConfigRepository) UpdateSeoMetaConfig(ctx context.Context, cfg *
 		update.BsonBuilder().
 			Set("props.description", cfg.Description).
 			Set("props.title", cfg.Title).
-			Set("props.og_title", cfg.Title).
-			Set("props.og_image", cfg.Title).
+			Set("props.og_title", cfg.OgTitle).
+			Set("props.og_image", cfg.OgImage).
 			Set("props.baidu_site_verification", cfg.BaiduSiteVerification).
 			Set("props.keywords", cfg.Keywords).
 			Set("props.author", cfg.Author).
