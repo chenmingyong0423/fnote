@@ -82,6 +82,7 @@
             :commentId="comment.id"
             @submitReply2Reply="submitReply2Reply"
             ref="replyList"
+            v-if="comment.replies && comment.replies.length > 0"
           ></CommentReply>
         </div>
         <div v-if="activeCommentIndex === comment.id">
@@ -162,6 +163,7 @@ const submitReply2Reply = (req: ICommentReplyRequest, replyToId: string) => {
 
 const replyList = ref();
 const clearReply2ReplyReq = () => {
+  console.log("rrr", replyList.value);
   if (replyList.value) {
     replyList.value[0].clearReplyReq();
   }
