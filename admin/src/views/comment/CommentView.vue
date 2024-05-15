@@ -341,7 +341,6 @@ const onChange = (srks: Key[], selectedRows: AdminCommentVO[]) => {
       }
     }
   })
-  console.log(selectedComments.value)
 }
 const batchApproveComment = async () => {
   try {
@@ -442,8 +441,8 @@ const batchDeleteComment = async () => {
     JSON.stringify(selectedComments.value)
   )
   deleteRequest.comment_ids.forEach((commentId: string) => {
-    if (selectedComments.value.replies[commentId]) {
-      delete selectedComments.value.replies[commentId]
+    if (deleteRequest.replies[commentId]) {
+      delete deleteRequest.replies[commentId]
     }
   })
   try {

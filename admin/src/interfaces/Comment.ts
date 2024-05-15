@@ -84,7 +84,7 @@ export const batchApproved = (req: BatchApprovedCommentRequest) => {
 
 export const batchDelete = (req: BatchApprovedCommentRequest) => {
   return instance({
-    url: `/comments/batch-approval`,
+    url: `/comments/batch-delete`,
     method: 'delete',
     data: req
   })

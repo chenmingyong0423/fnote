@@ -56,7 +56,7 @@
           :authorization="userStore.token"
           @update:imageUrl="(value) => (data.og_image = value)"
         />
-        <a-image v-else :width="200" :src="data.og_image" />
+        <a-image v-else :width="200" :src="serverHost + data.og_image" />
       </a-descriptions-item>
     </a-descriptions>
     <div style="margin-top: 10px">
@@ -90,7 +90,7 @@ const data = ref<SeoConfig>({
   author: '',
   robots: ''
 })
-
+const serverHost = import.meta.env.VITE_API_HOST
 const getSeo = async () => {
   try {
     const response = await GetSeo()
