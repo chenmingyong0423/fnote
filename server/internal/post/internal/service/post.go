@@ -168,7 +168,7 @@ func (s *PostService) marshalUpdatePostEvent(post *domain.Post, savedPost *domai
 		AddedTagId:        addedTagIds,
 		DeletedTagId:      removedTagIds,
 		NewFileId:         strings.Split(savedPost.CoverImg[8:], ".")[0],
-		OldFileId:         strings.Split(post.CoverImg[1:], ".")[0],
+		OldFileId:         strings.Split(post.CoverImg[8:], ".")[0],
 		Type:              "update",
 	}
 	return json.Marshal(postEvent)
@@ -196,8 +196,9 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 		DeletedTagId: slice.Map[domain.Tag4Post, string](post.Tags, func(_ int, t domain.Tag4Post) string {
 			return t.Id
 		}),
-		OldFileId: strings.Split(post.CoverImg[1:], ".")[0],
-		Type:      "delete",
+		OldFileId:    strings.Split(post.CoverImg[8:], ".")[0],
+		CommentCount: post.CommentCount,
+		Type:         "delete",
 	}
 	marshal, err := json.Marshal(postInfo)
 	if err != nil {

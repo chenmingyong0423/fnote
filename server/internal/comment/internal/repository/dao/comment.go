@@ -137,6 +137,7 @@ type ICommentDao interface {
 	DeleteByIds(ctx context.Context, ids []primitive.ObjectID) error
 	PullReplyByCIdAndRIds(ctx context.Context, commentId primitive.ObjectID, replyIds []string) error
 	DeleteManyByPostId(ctx context.Context, postId string) error
+	FindCommentsByPostId(ctx context.Context, postId string) ([]*Comment, error)
 }
 
 func NewCommentDao(db *mongo.Database) *CommentDao {
@@ -149,6 +150,14 @@ var _ ICommentDao = (*CommentDao)(nil)
 
 type CommentDao struct {
 	coll *mongox.Collection[Comment]
+}
+
+func (d *CommentDao) FindCommentsByPostId(ctx context.Context, postId string) ([]*Comment, error) {
+	result, err := d.coll.Finder().Filter(query.Eq("post_info.post_id", postId)).Find(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Fails to find the docs from comment, post_info.post_id=%s", postId)
+	}
+	return result, nil
 }
 
 func (d *CommentDao) DeleteManyByPostId(ctx context.Context, postId string) error {

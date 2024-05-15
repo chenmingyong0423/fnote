@@ -39,9 +39,9 @@ type CountStats struct {
 
 type ICountStatsDao interface {
 	Create(ctx context.Context, countStats *CountStats) (string, error)
-	DeleteByReferenceIdAndType(ctx context.Context, referenceId string, statsType string) error
-	DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string, count int) error
-	IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string, delta int) error
+	DeleteByReferenceIdAndType(ctx context.Context, statsType string) error
+	DecreaseByReferenceIdAndType(ctx context.Context, statsType string, count int) error
+	IncreaseByReferenceIdAndType(ctx context.Context, statsType string, delta int) error
 	GetByFilter(ctx context.Context, filter bson.D) ([]*CountStats, error)
 }
 
@@ -65,7 +65,7 @@ func (d *CountStatsDao) GetByFilter(ctx context.Context, filter bson.D) ([]*Coun
 	return countStats, nil
 }
 
-func (d *CountStatsDao) IncreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string, delta int) error {
+func (d *CountStatsDao) IncreaseByReferenceIdAndType(ctx context.Context, statsType string, delta int) error {
 	oneResult, err := d.coll.Updater().Filter(query.Eq("type", statsType)).Updates(update.BsonBuilder().Inc("count", delta).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "iucrease count stats error, type=%s", statsType)
@@ -76,7 +76,7 @@ func (d *CountStatsDao) IncreaseByReferenceIdAndType(ctx context.Context, refere
 	return nil
 }
 
-func (d *CountStatsDao) DecreaseByReferenceIdAndType(ctx context.Context, referenceId string, statsType string, count int) error {
+func (d *CountStatsDao) DecreaseByReferenceIdAndType(ctx context.Context, statsType string, count int) error {
 	oneResult, err := d.coll.Updater().Filter(query.Eq("type", statsType)).Updates(update.BsonBuilder().Inc("count", -count).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "decrease count stats error, type=%s", statsType)
@@ -87,8 +87,8 @@ func (d *CountStatsDao) DecreaseByReferenceIdAndType(ctx context.Context, refere
 	return nil
 }
 
-func (d *CountStatsDao) DeleteByReferenceIdAndType(ctx context.Context, referenceId string, statsType string) error {
-	deleteOne, err := d.coll.Deleter().Filter(query.BsonBuilder().Add("reference_id", referenceId).Add("type", statsType).Build()).DeleteOne(ctx)
+func (d *CountStatsDao) DeleteByReferenceIdAndType(ctx context.Context, statsType string) error {
+	deleteOne, err := d.coll.Deleter().Filter(query.Eq("type", statsType)).DeleteOne(ctx)
 	if err != nil {
 		return err
 	}

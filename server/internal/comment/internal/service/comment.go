@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/gin-gonic/gin"
@@ -441,7 +442,7 @@ func (s *CommentService) subscribePostEvent() {
 		switch e.Type {
 		case "delete":
 			err = s.DeleteAllCommentByPostId(ctx, e.PostId)
-			if err != nil {
+			if err != nil && !strings.Contains(err.Error(), "DeletedCount=0") {
 				l.ErrorContext(ctx, "Comment: post event: failed to delete all comment", "postId", e.PostId, "error", err)
 				continue
 			}

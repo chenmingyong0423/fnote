@@ -74,7 +74,7 @@ func (h *CommentHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.DELETE("/:id/replies/:rid", apiwrap.Wrap(h.AdminDeleteCommentReply))
 	adminGroup.PUT("/:id/replies/:rid/approval", apiwrap.Wrap(h.AdminApproveCommentReply))
 	adminGroup.PUT("/batch-approval", apiwrap.WrapWithBody(h.AdminBatchApproveComments))
-	adminGroup.DELETE("/batch-approval", apiwrap.WrapWithBody(h.AdminBatchDeleteComments))
+	adminGroup.DELETE("/batch-delete", apiwrap.WrapWithBody(h.AdminBatchDeleteComments))
 }
 
 func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiwrap.ResponseBody[IdVO], error) {
@@ -82,7 +82,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiw
 	if ip == "" {
 		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
-	if req.Website != "" && !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
+	if req.Website != "" && !strings.HasPrefix(req.Website, "https://") {
 		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
 	}
 	switchConfig, err := h.cfgService.GetCommentConfig(ctx)
@@ -93,8 +93,11 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiw
 		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
 	}
 	p, err := h.postServ.GetPunishedPostById(ctx, req.PostId)
-	if err != nil {
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, err
+	}
+	if p == nil {
+		return nil, apiwrap.NewErrorResponseBody(http.StatusNotFound, "Post not found.")
 	}
 	if !p.IsCommentAllowed {
 		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
@@ -145,7 +148,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*a
 	if ip == "" {
 		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "Ip is empty.")
 	}
-	if req.Website != "" && !strings.HasPrefix(req.Website, "http://") && !strings.HasPrefix(req.Website, "https://") {
+	if req.Website != "" && !strings.HasPrefix(req.Website, "https://") {
 		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "website format is invalid.")
 	}
 	switchConfig, err := h.cfgService.GetCommentConfig(ctx)
