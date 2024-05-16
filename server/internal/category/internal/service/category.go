@@ -71,12 +71,15 @@ func (s *CategoryService) ModifyCategoryNavigation(ctx context.Context, id strin
 }
 
 func (s *CategoryService) DeleteCategory(ctx context.Context, id string) error {
-	_, err := s.repo.GetCategoryById(ctx, id)
+	category, err := s.repo.GetCategoryById(ctx, id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return apiwrap.NewErrorResponseBody(http.StatusNotFound, "category not found")
 		}
 		return err
+	}
+	if category.PostCount > 0 {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "category has posts")
 	}
 	var categoryEvent = domain.CategoryEvent{CategoryId: id, Type: "delete"}
 	marshal, err := json.Marshal(&categoryEvent)

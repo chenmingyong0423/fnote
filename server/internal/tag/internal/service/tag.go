@@ -65,12 +65,15 @@ func (s *TagService) GetSelectTags(ctx context.Context) ([]domain.Tag, error) {
 }
 
 func (s *TagService) DeleteTag(ctx context.Context, id string) error {
-	_, err := s.repo.GetTagById(ctx, id)
+	tag, err := s.repo.GetTagById(ctx, id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return apiwrap.NewErrorResponseBody(http.StatusNotFound, "tag not found")
 		}
 		return err
+	}
+	if tag.PostCount > 0 {
+		return apiwrap.NewErrorResponseBody(http.StatusConflict, "tag has post")
 	}
 	tagEvent := domain.TagEvent{
 		TagId: id,
