@@ -112,7 +112,7 @@
                 <a-popconfirm
                   v-if="data.length"
                   title="确认删除？"
-                  @confirm="deleteCategory(record.id)"
+                  @confirm="deleteCategory(record.id, record.post_count)"
                 >
                   <a>删除</a>
                 </a-popconfirm>
@@ -311,8 +311,12 @@ const changeCategoryNav = async (record: ICategory) => {
 }
 
 // 删除
-const deleteCategory = async (id: string) => {
+const deleteCategory = async (id: string, postCount: number) => {
   try {
+    if (postCount > 0) {
+      message.warn('该分类下有文章，不能删除')
+      return
+    }
     const response: any = await DeleteCategory(id)
     if (response.data.code !== 0) {
       message.error(response.data.message)
