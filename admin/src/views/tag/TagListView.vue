@@ -61,7 +61,11 @@
             </template>
 
             <template v-else-if="column.dataIndex === 'operation'">
-              <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteTag(record.id)">
+              <a-popconfirm
+                v-if="data.length"
+                title="确认删除？"
+                @confirm="deleteTag(record.id, record.post_count)"
+              >
                 <a>删除</a>
               </a-popconfirm>
             </template>
@@ -228,8 +232,12 @@ const changeTagEnabled = async (record: Tag) => {
 }
 
 // 删除
-const deleteTag = async (id: string) => {
+const deleteTag = async (id: string, postCount: number) => {
   try {
+    if (postCount > 0) {
+      message.warn('该标签下有文章，不能删除')
+      return
+    }
     const response: any = await DeleteTag(id)
     if (response.data.code !== 0) {
       message.error(response.data.message)
