@@ -1,6 +1,18 @@
 <template>
-  <div>
-    <a-button type="primary" @click="visible = true">新增社交信息</a-button>
+  <a-card title="社交信息">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button
+            shape="circle"
+            :icon="h(ReloadOutlined)"
+            :loading="loading"
+            @click="getSocialInfo"
+          />
+        </a-tooltip>
+      </div>
+    </template>
+    <a-button @click="visible = true">新增社交信息</a-button>
     <a-modal
       v-model:open="visible"
       title="新增分类"
@@ -72,104 +84,110 @@
         </a-form-item>
       </a-form>
     </a-modal>
-  </div>
-  <div>
-    <a-table :columns="columns" :data-source="data">
-      <template #bodyCell="{ column, text, record }">
-        <template v-if="['social_name', 'social_value'].includes(column.dataIndex)">
-          <div>
-            <a-input
-              v-if="editableData[record.id]"
-              v-model:value="editableData[record.id][column.dataIndex as keyof SocialConfig]"
-              style="margin: -5px 0"
-            />
-            <template v-else>
-              {{ text }}
+    <div>
+      <a-spin :spinning="loading">
+        <a-table :columns="columns" :data-source="data">
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="['social_name', 'social_value'].includes(column.dataIndex)">
+              <div>
+                <a-input
+                  v-if="editableData[record.id]"
+                  v-model:value="editableData[record.id][column.dataIndex as keyof SocialConfig]"
+                  style="margin: -5px 0"
+                />
+                <template v-else>
+                  {{ text }}
+                </template>
+              </div>
             </template>
-          </div>
-        </template>
-        <template v-if="'css_class' === column.dataIndex">
-          <div>
-            <a-radio-group
-              v-if="editableData[record.id]"
-              v-model:value="editableData[record.id][column.dataIndex as keyof SocialConfig]"
-            >
-              <a-radio :value="`i-fa6-brands-x-twitter`">
-                <div class="i-fa6-brands-x-twitter w-5 h-5"></div>
-              </a-radio>
-              <a-radio :value="`i-fa6-brands-facebook`">
-                <div class="i-fa6-brands-facebook w-5 h-5"></div>
-              </a-radio>
-              <a-radio :value="`i-fa6-brands-instagram`">
-                <div class="i-fa6-brands-instagram w-5 h-5"></div>
-              </a-radio>
-              <a-radio :value="`i-fa6-brands-youtube`">
-                <div class="i-fa6-brands-youtube w-5 h-5"></div>
-              </a-radio>
-              <a-radio :value="`i-fa6-brands-bilibili`">
-                <div class="i-fa6-brands-bilibili w-5 h-5"></div>
-              </a-radio>
-              <a-radio :value="`i-fa6-brands-qq`">
-                <div class="i-fa6-brands-qq w-5 h-5"></div>
-              </a-radio>
-              <a-radio :value="`i-fa6-brands-github`">
-                <div class="i-fa6-brands-github w-5 h-5"></div>
-              </a-radio>
-              <a-radio :value="`i-fa6-brands:square-git`">
-                <div class="i-fa6-brands:square-git w-5 h-5"></div>
-              </a-radio>
-              <a-radio :value="`i-fa6-brands-weixin`">
-                <div class="i-fa6-brands-weixin w-5 h-5"></div>
-              </a-radio>
-              <a-radio :value="`i-fa6-brands-zhihu`">
-                <div class="i-fa6-brands-zhihu w-5 h-5"></div>
-              </a-radio>
-              <a-radio :value="`i-bi-link-45deg`">
-                <div class="i-bi-link-45deg w-5 h-5"></div>
-              </a-radio>
-            </a-radio-group>
-            <template v-else>
-              <div class="w-5 h-5" :class="text"></div>
+            <template v-if="'css_class' === column.dataIndex">
+              <div>
+                <a-radio-group
+                  v-if="editableData[record.id]"
+                  v-model:value="editableData[record.id][column.dataIndex as keyof SocialConfig]"
+                >
+                  <a-radio :value="`i-fa6-brands-x-twitter`">
+                    <div class="i-fa6-brands-x-twitter w-5 h-5"></div>
+                  </a-radio>
+                  <a-radio :value="`i-fa6-brands-facebook`">
+                    <div class="i-fa6-brands-facebook w-5 h-5"></div>
+                  </a-radio>
+                  <a-radio :value="`i-fa6-brands-instagram`">
+                    <div class="i-fa6-brands-instagram w-5 h-5"></div>
+                  </a-radio>
+                  <a-radio :value="`i-fa6-brands-youtube`">
+                    <div class="i-fa6-brands-youtube w-5 h-5"></div>
+                  </a-radio>
+                  <a-radio :value="`i-fa6-brands-bilibili`">
+                    <div class="i-fa6-brands-bilibili w-5 h-5"></div>
+                  </a-radio>
+                  <a-radio :value="`i-fa6-brands-qq`">
+                    <div class="i-fa6-brands-qq w-5 h-5"></div>
+                  </a-radio>
+                  <a-radio :value="`i-fa6-brands-github`">
+                    <div class="i-fa6-brands-github w-5 h-5"></div>
+                  </a-radio>
+                  <a-radio :value="`i-fa6-brands:square-git`">
+                    <div class="i-fa6-brands:square-git w-5 h-5"></div>
+                  </a-radio>
+                  <a-radio :value="`i-fa6-brands-weixin`">
+                    <div class="i-fa6-brands-weixin w-5 h-5"></div>
+                  </a-radio>
+                  <a-radio :value="`i-fa6-brands-zhihu`">
+                    <div class="i-fa6-brands-zhihu w-5 h-5"></div>
+                  </a-radio>
+                  <a-radio :value="`i-bi-link-45deg`">
+                    <div class="i-bi-link-45deg w-5 h-5"></div>
+                  </a-radio>
+                </a-radio-group>
+                <template v-else>
+                  <div class="w-5 h-5" :class="text"></div>
+                </template>
+              </div>
             </template>
-          </div>
-        </template>
-        <template v-if="column.key === 'is_link'">
-          <a-radio-group
-            v-if="editableData[record.id]"
-            v-model:value="editableData[record.id][column.dataIndex as keyof SocialConfig]"
-          >
-            <a-radio :value="false">否</a-radio>
-            <a-radio :value="true">是</a-radio>
-          </a-radio-group>
-          <template v-else>
-            <a-tag color="success">{{ record.is_link ? '是' : '否' }}</a-tag>
+            <template v-if="column.key === 'is_link'">
+              <a-radio-group
+                v-if="editableData[record.id]"
+                v-model:value="editableData[record.id][column.dataIndex as keyof SocialConfig]"
+              >
+                <a-radio :value="false">否</a-radio>
+                <a-radio :value="true">是</a-radio>
+              </a-radio-group>
+              <template v-else>
+                <a-tag color="success">{{ record.is_link ? '是' : '否' }}</a-tag>
+              </template>
+            </template>
+
+            <template v-else-if="column.dataIndex === 'operation'">
+              <div class="editable-row-operations">
+                <span v-if="editableData[record.id]">
+                  <a-typography-link @click="save(record.id)">保存</a-typography-link>
+                  <a-popconfirm title="确定取消？" @confirm="cancel(record.id)">
+                    <a>取消</a>
+                  </a-popconfirm>
+                </span>
+                <span v-else>
+                  <a @click="edit(record.id)">编辑</a>
+                </span>
+
+                <a-popconfirm
+                  v-if="data.length"
+                  title="确认删除？"
+                  @confirm="deleteInfo(record.id)"
+                >
+                  <a>删除</a>
+                </a-popconfirm>
+              </div>
+            </template>
           </template>
-        </template>
-
-        <template v-else-if="column.dataIndex === 'operation'">
-          <div class="editable-row-operations">
-            <span v-if="editableData[record.id]">
-              <a-typography-link @click="save(record.id)">保存</a-typography-link>
-              <a-popconfirm title="确定取消？" @confirm="cancel(record.id)">
-                <a>取消</a>
-              </a-popconfirm>
-            </span>
-            <span v-else>
-              <a @click="edit(record.id)">编辑</a>
-            </span>
-
-            <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteInfo(record.id)">
-              <a>删除</a>
-            </a-popconfirm>
-          </div>
-        </template>
-      </template>
-    </a-table>
-  </div>
+        </a-table>
+      </a-spin>
+    </div>
+  </a-card>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, type UnwrapRef } from 'vue'
+import { h, reactive, ref, type UnwrapRef } from 'vue'
 import {
   AddSocial,
   DeleteSocial,
@@ -180,6 +198,7 @@ import {
 } from '@/interfaces/Config'
 import { type FormInstance, message } from 'ant-design-vue'
 import { cloneDeep } from 'lodash-es'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const columns = [
   {
@@ -209,13 +228,16 @@ const columns = [
 ]
 
 const data = ref<SocialConfig[]>([])
-
+const loading = ref(false)
 const getSocialInfo = async () => {
   try {
+    loading.value = true
     const response: any = await GetSocial()
     data.value = response.data.data?.list || []
   } catch (error) {
     console.log(error)
+  } finally {
+    loading.value = false
   }
 }
 getSocialInfo()

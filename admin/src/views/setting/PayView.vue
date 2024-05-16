@@ -1,5 +1,17 @@
 <template>
-  <div>
+  <a-card title="支付二维码配置">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button
+            shape="circle"
+            :icon="h(ReloadOutlined)"
+            :loading="loading"
+            @click="getPayConfig"
+          />
+        </a-tooltip>
+      </div>
+    </template>
     <a-button type="primary" @click="visible = true">新增支付二维码</a-button>
     <a-modal
       v-model:open="visible"
@@ -25,23 +37,25 @@
         </a-form-item>
       </a-form>
     </a-modal>
-  </div>
-  <a-table :columns="columns" :data-source="list">
-    <template #bodyCell="{ column, record }">
-      <template v-if="column.key === 'image'">
-        <a-image :width="200" :src="serverHost + record.image" />
-      </template>
-      <template v-else-if="column.dataIndex === 'operation'">
-        <a-popconfirm v-if="list.length" title="确认删除？" @confirm="deletePay(record)">
-          <a>删除</a>
-        </a-popconfirm>
-      </template>
-    </template>
-  </a-table>
+    <a-spin :spinning="loading">
+      <a-table :columns="columns" :data-source="list">
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'image'">
+            <a-image :width="200" :src="serverHost + record.image" />
+          </template>
+          <template v-else-if="column.dataIndex === 'operation'">
+            <a-popconfirm v-if="list.length" title="确认删除？" @confirm="deletePay(record)">
+              <a>删除</a>
+            </a-popconfirm>
+          </template>
+        </template>
+      </a-table>
+    </a-spin>
+  </a-card>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { h, reactive, ref } from 'vue'
 import {
   AddPay,
   DeletePay,
@@ -52,6 +66,7 @@ import {
 import { type FormInstance, message } from 'ant-design-vue'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
 import { useUserStore } from '@/stores/user'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const userStore = useUserStore()
 const serverHost = import.meta.env.VITE_API_HOST
@@ -75,9 +90,18 @@ const columns = [
 ]
 const list = ref<PayConfig[]>([])
 
+const loading = ref(false)
+
 const getPayConfig = async () => {
-  const res: any = await GetPay()
-  list.value = res.data.data.list || []
+  try {
+    loading.value = true
+    const res: any = await GetPay()
+    list.value = res.data.data.list || []
+  } catch (e) {
+    console.log(e)
+  } finally {
+    loading.value = false
+  }
 }
 getPayConfig()
 

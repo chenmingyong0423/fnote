@@ -65,12 +65,12 @@ const router = createRouter({
         {
           path: '/home/category',
           name: 'category',
-          component: () => import('../views/CategoryListView.vue')
+          component: () => import('../views/category/CategoryListView.vue')
         },
         {
           path: '/home/tag',
           name: 'tag',
-          component: () => import('../views/TagListView.vue')
+          component: () => import('../views/tag/TagListView.vue')
         },
         {
           path: '/home/friend',

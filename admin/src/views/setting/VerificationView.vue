@@ -1,51 +1,65 @@
 <template>
-  <div class="color-gray">示例：key = baidu_site_verification, value = xxxxxx</div>
-  <a-form
-    class="my-4"
-    :model="formState"
-    name="horizontal_login"
-    layout="inline"
-    autocomplete="off"
-    @finish="onFinish"
-    @finishFailed="onFinishFailed"
-  >
-    <a-form-item label="key" name="key" :rules="[{ required: true, message: '请输入 key!' }]">
-      <a-input v-model:value="formState.key"></a-input>
-    </a-form-item>
-
-    <a-form-item label="value" name="value" :rules="[{ required: true, message: '请输入 value!' }]">
-      <a-input v-model:value="formState.value"></a-input>
-    </a-form-item>
-
-    <a-form-item
-      label="描述"
-      name="description"
-      :rules="[{ required: true, message: '请输入描述!' }]"
-    >
-      <a-input v-model:value="formState.description"></a-input>
-    </a-form-item>
-
-    <a-form-item>
-      <a-button type="primary" html-type="submit">添加</a-button>
-    </a-form-item>
-  </a-form>
-
-  <a-table bordered :data-source="dataSource" :columns="columns">
-    <template #bodyCell="{ column, record }">
-      <template v-if="column.dataIndex === 'operation'">
-        <a-popconfirm
-          v-if="dataSource.length"
-          title="Sure to delete?"
-          @confirm="onDelete(record.key)"
-        >
-          <a>Delete</a>
-        </a-popconfirm>
-      </template>
+  <a-card title="站点验证配置">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="get" />
+        </a-tooltip>
+      </div>
     </template>
-  </a-table>
+    <div class="color-gray">示例：key = baidu_site_verification, value = xxxxxx</div>
+    <a-form
+      class="my-4"
+      :model="formState"
+      name="horizontal_login"
+      layout="inline"
+      autocomplete="off"
+      @finish="onFinish"
+      @finishFailed="onFinishFailed"
+    >
+      <a-form-item label="key" name="key" :rules="[{ required: true, message: '请输入 key!' }]">
+        <a-input v-model:value="formState.key"></a-input>
+      </a-form-item>
+
+      <a-form-item
+        label="value"
+        name="value"
+        :rules="[{ required: true, message: '请输入 value!' }]"
+      >
+        <a-input v-model:value="formState.value"></a-input>
+      </a-form-item>
+
+      <a-form-item
+        label="描述"
+        name="description"
+        :rules="[{ required: true, message: '请输入描述!' }]"
+      >
+        <a-input v-model:value="formState.description"></a-input>
+      </a-form-item>
+
+      <a-form-item>
+        <a-button html-type="submit">添加</a-button>
+      </a-form-item>
+    </a-form>
+    <a-spin :spinning="loading">
+      <a-table bordered :data-source="dataSource" :columns="columns">
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'operation'">
+            <a-popconfirm
+              v-if="dataSource.length"
+              title="Sure to delete?"
+              @confirm="onDelete(record.key)"
+            >
+              <a>删除</a>
+            </a-popconfirm>
+          </template>
+        </template>
+      </a-table>
+    </a-spin>
+  </a-card>
 </template>
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { h, reactive, ref } from 'vue'
 import type { Ref } from 'vue'
 import {
   AddThirdPartySiteVerification,
@@ -55,6 +69,7 @@ import {
   type ThirdPartySiteVerificationRequest
 } from '@/interfaces/Config'
 import { message } from 'ant-design-vue'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const columns = [
   {
@@ -77,10 +92,17 @@ const columns = [
 ]
 
 const dataSource: Ref<ThirdPartySiteVerification[]> = ref([])
-
+const loading = ref(false)
 const get = async () => {
-  const res: any = await GetThirdPartySiteVerification()
-  dataSource.value = res.data.data.list || []
+  try {
+    loading.value = true
+    const res: any = await GetThirdPartySiteVerification()
+    dataSource.value = res.data.data.list || []
+  } catch (e) {
+    console.log(e)
+  } finally {
+    loading.value = false
+  }
 }
 get()
 
