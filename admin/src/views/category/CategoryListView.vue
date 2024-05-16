@@ -1,7 +1,19 @@
 <template>
-  <div>
+  <a-card title="分类列表">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button
+            shape="circle"
+            :icon="h(ReloadOutlined)"
+            :loading="loading"
+            @click="getCategories"
+          />
+        </a-tooltip>
+      </div>
+    </template>
     <div>
-      <a-button type="primary" @click="visible = true">新增分类</a-button>
+      <a-button @click="visible = true" class="mb-5">新增分类</a-button>
       <a-modal
         v-model:open="visible"
         title="新增分类"
@@ -51,68 +63,70 @@
       </a-modal>
     </div>
     <div>
-      <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
-        <template #bodyCell="{ column, text, record }">
-          <template v-if="column.dataIndex === 'description'">
-            <div>
-              <a-textarea
-                v-if="editableData[record.id]"
-                v-model:value="
-                  editableData[record.id][column.dataIndex as keyof UpdateCategoryRequest]
-                "
-                style="margin: -5px 0"
-              />
-              <template v-else>
-                {{ text }}
-              </template>
-            </div>
-          </template>
+      <a-spin :spinning="loading">
+        <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="column.dataIndex === 'description'">
+              <div>
+                <a-textarea
+                  v-if="editableData[record.id]"
+                  v-model:value="
+                    editableData[record.id][column.dataIndex as keyof UpdateCategoryRequest]
+                  "
+                  style="margin: -5px 0"
+                />
+                <template v-else>
+                  {{ text }}
+                </template>
+              </div>
+            </template>
 
-          <template v-if="column.dataIndex === 'created_at'">
-            {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
-          </template>
+            <template v-if="column.dataIndex === 'created_at'">
+              {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
+            </template>
 
-          <template v-if="column.dataIndex === 'updated_at'">
-            {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
-          </template>
+            <template v-if="column.dataIndex === 'updated_at'">
+              {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
+            </template>
 
-          <template v-if="column.key === 'enabled'">
-            <a-switch v-model:checked="record.enabled" @change="changeCategoryEnabled(record)" />
-          </template>
+            <template v-if="column.key === 'enabled'">
+              <a-switch v-model:checked="record.enabled" @change="changeCategoryEnabled(record)" />
+            </template>
 
-          <template v-if="column.key === 'show_in_nav'">
-            <a-switch v-model:checked="record.show_in_nav" @change="changeCategoryNav(record)" />
-          </template>
+            <template v-if="column.key === 'show_in_nav'">
+              <a-switch v-model:checked="record.show_in_nav" @change="changeCategoryNav(record)" />
+            </template>
 
-          <template v-else-if="column.dataIndex === 'operation'">
-            <div class="editable-row-operations">
-              <span v-if="editableData[record.id]">
-                <a-typography-link @click="save(record.id)">保存</a-typography-link>
-                <a-popconfirm title="确定取消？" @confirm="cancel(record.id)">
-                  <a>取消</a>
+            <template v-else-if="column.dataIndex === 'operation'">
+              <div class="editable-row-operations">
+                <span v-if="editableData[record.id]">
+                  <a-typography-link @click="save(record.id)">保存</a-typography-link>
+                  <a-popconfirm title="确定取消？" @confirm="cancel(record.id)">
+                    <a>取消</a>
+                  </a-popconfirm>
+                </span>
+                <span v-else>
+                  <a @click="edit(record.id)">编辑</a>
+                </span>
+
+                <a-popconfirm
+                  v-if="data.length"
+                  title="确认删除？"
+                  @confirm="deleteCategory(record.id)"
+                >
+                  <a>删除</a>
                 </a-popconfirm>
-              </span>
-              <span v-else>
-                <a @click="edit(record.id)">编辑</a>
-              </span>
-
-              <a-popconfirm
-                v-if="data.length"
-                title="确认删除？"
-                @confirm="deleteCategory(record.id)"
-              >
-                <a>删除</a>
-              </a-popconfirm>
-            </div>
+              </div>
+            </template>
           </template>
-        </template>
-      </a-table>
-    </div>
-  </div>
+        </a-table>
+      </a-spin>
+    </div> </a-card
+  >>
 </template>
 <script lang="ts" setup>
 import originalAxios from 'axios'
-import { ref, reactive, type UnwrapRef, computed } from 'vue'
+import { ref, reactive, type UnwrapRef, computed, h } from 'vue'
 import type { FormInstance } from 'ant-design-vue'
 import type { PageRequest } from '@/interfaces/Common'
 import {
@@ -129,6 +143,7 @@ import {
 import { message } from 'ant-design-vue'
 import { cloneDeep } from 'lodash-es'
 import dayjs from 'dayjs'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 document.title = '分类列表 - 后台管理'
 
@@ -196,13 +211,18 @@ const pagination = computed(() => ({
   pageSize: pageReq.value.pageSize
 }))
 
+const loading = ref(false)
+
 const getCategories = async () => {
   try {
+    loading.value = true
     const response: any = await GetCategories(pageReq.value)
     data.value = response.data.data?.list || []
     total.value = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
+  } finally {
+    loading.value = false
   }
 }
 

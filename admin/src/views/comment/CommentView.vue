@@ -1,5 +1,12 @@
 <template>
   <a-card title="评论列表">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="refresh" />
+        </a-tooltip>
+      </div>
+    </template>
     <div class="flex mb-3 gap-x-2">
       <div class="flex gap-x-2" v-if="data.length > 0">
         <a-button @click="expandOrHideRows">{{
@@ -20,75 +27,74 @@
           @change="handleChange"
         ></a-select>
       </div>
-      <div>
-        <a-tooltip title="刷新数据">
-          <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="refresh" />
-        </a-tooltip>
-      </div>
     </div>
-    <a-table
-      :columns="columns"
-      :data-source="data"
-      :pagination="pagination"
-      @change="change"
-      :row-selection="selection"
-      childrenColumnName="replies"
-      v-model:expandedRowKeys="expandedRowKeys"
-      @expandedRowsChange="expandedRowsChange"
-    >
-      <template #bodyCell="{ column, text, record }">
-        <template v-if="column.dataIndex === 'user_info'">
-          <div class="flex gap-x-3">
-            <div>
-              <a-avatar :src="record.user_info.picture" />
-            </div>
-            <div class="flex-col">
+    <a-spin :spinning="loading">
+      <a-table
+        :columns="columns"
+        :data-source="data"
+        :pagination="pagination"
+        @change="change"
+        :row-selection="selection"
+        childrenColumnName="replies"
+        v-model:expandedRowKeys="expandedRowKeys"
+        @expandedRowsChange="expandedRowsChange"
+      >
+        <template #bodyCell="{ column, text, record }">
+          <template v-if="column.dataIndex === 'user_info'">
+            <div class="flex gap-x-3">
               <div>
-                <a
-                  :href="record.user_info.website"
-                  target="_blank"
-                  v-if="record.user_info.website"
-                  >{{ record.user_info.name }}</a
-                >
-                <span class="font-bold" v-else>{{ record.user_info.name }}</span>
+                <a-avatar :src="record.user_info.picture" />
               </div>
-              <div class="text-gray-5">{{ record.user_info.email }}</div>
+              <div class="flex-col">
+                <div>
+                  <a
+                    :href="record.user_info.website"
+                    target="_blank"
+                    v-if="record.user_info.website"
+                    >{{ record.user_info.name }}</a
+                  >
+                  <span class="font-bold" v-else>{{ record.user_info.name }}</span>
+                </div>
+                <div class="text-gray-5">{{ record.user_info.email }}</div>
+              </div>
             </div>
-          </div>
+          </template>
+          <template v-if="column.dataIndex === 'post.post_url'">
+            <a :href="record.post_info.post_url" target="_blank">{{
+              record.post_info.post_title
+            }}</a>
+          </template>
+          <template v-if="column.dataIndex === 'content'">
+            {{ text }}
+          </template>
+          <template v-if="column.dataIndex === 'approval_status'">
+            <a-tag :color="record.approval_status ? 'success' : 'processing'"
+              >{{ text ? '审核通过' : '未审核' }}
+            </a-tag>
+          </template>
+          <template v-if="column.dataIndex === 'type'">
+            <a-tag color="success">{{ record.type === 'comment' ? '评论' : '回复' }}</a-tag>
+          </template>
+          <template v-if="['created_at', 'updated_at'].includes(column.dataIndex)">
+            {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
+          </template>
+          <template v-else-if="column.dataIndex === 'operation'">
+            <div class="editable-row-operations">
+              <a-popconfirm
+                v-if="data.length && !record.approval_status"
+                title="确认通过？"
+                @confirm="approveComment(record)"
+              >
+                <a>通过</a>
+              </a-popconfirm>
+              <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteById(record)">
+                <a>删除</a>
+              </a-popconfirm>
+            </div>
+          </template>
         </template>
-        <template v-if="column.dataIndex === 'post.post_url'">
-          <a :href="record.post_info.post_url" target="_blank">{{ record.post_info.post_title }}</a>
-        </template>
-        <template v-if="column.dataIndex === 'content'">
-          {{ text }}
-        </template>
-        <template v-if="column.dataIndex === 'approval_status'">
-          <a-tag :color="record.approval_status ? 'success' : 'processing'"
-            >{{ text ? '审核通过' : '未审核' }}
-          </a-tag>
-        </template>
-        <template v-if="column.dataIndex === 'type'">
-          <a-tag color="success">{{ record.type === 'comment' ? '评论' : '回复' }}</a-tag>
-        </template>
-        <template v-if="['created_at', 'updated_at'].includes(column.dataIndex)">
-          {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
-        </template>
-        <template v-else-if="column.dataIndex === 'operation'">
-          <div class="editable-row-operations">
-            <a-popconfirm
-              v-if="data.length && !record.approval_status"
-              title="确认通过？"
-              @confirm="approveComment(record)"
-            >
-              <a>通过</a>
-            </a-popconfirm>
-            <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteById(record)">
-              <a>删除</a>
-            </a-popconfirm>
-          </div>
-        </template>
-      </template>
-    </a-table>
+      </a-table>
+    </a-spin>
   </a-card>
 </template>
 <script setup lang="ts">

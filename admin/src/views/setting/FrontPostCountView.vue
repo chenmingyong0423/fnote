@@ -1,20 +1,34 @@
 <template>
   <div>
-    <a-descriptions title="首页展示文章数量配置" :column="1" bordered>
-      <a-descriptions-item label="数量">
-        <div>
-          <a-input
-            v-if="editable"
-            v-model:value="data.count"
-            style="margin: -5px 0"
-            @change="changed"
-          />
-          <template v-else>
-            {{ data.count }}
-          </template>
-        </div>
-      </a-descriptions-item>
-    </a-descriptions>
+    <a-spin :spinning="loading">
+      <a-descriptions title="首页展示文章数量配置" :column="1" bordered>
+        <template #extra>
+          <div class="flex gap-x-3">
+            <a-tooltip title="刷新数据">
+              <a-button
+                shape="circle"
+                :icon="h(ReloadOutlined)"
+                :loading="loading"
+                @click="getData"
+              />
+            </a-tooltip>
+          </div>
+        </template>
+        <a-descriptions-item label="数量">
+          <div>
+            <a-input
+              v-if="editable"
+              v-model:value="data.count"
+              style="margin: -5px 0"
+              @change="changed"
+            />
+            <template v-else>
+              {{ data.count }}
+            </template>
+          </div>
+        </a-descriptions-item>
+      </a-descriptions>
+    </a-spin>
     <div style="margin-top: 10px">
       <a-button v-if="!editable" type="primary" @click="editable = true">编辑</a-button>
       <div v-else>
@@ -30,8 +44,9 @@ import {
   GetFrontPostCount,
   UpdateFrontPostCount
 } from '@/interfaces/Config'
-import { ref } from 'vue'
+import { h, ref } from 'vue'
 import { message } from 'ant-design-vue'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const editable = ref<boolean>(false)
 
@@ -54,8 +69,11 @@ const cancel = () => {
   getData()
 }
 
+const loading = ref(false)
+
 const save = async () => {
   try {
+    loading.value = true
     const response: any = await UpdateFrontPostCount({
       count: data.value.count
     })
@@ -68,6 +86,8 @@ const save = async () => {
     }
   } catch (error) {
     console.log(error)
+  } finally {
+    loading.value = false
   }
 }
 

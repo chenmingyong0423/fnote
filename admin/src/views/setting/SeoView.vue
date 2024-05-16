@@ -1,64 +1,78 @@
 <template>
   <div>
-    <a-descriptions title="seo meta" :column="1" bordered>
-      <a-descriptions-item label="title - 标题">
-        <div>
-          <a-input v-if="editable" v-model:value="data.title" style="margin: -5px 0" />
-          <template v-else>
-            {{ data.title }}
-          </template>
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="og_title - 社交标题">
-        <div>
-          <a-input v-if="editable" v-model:value="data.og_title" style="margin: -5px 0" />
-          <template v-else>
-            {{ data.og_title }}
-          </template>
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="description - 描述">
-        <div>
-          <a-input v-if="editable" v-model:value="data.description" style="margin: -5px 0" />
-          <template v-else>
-            {{ data.description }}
-          </template>
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="keywords - 关键字">
-        <div>
-          <a-input v-if="editable" v-model:value="data.keywords" style="margin: -5px 0" />
-          <template v-else>
-            {{ data.keywords }}
-          </template>
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="author - 作者">
-        <div>
-          <a-input v-if="editable" v-model:value="data.author" style="margin: -5px 0" />
-          <template v-else>
-            {{ data.author }}
-          </template>
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="robots - 搜索引擎指令">
-        <div>
-          <a-input v-if="editable" v-model:value="data.robots" style="margin: -5px 0" />
-          <template v-else>
-            {{ data.robots }}
-          </template>
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="分享封面">
-        <StaticUpload
-          v-if="editable"
-          :image-url="data.og_image"
-          :authorization="userStore.token"
-          @update:imageUrl="(value) => (data.og_image = value)"
-        />
-        <a-image v-else :width="200" :src="serverHost + data.og_image" />
-      </a-descriptions-item>
-    </a-descriptions>
+    <a-spin :spinning="loading">
+      <a-descriptions title="seo meta" :column="1" bordered>
+        <template #extra>
+          <div class="flex gap-x-3">
+            <a-tooltip title="刷新数据">
+              <a-button
+                shape="circle"
+                :icon="h(ReloadOutlined)"
+                :loading="loading"
+                @click="getSeo"
+              />
+            </a-tooltip>
+          </div>
+        </template>
+        <a-descriptions-item label="title - 标题">
+          <div>
+            <a-input v-if="editable" v-model:value="data.title" style="margin: -5px 0" />
+            <template v-else>
+              {{ data.title }}
+            </template>
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="og_title - 社交标题">
+          <div>
+            <a-input v-if="editable" v-model:value="data.og_title" style="margin: -5px 0" />
+            <template v-else>
+              {{ data.og_title }}
+            </template>
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="description - 描述">
+          <div>
+            <a-input v-if="editable" v-model:value="data.description" style="margin: -5px 0" />
+            <template v-else>
+              {{ data.description }}
+            </template>
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="keywords - 关键字">
+          <div>
+            <a-input v-if="editable" v-model:value="data.keywords" style="margin: -5px 0" />
+            <template v-else>
+              {{ data.keywords }}
+            </template>
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="author - 作者">
+          <div>
+            <a-input v-if="editable" v-model:value="data.author" style="margin: -5px 0" />
+            <template v-else>
+              {{ data.author }}
+            </template>
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="robots - 搜索引擎指令">
+          <div>
+            <a-input v-if="editable" v-model:value="data.robots" style="margin: -5px 0" />
+            <template v-else>
+              {{ data.robots }}
+            </template>
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="分享封面">
+          <StaticUpload
+            v-if="editable"
+            :image-url="data.og_image"
+            :authorization="userStore.token"
+            @update:imageUrl="(value) => (data.og_image = value)"
+          />
+          <a-image v-else :width="200" :src="serverHost + data.og_image" />
+        </a-descriptions-item>
+      </a-descriptions>
+    </a-spin>
     <div style="margin-top: 10px">
       <a-button v-if="!editable" type="primary" @click="editable = true">编辑</a-button>
       <div v-else>
@@ -67,15 +81,14 @@
       </div>
     </div>
   </div>
-  <div></div>
 </template>
 <script lang="ts" setup>
 import { GetSeo, type SeoConfig, UpdateSeo } from '@/interfaces/Config'
-import { ref } from 'vue'
+import { h, ref } from 'vue'
 import { message } from 'ant-design-vue'
-import type { UploadChangeParam, UploadProps } from 'ant-design-vue'
 import { useUserStore } from '@/stores/user'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const userStore = useUserStore()
 
@@ -91,12 +104,16 @@ const data = ref<SeoConfig>({
   robots: ''
 })
 const serverHost = import.meta.env.VITE_API_HOST
+const loading = ref(false)
 const getSeo = async () => {
   try {
+    loading.value = true
     const response = await GetSeo()
     data.value = response.data.data || {}
   } catch (error) {
     console.log(error)
+  } finally {
+    loading.value = false
   }
 }
 getSeo()

@@ -1,35 +1,41 @@
 <template>
   <div>
-    <a-descriptions title="友链配置" :column="1" bordered>
-      <a-descriptions-item label="是否开启友链申请">
-        <div>
-          <a-switch v-model:checked="enableFriendCommit" @change="save" />
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="友链页面介绍">
-        <div>
-          <div class="mb-5">
-            <a-button
-              type="primary"
-              v-if="editorMode === 'preview'"
-              @click="editorMode = 'editable'"
-              >编辑</a-button
-            >
-            <div v-else class="flex gap-x-2">
-              <a-button type="primary" @click="saveIntroduction">保存</a-button>
-              <a-button @click="refreshData()">取消</a-button>
-            </div>
+    <a-spin :spinning="loading">
+      <a-descriptions title="友链配置" :column="1" bordered>
+        <template #extra>
+          <div class="flex gap-x-3">
+            <a-tooltip title="刷新数据">
+              <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="get" />
+            </a-tooltip>
           </div>
-          <v-md-editor
-            v-model="introduction"
-            height="400px"
-            :disabled-menus="[]"
-            @upload-image="handleUploadImage"
-            :mode="editorMode"
-          />
-        </div>
-      </a-descriptions-item>
-    </a-descriptions>
+        </template>
+        <a-descriptions-item label="是否开启友链申请">
+          <div>
+            <a-switch v-model:checked="enableFriendCommit" @change="save" />
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="友链页面介绍">
+          <div>
+            <div class="mb-5">
+              <a-button v-if="editorMode === 'preview'" @click="editorMode = 'editable'"
+                >编辑</a-button
+              >
+              <div v-else class="flex gap-x-2">
+                <a-button @click="refreshData()">取消</a-button>
+                <a-button type="primary" @click="saveIntroduction">保存</a-button>
+              </div>
+            </div>
+            <v-md-editor
+              v-model="introduction"
+              height="400px"
+              :disabled-menus="[]"
+              @upload-image="handleUploadImage"
+              :mode="editorMode"
+            />
+          </div>
+        </a-descriptions-item>
+      </a-descriptions>
+    </a-spin>
   </div>
 </template>
 
@@ -41,15 +47,19 @@ import {
   UpdateFriendSwitch
 } from '@/interfaces/Config'
 import { message } from 'ant-design-vue'
-import { ref } from 'vue'
+import { h, ref } from 'vue'
 import { FileUpload } from '@/interfaces/File'
 import type { IBaseResponse, IResponse } from '@/interfaces/Common'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const enableFriendCommit = ref(false)
 const introduction = ref('')
 
-const getCommentConfig = async () => {
+const loading = ref(false)
+
+const get = async () => {
   try {
+    loading.value = true
     const response: any = await GetFriend()
     const result: IResponse<FriendConfigVO> = response.data
     if (result.code === 0) {
@@ -60,9 +70,11 @@ const getCommentConfig = async () => {
     }
   } catch (error) {
     console.log(error)
+  } finally {
+    loading.value = false
   }
 }
-getCommentConfig()
+get()
 
 const save = async () => {
   try {
@@ -78,7 +90,7 @@ const save = async () => {
   } catch (error) {
     console.log(error)
   }
-  await getCommentConfig()
+  await get()
 }
 
 // md 图片上传
@@ -108,7 +120,7 @@ const editorMode = ref('preview')
 
 const refreshData = async () => {
   editorMode.value = 'preview'
-  await getCommentConfig()
+  await get()
 }
 
 const saveIntroduction = async () => {
@@ -126,6 +138,6 @@ const saveIntroduction = async () => {
   } catch (error) {
     console.log(error)
   }
-  await getCommentConfig()
+  await get()
 }
 </script>

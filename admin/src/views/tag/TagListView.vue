@@ -1,7 +1,14 @@
 <template>
-  <div>
+  <a-card title="标签列表">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="getTags" />
+        </a-tooltip>
+      </div>
+    </template>
     <div>
-      <a-button type="primary" @click="visible = true">新增标签</a-button>
+      <a-button @click="visible = true" class="mb-5">新增标签</a-button>
       <a-modal
         v-model:open="visible"
         title="新增标签"
@@ -38,33 +45,35 @@
       </a-modal>
     </div>
     <div>
-      <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
-        <template #bodyCell="{ column, text, record }">
-          <template v-if="column.dataIndex === 'created_at'">
-            {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
-          </template>
+      <a-spin :spinning="loading">
+        <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="column.dataIndex === 'created_at'">
+              {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
+            </template>
 
-          <template v-if="column.dataIndex === 'updated_at'">
-            {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
-          </template>
+            <template v-if="column.dataIndex === 'updated_at'">
+              {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
+            </template>
 
-          <template v-if="column.key === 'enabled'">
-            <a-switch v-model:checked="record.enabled" @change="changeTagEnabled(record)" />
-          </template>
+            <template v-if="column.key === 'enabled'">
+              <a-switch v-model:checked="record.enabled" @change="changeTagEnabled(record)" />
+            </template>
 
-          <template v-else-if="column.dataIndex === 'operation'">
-            <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteTag(record.id)">
-              <a>删除</a>
-            </a-popconfirm>
+            <template v-else-if="column.dataIndex === 'operation'">
+              <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteTag(record.id)">
+                <a>删除</a>
+              </a-popconfirm>
+            </template>
           </template>
-        </template>
-      </a-table>
-    </div>
-  </div>
+        </a-table>
+      </a-spin>
+    </div> </a-card
+  >>
 </template>
 <script lang="ts" setup>
 import originalAxios from 'axios'
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, h } from 'vue'
 import type { FormInstance } from 'ant-design-vue'
 import type { PageRequest } from '@/interfaces/Common'
 import { message } from 'ant-design-vue'
@@ -77,6 +86,7 @@ import {
   type Tag,
   type TagRequest
 } from '@/interfaces/Tag'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 document.title = '标签列表 - 后台管理'
 
@@ -134,13 +144,18 @@ const pagination = computed(() => ({
   pageSize: pageReq.value.pageSize
 }))
 
+const loading = ref(false)
+
 const getTags = async () => {
   try {
+    loading.value = true
     const response: any = await GetTag(pageReq.value)
     data.value = response.data.data?.list || []
     total.value = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
+  } finally {
+    loading.value = false
   }
 }
 

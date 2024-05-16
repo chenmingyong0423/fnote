@@ -1,6 +1,18 @@
 <template>
-  <div>
+  <a-spin :spinning="loading">
     <a-descriptions title="百度推送配置" :column="1" bordered>
+      <template #extra>
+        <div class="flex gap-x-3">
+          <a-tooltip title="刷新数据">
+            <a-button
+              shape="circle"
+              :icon="h(ReloadOutlined)"
+              :loading="loading"
+              @click="getConfig"
+            />
+          </a-tooltip>
+        </div>
+      </template>
       <a-descriptions-item label="站点">
         <div>
           <a-input v-if="baiduEditable" v-model:value="baiduPushCfg.site" style="margin: -5px 0" />
@@ -25,26 +37,36 @@
         <a-button type="primary" @click="save4Baidu">保存</a-button>
       </div>
     </div>
-  </div>
+  </a-spin>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { h, ref } from 'vue'
 import {
   type BaiduPushConfig,
   GetBaiduPushConfig,
   UpdateBaiduPushConfig
 } from '@/interfaces/Config'
 import { message } from 'ant-design-vue'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const baiduPushCfg = ref<BaiduPushConfig>({
   site: '',
   token: ''
 })
 const baiduEditable = ref(false)
+
+const loading = ref(false)
 const getConfig = async () => {
-  const res: any = await GetBaiduPushConfig()
-  baiduPushCfg.value = res.data.data || {}
+  try {
+    loading.value = true
+    const res: any = await GetBaiduPushConfig()
+    baiduPushCfg.value = res.data.data || {}
+  } catch (e) {
+    console.log(e)
+  } finally {
+    loading.value = false
+  }
 }
 getConfig()
 

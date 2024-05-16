@@ -1,85 +1,99 @@
 <template>
-  <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
-    <template #bodyCell="{ column, text, record }">
-      <template v-if="column.dataIndex === 'logo'">
-        <a-input
-          v-if="editableData[record.id]"
-          v-model:value="editableData[record.id][column.dataIndex as keyof FriendReq]"
-        >
-        </a-input>
-        <template v-else>
-          <a-image :width="50" :src="record.logo" />
-        </template>
-      </template>
-      <template v-if="['name', 'description'].includes(column.dataIndex)">
-        <div>
-          <a-input
-            v-if="editableData[record.id]"
-            v-model:value="editableData[record.id][column.dataIndex as keyof FriendReq]"
-            style="margin: -5px 0"
-          />
-          <template v-else>
-            {{ text }}
-          </template>
-        </div>
-      </template>
-      <template v-if="column.dataIndex === 'status'">
-        <a-radio-group
-          v-if="editableData[record.id] && record.status != 3 && record.status != 0"
-          v-model:value="editableData[record.id][column.dataIndex as keyof FriendReq]"
-        >
-          <a-radio :value="2">隐藏</a-radio>
-          <a-radio :value="1">展示</a-radio>
-        </a-radio-group>
-        <template v-else>
-          <a-tag
-            :color="
-              record.status === 0 ? 'processing' : record.status === 1 ? 'success' : 'warning'
-            "
-            >{{ statusConvert(record.status) }}
-          </a-tag>
-        </template>
-      </template>
-      <template v-if="column.dataIndex === 'created_at'">
-        {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
-      </template>
-      <template v-else-if="column.dataIndex === 'operation'">
-        <div class="editable-row-operations">
-          <a-popconfirm
-            v-if="data.length && record.status === 0"
-            title="确认接受?"
-            @confirm="approved(record.id)"
-          >
-            <a>接收</a>
-          </a-popconfirm>
-          <a-modal v-model:open="rejectionDialog" title="请输入原因" @ok="rejected">
-            <a-input v-model:value="reason" placeholder="请输入审核不通过的原因。" />
-          </a-modal>
-          <span v-if="data.length && record.status === 0" @click="openRejectionDialog(record.id)">
-            <a>拒绝</a>
-          </span>
-
-          <span v-if="editableData[record.id]">
-            <a-typography-link @click="save(record.id)">保存</a-typography-link>
-            <a-popconfirm title="确定取消？" @confirm="cancel(record.id)">
-              <a>取消</a>
-            </a-popconfirm>
-          </span>
-          <span v-else>
-            <a @click="edit(record.id)">编辑</a>
-          </span>
-
-          <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteInfo(record.id)">
-            <a>删除</a>
-          </a-popconfirm>
-        </div>
-      </template>
+  <a-card title="标签列表">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="get" />
+        </a-tooltip>
+      </div>
     </template>
-  </a-table>
+    <a-spin :spinning="loading">
+      <a-table :columns="columns" :data-source="data" :pagination="pagination" @change="change">
+        <template #bodyCell="{ column, text, record }">
+          <template v-if="column.dataIndex === 'logo'">
+            <a-input
+              v-if="editableData[record.id]"
+              v-model:value="editableData[record.id][column.dataIndex as keyof FriendReq]"
+            >
+            </a-input>
+            <template v-else>
+              <a-image :width="50" :src="record.logo" />
+            </template>
+          </template>
+          <template v-if="['name', 'description'].includes(column.dataIndex)">
+            <div>
+              <a-input
+                v-if="editableData[record.id]"
+                v-model:value="editableData[record.id][column.dataIndex as keyof FriendReq]"
+                style="margin: -5px 0"
+              />
+              <template v-else>
+                {{ text }}
+              </template>
+            </div>
+          </template>
+          <template v-if="column.dataIndex === 'status'">
+            <a-radio-group
+              v-if="editableData[record.id] && record.status != 3 && record.status != 0"
+              v-model:value="editableData[record.id][column.dataIndex as keyof FriendReq]"
+            >
+              <a-radio :value="2">隐藏</a-radio>
+              <a-radio :value="1">展示</a-radio>
+            </a-radio-group>
+            <template v-else>
+              <a-tag
+                :color="
+                  record.status === 0 ? 'processing' : record.status === 1 ? 'success' : 'warning'
+                "
+                >{{ statusConvert(record.status) }}
+              </a-tag>
+            </template>
+          </template>
+          <template v-if="column.dataIndex === 'created_at'">
+            {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
+          </template>
+          <template v-else-if="column.dataIndex === 'operation'">
+            <div class="editable-row-operations">
+              <a-popconfirm
+                v-if="data.length && record.status === 0"
+                title="确认接受?"
+                @confirm="approved(record.id)"
+              >
+                <a>接收</a>
+              </a-popconfirm>
+              <a-modal v-model:open="rejectionDialog" title="请输入原因" @ok="rejected">
+                <a-input v-model:value="reason" placeholder="请输入审核不通过的原因。" />
+              </a-modal>
+              <span
+                v-if="data.length && record.status === 0"
+                @click="openRejectionDialog(record.id)"
+              >
+                <a>拒绝</a>
+              </span>
+
+              <span v-if="editableData[record.id]">
+                <a-typography-link @click="save(record.id)">保存</a-typography-link>
+                <a-popconfirm title="确定取消？" @confirm="cancel(record.id)">
+                  <a>取消</a>
+                </a-popconfirm>
+              </span>
+              <span v-else>
+                <a @click="edit(record.id)">编辑</a>
+              </span>
+
+              <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteInfo(record.id)">
+                <a>删除</a>
+              </a-popconfirm>
+            </div>
+          </template>
+        </template>
+      </a-table>
+    </a-spin>
+  </a-card>
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, ref, type UnwrapRef } from 'vue'
+import { computed, h, reactive, ref, type UnwrapRef } from 'vue'
 import {
   ApproveFriend,
   DeleteFriend,
@@ -93,6 +107,7 @@ import { message } from 'ant-design-vue'
 import { cloneDeep } from 'lodash-es'
 import dayjs from 'dayjs'
 import { UpdateFriend } from '@/interfaces/Friend'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 document.title = '友链列表 - 后台管理'
 
@@ -148,13 +163,17 @@ const pagination = computed(() => ({
   pageSize: pageReq.value.pageSize
 }))
 
+const loading = ref(false)
 const get = async () => {
   try {
+    loading.value = true
     const response: any = await GetFriends(pageReq.value)
     data.value = response.data.data?.list || []
     total.value = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
+  } finally {
+    loading.value = false
   }
 }
 get()

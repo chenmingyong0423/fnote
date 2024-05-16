@@ -1,75 +1,89 @@
 <template>
   <div>
-    <a-descriptions title="站点信息" :column="1" bordered>
-      <a-descriptions-item label="站点名称">
-        <div>
-          <a-input v-if="editable" v-model:value="data.website_name" style="margin: -5px 0" />
-          <template v-else>
-            {{ data.website_name }}
-          </template>
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="站点 logo">
-        <div>
-          <StaticUpload
-            v-if="editable"
-            :image-url="data.website_icon"
-            :authorization="userStore.token"
-            @update:imageUrl="(value) => (data.website_icon = value)"
-          />
-          <a-image
-            v-else
-            :width="200"
-            :src="data.website_icon === '' ? '' : apiHost + data.website_icon"
-          />
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="站长昵称">
-        <div>
-          <a-input v-if="editable" v-model:value="data.website_owner" style="margin: -5px 0" />
-          <template v-else>
-            {{ data.website_owner }}
-          </template>
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="站长简介">
-        <div>
-          <a-input
-            v-if="editable"
-            v-model:value="data.website_owner_profile"
-            style="margin: -5px 0"
-          />
-          <template v-else>
-            {{ data.website_owner_profile }}
-          </template>
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="站长照片">
-        <div>
-          <StaticUpload
-            v-if="editable"
-            :image-url="data.website_owner_avatar"
-            :authorization="userStore.token"
-            @update:imageUrl="(value) => (data.website_owner_avatar = value)"
-          />
-          <a-image
-            v-else
-            :width="200"
-            :src="data.website_owner_avatar === '' ? '' : apiHost + data.website_owner_avatar"
-          />
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="站点运行时间">
-        <div>
-          <a-date-picker v-if="editable" v-model:value="liveTime" @change="liveTimeChanged" />
-          <template v-else>
-            {{ dayjs.unix(data.website_runtime).format('YYYY-MM-DD') }}
-          </template>
-        </div>
-      </a-descriptions-item>
-    </a-descriptions>
+    <a-spin :spinning="loading">
+      <a-descriptions title="站点信息" :column="1" bordered>
+        <template #extra>
+          <div class="flex gap-x-3">
+            <a-tooltip title="刷新数据">
+              <a-button
+                shape="circle"
+                :icon="h(ReloadOutlined)"
+                :loading="loading"
+                @click="getWebsite"
+              />
+            </a-tooltip>
+          </div>
+        </template>
+        <a-descriptions-item label="站点名称">
+          <div>
+            <a-input v-if="editable" v-model:value="data.website_name" style="margin: -5px 0" />
+            <template v-else>
+              {{ data.website_name }}
+            </template>
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="站点 logo">
+          <div>
+            <StaticUpload
+              v-if="editable"
+              :image-url="data.website_icon"
+              :authorization="userStore.token"
+              @update:imageUrl="(value) => (data.website_icon = value)"
+            />
+            <a-image
+              v-else
+              :width="200"
+              :src="data.website_icon === '' ? '' : apiHost + data.website_icon"
+            />
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="站长昵称">
+          <div>
+            <a-input v-if="editable" v-model:value="data.website_owner" style="margin: -5px 0" />
+            <template v-else>
+              {{ data.website_owner }}
+            </template>
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="站长简介">
+          <div>
+            <a-input
+              v-if="editable"
+              v-model:value="data.website_owner_profile"
+              style="margin: -5px 0"
+            />
+            <template v-else>
+              {{ data.website_owner_profile }}
+            </template>
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="站长照片">
+          <div>
+            <StaticUpload
+              v-if="editable"
+              :image-url="data.website_owner_avatar"
+              :authorization="userStore.token"
+              @update:imageUrl="(value) => (data.website_owner_avatar = value)"
+            />
+            <a-image
+              v-else
+              :width="200"
+              :src="data.website_owner_avatar === '' ? '' : apiHost + data.website_owner_avatar"
+            />
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="站点运行时间">
+          <div>
+            <a-date-picker v-if="editable" v-model:value="liveTime" @change="liveTimeChanged" />
+            <template v-else>
+              {{ dayjs.unix(data.website_runtime).format('YYYY-MM-DD') }}
+            </template>
+          </div>
+        </a-descriptions-item>
+      </a-descriptions>
+    </a-spin>
     <div style="margin-top: 10px">
-      <a-button v-if="!editable" type="primary" @click="editable = true">编辑</a-button>
+      <a-button v-if="!editable" @click="editable = true">编辑</a-button>
       <div v-else>
         <a-button type="primary" @click="cancel" style="margin-right: 5px">取消</a-button>
         <a-button type="primary" @click="save">保存</a-button>
@@ -102,12 +116,13 @@ import {
   UpdateWebSite,
   type WebsiteConfig
 } from '@/interfaces/Config'
-import { ref } from 'vue'
+import { h, ref } from 'vue'
 import dayjs from 'dayjs'
 import { type Dayjs } from 'dayjs'
 import { message } from 'ant-design-vue'
 import { useUserStore } from '@/stores/user'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 document.title = '博客设置 - 后台管理'
 
@@ -127,8 +142,11 @@ const data = ref<WebsiteConfig>({
   website_records: []
 })
 
+const loading = ref<boolean>(false)
+
 const getWebsite = async () => {
   try {
+    loading.value = true
     const response: any = await GetWebSite()
     if (response.data.code === 0) {
       data.value = response.data.data || data.value
@@ -136,6 +154,8 @@ const getWebsite = async () => {
     }
   } catch (error) {
     console.log(error)
+  } finally {
+    loading.value = false
   }
 }
 getWebsite()
