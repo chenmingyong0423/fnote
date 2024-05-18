@@ -15,6 +15,7 @@
 package tag
 
 import (
+	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/web"
 )
@@ -22,6 +23,7 @@ import (
 type (
 	Handler = web.TagHandler
 	Service = service.ITagService
+	Tag     = domain.Tag
 	Module  struct {
 		Svc Service
 		Hdl *Handler

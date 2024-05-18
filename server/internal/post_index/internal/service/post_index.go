@@ -17,26 +17,72 @@ package service
 import (
 	"context"
 
+	"github.com/chenmingyong0423/fnote/server/internal/category"
+	"github.com/chenmingyong0423/fnote/server/internal/tag"
+
+	jsoniter "github.com/json-iterator/go"
+
+	"github.com/chenmingyong0423/fnote/server/internal/file"
+	"github.com/chenmingyong0423/fnote/server/internal/post"
+
 	"github.com/chenmingyong0423/fnote/server/internal/post_index/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 )
 
 type IPostIndexService interface {
 	PushUrls2Baidu(ctx context.Context, urls string) (*domain.BaiduResponse, error)
+	GenerateSitemap(ctx context.Context) error
 }
 
 var _ IPostIndexService = (*PostIndexService)(nil)
 
-func NewPostIndexService(baiduServ *BaiduService, cfgServ website_config.Service) *PostIndexService {
+func NewPostIndexService(baiduServ *BaiduService, cfgServ website_config.Service, postServ post.Service, fileServ file.Service, categoryServ category.Service, tagServ tag.Service) *PostIndexService {
 	return &PostIndexService{
-		baiduServ: baiduServ,
-		cfgServ:   cfgServ,
+		baiduServ:    baiduServ,
+		cfgServ:      cfgServ,
+		postServ:     postServ,
+		fileServ:     fileServ,
+		categoryServ: categoryServ,
+		tagServ:      tagServ,
 	}
 }
 
 type PostIndexService struct {
-	baiduServ *BaiduService
-	cfgServ   website_config.Service
+	baiduServ    *BaiduService
+	cfgServ      website_config.Service
+	postServ     post.Service
+	fileServ     file.Service
+	categoryServ category.Service
+	tagServ      tag.Service
+}
+
+func (s *PostIndexService) GenerateSitemap(ctx context.Context) error {
+	posts, err := s.postServ.FindDisplayedPosts(ctx)
+	if err != nil {
+		return err
+	}
+	postBytes, err := jsoniter.Marshal(posts)
+	if err != nil {
+		return err
+	}
+	categories, err := s.categoryServ.FindEnabledCategories(ctx)
+	if err != nil {
+		return err
+	}
+	categoryBytes, err := jsoniter.Marshal(categories)
+	if err != nil {
+		return err
+	}
+	tags, err := s.tagServ.FindEnabledTags(ctx)
+	if err != nil {
+		return err
+
+	}
+	tagBytes, err := jsoniter.Marshal(tags)
+	if err != nil {
+		return err
+	}
+	return s.fileServ.GenerateSitemap(ctx, postBytes, categoryBytes, tagBytes)
 }
 
 func (s *PostIndexService) PushUrls2Baidu(ctx context.Context, urls string) (*domain.BaiduResponse, error) {

@@ -15,14 +15,16 @@
 package category
 
 import (
+	"github.com/chenmingyong0423/fnote/server/internal/category/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/category/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/category/internal/web"
 )
 
 type (
-	Handler = web.CategoryHandler
-	Service = service.ICategoryService
-	Module  struct {
+	Handler  = web.CategoryHandler
+	Service  = service.ICategoryService
+	Category = domain.Category
+	Module   struct {
 		Svc Service
 		Hdl *Handler
 	}

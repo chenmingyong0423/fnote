@@ -44,6 +44,7 @@ type ICategoryService interface {
 	DeleteCategory(ctx context.Context, id string) error
 	ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error
 	AdminGetSelectCategories(ctx context.Context) ([]domain.Category, error)
+	FindEnabledCategories(ctx context.Context) ([]domain.Category, error)
 }
 
 var _ ICategoryService = (*CategoryService)(nil)
@@ -60,6 +61,10 @@ func NewCategoryService(repo repository.ICategoryRepository, eventbus *eventbus.
 type CategoryService struct {
 	repo     repository.ICategoryRepository
 	eventBus *eventbus.EventBus
+}
+
+func (s *CategoryService) FindEnabledCategories(ctx context.Context) ([]domain.Category, error) {
+	return s.repo.FindEnabledCategories(ctx)
 }
 
 func (s *CategoryService) AdminGetSelectCategories(ctx context.Context) ([]domain.Category, error) {

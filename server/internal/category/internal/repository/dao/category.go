@@ -62,6 +62,7 @@ type ICategoryDao interface {
 	GetEnabled(ctx context.Context) ([]*Category, error)
 	IncreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error
 	DecreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error
+	FindEnabledCategories(ctx context.Context) ([]*Category, error)
 }
 
 var _ ICategoryDao = (*CategoryDao)(nil)
@@ -74,6 +75,10 @@ func NewCategoryDao(db *mongo.Database) *CategoryDao {
 
 type CategoryDao struct {
 	coll *mongox.Collection[Category]
+}
+
+func (d *CategoryDao) FindEnabledCategories(ctx context.Context) ([]*Category, error) {
+	return d.coll.Finder().Filter(query.Eq("enabled", true)).Find(ctx)
 }
 
 func (d *CategoryDao) DecreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error {

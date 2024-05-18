@@ -52,6 +52,7 @@ type ITagDao interface {
 	GetEnabled(ctx context.Context) ([]*Tags, error)
 	IncreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error
 	DecreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error
+	FindEnabledTags(ctx context.Context) ([]*Tags, error)
 }
 
 var _ ITagDao = (*TagDao)(nil)
@@ -62,6 +63,10 @@ func NewTagDao(db *mongo.Database) *TagDao {
 
 type TagDao struct {
 	coll *mongox.Collection[Tags]
+}
+
+func (d *TagDao) FindEnabledTags(ctx context.Context) ([]*Tags, error) {
+	return d.coll.Finder().Filter(query.Eq("enabled", true)).Find(ctx)
 }
 
 func (d *TagDao) DecreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error {

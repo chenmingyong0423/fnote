@@ -32,6 +32,8 @@ type PostIndexHandler struct {
 
 func (h *PostIndexHandler) RegisterGinRoutes(engine *gin.Engine) {
 	engine.POST("/post-index/baidu/push", apiwrap.WrapWithBody(h.BaiduPostIndex))
+	adminGroup := engine.Group("/admin-api")
+	adminGroup.POST("/post-index/sitemap", apiwrap.Wrap(h.GenerateSitemap))
 }
 
 func (h *PostIndexHandler) BaiduPostIndex(ctx *gin.Context, req PostIndexRequest) (*apiwrap.ResponseBody[BaiduPushVO], error) {
@@ -50,4 +52,8 @@ func (h *PostIndexHandler) BaiduPostIndex(ctx *gin.Context, req PostIndexRequest
 		Err:         baiduResponse.Err,
 		Message:     baiduResponse.Message,
 	}), nil
+}
+
+func (h *PostIndexHandler) GenerateSitemap(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.GenerateSitemap(ctx)
 }

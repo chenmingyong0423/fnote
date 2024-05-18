@@ -17,8 +17,12 @@
 package post_index
 
 import (
+	"github.com/chenmingyong0423/fnote/server/internal/category"
+	"github.com/chenmingyong0423/fnote/server/internal/file"
+	"github.com/chenmingyong0423/fnote/server/internal/post"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index/internal/web"
+	"github.com/chenmingyong0423/fnote/server/internal/tag"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"github.com/google/wire"
 )
@@ -26,9 +30,13 @@ import (
 var PostIndexProviders = wire.NewSet(web.NewPostIndexHandler, service.NewPostIndexService, service.NewBaiduService,
 	wire.Bind(new(service.IPostIndexService), new(*service.PostIndexService)))
 
-func InitPostIndexModule(cfgServ *website_config.Module) *Module {
+func InitPostIndexModule(cfgModule *website_config.Module, categoryModule *category.Module, tagModule *tag.Module, postModule *post.Module, fileModule *file.Module) *Module {
 	panic(wire.Build(
 		wire.FieldsOf(new(*website_config.Module), "Svc"),
+		wire.FieldsOf(new(*category.Module), "Svc"),
+		wire.FieldsOf(new(*tag.Module), "Svc"),
+		wire.FieldsOf(new(*post.Module), "Svc"),
+		wire.FieldsOf(new(*file.Module), "Svc"),
 		PostIndexProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),
 	))

@@ -43,6 +43,7 @@ func (h *AggregatePostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin-api")
 	adminGroup.GET("/post-draft/:id", apiwrap.Wrap(h.GetPostDraftById))
 	adminGroup.POST("/post-draft/:id/publish", apiwrap.WrapWithBody(h.AdminPublishDraft))
+	adminGroup.PUT("/post-draft/:id/publish", apiwrap.WrapWithBody(h.AdminPublishDraft))
 }
 
 func (h *AggregatePostHandler) GetPostDraftById(ctx *gin.Context) (*apiwrap.ResponseBody[*PostDraftVO], error) {

@@ -40,6 +40,7 @@ type ITagRepository interface {
 	GetSelectTags(ctx context.Context) ([]domain.Tag, error)
 	IncreasePostCountByIds(ctx context.Context, tagIds []string) error
 	DecreasePostCountByIds(ctx context.Context, tagIds []string) error
+	FindEnabledTags(ctx context.Context) ([]domain.Tag, error)
 }
 
 var _ ITagRepository = (*TagRepository)(nil)
@@ -50,6 +51,14 @@ func NewTagRepository(dao dao.ITagDao) *TagRepository {
 
 type TagRepository struct {
 	dao dao.ITagDao
+}
+
+func (r *TagRepository) FindEnabledTags(ctx context.Context) ([]domain.Tag, error) {
+	tags, err := r.dao.FindEnabledTags(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainTags(tags), nil
 }
 
 func (r *TagRepository) DecreasePostCountByIds(ctx context.Context, tagIds []string) (err error) {

@@ -51,6 +51,7 @@ type ITagService interface {
 	ModifyTagEnabled(ctx context.Context, id string, enabled bool) error
 	DeleteTag(ctx context.Context, id string) error
 	GetSelectTags(ctx context.Context) ([]domain.Tag, error)
+	FindEnabledTags(ctx context.Context) ([]domain.Tag, error)
 }
 
 var _ ITagService = (*TagService)(nil)
@@ -58,6 +59,10 @@ var _ ITagService = (*TagService)(nil)
 type TagService struct {
 	repo     repository.ITagRepository
 	eventBus *eventbus.EventBus
+}
+
+func (s *TagService) FindEnabledTags(ctx context.Context) ([]domain.Tag, error) {
+	return s.repo.FindEnabledTags(ctx)
 }
 
 func (s *TagService) GetSelectTags(ctx context.Context) ([]domain.Tag, error) {
