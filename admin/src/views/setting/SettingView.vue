@@ -3,6 +3,7 @@
     <a-tab-pane key="basic" tab="站点信息"><BasicView /></a-tab-pane>
     <a-tab-pane key="carousel" tab="轮播图配置"><CarouselView /></a-tab-pane>
     <a-tab-pane key="seo" tab="seo 配置"><SeoView /></a-tab-pane>
+    <a-tab-pane key="sitemap" tab="sitemap 配置"><SiteMapVIew /></a-tab-pane>
     <a-tab-pane key="verification" tab="站点验证"><VerificationView /></a-tab-pane>
     <a-tab-pane key="push" tab="文章推送配置"><PushView /></a-tab-pane>
     <a-tab-pane key="comment" tab="评论配置"><CommentSwitchView /></a-tab-pane>
@@ -30,5 +31,6 @@ import SocialView from '@/views/setting/SocialView.vue'
 import VerificationView from '@/views/setting/VerificationView.vue'
 import PushView from '@/views/setting/PushView.vue'
 import CarouselView from '@/views/setting/CarouselView.vue'
+import SiteMapVIew from '@/views/setting/SiteMapVIew.vue'
 const activeKey = ref('basic')
 </script>
