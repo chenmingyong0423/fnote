@@ -91,6 +91,7 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 		return err
 	}
 	sitemapBuilder := sitemap.NewSitemap().
+		XmlnsImage("https://www.google.com/schemas/sitemap-image/1.1").
 		Url(
 			viper.GetString("website.base_host"),
 			sitemap.WithLastMod(time.Now().Format(time.DateOnly)),
