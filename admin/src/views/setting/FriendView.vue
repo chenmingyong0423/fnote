@@ -1,14 +1,14 @@
 <template>
-  <div>
+  <a-card title="友链配置">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="get" />
+        </a-tooltip>
+      </div>
+    </template>
     <a-spin :spinning="loading">
-      <a-descriptions title="友链配置" :column="1" bordered>
-        <template #extra>
-          <div class="flex gap-x-3">
-            <a-tooltip title="刷新数据">
-              <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="get" />
-            </a-tooltip>
-          </div>
-        </template>
+      <a-descriptions :column="1" bordered>
         <a-descriptions-item label="是否开启友链申请">
           <div>
             <a-switch v-model:checked="enableFriendCommit" @change="save" />
@@ -36,7 +36,7 @@
         </a-descriptions-item>
       </a-descriptions>
     </a-spin>
-  </div>
+  </a-card>
 </template>
 
 <script lang="ts" setup>

@@ -1,43 +1,53 @@
 <template>
-  <a-spin :spinning="loading">
-    <a-descriptions title="百度推送配置" :column="1" bordered>
-      <template #extra>
-        <div class="flex gap-x-3">
-          <a-tooltip title="刷新数据">
-            <a-button
-              shape="circle"
-              :icon="h(ReloadOutlined)"
-              :loading="loading"
-              @click="getConfig"
-            />
-          </a-tooltip>
-        </div>
-      </template>
-      <a-descriptions-item label="站点">
-        <div>
-          <a-input v-if="baiduEditable" v-model:value="baiduPushCfg.site" style="margin: -5px 0" />
-          <template v-else>
-            {{ baiduPushCfg.site }}
-          </template>
-        </div>
-      </a-descriptions-item>
-      <a-descriptions-item label="token">
-        <div>
-          <a-input v-if="baiduEditable" v-model:value="baiduPushCfg.token" style="margin: -5px 0" />
-          <template v-else>
-            {{ baiduPushCfg.token }}
-          </template>
-        </div>
-      </a-descriptions-item>
-    </a-descriptions>
-    <div style="margin-top: 10px">
-      <a-button v-if="!baiduEditable" type="primary" @click="baiduEditable = true">编辑</a-button>
-      <div v-else>
-        <a-button type="primary" @click="cancel4Baidu" style="margin-right: 5px">取消</a-button>
-        <a-button type="primary" @click="save4Baidu">保存</a-button>
+  <a-card title="推送配置">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button
+            shape="circle"
+            :icon="h(ReloadOutlined)"
+            :loading="loading"
+            @click="getConfig"
+          />
+        </a-tooltip>
       </div>
-    </div>
-  </a-spin>
+    </template>
+    <a-spin :spinning="loading">
+      <a-descriptions title="百度推送配置" :column="1" bordered>
+        <a-descriptions-item label="站点">
+          <div>
+            <a-input
+              v-if="baiduEditable"
+              v-model:value="baiduPushCfg.site"
+              style="margin: -5px 0"
+            />
+            <template v-else>
+              {{ baiduPushCfg.site }}
+            </template>
+          </div>
+        </a-descriptions-item>
+        <a-descriptions-item label="token">
+          <div>
+            <a-input
+              v-if="baiduEditable"
+              v-model:value="baiduPushCfg.token"
+              style="margin: -5px 0"
+            />
+            <template v-else>
+              {{ baiduPushCfg.token }}
+            </template>
+          </div>
+        </a-descriptions-item>
+      </a-descriptions>
+      <div style="margin-top: 10px">
+        <a-button v-if="!baiduEditable" @click="baiduEditable = true">编辑</a-button>
+        <div v-else>
+          <a-button @click="cancel4Baidu" style="margin-right: 5px">取消</a-button>
+          <a-button type="primary" @click="save4Baidu">保存</a-button>
+        </div>
+      </div>
+    </a-spin>
+  </a-card>
 </template>
 
 <script lang="ts" setup>

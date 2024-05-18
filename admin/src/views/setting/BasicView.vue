@@ -1,19 +1,19 @@
 <template>
-  <div>
+  <a-card title="站点信息">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button
+            shape="circle"
+            :icon="h(ReloadOutlined)"
+            :loading="loading"
+            @click="getWebsite"
+          />
+        </a-tooltip>
+      </div>
+    </template>
     <a-spin :spinning="loading">
-      <a-descriptions title="站点信息" :column="1" bordered>
-        <template #extra>
-          <div class="flex gap-x-3">
-            <a-tooltip title="刷新数据">
-              <a-button
-                shape="circle"
-                :icon="h(ReloadOutlined)"
-                :loading="loading"
-                @click="getWebsite"
-              />
-            </a-tooltip>
-          </div>
-        </template>
+      <a-descriptions :column="1" bordered>
         <a-descriptions-item label="站点名称">
           <div>
             <a-input v-if="editable" v-model:value="data.website_name" style="margin: -5px 0" />
@@ -106,7 +106,7 @@
         </a-popconfirm>
       </div>
     </div>
-  </div>
+  </a-card>
 </template>
 <script lang="ts" setup>
 import {
