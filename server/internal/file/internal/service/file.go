@@ -98,7 +98,7 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 			sitemap.WithPriority(1.0),
 		).Output(viper.GetString("system.static_path") + "/sitemap.xml")
 	for _, p := range posts {
-		if p.Id == "/about-me" {
+		if p.Id == "about-me" {
 			aboutMeLastMod = time.Unix(p.UpdatedAt, 0).Format(time.DateOnly)
 			continue
 		}
