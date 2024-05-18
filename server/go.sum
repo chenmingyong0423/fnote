@@ -14,6 +14,8 @@ github.com/chenmingyong0423/go-mongox v0.18.0 h1:VnOy5lSiGv6YWRPo4MbXVWGHdQVTIm8
 github.com/chenmingyong0423/go-mongox v0.18.0/go.mod h1:oNxv2shqL/wxn/DOcJiMzuokum/br8f0j20RpbxtEXY=
 github.com/chenmingyong0423/go-sitemap-generator v1.0.0 h1:dq0PaJD8kdsgtrp8fMFjCRBGx48/XSaJ+fCx9Bhqzo8=
 github.com/chenmingyong0423/go-sitemap-generator v1.0.0/go.mod h1:xJsKdYIldwU3OuYb/81gOVcxvkjYAnpwNULWud/VYI4=
+github.com/chenmingyong0423/go-sitemap-generator v1.0.1 h1:WdFfxpLTJDatPFdPq7xgi70D+e4NRM+8gJCeBsPcJec=
+github.com/chenmingyong0423/go-sitemap-generator v1.0.1/go.mod h1:xJsKdYIldwU3OuYb/81gOVcxvkjYAnpwNULWud/VYI4=
 github.com/chenzhuoyu/base64x v0.0.0-20211019084208-fb5309c8db06/go.mod h1:DH46F32mSOjUmXrMHnKwZdA8wcEefY7UVqBKYGjpdQY=
 github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311/go.mod h1:b583jCggY9gE99b6G5LEC39OIiVsWj+R97kbl5odCEk=
 github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d h1:77cEq6EriyTZ0g/qfRdp61a3Uu/AWrgIq2s0ClJV1g0=
