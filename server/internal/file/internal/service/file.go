@@ -17,9 +17,19 @@ package service
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/chenmingyong0423/fnote/server/internal/tag"
+
+	"github.com/chenmingyong0423/fnote/server/internal/category"
+
+	"github.com/chenmingyong0423/fnote/server/internal/post"
+
+	"github.com/chenmingyong0423/go-sitemap-generator"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -44,6 +54,7 @@ type IFileService interface {
 	Upload(ctx context.Context, fileDTO domain.FileDTO) (*domain.File, error)
 	IndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	DeleteIndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error
+	GenerateSitemap(ctx context.Context, postBytes, categoryBytes, tagBytes []byte) error
 }
 
 var _ IFileService = (*FileService)(nil)
@@ -60,6 +71,81 @@ func NewFileService(repo repository.IFileRepository, eventbus *eventbus.EventBus
 type FileService struct {
 	repo     repository.IFileRepository
 	eventBus *eventbus.EventBus
+}
+
+func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryBytes, tagBytes []byte) error {
+	var aboutMeLastMod string
+	var posts []post.Post
+	err := jsoniter.Unmarshal(postBytes, &posts)
+	if err != nil {
+		return err
+	}
+	var categories []category.Category
+	err = jsoniter.Unmarshal(categoryBytes, &categories)
+	if err != nil {
+		return err
+	}
+	var tags []tag.Tag
+	err = jsoniter.Unmarshal(tagBytes, &tags)
+	if err != nil {
+		return err
+	}
+	sitemapBuilder := sitemap.NewSitemap().
+		Url(
+			viper.GetString("website.base_host"),
+			sitemap.WithLastMod(time.Now().Format(time.DateOnly)),
+			sitemap.WithChangeFreq("always"),
+			sitemap.WithPriority(1.0),
+		).Output(viper.GetString("system.static_path") + "/sitemap.xml")
+	for _, p := range posts {
+		if p.Id == "/about-me" {
+			aboutMeLastMod = time.Unix(p.UpdatedAt, 0).Format(time.DateOnly)
+			continue
+		}
+		sitemapBuilder.Url(
+			fmt.Sprintf("%s/posts/%s", viper.GetString("website.base_host"), p.Id),
+			sitemap.WithLastMod(time.Unix(p.UpdatedAt, 0).Format(time.DateOnly)),
+			sitemap.WithChangeFreq("monthly"),
+			sitemap.WithPriority(0.9),
+		)
+	}
+	for _, c := range categories {
+		sitemapBuilder.Url(
+			fmt.Sprintf("%s/categories/%s", viper.GetString("website.base_host"), c.Route),
+			sitemap.WithLastMod(time.Unix(c.UpdatedAt, 0).Format(time.DateOnly)),
+			sitemap.WithChangeFreq("weekly"),
+			sitemap.WithPriority(0.8),
+		)
+	}
+	for _, t := range tags {
+		sitemapBuilder.Url(
+			fmt.Sprintf("%s/tags/%s", viper.GetString("website.base_host"), t.Name),
+			sitemap.WithLastMod(time.Unix(t.UpdatedAt, 0).Format(time.DateOnly)),
+			sitemap.WithChangeFreq("weekly"),
+			sitemap.WithPriority(0.8),
+		)
+	}
+	sitemapBuilder.Url(
+		fmt.Sprintf("%s/about-me", viper.GetString("website.base_host")),
+		sitemap.WithLastMod(aboutMeLastMod),
+		sitemap.WithChangeFreq("monthly"),
+		sitemap.WithPriority(0.9),
+	)
+	sitemapBuilder.Url(
+		fmt.Sprintf("%s/search", viper.GetString("website.base_host")),
+		sitemap.WithChangeFreq("weekly"),
+		sitemap.WithPriority(0.7),
+	)
+	sitemapBuilder.Url(
+		fmt.Sprintf("%s/friend", viper.GetString("website.base_host")),
+		sitemap.WithChangeFreq("always"),
+		sitemap.WithPriority(0.5),
+	)
+	err = sitemapBuilder.GenerateXml()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *FileService) DeleteIndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error {

@@ -53,6 +53,7 @@ type IPostService interface {
 	UpdatePostIsCommentAllowed(ctx context.Context, id string, isCommentAllowed bool) error
 	SavePost(ctx context.Context, originalPost *domain.Post, savedPost *domain.Post, isNewPost bool) error
 	IncreasePostLikeCount(ctx context.Context, postId string) error
+	FindDisplayedPosts(ctx context.Context) ([]domain.Post, error)
 }
 
 var _ IPostService = (*PostService)(nil)
@@ -71,6 +72,10 @@ type PostService struct {
 	repo       repository.IPostRepository
 	cfgService website_config.Service
 	eventBus   *eventbus.EventBus
+}
+
+func (s *PostService) FindDisplayedPosts(ctx context.Context) ([]domain.Post, error) {
+	return s.repo.FindDisplayedPosts(ctx)
 }
 
 func (s *PostService) IncreasePostLikeCount(ctx context.Context, postId string) error {

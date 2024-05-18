@@ -78,6 +78,7 @@ type IPostDao interface {
 	UpdateIsDisplayedById(ctx context.Context, id string, isDisplayed bool) error
 	UpdateIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error
 	IncreasePostLikeCount(ctx context.Context, postId string) error
+	FindDisplayedPosts(ctx context.Context) ([]*Post, error)
 }
 
 var _ IPostDao = (*PostDao)(nil)
@@ -90,6 +91,10 @@ func NewPostDao(db *mongo.Database) *PostDao {
 
 type PostDao struct {
 	coll *mongox.Collection[Post]
+}
+
+func (d *PostDao) FindDisplayedPosts(ctx context.Context) ([]*Post, error) {
+	return d.coll.Finder().Filter(query.Eq("is_displayed", true)).Find(ctx)
 }
 
 func (d *PostDao) IncreasePostLikeCount(ctx context.Context, postId string) error {

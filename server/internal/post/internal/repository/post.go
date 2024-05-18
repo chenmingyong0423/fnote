@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
-	domain2 "github.com/chenmingyong0423/fnote/server/internal/post/internal/domain"
 
 	"github.com/chenmingyong0423/fnote/server/internal/post/internal/repository/dao"
 
@@ -41,7 +40,7 @@ type IPostRepository interface {
 	IncreaseVisitCount(ctx context.Context, id string) error
 	HadLikePost(ctx context.Context, id string, ip string) (bool, error)
 	IncreaseCommentCount(ctx context.Context, id string) error
-	QueryAdminPostsPage(ctx context.Context, page domain2.Page) ([]*domain.Post, int64, error)
+	QueryAdminPostsPage(ctx context.Context, page domain.Page) ([]*domain.Post, int64, error)
 	AddPost(ctx context.Context, post *domain.Post) error
 	DeletePost(ctx context.Context, id string) error
 	FindPostById(ctx context.Context, id string) (*domain.Post, error)
@@ -50,6 +49,7 @@ type IPostRepository interface {
 	UpdatePostIsDisplayedById(ctx context.Context, id string, isDisplayed bool) error
 	UpdatePostIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error
 	IncreasePostLikeCount(ctx context.Context, postId string) error
+	FindDisplayedPosts(ctx context.Context) ([]domain.Post, error)
 }
 
 var _ IPostRepository = (*PostRepository)(nil)
@@ -62,6 +62,14 @@ func NewPostRepository(dao dao.IPostDao) *PostRepository {
 
 type PostRepository struct {
 	dao dao.IPostDao
+}
+
+func (r *PostRepository) FindDisplayedPosts(ctx context.Context) ([]domain.Post, error) {
+	posts, err := r.dao.FindDisplayedPosts(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainPostsV2(posts), nil
 }
 
 func (r *PostRepository) IncreasePostLikeCount(ctx context.Context, postId string) error {
@@ -175,7 +183,7 @@ func (r *PostRepository) AddPost(ctx context.Context, post *domain.Post) error {
 	return nil
 }
 
-func (r *PostRepository) QueryAdminPostsPage(ctx context.Context, page domain2.Page) ([]*domain.Post, int64, error) {
+func (r *PostRepository) QueryAdminPostsPage(ctx context.Context, page domain.Page) ([]*domain.Post, int64, error) {
 	condBuilder := query.BsonBuilder()
 	if page.Keyword != "" {
 		condBuilder.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(page.Keyword)), "i")
@@ -293,10 +301,19 @@ func (r *PostRepository) GetLatest5Posts(ctx context.Context, count int64) ([]*d
 	}
 	return r.toDomainPosts(posts), nil
 }
+
 func (r *PostRepository) toDomainPosts(posts []*dao.Post) []*domain.Post {
 	result := make([]*domain.Post, 0, len(posts))
 	for _, post := range posts {
 		result = append(result, r.daoPostToDomainPost(post))
+	}
+	return result
+}
+
+func (r *PostRepository) toDomainPostsV2(posts []*dao.Post) []domain.Post {
+	result := make([]domain.Post, 0, len(posts))
+	for _, post := range posts {
+		result = append(result, *r.daoPostToDomainPost(post))
 	}
 	return result
 }

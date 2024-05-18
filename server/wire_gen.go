@@ -70,7 +70,7 @@ func initializeApp() (*gin.Engine, error) {
 	}
 	v2 := ioc.InitMiddlewares(writer, v)
 	validators := ioc.InitGinValidators()
-	post_indexModule := post_index.InitPostIndexModule(website_configModule)
+	post_indexModule := post_index.InitPostIndexModule(website_configModule, categoryModule, tagModule, postModule, module)
 	postIndexHandler := post_indexModule.Hdl
 	post_draftModule := post_draft.InitPostDraftModule(database)
 	postDraftHandler := post_draftModule.Hdl

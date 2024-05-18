@@ -48,6 +48,7 @@ type ICategoryRepository interface {
 	GetSelectCategories(ctx context.Context) ([]domain.Category, error)
 	IncreasePostCountByIds(ctx context.Context, categoryIds []string) error
 	DecreasePostCountByIds(ctx context.Context, categoryIds []string) error
+	FindEnabledCategories(ctx context.Context) ([]domain.Category, error)
 }
 
 var _ ICategoryRepository = (*CategoryRepository)(nil)
@@ -60,6 +61,14 @@ func NewCategoryRepository(dao dao.ICategoryDao) *CategoryRepository {
 
 type CategoryRepository struct {
 	dao dao.ICategoryDao
+}
+
+func (r *CategoryRepository) FindEnabledCategories(ctx context.Context) ([]domain.Category, error) {
+	categories, err := r.dao.FindEnabledCategories(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainCategories(categories), nil
 }
 
 func (r *CategoryRepository) DecreasePostCountByIds(ctx context.Context, categoryIds []string) (err error) {
