@@ -107,6 +107,7 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 			sitemap.WithLastMod(time.Unix(p.UpdatedAt, 0).Format(time.DateOnly)),
 			sitemap.WithChangeFreq("monthly"),
 			sitemap.WithPriority(0.9),
+			sitemap.WithImage(sitemap.NewUrlImage(fmt.Sprintf("%s%s", viper.GetString("uploader.host"), p.CoverImg))),
 		)
 	}
 	for _, c := range categories {
@@ -119,7 +120,7 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 	}
 	for _, t := range tags {
 		sitemapBuilder.Url(
-			fmt.Sprintf("%s/tags/%s", viper.GetString("website.base_host"), t.Name),
+			fmt.Sprintf("%s/tags/%s", viper.GetString("website.base_host"), t.Route),
 			sitemap.WithLastMod(time.Unix(t.UpdatedAt, 0).Format(time.DateOnly)),
 			sitemap.WithChangeFreq("weekly"),
 			sitemap.WithPriority(0.8),
