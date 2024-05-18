@@ -1,19 +1,19 @@
 <template>
-  <div>
+  <a-card title="公告配置">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button
+            shape="circle"
+            :icon="h(ReloadOutlined)"
+            :loading="loading"
+            @click="getNotice"
+          />
+        </a-tooltip>
+      </div>
+    </template>
     <a-spin :spinning="loading">
-      <a-descriptions title="公告配置" :column="1" bordered>
-        <template #extra>
-          <div class="flex gap-x-3">
-            <a-tooltip title="刷新数据">
-              <a-button
-                shape="circle"
-                :icon="h(ReloadOutlined)"
-                :loading="loading"
-                @click="getNotice"
-              />
-            </a-tooltip>
-          </div>
-        </template>
+      <a-descriptions :column="1" bordered>
         <a-descriptions-item label="公告标题">
           <div>
             <a-input v-if="editable" v-model:value="data.title" style="margin: -5px 0" />
@@ -49,7 +49,7 @@
         <a-button type="primary" @click="save">保存</a-button>
       </div>
     </div>
-  </div>
+  </a-card>
 </template>
 <script lang="ts" setup>
 import {

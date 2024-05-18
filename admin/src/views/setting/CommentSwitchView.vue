@@ -1,19 +1,19 @@
 <template>
-  <div>
+  <a-card title="评论配置">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button
+            shape="circle"
+            :icon="h(ReloadOutlined)"
+            :loading="loading"
+            @click="getCommentConfig"
+          />
+        </a-tooltip>
+      </div>
+    </template>
     <a-spin :spinning="loading">
-      <a-descriptions title="评论配置" :column="1" bordered>
-        <template #extra>
-          <div class="flex gap-x-3">
-            <a-tooltip title="刷新数据">
-              <a-button
-                shape="circle"
-                :icon="h(ReloadOutlined)"
-                :loading="loading"
-                @click="getCommentConfig"
-              />
-            </a-tooltip>
-          </div>
-        </template>
+      <a-descriptions :column="1" bordered>
         <a-descriptions-item label="是否开启评论">
           <div>
             <a-switch v-model:checked="data.enable_comment" @change="save" />
@@ -21,7 +21,7 @@
         </a-descriptions-item>
       </a-descriptions>
     </a-spin>
-  </div>
+  </a-card>
 </template>
 
 <script lang="ts" setup>

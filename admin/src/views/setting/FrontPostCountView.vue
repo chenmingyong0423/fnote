@@ -1,19 +1,14 @@
 <template>
-  <div>
+  <a-card title="公告配置">
+    <template #extra>
+      <div class="flex gap-x-3">
+        <a-tooltip title="刷新数据">
+          <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="getData" />
+        </a-tooltip>
+      </div>
+    </template>
     <a-spin :spinning="loading">
       <a-descriptions title="首页展示文章数量配置" :column="1" bordered>
-        <template #extra>
-          <div class="flex gap-x-3">
-            <a-tooltip title="刷新数据">
-              <a-button
-                shape="circle"
-                :icon="h(ReloadOutlined)"
-                :loading="loading"
-                @click="getData"
-              />
-            </a-tooltip>
-          </div>
-        </template>
         <a-descriptions-item label="数量">
           <div>
             <a-input
@@ -30,13 +25,13 @@
       </a-descriptions>
     </a-spin>
     <div style="margin-top: 10px">
-      <a-button v-if="!editable" type="primary" @click="editable = true">编辑</a-button>
+      <a-button v-if="!editable" @click="editable = true">编辑</a-button>
       <div v-else>
-        <a-button type="primary" @click="cancel" style="margin-right: 5px">取消</a-button>
+        <a-button @click="cancel" style="margin-right: 5px">取消</a-button>
         <a-button type="primary" @click="save">保存</a-button>
       </div>
     </div>
-  </div>
+  </a-card>
 </template>
 <script lang="ts" setup>
 import {
