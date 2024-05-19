@@ -8,7 +8,7 @@ require (
 	github.com/chenmingyong0423/go-eventbus v0.2.0
 	github.com/chenmingyong0423/go-http-chain v0.3.4
 	github.com/chenmingyong0423/go-mongox v0.18.0
-	github.com/chenmingyong0423/go-sitemap-generator v1.0.1
+	github.com/chenmingyong0423/go-sitemap-generator v1.1.0
 	github.com/gin-contrib/cors v1.7.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.19.0
