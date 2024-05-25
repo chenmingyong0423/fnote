@@ -121,8 +121,8 @@
           </template>
         </a-table>
       </a-spin>
-    </div> </a-card
-  >>
+    </div>
+  </a-card>
 </template>
 <script lang="ts" setup>
 import originalAxios from 'axios'
