@@ -4,6 +4,9 @@
     ref="carouselRef"
     @mouseenter="addWheelListener"
     @mouseleave="removeWheelListener"
+    @touchstart.prevent="handleTouchStart"
+    @touchmove.prevent="handleTouchMove"
+    @touchend="handleTouchEnd"
   >
     <div
       v-if="carousel.length > 0"
@@ -152,6 +155,28 @@ const addWheelListener = () => {
 const removeWheelListener = () => {
   startAutoSlide();
   carouselRef.value?.removeEventListener("wheel", throttledHandleWheel);
+};
+
+// 处理触摸滑动事件
+let touchStartX = 0;
+let touchEndX = 0;
+
+const handleTouchStart = (event: TouchEvent) => {
+  stopAutoSlide();
+  touchStartX = event.touches[0].clientX;
+};
+
+const handleTouchMove = (event: TouchEvent) => {
+  touchEndX = event.touches[0].clientX;
+};
+
+const handleTouchEnd = () => {
+  if (touchStartX - touchEndX > 50) {
+    nextSlide();
+  } else if (touchStartX - touchEndX < -50) {
+    prevSlide();
+  }
+  startAutoSlide();
 };
 </script>
 
