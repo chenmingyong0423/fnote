@@ -51,7 +51,7 @@ type MessageTemplateDao struct {
 
 func (d *MessageTemplateDao) FindMsgTplByName(ctx context.Context, name string, recipientType uint) (*MessageTemplate, error) {
 	msgTpl, err := d.coll.Finder().Filter(
-		query.BsonBuilder().Eq("name", name).Eq("active", 1).Eq("recipient_type", recipientType).Build(),
+		query.NewBuilder().Eq("name", name).Eq("active", 1).Eq("recipient_type", recipientType).Build(),
 	).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Fails to find a docment from message_template, name=%s, recipient_type=%d", name, recipientType)

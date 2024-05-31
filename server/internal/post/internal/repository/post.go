@@ -184,7 +184,7 @@ func (r *PostRepository) AddPost(ctx context.Context, post *domain.Post) error {
 }
 
 func (r *PostRepository) QueryAdminPostsPage(ctx context.Context, page domain.Page) ([]*domain.Post, int64, error) {
-	condBuilder := query.BsonBuilder()
+	condBuilder := query.NewBuilder()
 	if page.Keyword != "" {
 		condBuilder.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(page.Keyword)), "i")
 	}
@@ -252,7 +252,7 @@ func (r *PostRepository) GetPunishedPostById(ctx context.Context, id string) (*d
 }
 
 func (r *PostRepository) QueryPostsPage(ctx context.Context, postsQueryCondition domain.PostsQueryCondition) ([]*domain.Post, int64, error) {
-	condBuilder := query.BsonBuilder().Eq("is_displayed", true)
+	condBuilder := query.NewBuilder().Eq("is_displayed", true)
 	if postsQueryCondition.Categories != nil && len(postsQueryCondition.Categories) > 0 {
 		condBuilder.Eq("categories.name", postsQueryCondition.Categories[0])
 	}

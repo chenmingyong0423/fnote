@@ -109,7 +109,7 @@ func (d *PostDao) IncreasePostLikeCount(ctx context.Context, postId string) erro
 }
 
 func (d *PostDao) UpdateIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error {
-	result, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("is_comment_allowed", isCommentAllowed).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
+	result, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.NewBuilder().Set("is_comment_allowed", isCommentAllowed).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the is_comment_allowed of post, id=%s, isCommentAllowed=%v", id, isCommentAllowed)
 	}
@@ -120,7 +120,7 @@ func (d *PostDao) UpdateIsCommentAllowedById(ctx context.Context, id string, isC
 }
 
 func (d *PostDao) UpdateIsDisplayedById(ctx context.Context, id string, isDisplayed bool) error {
-	result, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("is_displayed", isDisplayed).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
+	result, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.NewBuilder().Set("is_displayed", isDisplayed).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the is_displayed of post, id=%s, isDisplayed=%v", id, isDisplayed)
 	}
@@ -143,7 +143,7 @@ func (d *PostDao) SavePost(ctx context.Context, post *Post) error {
 
 func (d *PostDao) DecreaseByField(ctx context.Context, id string, filedName string, cnt int) error {
 	filter := query.Id(id)
-	u := update.BsonBuilder().Inc(filedName, -cnt).Set("updated_at", time.Now().Local()).Build()
+	u := update.NewBuilder().Inc(filedName, -cnt).Set("updated_at", time.Now().Local()).Build()
 	result, err := d.coll.Updater().Filter(filter).Updates(u).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to decrease the %s of post, id=%s, cnt=%d", filedName, id, cnt)
@@ -194,8 +194,8 @@ func (d *PostDao) IncreaseFieldById(ctx context.Context, id string, field string
 
 func (d *PostDao) DeleteLike(ctx context.Context, id string, ip string) error {
 	result, err := d.coll.Updater().
-		Filter(query.BsonBuilder().Id(id).Add("is_displayed", true).Build()).
-		Updates(update.BsonBuilder().Pull("likes", ip).Inc("like_count", -1).Build()).
+		Filter(query.NewBuilder().Id(id).KeyValue("is_displayed", true).Build()).
+		Updates(update.NewBuilder().Pull("likes", ip).Inc("like_count", -1).Build()).
 		UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to delete a like, id=%s, ip=%s", id, ip)
@@ -208,8 +208,8 @@ func (d *PostDao) DeleteLike(ctx context.Context, id string, ip string) error {
 
 func (d *PostDao) AddLike(ctx context.Context, id string, ip string) error {
 	result, err := d.coll.Updater().
-		Filter(query.BsonBuilder().Id(id).Add("is_displayed", true).Build()).
-		Updates(update.BsonBuilder().Push("likes", ip).Inc("like_count", 1).Build()).
+		Filter(query.NewBuilder().Id(id).KeyValue("is_displayed", true).Build()).
+		Updates(update.NewBuilder().Push("likes", ip).Inc("like_count", 1).Build()).
 		UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to add a like, id=%s, ip=%s", id, ip)
@@ -221,7 +221,7 @@ func (d *PostDao) AddLike(ctx context.Context, id string, ip string) error {
 }
 
 func (d *PostDao) FindByIdAndIp(ctx context.Context, id string, ip string) (*Post, error) {
-	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add("likes", ip).Build()).FindOne(ctx)
+	post, err := d.coll.Finder().Filter(query.NewBuilder().Id(id).KeyValue("likes", ip).Build()).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the documents from post, id=%s, ip=%s", id, ip)
 	}
@@ -229,7 +229,7 @@ func (d *PostDao) FindByIdAndIp(ctx context.Context, id string, ip string) (*Pos
 }
 
 func (d *PostDao) GetPunishedPostById(ctx context.Context, id string) (*Post, error) {
-	post, err := d.coll.Finder().Filter(query.BsonBuilder().Id(id).Add("is_displayed", true).Build()).FindOne(ctx)
+	post, err := d.coll.Finder().Filter(query.NewBuilder().Id(id).KeyValue("is_displayed", true).Build()).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the document from post, id=%s", id)
 	}

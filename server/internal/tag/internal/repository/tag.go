@@ -130,7 +130,7 @@ func (r *TagRepository) CreateTag(ctx context.Context, tag domain.Tag) (string, 
 }
 
 func (r *TagRepository) QueryTagsPage(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Tag, int64, error) {
-	condBuilder := query.BsonBuilder()
+	condBuilder := query.NewBuilder()
 	if pageDTO.Keyword != "" {
 		condBuilder.RegexOptions("name", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageDTO.Keyword)), "i")
 	}

@@ -61,7 +61,7 @@ type VisitLogDao struct {
 
 func (d *VisitLogDao) GetByDate(ctx context.Context, start time.Time, end time.Time) ([]*VisitHistory, error) {
 	return d.coll.Finder().
-		Filter(query.BsonBuilder().
+		Filter(query.NewBuilder().
 			Gte("created_at", start).
 			Lte("created_at", end).
 			Build()).
@@ -70,11 +70,11 @@ func (d *VisitLogDao) GetByDate(ctx context.Context, start time.Time, end time.T
 
 func (d *VisitLogDao) GetViewTendencyStats4UV(ctx context.Context, days int) ([]*TendencyData, error) {
 	daysAgo := time.Now().Local().AddDate(0, 0, -days).Truncate(24 * time.Hour)
-	pipeline := aggregation.StageBsonBuilder().
+	pipeline := aggregation.NewStageBuilder().
 		Match(query.Gte("created_at", daysAgo)).
 		Set(bsonx.M("dayStart", bsonx.M("$dateTrunc", bsonx.NewD().Add("date", "$created_at").Add("unit", "day").Build()))).
 		Group("$dayStart", bsonx.E("ips", bsonx.M("$addToSet", "$ip"))).
-		Project(aggregation.BsonBuilder().AddKeyValues("_id", "$_id").Size("view_count", "$ips").Build()).
+		Project(aggregation.NewBuilder().KeyValue("_id", "$_id").Size("view_count", "$ips").Build()).
 		Sort(bsonx.M("_id", 1)).
 		Build()
 	var result []*TendencyData
@@ -87,7 +87,7 @@ func (d *VisitLogDao) GetViewTendencyStats4UV(ctx context.Context, days int) ([]
 
 func (d *VisitLogDao) GetViewTendencyStats4PV(ctx context.Context, days int) ([]*TendencyData, error) {
 	daysAgo := time.Now().Local().AddDate(0, 0, -days).Truncate(24 * time.Hour)
-	pipeline := aggregation.StageBsonBuilder().
+	pipeline := aggregation.NewStageBuilder().
 		Match(query.Gte("created_at", daysAgo)).
 		Set(bsonx.M("dayStart", bsonx.M("$dateTrunc", bsonx.NewD().Add("date", "$created_at").Add("unit", "day").Build()))).
 		Group("$dayStart", aggregation.Sum("view_count", 1)...).
@@ -103,7 +103,7 @@ func (d *VisitLogDao) GetViewTendencyStats4PV(ctx context.Context, days int) ([]
 
 func (d *VisitLogDao) CountOfTodayByIp(ctx context.Context) (int64, error) {
 	startOfDayUnix, endOfDayUnix := d.getBeginSecondsAndEnd()
-	distinct, err := d.coll.Collection().Distinct(ctx, "ip", query.BsonBuilder().Gte("created_at", startOfDayUnix).Lte("created_at", endOfDayUnix).Build())
+	distinct, err := d.coll.Collection().Distinct(ctx, "ip", query.NewBuilder().Gte("created_at", startOfDayUnix).Lte("created_at", endOfDayUnix).Build())
 	if err != nil {
 		return 0, errors.Wrap(err, "fails to find the count of today from visit_logs")
 	}
@@ -121,7 +121,7 @@ func (d *VisitLogDao) getBeginSecondsAndEnd() (time.Time, time.Time) {
 
 func (d *VisitLogDao) CountOfToday(ctx context.Context) (int64, error) {
 	startOfDayUnix, endOfDayUnix := d.getBeginSecondsAndEnd()
-	count, err := d.coll.Finder().Filter(query.BsonBuilder().Gte("created_at", startOfDayUnix).Lte("created_at", endOfDayUnix).Build()).Count(ctx)
+	count, err := d.coll.Finder().Filter(query.NewBuilder().Gte("created_at", startOfDayUnix).Lte("created_at", endOfDayUnix).Build()).Count(ctx)
 	if err != nil {
 		return 0, errors.Wrap(err, "fails to find the count of today from visit_logs")
 	}

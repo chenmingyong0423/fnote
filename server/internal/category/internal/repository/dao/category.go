@@ -82,7 +82,7 @@ func (d *CategoryDao) FindEnabledCategories(ctx context.Context) ([]*Category, e
 }
 
 func (d *CategoryDao) DecreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error {
-	updateResult, err := d.coll.Updater().Filter(query.In("_id", categoryObjectIds...)).Updates(update.BsonBuilder().Inc("post_count", -1).Set("updated_at", time.Now().Local()).Build()).UpdateMany(ctx)
+	updateResult, err := d.coll.Updater().Filter(query.In("_id", categoryObjectIds...)).Updates(update.NewBuilder().Inc("post_count", -1).Set("updated_at", time.Now().Local()).Build()).UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to decrease post count by ids, ids=%+v", categoryObjectIds)
 	}
@@ -93,7 +93,7 @@ func (d *CategoryDao) DecreasePostCountByIds(ctx context.Context, categoryObject
 }
 
 func (d *CategoryDao) IncreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error {
-	updateResult, err := d.coll.Updater().Filter(query.In("_id", categoryObjectIds...)).Updates(update.BsonBuilder().Inc("post_count", 1).Set("updated_at", time.Now().Local()).Build()).UpdateMany(ctx)
+	updateResult, err := d.coll.Updater().Filter(query.In("_id", categoryObjectIds...)).Updates(update.NewBuilder().Inc("post_count", 1).Set("updated_at", time.Now().Local()).Build()).UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to increase post count by ids, ids=%+v", categoryObjectIds)
 	}
@@ -128,7 +128,7 @@ func (d *CategoryDao) GetById(ctx context.Context, id primitive.ObjectID) (*Cate
 }
 
 func (d *CategoryDao) ModifyCategoryNavigation(ctx context.Context, id primitive.ObjectID, showInNav bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("show_in_nav", showInNav).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.NewBuilder().Set("show_in_nav", showInNav).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "Modify category navigation failed, id=%s, showInNav=%v", id, showInNav)
 	}
@@ -139,7 +139,7 @@ func (d *CategoryDao) ModifyCategoryNavigation(ctx context.Context, id primitive
 }
 
 func (d *CategoryDao) GetByShowInNav(ctx context.Context) ([]*Category, error) {
-	categories, err := d.coll.Finder().Filter(query.BsonBuilder().Eq("show_in_nav", true).Eq("enabled", true).Build()).Find(ctx)
+	categories, err := d.coll.Finder().Filter(query.NewBuilder().Eq("show_in_nav", true).Eq("enabled", true).Build()).Find(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "Find categories failed")
 	}
@@ -158,7 +158,7 @@ func (d *CategoryDao) DeleteById(ctx context.Context, id primitive.ObjectID) err
 }
 
 func (d *CategoryDao) ModifyCategory(ctx context.Context, id primitive.ObjectID, description string) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("description", description).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.NewBuilder().Set("description", description).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (d *CategoryDao) ModifyCategory(ctx context.Context, id primitive.ObjectID,
 }
 
 func (d *CategoryDao) ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error {
-	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.BsonBuilder().Set("enabled", enabled).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.NewBuilder().Set("enabled", enabled).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
 	}

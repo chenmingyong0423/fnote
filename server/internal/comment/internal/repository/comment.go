@@ -21,8 +21,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -155,17 +153,17 @@ func (r *CommentRepository) AdminFindCommentsWithPagination(ctx context.Context,
 	} else {
 		// 如果是根据关键字 approvalStatus 查询的话，使用聚合操作
 		approvalStatus := *page.ApprovalStatus
-		pipelineBuilder := aggregation.StageBsonBuilder()
+		pipelineBuilder := aggregation.NewStageBuilder()
 		if approvalStatus {
 			pipelineBuilder.Match(bsonx.M("approval_status", true)).
 				Project(
-					aggregation.BsonBuilder().
-						AddKeyValues("content", 1).
-						AddKeyValues("post_info", 1).
-						AddKeyValues("user_info", 1).
-						AddKeyValues("approval_status", 1).
-						AddKeyValues("created_at", 1).
-						Filter("replies", "$replies", aggregation.EqWithoutKey("$$reply.approval_status", true), &types.FilterOptions{As: "reply"}).Build(),
+					aggregation.NewBuilder().
+						KeyValue("content", 1).
+						KeyValue("post_info", 1).
+						KeyValue("user_info", 1).
+						KeyValue("approval_status", 1).
+						KeyValue("created_at", 1).
+						Filter("replies", "$replies", aggregation.EqWithoutKey("$$reply.approval_status", true), &aggregation.FilterOptions{As: "reply"}).Build(),
 				)
 		} else {
 			pipelineBuilder.Match(
@@ -176,15 +174,15 @@ func (r *CommentRepository) AdminFindCommentsWithPagination(ctx context.Context,
 						Add("replies.approval_status", false).
 						Build()),
 			).Project(
-				aggregation.BsonBuilder().
-					AddKeyValues("content", 1).
-					AddKeyValues("post_info", 1).
-					AddKeyValues("user_info", 1).
-					AddKeyValues("approval_status", 1).
-					AddKeyValues("created_at", 1).
+				aggregation.NewBuilder().
+					KeyValue("content", 1).
+					KeyValue("post_info", 1).
+					KeyValue("user_info", 1).
+					KeyValue("approval_status", 1).
+					KeyValue("created_at", 1).
 					Cond("replies",
 						aggregation.EqWithoutKey("$approval_status", true),
-						aggregation.FilterWithoutKey("$replies", aggregation.EqWithoutKey("$$reply.approval_status", false), &types.FilterOptions{As: "reply"}),
+						aggregation.FilterWithoutKey("$replies", aggregation.EqWithoutKey("$$reply.approval_status", false), &aggregation.FilterOptions{As: "reply"}),
 						"$replies",
 					).Build(),
 			)

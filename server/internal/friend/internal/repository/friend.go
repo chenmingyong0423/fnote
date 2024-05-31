@@ -105,7 +105,7 @@ func (r *FriendRepository) UpdateById(ctx context.Context, friend domain.Friend)
 }
 
 func (r *FriendRepository) FindAll(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Friend, int64, error) {
-	condBuilder := query.BsonBuilder()
+	condBuilder := query.NewBuilder()
 	if pageDTO.Keyword != "" {
 		condBuilder.RegexOptions("name", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageDTO.Keyword)), "i")
 	}

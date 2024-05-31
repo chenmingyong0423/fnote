@@ -7,18 +7,18 @@ require (
 	github.com/chenmingyong0423/gkit v0.6.0
 	github.com/chenmingyong0423/go-eventbus v0.2.0
 	github.com/chenmingyong0423/go-http-chain v0.3.4
-	github.com/chenmingyong0423/go-mongox v0.18.0
+	github.com/chenmingyong0423/go-mongox v1.0.2
 	github.com/chenmingyong0423/go-sitemap-generator v1.2.0
 	github.com/gin-contrib/cors v1.7.1
 	github.com/gin-gonic/gin v1.9.1
-	github.com/go-playground/validator/v10 v10.19.0
+	github.com/go-playground/validator/v10 v10.20.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
 	github.com/json-iterator/go v1.1.12
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.18.2
-	go.mongodb.org/mongo-driver v1.14.0
+	go.mongodb.org/mongo-driver v1.15.0
 	golang.org/x/sync v0.7.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
