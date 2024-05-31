@@ -108,7 +108,7 @@ func (d *WebsiteConfigDao) DeleteTPSVConfigByKey(ctx context.Context, key string
 
 func (d *WebsiteConfigDao) AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error {
 	updateResult, err := d.coll.Updater().Filter(query.Eq("typ", "third party site verification")).Updates(
-		update.BsonBuilder().Push("props.list", tpsv).Set("updated_at", time.Now().Local()).Build(),
+		update.NewBuilder().Push("props.list", tpsv).Set("updated_at", time.Now().Local()).Build(),
 	).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to add tpsv config, tpsv=%v", tpsv)
@@ -120,7 +120,7 @@ func (d *WebsiteConfigDao) AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) 
 }
 
 func (d *WebsiteConfigDao) UpdatePropsByTyp(ctx context.Context, typ string, cfg any, now time.Time) error {
-	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", typ)).Updates(update.BsonBuilder().Set("props", cfg).Set("updated_at", now).Build()).UpdateOne(ctx)
+	updateResult, err := d.coll.Updater().Filter(bsonx.M("typ", typ)).Updates(update.NewBuilder().Set("props", cfg).Set("updated_at", now).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update %s config, updates=%v", typ, cfg)
 	}

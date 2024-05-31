@@ -52,11 +52,11 @@ type PostLikeDao struct {
 
 func (d *PostLikeDao) CountOfToday(ctx context.Context) (int64, error) {
 	start, end := d.getBeginAndEndTime()
-	return d.coll.Finder().Filter(query.BsonBuilder().Gte("created_at", start).Lte("created_at", end).Build()).Count(ctx)
+	return d.coll.Finder().Filter(query.NewBuilder().Gte("created_at", start).Lte("created_at", end).Build()).Count(ctx)
 }
 
 func (d *PostLikeDao) FindByPostIdAndIp(ctx context.Context, postId string, ip string) (*PostLike, error) {
-	postLike, err := d.coll.Finder().Filter(query.BsonBuilder().Eq("post_id", postId).Eq("ip", ip).Build()).FindOne(ctx)
+	postLike, err := d.coll.Finder().Filter(query.NewBuilder().Eq("post_id", postId).Eq("ip", ip).Build()).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to find post_likes, post_id=%s, ip=%s", postLike, ip)
 	}

@@ -50,7 +50,7 @@ type PostDraftRepository struct {
 }
 
 func (r *PostDraftRepository) GetPostDraftPage(ctx context.Context, pageQuery domain.PageQuery) ([]*domain.PostDraft, int64, error) {
-	condBuilder := query.BsonBuilder()
+	condBuilder := query.NewBuilder()
 	if pageQuery.Keyword != "" {
 		condBuilder.RegexOptions("title", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageQuery.Keyword)), "i")
 	}

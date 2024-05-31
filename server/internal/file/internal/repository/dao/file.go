@@ -77,7 +77,7 @@ func (d *FileDao) FindByFileName(ctx context.Context, filename string) (*File, e
 }
 
 func (d *FileDao) PullUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error {
-	updateOne, err := d.coll.Updater().Filter(bsonx.M("file_id", fileId)).Updates(update.BsonBuilder().Pull("used_in", fileUsage).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(bsonx.M("file_id", fileId)).Updates(update.NewBuilder().Pull("used_in", fileUsage).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "pull used in error, file id: %s, file usage: %+v", fileId, fileUsage)
 	}
@@ -88,7 +88,7 @@ func (d *FileDao) PullUsedIn(ctx context.Context, fileId []byte, fileUsage FileU
 }
 
 func (d *FileDao) PushIntoUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error {
-	updateOne, err := d.coll.Updater().Filter(bsonx.M("file_id", fileId)).Updates(update.BsonBuilder().Push("used_in", fileUsage).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(bsonx.M("file_id", fileId)).Updates(update.NewBuilder().Push("used_in", fileUsage).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "push into used in error, file id: %s, file usage: %+v", fileId, fileUsage)
 	}

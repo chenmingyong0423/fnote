@@ -21,9 +21,8 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-
 	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -31,7 +30,6 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
-	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -203,11 +201,11 @@ func (d *CommentDao) FindDisapprovedCommentByObjectIDs(ctx context.Context, comm
 	for _, objectID := range commentObjectIDs {
 		anyIds = append(anyIds, objectID)
 	}
-	return d.coll.Finder().Filter(query.BsonBuilder().In("_id", anyIds...).Eq("approval_status", false).Build()).Find(ctx)
+	return d.coll.Finder().Filter(query.NewBuilder().In("_id", anyIds...).Eq("approval_status", false).Build()).Find(ctx)
 }
 
 func (d *CommentDao) FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentObjID primitive.ObjectID, replyIds []string) (*Comment, error) {
-	pipeline := aggregation.StageBsonBuilder().
+	pipeline := aggregation.NewStageBuilder().
 		Match(query.Id(commentObjID)).
 		Project(
 			bsonx.NewD().
@@ -222,7 +220,7 @@ func (d *CommentDao) FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, c
 					aggregation.AndWithoutKey(
 						bsonx.D("$in", bsonx.A("$$reply.reply_id", replyIds)),
 						aggregation.EqWithoutKey("$$reply.approval_status", false),
-					), &types.FilterOptions{As: "reply"})).Build(),
+					), &aggregation.FilterOptions{As: "reply"})).Build(),
 		).Build()
 	comments, err := d.coll.Aggregator().Pipeline(pipeline).Aggregate(ctx)
 	if err != nil {
@@ -237,7 +235,7 @@ func (d *CommentDao) FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, c
 func (d *CommentDao) UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentObjectID primitive.ObjectID, replyIds []string) error {
 	now := time.Now().Local()
 	updateResult, err := d.coll.Updater().Filter(query.Id(commentObjectID)).
-		Updates(update.BsonBuilder().Set("updated_at", now).Set("replies.$[elem].approval_status", true).Set("replies.$[elem].updated_at", now).Build()).
+		Updates(update.NewBuilder().Set("updated_at", now).Set("replies.$[elem].approval_status", true).Set("replies.$[elem].updated_at", now).Build()).
 		UpdateMany(ctx, options.Update().SetArrayFilters(options.ArrayFilters{Filters: []any{query.In("elem.reply_id", replyIds...)}}))
 	if err != nil {
 		return errors.Wrapf(err, "failed to update reply approval_status, commentId=%s, replyIds=%v", commentObjectID, replyIds)
@@ -257,7 +255,7 @@ func (d *CommentDao) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []pr
 	for _, objectID := range ids {
 		anyIds = append(anyIds, objectID)
 	}
-	updateResult, err := d.coll.Updater().Filter(query.BsonBuilder().In("_id", anyIds...).Eq("approval_status", false).Build()).Updates(update.BsonBuilder().Set("approval_status", true).Set("updated_at", time.Now().Local()).Build()).UpdateMany(ctx)
+	updateResult, err := d.coll.Updater().Filter(query.NewBuilder().In("_id", anyIds...).Eq("approval_status", false).Build()).Updates(update.NewBuilder().Set("approval_status", true).Set("updated_at", time.Now().Local()).Build()).UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to update approval_status of comments, ids=%v", ids)
 	}
@@ -281,7 +279,7 @@ func (d *CommentDao) Find(ctx context.Context, findOptions *options.FindOptions)
 
 func (d *CommentDao) CountOfToday(ctx context.Context) (int64, error) {
 	startOfDayUnix, endOfDayUnix := d.getBeginSecondsAndEndSeconds()
-	return d.coll.Finder().Filter(query.BsonBuilder().Gte("created_at", startOfDayUnix).Lte("created_at", endOfDayUnix).Build()).Count(ctx)
+	return d.coll.Finder().Filter(query.NewBuilder().Gte("created_at", startOfDayUnix).Lte("created_at", endOfDayUnix).Build()).Count(ctx)
 }
 
 func (d *CommentDao) DeleteReplyByCIdAndRId(ctx context.Context, objectID primitive.ObjectID, replyId string) error {
@@ -315,8 +313,8 @@ func (d *CommentDao) FindCommentWithRepliesById(ctx context.Context, objectID pr
 }
 
 func (d *CommentDao) UpdateCommentReplyStatus(ctx context.Context, objectID primitive.ObjectID, replyId string, commentStatus bool) error {
-	filter := query.BsonBuilder().Id(objectID).Add("replies.reply_id", replyId).Build()
-	updates := update.BsonBuilder().Set("replies.$.approval_status", commentStatus).Set("replies.$.updated_at", time.Now().Local()).Build()
+	filter := query.NewBuilder().Id(objectID).KeyValue("replies.reply_id", replyId).Build()
+	updates := update.NewBuilder().Set("replies.$.approval_status", commentStatus).Set("replies.$.updated_at", time.Now().Local()).Build()
 	result, err := d.coll.Updater().Filter(filter).Updates(updates).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update one from comment, filter=%v, update=%v", filter, updates)
@@ -328,7 +326,7 @@ func (d *CommentDao) UpdateCommentReplyStatus(ctx context.Context, objectID prim
 }
 
 func (d *CommentDao) FindReplyByCIdAndRId(ctx context.Context, objectCommentID primitive.ObjectID, replyId string) (*ReplyWithPostInfo, error) {
-	pipeline := aggregation.StageBsonBuilder().
+	pipeline := aggregation.NewStageBuilder().
 		Match(query.Id(objectCommentID)).
 		Unwind("$replies", nil).
 		Match(bsonx.M("replies.reply_id", replyId)).
@@ -346,7 +344,7 @@ func (d *CommentDao) FindReplyByCIdAndRId(ctx context.Context, objectCommentID p
 }
 
 func (d *CommentDao) UpdateCommentStatus2True(ctx context.Context, objectID primitive.ObjectID) error {
-	result, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.BsonBuilder().Set("approval_status", true).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
+	result, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.NewBuilder().Set("approval_status", true).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update one from comment, id=%s, commentStatus=%v", objectID.Hex(), true)
 	}
@@ -365,7 +363,7 @@ func (d *CommentDao) FindCommentById(ctx context.Context, objectID primitive.Obj
 }
 
 func (d *CommentDao) AggregationQuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]AdminComment, int64, error) {
-	pipeline := aggregation.StageBsonBuilder().
+	pipeline := aggregation.NewStageBuilder().
 		Match(bson.D{}).
 		Project(aggregation.ConcatArrays("combined", []any{
 			bsonx.A(bsonx.NewD().Add("_id", "$_id").Add("post_info", "$post_info").Add("user_info", "$user_info").Add("content", "$content").Add("created_at", "$created_at").Add("type", 0).Add("approval_status", "approval_status").Build()),
@@ -400,12 +398,12 @@ func (d *CommentDao) FindApprovedCommentsByPostId(ctx context.Context, postId st
 }
 
 func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error) {
-	pipeline := aggregation.StageBsonBuilder().
+	pipeline := aggregation.NewStageBuilder().
 		Match(bsonx.M("approval_status", true)).
 		Project(aggregation.ConcatArrays("combined", []any{
 			bsonx.A(bsonx.NewD().Add("post_info", "$post_info").Add("name", "$user_info.name").Add("email", "$user_info.email").Add("content", "$content").Add("created_at", "$created_at").Build()),
 			aggregation.MapWithoutKey(
-				aggregation.FilterWithoutKey("$replies", aggregation.EqWithoutKey("$$replyItem.approval_status", true), &types.FilterOptions{As: "replyItem"}),
+				aggregation.FilterWithoutKey("$replies", aggregation.EqWithoutKey("$$replyItem.approval_status", true), &aggregation.FilterOptions{As: "replyItem"}),
 				"reply",
 				bsonx.NewD().Add("post_info", "$post_info").Add("name", "$$reply.user_info.name").Add("email", "$$reply.user_info.email").Add("content", "$$reply.content").Add("created_at", "$$reply.created_at").Build(),
 			),
@@ -478,7 +476,7 @@ func (d *CommentDao) AddCommentReply(ctx context.Context, objectID primitive.Obj
 
 func (d *CommentDao) FindApprovedCommentById(ctx context.Context, objectID primitive.ObjectID) (*Comment, error) {
 	comment, err := d.coll.Finder().Filter(
-		query.BsonBuilder().Id(objectID).Eq("approval_status", true).Build()).FindOne(ctx)
+		query.NewBuilder().Id(objectID).Eq("approval_status", true).Build()).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the document from comment, cmtId=%s", objectID.Hex())
 	}

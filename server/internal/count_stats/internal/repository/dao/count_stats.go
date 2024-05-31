@@ -66,7 +66,7 @@ func (d *CountStatsDao) GetByFilter(ctx context.Context, filter bson.D) ([]*Coun
 }
 
 func (d *CountStatsDao) IncreaseByReferenceIdAndType(ctx context.Context, statsType string, delta int) error {
-	oneResult, err := d.coll.Updater().Filter(query.Eq("type", statsType)).Updates(update.BsonBuilder().Inc("count", delta).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
+	oneResult, err := d.coll.Updater().Filter(query.Eq("type", statsType)).Updates(update.NewBuilder().Inc("count", delta).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "iucrease count stats error, type=%s", statsType)
 	}
@@ -77,7 +77,7 @@ func (d *CountStatsDao) IncreaseByReferenceIdAndType(ctx context.Context, statsT
 }
 
 func (d *CountStatsDao) DecreaseByReferenceIdAndType(ctx context.Context, statsType string, count int) error {
-	oneResult, err := d.coll.Updater().Filter(query.Eq("type", statsType)).Updates(update.BsonBuilder().Inc("count", -count).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
+	oneResult, err := d.coll.Updater().Filter(query.Eq("type", statsType)).Updates(update.NewBuilder().Inc("count", -count).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "decrease count stats error, type=%s", statsType)
 	}

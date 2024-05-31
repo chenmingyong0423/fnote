@@ -179,7 +179,7 @@ func (r *CategoryRepository) CreateCategory(ctx context.Context, category domain
 }
 
 func (r *CategoryRepository) QueryCategoriesPage(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Category, int64, error) {
-	condBuilder := query.BsonBuilder()
+	condBuilder := query.NewBuilder()
 	if pageDTO.Keyword != "" {
 		condBuilder.RegexOptions("name", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageDTO.Keyword)), "i")
 	}
