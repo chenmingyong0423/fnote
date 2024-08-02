@@ -19,7 +19,7 @@
       <div class="h-10 line-height-10 font-bold text-6 mb-5">友链列表</div>
       <div class="flex flex-wrap gap-x-4 mb-5 lt-md:flex-col">
         <a
-          :href="friend.url"
+          :href="`${friend.url}?from=${siteURL}`"
           target="_blank"
           class="flex mb-5 w-23% custom_border_gray h-[100px] p-2 b-rounded-4 custom_cursor_flow cursor-pointer dark:text-dtc dark_bg_gray custom_shadow lt-md:w-100%"
           v-for="(friend, index) in friends"
@@ -141,6 +141,8 @@ const friends = ref<IFriend[]>([]);
 const toast = useAlertStore();
 const homeStore = useHomeStore();
 const isBlackMode = computed(() => homeStore.isBlackMode);
+const runtimeConfig = useRuntimeConfig();
+const siteURL = runtimeConfig.public.domain;
 
 const req = ref<FriendReq>({
   name: "",
