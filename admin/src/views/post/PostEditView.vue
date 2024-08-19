@@ -138,9 +138,14 @@
         height="800px"
         :disabled-menus="[]"
         @upload-image="handleUploadImage"
-        @save="saveDraft"
+        @save="preSave"
+        left-toolbar="undo redo clear | h bold italic strikethrough quote | ul ol table hr | link image code | save | template"
+        :toolbar="toolbar"
       />
     </div>
+    <a-modal v-model:visible="visible4Template" width="1000px" title="图片素材" @ok="handleOk4Template" :footer="null">
+      <ImageLIstView />
+    </a-modal>
   </div>
 </template>
 
@@ -153,6 +158,7 @@ import type { SelectTag } from '@/interfaces/Tag'
 import { FileUpload } from '@/interfaces/File'
 import { useUserStore } from '@/stores/user'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
+import ImageLIstView from '@/views/post/editor/ImageLIstView.vue'
 
 const emit = defineEmits(['publish', 'saveDraft'])
 const userStore = useUserStore()
@@ -315,4 +321,42 @@ const handleUploadImage = async (event: any, insertImage: any, files: any) => {
     console.log(error)
   }
 }
+
+const globalEditor = ref<any>(null);
+
+const toolbar = {
+  template: {
+    title: '模板',
+    icon: 'v-md-icon-tip',
+    menus: [
+      {
+        name: 'personal-images',
+        text: '图片素材',
+        action(editor : any) {
+          visible4Template.value = true;
+          globalEditor.value = editor;
+          // @ts-ignore
+          // editor.insert(function (selected : any) {
+          //   const prefix = '(((';
+          //   const suffix = ')))';
+          //   const placeholder = '请输入文本';
+          //   const content = selected || placeholder;
+          //
+          //   return {
+          //     text: `${prefix}${content}${suffix}`,
+          //     selected: content,
+          //   };
+          // });
+        },
+      },
+    ]
+  },
+}
+
+const visible4Template = ref<boolean>(false);
+
+const handleOk4Template = (e: MouseEvent) => {
+  console.log(e);
+  visible4Template.value = false;
+};
 </script>
