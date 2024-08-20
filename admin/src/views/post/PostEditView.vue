@@ -13,7 +13,7 @@
       <a-input v-model:value="post4Edit.title" addon-before="标题" class="w-59%" />
       <a-input v-model:value="post4Edit.author" addon-before="作者" class="w-30% ml-1%" />
       <a-button type="primary" @click="visible = true" class="w-9% ml-1%"
-        >{{ props.isNewPost ? '发布' : '更新' }}
+      >{{ props.isNewPost ? '发布' : '更新' }}
       </a-button>
       <a-button type="primary" @click="preSave" class="w-9% ml-1%">保存草稿</a-button>
       <a-modal
@@ -144,7 +144,7 @@
       />
     </div>
     <a-modal v-model:visible="visible4Template" width="1000px" title="图片素材" @ok="handleOk4Template" :footer="null">
-      <ImageLIstView />
+      <ImageLIstView @insertImg="insertImg"/>
     </a-modal>
   </div>
 </template>
@@ -322,8 +322,6 @@ const handleUploadImage = async (event: any, insertImage: any, files: any) => {
   }
 }
 
-const globalEditor = ref<any>(null);
-
 const toolbar = {
   template: {
     title: '模板',
@@ -332,31 +330,34 @@ const toolbar = {
       {
         name: 'personal-images',
         text: '图片素材',
-        action(editor : any) {
-          visible4Template.value = true;
-          globalEditor.value = editor;
-          // @ts-ignore
-          // editor.insert(function (selected : any) {
-          //   const prefix = '(((';
-          //   const suffix = ')))';
-          //   const placeholder = '请输入文本';
-          //   const content = selected || placeholder;
-          //
-          //   return {
-          //     text: `${prefix}${content}${suffix}`,
-          //     selected: content,
-          //   };
-          // });
-        },
-      },
+        action(editor: any) {
+          visible4Template.value = true
+          globalEditor.value = editor
+        }
+      }
     ]
-  },
+  }
 }
 
-const visible4Template = ref<boolean>(false);
+const visible4Template = ref<boolean>(false)
 
 const handleOk4Template = (e: MouseEvent) => {
-  console.log(e);
-  visible4Template.value = false;
-};
+  console.log(e)
+  visible4Template.value = false
+  globalEditor.value = null
+}
+
+const globalEditor = ref<any>(null)
+
+const insertImg = (content : string) => {
+  // @ts-ignore
+  globalEditor.value.insert(function() {
+    return {
+      text: content,
+      selected: content
+    }
+  })
+  visible4Template.value = false
+  globalEditor.value = null
+}
 </script>
