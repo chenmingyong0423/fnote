@@ -31,6 +31,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/message"
 	"github.com/chenmingyong0423/fnote/server/internal/message_template"
 	"github.com/chenmingyong0423/fnote/server/internal/post"
+	"github.com/chenmingyong0423/fnote/server/internal/post_asset"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
@@ -88,5 +89,7 @@ func initializeApp() (*gin.Engine, error) {
 		email.InitEmailModule,
 		backup.InitBackupModule,
 		wire.FieldsOf(new(*backup.Module), "Hdl"),
+		post_asset.InitPostAssetModule,
+		wire.FieldsOf(new(*post_asset.Module), "Hdl"),
 	))
 }

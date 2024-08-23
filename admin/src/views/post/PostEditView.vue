@@ -143,7 +143,7 @@
         :toolbar="toolbar"
       />
     </div>
-    <a-modal v-model:visible="visible4Template" width="1000px" title="图片素材" @ok="handleOk4Template" :footer="null">
+    <a-modal v-model:visible="visible4Template" width="1000px" title="图片素材" @ok="handleOk4Template" :footer="null" :destroyOnClose="true">
       <ImageLIstView @insertImg="insertImg"/>
     </a-modal>
   </div>
