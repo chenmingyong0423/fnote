@@ -21,6 +21,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/message"
 	"github.com/chenmingyong0423/fnote/server/internal/message_template"
 	"github.com/chenmingyong0423/fnote/server/internal/post"
+	"github.com/chenmingyong0423/fnote/server/internal/post_asset"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
@@ -79,7 +80,9 @@ func initializeApp() (*gin.Engine, error) {
 	postLikeHandler := post_likeModule.Hdl
 	post_visitModule := post_visit.InitPostVisitModule(database)
 	postVisitHandler := post_visitModule.Hdl
-	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, messageTemplateHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v2, validators, postIndexHandler, postDraftHandler, aggregatePostHandler, postLikeHandler, postVisitHandler)
+	post_assetModule := post_asset.InitPostAssetModule(database)
+	postAssetHandler := post_assetModule.Hdl
+	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, messageTemplateHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v2, validators, postIndexHandler, postDraftHandler, aggregatePostHandler, postLikeHandler, postVisitHandler, postAssetHandler)
 	if err != nil {
 		return nil, err
 	}
