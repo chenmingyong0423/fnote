@@ -23,7 +23,8 @@ type AssetFolder struct {
 	// 文件夹类型，post-editor ···
 	Type          string
 	Assets        []string
-	ChildFolders  []AssetFolder
+	ChildFolders  []*AssetFolder
 	SupportDelete bool
 	SupportEdit   bool
+	SupportAdd    bool
 }

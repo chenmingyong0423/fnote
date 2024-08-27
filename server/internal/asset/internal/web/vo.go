@@ -12,36 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dao
+package web
 
-import (
-	"github.com/chenmingyong0423/go-mongox"
-	"go.mongodb.org/mongo-driver/mongo"
-)
-
-type PostAsset struct {
-	mongox.Model `bson:",inline"`
+type AssetVO struct {
+	Id string `json:"id"`
 	// 素材标题
-	Title string `bson:"title,omitempty"`
+	Title string `json:"title"`
 	// 素材内容
-	Content string `bson:"content"`
+	Content string `json:"content"`
 	// 素材描述
-	Description string `bson:"description,omitempty"`
+	Description string `json:"description"`
 	// 素材类型，image ···
-	AssetType string `bson:"asset_type"`
+	AssetType string `json:"asset_type"`
+	// 文件夹类型，post-editor ···
+	Type string `json:"type"`
 	// 元数据
-	Metadata map[string]any `bson:"metadata,omitempty"`
+	Metadata map[string]any `json:"metadata"`
 }
 
-type IPostAssetDao interface {
-}
-
-var _ IPostAssetDao = (*PostAssetDao)(nil)
-
-func NewPostAssetDao(db *mongo.Database) *PostAssetDao {
-	return &PostAssetDao{coll: mongox.NewCollection[PostAsset](db.Collection("post_assets"))}
-}
-
-type PostAssetDao struct {
-	coll *mongox.Collection[PostAsset]
+type AssetFolderVO struct {
+	Id            string           `json:"id"`
+	Name          string           `json:"name"`
+	SupportDelete bool             `json:"support_delete"`
+	SupportEdit   bool             `json:"support_edit"`
+	SupportAdd    bool             `json:"support_add"`
+	Children      []*AssetFolderVO `json:"children"`
 }
