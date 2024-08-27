@@ -138,9 +138,21 @@
         height="800px"
         :disabled-menus="[]"
         @upload-image="handleUploadImage"
-        @save="saveDraft"
+        @save="preSave"
+        left-toolbar="undo redo clear | h bold italic strikethrough quote | ul ol table hr | link image code | save | template"
+        :toolbar="toolbar"
       />
     </div>
+    <a-modal
+      v-model:visible="visible4Template"
+      width="1000px"
+      title="图片素材"
+      @ok="handleOk4Template"
+      :footer="null"
+      :destroyOnClose="true"
+    >
+      <ImageLIstView @insertImg="insertImg" />
+    </a-modal>
   </div>
 </template>
 
@@ -153,6 +165,7 @@ import type { SelectTag } from '@/interfaces/Tag'
 import { FileUpload } from '@/interfaces/File'
 import { useUserStore } from '@/stores/user'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
+import ImageLIstView from '@/views/post/editor/ImageLIstView.vue'
 
 const emit = defineEmits(['publish', 'saveDraft'])
 const userStore = useUserStore()
@@ -314,5 +327,44 @@ const handleUploadImage = async (event: any, insertImage: any, files: any) => {
   } catch (error) {
     console.log(error)
   }
+}
+
+const toolbar = {
+  template: {
+    title: '模板',
+    icon: 'v-md-icon-tip',
+    menus: [
+      {
+        name: 'personal-images',
+        text: '图片素材',
+        action(editor: any) {
+          visible4Template.value = true
+          globalEditor.value = editor
+        }
+      }
+    ]
+  }
+}
+
+const visible4Template = ref<boolean>(false)
+
+const handleOk4Template = (e: MouseEvent) => {
+  console.log(e)
+  visible4Template.value = false
+  globalEditor.value = null
+}
+
+const globalEditor = ref<any>(null)
+
+const insertImg = (content: string) => {
+  // @ts-ignore
+  globalEditor.value.insert(function () {
+    return {
+      text: content,
+      selected: content
+    }
+  })
+  visible4Template.value = false
+  globalEditor.value = null
 }
 </script>

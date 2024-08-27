@@ -18,6 +18,7 @@ package main
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
+	"github.com/chenmingyong0423/fnote/server/internal/asset"
 	"github.com/chenmingyong0423/fnote/server/internal/backup"
 	"github.com/chenmingyong0423/fnote/server/internal/category"
 	"github.com/chenmingyong0423/fnote/server/internal/comment"
@@ -88,5 +89,7 @@ func initializeApp() (*gin.Engine, error) {
 		email.InitEmailModule,
 		backup.InitBackupModule,
 		wire.FieldsOf(new(*backup.Module), "Hdl"),
+		asset.InitAssetModule,
+		wire.FieldsOf(new(*asset.Module), "Hdl"),
 	))
 }
