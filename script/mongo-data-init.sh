@@ -367,13 +367,14 @@ db.post_likes.createIndex({ "post_id": 1, "ip": 1 }, { "unique": true })
 
 // asset-folder
 db.createCollection("asset_folders");
-db.asset_folders.createIndex({ "asset_type": 1, "type": 1 }, { "unique": true })
+db.asset_folders.createIndex({ "name": 1, "asset_type": 1, "type": 1 }, { "unique": true })
 db.getCollection("asset_folders").insertOne({
     name: "默认",
     asset_type: "image",
     type: "post-editor",
     support_delete: false,
     support_edit: false,
+    support_add: false,
     created_at: new Date(),
     updated_at: new Date()
 });
