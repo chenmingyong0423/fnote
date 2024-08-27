@@ -13,7 +13,7 @@
       <a-input v-model:value="post4Edit.title" addon-before="标题" class="w-59%" />
       <a-input v-model:value="post4Edit.author" addon-before="作者" class="w-30% ml-1%" />
       <a-button type="primary" @click="visible = true" class="w-9% ml-1%"
-      >{{ props.isNewPost ? '发布' : '更新' }}
+        >{{ props.isNewPost ? '发布' : '更新' }}
       </a-button>
       <a-button type="primary" @click="preSave" class="w-9% ml-1%">保存草稿</a-button>
       <a-modal
@@ -143,8 +143,15 @@
         :toolbar="toolbar"
       />
     </div>
-    <a-modal v-model:visible="visible4Template" width="1000px" title="图片素材" @ok="handleOk4Template" :footer="null" :destroyOnClose="true">
-      <ImageLIstView @insertImg="insertImg"/>
+    <a-modal
+      v-model:visible="visible4Template"
+      width="1000px"
+      title="图片素材"
+      @ok="handleOk4Template"
+      :footer="null"
+      :destroyOnClose="true"
+    >
+      <ImageLIstView @insertImg="insertImg" />
     </a-modal>
   </div>
 </template>
@@ -349,9 +356,9 @@ const handleOk4Template = (e: MouseEvent) => {
 
 const globalEditor = ref<any>(null)
 
-const insertImg = (content : string) => {
+const insertImg = (content: string) => {
   // @ts-ignore
-  globalEditor.value.insert(function() {
+  globalEditor.value.insert(function () {
     return {
       text: content,
       selected: content
