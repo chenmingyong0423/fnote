@@ -1,10 +1,11 @@
 import instance from '@/utils/axios'
+import type { VNode } from 'vue'
 
 export interface AssetFolderVO {
   id: string
   name: string
   // icon: () => h(PictureOutlined),
-  icon: string
+  icon: VNode
   support_delete: boolean
   support_edit: boolean
   support_add: boolean
