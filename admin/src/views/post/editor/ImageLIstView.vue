@@ -83,7 +83,7 @@
             :key="image.id"
             @click="selectImage(image.id)"
             @mouseover="state.hoveredImgIndex = image.id"
-            @mouseleave="state.hoveredImgIndex = null"
+            @mouseleave="state.hoveredImgIndex = ''"
             :class="[
               'relative box-border border rounded w-27 h-27 cursor-pointer',
               { 'border-blue-500': isSelected(image.id) }
@@ -142,7 +142,7 @@ import {
   AddAsset,
   AddAssetFolder,
   type AddAssetFolderRequest,
-  type AssetFolderVO,
+  type AssetFolderVO, type AssetRequest,
   type AssetVO,
   DeleteAssetFolder,
   EditAssetFolderName,
@@ -156,8 +156,8 @@ import SimpleUpload from '@/components/upload/SimpleUpload.vue'
 
 const state = reactive({
   selectedMenuItem: '',
-  selectedImgIndex: null,
-  hoveredImgIndex: null
+  selectedImgIndex: '',
+  hoveredImgIndex: ''
 })
 
 const folders = ref<AssetFolderVO[]>([])
@@ -181,12 +181,12 @@ getFolders()
 
 const images = ref<AssetVO[]>([])
 
-const selectImage = (id) => {
-  state.selectedImgIndex = state.selectedImgIndex === id ? null : id
+const selectImage = (id: string) => {
+  state.selectedImgIndex = state.selectedImgIndex == id ? '' : id
 }
 
-const isSelected = (id) => {
-  return state.selectedImgIndex === id
+const isSelected = (id: string) => {
+  return state.selectedImgIndex == id
 }
 
 const emit = defineEmits(['insertImg'])
@@ -195,7 +195,7 @@ const insert = () => {
   // 从 images 里面找到对应元素
   const image = images.value.find((item) => item.id == state.selectedImgIndex)
   // 告诉父组件
-  emit('insertImg', `![](${image.content})`)
+  emit('insertImg', `![](${image?.content})`)
 }
 
 const menuItemChanged = (id: string) => {
@@ -212,7 +212,7 @@ const assetFolder = reactive<AddAssetFolderRequest>({
   support_delete: true,
   support_edit: true,
   support_add: true
-})
+} as AddAssetFolderRequest)
 
 const handleOk = () => {
   if (modalLabel.value === '新增分类') {
@@ -375,7 +375,7 @@ const uploadAsset = async (content: string) => {
       content: content,
       asset_type: 'image',
       type: 'post-editor'
-    })
+    } as AssetRequest)
     if (response.data.code !== 0) {
       message.error(response.data.message)
       return
