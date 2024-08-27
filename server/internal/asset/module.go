@@ -12,13 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package web
+package asset
 
-type PostAssetVO struct{}
+import (
+	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/service"
+	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/web"
+)
 
-type AssetFolderVO struct {
-	Id            string `json:"id"`
-	Name          string `json:"name"`
-	SupportDelete bool   `json:"support_delete"`
-	SupportEdit   bool   `json:"support_edit"`
-}
+type (
+	AssetHandler = web.AssetHandler
+	Service      = service.IAssetService
+	Module       struct {
+		Svc Service
+		Hdl *AssetHandler
+	}
+)

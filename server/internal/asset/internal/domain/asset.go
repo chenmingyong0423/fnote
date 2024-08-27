@@ -12,23 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package service
+package domain
 
-import (
-	"github.com/chenmingyong0423/fnote/server/internal/post_asset/internal/repository"
-)
-
-type IPostAssetService interface {
-}
-
-var _ IPostAssetService = (*PostAssetService)(nil)
-
-func NewPostAssetService(repo repository.IPostAssetRepository) *PostAssetService {
-	return &PostAssetService{
-		repo: repo,
-	}
-}
-
-type PostAssetService struct {
-	repo repository.IPostAssetRepository
+type Asset struct {
+	Id string
+	// 素材标题
+	Title string
+	// 素材内容
+	Content string
+	// 素材描述
+	Description string
+	// 素材类型，image ···
+	AssetType string
+	// 文件夹类型，post-editor ···
+	Type string
+	// 元数据
+	Metadata map[string]any
 }
