@@ -52,6 +52,7 @@ type IAssetFolderDao interface {
 	DeleteSubFolderById(ctx context.Context, objectID primitive.ObjectID, subObjID primitive.ObjectID) (int64, error)
 	ModifyNameById(ctx context.Context, objectID primitive.ObjectID, name string) (int64, error)
 	PutAssetId(ctx context.Context, folderObjID primitive.ObjectID, assetObjID primitive.ObjectID) (int64, error)
+	PullAssetId(ctx context.Context, folderObjID primitive.ObjectID, assetObjID primitive.ObjectID) (int64, error)
 }
 
 var _ IAssetFolderDao = (*AssetFolderDao)(nil)
@@ -62,6 +63,17 @@ func NewAssetFolderDao(db *mongo.Database) *AssetFolderDao {
 
 type AssetFolderDao struct {
 	coll *mongox.Collection[AssetFolder]
+}
+
+func (d *AssetFolderDao) PullAssetId(ctx context.Context, folderObjID primitive.ObjectID, assetObjID primitive.ObjectID) (int64, error) {
+	updateResult, err := d.coll.Updater().
+		Filter(query.Id(folderObjID)).
+		Updates(update.NewBuilder().Pull("assets", assetObjID).Set("updated_at", time.Now()).Build()).
+		UpdateOne(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return updateResult.ModifiedCount, nil
 }
 
 func (d *AssetFolderDao) PutAssetId(ctx context.Context, folderObjID primitive.ObjectID, assetObjID primitive.ObjectID) (int64, error) {

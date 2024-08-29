@@ -36,6 +36,7 @@ type IAssetService interface {
 	GetAssetsByIDs(ctx context.Context, id string) ([]*domain.Asset, error)
 	AddAsset(ctx context.Context, folderId string, asset *domain.Asset) (string, error)
 	DeleteAssetById(ctx context.Context, id string) (int64, error)
+	DeleteAsset(ctx context.Context, folderId string, assetId string) error
 }
 
 var _ IAssetService = (*AssetService)(nil)
@@ -50,6 +51,27 @@ func NewAssetService(repo repository.IAssetFolderRepository, assetRepo repositor
 type AssetService struct {
 	assetFolderRepo repository.IAssetFolderRepository
 	assetRepo       repository.IAssetRepository
+}
+
+func (s *AssetService) DeleteAsset(ctx context.Context, folderId string, assetId string) error {
+	// todo 后面考虑事务
+	cnt, err := s.assetFolderRepo.PullAssetId(ctx, folderId, assetId)
+	if err != nil {
+		return err
+	}
+	if cnt == 0 {
+		return errors.New("failed to pull assetId, ModifiedCount = 0")
+	}
+	cnt, err = s.assetRepo.DeleteById(ctx, assetId)
+	if err != nil {
+		s.recovery4PullAssetId(ctx, folderId, assetId)
+		return err
+	}
+	if cnt == 0 {
+		s.recovery4PullAssetId(ctx, folderId, assetId)
+		return errors.New("failed to delete asset, DeletedCount = 0")
+	}
+	return nil
 }
 
 func (s *AssetService) AddAsset(ctx context.Context, folderId string, asset *domain.Asset) (string, error) {
@@ -131,4 +153,16 @@ func (s *AssetService) GetAssetsByIDs(ctx context.Context, id string) ([]*domain
 
 func (s *AssetService) DeleteAssetById(ctx context.Context, id string) (int64, error) {
 	return s.assetRepo.DeleteById(ctx, id)
+}
+
+func (s *AssetService) recovery4PullAssetId(ctx context.Context, folderId string, assetId string) {
+	cnt, err := s.assetFolderRepo.PullAssetId(ctx, folderId, assetId)
+	if err != nil {
+		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+		l.ErrorContext(ctx, "failed to recovery 4 PullAssetId", err.Error())
+	}
+	if cnt == 0 {
+		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
+		l.ErrorContext(ctx, "failed to recovery 4 PullAssetId", "ModifiedCount = 0")
+	}
 }

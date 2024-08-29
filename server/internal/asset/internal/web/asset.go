@@ -35,21 +35,25 @@ type AssetHandler struct {
 }
 
 func (h *AssetHandler) RegisterGinRoutes(engine *gin.Engine) {
-	group := engine.Group("/admin-api/assets")
-	group.GET("/folders", apiwrap.Wrap(h.GetAssetFolders))
-	group.POST("/folders", apiwrap.WrapWithBody(h.AddAssetFolder))
-	group.PUT("/folders/:id", apiwrap.WrapWithBody(h.ModifyAssetFolder))
-	group.PUT("/folders/:id/name", apiwrap.WrapWithBody(h.ModifyAssetFolderName))
-	group.DELETE("/folders/:id", apiwrap.Wrap(h.DeleteAssetFolder))
+	group := engine.Group("/admin-api/assets/folders")
+	baseFolderIdGroup := group.Group("/:folderId")
+
+	group.GET("", apiwrap.Wrap(h.GetAssetFolders))
+	group.POST("", apiwrap.WrapWithBody(h.AddAssetFolder))
+	baseFolderIdGroup.PUT("", apiwrap.WrapWithBody(h.ModifyAssetFolder))
+	baseFolderIdGroup.PUT("/name", apiwrap.WrapWithBody(h.ModifyAssetFolderName))
+	baseFolderIdGroup.DELETE("", apiwrap.Wrap(h.DeleteAssetFolder))
 
 	// 子文件夹 API
-	group.POST("/folders/:id/subfolders", apiwrap.WrapWithBody(h.AddSubAssetFolder))
-	group.PUT("/folders/:id/subfolders/:subId", apiwrap.WrapWithBody(h.ModifySubAssetFolder))
-	group.DELETE("/folders/:id/subfolders/:subId", apiwrap.Wrap(h.DeleteSubAssetFolder))
+	baseFolderIdGroup.POST("/subfolders", apiwrap.WrapWithBody(h.AddSubAssetFolder))
+	baseFolderIdGroup.PUT("/subfolders/:subId", apiwrap.WrapWithBody(h.ModifySubAssetFolder))
+	baseFolderIdGroup.DELETE("/subfolders/:subId", apiwrap.Wrap(h.DeleteSubAssetFolder))
 
 	// 文件 API
-	group.GET("/folders/:id/assets", apiwrap.Wrap(h.GetAssetsByFolderId))
-	group.POST("/folders/:id/assets", apiwrap.WrapWithBody(h.AddAsset))
+	baseFolderIdGroup.GET("/assets", apiwrap.Wrap(h.GetAssetsByFolderId))
+	baseFolderIdGroup.POST("/assets", apiwrap.WrapWithBody(h.AddAsset))
+	// 删除文件
+	baseFolderIdGroup.DELETE("/assets/:assetId", apiwrap.Wrap(h.DeleteAsset))
 }
 
 func (h *AssetHandler) GetAssetFolders(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[*AssetFolderVO]], error) {
@@ -102,9 +106,9 @@ func (h *AssetHandler) AddAssetFolder(ctx *gin.Context, req AssetFolderRequest) 
 }
 
 func (h *AssetHandler) ModifyAssetFolder(ctx *gin.Context, req AssetFolderRequest) (*apiwrap.ResponseBody[any], error) {
-	id := ctx.Param("id")
+	folderId := ctx.Param("folderId")
 	modifyCnt, err := h.assetServ.ModifyFolderById(ctx, &domain.AssetFolder{
-		Id:            id,
+		Id:            folderId,
 		Name:          req.Name,
 		AssetType:     req.AssetType,
 		Type:          req.Type,
@@ -121,8 +125,8 @@ func (h *AssetHandler) ModifyAssetFolder(ctx *gin.Context, req AssetFolderReques
 }
 
 func (h *AssetHandler) DeleteAssetFolder(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
-	id := ctx.Param("id")
-	deleteCnt, err := h.assetServ.DeleteFolderById(ctx, id)
+	folderId := ctx.Param("folderId")
+	deleteCnt, err := h.assetServ.DeleteFolderById(ctx, folderId)
 	if err != nil {
 		return nil, err
 	}
@@ -133,8 +137,8 @@ func (h *AssetHandler) DeleteAssetFolder(ctx *gin.Context) (*apiwrap.ResponseBod
 }
 
 func (h *AssetHandler) AddSubAssetFolder(ctx *gin.Context, req AssetFolderRequest) (*apiwrap.ResponseBody[any], error) {
-	id := ctx.Param("id")
-	modifyCnt, _, err := h.assetServ.AddSubFolder(ctx, id, &domain.AssetFolder{
+	folderId := ctx.Param("folderId")
+	modifyCnt, _, err := h.assetServ.AddSubFolder(ctx, folderId, &domain.AssetFolder{
 		Name:          req.Name,
 		AssetType:     req.Type,
 		Type:          req.Type,
@@ -152,9 +156,9 @@ func (h *AssetHandler) AddSubAssetFolder(ctx *gin.Context, req AssetFolderReques
 }
 
 func (h *AssetHandler) ModifySubAssetFolder(ctx *gin.Context, req AssetFolderRequest) (*apiwrap.ResponseBody[any], error) {
-	id := ctx.Param("id")
+	folderId := ctx.Param("folderId")
 	subId := ctx.Param("subId")
-	modifyCnt, err := h.assetServ.ModifySubFolderById(ctx, id, &domain.AssetFolder{
+	modifyCnt, err := h.assetServ.ModifySubFolderById(ctx, folderId, &domain.AssetFolder{
 		Id:            subId,
 		Name:          req.Name,
 		AssetType:     req.Type,
@@ -173,9 +177,9 @@ func (h *AssetHandler) ModifySubAssetFolder(ctx *gin.Context, req AssetFolderReq
 }
 
 func (h *AssetHandler) DeleteSubAssetFolder(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
-	id := ctx.Param("id")
+	folderId := ctx.Param("folderId")
 	subId := ctx.Param("subId")
-	deleteCnt, err := h.assetServ.DeleteSubFolderById(ctx, id, subId)
+	deleteCnt, err := h.assetServ.DeleteSubFolderById(ctx, folderId, subId)
 	if err != nil {
 		return nil, err
 	}
@@ -186,8 +190,8 @@ func (h *AssetHandler) DeleteSubAssetFolder(ctx *gin.Context) (*apiwrap.Response
 }
 
 func (h *AssetHandler) ModifyAssetFolderName(ctx *gin.Context, req ModifyFolderNameRequest) (*apiwrap.ResponseBody[any], error) {
-	id := ctx.Param("id")
-	modifyCnt, err := h.assetServ.ModifyFolderNameById(ctx, id, req.Name)
+	folderId := ctx.Param("folderId")
+	modifyCnt, err := h.assetServ.ModifyFolderNameById(ctx, folderId, req.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -198,8 +202,8 @@ func (h *AssetHandler) ModifyAssetFolderName(ctx *gin.Context, req ModifyFolderN
 }
 
 func (h *AssetHandler) GetAssetsByFolderId(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[AssetVO]], error) {
-	id := ctx.Param("id")
-	assets, err := h.assetServ.GetAssetsByIDs(ctx, id)
+	folderId := ctx.Param("folderId")
+	assets, err := h.assetServ.GetAssetsByIDs(ctx, folderId)
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +219,7 @@ func (h *AssetHandler) toAssetVOs(assets []*domain.Asset) []AssetVO {
 }
 
 func (h *AssetHandler) AddAsset(ctx *gin.Context, req PostAssetRequest) (*apiwrap.ResponseBody[any], error) {
-	folderId := ctx.Param("id")
+	folderId := ctx.Param("folderId")
 	_, err := h.assetServ.AddAsset(ctx, folderId, &domain.Asset{
 		Title:       req.Title,
 		Content:     req.Content,
@@ -224,6 +228,16 @@ func (h *AssetHandler) AddAsset(ctx *gin.Context, req PostAssetRequest) (*apiwra
 		Type:        req.Type,
 		Metadata:    req.Metadata,
 	})
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponse(), nil
+}
+
+func (h *AssetHandler) DeleteAsset(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
+	folderId := ctx.Param("folderId")
+	assetId := ctx.Param("assetId")
+	err := h.assetServ.DeleteAsset(ctx, folderId, assetId)
 	if err != nil {
 		return nil, err
 	}

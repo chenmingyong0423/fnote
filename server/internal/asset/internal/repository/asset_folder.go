@@ -34,6 +34,7 @@ type IAssetFolderRepository interface {
 	DeleteSubFolderById(ctx context.Context, id string, subId string) (int64, error)
 	ModifyFolderNameById(ctx context.Context, id string, name string) (int64, error)
 	PutAssetId(ctx context.Context, folderId string, assetId string) (int64, error)
+	PullAssetId(ctx context.Context, folderId string, assetId string) (int64, error)
 }
 
 var _ IAssetFolderRepository = (*AssetFolderRepository)(nil)
@@ -44,6 +45,18 @@ func NewAssetFolderRepository(dao dao.IAssetFolderDao) *AssetFolderRepository {
 
 type AssetFolderRepository struct {
 	dao dao.IAssetFolderDao
+}
+
+func (r *AssetFolderRepository) PullAssetId(ctx context.Context, folderId string, assetId string) (int64, error) {
+	objID, err := primitive.ObjectIDFromHex(folderId)
+	if err != nil {
+		return 0, err
+	}
+	assetObjID, err := primitive.ObjectIDFromHex(assetId)
+	if err != nil {
+		return 0, err
+	}
+	return r.dao.PullAssetId(ctx, objID, assetObjID)
 }
 
 func (r *AssetFolderRepository) PutAssetId(ctx context.Context, folderId string, assetId string) (int64, error) {
