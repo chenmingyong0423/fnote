@@ -41,3 +41,9 @@ type FileDTO struct {
 	FileExt        string `json:"file_ext"`
 	CustomFileName string
 }
+
+type PageDTO struct {
+	PageNum  int64
+	PageSize int64
+	FileType []string
+}

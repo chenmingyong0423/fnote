@@ -28,6 +28,7 @@ type IFileRepository interface {
 	PushIntoUsedIn(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	PullUsedIn(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	FindByFileName(ctx context.Context, filename string) (*domain.File, error)
+	FindPageFilesByFileType(ctx context.Context, pageDTO domain.PageDTO) ([]*domain.File, int64, error)
 }
 
 var _ IFileRepository = (*FileRepository)(nil)
@@ -38,6 +39,22 @@ func NewFileRepository(dao dao.IFileDao) *FileRepository {
 
 type FileRepository struct {
 	dao dao.IFileDao
+}
+
+func (r *FileRepository) FindPageFilesByFileType(ctx context.Context, pageDTO domain.PageDTO) ([]*domain.File, int64, error) {
+	files, cnt, err := r.dao.FindPageByFileType(ctx, pageDTO.PageNum, pageDTO.PageSize, pageDTO.FileType)
+	if err != nil {
+		return nil, 0, err
+	}
+	return r.toDomainFiles(files), cnt, nil
+}
+
+func (r *FileRepository) toDomainFiles(files []*dao.File) []*domain.File {
+	result := make([]*domain.File, 0)
+	for _, file := range files {
+		result = append(result, r.toDomainFile(file))
+	}
+	return result
 }
 
 func (r *FileRepository) FindByFileName(ctx context.Context, filename string) (*domain.File, error) {

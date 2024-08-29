@@ -55,6 +55,7 @@ type IFileService interface {
 	IndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	DeleteIndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	GenerateSitemap(ctx context.Context, postBytes, categoryBytes, tagBytes []byte) error
+	GetFiles(ctx context.Context, pageDTO domain.PageDTO) ([]*domain.File, int64, error)
 }
 
 var _ IFileService = (*FileService)(nil)
@@ -71,6 +72,10 @@ func NewFileService(repo repository.IFileRepository, eventbus *eventbus.EventBus
 type FileService struct {
 	repo     repository.IFileRepository
 	eventBus *eventbus.EventBus
+}
+
+func (s *FileService) GetFiles(ctx context.Context, pageDTO domain.PageDTO) ([]*domain.File, int64, error) {
+	return s.repo.FindPageFilesByFileType(ctx, pageDTO)
 }
 
 func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryBytes, tagBytes []byte) error {

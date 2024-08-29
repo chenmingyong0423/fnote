@@ -17,6 +17,7 @@ package dao
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
@@ -60,6 +61,7 @@ type IFileDao interface {
 	PushIntoUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error
 	PullUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error
 	FindByFileName(ctx context.Context, filename string) (*File, error)
+	FindPageByFileType(ctx context.Context, pageNum int64, pageSize int64, fileType []string) ([]*File, int64, error)
 }
 
 var _ IFileDao = (*FileDao)(nil)
@@ -70,6 +72,23 @@ func NewFileDao(db *mongo.Database) *FileDao {
 
 type FileDao struct {
 	coll *mongox.Collection[File]
+}
+
+func (d *FileDao) FindPageByFileType(ctx context.Context, pageNum int64, pageSize int64, fileType []string) ([]*File, int64, error) {
+	filter := query.In("file_type", fileType...)
+	count, err := d.coll.Finder().Filter(filter).Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	findOptions := options.Find().
+		SetSkip((pageNum - 1) * pageSize).
+		SetLimit(pageSize).
+		SetSort(bsonx.M("created_at", -1))
+	files, err := d.coll.Finder().Filter(filter).Find(ctx, findOptions)
+	if err != nil {
+		return nil, 0, err
+	}
+	return files, count, nil
 }
 
 func (d *FileDao) FindByFileName(ctx context.Context, filename string) (*File, error) {

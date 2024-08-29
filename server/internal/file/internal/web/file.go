@@ -40,6 +40,7 @@ type FileHandler struct {
 func (h *FileHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin-api/files")
 	adminGroup.POST("/upload", apiwrap.Wrap(h.UploadFile))
+	adminGroup.GET("", apiwrap.WrapWithBody(h.GetFiles))
 }
 
 func (h *FileHandler) UploadFile(ctx *gin.Context) (*apiwrap.ResponseBody[FileVO], error) {
@@ -75,4 +76,33 @@ func (h *FileHandler) UploadFile(ctx *gin.Context) (*apiwrap.ResponseBody[FileVO
 		FileName: fileInfo.FileName,
 		Url:      fileInfo.Url,
 	}), nil
+}
+
+func (h *FileHandler) GetFiles(ctx *gin.Context, req PageRequest) (*apiwrap.ResponseBody[apiwrap.PageVO[FileVO]], error) {
+	files, total, err := h.serv.GetFiles(ctx, domain.PageDTO{
+		PageNum:  req.PageNum,
+		PageSize: req.PageSize,
+		FileType: req.FileType,
+	})
+	if err != nil {
+		return nil, err
+	}
+	pageVO := apiwrap.PageVO[FileVO]{}
+	pageVO.PageNo = req.PageNum
+	pageVO.PageSize = req.PageSize
+	pageVO.List = h.toVOs(files)
+	pageVO.SetTotalCountAndCalculateTotalPages(total)
+	return apiwrap.SuccessResponseWithData(pageVO), nil
+}
+
+func (h *FileHandler) toVOs(files []*domain.File) []FileVO {
+	voList := make([]FileVO, len(files))
+	for i, file := range files {
+		voList[i] = FileVO{
+			FileId:   file.FileId,
+			FileName: file.FileName,
+			Url:      file.Url,
+		}
+	}
+	return voList
 }
