@@ -67,7 +67,7 @@
         </a-modal>
       </div>
       <div class="w-69% ml-1% flex flex-col gap-y-2 relative">
-        <div>
+        <div class="flex gap-x-1">
           <SimpleUpload
             @success:imageUrl="uploadAsset"
             :authorization="userStore.token"
@@ -76,57 +76,65 @@
             :fileTypes="['image/jpeg', 'image/png']"
             :maxSize="1048576"
           />
+          <a-button @click="visible4ExistImageModal = true">
+            <template #icon><FileImageOutlined /></template>
+            选择已有图片
+          </a-button>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap">
+          <PreviewImg v-model="visible4PreviewImgModal" :image-url="previewImgUrl" />
           <div
             v-for="image in images"
             :key="image.id"
             @click="selectImage(image.id)"
-            @mouseover="state.hoveredImgIndex = image.id"
-            @mouseleave="state.hoveredImgIndex = ''"
-            :class="[
-              'relative box-border border rounded w-27 h-27 cursor-pointer',
-              { 'border-blue-500': isSelected(image.id) }
-            ]"
+            class="relative box-border border rounded w-27 h-27 cursor-pointer"
           >
             <img
               :src="serverHost + image.content"
-              class="box-border w-27 h-27 object-cover"
+              class="box-border w-27 h-27 object-contain"
               alt="image"
             />
 
-            <div v-if="isSelected(image.id)" class="w-full h-full absolute top-0">
-              <div class="box-border bg-black opacity-20 w-full h-full"></div>
-              <div class="absolute inset-0 border-2 border-solid border-blue-500"></div>
-              <div class="absolute top-2 right-2">
-                <span
-                  class="bg-blue-500 text-white text-xl rounded-full w-6 h-6 lh-6 flex items-center justify-center"
-                  >√</span
-                >
+            <div
+              :class="[
+                'w-full h-full absolute top-0 duration-300 ease-in-out group',
+                {
+                  'bg-black bg-opacity-40': isSelected(image.id),
+                  'hover:bg-black hover:bg-opacity-40': !isSelected(image.id)
+                }
+              ]"
+            >
+              <div
+                class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 group-hover:block duration-300 ease-in-out group"
+              >
+                <div class="flex space-x-2">
+                  <a-button shape="circle" :ghost="true" @click.stop="preview(image.content)">
+                    <template #icon><EyeOutlined /></template>
+                  </a-button>
+                </div>
               </div>
             </div>
 
-            <div
-              v-if="state.hoveredImgIndex == image.id && !isSelected(image.id)"
-              class="w-full h-full absolute top-0"
-            >
-              <div class="box-border bg-black opacity-20 w-full h-full"></div>
-              <div class="absolute inset-0 border-2 border-solid border-blue-500"></div>
-              <div class="absolute top-2 right-2">
-                <span
-                  class="rounded-full border-2 border-solid border-white w-6 h-6 flex items-center justify-center"
-                ></span>
-              </div>
+            <div v-if="isSelected(image.id)" class="absolute top-2 right-2 opacity-100">
+              <span
+                class="bg-blue-500 text-white text-xl rounded-full w-6 h-6 lh-6 flex items-center justify-center"
+                >√</span
+              >
             </div>
           </div>
         </div>
-        <div class="absolute bottom-0 w-full text-right">
-          <a-button type="primary" :disabled="state.selectedImgIndex == null" @click="insert">
+        <div class="absolute bottom-0 w-full flex gap-x-1 justify-end">
+          <a-popconfirm title="确认删除？" ok-text="是" cancel-text="否" @confirm="deleteAsset">
+            <a-button type="primary" :disabled="state.selectedImgIndex == ''"> 删除图片 </a-button>
+          </a-popconfirm>
+
+          <a-button type="primary" :disabled="state.selectedImgIndex == ''" @click="insert">
             插入图片
           </a-button>
         </div>
       </div>
     </div>
+    <ImageList v-model="visible4ExistImageModal" @insertImg="uploadAsset"></ImageList>
   </a-card>
 </template>
 
@@ -136,28 +144,33 @@ import {
   PictureOutlined,
   FolderAddOutlined,
   FormOutlined,
-  DeleteOutlined
+  DeleteOutlined,
+  FileImageOutlined,
+  EyeOutlined
 } from '@ant-design/icons-vue'
 import {
   AddAsset,
   AddAssetFolder,
   type AddAssetFolderRequest,
-  type AssetFolderVO, type AssetRequest,
+  type AssetFolderVO,
+  type AssetRequest,
   type AssetVO,
+  DeleteAsset,
   DeleteAssetFolder,
   EditAssetFolderName,
   GetAssetFolderList,
   GetAssetList
-} from '@/interfaces/PostAsset'
+} from '@/interfaces/Asset'
 import { message } from 'ant-design-vue'
 import originalAxios from 'axios'
 import { useUserStore } from '@/stores/user'
 import SimpleUpload from '@/components/upload/SimpleUpload.vue'
+import ImageList from '@/components/file/ImageList.vue'
+import PreviewImg from '@/components/image/PreviewImg.vue'
 
 const state = reactive({
   selectedMenuItem: '',
-  selectedImgIndex: '',
-  hoveredImgIndex: ''
+  selectedImgIndex: ''
 })
 
 const folders = ref<AssetFolderVO[]>([])
@@ -369,12 +382,15 @@ watch(
 const serverHost = import.meta.env.VITE_API_HOST
 const userStore = useUserStore()
 
-const uploadAsset = async (content: string) => {
+const uploadAsset = async (fileId: string, fileUrl: string) => {
   try {
     const response: any = await AddAsset(state.selectedMenuItem, {
-      content: content,
+      content: fileUrl,
       asset_type: 'image',
-      type: 'post-editor'
+      type: 'post-editor',
+      metadata: {
+        file_id: fileId
+      }
     } as AssetRequest)
     if (response.data.code !== 0) {
       message.error(response.data.message)
@@ -385,6 +401,35 @@ const uploadAsset = async (content: string) => {
   } catch (error) {
     console.log(error)
     message.error('上传失败')
+  }
+}
+
+const visible4ExistImageModal = ref(false)
+
+const visible4PreviewImgModal = ref(false)
+const previewImgUrl = ref('')
+const preview = (imgUrl: string) => {
+  previewImgUrl.value = serverHost + imgUrl
+  visible4PreviewImgModal.value = true
+}
+
+const deleteAsset = async () => {
+  try {
+    if (state.selectedMenuItem === '' || state.selectedImgIndex === '') {
+      message.error('请选择图片')
+      return
+    }
+    const response: any = await DeleteAsset(state.selectedMenuItem, state.selectedImgIndex)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
+      return
+    }
+    message.success('删除成功')
+    state.selectedImgIndex = ''
+    await getImages()
+  } catch (error) {
+    console.log(error)
+    message.error('删除失败')
   }
 }
 </script>

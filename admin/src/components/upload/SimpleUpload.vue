@@ -45,7 +45,7 @@ const handleChange = async (info: UploadChangeParam) => {
 
   if (info.file.status === 'done') {
     console.log(123)
-    emit('success:imageUrl', info.file.response.data.url)
+    emit('success:imageUrl', info.file.response.data.file_id, info.file.response.data.url)
     fileList.value = []
   }
 
