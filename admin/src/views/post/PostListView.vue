@@ -89,6 +89,9 @@
           <template v-else-if="column.dataIndex === 'operation'">
             <div class="flex gap-x-1">
               <span>
+                <a @click="copyContent(record.id)">复制</a>
+              </span>
+              <span>
                 <a @click="router.push(`/home/post/draft/${record.id}`)">编辑</a>
               </span>
               <a-popconfirm v-if="posts.length" title="确认删除？" @confirm="deletePost(record)">
@@ -109,6 +112,8 @@ import {
   ChangePostDisplayStatus,
   DeletePost,
   GetPost,
+  GetPostById,
+  GetPostBySug,
   type IPost,
   type PageRequest
 } from '@/interfaces/Post'
@@ -331,4 +336,15 @@ const getTags = async () => {
   }
 }
 getTags()
+
+const copyContent = async (id: string) => {
+  const response = await GetPostById(id)
+  if (response.data.code !== 0) {
+    message.error(response.data.message)
+    return
+  }
+  const content = response.data.data?.content
+  await navigator.clipboard.writeText(content)
+  message.success('复制成功')
+}
 </script>

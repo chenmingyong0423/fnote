@@ -134,3 +134,10 @@ export const GetPostDraft = (pageReq: PageRequest) => {
     params: pageReq
   })
 }
+
+export const GetPostById = (id: string) => {
+  return instance({
+    url: `/posts/${id}`,
+    method: 'get'
+  })
+}
