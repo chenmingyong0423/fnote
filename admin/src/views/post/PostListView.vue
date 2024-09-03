@@ -113,7 +113,6 @@ import {
   DeletePost,
   GetPost,
   GetPostById,
-  GetPostBySug,
   type IPost,
   type PageRequest
 } from '@/interfaces/Post'
