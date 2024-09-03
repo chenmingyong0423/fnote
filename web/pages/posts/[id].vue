@@ -563,7 +563,7 @@ const dataSent = ref(false);
 const collectPostVisit = async () => {
   if (enterTime.value && !dataSent.value) {
     postVisitRequest.value.stay_time =
-      new Date().getSeconds() - enterTime.value?.getSeconds();
+        Math.floor((new Date().getTime() - enterTime.value.getTime()) / 1000);
     dataSent.value = true;
     // 发送数据到服务器
     await CollectPostVisit(postVisitRequest.value);
