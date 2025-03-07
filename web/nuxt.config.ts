@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     ],
   },
   devtools: { enabled: true },
-  modules: ["@unocss/nuxt", "@pinia/nuxt", "dayjs-nuxt"],
+  modules: ["@nuxtjs/mdc", "@unocss/nuxt", "@pinia/nuxt", "dayjs-nuxt", "@nuxtjs/mdc"],
   runtimeConfig: {
     public: {
       domain: process.env.BASE_HOST,

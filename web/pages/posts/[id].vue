@@ -123,16 +123,14 @@
           <div>阅读 {{ post?.visit_count }}</div>
         </div>
         <!--  文章内容  -->
-        <div class="text-4" ref="previewRef">
-          <client-only>
-            <v-md-preview
-              :text="post?.content"
-              @copy-code-success="handleCopyCodeSuccess"
-              class="lt-lg:important:p0"
-              :class="{ dark: isBlackMode }"
-              @change="generateAnchors"
-            ></v-md-preview>
-          </client-only>
+        <div ref="previewRef">
+<!--          <MDC-->
+<!--            :value="post?.content" tag="article"-->
+<!--            :parserOptions="{toc: {depth: 3, searchDepth: 3}}"-->
+<!--            class="lt-lg:important:p0"-->
+<!--            :class="{ dark: isBlackMode }"-->
+<!--          />-->
+          <MDCRenderer v-if="ast.body" :body="ast.body" :data="ast.data" />
         </div>
       </div>
       <div class="mb-5 md:hidden">
@@ -221,7 +219,8 @@ import {
 import type { IResponse, IBaseResponse, IPageData } from "~/api/http";
 import { onMounted, ref } from "vue";
 import { useHomeStore } from "~/store/home";
-import VMdPreview from "@kangc/v-md-editor/lib/preview";
+import { parseMarkdown } from '@nuxtjs/mdc/runtime'
+
 
 const homeStore = useHomeStore();
 const configStore = useConfigStore();
@@ -238,6 +237,9 @@ const payList = ref<IPayInfo[]>(configStore.pay_info || []);
 
 const link = ref("");
 
+const mdData = ref<any>();
+
+
 const getPostDetail = async () => {
   try {
     let postRes: any = await getPostsById(id);
@@ -250,6 +252,10 @@ const getPostDetail = async () => {
       );
       post.value = res.data;
       author.value = post.value?.author || "";
+
+      const { data: ast } = await useAsyncData('markdown', () => parseMarkdown(post.value))
+      mdData.value = ast
+      console.log(ast.Toc)
     }
   } catch (error) {
     console.log(error);
@@ -267,14 +273,10 @@ const handleCopyCodeSuccess = () => {
 
 const htmlContent = ref<string>("");
 
-const generateAnchors = (text: string, html: string) => {
-  htmlContent.value = html;
-};
-
 const previewRef = ref<HTMLElement>();
 const anchor = ref();
 const anchorOriginTop = ref(0);
-const lineIndex = ref("8");
+const lineIndex = ref("-");
 
 const anchorScroll = () => {
   if (
@@ -306,7 +308,7 @@ const subscribeTitleFocus = () => {
   titles.forEach((title, _) => {
     const cur = title as HTMLElement;
     if (cur.offsetTop - 60 <= scrollTop) {
-      const lineIdx = cur.getAttribute("data-v-md-line");
+      const lineIdx = cur.getAttribute("id");
       lineIndex.value = String(lineIdx);
       return;
     }
@@ -314,6 +316,10 @@ const subscribeTitleFocus = () => {
 };
 
 onMounted(() => {
+  // 获取 <article> 标签的内容
+  const articleEl = previewRef.value?.querySelector('article')
+  htmlContent.value = articleEl?.innerHTML || '';
+
   window.addEventListener("scroll", anchorScroll);
   window.addEventListener("scroll", subscribeTitleFocus);
   link.value = window.location.href;
@@ -328,7 +334,7 @@ const handleAnchorClick = (newLineIndex: string) => {
   isScrolling.value = true;
   const preview = previewRef.value;
   if (!preview) return;
-  const heading = preview.querySelector(`[data-v-md-line="${newLineIndex}"]`);
+  const heading = preview.querySelector(`[id="${newLineIndex}"]`);
   if (heading && heading instanceof HTMLElement) {
     const top = heading.offsetTop - 60;
     window.scrollTo({
