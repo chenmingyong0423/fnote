@@ -133,7 +133,6 @@ import { useAlertStore } from "~/store/toast";
 import type { IBaseResponse, IListData, IResponse } from "~/api/http";
 import { isValidEmail } from "~/utils/email";
 import { useConfigStore } from "~/store/config";
-import VMdPreview from "@kangc/v-md-editor/lib/preview";
 import { useHomeStore } from "~/store/home";
 
 const configStore = useConfigStore();

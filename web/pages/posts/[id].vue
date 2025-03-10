@@ -123,12 +123,13 @@
           <div>阅读 {{ post?.visit_count }}</div>
         </div>
         <!--  文章内容  -->
-        <div class="text-4 w-95% mx-auto" ref="previewRef">
+        <div class="w-95% mx-auto" ref="previewRef">
           <MDCRenderer
               :body="mdData.body"
               :data="mdData.data"
-              class="lt-lg:important:p0 md-content-isolated"
+              class=""
               :class="{ dark: isBlackMode }"
+              tag="article"
           />
         </div>
       </div>
