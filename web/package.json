@@ -32,6 +32,7 @@
     "@iconify-json/fa6-brands": "^1.1.18",
     "@iconify-json/ph": "^1.1.9",
     "@kangc/v-md-editor": "^2.3.18",
+    "@nuxtjs/mdc": "^0.15.0",
     "@pinia/nuxt": "^0.5.1",
     "@types/node": "^20.10.4",
     "@unocss/nuxt": "^0.58.0",
