@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     ],
   },
   devtools: { enabled: true },
-  modules: ["@unocss/nuxt", "@pinia/nuxt", "dayjs-nuxt"],
+  modules: ["@unocss/nuxt", "@pinia/nuxt", "dayjs-nuxt", '@nuxtjs/mdc'],
   runtimeConfig: {
     public: {
       domain: process.env.BASE_HOST,
@@ -121,4 +121,24 @@ export default defineNuxtConfig({
     "~/plugins/qrcode.client.ts",
     "~/plugins/routerGuard.ts",
   ],
+  mdc: {
+    theme: 'docs',
+    highlight: {
+      theme: {
+        // Default theme (same as single string)
+        default: 'github-light',
+        // Theme used if `html.dark`
+        dark: 'github-dark',
+        // Theme used if `html.sepia`
+        sepia: 'monokai'
+      }
+    },
+    headings: {
+      anchorLinks: {
+        // Enable/Disable heading anchor links. { h1: true, h2: false }
+        h1: true,
+      }
+    },
+  },
+  extends: '@nuxt-themes/docus'
 });

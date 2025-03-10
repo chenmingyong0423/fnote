@@ -123,16 +123,13 @@
           <div>阅读 {{ post?.visit_count }}</div>
         </div>
         <!--  文章内容  -->
-        <div class="text-4" ref="previewRef">
-          <client-only>
-            <v-md-preview
-              :text="post?.content"
-              @copy-code-success="handleCopyCodeSuccess"
-              class="lt-lg:important:p0"
+        <div class="text-4 w-95% mx-auto" ref="previewRef">
+          <MDCRenderer
+              :body="mdData.body"
+              :data="mdData.data"
+              class="lt-lg:important:p0 md-content-isolated"
               :class="{ dark: isBlackMode }"
-              @change="generateAnchors"
-            ></v-md-preview>
-          </client-only>
+          />
         </div>
       </div>
       <div class="mb-5 md:hidden">
@@ -221,7 +218,6 @@ import {
 import type { IResponse, IBaseResponse, IPageData } from "~/api/http";
 import { onMounted, ref } from "vue";
 import { useHomeStore } from "~/store/home";
-import VMdPreview from "@kangc/v-md-editor/lib/preview";
 
 const homeStore = useHomeStore();
 const configStore = useConfigStore();
@@ -232,34 +228,36 @@ const apiHost = runtimeConfig.public.apiHost;
 const route = useRoute();
 const path: string = route.path;
 const id: string = String(route.params.id);
-const post = ref<IPostDetail>();
-const author = ref<string>("");
 const payList = ref<IPayInfo[]>(configStore.pay_info || []);
+import { parseMarkdown } from '@nuxtjs/mdc/runtime'
 
 const link = ref("");
 
-const getPostDetail = async () => {
-  try {
-    let postRes: any = await getPostsById(id);
-    let res: IResponse<IPostDetail> = postRes.data.value;
-    if (res && res.data) {
-      // 使用正则表达式来匹配 Markdown 中的图片链接路径 "/static/" 并替换为 "${serverHost}/static/"
-      res.data.content = res.data.content.replace(
-        /\]\(\/static\//g,
-        `](${apiHost}/static/`,
-      );
-      post.value = res.data;
-      author.value = post.value?.author || "";
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
-await getPostDetail();
+const ri = ref("")
 
-const bdPush = async (urls: string) => {
-  await baiduPostIndex(urls);
-};
+// 让 Nuxt 在服务器端请求数据，并在客户端复用
+const { data: post } = await useAsyncData(`post-${id}`, async () => {
+  let postRes: any = await getPostsById(id);
+  let res: IResponse<IPostDetail> = postRes.data.value;
+
+  if (res && res.data) {
+    res.data.content = res.data.content.replace(/\]\(\/static\//g, `](${apiHost}/static/`);
+    return res.data;
+  }
+  return null;
+});
+
+const author = computed(() => post.value?.author || "");
+
+// 解析 Markdown 数据
+const { data: mdData } = await useAsyncData(`markdown-${id}`, () =>
+    post.value ? parseMarkdown(post.value.content) : null
+);
+
+await useAsyncData(`baidu-push`, async () => {
+  await baiduPostIndex(runtimeConfig.public.domain + route.path);
+})
+
 
 const handleCopyCodeSuccess = () => {
   toast.showToast("复制成功", 2000);
@@ -406,24 +404,22 @@ const copyLink = async () => {
   toast.showToast("复制成功！", 2000);
 };
 
-const comments = ref<IComment[]>([]);
-const initComments = async () => {
+const {data: comments} = await useAsyncData(`post-${id}-comments`, async () => {
   try {
     let commentRes: any = await getComments(id);
     let res: IResponse<IPageData<IComment>> = commentRes.data.value;
     if (res && res.data) {
       if (res.code !== 0) {
         toast.showToast(res.message, 2000);
-        return;
+        return [];
       }
-      comments.value = res.data?.list || [];
+      return res.data?.list || [];
     }
   } catch (error: any) {
     toast.showToast(error.toString(), 2000);
+    return [];
   }
-};
-
-initComments();
+})
 
 const submit = async (req: ICommentRequest) => {
   try {
@@ -551,7 +547,7 @@ useSeoMeta({
   twitterCard: "summary",
 });
 
-bdPush(runtimeConfig.public.domain + route.path);
+
 
 const postVisitRequest = ref<PostVisitRequest>({
   post_id: id,
