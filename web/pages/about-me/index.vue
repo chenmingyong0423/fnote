@@ -120,15 +120,13 @@
         </div>
         <!--  文章内容  -->
         <div class="text-4" ref="previewRef">
-          <client-only>
-            <v-md-preview
-              :text="post?.content"
-              @copy-code-success="handleCopyCodeSuccess"
-              class="lt-lg:important:p0"
-              :class="{ dark: isBlackMode }"
-              @change="generateAnchors"
-            ></v-md-preview>
-          </client-only>
+          <MDCRenderer
+            :body="mdData.body"
+            :data="mdData.data"
+            :class="{ dark: isBlackMode }"
+            tag="article"
+            class="markdown-body lt-lg:important:p0 bg-transparent dark:text-dtc"
+          />
         </div>
       </div>
       <div v-if="existPost">
@@ -168,7 +166,7 @@
       <Profile class="mb-5"></Profile>
       <div ref="anchor" v-if="existPost">
         <Anchor
-          :htmlContent="htmlContent"
+          :toc="mdData.toc.links"
           :lineIndex="lineIndex"
           @handleAnchorClick="handleAnchorClick"
           class="dark:text-dtc dark_bg_gray"
@@ -214,34 +212,42 @@ const post = ref<IPostDetail>({
 const author = ref<string>("");
 const payList = ref<IPayInfo[]>(configStore.pay_info || []);
 const existPost = ref<boolean>(false);
-const getPostDetail = async () => {
-  try {
-    let postRes: any = await getPostsById(id);
-    let res: IResponse<IPostDetail> = postRes.data.value;
-    if (res && res.data) {
-      if (res.code !== 0) {
-        return;
-      }
-      existPost.value = true;
-      post.value = res.data!;
-      author.value = post.value?.author || "";
-    }
-  } catch (error) {
-    console.log(error);
+const runtimeConfig = useRuntimeConfig();
+
+const apiHost = runtimeConfig.public.apiHost;
+
+// 让 Nuxt 在服务器端请求数据，并在客户端复用
+const { data: post2 } = await useAsyncData(`about-me`, async () => {
+  let postRes: any = await getPostsById(id);
+  let res: IResponse<IPostDetail> = postRes.data.value;
+
+  if (res && res.data) {
+    res.data.content = res.data.content.replace(
+      /\]\(\/static\//g,
+      `](${apiHost}/static/`,
+    );
+    return res.data;
   }
-};
-await getPostDetail();
+  return null;
+});
+
+if (post2.value !== null) {
+  existPost.value = true;
+  post.value = post2.value;
+}
+
+// 解析 Markdown 数据
+const { data: mdData } = await useAsyncData(`markdown-${id}`, () =>
+  post.value
+    ? parseMarkdown(post.value.content, {
+        toc: {
+          depth: 5,
+        },
+      })
+    : null,
+);
+
 const link = ref("");
-
-const handleCopyCodeSuccess = () => {
-  console.log("成功");
-};
-
-const htmlContent = ref<string>("");
-
-const generateAnchors = (text: string, html: string) => {
-  htmlContent.value = html;
-};
 
 const previewRef = ref<HTMLElement>();
 const anchor = ref();
@@ -264,70 +270,61 @@ const anchorScroll = () => {
   }
 };
 
-// 用于判断是否正在滚动，滚动则不触发标题滚动监听事件
-const isScrolling = ref(false);
-
-const subscribeTitleFocus = () => {
-  if (isScrolling.value) return;
-  // 获取当前滚动位置
-  const scrollTop =
-    document.documentElement.scrollTop || document.body.scrollTop;
-  const preview = previewRef.value;
-  if (!preview) return;
-  const titles = preview.querySelectorAll("h1,h2,h3,h4,h5,h6");
-  titles.forEach((title, _) => {
-    const cur = title as HTMLElement;
-    if (cur.offsetTop - 60 <= scrollTop) {
-      const lineIdx = cur.getAttribute("data-v-md-line");
-      lineIndex.value = String(lineIdx);
-      return;
-    }
-  });
-};
+let titleOffsets: { id: string; top: number }[] = [];
 
 onMounted(() => {
+  const preview = previewRef.value;
+  if (!preview) return;
+
+  // 缓存所有标题元素
+  const titles: HTMLElement[] = Array.from(
+    preview.querySelectorAll("h1,h2,h3,h4,h5,h6"),
+  );
+
+  // 预存 offsetTop，避免 scroll 事件中重复计算
+  titleOffsets = titles.map((el) => ({
+    id: el.getAttribute("id") || "",
+    top: el.offsetTop - 20,
+  }));
+
   window.addEventListener("scroll", anchorScroll);
   window.addEventListener("scroll", subscribeTitleFocus);
   link.value = window.location.href;
 });
+
+const subscribeTitleFocus = () => {
+  const scrollTop =
+    document.documentElement.scrollTop || document.body.scrollTop;
+
+  if (titleOffsets.length === 0) return;
+
+  // 使用二分查找定位当前标题
+  let left = 0,
+    right = titleOffsets.length - 1;
+  let targetIdx = 0;
+
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    if (titleOffsets[mid].top <= scrollTop) {
+      targetIdx = mid;
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
+  }
+
+  const newHash = titleOffsets[targetIdx].id;
+  if (newHash && location.hash.slice(1) !== newHash) {
+    history.replaceState(null, "", `#${newHash}`);
+  }
+
+  lineIndex.value = titleOffsets[targetIdx].id;
+};
+
 onBeforeUnmount(() => {
   window.removeEventListener("scroll", anchorScroll);
   window.removeEventListener("scroll", subscribeTitleFocus);
 });
-
-const handleAnchorClick = (newLineIndex: string) => {
-  isScrolling.value = true;
-  const preview = previewRef.value;
-  if (!preview) return;
-  const heading = preview.querySelector(`[data-v-md-line="${newLineIndex}"]`);
-  if (heading && heading instanceof HTMLElement) {
-    const top = heading.offsetTop - 60;
-    window.scrollTo({
-      top: top,
-      behavior: "smooth",
-    });
-
-    const checkIfDone = () => {
-      const currentPosition = document.documentElement.scrollTop;
-
-      if (
-        Math.abs(currentPosition - top) < 1 ||
-        window.innerHeight + currentPosition >= document.body.offsetHeight
-      ) {
-        // 滚动已经完成
-        lineIndex.value = newLineIndex;
-        isScrolling.value = false;
-      } else {
-        // 滚动未完成，继续检查
-        requestAnimationFrame(checkIfDone);
-      }
-    };
-
-    requestAnimationFrame(checkIfDone);
-  } else {
-    isScrolling.value = false;
-  }
-};
 
 // 点赞
 const like = async () => {
@@ -335,7 +332,7 @@ const like = async () => {
   try {
     let likeRes: any = await likePost(id);
     let res: IBaseResponse = likeRes.data.value;
-    if (res?.code === 200) {
+    if (res?.code === 0) {
       post.value!.is_liked = true;
       post.value!.like_count++;
     } else {
@@ -376,22 +373,25 @@ const copyLink = async () => {
   toast.showToast("复制成功！", 2000);
 };
 
-const comments = ref<IComment[]>([]);
-const initComments = async () => {
-  try {
-    let commentRes: any = await getComments(id);
-    let res: IResponse<IPageData<IComment>> = commentRes.data.value;
-    if (res.code !== 0) {
-      toast.showToast(res.message, 2000);
-      return;
+const { data: comments } = await useAsyncData(
+  `post-${id}-comments`,
+  async () => {
+    try {
+      let commentRes: any = await getComments(id);
+      let res: IResponse<IPageData<IComment>> = commentRes.data.value;
+      if (res && res.data) {
+        if (res.code !== 0) {
+          toast.showToast(res.message, 2000);
+          return [];
+        }
+        return res.data?.list || [];
+      }
+    } catch (error: any) {
+      toast.showToast(error.toString(), 2000);
+      return [];
     }
-    comments.value = res.data?.list || [];
-  } catch (error: any) {
-    toast.showToast(error.toString(), 2000);
-  }
-};
-
-initComments();
+  },
+);
 
 const submit = async (req: ICommentRequest) => {
   try {
@@ -511,45 +511,34 @@ useSeoMeta({
 </script>
 
 <style scoped>
-.dark :deep(.v-md-pre-wrapper) {
-  background-color: rgba(10, 0, 0, 0.1) !important;
+.markdown-body :deep(a) {
+  color: black !important;
 }
-
-.dark :deep(.v-md-pre-wrapper) {
-  background-color: rgba(10, 0, 0, 0.1) !important;
+.dark .markdown-body :deep(a) {
+  color: #ffffffb2 !important;
 }
-
 .dark :deep(code) {
   color: white !important;
 }
 
-.dark :deep(.line-numbers-mode:after) {
+.dark :deep(.language-bash),
+.dark :deep(.language-shell),
+.dark :deep(.language-go),
+.dark :deep(.language-txt) {
   background-color: rgba(10, 0, 0, 0.1) !important;
   border: 0 !important;
 }
 
-/* 根据需要定制不同代码语言或元素的样式 */
-.dark :deep(.hljs-keyword, .hljs-selector-tag, .hljs-literal) {
-  color: #ff7b72 !important;
+.dark .markdown-body :deep(table),
+.dark .markdown-body :deep(thead),
+.dark .markdown-body :deep(th),
+.dark .markdown-body :deep(tbody),
+.dark .markdown-body :deep(tr),
+.dark .markdown-body :deep(td) {
+  background-color: transparent !important;
 }
 
-.dark :deep(.hljs-string) {
-  color: #a5d6ff !important;
-}
-
-.dark :deep(.hljs-title) {
-  color: #a5d6ff !important;
-}
-
-.dark :deep(.hljs-type) {
-  color: #cc880a !important;
-}
-
-.dark :deep(.github-markdown-body table tr) {
-  background-color: rgba(10, 0, 0, 0.1) !important;
-}
-
-.dark :deep(.github-markdown-body blockquote) {
+.dark :deep(blockquote) {
   border-color: #334a61 !important;
 }
 

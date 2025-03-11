@@ -14,11 +14,11 @@
           <span>预览中...</span>
         </div>
         <br />
-        <v-md-preview
-          :text="commentReq.content"
-          class="lt-lg:important:p0 max-h-[170px] h-[170px] overflow-x-auto text-nowrap custom_border_gray p-2 b-rounded-2"
+        <MDC
+          :value="commentReq.content"
+          class="markdown-body lt-lg:important:p0 bg-transparent dark:text-dtc max-h-[170px] h-[170px] overflow-x-auto text-nowrap custom_border_gray p-2 b-rounded-2"
           :class="{ dark: isBlackMode }"
-        ></v-md-preview>
+        />
       </div>
     </div>
     <div>
@@ -198,6 +198,37 @@ const calculateMD54Email = () => {
 </script>
 
 <style scoped>
+.markdown-body :deep(a) {
+  color: black !important;
+}
+.dark .markdown-body :deep(a) {
+  color: #ffffffb2 !important;
+}
+.dark :deep(code) {
+  color: white !important;
+}
+
+.dark :deep(.language-bash),
+.dark :deep(.language-shell),
+.dark :deep(.language-go),
+.dark :deep(.language-txt) {
+  background-color: rgba(10, 0, 0, 0.1) !important;
+  border: 0 !important;
+}
+
+.dark .markdown-body :deep(table),
+.dark .markdown-body :deep(thead),
+.dark .markdown-body :deep(th),
+.dark .markdown-body :deep(tbody),
+.dark .markdown-body :deep(tr),
+.dark .markdown-body :deep(td) {
+  background-color: transparent !important;
+}
+
+.dark :deep(blockquote) {
+  border-color: #334a61 !important;
+}
+
 .popup-text:before {
   content: "";
   position: absolute;

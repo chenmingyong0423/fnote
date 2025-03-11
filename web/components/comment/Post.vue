@@ -69,11 +69,11 @@
           ></Button>
         </div>
         <div>
-          <v-md-preview
-            :text="comment.content"
-            class="lt-lg:important:p0"
+          <MDC
+            :value="comment.content"
+            class="markdown-body lt-lg:important:p0 bg-transparent dark:text-dtc"
             :class="{ dark: isBlackMode }"
-          ></v-md-preview>
+          />
         </div>
         <div>
           <CommentReply
@@ -177,6 +177,37 @@ defineExpose({
 </script>
 
 <style scoped>
+.markdown-body :deep(a) {
+  color: black !important;
+}
+.dark .markdown-body :deep(a) {
+  color: #ffffffb2 !important;
+}
+.dark :deep(code) {
+  color: white !important;
+}
+
+.dark :deep(.language-bash),
+.dark :deep(.language-shell),
+.dark :deep(.language-go),
+.dark :deep(.language-txt) {
+  background-color: rgba(10, 0, 0, 0.1) !important;
+  border: 0 !important;
+}
+
+.dark .markdown-body :deep(table),
+.dark .markdown-body :deep(thead),
+.dark .markdown-body :deep(th),
+.dark .markdown-body :deep(tbody),
+.dark .markdown-body :deep(tr),
+.dark .markdown-body :deep(td) {
+  background-color: transparent !important;
+}
+
+.dark :deep(blockquote) {
+  border-color: #334a61 !important;
+}
+
 :deep(.github-markdown-body) {
   padding: 0;
 }
