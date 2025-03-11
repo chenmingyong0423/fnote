@@ -6,13 +6,11 @@
     >
       <div class="h-10 line-height-10 font-bold text-6 mb-5">友情链接</div>
       <div>
-        <client-only>
-          <v-md-preview
-            :text="introduction"
-            class="lt-lg:important:p0"
-            :class="{ dark: isBlackMode }"
-          ></v-md-preview>
-        </client-only>
+        <MDC
+          :value="introduction"
+          :class="{ dark: isBlackMode }"
+          class="markdown-body lt-lg:important:p0 bg-transparent dark:text-dtc"
+        />
       </div>
     </div>
     <div class="bg-white b-rounded-4 p-5 mb-5 dark:text-dtc dark_bg_gray">
@@ -272,6 +270,35 @@ useSeoMeta({
 </script>
 
 <style scoped>
+.markdown-body :deep(a) {
+  color: black !important;
+}
+
+.dark :deep(code) {
+  color: white !important;
+}
+
+.dark :deep(.language-bash),
+.dark :deep(.language-shell),
+.dark :deep(.language-go),
+.dark :deep(.language-txt) {
+  background-color: rgba(10, 0, 0, 0.1) !important;
+  border: 0 !important;
+}
+
+.dark .markdown-body :deep(table),
+.dark .markdown-body :deep(thead),
+.dark .markdown-body :deep(th),
+.dark .markdown-body :deep(tbody),
+.dark .markdown-body :deep(tr),
+.dark .markdown-body :deep(td) {
+  background-color: transparent !important;
+}
+
+.dark :deep(blockquote) {
+  border-color: #334a61 !important;
+}
+
 @keyframes slideUp {
   0% {
     transform: translateY(+100%);

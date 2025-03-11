@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     ],
   },
   devtools: { enabled: true },
-  modules: ["@unocss/nuxt", "@pinia/nuxt", "dayjs-nuxt", '@nuxtjs/mdc'],
+  modules: ["@unocss/nuxt", "@pinia/nuxt", "dayjs-nuxt", "@nuxtjs/mdc"],
   runtimeConfig: {
     public: {
       domain: process.env.BASE_HOST,
@@ -35,8 +35,7 @@ export default defineNuxtConfig({
   unocss: {
     uno: true, // enabled `@unocss/preset-uno`
     icons: true, // enabled `@unocss/preset-icons`
-    attributify: false, // enabled `@unocss/preset-attributify`,
-    // core options
+    attributify: false, // enabled `@unocss/preset-attributify`,// core options
     shortcuts: [
       { dark_bg_black: "dark:bg-#03080c" },
       {
@@ -113,7 +112,7 @@ export default defineNuxtConfig({
       "i-bi-link-45deg",
     ],
   },
-  css: ["@/styles/main.css"],
+  css: ["@/styles/main.css", "github-markdown-css/github-markdown.css"],
   plugins: [
     "~/plugins/pinia.js",
     "~/plugins/localStorage.client.ts",
@@ -121,12 +120,36 @@ export default defineNuxtConfig({
     "~/plugins/routerGuard.ts",
   ],
   mdc: {
+    // highlight: {
+    //   theme: {
+    //     // Default theme (same as single string)
+    //     default: "github-light",
+    //     // Theme used if `html.dark`
+    //     dark: "github-dark",
+    //     // Theme used if `html.sepia`
+    //     sepia: "monokai",
+    //   },
+    //   langs: [
+    //     "json",
+    //     "js",
+    //     "ts",
+    //     "html",
+    //     "css",
+    //     "vue",
+    //     "shell",
+    //     "mdc",
+    //     "md",
+    //     "yaml",
+    //     "go",
+    //     "java",
+    //     "protoc",
+    //   ],
+    // },
     headings: {
       anchorLinks: {
         // Enable/Disable heading anchor links. { h1: true, h2: false }
         h1: true,
-      }
+      },
     },
   },
-  extends: '@nuxt-themes/typography'
 });
