@@ -69,11 +69,12 @@
           ></Button>
         </div>
         <div>
-          <MDC
-            :value="comment.content"
-            class="markdown-body lt-lg:important:p0 bg-transparent dark:text-dtc"
-            :class="{ dark: isBlackMode }"
-          />
+          <div :data-theme="isBlackMode ? 'dark' : 'light'">
+            <MDC
+              :value="comment.content"
+              class="markdown-body lt-lg:important:p0"
+            />
+          </div>
         </div>
         <div>
           <CommentReply
@@ -177,38 +178,25 @@ defineExpose({
 </script>
 
 <style scoped>
+.markdown-body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 45px;
+}
+
+@media (max-width: 767px) {
+  .markdown-body {
+    padding: 15px;
+  }
+}
+
 .markdown-body :deep(a) {
   color: black !important;
 }
+
 .dark .markdown-body :deep(a) {
   color: #ffffffb2 !important;
-}
-.dark :deep(code) {
-  color: white !important;
-}
-
-.dark :deep(.language-bash),
-.dark :deep(.language-shell),
-.dark :deep(.language-go),
-.dark :deep(.language-txt) {
-  background-color: rgba(10, 0, 0, 0.1) !important;
-  border: 0 !important;
-}
-
-.dark .markdown-body :deep(table),
-.dark .markdown-body :deep(thead),
-.dark .markdown-body :deep(th),
-.dark .markdown-body :deep(tbody),
-.dark .markdown-body :deep(tr),
-.dark .markdown-body :deep(td) {
-  background-color: transparent !important;
-}
-
-.dark :deep(blockquote) {
-  border-color: #334a61 !important;
-}
-
-:deep(.github-markdown-body) {
-  padding: 0;
 }
 </style>
