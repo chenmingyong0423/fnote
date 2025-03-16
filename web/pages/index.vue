@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getLatestPosts } from "~/api/post";
+import { getLatestPosts, getPostsById, type IPostDetail } from "~/api/post";
 import type { IPost } from "~/api/post";
 import type { IResponse, IListData } from "~/api/http";
 import { useConfigStore } from "~/store/config";
@@ -34,37 +34,25 @@ import {
   type InitializationStatusVO,
 } from "~/api/config";
 
-let posts = ref<IPost[]>([]);
-let carousel = ref<CarouselVO[]>([]);
-
-const postInfos = async () => {
-  try {
-    let postRes: any = await getLatestPosts();
-    let res: IResponse<IListData<IPost>> = postRes.data.value;
-    if (res) {
-      posts.value = res.data?.list || [];
-    }
-  } catch (error) {
-    console.log(error);
+const { data: posts } = await useAsyncData<IPost[]>(`latest-post`, async () => {
+  let postRes: any = await getLatestPosts();
+  let res: IResponse<IListData<IPost>> = postRes.data.value;
+  if (res) {
+    return res.data?.list || [];
   }
-};
-await postInfos();
+  return [];
+});
 
-const getCarousel = async () => {
-  try {
-    const res: any = await GetCarousel();
-    const apiRes: IResponse<IListData<CarouselVO>> = res.data.value;
-    if (apiRes) {
-      if (apiRes.code === 0) {
-        carousel.value = apiRes.data?.list || [];
-      }
+const { data: carousel } = await useAsyncData(`get-carousel`, async () => {
+  const res: any = await GetCarousel();
+  const apiRes: IResponse<IListData<CarouselVO>> = res.data.value;
+  if (apiRes) {
+    if (apiRes.code === 0) {
+      return apiRes.data?.list || [];
     }
-  } catch (e) {
-    console.log(e);
   }
-};
-
-await getCarousel();
+  return [];
+});
 </script>
 
 <style scoped>

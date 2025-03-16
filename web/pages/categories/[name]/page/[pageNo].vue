@@ -85,7 +85,7 @@ let req = ref<PageRequest>({
   sortField: "created_at",
   sortOrder: "DESC",
 } as PageRequest);
-const totalPosts = ref<Number>(0);
+const totalPosts = ref<number>(0);
 const title = ref<string>("");
 
 const configStore = useConfigStore();
@@ -110,39 +110,50 @@ if (route.query.filter && route.query.filter !== "") {
   }
 }
 
-const postInfos = async () => {
-  try {
-    if (!req.value.categories || req.value.categories.length == 0) {
-      let categoryRes: any = await getCategoryByRoute(routeParam);
-      let res: IResponse<ICategoryName> = categoryRes.data.value;
-      if (res && res.data) {
-        title.value = res.data?.name || "";
-        req.value.categories = [title.value || ""];
-      }
-    }
-    const deepCopyReq = JSON.parse(JSON.stringify(req.value));
-    let postRes: any = await getPosts(deepCopyReq);
-    let res: IResponse<IPageData<IPost>> = postRes.data.value;
+await useAsyncData(`category-page`, async () => {
+  if (!req.value.categories || req.value.categories.length == 0) {
+    let categoryRes: any = await getCategoryByRoute(routeParam);
+    let res: IResponse<ICategoryName> = categoryRes.data.value;
     if (res && res.data) {
-      posts.value = res.data?.list || [];
-      totalPosts.value = res.data?.totalCount || totalPosts.value;
+      title.value = res.data?.name || "";
+      req.value.categories = [title.value || ""];
     }
-  } catch (error) {
-    console.log(error);
+  }
+});
+
+const getPostList = async (): Promise<IPageData<IPost>> => {
+  const deepCopyReq = JSON.parse(JSON.stringify(req.value));
+  let postRes: any = await getPosts(deepCopyReq);
+  let res: IResponse<IPageData<IPost>> = postRes.data.value;
+  if (res && res.data) {
+    return res.data;
+  } else {
+    return { pageNo: 1, pageSize: 5, totalPage: 0, totalCount: 0, list: [] };
   }
 };
-await postInfos();
+
+const { data: postPageData } = await useAsyncData<IPageData<IPost>>(
+  `category-route-posts`,
+  async () => {
+    return getPostList();
+  },
+);
+
+watchEffect(
+  () => (totalPosts.value = postPageData.value?.totalCount || totalPosts.value),
+);
+watchEffect(() => (posts.value = postPageData.value?.list || []));
 
 // 创建一个计算属性来追踪 query 对象
 const routeQuery = computed(() => route.query);
 watch(
   () => routeQuery,
-  async (newQuery, oldQuery) => {
+  async (newQuery, _) => {
     const p: number = Number(route.query.pageSize) || -1;
     if (p != req.value.pageSize && p != -1) {
       req.value.pageSize = p;
       pageSize = p;
-      await postInfos();
+      postPageData.value = await getPostList();
     }
     if (
       newQuery.value.filter &&
@@ -164,7 +175,7 @@ watch(
           req.value.sortOrder = "DESC";
           break;
       }
-      await postInfos();
+      postPageData.value = await getPostList();
     }
   },
   { deep: true },

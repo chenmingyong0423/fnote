@@ -7,10 +7,7 @@
       <div class="h-10 line-height-10 font-bold text-6 mb-5">友情链接</div>
       <div>
         <div :data-theme="isBlackMode ? 'dark' : 'light'">
-          <MDC
-              :value="introduction"
-              class="markdown-body lt-lg:important:p0"
-          />
+          <MDC :value="introduction" class="markdown-body lt-lg:important:p0" />
         </div>
       </div>
     </div>
@@ -133,9 +130,9 @@ import type { IBaseResponse, IListData, IResponse } from "~/api/http";
 import { isValidEmail } from "~/utils/email";
 import { useConfigStore } from "~/store/config";
 import { useHomeStore } from "~/store/home";
+import type { IPost } from "~/api/post";
 
 const configStore = useConfigStore();
-const friends = ref<IFriend[]>([]);
 const toast = useAlertStore();
 const homeStore = useHomeStore();
 const isBlackMode = computed(() => homeStore.isBlackMode);
@@ -149,26 +146,29 @@ const req = ref<FriendReq>({
   url: "",
   description: "",
 });
-const getFriendList = async () => {
+
+const { data: friends } = await useAsyncData<IFriend[]>(`friends`, async () => {
   try {
     let httpRes: any = await getFriends();
     if (httpRes.data.value === null) {
       toast.showToast(httpRes.error.value.statusMessage, 2000);
-      return;
+      return [];
     }
     let res: IResponse<IListData<IFriend>> = httpRes.data.value;
     if (res && res.data) {
       if (res.code !== 0) {
         toast.showToast(res.message, 2000);
-        return;
+        return [];
       }
-      friends.value = res.data?.list || [];
+      return res.data?.list || [];
+    } else {
+      return [];
     }
   } catch (error: any) {
     toast.showToast(error.toString(), 2000);
+    return [];
   }
-};
-await getFriendList();
+});
 
 const submit = async () => {
   try {
@@ -226,29 +226,31 @@ const submit = async () => {
   }
 };
 
-const introduction = ref("");
-
-const getIntroduction = async () => {
-  try {
-    let httpRes: any = await GetFriendIntroduction();
-    if (httpRes.data.value === null) {
-      toast.showToast(httpRes.error.value.statusMessage, 2000);
-      return;
-    }
-    let res: IResponse<FriendIntroductionVO> = httpRes.data.value;
-    if (res && res.data) {
-      if (res.code !== 0) {
-        toast.showToast(res.message, 2000);
-        return;
+const { data: introduction } = await useAsyncData<string>(
+  `friend-introduction`,
+  async () => {
+    try {
+      let httpRes: any = await GetFriendIntroduction();
+      if (httpRes.data.value === null) {
+        toast.showToast(httpRes.error.value.statusMessage, 2000);
+        return "";
       }
-      introduction.value = res.data.introduction || "";
+      let res: IResponse<FriendIntroductionVO> = httpRes.data.value;
+      if (res && res.data) {
+        if (res.code !== 0) {
+          toast.showToast(res.message, 2000);
+          return "";
+        }
+        return res.data.introduction || "";
+      } else {
+        return "";
+      }
+    } catch (error: any) {
+      toast.showToast(error.toString(), 2000);
+      return "";
     }
-  } catch (error: any) {
-    toast.showToast(error.toString(), 2000);
-  }
-};
-
-getIntroduction();
+  },
+);
 
 useHead({
   title: `友链 - ${

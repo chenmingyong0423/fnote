@@ -65,6 +65,7 @@ import type { IResponse, IPageData } from "~/api/http";
 import type { ICategoryName } from "~/api/category";
 import { useHomeStore } from "~/store/home";
 import { useConfigStore } from "~/store/config";
+import { getTagByRoute, type ITagName } from "~/api/tag";
 
 const route = useRoute();
 const pageSize: number = Number(route.query.pageSize) || 5;
@@ -100,6 +101,44 @@ if (route.query.filter && route.query.filter !== "") {
     }
   }
 }
+
+const totalPosts = ref<number>(0);
+const title = ref<string>("");
+
+await useAsyncData(`category`, async () => {
+  if (!req.value.categories || req.value.categories.length == 0) {
+    let categoryRes: any = await getCategoryByRoute(routeParam);
+    let res: IResponse<ICategoryName> = categoryRes.data.value;
+    if (res && res.data) {
+      title.value = res.data?.name || "";
+    }
+    req.value.categories = [title.value];
+  }
+});
+
+const getPostList = async (): Promise<IPageData<IPost>> => {
+  const deepCopyReq = JSON.parse(JSON.stringify(req.value));
+  let postRes: any = await getPosts(deepCopyReq);
+  let res: IResponse<IPageData<IPost>> = postRes.data.value;
+  if (res && res.data) {
+    return res.data;
+  } else {
+    return { pageNo: 1, pageSize: 5, totalPage: 0, totalCount: 0, list: [] };
+  }
+};
+
+const { data: postPageData } = await useAsyncData<IPageData<IPost>>(
+  `category-route-posts`,
+  async () => {
+    return getPostList();
+  },
+);
+
+watchEffect(
+  () => (totalPosts.value = postPageData.value?.totalCount || totalPosts.value),
+);
+watchEffect(() => (posts.value = postPageData.value?.list || []));
+
 // 创建一个计算属性来追踪 query 对象
 const routeQuery = computed(() => route.query);
 watch(
@@ -125,39 +164,11 @@ watch(
           req.value.sortOrder = "DESC";
           break;
       }
-      await postInfos();
+      postPageData.value = await getPostList();
     }
   },
   { deep: true },
 );
-
-const totalPosts = ref<Number>(0);
-
-const title = ref<string>("");
-
-const postInfos = async () => {
-  try {
-    if (!req.value.categories || req.value.categories.length == 0) {
-      let categoryRes: any = await getCategoryByRoute(routeParam);
-      let res: IResponse<ICategoryName> = categoryRes.data.value;
-      if (res && res.data) {
-        title.value = res.data?.name || "";
-      }
-      req.value.categories = [title.value];
-    }
-    const deepCopyReq = JSON.parse(JSON.stringify(req.value));
-    let postRes: any = await getPosts(deepCopyReq);
-    let res: IResponse<IPageData<IPost>> = postRes.data.value;
-    if (res && res.data) {
-      posts.value = res.data?.list || [];
-      totalPosts.value = res.data?.totalCount || totalPosts.value;
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-await postInfos();
 
 useHead({
   title: `${title.value} - ${

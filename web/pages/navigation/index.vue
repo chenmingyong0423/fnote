@@ -58,38 +58,32 @@ import { getTagList } from "~/api/tag";
 import { getCategoriesAndTags } from "~/api/category";
 import { useConfigStore } from "~/store/config";
 
-let categories = ref<ICategoryWithCount[]>([]);
 let ct = ref<string>("");
 
-const categoryAndTags = async () => {
-  try {
-    let httpRes: any = await getCategoriesAndTags();
-    let res: IResponse<IListData<ICategoryWithCount>> = httpRes.data.value;
-    categories.value = res.data?.list || [];
-    categories.value.forEach((item: ICategoryWithCount) => {
-      ct.value += item.name + "、";
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
+const { data: categories } = await useAsyncData(`categories`, async () => {
+  let httpRes: any = await getCategoriesAndTags();
+  let res: IResponse<IListData<ICategoryWithCount>> = httpRes.data.value;
+  return res.data?.list || [];
+});
 
-let tags = ref<ITagWithCount[]>([]);
-const tagList = async () => {
-  try {
-    let httpRes: any = await getTagList();
-    let res: IResponse<IListData<ITagWithCount>> = httpRes.data.value;
-    tags.value = res.data?.list || [];
-    tags.value.forEach((item: ITagWithCount) => {
-      ct.value += item.name + "、";
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
+if (categories.value) {
+  categories.value.forEach((item: ICategoryWithCount) => {
+    ct.value += item.name + "、";
+  });
+}
 
-await categoryAndTags();
-await tagList();
+const { data: tags } = await useAsyncData(`tags`, async () => {
+  let httpRes: any = await getTagList();
+  let res: IResponse<IListData<ITagWithCount>> = httpRes.data.value;
+  return res.data?.list || [];
+});
+
+if (tags.value) {
+  tags.value.forEach((item: ITagWithCount) => {
+    ct.value += item.name + "、";
+  });
+}
+
 ct.value = ct.value.substring(0, ct.value.length - 1);
 
 const configStore = useConfigStore();

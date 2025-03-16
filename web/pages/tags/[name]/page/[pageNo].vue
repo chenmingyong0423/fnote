@@ -35,9 +35,12 @@
     <div class="flex">
       <div class="w-69% mr-1% flex flex-col lt-md:w-100%">
         <div class="flex flex-col">
-          <PostListItem :posts="posts" class="lt-md:hidden"></PostListItem>
+          <PostListItem
+            :posts="posts || []"
+            class="lt-md:hidden"
+          ></PostListItem>
           <PostListSquareItem
-            :posts="posts"
+            :posts="posts || []"
             class="md:hidden"
           ></PostListSquareItem>
           <Pagination
@@ -62,7 +65,7 @@ import type { PageRequest } from "~/api/post";
 import type { IPost } from "~/api/post";
 import type { IResponse, IPageData } from "~/api/http";
 import type { ICategoryName } from "~/api/category";
-import { getTagByRoute } from "~/api/tag";
+import { getTagByRoute, type ITagName } from "~/api/tag";
 import { useConfigStore } from "~/store/config";
 
 const route = useRoute();
@@ -77,7 +80,6 @@ const generateQuery = (filter: string) => {
   return "?filter=" + filter;
 };
 
-let posts = ref<IPost[]>([]);
 let req = ref<PageRequest>({
   pageNo: pageNo,
   pageSize: pageSize,
@@ -104,29 +106,44 @@ if (route.query.filter && route.query.filter !== "") {
     }
   }
 }
-const totalPosts = ref<Number>(0);
-const postInfos = async () => {
-  try {
-    if (!req.value.tags || req.value.tags.length == 0) {
-      let categoryRes: any = await getTagByRoute(routeParam);
-      let res: IResponse<ICategoryName> = categoryRes.data.value;
-      if (res && res.data) {
-        req.value.tags = [res.data?.name || ""];
-      }
-    }
-    const deepCopyReq = JSON.parse(JSON.stringify(req.value));
-    let postRes: any = await getPosts(deepCopyReq);
-    let res: IResponse<IPageData<IPost>> = postRes.data.value;
+const totalPosts = ref<number>(0);
+
+const getTag = async () => {
+  if (!req.value.tags || req.value.tags.length == 0) {
+    let categoryRes: any = await getTagByRoute(routeParam);
+    let res: IResponse<ITagName> = categoryRes.data.value;
     if (res && res.data) {
-      posts.value = res.data?.list || [];
+      req.value.tags = [res.data?.name || ""];
     }
-    totalPosts.value = res.data?.totalCount || totalPosts.value;
-  } catch (error) {
-    console.log(error);
   }
 };
 
-await postInfos();
+await useAsyncData(`tag-page`, async () => {
+  await getTag();
+});
+
+const getPostList = async (): Promise<IPageData<IPost>> => {
+  const deepCopyReq = JSON.parse(JSON.stringify(req.value));
+  let postRes: any = await getPosts(deepCopyReq);
+  let res: IResponse<IPageData<IPost>> = postRes.data.value;
+  if (res && res.data) {
+    return res.data;
+  }
+  return { pageNo: 1, pageSize: 5, totalPage: 0, totalCount: 0, list: [] };
+};
+const { data: postPageData } = await useAsyncData(
+  `tag-route-page-posts`,
+  async () => {
+    return getPostList();
+  },
+);
+
+const posts = ref<IPost[]>([]);
+
+watchEffect(
+  () => (totalPosts.value = postPageData.value?.totalCount || totalPosts.value),
+);
+watchEffect(() => (posts.value = postPageData.value?.list || []));
 
 const configStore = useConfigStore();
 useHead({
@@ -153,12 +170,12 @@ const routeQuery = computed(() => route.query);
 
 watch(
   () => routeQuery,
-  async (newQuery, oldQuery) => {
+  async (newQuery, _) => {
     const p: number = Number(route.query.pageSize) || -1;
     if (p != req.value.pageSize && p != -1) {
       req.value.pageSize = p;
       pageSize = p;
-      await postInfos();
+      postPageData.value = await getPostList();
     }
     if (
       newQuery.value.filter &&
@@ -180,7 +197,7 @@ watch(
           req.value.sortOrder = "DESC";
           break;
       }
-      await postInfos();
+      postPageData.value = await getPostList();
     }
   },
   { deep: true },
