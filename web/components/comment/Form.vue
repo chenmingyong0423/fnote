@@ -16,8 +16,8 @@
         <br />
         <div :data-theme="isBlackMode ? 'dark' : 'light'">
           <MDC
-              :value="commentReq.content"
-              class="markdown-body lt-lg:important:p0 max-h-[170px] h-[170px] overflow-x-auto text-nowrap custom_border_gray p-2 b-rounded-2"
+            :value="commentReq.content"
+            class="markdown-body lt-lg:important:p0 max-h-[170px] h-[170px] overflow-x-auto text-nowrap custom_border_gray p-2 b-rounded-2"
           />
         </div>
       </div>

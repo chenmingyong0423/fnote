@@ -164,7 +164,6 @@ const submitReply2Reply = (req: ICommentReplyRequest, replyToId: string) => {
 
 const replyList = ref();
 const clearReply2ReplyReq = () => {
-  console.log("rrr", replyList.value);
   if (replyList.value) {
     replyList.value[0].clearReplyReq();
   }

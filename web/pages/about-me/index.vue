@@ -119,12 +119,16 @@
           <div>阅读 {{ post?.visit_count }}</div>
         </div>
         <!--  文章内容  -->
-        <div class="text-4" ref="previewRef" :data-theme="isBlackMode ? 'dark' : 'light'">
+        <div
+          class="text-4"
+          ref="previewRef"
+          :data-theme="isBlackMode ? 'dark' : 'light'"
+        >
           <MDCRenderer
-              :body="mdData.body"
-              :data="mdData.data"
-              class="markdown-body lt-lg:important:p0"
-              tag="article"
+            :body="mdData.body"
+            :data="mdData.data"
+            class="markdown-body lt-lg:important:p0"
+            tag="article"
           />
         </div>
       </div>

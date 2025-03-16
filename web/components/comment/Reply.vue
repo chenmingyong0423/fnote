@@ -47,18 +47,12 @@
         <Button
           name="回复"
           class="w-15 h-8 line-height-8 hover:bg-gray-1 ml-auto"
-          @click="
-            activeCommentIndex = rpy.id;
-            console.log(rpy.id);
-          "
+          @click="activeCommentIndex = rpy.id"
         ></Button>
       </div>
       <div>
         <div :data-theme="isBlackMode ? 'dark' : 'light'">
-          <MDC
-              :value="rpy.content"
-              class="markdown-body lt-lg:important:p0"
-          />
+          <MDC :value="rpy.content" class="markdown-body lt-lg:important:p0" />
         </div>
       </div>
       <div

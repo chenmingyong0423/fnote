@@ -25,7 +25,16 @@
 </template>
 <script lang="ts" setup>
 import { useHomeStore } from "~/store/home";
-import { type IWebsiteInfo, getWebsiteInfo, type TPSVVO } from "~/api/config";
+import {
+  type IWebsiteInfo,
+  getWebsiteInfo,
+  type TPSVVO,
+  type IWebsite,
+  type INotice,
+  type ISocialInfo,
+  type IPayInfo,
+  type SeoMetaConfigVO,
+} from "~/api/config";
 import { type IResponse } from "~/api/http";
 import SmallMenu from "~/components/SmallMenu.vue";
 import {
@@ -35,6 +44,7 @@ import {
   type WebsiteCountStats,
 } from "~/api/statiscs";
 import { useConfigStore } from "~/store/config";
+import type { IPost } from "~/api/post";
 
 const myDom = ref();
 const homeStore = useHomeStore();
@@ -54,44 +64,75 @@ const siteURL = runtimeConfig.public.domain;
 const apiHost = runtimeConfig.public.apiHost;
 const metaVerificationList = ref([] as { name: string; content: string }[]);
 
-const webMaster = async () => {
-  try {
-    let postRes: any = await getWebsiteInfo();
-    let res: IResponse<IWebsiteInfo> = postRes.data.value;
-    if (res && res.data) {
-      configStore.website_info = res.data.website_config;
-      siteName.value = res.data.website_config.website_name;
-      configStore.notice_info = res.data.notice_config;
-      configStore.social_info_list =
-        res.data.social_info_config.social_info_list;
-      configStore.pay_info = res.data.pay_info_config;
-      configStore.seo_meta_config = res.data.seo_meta_config;
-      configStore.tpsv_list = res.data.third_party_site_verification;
-      configStore.tpsv_list.forEach((item) => {
-        metaVerificationList.value.push({
-          name: item.key,
-          content: item.value,
-        });
-      });
+const { data: webMaster } = await useAsyncData<IWebsiteInfo>(
+  `webMaster`,
+  async () => {
+    try {
+      let postRes: any = await getWebsiteInfo();
+      let res: IResponse<IWebsiteInfo> = postRes.data.value;
+      if (res && res.data) {
+        return res.data;
+      } else {
+        return {
+          website_config: {} as IWebsite,
+          notice_config: {} as INotice,
+          social_info_config: {} as ISocialInfo,
+          pay_info_config: [] as IPayInfo[],
+          seo_meta_config: {} as SeoMetaConfigVO,
+          third_party_site_verification: [] as TPSVVO[],
+        };
+      }
+    } catch (error) {
+      console.log(error);
+      return {
+        website_config: {} as IWebsite,
+        notice_config: {} as INotice,
+        social_info_config: {} as ISocialInfo,
+        pay_info_config: [] as IPayInfo[],
+        seo_meta_config: {} as SeoMetaConfigVO,
+        third_party_site_verification: [] as TPSVVO[],
+      };
     }
-  } catch (error) {
-    console.log(error);
-  }
-};
-await webMaster();
+  },
+);
 
-const websiteCountStats = async () => {
-  try {
-    let postRes: any = await getWebsiteCountStats();
-    let res: IResponse<WebsiteCountStats> = postRes.data.value;
-    if (res && res.data) {
-      configStore.website_count_stats = res.data;
+configStore.website_info = webMaster.value?.website_config || ({} as IWebsite);
+siteName.value = webMaster.value?.website_config.website_name || "fnote";
+configStore.notice_info = webMaster.value?.notice_config || ({} as INotice);
+configStore.social_info_list =
+  webMaster.value?.social_info_config.social_info_list || [];
+configStore.pay_info = webMaster.value?.pay_info_config || ([] as IPayInfo[]);
+configStore.seo_meta_config =
+  webMaster.value?.seo_meta_config || ({} as SeoMetaConfigVO);
+configStore.tpsv_list =
+  webMaster.value?.third_party_site_verification || ([] as TPSVVO[]);
+configStore.tpsv_list.forEach((item) => {
+  metaVerificationList.value.push({
+    name: item.key,
+    content: item.value,
+  });
+});
+
+const { data: websiteCountStats } = await useAsyncData<WebsiteCountStats>(
+  `websiteCountStats`,
+  async () => {
+    try {
+      let postRes: any = await getWebsiteCountStats();
+      let res: IResponse<WebsiteCountStats> = postRes.data.value;
+      if (res && res.data) {
+        return res.data;
+      } else {
+        return {} as WebsiteCountStats;
+      }
+    } catch (error) {
+      console.log(error);
+      return {} as WebsiteCountStats;
     }
-  } catch (error) {
-    console.log(error);
-  }
-};
-websiteCountStats();
+  },
+);
+
+configStore.website_count_stats =
+  websiteCountStats.value || ({} as WebsiteCountStats);
 
 const scrollToTop = ref();
 
