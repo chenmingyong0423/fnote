@@ -61,6 +61,7 @@ type GenDomain struct {
 	DomainName    string
 	UnderlineName string
 	TableName     string
+	OutputDir     string
 }
 
 func main() {
@@ -72,11 +73,13 @@ func main() {
 		DomainName:    *domain,
 		UnderlineName: stringx.CamelToSnake(*domain),
 		TableName:     *tableName,
+		OutputDir:     *outputDir,
 	}
 
 	if outputDir == nil || *outputDir == "" {
 		outputDir = new(string)
 		*outputDir = "internal/" + gen.UnderlineName
+		gen.OutputDir = *outputDir
 	}
 
 	if tableName == nil || *tableName == "" {
