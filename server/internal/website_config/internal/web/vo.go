@@ -17,7 +17,6 @@ package web
 // IndexConfigVO 首页信息
 type IndexConfigVO struct {
 	WebsiteConfig      WebsiteConfigVO    `json:"website_config"`
-	OwnerConfig        OwnerConfigVO      `json:"owner_config"`
 	NoticeConfigVO     NoticeConfigVO     `json:"notice_config"`
 	SocialInfoConfigVO SocialInfoConfigVO `json:"social_info_config"`
 	PayInfoConfigVO    []PayInfoConfigVO  `json:"pay_info_config"`
