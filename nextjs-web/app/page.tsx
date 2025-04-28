@@ -1,103 +1,229 @@
-import Image from "next/image";
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+import Notice from './components/Notice';
+import Profile from './components/Profile';
+import ExternalLink from './components/ExternalLink';
+import PostListItem from './components/post/PostListItem';
+import PostSquareItem from './components/post/PostSquareItem';
+import PostCarousel from './components/post/PostCarousel';
+import { useConfigContext } from './context/ConfigContext';
+import { IPost } from './api/post';
+import { getPosts, getLatestPosts } from './api/post';
+import { GetCarousel, CarouselVO } from './api/config';
+import { getLatestComments, ILatestComment } from './api/comment';
+
+// 用于跟踪API调用状态的全局对象
+const API_REQUEST_STATUS = {
+  latestPosts: false,
+  latestComments: false,
+  carousel: false
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [latestPosts, setLatestPosts] = useState<IPost[]>([]);
+  const [carouselData, setCarouselData] = useState<CarouselVO[]>([]);
+  const [latestComments, setLatestComments] = useState<ILatestComment[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  
+  // 使用 ref 来防止重复调用API
+  const dataFetchedRef = useRef(false);
+  
+  const config = useConfigContext();
+  const apiHost = process.env.NEXT_PUBLIC_API_HOST || '';
+  
+  // 设置响应式布局检测 - 使用媒体查询更可靠
+  useEffect(() => {
+    // 使用媒体查询检测移动设备
+    const mobileQuery = window.matchMedia('(max-width: 767px)');
+    
+    // 初始检查
+    setIsMobile(mobileQuery.matches);
+    
+    // 添加媒体查询事件监听
+    const handleMobileChange = (event: MediaQueryListEvent) => {
+      setIsMobile(event.matches);
+    };
+    
+    // 现代浏览器使用 addEventListener
+    if (mobileQuery.addEventListener) {
+      mobileQuery.addEventListener('change', handleMobileChange);
+      return () => mobileQuery.removeEventListener('change', handleMobileChange);
+    } 
+    // 旧版浏览器兼容性支持
+    else {
+      mobileQuery.addListener(handleMobileChange);
+      return () => mobileQuery.removeListener(handleMobileChange);
+    }
+  }, []);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // 获取数据
+  useEffect(() => {
+    // 如果已经获取过数据，不再重复获取
+    if (dataFetchedRef.current) return;
+    
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // 获取轮播图数据
+        if (!API_REQUEST_STATUS.carousel) {
+          API_REQUEST_STATUS.carousel = true;
+          const carouselResponse = await GetCarousel();
+          if (carouselResponse?.data) {
+            setCarouselData(carouselResponse.data || []);
+          }
+        }
+        
+        // 获取最新文章
+        if (!API_REQUEST_STATUS.latestPosts) {
+          API_REQUEST_STATUS.latestPosts = true;
+          console.log('Fetching latest posts...');
+          const latestResponse = await getLatestPosts();
+          if (latestResponse?.data) {
+            setLatestPosts(latestResponse.data || []);
+            console.log('Latest posts fetched successfully');
+          }
+        }
+        
+        // 获取最新评论
+        if (!API_REQUEST_STATUS.latestComments) {
+          API_REQUEST_STATUS.latestComments = true;
+          console.log('Fetching latest comments...');
+          const commentsResponse = await getLatestComments();
+          if (commentsResponse?.data) {
+            setLatestComments(commentsResponse.data || []);
+            console.log('Latest comments fetched successfully');
+          }
+        }
+        
+        // 标记数据已获取
+        dataFetchedRef.current = true;
+      } catch (error) {
+        console.error('获取数据失败:', error);
+        // 设置模拟数据作为备用
+        setLatestPosts(mockPosts);
+        setCarouselData([]);
+        setLatestComments([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+    
+    // 组件卸载时重置状态
+    return () => {
+      API_REQUEST_STATUS.latestPosts = false;
+      API_REQUEST_STATUS.latestComments = false;
+      API_REQUEST_STATUS.carousel = false;
+    };
+  }, []);
+  
+  // 模拟数据
+  const mockPosts: IPost[] = [];
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-[#03080c]">
+      {/* 主内容 */}
+      <div className="container mx-auto px-4 py-8">
+        {/* 移动端上使用单列布局 */}
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* 左侧垂直布局 - 轮播图、公告、文章列表 */}
+          <main className="w-full md:w-2/3">
+            {/* 轮播图区域 */}
+            <div className="mb-8">
+              <PostCarousel carousel={carouselData} />
+            </div>
+            
+            {/* 公告区域 */}
+            <div className="mb-8">
+              <Notice />
+            </div>
+            
+            {/* 最新文章标题 */}
+            <div className="mb-4 flex justify-between items-center">
+              <h2 className="text-2xl font-bold dark:text-white">最新文章</h2>
+            </div>
+            
+            {/* 最新文章列表 */}
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <p className="text-gray-500 dark:text-gray-400">加载中...</p>
+              </div>
+            ) : (
+              <>
+                {!isMobile ? (
+                  <PostListItem posts={latestPosts.length > 0 ? latestPosts : mockPosts} />
+                ) : (
+                  <PostSquareItem posts={latestPosts.length > 0 ? latestPosts : mockPosts} />
+                )}
+              </>
+            )}
+          </main>
+
+          {/* 右侧布局 - 仅在非移动端显示 */}
+          {!isMobile && (
+            <aside className="w-full md:w-1/3">
+              {/* 个人资料卡片 */}
+              <div className="mb-6">
+                <Profile />
+              </div>
+              
+              {/* 社交链接 */}
+              <div className="mb-6">
+                <ExternalLink />
+              </div>
+              
+              {/* 最新评论 */}
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6 dark:bg-gray-800">
+                <h3 className="text-lg font-bold border-b pb-3 mb-4 dark:text-white dark:border-gray-700">最新评论</h3>
+                <div className="space-y-4">
+                  {Array.isArray(latestComments) && latestComments.length > 0 ? (
+                    latestComments.map((comment, index) => (
+                      <div key={index} className="flex gap-3">
+                        {comment.picture ? (
+                          <img
+                            src={comment.picture.startsWith('http') ? comment.picture : `${apiHost}${comment.picture}`} 
+                            alt={comment.name}
+                            width={40}
+                            height={40}
+                            className="rounded-full"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                            {comment.name.charAt(0)}
+                          </div>
+                        )}
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium dark:text-white">{comment.name}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {new Date(comment.created_at * 1000).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <a 
+                            href={`/posts/${comment.post_id}`} 
+                            className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-500"
+                          >
+                            <p className="line-clamp-2">{comment.content}</p>
+                            <p className="text-xs text-gray-500 mt-1">文章：{comment.post_title}</p>
+                          </a>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-gray-500 dark:text-gray-400">暂无评论</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </aside>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }
