@@ -12,6 +12,7 @@ import { IPost } from './api/post';
 import { getPosts, getLatestPosts } from './api/post';
 import { GetCarousel, CarouselVO } from './api/config';
 import { getLatestComments, ILatestComment } from './api/comment';
+import { log } from 'console';
 
 // 用于跟踪API调用状态的全局对象
 const API_REQUEST_STATUS = {
@@ -64,31 +65,48 @@ export default function Home() {
     if (dataFetchedRef.current) return;
     
     const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        // 获取轮播图数据
-        if (!API_REQUEST_STATUS.carousel) {
+      setLoading(true);
+      let hasError = false;
+      // 获取轮播图数据
+      if (!API_REQUEST_STATUS.carousel) {
+        try {
           API_REQUEST_STATUS.carousel = true;
           const carouselResponse = await GetCarousel();
           if (carouselResponse?.data) {
             setCarouselData(carouselResponse.data || []);
           }
+        } catch (error) {
+          hasError = true;
+          setCarouselData([]);
+          console.error('获取轮播图数据失败:', error);
         }
-        
-        // 获取最新文章
-        if (!API_REQUEST_STATUS.latestPosts) {
+      }
+      // 获取最新文章
+      if (!API_REQUEST_STATUS.latestPosts) {
+        try {
           API_REQUEST_STATUS.latestPosts = true;
           console.log('Fetching latest posts...');
           const latestResponse = await getLatestPosts();
           if (latestResponse?.data) {
-            setLatestPosts(latestResponse.data || []);
-            console.log('Latest posts fetched successfully');
+            // 处理 cover_img 路径
+            const serverHost = process.env.SERVER_HOST || '';
+            const posts = (latestResponse.data.list || []).map((post: IPost) => ({
+              ...post,
+              cover_img: post.cover_img && !post.cover_img.startsWith('http')
+                ? serverHost + post.cover_img
+                : post.cover_img
+            }));
+            setLatestPosts(posts);
           }
+        } catch (error) {
+          hasError = true;
+          setLatestPosts(mockPosts);
+          console.error('获取最新文章失败:', error);
         }
-        
-        // 获取最新评论
-        if (!API_REQUEST_STATUS.latestComments) {
+      }
+      // 获取最新评论
+      if (!API_REQUEST_STATUS.latestComments) {
+        try {
           API_REQUEST_STATUS.latestComments = true;
           console.log('Fetching latest comments...');
           const commentsResponse = await getLatestComments();
@@ -96,18 +114,17 @@ export default function Home() {
             setLatestComments(commentsResponse.data || []);
             console.log('Latest comments fetched successfully');
           }
+        } catch (error) {
+          hasError = true;
+          setLatestComments([]);
+          console.error('获取最新评论失败:', error);
         }
-        
-        // 标记数据已获取
-        dataFetchedRef.current = true;
-      } catch (error) {
-        console.error('获取数据失败:', error);
-        // 设置模拟数据作为备用
-        setLatestPosts(mockPosts);
-        setCarouselData([]);
-        setLatestComments([]);
-      } finally {
-        setLoading(false);
+      }
+      // 标记数据已获取
+      dataFetchedRef.current = true;
+      setLoading(false);
+      if (hasError) {
+        // 可以在这里做全局错误提示
       }
     };
     
