@@ -21,6 +21,7 @@ const API_REQUEST_STATUS = {
   carousel: false
 };
 
+
 export default function Home() {
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [latestPosts, setLatestPosts] = useState<IPost[]>([]);
