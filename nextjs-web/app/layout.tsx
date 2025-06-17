@@ -4,11 +4,9 @@ import { ConfigProvider } from "./context/ConfigContext";
 import BlogLayout from "./components/BlogLayout";
 import StyledComponentsRegistry from "./components/AntdRegistry";
 import { AntdRegistry } from '@ant-design/nextjs-registry';
+import { generateMetadata } from "./generateMetadata";
 
-export const metadata: Metadata = {
-  title: "fnote",
-  description: "fnote",
-};
+export const metadata = generateMetadata;
 
 export default function RootLayout({
   children,

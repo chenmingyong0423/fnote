@@ -1,16 +1,15 @@
 'use client';
 
 import Image from 'next/image';
-import { useConfigContext } from '../context/ConfigContext';
+import { useConfigStore } from '../store/configStore';
 
 export default function Profile() {
-  const config = useConfigContext();
+  const store = useConfigStore();
   const apiHost = process.env.NEXT_PUBLIC_API_HOST || '';
-  
   // 获取网站信息
-  const websiteInfo = config.website_info || {};
+  const websiteInfo = store.website_info?.website_config || {};
   // 获取统计数据
-  const statsInfo = config.website_count_stats || {
+  const statsInfo = store.website_stats || {
     post_count: 0,
     category_count: 0,
     tag_count: 0,

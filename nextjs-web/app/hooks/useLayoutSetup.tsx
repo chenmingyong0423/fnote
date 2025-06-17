@@ -75,27 +75,14 @@ export function useLayoutSetup() {
   // 初始化函数
   const initLayout = useCallback(async () => {
     console.log('Initializing layout...');
-    
-    // 初始化暗黑模式 (现在由 useInitConfig 处理)
-    config.initDarkMode();
-
-    // 获取网站统计数据 (现在由 useInitConfig 处理)
-    await config.fetchWebsiteStats();
-
-    // 获取网站信息 (现在由 useInitConfig 处理)
-    await config.fetchWebsiteInfo();
-    
-    // 收集访问日志
+    // 只做布局和访问日志相关初始化，不再重复请求全局配置和统计
+    // 暗黑模式、网站信息、网站统计数据由 useInitConfig 负责
     await collectVisit();
-    
-    // 添加滚动事件监听
     window.addEventListener('scroll', handleScroll);
-    
     return () => {
-      // 清理事件监听
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [config, collectVisit, handleScroll]);
+  }, [collectVisit, handleScroll]);
   
   return {
     initLayout,
