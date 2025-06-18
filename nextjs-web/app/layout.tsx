@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import React from "react";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
+import Footer from "../src/components/Footer";
+import Header from "../src/components/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +31,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AntdRegistry>{children}</AntdRegistry>
+        <AntdRegistry>
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            <main className="flex-1 container mx-auto px-4 py-6">
+              {children}
+            </main>
+            <Footer />
+          </div>
+        </AntdRegistry>
       </body>
     </html>
   );
