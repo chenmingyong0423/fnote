@@ -4,13 +4,15 @@ import { Avatar, Button, Space } from "antd";
 import { BulbOutlined, SearchOutlined } from "@ant-design/icons";
 import Navbar from "./Navbar";
 import Link from "next/link";
+import { useConfigStore } from "../store/config";
 
 const Header: React.FC = () => {
+  const websiteConfig = useConfigStore((s) => s.config?.website_config);
   return (
     <header className="w-full bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
       <div className="flex items-center space-x-4 w-full">
         <Link href="/">
-          <Avatar src="/logo.png" alt="logo" size={40} />
+          <Avatar src={websiteConfig?.website_icon || "/logo.png"} alt="logo" size={40} />
         </Link>
         <div className="flex-1 min-w-0">
           <Navbar />
