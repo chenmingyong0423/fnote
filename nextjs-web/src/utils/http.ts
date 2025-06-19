@@ -14,7 +14,12 @@ export async function request<T = any>(
   // 如果在服务端，且 input 是字符串且以 /api 或 /static 开头，则拼接后端地址
   if (typeof window === 'undefined' && typeof input === 'string' && (input.startsWith('/api') || input.startsWith('/static'))) {
     const serverHost = process.env.SERVER_HOST || 'http://localhost:8080';
-    url = serverHost.replace(/\/$/, '') + input;
+    // 去掉 /api 前缀再拼接
+    let path = input;
+    if (path.startsWith('/api')) {
+      path = path.replace(/^\/api/, '');
+    }
+    url = serverHost.replace(/\/$/, '') + path;
   }
   const res = await fetch(url, init);
   if (!res.ok) {
