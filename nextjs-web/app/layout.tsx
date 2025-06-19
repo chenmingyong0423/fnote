@@ -32,11 +32,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AntdRegistry>
-          <div className="min-h-screen flex flex-col">
+          <div className="min-h-screen flex flex-col bg-gray-100">
             <Header />
-            <main className="flex-1 container mx-auto px-4 py-6">
-              {children}
-            </main>
+            <main className="flex-1 py-8">{children}</main>
             <Footer />
           </div>
         </AntdRegistry>
