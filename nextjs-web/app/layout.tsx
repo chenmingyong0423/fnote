@@ -7,6 +7,7 @@ import Footer from "../src/components/Footer";
 import Header from "../src/components/Header";
 import ConfigToZustand from "../src/components/ConfigToZustand";
 import { getIndexConfig } from "../src/api/config";
+import { getWebsiteStats } from "../src/api/stats";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,11 @@ export default async function RootLayout({
 }>) {
   // SSR 获取配置信息
   const config = await getIndexConfig();
+  let stats = null;
+  try {
+    stats = await getWebsiteStats();
+  } catch {}
+  const configWithStats = { ...config, stats };
 
   return (
     <html lang="en">
@@ -39,7 +45,7 @@ export default async function RootLayout({
         <AntdRegistry>
           <div className="min-h-screen flex flex-col bg-gray-100">
             <Header />
-            <ConfigToZustand config={config} />
+            <ConfigToZustand config={configWithStats} />
             <main className="flex-1 py-8">{children}</main>
             <Footer />
           </div>

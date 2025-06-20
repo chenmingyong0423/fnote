@@ -1,4 +1,5 @@
 import { request } from "../utils/http";
+import type { WebsiteCountStatsVO } from "./stats";
 
 export interface WebsiteConfigVO {
   website_name: string;
@@ -56,6 +57,7 @@ export interface IndexConfigVO {
   pay_info_config: PayInfoConfigVO[];
   seo_meta_config: SeoMetaConfigVO;
   third_party_site_verification: TPSVVO[];
+  stats?: WebsiteCountStatsVO; // 新增，可选
 }
 
 export interface Response<T> {
