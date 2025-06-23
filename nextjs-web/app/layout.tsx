@@ -8,6 +8,7 @@ import Header from "../src/components/Header";
 import ConfigToZustand from "../src/components/ConfigToZustand";
 import { getIndexConfig } from "../src/api/config";
 import { getWebsiteStats } from "../src/api/stats";
+import { getMenus } from "../src/api/category";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +30,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const menus = await getMenus();
   // SSR 获取配置信息
   const config = await getIndexConfig();
   let stats = null;
@@ -44,7 +46,7 @@ export default async function RootLayout({
       >
         <AntdRegistry>
           <div className="min-h-screen flex flex-col bg-gray-100">
-            <Header />
+            <Header menus={menus} />
             <ConfigToZustand config={configWithStats} />
             <main>{children}</main>
             <Footer />
