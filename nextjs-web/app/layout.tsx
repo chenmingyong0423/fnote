@@ -46,7 +46,7 @@ export default async function RootLayout({
           <div className="min-h-screen flex flex-col bg-gray-100">
             <Header />
             <ConfigToZustand config={configWithStats} />
-            <main className="flex-1 py-8">{children}</main>
+            <main>{children}</main>
             <Footer />
           </div>
         </AntdRegistry>
