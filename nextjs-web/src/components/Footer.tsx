@@ -1,7 +1,7 @@
 import React from "react";
 
 const Footer: React.FC = () => (
-  <footer className="w-full bg-white border-t border-gray-200 mt-8 h-[60px] px-4 mx-auto max-w-7xl grid grid-cols-12 items-center">
+  <footer className="w-full bg-white border-t border-gray-200 mt-8 h-[60px] px-4 mx-auto max-w-7xl grid grid-cols-12 items-center rounded-xl">
     {/* 左留白 */}
     <div className="col-span-1 lg:col-span-2" />
     {/* 主体内容 10/12 或 8/12 居中 */}
