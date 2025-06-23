@@ -23,8 +23,8 @@ export default function LatestArticles({ articles }: { articles: LatestPostVO[] 
             >
               <Card
                 hoverable
-                className="h-full flex flex-col"
-                styles={{ body: { padding: 12 } }}
+                className="h-full flex flex-col relative"
+                styles={{ body: { padding: 12, display: 'flex', flexDirection: 'column', height: '100%' } }}
               >
                 {/* 标签区：左上角绝对定位，使用 antd Tag */}
                 <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
@@ -47,9 +47,9 @@ export default function LatestArticles({ articles }: { articles: LatestPostVO[] 
                   {item.title}
                 </div>
                 {/* 摘要 */}
-                <div className="pt-2 pb-4 text-gray-500 text-sm min-h-[48px]">{item.summary}</div>
+                <div className="pt-2 pb-4 text-gray-500 h-13 text-sm line-clamp-2">{item.summary}</div>
                 {/* 数据区 */}
-                <div className="flex items-center justify-between pb-2 text-xs text-gray-400">
+                <div className="flex items-center justify-between pb-2 text-xs text-gray-400 mt-auto">
                   <div className="flex items-center gap-4">
                     {/* 浏览量 */}
                     <span className="flex items-center gap-1"><EyeOutlined /> {item.visit_count}</span>
