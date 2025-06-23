@@ -1,4 +1,5 @@
 import { request } from "../utils/http";
+import type { Response } from "./types";
 
 export interface CategoryResponse {
   list: CategoryWithCountVO[];
@@ -21,12 +22,6 @@ export interface CategoryNameVO {
 export interface MenuVO {
   name: string;
   route: string;
-}
-
-export interface Response<T> {
-  code: number;
-  message: string;
-  data: T;
 }
 
 const API_PREFIX = "/api/categories";

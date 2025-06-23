@@ -1,5 +1,6 @@
 import { request } from "../utils/http";
 import type { LatestComment } from "../components/LatestComments";
+import type { Response } from "./types";
 
 export interface LatestCommentApiItem {
   post_id: string;
@@ -13,12 +14,6 @@ export interface LatestCommentApiItem {
 
 export interface LatestCommentsResponse {
   list: LatestCommentApiItem[];
-}
-
-export interface Response<T> {
-  code: number;
-  message: string;
-  data: T;
 }
 
 // 获取最新评论

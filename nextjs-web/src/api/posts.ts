@@ -1,4 +1,5 @@
 import { request } from "../utils/http";
+import type { Response } from "./types";
 
 export interface LatestPostVO {
   sug: string;
@@ -19,14 +20,8 @@ export interface LatestPostsResponse {
   list: LatestPostVO[];
 }
 
-export interface ApiResponse<T> {
-  code: number;
-  message: string;
-  data: T;
-}
-
 export async function getLatestPosts(): Promise<LatestPostVO[]> {
-  const res = await request<ApiResponse<LatestPostsResponse>>("/api/posts/latest");
+  const res = await request<Response<LatestPostsResponse>>("/api/posts/latest");
   if (res.code !== 0 || !res.data) throw new Error(res.message || "Failed to fetch latest posts");
   return res.data.list;
 }
