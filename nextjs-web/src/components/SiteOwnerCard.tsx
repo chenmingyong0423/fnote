@@ -25,23 +25,19 @@ export default function SiteOwnerCard() {
         links: [],
       }
     : {
-        name: "站长小明",
-        avatar: "/logo.png",
-        bio: "全栈开发者，热爱开源与分享。专注于前端、Node.js、云原生。",
-        links: [
-          { label: "GitHub", url: "https://github.com/owner" },
-          { label: "博客", url: "/about" },
-        ],
+        name: "",
+        avatar: "",
+        bio: ""
       };
   return (
     <Card className="text-center p-6">
-      <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-col items-center gap-3">
         {/* 头像 */}
-        <Avatar src={siteOwner.avatar} size={64} className="mb-3" />
+        <Avatar src={siteOwner.avatar} size={64} />
         {/* 名字 */}
-        <div className="font-bold text-lg mb-3">{siteOwner.name}</div>
+        <div className="font-bold text-lg">{siteOwner.name}</div>
         {/* 简介 */}
-        <div className="text-gray-500 mb-5 text-sm">{siteOwner.bio}</div>
+        <div className="text-gray-500 text-sm">{siteOwner.bio}</div>
         {/* 指标区 */}
         <SiteStats />
       </div>
