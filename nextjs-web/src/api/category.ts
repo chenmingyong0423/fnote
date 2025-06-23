@@ -1,5 +1,9 @@
 import { request } from "../utils/http";
 
+export interface CategoryResponse {
+  list: CategoryWithCountVO[];
+}
+
 // 分类及文章数
 export interface CategoryWithCountVO {
   name: string;
@@ -29,9 +33,9 @@ const API_PREFIX = "/api/categories";
 
 // 获取所有已启用分类及文章数
 export async function getCategories(): Promise<CategoryWithCountVO[]> {
-  const res = await request<Response<CategoryWithCountVO[]>>(`${API_PREFIX}`);
-  if (res.code !== 0) throw new Error(res.message);
-  return res.data;
+  const res = await request<Response<CategoryResponse>>(`${API_PREFIX}`);
+  if (res.code !== 0 || !res.data) throw new Error(res.message);
+  return res.data.list;
 }
 
 // 根据路由获取分类名称
