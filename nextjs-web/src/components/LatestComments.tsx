@@ -9,6 +9,7 @@ export interface LatestComment {
   avatar: string;
   content: string;
   article: { title: string; link: string };
+  created_at: number;
 }
 
 export default function LatestComments({ comments }: { comments: LatestComment[] }) {
@@ -25,7 +26,7 @@ export default function LatestComments({ comments }: { comments: LatestComment[]
               title={
                 <div className="flex flex-col">
                   <span className="font-medium text-sm text-gray-800">{item.user}</span>
-                  <span className="text-xs text-gray-400 mt-1">{new Date(item.id ? item.id * 100000000 : Date.now()).toLocaleString()}</span>
+                  <span className="text-xs text-gray-400 mt-1">{new Date(item.created_at ? item.created_at * 1000 : Date.now()).toLocaleString()}</span>
                 </div>
               }
               description={
