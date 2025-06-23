@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { useConfigStore } from "../store/config";
 
 export default function SiteStats({ stats }: { stats?: any }) {
   if (!stats) return null;
