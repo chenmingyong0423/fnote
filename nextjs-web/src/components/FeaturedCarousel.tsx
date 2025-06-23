@@ -7,7 +7,7 @@ import type { CarouselItemVO } from "../api/carousel";
 export default function FeaturedCarousel({ items }: { items: CarouselItemVO[] }) {
   return (
     <section>
-      <Carousel autoplay className="rounded-lg overflow-hidden shadow">
+      <Carousel autoplay arrows className="rounded-lg overflow-hidden shadow">
         {items.map((item) => (
           <a
             key={item.id}
