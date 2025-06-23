@@ -16,8 +16,8 @@ export default async function Home() {
       id: 1,
       user: "Alice",
       avatar: "/logo.png",
-      content: "文章写得很棒，受益匪浅！",
-      article: { title: "深入理解 Next.js 13 App Router", link: "/articles/1" },
+      content: "文章写得很棒，受益匪浅！文章写得很棒，受益匪浅！文章写得很棒，受益匪浅！文章写得很棒，受益匪浅！文章写得很棒，受益匪浅！文章写得很棒，受益匪浅！文章写得很棒，受益匪浅！",
+      article: { title: "深入理解 Next.js 13 App Router深入理解 Next.js 13 App Router深入理解 Next.js 13 App Router深入理解 Next.js 13 App Router深入理解 Next.js 13 App Router", link: "/articles/1" },
     },
     {
       id: 2,
@@ -46,21 +46,7 @@ export default async function Home() {
         {/* 用户卡片 */}
        <SiteOwnerCard />
         {/* 最新评论卡片 */}
-        <section className="bg-white rounded-xl shadow p-6 flex flex-col gap-4">
-          <h2 className="text-xl font-bold mb-2 border-b border-gray-100 pb-2">最新评论</h2>
-          <div className="divide-y divide-gray-100">
-            {latestComments.map((c) => (
-              <div key={c.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-                <img src={c.avatar} alt={c.user} className="w-8 h-8 rounded-full" />
-                <div className="flex-1">
-                  <div className="font-medium text-sm text-gray-800">{c.user}</div>
-                  <a href={c.article.link} className="text-blue-600 hover:underline text-xs font-medium">{c.article.title}</a>
-                  <div className="text-gray-500 text-xs mt-1">{c.content}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <LatestComments comments={latestComments} />
       </div>
     </div>
   );
