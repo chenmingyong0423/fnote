@@ -11,7 +11,7 @@ const Header: React.FC<{ menus: MenuVO[] }> = ({ menus }) => {
   const websiteConfig = useConfigStore((s) => s.config?.website_config);
   return (
     <header
-      className="w-full bg-white border-b border-gray-100 shadow-sm rounded-xl py-0 px-4 mx-auto max-w-7xl grid grid-cols-12 items-center h-[60px] mt-4"
+      className="w-full bg-white border-b border-gray-100 shadow-sm rounded-xl py-0 px-4 mx-auto max-w-7xl grid grid-cols-12 items-center h-[60px] mt-4 mb-8"
       style={{ minHeight: 60 }}
     >
       {/* 左侧 Logo 区 1/12 */}

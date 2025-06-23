@@ -21,7 +21,7 @@ export default async function Home() {
 	const stats = await getWebsiteStats();
 
 	return (
-		<div className="w-full max-w-7xl mx-auto py-4 grid grid-cols-1 md:grid-cols-12 gap-8">
+		<div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8">
 			{/* 左侧主内容区 8/12 */}
 			<div className="md:col-span-8 flex flex-col gap-8 min-w-0">
 				{/* Banner 区 */}
