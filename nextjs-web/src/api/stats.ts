@@ -1,4 +1,5 @@
 import { request } from "../utils/http";
+import type { Response } from "./types";
 
 export interface WebsiteCountStatsVO {
   post_count: number;
@@ -9,14 +10,8 @@ export interface WebsiteCountStatsVO {
   website_view_count: number;
 }
 
-export interface ResponseBody<T> {
-  code: number;
-  message: string;
-  data?: T;
-}
-
 export async function getWebsiteStats(): Promise<WebsiteCountStatsVO> {
-  const res = await request<ResponseBody<WebsiteCountStatsVO>>("/api/stats");
+  const res = await request<Response<WebsiteCountStatsVO>>("/api/stats");
   if (res.code !== 0 || !res.data) {
     throw new Error(res.message || "Failed to fetch website stats");
   }

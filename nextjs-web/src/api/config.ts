@@ -1,5 +1,6 @@
 import { request } from "../utils/http";
 import type { WebsiteCountStatsVO } from "./stats";
+import type { Response } from "./types";
 
 export interface WebsiteConfigVO {
   website_name: string;
@@ -58,12 +59,6 @@ export interface IndexConfigVO {
   seo_meta_config: SeoMetaConfigVO;
   third_party_site_verification: TPSVVO[];
   stats?: WebsiteCountStatsVO; // 新增，可选
-}
-
-export interface Response<T> {
-  code: number;
-  message: string;
-  data: T;
 }
 
 // 获取网站相关配置信息
