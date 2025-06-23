@@ -2,8 +2,7 @@
 import React from "react";
 import { useConfigStore } from "../store/config";
 
-export default function SiteStats() {
-  const stats = useConfigStore((s) => s.config?.stats);
+export default function SiteStats({ stats }: { stats?: any }) {
   if (!stats) return null;
   return (
     <div className="w-full border-t border-b border-gray-200 py-3 grid grid-cols-3 gap-y-2 text-xs text-gray-600 divide-x divide-gray-200">
