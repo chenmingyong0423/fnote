@@ -5,8 +5,9 @@ import { BulbOutlined, SearchOutlined } from "@ant-design/icons";
 import Navbar from "./Navbar";
 import Link from "next/link";
 import { useConfigStore } from "../store/config";
+import type { MenuVO } from "../api/category";
 
-const Header: React.FC = () => {
+const Header: React.FC<{ menus: MenuVO[] }> = ({ menus }) => {
   const websiteConfig = useConfigStore((s) => s.config?.website_config);
   return (
     <header
@@ -21,7 +22,7 @@ const Header: React.FC = () => {
       </div>
       {/* 菜单区 7/12，左对齐，紧挨logo */}
       <div className="col-span-7 flex items-center justify-start min-w-0">
-        <Navbar />
+        <Navbar menus={menus} />
       </div>
       {/* 右侧按钮区 4/12 */}
       <div className="col-span-4 flex items-center justify-end gap-2">
@@ -29,7 +30,6 @@ const Header: React.FC = () => {
           <Button type="text" shape="circle" icon={<BulbOutlined />} aria-label="切换暗黑模式" />
           <Button type="text" shape="circle" icon={<SearchOutlined />} aria-label="搜索" />
         </Space>
-        {/* 可加头像/发布按钮等 */}
       </div>
     </header>
   );
