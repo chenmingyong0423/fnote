@@ -44,9 +44,7 @@ export default async function Home() {
       {/* 右侧信息区 4/12 */}
       <div className="md:col-span-4 flex flex-col gap-8 min-w-0">
         {/* 用户卡片 */}
-        <section className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-          <SiteOwnerCard />
-        </section>
+       <SiteOwnerCard />
         {/* 最新评论卡片 */}
         <section className="bg-white rounded-xl shadow p-6 flex flex-col gap-4">
           <h2 className="text-xl font-bold mb-2 border-b border-gray-100 pb-2">最新评论</h2>
