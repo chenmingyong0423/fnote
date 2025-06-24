@@ -7,6 +7,18 @@ import { getCarouselList } from "../src/api/carousel";
 import { getLatestComments } from "../src/api/comments";
 import { getIndexConfig } from "../src/api/config";
 import { getWebsiteStats } from "../src/api/stats";
+import { generatePageMetadata } from "../src/utils/seo";
+import type { Metadata } from "next";
+
+// 首页的动态 metadata
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getIndexConfig();
+  
+  return generatePageMetadata(config, {
+    description: `${config.website_config.website_name} - ${config.seo_meta_config.description}`,
+    keywords: config.seo_meta_config.keywords,
+  });
+}
 
 export default async function Home() {
 	// 动态获取最新文章
