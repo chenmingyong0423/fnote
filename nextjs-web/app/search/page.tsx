@@ -1,13 +1,43 @@
 "use client";
 
 import ArticleListContainer from "@/src/components/ArticleListContainer";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Input } from "antd";
 
 export default function SearchPage() {
   const params = useSearchParams();
+  const router = useRouter();
   const field = (params.get("filter") as "latest" | "oldest" | "likes") || "latest";
   const page = Number(params.get("page") || 1);
   const pageSize = Number(params.get("pageSize") || 10);
-  const q = params.get("q") || undefined;
-  return <ArticleListContainer keyword={q} field={field} page={page} pageSize={pageSize} />;
+  const keyword = params.get("keyword") || "";
+
+  const handleSearch = (value: string) => {
+    const newParams = new URLSearchParams(params.toString());
+    if (value) {
+      newParams.set("keyword", value);
+    } else {
+      newParams.delete("keyword");
+    }
+    newParams.delete("page"); // 搜索时重置分页
+    router.replace("?" + newParams.toString());
+  };
+
+  return (
+    <div className="w-full max-w-7xl mx-auto">
+      <div className="mb-6 flex md:justify-start justify-center">
+        <div className="w-full md:col-span-8" style={{ maxWidth: '66.6667%' }}>
+          <Input.Search
+            placeholder="请输入关键词..."
+            allowClear
+            enterButton="搜索"
+            size="large"
+            defaultValue={keyword}
+            onSearch={handleSearch}
+          />
+        </div>
+      </div>
+      <ArticleListContainer keyword={keyword} field={field} page={page} pageSize={pageSize} />
+    </div>
+  );
 }

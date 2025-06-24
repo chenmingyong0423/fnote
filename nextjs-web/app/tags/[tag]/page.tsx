@@ -1,3 +1,5 @@
+"use client";
+
 import ArticleListContainer from "@/src/components/ArticleListContainer";
 import { notFound } from "next/navigation";
 import { useSearchParams } from "next/navigation";
