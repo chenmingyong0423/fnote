@@ -33,6 +33,8 @@ export interface PostListParams {
   field?: string;
   order?: string;
   keyword?: string;
+  tags?: string[];
+  categories?: string[];
 }
 
 export interface PostListResponse {
@@ -50,7 +52,12 @@ export async function getPostList(params: PostListParams): Promise<PostListRespo
   if (params.field) searchParams.set("field", params.field);
   if (params.order) searchParams.set("order", params.order);
   if (params.keyword) searchParams.set("keyword", params.keyword);
-
+  if (params.tags && params.tags.length > 0) {
+    params.tags.forEach(tag => searchParams.append("tags", tag));
+  }
+  if (params.categories && params.categories.length > 0) {
+    params.categories.forEach(cat => searchParams.append("categories", cat));
+  }
   const res = await request<Response<PostListResponse>>(`/api/posts?${searchParams.toString()}`);
   if (res.code !== 0 || !res.data) throw new Error(res.message || "Failed to fetch post list");
   return res.data;
