@@ -49,8 +49,8 @@ export async function getPostList(params: PostListParams): Promise<PostListRespo
   const searchParams = new URLSearchParams();
   searchParams.set("pageNo", String(params.pageNo));
   searchParams.set("pageSize", String(params.pageSize));
-  if (params.sortField) searchParams.set("field", params.sortField);
-  if (params.sortOrder) searchParams.set("order", params.sortOrder);
+  if (params.sortField) searchParams.set("sortField", params.sortField);
+  if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
   if (params.keyword) searchParams.set("keyword", params.keyword);
   if (params.tags && params.tags.length > 0) {
     params.tags.forEach(tag => searchParams.append("tags", tag));

@@ -28,7 +28,9 @@ const Header: React.FC<{ menus: MenuVO[] }> = ({ menus }) => {
       <div className="col-span-4 flex items-center justify-end gap-2">
         <Space size="middle">
           <Button type="text" shape="circle" icon={<BulbOutlined />} aria-label="切换暗黑模式" />
-          <Button type="text" shape="circle" icon={<SearchOutlined />} aria-label="搜索" />
+          <Link href="/search" passHref legacyBehavior>
+            <Button type="text" shape="circle" icon={<SearchOutlined />} aria-label="搜索" />
+          </Link>
         </Space>
       </div>
     </header>
