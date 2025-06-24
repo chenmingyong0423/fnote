@@ -30,17 +30,21 @@ export default function ArticleList({ list, total, siteOwner, currentPage = 1, p
   const handleFilterChange = (value: "latest" | "oldest" | "likes") => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("filter", value);
-    params.delete("page"); // 切换排序时移除 page 相关参数
-    params.delete("pageSize");
-    router.replace("?" + params.toString());
+    params.delete("page"); // 切换排序时移除 page 参数
+    // 跳回第一页
+    const base = window.location.pathname.replace(/\/page\/[0-9]+$/, "");
+    router.push(`${base}?${params.toString()}`);
   };
 
   // 处理分页切换
   const handlePageChange = (page: number, size: number) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("page", String(page));
     params.set("pageSize", String(size));
-    router.replace("?" + params.toString());
+    // 静态路由跳转，支持 /categories/[category]、/tags/[tag]、/search
+    const base = window.location.pathname.replace(/\/page\/[0-9]+$/, "");
+    const targetPage = page === 1 ? "" : `/page/${page}`;
+    // 兼容 /categories/[category]/page/[page]、/tags/[tag]/page/[page]、/search/page/[page]
+    router.push(`${base}${targetPage}?${params.toString()}`);
   };
 
   return (
