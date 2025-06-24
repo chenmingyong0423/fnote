@@ -30,8 +30,8 @@ export async function getLatestPosts(): Promise<LatestPostVO[]> {
 export interface PostListParams {
   pageNo: number;
   pageSize: number;
-  field?: string;
-  order?: string;
+  sortField?: string;
+  sortOrder?: string;
   keyword?: string;
   tags?: string[];
   categories?: string[];
@@ -49,8 +49,8 @@ export async function getPostList(params: PostListParams): Promise<PostListRespo
   const searchParams = new URLSearchParams();
   searchParams.set("pageNo", String(params.pageNo));
   searchParams.set("pageSize", String(params.pageSize));
-  if (params.field) searchParams.set("field", params.field);
-  if (params.order) searchParams.set("order", params.order);
+  if (params.sortField) searchParams.set("field", params.sortField);
+  if (params.sortOrder) searchParams.set("order", params.sortOrder);
   if (params.keyword) searchParams.set("keyword", params.keyword);
   if (params.tags && params.tags.length > 0) {
     params.tags.forEach(tag => searchParams.append("tags", tag));

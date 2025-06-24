@@ -46,3 +46,9 @@ export async function getMenus(): Promise<MenuVO[]> {
   if (res.code !== 0) throw new Error(res.message);
   return res.data.list;
 }
+
+// 获取分类名称字符串
+export async function getCategoryNameStringByRoute(route: string): Promise<string> {
+  const res = await getCategoryNameByRoute(route);
+  return res.name;
+}

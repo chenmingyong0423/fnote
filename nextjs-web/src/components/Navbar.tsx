@@ -31,7 +31,7 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({ menus, loadi
         ]
       : menus.map((item) => ({
           key: item.route,
-          label: <Link href={`/categories${item.route}`}>{item.name}</Link>,
+          label: <Link href={`/categories/${item.route}`}>{item.name}</Link>,
         }))) ,
     {
       key: staticNav[2].href,
