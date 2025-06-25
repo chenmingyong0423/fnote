@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Select, Pagination, List, Tag } from "antd";
+import { Select, Pagination, List, Tag, Tabs } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { EyeOutlined, LikeOutlined, MessageOutlined } from "@ant-design/icons";
@@ -27,7 +27,7 @@ export default function ArticleList({ list, total, siteOwner, currentPage = 1, p
   const searchParams = useSearchParams();
 
   // 处理排序切换
-  const handleFilterChange = (value: "latest" | "oldest" | "likes") => {
+  const handleFilterChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("filter", value);
     params.delete("page"); // 切换排序时移除 page 参数
@@ -54,14 +54,13 @@ export default function ArticleList({ list, total, siteOwner, currentPage = 1, p
         <section>
           {/* 排序过滤选项 */}
           <div className="flex items-center justify-between mb-4">
-            <Select
-              value={field}
+            <Tabs
+              activeKey={field}
               onChange={handleFilterChange}
-              style={{ width: 160 }}
-              options={[
-                { label: "最新发布", value: "latest" },
-                { label: "最早发布", value: "oldest" },
-                { label: "点赞最多", value: "likes" },
+              items={[
+                { key: "latest", label: "最新发布" },
+                { key: "oldest", label: "最早发布" },
+                { key: "likes", label: "点赞最多" },
               ]}
             />
           </div>
