@@ -9,6 +9,13 @@ import type { MenuVO } from "../api/category";
 
 const Header: React.FC<{ menus: MenuVO[] }> = ({ menus }) => {
   const websiteConfig = useConfigStore((s) => s.config?.website_config);
+
+  const toggleDarkMode = () => {
+    if (typeof window !== "undefined") {
+      document.documentElement.classList.toggle("dark");
+    }
+  };
+
   return (
     <header
       className="w-full bg-white border-b border-gray-100 shadow-sm rounded-xl py-0 px-4 mx-auto max-w-7xl grid grid-cols-12 items-center h-[60px] mt-4 mb-8"
@@ -27,7 +34,13 @@ const Header: React.FC<{ menus: MenuVO[] }> = ({ menus }) => {
       {/* 右侧按钮区 4/12 */}
       <div className="col-span-4 flex items-center justify-end gap-2">
         <Space size="middle">
-          <Button type="text" shape="circle" icon={<BulbOutlined />} aria-label="切换暗黑模式" />
+          <Button
+            type="text"
+            shape="circle"
+            icon={<BulbOutlined />}
+            aria-label="切换暗黑模式"
+            onClick={toggleDarkMode}
+          />
           <Link href="/search">
             <Button type="text" shape="circle" icon={<SearchOutlined />} aria-label="搜索" />
           </Link>
