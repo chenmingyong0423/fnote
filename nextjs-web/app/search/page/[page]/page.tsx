@@ -2,12 +2,14 @@
 import ArticleListContainer from "@/src/components/ArticleListContainer";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Input } from "antd";
+import React from "react";
 
-export default function SearchPageWithPagination({ params }: { params: { page: string } }) {
+export default function SearchPageWithPagination({ params }: { params: Promise<{ page: string }> }) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { page } = React.use(params);
   const field = (searchParams.get("filter") as "latest" | "oldest" | "likes") || "latest";
-  const page = Number(params.page || 1);
+  const pageNumber = Number(page || 1);
   const pageSize = Number(searchParams.get("pageSize") || 10);
   const keyword = searchParams.get("keyword") || "";
 
@@ -36,7 +38,7 @@ export default function SearchPageWithPagination({ params }: { params: { page: s
           />
         </div>
       </div>
-      <ArticleListContainer keyword={keyword} field={field} page={page} pageSize={pageSize} />
+      <ArticleListContainer keyword={keyword} field={field} page={pageNumber} pageSize={pageSize} />
     </div>
   );
 }

@@ -3,12 +3,14 @@
 import ArticleListContainer from "@/src/components/ArticleListContainer";
 import { useSearchParams } from "next/navigation";
 import { notFound } from "next/navigation";
+import React from "react";
 
-export default function CategoryPageWithPagination({ params }: { params: { category: string; page: string } }) {
+export default function CategoryPageWithPagination({ params }: { params: Promise<{ category: string; page: string }> }) {
   const searchParams = useSearchParams();
+  const { category, page } = React.use(params);
   const field = (searchParams.get("filter") as "latest" | "oldest" | "likes") || "latest";
-  const page = Number(params.page || 1);
+  const pageNumber = Number(page || 1);
   const pageSize = Number(searchParams.get("pageSize") || 10);
-  if (!params.category) return notFound();
-  return <ArticleListContainer category={params.category} field={field} page={page} pageSize={pageSize} />;
+  if (!category) return notFound();
+  return <ArticleListContainer category={category} field={field} page={pageNumber} pageSize={pageSize} />;
 }
