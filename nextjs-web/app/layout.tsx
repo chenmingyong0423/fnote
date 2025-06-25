@@ -75,7 +75,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >        <AntdRegistry>
-          <div className="min-h-screen flex flex-col bg-gray-100">
+          <div className="min-h-screen flex flex-col">
             <Header menus={menus} />
             <ConfigToZustand config={configWithStats} />
             <SeoHead config={configWithStats} />
