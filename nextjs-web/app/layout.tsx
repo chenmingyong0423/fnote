@@ -80,7 +80,7 @@ export default async function RootLayout({
             <ConfigToZustand config={configWithStats} />
             <SeoHead config={configWithStats} />
             <main>{children}</main>
-            <Footer />
+            <Footer websiteRecords={configWithStats.website_config.website_records || []} />
           </div>
         </AntdRegistry>
       </body>
