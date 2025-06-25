@@ -2,6 +2,7 @@
 import React from "react";
 import { Menu, Spin } from "antd";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import type { MenuVO } from "../api/category";
 
 const staticNav = [
@@ -11,6 +12,21 @@ const staticNav = [
 ];
 
 const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({ menus, loading }) => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const getSelectedKeys = (pathname: string) => {
+    pathname = pathname.replace(/\/$/, ""); // 去除末尾 /
+    if (pathname === "" || pathname === "/") return ["/"];
+    if (pathname === "/navigation" || pathname === "/about") {
+      return [pathname];
+    }
+    // 其它如 /categories/frontend => ["categories", "frontend"]
+    return pathname.replace(/^\//, "").split("/");
+  };
+  const [selectedKeys, setSelectedKeys] = React.useState(getSelectedKeys(pathname));
+  React.useEffect(() => {
+    setSelectedKeys(getSelectedKeys(pathname));
+  }, [pathname]);
   // 组装 items 数组
   const items = [
     {
@@ -46,6 +62,13 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({ menus, loadi
       className="bg-transparent border-none shadow-none"
       items={items}
       style={{ flex: 1, minWidth: 0 }}
+      selectedKeys={selectedKeys}
+      onSelect={({ keyPath }) => {
+        setSelectedKeys(keyPath);
+        // 还原为路径
+        const url = keyPath[0] === "/" ? "/" : `/${keyPath.reverse().join("/")}`;
+        router.push(url);
+      }}
     />
   );
 };
