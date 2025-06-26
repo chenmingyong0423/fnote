@@ -7,6 +7,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
 import { extractToc, Toc } from "@/src/components/Toc";
+import { PostActions } from "@/src/components/PostActions";
 
 function genHeadingId(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-").replace(/^-+|-+$/g, "");
@@ -57,8 +58,12 @@ export default async function PostDetailPage({ params }: { params: { id: string 
           </ReactMarkdown>
         </article>
       </div>
+      {/* 右侧悬浮区：操作区在上，目录在下，整体 sticky，避免重叠 */}
       <div className="w-full lg:w-64 flex-shrink-0">
-        <Toc toc={toc} />
+        <div className="sticky top-24 flex flex-col gap-4">
+          <PostActions />
+          <Toc toc={toc} />
+        </div>
       </div>
     </div>
   );
