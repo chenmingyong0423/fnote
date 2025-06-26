@@ -1,8 +1,9 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Button, Tooltip, Popover, message } from "antd";
-import { LikeOutlined, MessageOutlined, ShareAltOutlined, GiftOutlined, WechatOutlined, QqOutlined, LinkOutlined } from "@ant-design/icons";
+import { LikeOutlined, MessageOutlined, ShareAltOutlined, GiftOutlined, WechatOutlined, QqOutlined, LinkOutlined, LikeFilled } from "@ant-design/icons";
 import { QRCodeCanvas } from "qrcode.react";
+import { likePost } from "@/src/api/posts";
 import '@ant-design/v5-patch-for-react-19';
 
 const rewardList = [
@@ -10,16 +11,44 @@ const rewardList = [
   { name: "支付宝赞赏码", img: "/globe.svg" },
 ];
 
-export const PostActions: React.FC = () => {
+export const PostActions: React.FC<{ postId: string; isLiked?: boolean }> = ({ postId, isLiked = false }) => {
+  const [liked, setLiked] = useState(isLiked);
+  const [likeLoading, setLikeLoading] = useState(false);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
       message.success("链接已复制");
     });
   };
+
+  const handleLike = async () => {
+    if (liked) return;
+    setLikeLoading(true);
+    try {
+      const res = await likePost(postId);
+      if (res.code === 0) {
+        setLiked(true);
+        message.success("点赞成功");
+      } else {
+        message.error(res.message || "点赞失败");
+      }
+    } catch (e) {
+      message.error("点赞失败");
+    } finally {
+      setLikeLoading(false);
+    }
+  };
+
   return (
       <div className="flex flex-row items-center justify-center gap-3 bg-white dark:bg-[#232426] rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-700">
-        <Tooltip title="点赞">
-          <Button type="text" icon={<LikeOutlined />} />
+        <Tooltip title={liked ? "已点赞" : "点赞"}>
+          <Button
+            type="text"
+            icon={liked ? <LikeFilled style={{ color: '#eb2f96' }} /> : <LikeOutlined />}
+            loading={likeLoading}
+            onClick={handleLike}
+            disabled={liked}
+          />
         </Tooltip>
         <Tooltip title="评论">
           <Button type="text" icon={<MessageOutlined />} href="#comments" />
@@ -37,9 +66,6 @@ export const PostActions: React.FC = () => {
                   <Button type="text" shape="circle" icon={<WechatOutlined />} />
                 </Tooltip>
               </Popover>
-              <Tooltip title="QQ">
-                <Button type="text" shape="circle" icon={<QqOutlined />} onClick={() => window.open('#', '_blank')} />
-              </Tooltip>
               <Tooltip title="复制链接">
                 <Button type="text" shape="circle" icon={<LinkOutlined />} onClick={handleCopy} />
               </Tooltip>
