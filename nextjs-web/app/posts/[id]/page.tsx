@@ -79,7 +79,7 @@ export default async function PostDetailPage({ params }: { params: { id: string 
       {/* 右侧悬浮区：操作区在上，目录在下，整体 sticky，避免重叠 */}
       <div className="w-full lg:w-64 flex-shrink-0">
         <div className="sticky top-24 flex flex-col gap-4">
-          <PostActions />
+          <PostActions postId={post._id} isLiked={post.is_liked} />
           <Toc toc={toc} />
         </div>
       </div>

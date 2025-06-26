@@ -110,3 +110,13 @@ export interface PostDetailResponse {
 export async function getPostDetail(id: string) {
   return request<PostDetailResponse>(`/api/posts/${id}`);
 }
+
+/**
+ * 文章点赞
+ * @param id 文章ID
+ */
+export async function likePost(id: string): Promise<{ code: number; message: string }> {
+  return request<{ code: number; message: string }>(`/api/posts/${id}/likes`, {
+    method: 'POST',
+  });
+}
