@@ -62,3 +62,51 @@ export async function getPostList(params: PostListParams): Promise<PostListRespo
   if (res.code !== 0 || !res.data) throw new Error(res.message || "Failed to fetch post list");
   return res.data;
 }
+
+// 文章详情类型
+export interface Category {
+  id: string;
+  name: string;
+}
+
+export interface Tag {
+  id: string;
+  name: string;
+}
+
+export interface PostDetail {
+  _id: string;
+  author: string;
+  title: string;
+  summary: string;
+  cover_img: string;
+  category: Category[];
+  tags: Tag[];
+  like_count: number;
+  comment_count: number;
+  visit_count: number;
+  sticky_weight: number;
+  created_at: number;
+  content: string;
+  meta_description: string;
+  meta_keywords: string;
+  word_count: number;
+  updated_at: number;
+  is_displayed: boolean;
+  is_comment_allowed: boolean;
+  is_liked: boolean;
+}
+
+export interface PostDetailResponse {
+  code: number;
+  message: string;
+  data: PostDetail;
+}
+
+/**
+ * 查询文章详情
+ * @param id 文章ID
+ */
+export async function getPostDetail(id: string) {
+  return request<PostDetailResponse>(`/api/posts/${id}`);
+}
