@@ -10,6 +10,7 @@ import SeoHead from "../src/components/SeoHead";
 import { getIndexConfig } from "../src/api/config";
 import { getWebsiteStats } from "../src/api/stats";
 import { getMenus } from "../src/api/category";
+import { AntdThemeProvider } from "../src/components/AntdThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -74,14 +75,17 @@ export default async function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >        <AntdRegistry>
-          <div className="min-h-screen flex flex-col">
-            <Header menus={menus} />
-            <ConfigToZustand config={configWithStats} />
-            <SeoHead config={configWithStats} />
-            <main>{children}</main>
-            <Footer websiteRecords={configWithStats.website_config.website_records || []} />
-          </div>
+      >
+        <AntdRegistry>
+          <AntdThemeProvider>
+            <div className="min-h-screen flex flex-col">
+              <Header menus={menus} />
+              <ConfigToZustand config={configWithStats} />
+              <SeoHead config={configWithStats} />
+              <main>{children}</main>
+              <Footer websiteRecords={configWithStats.website_config.website_records || []} />
+            </div>
+          </AntdThemeProvider>
         </AntdRegistry>
       </body>
     </html>
