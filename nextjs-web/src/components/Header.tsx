@@ -5,16 +5,13 @@ import { BulbOutlined, SearchOutlined } from "@ant-design/icons";
 import Navbar from "./Navbar";
 import Link from "next/link";
 import { useConfigStore } from "../store/config";
+import { useThemeStore } from "../store/theme";
 import type { MenuVO } from "../api/category";
 
 const Header: React.FC<{ menus: MenuVO[] }> = ({ menus }) => {
   const websiteConfig = useConfigStore((s) => s.config?.website_config);
-
-  const toggleDarkMode = () => {
-    if (typeof window !== "undefined") {
-      document.documentElement.classList.toggle("dark");
-    }
-  };
+  const isDark = useThemeStore((s) => s.isDark);
+  const toggleDarkMode = useThemeStore((s) => s.toggleDark);
 
   return (
     <header
@@ -39,6 +36,7 @@ const Header: React.FC<{ menus: MenuVO[] }> = ({ menus }) => {
             icon={<BulbOutlined />}
             aria-label="切换暗黑模式"
             onClick={toggleDarkMode}
+            style={{ color: isDark ? '#fadb14' : undefined }}
           />
           <Link href="/search">
             <Button type="text" shape="circle" icon={<SearchOutlined />} aria-label="搜索" />
