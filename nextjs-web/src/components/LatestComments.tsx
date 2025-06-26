@@ -14,7 +14,7 @@ export interface LatestComment {
 
 export default function LatestComments({ comments }: { comments: LatestComment[] }) {
   return (
-    <section className="bg-white rounded-xl shadow p-6 flex flex-col gap-4">
+    <section className="bg-white dark:bg-[#141414] rounded-xl shadow p-6 flex flex-col gap-4">
       <h2 className="text-xl font-bold mb-2 border-b border-gray-100 pb-2">最新评论</h2>
       <List
         itemLayout="horizontal"
