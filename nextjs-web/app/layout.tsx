@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import React from "react";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
+// import {App as AntdApp } from "antd";
 import Footer from "../src/components/Footer";
 import Header from "../src/components/Header";
 import ConfigToZustand from "../src/components/ConfigToZustand";
