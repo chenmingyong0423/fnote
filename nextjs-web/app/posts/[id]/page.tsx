@@ -57,6 +57,24 @@ export default async function PostDetailPage({ params }: { params: { id: string 
             {post.content}
           </ReactMarkdown>
         </article>
+        {/* 版权信息区 */}
+        <div className="mt-10 p-4 rounded-lg bg-gray-50 dark:bg-[#232426] border border-gray-100 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
+          <div>
+            本文链接：<span className="break-all">{`${process.env.BASE_HOST || ''}/posts/${post._id}`}</span>
+          </div>
+          <div className="mt-2">
+            版权声明：本文由 <span className="font-semibold">{post.author}</span> 原创发布，如需转载请遵循
+            <a
+              href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 underline mx-1"
+            >
+              署名-非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0)
+            </a>
+            许可协议授权
+          </div>
+        </div>
       </div>
       {/* 右侧悬浮区：操作区在上，目录在下，整体 sticky，避免重叠 */}
       <div className="w-full lg:w-64 flex-shrink-0">
