@@ -2,17 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { ConfigProvider, theme as antdTheme } from "antd";
 
-function getInitialDark() {
-  if (typeof window !== "undefined") {
-    const saved = localStorage.getItem("theme-dark");
-    if (saved === "1") return true;
-    if (saved === "0") return false;
-    if (document.documentElement.classList.contains("dark")) return true;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  }
-  return undefined;
-}
-
 export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState<boolean | undefined>(undefined);
 
