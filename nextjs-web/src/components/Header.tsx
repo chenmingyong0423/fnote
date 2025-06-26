@@ -18,7 +18,7 @@ const Header: React.FC<{ menus: MenuVO[] }> = ({ menus }) => {
 
   return (
     <header
-      className="w-full bg-white dark:bg-[#141414] border-b border-gray-100 dark:border-gray-800 shadow-sm rounded-xl py-0 px-4 mx-auto max-w-7xl grid grid-cols-12 items-center h-[60px] mt-4 mb-8"
+      className="w-full bg-white dark:bg-[#141414] border-b border-gray-100 dark:border-[#303030] shadow-sm rounded-xl py-0 px-4 mx-auto max-w-7xl grid grid-cols-12 items-center h-[60px] mt-4 mb-8"
     >
       {/* 左侧 Logo 区 1/12 */}
       <div className="col-span-1 flex items-center">

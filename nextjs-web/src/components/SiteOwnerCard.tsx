@@ -19,9 +19,9 @@ export default function SiteOwnerCard({ name, avatar, bio, stats }: SiteOwnerCar
           <Avatar src={avatar} size={64} />
         ) : null}
         {/* 名字 */}
-        <div className="font-bold text-lg">{name}</div>
+        <div className="font-bold text-lg dark:text-gray-200">{name}</div>
         {/* 简介 */}
-        <div className="text-gray-500 text-sm">{bio}</div>
+        <div className="text-gray-500 text-sm dark:text-gray-400">{bio}</div>
         {/* 指标区 */}
         <SiteStats stats={stats} />
       </div>

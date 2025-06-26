@@ -4,30 +4,35 @@ import React from "react";
 export default function SiteStats({ stats }: { stats?: any }) {
   if (!stats) return null;
   return (
-    <div className="w-full border-t border-b border-gray-200 py-3 grid grid-cols-3 gap-y-2 text-xs text-gray-600 divide-x divide-gray-200">
-      <div className="col-span-1 flex flex-col items-center">
-        <span>文章</span>
-        <span className="font-bold">{stats.post_count}</span>
+    <div className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#141414] p-4 text-xs text-gray-600 dark:text-gray-400">
+      <div className="grid grid-cols-3 gap-y-2">
+        <div className="flex flex-col items-center">
+          <span>文章</span>
+          <span className="font-bold">{stats.post_count}</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span>分类</span>
+          <span className="font-bold">{stats.category_count}</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span>标签</span>
+          <span className="font-bold">{stats.tag_count}</span>
+        </div>
       </div>
-      <div className="col-span-1 flex flex-col items-center">
-        <span>分类</span>
-        <span className="font-bold">{stats.category_count}</span>
-      </div>
-      <div className="col-span-1 flex flex-col items-center">
-        <span>标签</span>
-        <span className="font-bold">{stats.tag_count}</span>
-      </div>
-      <div className="col-span-1 flex flex-col items-center pt-2 border-t border-gray-100">
-        <span>评论</span>
-        <span className="font-bold">{stats.comment_count}</span>
-      </div>
-      <div className="col-span-1 flex flex-col items-center pt-2 border-t border-gray-100">
-        <span>点赞</span>
-        <span className="font-bold">{stats.like_count}</span>
-      </div>
-      <div className="col-span-1 flex flex-col items-center pt-2 border-t border-gray-100">
-        <span>浏览</span>
-        <span className="font-bold">{stats.website_view_count}</span>
+      <div className="my-3 border-t border-gray-100 dark:border-gray-700" />
+      <div className="grid grid-cols-3 gap-y-2">
+        <div className="flex flex-col items-center">
+          <span>评论</span>
+          <span className="font-bold">{stats.comment_count}</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span>点赞</span>
+          <span className="font-bold">{stats.like_count}</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span>浏览</span>
+          <span className="font-bold">{stats.website_view_count}</span>
+        </div>
       </div>
     </div>
   );
