@@ -72,7 +72,7 @@ export default function ArticleList({ list, total, siteOwner, currentPage = 1, p
               <List.Item className="!p-4 !bg-white dark:!bg-[#141414] dark:border dark:border-[#303030] !rounded !shadow !overflow-hidden my-4 transition-transform duration-200 group/article hover:-translate-y-2 relative">
                 {/* 下划线动画，item hover 时从中间向两边展开 */}
                 <span className="pointer-events-none absolute left-1/2 bottom-0 w-0 h-0.5 bg-blue-500 rounded-full transition-all duration-300 group-hover/article:w-full group-hover/article:left-0"></span>
-                <Link href={`/articles/${item.sug}`} className="w-full group grid grid-cols-6">
+                <Link href={`/posts/${item.sug}`} className="w-full group grid grid-cols-6">
                   {/* 图片区域 grid 2/6，右侧加 pr-4 形成空隙 */}
                   <div className="col-span-2 h-32 relative flex items-center justify-center bg-gray-50 overflow-hidden pr-4">
                     {/* 标签区悬浮在图片左上角，初始隐藏，hover 时滑入 */}
