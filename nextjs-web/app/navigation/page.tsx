@@ -1,7 +1,7 @@
+import { TagsOutlined, AppstoreOutlined, ProductOutlined, BookOutlined } from "@ant-design/icons";
 import React from "react";
 import { getCategories } from "@/src/api/category";
 import { getTags } from "@/src/api/tags";
-import { TagsOutlined, AppstoreOutlined, ProductOutlined, BookOutlined } from "@ant-design/icons";
 
 export default async function NavigationPage() {
     // 获取所有分类
