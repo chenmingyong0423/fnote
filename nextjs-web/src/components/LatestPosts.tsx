@@ -17,7 +17,7 @@ export default function LatestArticles({ articles }: { articles: LatestPostVO[] 
           .map((item) => (
             <a
               key={item.sug}
-              href={`/articles/${item.sug}`}
+              href={`/posts/${item.sug}`}
               className="block h-full"
               tabIndex={0}
             >
