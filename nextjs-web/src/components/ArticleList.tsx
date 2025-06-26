@@ -48,7 +48,7 @@ export default function ArticleList({ list, total, siteOwner, currentPage = 1, p
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8">
+    <div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 dark:text-gray-200">
       {/* 左侧主内容区 8/12 */}
       <div className="md:col-span-8 flex flex-col gap-8 min-w-0">
         <section>
@@ -69,7 +69,7 @@ export default function ArticleList({ list, total, siteOwner, currentPage = 1, p
             dataSource={list}
             locale={{ emptyText: <div className="py-8 text-center text-gray-400">暂无数据</div> }}
             renderItem={item => (
-              <List.Item className="!p-4 !bg-white !rounded !shadow !overflow-hidden my-4 transition-transform duration-200 group/article hover:-translate-y-2 relative">
+              <List.Item className="!p-4 !bg-white dark:!bg-[#141414] dark:border dark:border-[#303030] !rounded !shadow !overflow-hidden my-4 transition-transform duration-200 group/article hover:-translate-y-2 relative">
                 {/* 下划线动画，item hover 时从中间向两边展开 */}
                 <span className="pointer-events-none absolute left-1/2 bottom-0 w-0 h-0.5 bg-blue-500 rounded-full transition-all duration-300 group-hover/article:w-full group-hover/article:left-0"></span>
                 <Link href={`/articles/${item.sug}`} className="w-full group grid grid-cols-6">
@@ -88,9 +88,9 @@ export default function ArticleList({ list, total, siteOwner, currentPage = 1, p
                   </div>
                   {/* 内容区域 grid 4/6 */}
                   <div className="col-span-4 flex flex-col justify-between p-4 relative">
-                    <div className="text-lg font-bold mb-1 group-hover:text-blue-600 transition-colors">{item.title}</div>
-                    <div className="text-gray-700 mb-2 line-clamp-2 text-sm">{item.summary}</div>
-                    <div className="flex items-center justify-between text-xs text-gray-400 mt-auto">
+                    <div className="text-lg font-bold mb-1 group-hover:text-blue-600 transition-colors dark:text-gray-200 dark:group-hover:text-gray-100">{item.title}</div>
+                    <div className="text-gray-700 mb-2 line-clamp-2 text-sm dark:text-gray-400">{item.summary}</div>
+                    <div className="flex items-center justify-between text-xs text-gray-400 mt-auto dark:text-gray-500">
                       <div className="flex items-center gap-4">
                         <span className="flex items-center gap-1"><EyeOutlined /> {item.visit_count}</span>
                         <span className="flex items-center gap-1"><LikeOutlined /> {item.like_count}</span>

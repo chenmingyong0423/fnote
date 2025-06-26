@@ -1,5 +1,5 @@
 "use client";
-import { List, Avatar } from "antd";
+import { List, Avatar, Card } from "antd";
 import { BookOutlined } from "@ant-design/icons";
 import React from "react";
 
@@ -14,8 +14,7 @@ export interface LatestComment {
 
 export default function LatestComments({ comments }: { comments: LatestComment[] }) {
   return (
-    <section className="bg-white dark:bg-[#141414] rounded-xl shadow p-6 flex flex-col gap-4">
-      <h2 className="text-xl font-bold mb-2 border-b border-gray-100 pb-2">最新评论</h2>
+    <Card title="最新评论">
       <List
         itemLayout="horizontal"
         dataSource={comments}
@@ -25,13 +24,13 @@ export default function LatestComments({ comments }: { comments: LatestComment[]
               avatar={<Avatar src={item.avatar} />}
               title={
                 <div className="flex flex-col">
-                  <span className="font-medium text-sm text-gray-800">{item.user}</span>
-                  <span className="text-xs text-gray-400 mt-1">{new Date(item.created_at ? item.created_at * 1000 : Date.now()).toLocaleString()}</span>
+                  <span className="font-medium text-sm text-gray-800 dark:text-gray-200">{item.user}</span>
+                  <span className="text-xs text-gray-400 mt-1 dark:text-gray-400">{new Date(item.created_at ? item.created_at * 1000 : Date.now()).toLocaleString()}</span>
                 </div>
               }
               description={
                 <div className="flex flex-col gap-1">
-                  <div className="text-gray-700 text-sm truncate">{item.content}</div>
+                  <div className="text-gray-700 text-sm truncate dark:text-gray-200">{item.content}</div>
                   <a href={item.article.link} className="text-blue-600 hover:underline text-xs flex items-center gap-1 mt-1 truncate">
                     <BookOutlined />
                     <span className="truncate">{item.article.title}</span>
@@ -42,6 +41,6 @@ export default function LatestComments({ comments }: { comments: LatestComment[]
           </List.Item>
         )}
       />
-    </section>
+    </Card>
   );
 }

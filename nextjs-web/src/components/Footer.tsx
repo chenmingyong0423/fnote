@@ -6,7 +6,7 @@ interface FooterProps {
 }
 
 const Footer: React.FC<FooterProps> = ({ websiteRecords }) => (
-  <footer className="w-full bg-white dark:bg-[#141414] border-t border-gray-200 mt-8 mb-4 mx-auto max-w-7xl flex flex-col items-center rounded-xl p-4">
+  <footer className="w-full bg-white dark:bg-[#141414] border-t border-gray-200 dark:border-[#303030] mt-8 mb-4 mx-auto max-w-7xl flex flex-col items-center rounded-xl p-4">
     <div className="flex items-center justify-center w-full text-center text-gray-500 text-sm">
       © {new Date().getFullYear()} Copyright © 2024 - Designed by
       <a
