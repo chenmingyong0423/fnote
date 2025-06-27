@@ -5,6 +5,7 @@ import { MarkdownPreview, genHeadingId } from "@/src/components/MarkdownPreview"
 import { extractToc, Toc } from "@/src/components/Toc";
 import { PostActions } from "@/src/components/PostActions";
 import { Comments } from "@/src/components/Comments";
+import { log } from "console";
 
 interface PostDetailProps {
   id: string;
@@ -16,6 +17,16 @@ const PostDetail: React.FC<PostDetailProps> = async ({ id }) => {
     const res = await getPostDetail(id);
     if (res.code !== 0 || !res.data) return notFound();
     post = res.data;
+    // 推送百度索引（仅在服务端渲染时调用，防止多次推送）
+    if (typeof window === "undefined" && post._id) {
+        log(`Pushing post ${post._id} to Baidu index...`);
+      // 动态 import，避免打包体积增加
+      const { baiduPushIndex } = await import("@/src/api/baiduPush");
+      const url = `${process.env.BASE_HOST || ''}/posts/${post._id}`;
+      try {
+        await baiduPushIndex({ urls: url });
+      } catch {}
+    }
   } catch {
     return notFound();
   }
