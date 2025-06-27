@@ -13,7 +13,7 @@ interface MarkdownPreviewProps {
 
 export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({ content, className = '' }) => {
   return (
-    <div className={`prose prose-neutral dark:prose-invert max-w-none ${className}`}>
+    <div className={`markdown-body ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw, rehypeHighlight]}
