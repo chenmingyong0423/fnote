@@ -20,7 +20,7 @@ export default async function PostDetailPage({ params }: { params: { id: string 
 
   return (
     <>
-      <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 bg-white dark:bg-[#141414] rounded-xl shadow-sm p-6 mt-8 mb-12">
+      <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 bg-white dark:bg-[#141414] rounded-xl shadow-sm p-6 mb-12">
         <div className="flex-1 min-w-0">
           <h1 className="text-3xl font-bold mb-4 dark:text-gray-100">{post.title}</h1>
           <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400 mb-6">
