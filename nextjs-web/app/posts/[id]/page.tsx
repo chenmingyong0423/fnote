@@ -1,18 +1,10 @@
 import React from "react";
 import { getPostDetail } from "@/src/api/posts";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeHighlight from "rehype-highlight";
-import "highlight.js/styles/github-dark.css";
+import { MarkdownPreview, genHeadingId } from "@/src/components/MarkdownPreview";
 import { extractToc, Toc } from "@/src/components/Toc";
 import { PostActions } from "@/src/components/PostActions";
 import { Comments } from "@/src/components/Comments";
-
-function genHeadingId(text: string) {
-  return text.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-").replace(/^-+|-+$/g, "");
-}
 
 export default async function PostDetailPage({ params }: { params: { id: string } }) {
   let post;
@@ -43,21 +35,8 @@ export default async function PostDetailPage({ params }: { params: { id: string 
           {post.cover_img && (
             <img src={post.cover_img} alt="cover" className="w-full max-h-96 object-cover rounded-lg mb-6" />
           )}
-          <article className="prose prose-neutral dark:prose-invert max-w-none">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw, rehypeHighlight]}
-              components={{
-                h1: ({node, children, ...props}) => <h1 id={genHeadingId(String(children))} {...props}>{children}</h1>,
-                h2: ({node, children, ...props}) => <h2 id={genHeadingId(String(children))} {...props}>{children}</h2>,
-                h3: ({node, children, ...props}) => <h3 id={genHeadingId(String(children))} {...props}>{children}</h3>,
-                h4: ({node, children, ...props}) => <h4 id={genHeadingId(String(children))} {...props}>{children}</h4>,
-                h5: ({node, children, ...props}) => <h5 id={genHeadingId(String(children))} {...props}>{children}</h5>,
-                h6: ({node, children, ...props}) => <h6 id={genHeadingId(String(children))} {...props}>{children}</h6>,
-              }}
-            >
-              {post.content}
-            </ReactMarkdown>
+          <article>
+            <MarkdownPreview content={post.content} />
           </article>
           {/* 版权信息区 */}
           <div className="mt-10 p-4 rounded-lg bg-gray-50 dark:bg-[#232426] border border-gray-100 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
