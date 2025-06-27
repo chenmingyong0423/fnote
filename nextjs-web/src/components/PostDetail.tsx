@@ -6,6 +6,7 @@ import { extractToc, Toc } from "@/src/components/Toc";
 import { PostActions } from "@/src/components/PostActions";
 import { Comments } from "@/src/components/Comments";
 import { log } from "console";
+import PostSeoClient from "@/src/components/PostSeoClient";
 
 interface PostDetailProps {
   id: string;
@@ -35,6 +36,12 @@ const PostDetail: React.FC<PostDetailProps> = async ({ id }) => {
 
   return (
     <>
+      <PostSeoClient
+        title={post.title}
+        description={post.meta_description || post.summary || ''}
+        keywords={post.meta_keywords || post.tags?.map(t => t.name).join(",")}
+        coverImg={post.cover_img}
+      />
       <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 bg-white dark:bg-[#141414] rounded-xl shadow-sm p-6 mb-12">
         <div className="flex-1 min-w-0">
           <h1 className="text-3xl font-bold mb-4 dark:text-gray-100">{post.title}</h1>
