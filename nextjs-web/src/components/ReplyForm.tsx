@@ -19,6 +19,8 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({ postId, commentId, replyTo
     try {
       await addReply(commentId, { ...values, postId, replyToId });
       message.success("回复成功，待审核后显示");
+      setFormKey(k => k + 1);
+      setPreview(false);
       onSuccess();
     } catch (e: any) {
       message.error(e.message || "回复失败");

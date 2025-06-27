@@ -32,6 +32,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+ul, li{
+  margin: 0;
+}
+
+
 .prose code:not(pre code) {
   all: unset;
   background-color: rgba(135, 131, 120, 0.15);
