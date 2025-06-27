@@ -1,12 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { getCommentsByPostId, CommentItem } from "@/src/api/comments";
-import { Button, Input, message, Divider, Form, Card } from "antd";
+import { message, Divider, Form, Card } from "antd";
 import { CommentOutlined } from "@ant-design/icons";
 
 import { CommentForm } from "./CommentForm";
 import { CommentList } from "./CommentList";
-import { ReplyForm } from "./ReplyForm";
+import '@ant-design/v5-patch-for-react-19';
 
 interface CommentsProps {
   postId: string;

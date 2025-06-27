@@ -3,6 +3,7 @@ import React from "react";
 import { Button, Avatar, List } from "antd";
 import { CommentItem } from "@/src/api/comments";
 import { ReplyForm } from "./ReplyForm";
+import { MarkdownPreview } from "./MarkdownPreview";
 
 interface CommentListProps {
   comments: CommentItem[];
@@ -36,7 +37,7 @@ export const CommentList: React.FC<CommentListProps & {
           title={<span>{item.username} <span className="text-xs text-gray-400 ml-2">{new Date(item.comment_time * 1000).toLocaleString()}</span></span>}
           description={
             <>
-              <span>{item.content}</span>
+              <span><MarkdownPreview content={item.content} /></span>
               {replying && replying.commentId === item.id && !replying.replyToId && (
                 <div className="w-full mt-2 p-3 bg-gray-50 dark:bg-[#232426] rounded border border-gray-200 dark:border-gray-700">
                   <ReplyForm
