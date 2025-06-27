@@ -12,6 +12,7 @@ import { getIndexConfig } from "../src/api/config";
 import { getWebsiteStats } from "../src/api/stats";
 import { getMenus } from "../src/api/category";
 import { AntdThemeProvider } from "../src/components/AntdThemeProvider";
+import LogVisitClient from "../src/components/LogVisitClient";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -84,6 +85,7 @@ export default async function RootLayout({
               <ConfigToZustand config={configWithStats} />
               <SeoHead config={configWithStats} />
               <main>{children}</main>
+              <LogVisitClient />
               <Footer websiteRecords={configWithStats.website_config.website_records || []} />
             </div>
           </AntdThemeProvider>
