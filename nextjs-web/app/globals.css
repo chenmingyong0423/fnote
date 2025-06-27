@@ -1,6 +1,7 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
 @custom-variant dark (&:where(.dark, .dark *));
+@import "github-markdown-css/github-markdown.css";
+@import "highlight.js/styles/github.css";
 
 :root {
   --background: #f3f4f6;
@@ -32,25 +33,37 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-ul, li{
-  margin: 0;
+/* 优化 github-markdown-css 的 li 样式 */
+.markdown-body ul {
+  list-style-type: disc;
+}
+.markdown-body ol {
+  list-style-type: decimal;
+}
+.markdown-body ul, .markdown-body ol {
+  padding-left: 2em;
+}
+.markdown-body li {
+  margin-bottom: 0.3em;
 }
 
-
-.prose code:not(pre code) {
-  all: unset;
-  background-color: rgba(135, 131, 120, 0.15);
-  padding: 0.2em 0.4em;
-  border-radius: 4px;
-  font-size: 0.95em;
-  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-}
-.dark .prose code:not(pre code) {
-  background-color: rgba(255, 255, 255, 0.1);
+/* 暗黑模式支持 */
+.dark .markdown-body {
+  background: #181a1b;
   color: #e6e6e6;
 }
-
-.prose code:not(pre code)::before,
-.prose code:not(pre code)::after {
-  content: none;
+.dark .markdown-body pre,
+.dark .markdown-body code {
+  background: #23272e;
+  color: #e6e6e6;
+}
+.dark .markdown-body blockquote {
+  color: #b4b4b4;
+  border-left-color: #444c56;
+}
+.dark .markdown-body table {
+  background: #23272e;
+}
+.dark .markdown-body hr {
+  border-color: #444c56;
 }

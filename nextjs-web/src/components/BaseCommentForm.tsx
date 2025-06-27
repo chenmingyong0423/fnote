@@ -57,7 +57,7 @@ export const BaseCommentForm = forwardRef<any, BaseCommentFormProps>(
         >
           {preview ? (
             <div className="border border-gray-200 rounded p-3 mb-2 bg-gray-50 dark:bg-[#232426] text-sm">
-              <MarkdownPreview content={form.getFieldValue("content") || ""} />
+              <MarkdownPreview content={form.getFieldValue("content") || ""} className="p-4" />
             </div>
           ) : (
             <Input.TextArea rows={4} placeholder={contentPlaceholder} />

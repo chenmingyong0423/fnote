@@ -11,8 +11,8 @@
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.0.2",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
-    "@tailwindcss/typography": "^0.5.16",
     "blueimp-md5": "^2.19.0",
+    "github-markdown-css": "^5.8.1",
     "next": "15.3.3",
     "postcss": "^8.5.6",
     "qrcode.react": "^4.2.0",
