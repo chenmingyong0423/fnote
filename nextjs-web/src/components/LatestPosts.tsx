@@ -40,7 +40,7 @@ export default function LatestArticles({ articles }: { articles: LatestPostVO[] 
                 </div>
                 {/* 封面图片 */}
                 <div className="h-40 w-full relative rounded-t-lg overflow-hidden bg-gray-50">
-                  <Image src={item.cover_img} alt={item.title} fill className="object-cover" />
+                  <Image src={item.cover_img} alt={item.title} fill sizes="60" className="object-cover" />
                 </div>
                 {/* 标题 */}
                 <div className="pt-4 text-lg font-bold">
