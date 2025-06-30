@@ -13,7 +13,7 @@ export default function SeoHead({ config }: SeoHeadProps) {
     if (config.website_config.website_icon) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.setAttribute('rel', 'shortcut icon');
-      link.setAttribute('href', config.website_config.website_icon);
+      link.setAttribute('href', (process.env.NEXT_PUBLIC_SERVER_HOST || '') + config.website_config.website_icon);
       document.getElementsByTagName('head')[0].appendChild(link);
     }
 
@@ -41,7 +41,7 @@ export default function SeoHead({ config }: SeoHeadProps) {
         "name": config.website_config.website_name,
         "logo": {
           "@type": "ImageObject",
-          "url": config.website_config.website_icon
+          "url": (process.env.NEXT_PUBLIC_SERVER_HOST || '') + config.website_config.website_icon
         }
       }
     };
