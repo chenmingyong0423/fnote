@@ -15,8 +15,6 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
     return () => observer.disconnect();
   }, []);
 
-  if (isDark === undefined) return null; // 避免初始 SSR/CSR 不一致
-
   return (
     <ConfigProvider
       theme={{
