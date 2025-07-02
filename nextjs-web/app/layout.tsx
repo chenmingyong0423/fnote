@@ -84,7 +84,7 @@ export default async function RootLayout({
             <div className="min-h-screen flex flex-col">
               <Header menus={menus} />
               <ConfigToZustand config={configWithStats} />
-              {/*<SeoHead config={configWithStats} />*/}
+              <SeoHead config={configWithStats} />
               <main>{children}</main>
               <LogVisitClient />
               <Footer websiteRecords={configWithStats.website_config.website_records || []} />
