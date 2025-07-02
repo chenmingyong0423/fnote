@@ -3,11 +3,12 @@ import ArticleListContainer from "@/src/components/ArticleListContainer";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Input } from "antd";
 import React from "react";
+import { Suspense } from 'react'
 
-export default function SearchPageWithPagination({ params }: { params: Promise<{ page: string }> }) {
+function SearchWithPagination() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { page } = React.use(params);
+  const page = searchParams?.get("page");
   const field = (searchParams?.get("filter") as "latest" | "oldest" | "likes") || "latest";
   const pageNumber = Number(page || 1);
   const pageSize = Number(searchParams?.get("pageSize") || 10);
@@ -41,4 +42,13 @@ export default function SearchPageWithPagination({ params }: { params: Promise<{
       <ArticleListContainer keyword={keyword} field={field} page={pageNumber} pageSize={pageSize} />
     </div>
   );
+}
+
+export default function SearchPageWithPagination() {
+  return (
+      // You could have a loading skeleton as the `fallback` too
+      <Suspense>
+        <SearchWithPagination />
+      </Suspense>
+  )
 }
