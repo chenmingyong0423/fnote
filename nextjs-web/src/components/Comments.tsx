@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { getCommentsByPostId, CommentItem } from "@/src/api/comments";
-import { message, Divider, Form, Card } from "antd";
+import { message, Divider, Card } from "antd";
 import { CommentOutlined } from "@ant-design/icons";
 
 import { CommentForm } from "./CommentForm";
@@ -20,22 +20,21 @@ export const Comments: React.FC<CommentsProps> = ({ postId }) => {
     { commentId: string; replyToId?: string; replyToName?: string } | null
   >(null);
 
-  const fetchComments = async () => {
+  const fetchComments = React.useCallback(async () => {
     setLoading(true);
     try {
       const res = await getCommentsByPostId(postId);
       setComments(res);
-    } catch (e: any) {
-      message.error(e.message || "获取评论失败");
+    } catch (e: unknown) {
+      message.error((e instanceof Error ? e.message : String(e)) || "获取评论失败");
     } finally {
       setLoading(false);
     }
-  };
+  }, [postId]);
 
   useEffect(() => {
-    fetchComments();
-    // eslint-disable-next-line
-  }, [postId]);
+    fetchComments().catch();
+  }, [postId, fetchComments]);
 
   // 点击回复按钮时，设置当前回复的评论id
   const handleReply = (
@@ -49,7 +48,7 @@ export const Comments: React.FC<CommentsProps> = ({ postId }) => {
   // 回复成功后，清空replying并刷新评论
   const handleReplyFormFinish = () => {
     setReplying(null);
-    fetchComments();
+    fetchComments().catch();
   };
 
   return (
@@ -64,12 +63,12 @@ export const Comments: React.FC<CommentsProps> = ({ postId }) => {
         </div>
       }
     >
-      <CommentForm postId={postId} onSuccess={fetchComments} />
+      <CommentForm postId={postId} onSuccessAction={fetchComments} />
       <Divider />
       <CommentList
         comments={comments}
         loading={loading}
-        onReply={handleReply}
+        onReplyAction={handleReply}
         replying={replying}
         onReplyFormFinish={handleReplyFormFinish}
         postId={postId}

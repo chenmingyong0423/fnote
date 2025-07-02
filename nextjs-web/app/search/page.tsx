@@ -7,13 +7,13 @@ import { Input } from "antd";
 export default function SearchPage() {
   const params = useSearchParams();
   const router = useRouter();
-  const field = (params.get("filter") as "latest" | "oldest" | "likes") || "latest";
-  const page = Number(params.get("page") || 1);
-  const pageSize = Number(params.get("pageSize") || 10);
-  const keyword = params.get("keyword") || "";
+  const field = (params?.get("filter") as "latest" | "oldest" | "likes") || "latest";
+  const page = Number(params?.get("page") || 1);
+  const pageSize = Number(params?.get("pageSize") || 10);
+  const keyword = params?.get("keyword") || "";
 
   const handleSearch = (value: string) => {
-    const newParams = new URLSearchParams(params.toString());
+    const newParams = new URLSearchParams(params?.toString());
     if (value) {
       newParams.set("keyword", value);
     } else {

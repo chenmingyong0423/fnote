@@ -5,7 +5,7 @@
  * @param input 请求地址或 Request 对象
  * @param init fetch 配置项
  */
-export async function request<T = any>(
+export async function request<T = never>(
   input: RequestInfo,
   init?: RequestInit
 ): Promise<T> {

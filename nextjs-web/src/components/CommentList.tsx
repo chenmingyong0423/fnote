@@ -8,14 +8,14 @@ import { MarkdownPreview } from "./MarkdownPreview";
 interface CommentListProps {
   comments: CommentItem[];
   loading: boolean;
-  onReply: (commentId: string, replyToId?: string, replyToName?: string) => void;
+  onReplyAction: (commentId: string, replyToId?: string, replyToName?: string) => void;
   postId: string;
 }
 
 export const CommentList: React.FC<CommentListProps & {
   replying?: { commentId: string; replyToId?: string; replyToName?: string } | null;
   onReplyFormFinish?: () => void;
-}> = ({ comments, loading, onReply, replying, onReplyFormFinish, postId }) => (
+}> = ({ comments, loading, onReplyAction, replying, onReplyFormFinish, postId }) => (
   <List
     loading={loading}
     dataSource={comments}
@@ -25,7 +25,7 @@ export const CommentList: React.FC<CommentListProps & {
         key={item.id}
         actions={[
           (!replying || replying.commentId !== item.id || replying.replyToId) && (
-            <Button size="small" type="link" onClick={() => onReply(item.id)}>回复</Button>
+            <Button size="small" type="link" onClick={() => onReplyAction(item.id)}>回复</Button>
           ),
           replying && replying.commentId === item.id && !replying.replyToId && (
             <Button size="small" type="link" danger onClick={onReplyFormFinish || (() => {})} key="cancel-reply">取消回复</Button>
@@ -43,7 +43,7 @@ export const CommentList: React.FC<CommentListProps & {
                   <ReplyForm
                     postId={postId}
                     commentId={item.id}
-                    onSuccess={onReplyFormFinish || (() => {})}
+                    onSuccessAction={onReplyFormFinish || (() => {})}
                     onCancel={onReplyFormFinish || (() => {})}
                   />
                 </div>
@@ -56,7 +56,7 @@ export const CommentList: React.FC<CommentListProps & {
                     <List.Item
                       key={reply.id}
                       actions={[
-                        <Button size="small" type="link" onClick={() => onReply(item.id, reply.id, reply.name)}>回复</Button>
+                        <Button key="reply" size="small" type="link" onClick={() => onReplyAction(item.id, reply.id, reply.name)}>回复</Button>
                       ]}
                     >
                       <List.Item.Meta
@@ -71,7 +71,7 @@ export const CommentList: React.FC<CommentListProps & {
                                   postId={postId}
                                   commentId={item.id}
                                   replyToId={reply.id}
-                                  onSuccess={onReplyFormFinish || (() => {})}
+                                  onSuccessAction={onReplyFormFinish || (() => {})}
                                   onCancel={onReplyFormFinish || (() => {})}
                                 />
                               </div>
