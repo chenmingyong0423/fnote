@@ -3,10 +3,11 @@ import React, { forwardRef, useImperativeHandle } from "react";
 import { Button, Input, Avatar, Form } from "antd";
 import md5 from "blueimp-md5";
 import { MarkdownPreview } from "@/src/components/MarkdownPreview";
+import {AddCommentBody} from "@/src/api/comments";
 
 export interface BaseCommentFormProps {
-  initialValues?: Record<string, any>;
-  onFinish: (values: any) => void;
+  initialValues?: Record<string, never>;
+  onFinish: (values: AddCommentBody) => void;
   loading?: boolean;
   submitText?: string;
   contentLabel?: string;
@@ -17,8 +18,11 @@ export interface BaseCommentFormProps {
   showClear?: boolean;
   onClear?: () => void;
 }
-
-export const BaseCommentForm = forwardRef<any, BaseCommentFormProps>(
+export interface BaseCommentFormRef {
+    resetFields: () => void;
+}
+// eslint-disable-next-line react/display-name
+export const BaseCommentForm = forwardRef<BaseCommentFormRef, BaseCommentFormProps>(
   (
     {
       initialValues = {},
@@ -38,7 +42,7 @@ export const BaseCommentForm = forwardRef<any, BaseCommentFormProps>(
     const [form] = Form.useForm();
     React.useEffect(() => {
       form.setFieldsValue(initialValues);
-    }, [initialValues]);
+    }, [form, initialValues]);
     useImperativeHandle(ref, () => ({
       resetFields: () => form.resetFields(),
     }));

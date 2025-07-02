@@ -1,37 +1,16 @@
 import React from "react";
-import { getPostDetail } from "@/src/api/posts";
-import { notFound } from "next/navigation";
-import { MarkdownPreview, genHeadingId } from "@/src/components/MarkdownPreview";
+import { MarkdownPreview } from "@/src/components/MarkdownPreview";
 import { extractToc, Toc } from "@/src/components/Toc";
 import { PostActions } from "@/src/components/PostActions";
 import { Comments } from "@/src/components/Comments";
-import { log } from "console";
 import PostSeoClient from "@/src/components/PostSeoClient";
+import Image from "next/image";
 
 interface PostDetailProps {
-  id: string;
+  post: import("@/src/api/posts").PostDetail;
 }
 
-const PostDetail: React.FC<PostDetailProps> = async ({ id }) => {
-  let post;
-  try {
-    const res = await getPostDetail(id);
-    if (res.code !== 0 || !res.data) return notFound();
-    post = res.data;
-    // 推送百度索引（仅在服务端渲染时调用，防止多次推送）
-    if (typeof window === "undefined" && post._id) {
-        log(`Pushing post ${post._id} to Baidu index...`);
-      // 动态 import，避免打包体积增加
-      const { baiduPushIndex } = await import("@/src/api/baiduPush");
-      const url = `${process.env.BASE_HOST || ''}/posts/${post._id}`;
-      try {
-        await baiduPushIndex({ urls: url });
-      } catch {}
-    }
-  } catch {
-    return notFound();
-  }
-
+const PostDetail: React.FC<PostDetailProps> = ({ post }) => {
   const toc = extractToc(post.content);
 
   return (
@@ -55,7 +34,7 @@ const PostDetail: React.FC<PostDetailProps> = async ({ id }) => {
             <span>点赞：{post.like_count}</span>
           </div>
           {post.cover_img && (
-            <img src={post.cover_img} alt="cover" className="w-full max-h-96 object-cover rounded-lg mb-6" />
+            <Image src={post.cover_img} alt="cover" width={800} height={384} className="w-full max-h-96 object-cover rounded-lg mb-6" />
           )}
           <article>
             <MarkdownPreview content={post.content} />

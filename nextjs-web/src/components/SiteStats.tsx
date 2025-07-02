@@ -1,7 +1,16 @@
 "use client";
 import React from "react";
 
-export default function SiteStats({ stats }: { stats?: any }) {
+export interface SiteStatsProps {
+  post_count: number;
+  category_count: number;
+  tag_count: number;
+  comment_count: number;
+  like_count: number;
+  website_view_count: number;
+}
+
+export default function SiteStats({ stats }: { stats?: SiteStatsProps }) {
   if (!stats) return null;
   return (
     <div className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#141414] p-4 text-xs text-gray-600 dark:text-gray-400">

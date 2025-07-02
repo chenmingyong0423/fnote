@@ -23,9 +23,9 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({ menus, loadi
     // 其它如 /categories/frontend => ["categories", "frontend"]
     return pathname.replace(/^\//, "").split("/");
   };
-  const [selectedKeys, setSelectedKeys] = React.useState(getSelectedKeys(pathname));
+  const [selectedKeys, setSelectedKeys] = React.useState(getSelectedKeys(pathname ?? ""));
   React.useEffect(() => {
-    setSelectedKeys(getSelectedKeys(pathname));
+    setSelectedKeys(getSelectedKeys(pathname ?? ""));
   }, [pathname]);
   // 组装 items 数组
   const items = [

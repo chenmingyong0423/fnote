@@ -7,7 +7,7 @@ export default function LogVisitClient() {
     // 1. 检查初始化状态
     import("@/src/api/checkInitialization").then(({ checkInitialization }) => {
       checkInitialization().then((res) => {
-        if (res.code === 0 && res.data && res.data.initStatus === false) {
+        if (res.code === 0 && res.data && !res.data.initStatus) {
           // 跳转到 ADMIN_HOST
           const adminHost = process.env.NEXT_PUBLIC_ADMIN_HOST || process.env.ADMIN_HOST;
           if (adminHost) {

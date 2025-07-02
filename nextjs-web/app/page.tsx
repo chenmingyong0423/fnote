@@ -2,12 +2,12 @@ import LatestComments from "@/src/components/LatestComments";
 import FeaturedCarousel from "../src/components/FeaturedCarousel";
 import LatestPosts from "../src/components/LatestPosts";
 import SiteOwnerCard from "../src/components/SiteOwnerCard";
-import { getLatestPosts } from "../src/api/posts";
-import { getCarouselList } from "../src/api/carousel";
-import { getLatestComments } from "../src/api/comments";
-import { getIndexConfig } from "../src/api/config";
-import { getWebsiteStats } from "../src/api/stats";
-import { generatePageMetadata } from "../src/utils/seo";
+import { getLatestPosts } from "@/src/api/posts";
+import { getCarouselList } from "@/src/api/carousel";
+import { getLatestComments } from "@/src/api/comments";
+import { getIndexConfig } from "@/src/api/config";
+import { getWebsiteStats } from "@/src/api/stats";
+import { generatePageMetadata } from "@/src/utils/seo";
 import type { Metadata } from "next";
 
 // 首页的动态 metadata

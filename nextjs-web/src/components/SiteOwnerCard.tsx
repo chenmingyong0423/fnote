@@ -1,13 +1,13 @@
 "use client";
 import { Card, Avatar } from "antd";
 import React from "react";
-import SiteStats from "./SiteStats";
+import SiteStats, {SiteStatsProps} from "./SiteStats";
 
 export interface SiteOwnerCardProps {
   name: string;
   avatar?: string;
   bio?: string;
-  stats?: any;
+  stats?: SiteStatsProps;
 }
 
 export default function SiteOwnerCard({ name, avatar, bio, stats }: SiteOwnerCardProps) {

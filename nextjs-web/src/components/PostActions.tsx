@@ -1,9 +1,10 @@
 "use client";
 import React, { useState } from "react";
 import { Button, Tooltip, Popover, message } from "antd";
-import { LikeOutlined, MessageOutlined, ShareAltOutlined, GiftOutlined, WechatOutlined, QqOutlined, LinkOutlined, LikeFilled } from "@ant-design/icons";
+import { LikeOutlined, MessageOutlined, ShareAltOutlined, GiftOutlined, WechatOutlined, LinkOutlined, LikeFilled } from "@ant-design/icons";
 import { QRCodeCanvas } from "qrcode.react";
 import { likePost } from "@/src/api/posts";
+import Image from "next/image";
 import '@ant-design/v5-patch-for-react-19';
 
 const rewardList = [
@@ -32,8 +33,8 @@ export const PostActions: React.FC<{ postId: string; isLiked?: boolean }> = ({ p
       } else {
         message.error(res.message || "点赞失败");
       }
-    } catch (e) {
-      message.error("点赞失败");
+    } catch (e: unknown) {
+        message.error((e instanceof Error ? e.message : String(e)) || "点赞失败");
     } finally {
       setLikeLoading(false);
     }
@@ -83,7 +84,7 @@ export const PostActions: React.FC<{ postId: string; isLiked?: boolean }> = ({ p
             <div className="flex flex-col gap-2">
               {rewardList.map(item => (
                 <div key={item.name} className="flex flex-col items-center">
-                  <img src={item.img} alt={item.name} className="w-20 h-20 object-contain rounded border mb-1" />
+                  <Image src={item.img} alt={item.name} width={80} height={80} className="w-20 h-20 object-contain rounded border mb-1" />
                   <span className="text-xs text-gray-500 dark:text-gray-400">{item.name}</span>
                 </div>
               ))}

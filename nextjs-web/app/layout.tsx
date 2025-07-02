@@ -8,10 +8,10 @@ import Footer from "../src/components/Footer";
 import Header from "../src/components/Header";
 import ConfigToZustand from "../src/components/ConfigToZustand";
 import SeoHead from "../src/components/SeoHead";
-import { getIndexConfig } from "../src/api/config";
-import { getWebsiteStats } from "../src/api/stats";
-import { getMenus } from "../src/api/category";
-import { AntdThemeProvider } from "../src/components/AntdThemeProvider";
+import { getIndexConfig } from "@/src/api/config";
+import { getWebsiteStats } from "@/src/api/stats";
+import { getMenus } from "@/src/api/category";
+import { AntdThemeProvider } from "@/src/components/AntdThemeProvider";
 import LogVisitClient from "../src/components/LogVisitClient";
 
 const geistSans = Geist({

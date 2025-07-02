@@ -1,6 +1,5 @@
 "use client";
 import { Card, Tag } from "antd";
-import Meta from "antd/es/card/Meta";
 import Image from "next/image";
 import React from "react";
 import type { LatestPostVO } from "../api/posts";

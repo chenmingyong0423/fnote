@@ -8,13 +8,13 @@ export default function SearchPageWithPagination({ params }: { params: Promise<{
   const searchParams = useSearchParams();
   const router = useRouter();
   const { page } = React.use(params);
-  const field = (searchParams.get("filter") as "latest" | "oldest" | "likes") || "latest";
+  const field = (searchParams?.get("filter") as "latest" | "oldest" | "likes") || "latest";
   const pageNumber = Number(page || 1);
-  const pageSize = Number(searchParams.get("pageSize") || 10);
-  const keyword = searchParams.get("keyword") || "";
+  const pageSize = Number(searchParams?.get("pageSize") || 10);
+  const keyword = searchParams?.get("keyword") || "";
 
   const handleSearch = (value: string) => {
-    const newParams = new URLSearchParams(searchParams.toString());
+    const newParams = new URLSearchParams(searchParams?.toString());
     if (value) {
       newParams.set("keyword", value);
     } else {

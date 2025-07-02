@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { getPostList } from "../api/posts";
+import {getPostList, PostListParams} from "../api/posts";
 import { getCategoryNameStringByRoute } from "../api/category";
 import { getTagNameByRoute } from "../api/tags";
 import { getIndexConfig } from "../api/config";
 import { getWebsiteStats } from "../api/stats";
 import type { PostListResponse } from "../api/posts";
+import {SiteOwnerCardProps} from "@/src/components/SiteOwnerCard";
 
 const ArticleListNoSSR = dynamic(() => import("./ArticleList"), { ssr: false });
 
@@ -38,7 +39,7 @@ export default function ArticleListContainer({
     totalPages: 0,
     totalCount: 0,
   });
-  const [siteOwner, setSiteOwner] = useState<any>(null);
+  const [siteOwner, setSiteOwner] = useState<SiteOwnerCardProps>();
 
   React.useEffect(() => {
     async function fetchData() {
@@ -64,7 +65,7 @@ export default function ArticleListContainer({
         sortField = "like_count";
         sortOrder = "DESC";
       }
-      const params: any = { pageNo: currentPage, pageSize: currentPageSize };
+      const params: PostListParams = { pageNo: currentPage, pageSize: currentPageSize };
       if (sortField) params.sortField = sortField;
       if (sortOrder) params.sortOrder = sortOrder;
       if (categoryName) params.categories = [categoryName];
@@ -81,8 +82,8 @@ export default function ArticleListContainer({
         stats,
       });
     }
-    fetchData();
-  }, [category, tag, keyword, currentField, currentPage, currentPageSize]);
+    fetchData().catch();
+  }, [category, tag, keyword, field, currentField, currentPage, currentPageSize]);
 
   React.useEffect(() => {
     setCurrentField(field);

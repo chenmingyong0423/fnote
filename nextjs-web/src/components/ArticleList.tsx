@@ -1,22 +1,16 @@
 "use client";
-import { useState } from "react";
-import { Select, Pagination, List, Tag, Tabs } from "antd";
+import { Pagination, List, Tag, Tabs } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { EyeOutlined, LikeOutlined, MessageOutlined } from "@ant-design/icons";
 import type { LatestPostVO } from "../api/posts";
-import SiteOwnerCard from "./SiteOwnerCard";
+import SiteOwnerCard, {SiteOwnerCardProps} from "./SiteOwnerCard";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface ArticleListLayoutProps {
   list: LatestPostVO[];
   total: number;
-  siteOwner?: {
-    name: string;
-    avatar: string;
-    bio: string;
-    stats?: any;
-  };
+  siteOwner?: SiteOwnerCardProps;
   currentPage?: number;
   pageSize?: number;
   field?: "latest" | "oldest" | "likes";
@@ -28,7 +22,7 @@ export default function ArticleList({ list, total, siteOwner, currentPage = 1, p
 
   // 处理排序切换
   const handleFilterChange = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
     params.set("filter", value);
     params.delete("page"); // 切换排序时移除 page 参数
     // 跳回第一页
@@ -38,7 +32,7 @@ export default function ArticleList({ list, total, siteOwner, currentPage = 1, p
 
   // 处理分页切换
   const handlePageChange = (page: number, size: number) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
     params.set("pageSize", String(size));
     // 静态路由跳转，支持 /categories/[category]、/tags/[tag]、/search
     const base = window.location.pathname.replace(/\/page\/[0-9]+$/, "");

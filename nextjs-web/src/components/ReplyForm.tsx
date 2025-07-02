@@ -8,11 +8,11 @@ interface ReplyFormProps {
   postId: string;
   commentId: string;
   replyToId?: string;
-  onSuccess: () => void;
+  onSuccessAction: () => void;
   onCancel?: () => void;
 }
 
-export const ReplyForm: React.FC<ReplyFormProps> = ({ postId, commentId, replyToId, onSuccess, onCancel }) => {
+export const ReplyForm: React.FC<ReplyFormProps> = ({ postId, commentId, replyToId, onSuccessAction }) => {
   const [preview, setPreview] = React.useState(false);
   const [formKey, setFormKey] = React.useState(0);
   const handleFinish = async (values: AddReplyBody) => {
@@ -21,9 +21,9 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({ postId, commentId, replyTo
       message.success("回复成功，待审核后显示");
       setFormKey(k => k + 1);
       setPreview(false);
-      onSuccess();
-    } catch (e: any) {
-      message.error(e.message || "回复失败");
+      onSuccessAction();
+    } catch (e: unknown) {
+      message.error((e instanceof Error ? e.message : String(e)) || "回复失败");
     }
   };
   return (
