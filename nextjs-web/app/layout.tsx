@@ -38,7 +38,8 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: seoConfig.og_title || seoConfig.title,
       description: seoConfig.description,
-      images: seoConfig.og_image ? [{ url: seoConfig.og_image }] : undefined,
+      url: process.env.BASE_HOST,
+      images: seoConfig.og_image ? [{ url: process.env.SERVER_HOST + seoConfig.og_image }] : [],
       siteName: config.website_config.website_name,
       type: "website",
     },
@@ -83,7 +84,7 @@ export default async function RootLayout({
             <div className="min-h-screen flex flex-col">
               <Header menus={menus} />
               <ConfigToZustand config={configWithStats} />
-              <SeoHead config={configWithStats} />
+              {/*<SeoHead config={configWithStats} />*/}
               <main>{children}</main>
               <LogVisitClient />
               <Footer websiteRecords={configWithStats.website_config.website_records || []} />
