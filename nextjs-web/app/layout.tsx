@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: seoConfig.og_title || seoConfig.title,
       description: seoConfig.description,
       url: process.env.BASE_HOST,
-      images: seoConfig.og_image ? [{ url: process.env.SERVER_HOST + seoConfig.og_image }] : [],
+      images: seoConfig.og_image ? [{ url: process.env.SERVER_HOST + seoConfig.og_image }] : undefined,
       siteName: config.website_config.website_name,
       type: "website",
     },

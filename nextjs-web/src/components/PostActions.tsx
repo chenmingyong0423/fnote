@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Tooltip, Popover, message } from "antd";
 import { LikeOutlined, MessageOutlined, ShareAltOutlined, GiftOutlined, WechatOutlined, LinkOutlined, LikeFilled } from "@ant-design/icons";
 import { QRCodeCanvas } from "qrcode.react";
@@ -15,9 +15,14 @@ const rewardList = [
 export const PostActions: React.FC<{ postId: string; isLiked?: boolean }> = ({ postId, isLiked = false }) => {
   const [liked, setLiked] = useState(isLiked);
   const [likeLoading, setLikeLoading] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState("");
+
+  useEffect(() => {
+    setCurrentUrl(window.location.href);
+  }, []);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(window.location.href).then(() => {
+    navigator.clipboard.writeText(currentUrl).then(() => {
       message.success("链接已复制");
     });
   };
@@ -60,7 +65,7 @@ export const PostActions: React.FC<{ postId: string; isLiked?: boolean }> = ({ p
             <div className="flex flex-row items-center gap-3">
               <Popover
                 placement="right"
-                content={<QRCodeCanvas value={window.location.href} size={120} />}
+                content={<QRCodeCanvas value={currentUrl} size={120} />}
                 trigger="hover"
               >
                 <Tooltip title="微信">

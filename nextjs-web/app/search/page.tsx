@@ -3,8 +3,9 @@
 import ArticleListContainer from "@/src/components/ArticleListContainer";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Input } from "antd";
+import React, {Suspense} from "react";
 
-export default function SearchPage() {
+function Search() {
   const params = useSearchParams();
   const router = useRouter();
   const field = (params?.get("filter") as "latest" | "oldest" | "likes") || "latest";
@@ -40,4 +41,13 @@ export default function SearchPage() {
       <ArticleListContainer keyword={keyword} field={field} page={page} pageSize={pageSize} />
     </div>
   );
+}
+
+export default function SearchPage() {
+  return (
+      // You could have a loading skeleton as the `fallback` too
+      <Suspense>
+        <Search />
+      </Suspense>
+  )
 }
