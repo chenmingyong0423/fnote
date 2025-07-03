@@ -1,19 +1,19 @@
 'use client';
 
 import { useEffect } from 'react';
-import type { IndexConfigVO } from '../api/config';
+import type {CommonConfigVO} from '../api/config';
 
 interface SeoHeadProps {
-  config: IndexConfigVO;
+  config: CommonConfigVO;
 }
 
 export default function SeoHead({ config }: SeoHeadProps) {
   useEffect(() => {
     // 动态设置网站图标
-    if (config.website_config.website_icon) {
+    if (config.website_meta.website_icon) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.setAttribute('rel', 'shortcut icon');
-      link.setAttribute('href', (process.env.NEXT_PUBLIC_SERVER_HOST || '') + config.website_config.website_icon);
+      link.setAttribute('href', (process.env.NEXT_PUBLIC_SERVER_HOST || '') + config.website_meta.website_icon);
       document.getElementsByTagName('head')[0].appendChild(link);
     }
 
@@ -28,21 +28,21 @@ export default function SeoHead({ config }: SeoHeadProps) {
       const jsonLd = {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": config.website_config.website_name,
+        "name": config.website_meta.website_name,
         "url": window.location.origin,
-        "description": config.seo_meta_config.description,
+        "description": config.seo_meta.description,
         "author": {
           "@type": "Person",
-          "name": config.website_config.website_owner,
-          "image": config.website_config.website_owner_avatar,
-          "description": config.website_config.website_owner_profile
+          "name": config.seo_meta.author,
+          "image": config.website_meta.website_owner_avatar,
+          "description": config.website_meta.website_owner_profile
         },
         "publisher": {
           "@type": "Organization",
-          "name": config.website_config.website_name,
+          "name": config.website_meta.website_name,
           "logo": {
             "@type": "ImageObject",
-            "url": (process.env.NEXT_PUBLIC_SERVER_HOST || '') + config.website_config.website_icon
+            "url": (process.env.NEXT_PUBLIC_SERVER_HOST || '') + config.website_meta.website_icon
           }
         }
       };

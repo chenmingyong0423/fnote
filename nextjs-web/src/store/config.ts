@@ -1,13 +1,13 @@
 import { create } from 'zustand';
-import type { IndexConfigVO } from '../api/config';
+import type { CommonConfigVO } from '../api/config';
 
-interface ConfigState {
-  config: IndexConfigVO | null;
-  setConfig: (config: IndexConfigVO) => void;
+interface CommonConfigState {
+  config: CommonConfigVO | null;
+  setConfig: (config: CommonConfigVO) => void;
   clearConfig: () => void;
 }
 
-export const useConfigStore = create<ConfigState>((set) => ({
+export const useConfigStore = create<CommonConfigState>((set) => ({
   config: null,
   setConfig: (config) => set({ config }),
   clearConfig: () => set({ config: null }),

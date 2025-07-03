@@ -8,7 +8,7 @@ import Footer from "../src/components/Footer";
 import Header from "../src/components/Header";
 import ConfigToZustand from "../src/components/ConfigToZustand";
 import SeoHead from "../src/components/SeoHead";
-import { getIndexConfig } from "@/src/api/config";
+import { getCommonConfig } from "@/src/api/config";
 import { getWebsiteStats } from "@/src/api/stats";
 import { getMenus } from "@/src/api/category";
 import { AntdThemeProvider } from "@/src/components/AntdThemeProvider";
@@ -26,21 +26,20 @@ const geistMono = Geist_Mono({
 
 // 动态生成 metadata
 export async function generateMetadata(): Promise<Metadata> {
-  const config = await getIndexConfig();
-  const seoConfig = config.seo_meta_config;
-  
+  const config = await getCommonConfig();
+
   return {
-    title: seoConfig.title || config.website_config.website_name,
-    description: seoConfig.description,
-    keywords: seoConfig.keywords,
-    authors: [{ name: seoConfig.author || config.website_config.website_owner }],
-    robots: seoConfig.robots || "index, follow",
+    title: config.seo_meta.title || config.website_meta.website_name,
+    description: config.seo_meta.description,
+    keywords: config.seo_meta.keywords,
+    authors: [{ name: config.seo_meta.author || config.website_meta.website_owner }],
+    robots: config.seo_meta.robots || "index, follow",
     openGraph: {
-      title: seoConfig.og_title || seoConfig.title,
-      description: seoConfig.description,
+      title: config.seo_meta.og_title || config.website_meta.website_name,
+      description: config.seo_meta.description,
       url: process.env.BASE_HOST,
-      images: seoConfig.og_image ? [{ url: process.env.SERVER_HOST + seoConfig.og_image }] : undefined,
-      siteName: config.website_config.website_name,
+      images: config.seo_meta.og_image ? [{ url: process.env.SERVER_HOST + config.seo_meta.og_image }] : undefined,
+      siteName: config.website_meta.website_name,
       type: "website",
     },
     verification: {
@@ -48,10 +47,6 @@ export async function generateMetadata(): Promise<Metadata> {
       google: undefined, // 可以根据需要添加谷歌验证
     },
     other: {
-      // 百度站点验证
-      ...(seoConfig.baidu_site_verification && {
-        'baidu-site-verification': seoConfig.baidu_site_verification,
-      }),
       // 第三方站点验证
       ...config.third_party_site_verification.reduce((acc, item) => {
         acc[item.key] = item.value;
@@ -67,7 +62,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const menus = await getMenus();  // SSR 获取配置信息
-  const config = await getIndexConfig();
+  const config = await getCommonConfig();
   let stats = undefined;
   try {
     stats = await getWebsiteStats();
@@ -83,11 +78,11 @@ export default async function RootLayout({
           <AntdThemeProvider>
             <div className="min-h-screen flex flex-col">
               <Header menus={menus} />
-              <ConfigToZustand config={configWithStats} />
-              <SeoHead config={configWithStats} />
+              <ConfigToZustand config={config} />
+              <SeoHead config={config} />
               <main>{children}</main>
               <LogVisitClient />
-              <Footer websiteRecords={configWithStats.website_config.website_records || []} />
+              <Footer websiteRecords={configWithStats.records || []} />
             </div>
           </AntdThemeProvider>
         </AntdRegistry>

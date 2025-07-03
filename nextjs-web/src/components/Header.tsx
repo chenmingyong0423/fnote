@@ -9,7 +9,7 @@ import { useThemeStore } from "../store/theme";
 import type { MenuVO } from "../api/category";
 
 const Header: React.FC<{ menus: MenuVO[] }> = ({ menus }) => {
-  const websiteConfig = useConfigStore((s) => s.config?.website_config);
+  const websiteMetaConfig = useConfigStore((s) => s.config?.website_meta);
   const isDark = useThemeStore((s) => s.isDark);
   const toggleDarkMode = useThemeStore((s) => s.toggleDark);
 
@@ -20,7 +20,7 @@ const Header: React.FC<{ menus: MenuVO[] }> = ({ menus }) => {
       {/* 左侧 Logo 区 1/12 */}
       <div className="col-span-1 flex items-center">
         <Link href="/">
-          <Avatar src={websiteConfig?.website_icon || "/logo.png"} alt="logo" size={40} />
+          <Avatar src={websiteMetaConfig?.website_icon || "/logo.png"} alt="logo" size={40} />
         </Link>
       </div>
       {/* 菜单区 7/12，左对齐，紧挨logo */}
