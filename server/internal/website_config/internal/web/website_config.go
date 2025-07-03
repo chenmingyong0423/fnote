@@ -69,8 +69,10 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.GET("/check-initialization", apiwrap.Wrap(h.GetInitStatus))
 	adminGroup.POST("/initialization", apiwrap.WrapWithBody(h.InitializeWebsite))
 
+	// 站长信息
+	routerGroup.GET("/owner", apiwrap.Wrap(h.GetWebsiteOwnerConfig))
+
 	// website
-	routerGroup.GET("/website", apiwrap.Wrap(h.GetWebsiteConfig))
 	adminGroup.GET("/website", apiwrap.Wrap(h.AdminGetWebsiteConfig))
 	adminGroup.GET("/website/meta", apiwrap.Wrap(h.AdminGetWebsiteConfig4Meta))
 	adminGroup.PUT("/website", apiwrap.WrapWithBody(h.AdminUpdateWebsiteConfig))
@@ -141,6 +143,14 @@ func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebsiteCon
 		WebsiteOwnerAvatar:  webMasterCfg.WebsiteOwnerAvatar,
 		WebsiteRuntime:      gkit.GetValueOrDefault(webMasterCfg.WebsiteRuntime).Unix(),
 		WebsiteRecords:      webMasterCfg.WebsiteRecords,
+	}
+}
+
+func (h *WebsiteConfigHandler) toWebsiteOwnerVO(webMasterCfg *domain.WebsiteConfig) OwnerConfigVO {
+	return OwnerConfigVO{
+		WebsiteOwner:        webMasterCfg.WebsiteOwner,
+		WebsiteOwnerProfile: webMasterCfg.WebsiteOwnerProfile,
+		WebsiteOwnerAvatar:  webMasterCfg.WebsiteOwnerAvatar,
 	}
 }
 
@@ -629,12 +639,12 @@ func (h *WebsiteConfigHandler) AdminUpdateIntroduction4FriendConfig(ctx *gin.Con
 	return apiwrap.SuccessResponse(), h.serv.UpdateIntroduction4FriendConfig(ctx, gkit.GetValueOrDefault(req.Introduction))
 }
 
-func (h *WebsiteConfigHandler) GetWebsiteConfig(ctx *gin.Context) (*apiwrap.ResponseBody[WebsiteConfigVO], error) {
+func (h *WebsiteConfigHandler) GetWebsiteOwnerConfig(ctx *gin.Context) (*apiwrap.ResponseBody[OwnerConfigVO], error) {
 	config, err := h.serv.GetWebSiteConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return apiwrap.SuccessResponseWithData(h.toWebsiteConfigVO(config)), nil
+	return apiwrap.SuccessResponseWithData(h.toWebsiteOwnerVO(config)), nil
 }
 
 func (h *WebsiteConfigHandler) GetCommonConfig(ctx *gin.Context) (*apiwrap.ResponseBody[CommonConfigVO], error) {
@@ -654,9 +664,12 @@ func (h *WebsiteConfigHandler) GetCommonConfig(ctx *gin.Context) (*apiwrap.Respo
 
 func (h *WebsiteConfigHandler) toMetaConfigVO(wc *domain.WebsiteConfig) WebsiteConfigMetaVO {
 	return WebsiteConfigMetaVO{
-		WebsiteName:  wc.WebsiteName,
-		WebsiteIcon:  wc.WebsiteIcon,
-		WebsiteOwner: wc.WebsiteOwner,
+		WebsiteName:         wc.WebsiteName,
+		WebsiteIcon:         wc.WebsiteIcon,
+		WebsiteOwner:        wc.WebsiteOwner,
+		WebsiteOwnerProfile: wc.WebsiteOwnerProfile,
+		WebsiteOwnerAvatar:  wc.WebsiteOwnerAvatar,
+		WebsiteRuntime:      wc.WebsiteRuntime.Unix(),
 	}
 }
 

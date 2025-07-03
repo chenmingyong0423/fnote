@@ -17,7 +17,6 @@ package web
 // IndexConfigVO 首页信息
 type IndexConfigVO struct {
 	WebsiteConfig      WebsiteConfigVO    `json:"website_config"`
-	OwnerConfig        OwnerConfigVO      `json:"owner_config"`
 	NoticeConfigVO     NoticeConfigVO     `json:"notice_config"`
 	SocialInfoConfigVO SocialInfoConfigVO `json:"social_info_config"`
 	PayInfoConfigVO    []PayInfoConfigVO  `json:"pay_info_config"`
@@ -26,9 +25,9 @@ type IndexConfigVO struct {
 }
 
 type OwnerConfigVO struct {
-	Name    string `json:"name"`
-	Profile string `json:"profile"`
-	Picture string `json:"picture"`
+	WebsiteOwner        string `json:"website_owner"`
+	WebsiteOwnerProfile string `json:"website_owner_profile"`
+	WebsiteOwnerAvatar  string `json:"website_owner_avatar"`
 }
 
 type PayInfoConfigVO struct {
@@ -53,9 +52,12 @@ type WebsiteConfigVO struct {
 }
 
 type WebsiteConfigMetaVO struct {
-	WebsiteName  string `json:"website_name"`
-	WebsiteIcon  string `json:"website_icon"`
-	WebsiteOwner string `json:"website_owner"`
+	WebsiteName         string `json:"website_name"`
+	WebsiteIcon         string `json:"website_icon"`
+	WebsiteOwner        string `json:"website_owner"`
+	WebsiteOwnerProfile string `json:"website_owner_profile"`
+	WebsiteOwnerAvatar  string `json:"website_owner_avatar"`
+	WebsiteRuntime      int64  `json:"website_runtime,omitempty"`
 }
 
 type SocialInfoConfigVO struct {
