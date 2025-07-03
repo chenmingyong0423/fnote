@@ -54,6 +54,7 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 
 	// 获取首页的配置信息
 	routerGroup.GET("/index", apiwrap.Wrap(h.GetIndexConfig))
+	routerGroup.GET("/common", apiwrap.Wrap(h.GetCommonConfig))
 
 	// 轮播图
 	routerGroup.GET("/index/carousel", apiwrap.Wrap(h.GetCarouselConfig))
@@ -63,18 +64,23 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.GET("/carousel", apiwrap.Wrap(h.AdminGetCarouselConfig))
 	adminGroup.PUT("/carousel/:id/show", apiwrap.WrapWithBody(h.AdminUpdateCarouselShowStatus))
 
+	// 初始化相关
 	routerGroup.GET("/check-initialization", apiwrap.Wrap(h.GetInitStatus))
-
 	adminGroup.GET("/check-initialization", apiwrap.Wrap(h.GetInitStatus))
 	adminGroup.POST("/initialization", apiwrap.WrapWithBody(h.InitializeWebsite))
+
+	// website
+	routerGroup.GET("/website", apiwrap.Wrap(h.GetWebsiteConfig))
 	adminGroup.GET("/website", apiwrap.Wrap(h.AdminGetWebsiteConfig))
 	adminGroup.GET("/website/meta", apiwrap.Wrap(h.AdminGetWebsiteConfig4Meta))
 	adminGroup.PUT("/website", apiwrap.WrapWithBody(h.AdminUpdateWebsiteConfig))
 	adminGroup.POST("/website/records", apiwrap.WrapWithBody(h.AdminAddRecordInWebsiteConfig))
 	adminGroup.DELETE("/website/records", apiwrap.Wrap(h.AdminDeleteRecordInWebsiteConfig))
+
 	// seo
 	adminGroup.GET("/seo", apiwrap.Wrap(h.AdminGetSeoConfig))
 	adminGroup.PUT("/seo", apiwrap.WrapWithBody(h.AdminUpdateSeoConfig))
+
 	// 评论
 	adminGroup.GET("/comment", apiwrap.Wrap(h.AdminGetCommentConfig))
 	adminGroup.PUT("/comment", apiwrap.WrapWithBody(h.AdminUpdateCommentConfig))
@@ -86,6 +92,8 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.GET("/email", apiwrap.Wrap(h.AdminGetEmailConfig))
 	adminGroup.PUT("/email", apiwrap.WrapWithBody(h.AdminUpdateEmailConfig))
 
+	// 公告配置
+	routerGroup.GET("/notice", apiwrap.Wrap(h.GetNoticeConfig))
 	adminGroup.GET("/notice", apiwrap.Wrap(h.AdminGetNoticeConfig))
 	adminGroup.PUT("/notice", apiwrap.WrapWithBody(h.AdminUpdateNoticeConfig))
 	adminGroup.PUT("/notice/enabled", apiwrap.WrapWithBody(h.AdminUpdateNoticeEnabled))
@@ -137,7 +145,7 @@ func (h *WebsiteConfigHandler) toWebsiteConfigVO(webMasterCfg *domain.WebsiteCon
 }
 
 func (h *WebsiteConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) NoticeConfigVO {
-	return NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, Enabled: noticeCfg.Enabled, PublishTime: noticeCfg.PublishTime.Unix()}
+	return NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, PublishTime: noticeCfg.PublishTime.Unix()}
 }
 
 func (h *WebsiteConfigHandler) toSocialInfoConfigVO(socialINfoConfig *domain.SocialInfoConfig) SocialInfoConfigVO {
@@ -619,4 +627,43 @@ func (h *WebsiteConfigHandler) DeleteCarouselElem(ctx *gin.Context) (*apiwrap.Re
 
 func (h *WebsiteConfigHandler) AdminUpdateIntroduction4FriendConfig(ctx *gin.Context, req UpdateFriendIntroConfigReq) (*apiwrap.ResponseBody[any], error) {
 	return apiwrap.SuccessResponse(), h.serv.UpdateIntroduction4FriendConfig(ctx, gkit.GetValueOrDefault(req.Introduction))
+}
+
+func (h *WebsiteConfigHandler) GetWebsiteConfig(ctx *gin.Context) (*apiwrap.ResponseBody[WebsiteConfigVO], error) {
+	config, err := h.serv.GetWebSiteConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponseWithData(h.toWebsiteConfigVO(config)), nil
+}
+
+func (h *WebsiteConfigHandler) GetCommonConfig(ctx *gin.Context) (*apiwrap.ResponseBody[CommonConfigVO], error) {
+	config, err := h.serv.GetCommonConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiwrap.SuccessResponseWithData(CommonConfigVO{
+		WebsiteMeta: h.toMetaConfigVO(&config.WebSiteConfig),
+		SeoMeta:     h.toSeoMetaConfigVO(&config.SeoMetaConfig),
+		TPSVVO:      h.toTPSVVO(config.TPSVConfig),
+		Records:     config.WebSiteConfig.WebsiteRecords,
+	}), nil
+
+}
+
+func (h *WebsiteConfigHandler) toMetaConfigVO(wc *domain.WebsiteConfig) WebsiteConfigMetaVO {
+	return WebsiteConfigMetaVO{
+		WebsiteName:  wc.WebsiteName,
+		WebsiteIcon:  wc.WebsiteIcon,
+		WebsiteOwner: wc.WebsiteOwner,
+	}
+}
+
+func (h *WebsiteConfigHandler) GetNoticeConfig(ctx *gin.Context) (*apiwrap.ResponseBody[NoticeConfigVO], error) {
+	config, err := h.serv.GetNoticeConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponseWithData(h.toNoticeConfigVO(&config)), nil
 }
