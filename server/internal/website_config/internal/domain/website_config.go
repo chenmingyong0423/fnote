@@ -33,6 +33,12 @@ type IndexConfig struct {
 	TPSVConfig       []TPSV
 }
 
+type CommonConfig struct {
+	WebSiteConfig WebsiteConfig
+	SeoMetaConfig SeoMetaConfig
+	TPSVConfig    []TPSV
+}
+
 type PayInfoConfigElem struct {
 	Name  string `bson:"name"`
 	Image string `bson:"image"`
