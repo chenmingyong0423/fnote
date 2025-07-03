@@ -40,7 +40,6 @@ type NoticeConfigVO struct {
 	Title       string `json:"title" `
 	Content     string `json:"content"`
 	PublishTime int64  `json:"publish_time"`
-	Enabled     bool   `json:"enabled"`
 }
 
 type WebsiteConfigVO struct {
@@ -54,8 +53,9 @@ type WebsiteConfigVO struct {
 }
 
 type WebsiteConfigMetaVO struct {
-	WebsiteName string `json:"website_name"`
-	WebsiteIcon string `json:"website_icon"`
+	WebsiteName  string `json:"website_name"`
+	WebsiteIcon  string `json:"website_icon"`
+	WebsiteOwner string `json:"website_owner"`
 }
 
 type SocialInfoConfigVO struct {
@@ -137,4 +137,11 @@ type CarouselVO struct {
 	Color     string `json:"color"`
 	CreatedAt int64  `json:"created_at"`
 	UpdatedAt int64  `json:"updated_at"`
+}
+
+type CommonConfigVO struct {
+	WebsiteMeta WebsiteConfigMetaVO `json:"website_meta"`
+	SeoMeta     SeoMetaConfigVO     `json:"seo_meta"`
+	TPSVVO      []TPSVVO            `json:"third_party_site_verification"`
+	Records     []string            `json:"records"`
 }

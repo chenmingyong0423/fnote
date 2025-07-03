@@ -71,6 +71,7 @@ type IWebsiteConfigService interface {
 	DeleteCarouselElem(ctx context.Context, id string) error
 	IsCarouselElemExist(ctx context.Context, id string) (bool, error)
 	UpdateIntroduction4FriendConfig(ctx context.Context, introduction string) error
+	GetCommonConfig(ctx context.Context) (*domain.CommonConfig, error)
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -83,6 +84,39 @@ func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteC
 
 type WebsiteConfigService struct {
 	repo repository.IWebsiteConfigRepository
+}
+
+func (s *WebsiteConfigService) GetCommonConfig(ctx context.Context) (*domain.CommonConfig, error) {
+	configs, err := s.repo.FindConfigByTypes(ctx, "website", "seo meta", "third party site verification")
+	if err != nil {
+		return nil, err
+	}
+	cfg := &domain.CommonConfig{}
+	for _, config := range configs {
+		if config.Typ == "website" {
+			wsc := domain.WebsiteConfig{}
+			err = s.anyToStruct(config.Props, &wsc)
+			if err != nil {
+				return nil, err
+			}
+			cfg.WebSiteConfig = wsc
+		} else if config.Typ == "seo meta" {
+			seoMetaConfig := domain.SeoMetaConfig{}
+			err = s.anyToStruct(config.Props, &seoMetaConfig)
+			if err != nil {
+				return nil, err
+			}
+			cfg.SeoMetaConfig = seoMetaConfig
+		} else if config.Typ == "third party site verification" {
+			tpsvConfig := domain.TPSVConfig{}
+			err = s.anyToStruct(config.Props, &tpsvConfig)
+			if err != nil {
+				return nil, err
+			}
+			cfg.TPSVConfig = tpsvConfig.List
+		}
+	}
+	return cfg, nil
 }
 
 func (s *WebsiteConfigService) UpdateIntroduction4FriendConfig(ctx context.Context, introduction string) error {
