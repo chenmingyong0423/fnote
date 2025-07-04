@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import {getPostList, PostListParams} from "../api/posts";
 import { getCategoryNameStringByRoute } from "../api/category";
 import { getTagNameByRoute } from "../api/tags";
-import { getIndexConfig } from "../api/config";
+import { getWebsiteOwnerConfig } from "../api/config";
 import { getWebsiteStats } from "../api/stats";
 import type { PostListResponse } from "../api/posts";
 import {SiteOwnerCardProps} from "@/src/components/SiteOwnerCard";
@@ -73,12 +73,12 @@ export default function ArticleListContainer({
       if (keyword) params.keyword = keyword;
       const posts = await getPostList(params);
       setData(posts);
-      const config = await getIndexConfig();
+      const config = await getWebsiteOwnerConfig();
       const stats = await getWebsiteStats();
       setSiteOwner({
-        name: config.website_config.website_owner,
-        avatar: config.website_config.website_owner_avatar,
-        bio: config.website_config.website_owner_profile,
+        name: config.website_owner,
+        avatar: config.website_owner_avatar,
+        bio: config.website_owner_profile,
         stats,
       });
     }
