@@ -63,11 +63,6 @@ export default async function RootLayout({
 }>) {
   const menus = await getMenus();  // SSR 获取配置信息
   const config = await getCommonConfig();
-  let stats = undefined;
-  try {
-    stats = await getWebsiteStats();
-  } catch {}
-  const configWithStats = { ...config, stats };
 
   return (
     <html lang="en">
@@ -82,7 +77,7 @@ export default async function RootLayout({
               <SeoHead config={config} />
               <main>{children}</main>
               <LogVisitClient />
-              <Footer websiteRecords={configWithStats.records || []} />
+              <Footer websiteRecords={config.records || []} />
             </div>
           </AntdThemeProvider>
         </AntdRegistry>
