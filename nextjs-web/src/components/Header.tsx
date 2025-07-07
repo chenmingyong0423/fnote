@@ -3,12 +3,12 @@ import { Avatar } from "antd";
 import Navbar from "./Navbar";
 import Link from "next/link";
 import { getMenus } from "../api/category";
-import { getCachedCommonConfig } from "@/src/api/config";
 import HeaderActions from "./HeaderActions";
+import {getCommonConfig} from "@/src/api/config";
 
 const Header = async () => {
   const menus = await getMenus();
-  const config = await getCachedCommonConfig();
+  const config = await getCommonConfig();
   const websiteMetaConfig = config?.website_meta;
 
   return (

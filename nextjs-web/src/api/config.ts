@@ -42,11 +42,6 @@ export async function getCommonConfig(): Promise<CommonConfigVO> {
   return res.data;
 }
 
-export const getCachedCommonConfig = unstable_cache(
-    async () => getCommonConfig(),
-    ['common-config']
-);
-
 export interface WebsiteOwnerConfigVO {
   website_owner: string;
   website_owner_profile: string;
