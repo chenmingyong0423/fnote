@@ -1,5 +1,5 @@
 "use client";
-import ArticleListContainer from "@/src/components/ArticleListContainer";
+import ArticleList from "@/src/components/ArticleList";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Input } from "antd";
 import React from "react";
@@ -39,14 +39,13 @@ function SearchWithPagination() {
           />
         </div>
       </div>
-      <ArticleListContainer keyword={keyword} field={field} page={pageNumber} pageSize={pageSize} />
+      <ArticleList keyword={keyword} field={field} page={pageNumber} pageSize={pageSize} />
     </div>
   );
 }
 
 export default function SearchPageWithPagination() {
   return (
-      // You could have a loading skeleton as the `fallback` too
       <Suspense>
         <SearchWithPagination />
       </Suspense>

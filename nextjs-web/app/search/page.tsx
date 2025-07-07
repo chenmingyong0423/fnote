@@ -1,6 +1,6 @@
 "use client";
 
-import ArticleListContainer from "@/src/components/ArticleListContainer";
+import ArticleList from "@/src/components/ArticleList";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Input } from "antd";
 import React, {Suspense} from "react";
@@ -38,14 +38,13 @@ function Search() {
           />
         </div>
       </div>
-      <ArticleListContainer keyword={keyword} field={field} page={page} pageSize={pageSize} />
+      <ArticleList keyword={keyword} field={field} page={page} pageSize={pageSize} />
     </div>
   );
 }
 
 export default function SearchPage() {
   return (
-      // You could have a loading skeleton as the `fallback` too
       <Suspense>
         <Search />
       </Suspense>
