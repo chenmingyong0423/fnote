@@ -3,14 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import React from "react";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-// import {App as AntdApp } from "antd";
 import Footer from "../src/components/Footer";
 import Header from "../src/components/Header";
-import ConfigToZustand from "../src/components/ConfigToZustand";
 import SeoHead from "../src/components/SeoHead";
-import { getCommonConfig } from "@/src/api/config";
-import { getWebsiteStats } from "@/src/api/stats";
-import { getMenus } from "@/src/api/category";
+import {getCachedCommonConfig, getCommonConfig} from "@/src/api/config";
 import { AntdThemeProvider } from "@/src/components/AntdThemeProvider";
 import LogVisitClient from "../src/components/LogVisitClient";
 
@@ -26,8 +22,7 @@ const geistMono = Geist_Mono({
 
 // 动态生成 metadata
 export async function generateMetadata(): Promise<Metadata> {
-  const config = await getCommonConfig();
-
+  const config = await getCachedCommonConfig()
   return {
     title: config.seo_meta.title || config.website_meta.website_name,
     description: config.seo_meta.description,
@@ -61,7 +56,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const menus = await getMenus();  // SSR 获取配置信息
+
   const config = await getCommonConfig();
 
   return (
@@ -72,8 +67,7 @@ export default async function RootLayout({
         <AntdRegistry>
           <AntdThemeProvider>
             <div className="min-h-screen flex flex-col">
-              <Header menus={menus} />
-              <ConfigToZustand config={config} />
+              <Header />
               <SeoHead config={config} />
               <main>{children}</main>
               <LogVisitClient />

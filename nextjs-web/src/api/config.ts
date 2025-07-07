@@ -1,5 +1,6 @@
 import { request } from "../utils/http";
 import type { Response } from "./types";
+import { unstable_cache } from 'next/cache';
 
 export interface SeoMetaConfigVO {
   title: string;
@@ -40,6 +41,11 @@ export async function getCommonConfig(): Promise<CommonConfigVO> {
   if (res.code !== 0) throw new Error(res.message);
   return res.data;
 }
+
+export const getCachedCommonConfig = unstable_cache(
+    async () => getCommonConfig(),
+    ['common-config']
+);
 
 export interface WebsiteOwnerConfigVO {
   website_owner: string;
