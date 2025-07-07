@@ -6,7 +6,7 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import Footer from "../src/components/Footer";
 import Header from "../src/components/Header";
 import SeoHead from "../src/components/SeoHead";
-import {getCachedCommonConfig, getCommonConfig} from "@/src/api/config";
+import { getCommonConfig } from "@/src/api/config";
 import { AntdThemeProvider } from "@/src/components/AntdThemeProvider";
 import LogVisitClient from "../src/components/LogVisitClient";
 
@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 
 // 动态生成 metadata
 export async function generateMetadata(): Promise<Metadata> {
-  const config = await getCachedCommonConfig()
+  const config = await getCommonConfig();
   return {
     title: config.seo_meta.title || config.website_meta.website_name,
     description: config.seo_meta.description,
