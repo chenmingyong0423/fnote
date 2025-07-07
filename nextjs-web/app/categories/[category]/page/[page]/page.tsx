@@ -1,6 +1,6 @@
 "use client";
 
-import ArticleListContainer from "@/src/components/ArticleListContainer";
+import ArticleList from "@/src/components/ArticleList";
 import { useSearchParams } from "next/navigation";
 import { notFound } from "next/navigation";
 import React from "react";
@@ -12,5 +12,5 @@ export default function CategoryPageWithPagination({ params }: { params: Promise
   const pageNumber = Number(page || 1);
   const pageSize = Number(searchParams?.get("pageSize") || 10);
   if (!category) return notFound();
-  return <ArticleListContainer category={category} field={field} page={pageNumber} pageSize={pageSize} />;
+  return <ArticleList category={category} field={field} page={pageNumber} pageSize={pageSize} />;
 }

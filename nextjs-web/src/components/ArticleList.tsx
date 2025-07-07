@@ -1,43 +1,110 @@
 "use client";
+import React, { useState, useEffect } from "react";
 import { Pagination, List, Tag, Tabs } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { EyeOutlined, LikeOutlined, MessageOutlined } from "@ant-design/icons";
-import type { LatestPostVO } from "../api/posts";
-import SiteOwnerCard, {SiteOwnerCardProps} from "./SiteOwnerCard";
+import { getPostList, type LatestPostVO, type PostListParams, type PostListResponse } from "../api/posts";
+import { getCategoryNameStringByRoute } from "../api/category";
+import { getTagNameByRoute } from "../api/tags";
+import { getWebsiteOwnerConfig } from "../api/config";
+import { getWebsiteStats } from "../api/stats";
+import SiteOwnerCard, { SiteOwnerCardProps } from "./SiteOwnerCard";
 import { useRouter, useSearchParams } from "next/navigation";
 
-interface ArticleListLayoutProps {
-  list: LatestPostVO[];
-  total: number;
-  siteOwner?: SiteOwnerCardProps;
-  currentPage?: number;
-  pageSize?: number;
+interface ArticleListProps {
+  category?: string;
+  tag?: string;
+  keyword?: string;
   field?: "latest" | "oldest" | "likes";
+  page?: number;
+  pageSize?: number;
 }
 
-export default function ArticleList({ list, total, siteOwner, currentPage = 1, pageSize = 10, field = "latest" }: ArticleListLayoutProps) {
+export default function ArticleList({
+  category,
+  tag,
+  keyword,
+  field = "latest",
+  page = 1,
+  pageSize = 10,
+}: ArticleListProps) {
+  const [currentField, setCurrentField] = useState(field);
+  const [currentPage, setCurrentPage] = useState(page);
+  const [currentPageSize, setCurrentPageSize] = useState(pageSize);
+  const [data, setData] = useState<PostListResponse>({
+    list: [],
+    PageNo: 1,
+    PageSize: 10,
+    totalPages: 0,
+    totalCount: 0,
+  });
+  const [siteOwner, setSiteOwner] = useState<SiteOwnerCardProps>();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // 处理排序切换
+  useEffect(() => {
+    async function fetchData() {
+      let categoryName: string | undefined = undefined;
+      let tagName: string | undefined = undefined;
+      if (category) {
+        categoryName = await getCategoryNameStringByRoute(category);
+      }
+      if (tag) {
+        tagName = await getTagNameByRoute(tag);
+      }
+      let sortField: string | undefined = undefined;
+      let sortOrder: string | undefined = undefined;
+      if (currentField === "latest") {
+        sortField = "created_at";
+        sortOrder = "DESC";
+      } else if (currentField === "oldest") {
+        sortField = "created_at";
+        sortOrder = "ASC";
+      } else if (currentField === "likes") {
+        sortField = "like_count";
+        sortOrder = "DESC";
+      }
+      const params: PostListParams = { pageNo: currentPage, pageSize: currentPageSize };
+      if (sortField) params.sortField = sortField;
+      if (sortOrder) params.sortOrder = sortOrder;
+      if (categoryName) params.categories = [categoryName];
+      if (tagName) params.tags = [tagName];
+      if (keyword) params.keyword = keyword;
+      const posts = await getPostList(params);
+      setData(posts);
+      const config = await getWebsiteOwnerConfig();
+      const stats = await getWebsiteStats();
+      setSiteOwner({
+        name: config.website_owner,
+        avatar: config.website_owner_avatar,
+        bio: config.website_owner_profile,
+        stats,
+      });
+    }
+    fetchData().catch();
+  }, [category, tag, keyword, currentField, currentPage, currentPageSize]);
+
+  // 排序切换
   const handleFilterChange = (value: string) => {
+    setCurrentField(value as "latest" | "oldest" | "likes");
+    setCurrentPage(1);
+    // 跳回第一页
     const params = new URLSearchParams(searchParams?.toString() ?? "");
     params.set("filter", value);
-    params.delete("page"); // 切换排序时移除 page 参数
-    // 跳回第一页
+    params.delete("page");
     const base = window.location.pathname.replace(/\/page\/[0-9]+$/, "");
     router.push(`${base}?${params.toString()}`);
   };
 
-  // 处理分页切换
+  // 分页切换
   const handlePageChange = (page: number, size: number) => {
+    setCurrentPage(page);
+    setCurrentPageSize(size);
     const params = new URLSearchParams(searchParams?.toString() ?? "");
     params.set("pageSize", String(size));
-    // 静态路由跳转，支持 /categories/[category]、/tags/[tag]、/search
     const base = window.location.pathname.replace(/\/page\/[0-9]+$/, "");
     const targetPage = page === 1 ? "" : `/page/${page}`;
-    // 兼容 /categories/[category]/page/[page]、/tags/[tag]/page/[page]、/search/page/[page]
     router.push(`${base}${targetPage}?${params.toString()}`);
   };
 
@@ -49,7 +116,7 @@ export default function ArticleList({ list, total, siteOwner, currentPage = 1, p
           {/* 排序过滤选项 */}
           <div className="flex items-center justify-between mb-4">
             <Tabs
-              activeKey={field}
+              activeKey={currentField}
               onChange={handleFilterChange}
               items={[
                 { key: "latest", label: "最新发布" },
@@ -60,7 +127,7 @@ export default function ArticleList({ list, total, siteOwner, currentPage = 1, p
           </div>
           <List
             itemLayout="horizontal"
-            dataSource={list}
+            dataSource={data.list}
             locale={{ emptyText: <div className="py-8 text-center text-gray-400">暂无数据</div> }}
             renderItem={item => (
               <List.Item className="!p-4 !bg-white dark:!bg-[#141414] dark:border dark:border-[#303030] !rounded !shadow !overflow-hidden my-4 transition-transform duration-200 group/article hover:-translate-y-2 relative">
@@ -100,8 +167,8 @@ export default function ArticleList({ list, total, siteOwner, currentPage = 1, p
           <div className="flex justify-end mt-4">
             <Pagination
               current={currentPage}
-              pageSize={pageSize}
-              total={total}
+              pageSize={currentPageSize}
+              total={data.totalCount}
               onChange={handlePageChange}
               showSizeChanger={true}
               pageSizeOptions={["5", "10", "20", "50"]}
