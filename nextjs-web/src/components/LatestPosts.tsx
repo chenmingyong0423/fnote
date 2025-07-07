@@ -8,7 +8,7 @@ import { EyeOutlined, LikeOutlined, MessageOutlined } from "@ant-design/icons";
 export default function LatestArticles({ articles }: { articles: LatestPostVO[] }) {
   return (
     <section>
-      <h2 className="text-xl font-bold mb-4">最新发布</h2>
+      <h2 className="text-xl font-bold mb-4">最新文章</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {articles
           .slice()

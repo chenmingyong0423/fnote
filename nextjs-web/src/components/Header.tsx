@@ -1,17 +1,15 @@
-"use client";
 import React from "react";
-import { Avatar, Button, Space } from "antd";
-import { BulbOutlined, SearchOutlined } from "@ant-design/icons";
+import { Avatar } from "antd";
 import Navbar from "./Navbar";
 import Link from "next/link";
-import { useConfigStore } from "../store/config";
-import { useThemeStore } from "../store/theme";
-import type { MenuVO } from "../api/category";
+import { getMenus } from "../api/category";
+import { getCachedCommonConfig } from "@/src/api/config";
+import HeaderActions from "./HeaderActions";
 
-const Header: React.FC<{ menus: MenuVO[] }> = ({ menus }) => {
-  const websiteMetaConfig = useConfigStore((s) => s.config?.website_meta);
-  const isDark = useThemeStore((s) => s.isDark);
-  const toggleDarkMode = useThemeStore((s) => s.toggleDark);
+const Header = async () => {
+  const menus = await getMenus();
+  const config = await getCachedCommonConfig();
+  const websiteMetaConfig = config?.website_meta;
 
   return (
     <header
@@ -29,19 +27,7 @@ const Header: React.FC<{ menus: MenuVO[] }> = ({ menus }) => {
       </div>
       {/* 右侧按钮区 4/12 */}
       <div className="col-span-4 flex items-center justify-end gap-2">
-        <Space size="middle">
-          <Button
-            type="text"
-            shape="circle"
-            icon={<BulbOutlined />}
-            aria-label="切换暗黑模式"
-            onClick={toggleDarkMode}
-            style={{ color: isDark ? '#fadb14' : undefined }}
-          />
-          <Link href="/search">
-            <Button type="text" shape="circle" icon={<SearchOutlined />} aria-label="搜索" />
-          </Link>
-        </Space>
+        <HeaderActions />
       </div>
     </header>
   );
