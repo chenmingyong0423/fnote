@@ -1,94 +1,43 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Pagination, List, Tag, Tabs } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { EyeOutlined, LikeOutlined, MessageOutlined } from "@ant-design/icons";
-import { getPostList, type LatestPostVO, type PostListParams, type PostListResponse } from "../api/posts";
-import { getCategoryNameStringByRoute } from "../api/category";
-import { getTagNameByRoute } from "../api/tags";
-import { getWebsiteOwnerConfig } from "../api/config";
-import { getWebsiteStats } from "../api/stats";
 import SiteOwnerCard, { SiteOwnerCardProps } from "./SiteOwnerCard";
 import { useRouter, useSearchParams } from "next/navigation";
+import type { LatestPostVO } from "../api/posts";
 
 interface ArticleListProps {
-  category?: string;
-  tag?: string;
-  keyword?: string;
+  list: LatestPostVO[];
+  total: number;
+  siteOwner?: SiteOwnerCardProps;
   field?: "latest" | "oldest" | "likes";
-  page?: number;
+  currentPage?: number;
   pageSize?: number;
+  onPageChange?: (page: number, pageSize: number, field: string) => void;
 }
 
 export default function ArticleList({
-  category,
-  tag,
-  keyword,
+  list,
+  total,
+  siteOwner,
   field = "latest",
-  page = 1,
+  currentPage = 1,
   pageSize = 10,
+  onPageChange,
 }: ArticleListProps) {
-  const [currentField, setCurrentField] = useState(field);
-  const [currentPage, setCurrentPage] = useState(page);
-  const [currentPageSize, setCurrentPageSize] = useState(pageSize);
-  const [data, setData] = useState<PostListResponse>({
-    list: [],
-    PageNo: 1,
-    PageSize: 10,
-    totalPages: 0,
-    totalCount: 0,
-  });
-  const [siteOwner, setSiteOwner] = useState<SiteOwnerCardProps>();
+  const [localField, setLocalField] = useState(field);
+  const [localPage, setLocalPage] = useState(currentPage);
+  const [localPageSize, setLocalPageSize] = useState(pageSize);
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    async function fetchData() {
-      let categoryName: string | undefined = undefined;
-      let tagName: string | undefined = undefined;
-      if (category) {
-        categoryName = await getCategoryNameStringByRoute(category);
-      }
-      if (tag) {
-        tagName = await getTagNameByRoute(tag);
-      }
-      let sortField: string | undefined = undefined;
-      let sortOrder: string | undefined = undefined;
-      if (currentField === "latest") {
-        sortField = "created_at";
-        sortOrder = "DESC";
-      } else if (currentField === "oldest") {
-        sortField = "created_at";
-        sortOrder = "ASC";
-      } else if (currentField === "likes") {
-        sortField = "like_count";
-        sortOrder = "DESC";
-      }
-      const params: PostListParams = { pageNo: currentPage, pageSize: currentPageSize };
-      if (sortField) params.sortField = sortField;
-      if (sortOrder) params.sortOrder = sortOrder;
-      if (categoryName) params.categories = [categoryName];
-      if (tagName) params.tags = [tagName];
-      if (keyword) params.keyword = keyword;
-      const posts = await getPostList(params);
-      setData(posts);
-      const config = await getWebsiteOwnerConfig();
-      const stats = await getWebsiteStats();
-      setSiteOwner({
-        name: config.website_owner,
-        avatar: config.website_owner_avatar,
-        bio: config.website_owner_profile,
-        stats,
-      });
-    }
-    fetchData().catch();
-  }, [category, tag, keyword, currentField, currentPage, currentPageSize]);
-
   // 排序切换
   const handleFilterChange = (value: string) => {
-    setCurrentField(value as "latest" | "oldest" | "likes");
-    setCurrentPage(1);
+    setLocalField(value as "latest" | "oldest" | "likes");
+    setLocalPage(1);
+    if (onPageChange) onPageChange(1, localPageSize, value);
     // 跳回第一页
     const params = new URLSearchParams(searchParams?.toString() ?? "");
     params.set("filter", value);
@@ -99,8 +48,9 @@ export default function ArticleList({
 
   // 分页切换
   const handlePageChange = (page: number, size: number) => {
-    setCurrentPage(page);
-    setCurrentPageSize(size);
+    setLocalPage(page);
+    setLocalPageSize(size);
+    if (onPageChange) onPageChange(page, size, localField);
     const params = new URLSearchParams(searchParams?.toString() ?? "");
     params.set("pageSize", String(size));
     const base = window.location.pathname.replace(/\/page\/[0-9]+$/, "");
@@ -116,7 +66,7 @@ export default function ArticleList({
           {/* 排序过滤选项 */}
           <div className="flex items-center justify-between mb-4">
             <Tabs
-              activeKey={currentField}
+              activeKey={localField}
               onChange={handleFilterChange}
               items={[
                 { key: "latest", label: "最新发布" },
@@ -127,7 +77,7 @@ export default function ArticleList({
           </div>
           <List
             itemLayout="horizontal"
-            dataSource={data.list}
+            dataSource={list}
             locale={{ emptyText: <div className="py-8 text-center text-gray-400">暂无数据</div> }}
             renderItem={item => (
               <List.Item className="!p-4 !bg-white dark:!bg-[#141414] dark:border dark:border-[#303030] !rounded !shadow !overflow-hidden my-4 transition-transform duration-200 group/article hover:-translate-y-2 relative">
@@ -166,9 +116,9 @@ export default function ArticleList({
           />
           <div className="flex justify-end mt-4">
             <Pagination
-              current={currentPage}
-              pageSize={currentPageSize}
-              total={data.totalCount}
+              current={localPage}
+              pageSize={localPageSize}
+              total={total}
               onChange={handlePageChange}
               showSizeChanger={true}
               pageSizeOptions={["5", "10", "20", "50"]}
