@@ -4,7 +4,7 @@ import { getWebsiteStats } from "@/src/api/stats";
 import type { Metadata } from "next";
 import SearchPageClient from "../../SearchPageClient";
 
-export async function generateMetadata({ searchParams }: { searchParams: Promise<{ keyword?: string }> }): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ filter?: string, pageSize?: string, keyword?: string }> }): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const keyword = resolvedSearchParams?.keyword || "";
   const config = await getCommonConfig();
@@ -22,10 +22,11 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   };
 }
 
-export default async function SearchPageWithPagination({ searchParams }: { searchParams: Promise<{ filter?: string, pageSize?: string, page?: string, keyword?: string }> }) {
+export default async function SearchPageWithPagination({ params, searchParams }: { params: Promise<{ page: string }>; searchParams: Promise<{ filter?: string, pageSize?: string, keyword?: string }> }) {
+  const { page } = await params;
   const resolvedSearchParams = await searchParams;
   const field = (resolvedSearchParams?.filter as "latest" | "oldest" | "likes") || "latest";
-  const pageNumber = Number(resolvedSearchParams?.page || 1);
+  const pageNumber = Number(page || 1);
   const pageSize = Number(resolvedSearchParams?.pageSize || 10);
   const keyword = resolvedSearchParams?.keyword || "";
 
