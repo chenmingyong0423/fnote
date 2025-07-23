@@ -3,6 +3,8 @@ import React, {Suspense} from "react";
 import { Input } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";
 import ArticleList from "@/src/components/ArticleList";
+import {LatestPostVO} from "@/src/api/posts";
+import {SiteOwnerCardProps} from "@/src/components/SiteOwnerCard";
 
 function SearchPage({
   keyword,
@@ -17,9 +19,9 @@ function SearchPage({
   field: "latest" | "oldest" | "likes";
   page: number;
   pageSize: number;
-  list: any[];
+  list: LatestPostVO[];
   total: number;
-  siteOwner: any;
+  siteOwner: SiteOwnerCardProps;
 }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -72,9 +74,9 @@ export default function SearchPageClient({
   field: "latest" | "oldest" | "likes";
   page: number;
   pageSize: number;
-  list: any[];
+  list: LatestPostVO[];
   total: number;
-  siteOwner: any;
+  siteOwner: SiteOwnerCardProps;
 }) {
   return (
       <Suspense>

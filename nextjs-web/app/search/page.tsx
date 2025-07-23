@@ -4,8 +4,9 @@ import { getWebsiteStats } from "@/src/api/stats";
 import type { Metadata } from "next";
 import SearchPageClient from "./SearchPageClient";
 
-export async function generateMetadata({ searchParams }: { searchParams: { keyword?: string } }): Promise<Metadata> {
-  const keyword = searchParams?.keyword || "";
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ keyword?: string }> }): Promise<Metadata> {
+  const resolvedSearchParams = await searchParams;
+  const keyword = resolvedSearchParams?.keyword || "";
   const config = await getCommonConfig();
   return {
     title: keyword ? `搜索：${keyword} - ${config.seo_meta.title || config.website_meta.website_name}` : `搜索文章 - ${config.seo_meta.title || config.website_meta.website_name}`,
@@ -21,11 +22,12 @@ export async function generateMetadata({ searchParams }: { searchParams: { keywo
   };
 }
 
-export default async function SearchPage({ searchParams }: { searchParams: { filter?: string, pageSize?: string, page?: string, keyword?: string } }) {
-  const field = (searchParams?.filter as "latest" | "oldest" | "likes") || "latest";
-  const pageNumber = Number(searchParams?.page || 1);
-  const pageSize = Number(searchParams?.pageSize || 10);
-  const keyword = searchParams?.keyword || "";
+export default async function SearchPage({ searchParams }: { searchParams: Promise<{ filter?: string, pageSize?: string, page?: string, keyword?: string }> }) {
+  const resolvedSearchParams = await searchParams;
+  const field = (resolvedSearchParams?.filter as "latest" | "oldest" | "likes") || "latest";
+  const pageNumber = Number(resolvedSearchParams?.page || 1);
+  const pageSize = Number(resolvedSearchParams?.pageSize || 10);
+  const keyword = resolvedSearchParams?.keyword || "";
 
   const posts = await getPostList({
     pageNo: pageNumber,
