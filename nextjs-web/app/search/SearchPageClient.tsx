@@ -52,19 +52,30 @@ function SearchPage({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto">
-      <div className="mb-6 flex md:justify-start justify-center">
-        <div className="w-full md:col-span-8" style={{ maxWidth: '66.6667%' }}>
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
+      {/* 搜索框区域 */}
+      <div className="mb-6 bg-white dark:bg-[#141414] rounded-lg shadow-sm p-4 md:p-6">
+        <h1 className="text-xl md:text-2xl font-bold mb-4 dark:text-gray-100">搜索文章</h1>
+        <div className="w-full">
           <Input.Search
-            placeholder="请输入关键词..."
+            placeholder="请输入关键词搜索文章..."
             allowClear
             enterButton="搜索"
             size="large"
             defaultValue={keyword}
             onSearch={handleSearch}
+            className="w-full"
           />
         </div>
+        {keyword && (
+          <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+            搜索关键词：<span className="font-medium text-blue-600 dark:text-blue-400">"{keyword}"</span>
+            {total > 0 && <span className="ml-2">找到 {total} 篇相关文章</span>}
+          </div>
+        )}
       </div>
+      
+      {/* 文章列表 */}
       <ArticleList
         list={list}
         total={total}

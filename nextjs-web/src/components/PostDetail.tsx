@@ -21,28 +21,35 @@ const PostDetail: React.FC<PostDetailProps> = ({ post }) => {
         keywords={post.meta_keywords || post.tags?.map(t => t.name).join(",")}
         coverImg={post.cover_img}
       />
-      <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 bg-white dark:bg-[#141414] rounded-xl shadow-sm p-6 mb-12">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-3xl font-bold mb-4 dark:text-gray-100">{post.title}</h1>
-          <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400 mb-6">
-            <span>作者：{post.author}</span>
-            <span>分类：{post.category.map(c => c.name).join(', ')}</span>
-            <span>标签：{post.tags.map(t => t.name).join(', ')}</span>
-            <span>发布时间：{new Date(post.created_at * 1000).toLocaleString()}</span>
-            <span>浏览：{post.visit_count}</span>
-            <span>评论：{post.comment_count}</span>
-            <span>点赞：{post.like_count}</span>
-          </div>
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 bg-white dark:bg-[#141414] rounded-xl shadow-sm p-4 md:p-6 mb-12">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl md:text-3xl font-bold mb-4 dark:text-gray-100">{post.title}</h1>
+            <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-6">
+              <span>作者：{post.author}</span>
+              <span>分类：{post.category.map(c => c.name).join(', ')}</span>
+              <span className="hidden sm:inline">标签：{post.tags.map(t => t.name).join(', ')}</span>
+              <span>发布：{new Date(post.created_at * 1000).toLocaleDateString()}</span>
+              <span className="flex items-center gap-1 md:gap-3">
+                <span>浏览：{post.visit_count}</span>
+                <span>评论：{post.comment_count}</span>
+                <span>点赞：{post.like_count}</span>
+              </span>
+            </div>
+            {/* 移动端显示标签 */}
+            <div className="sm:hidden mb-4 text-xs text-gray-500 dark:text-gray-400">
+              标签：{post.tags.map(t => t.name).join(', ')}
+            </div>
           {post.cover_img && (
-            <Image src={post.cover_img} alt="cover" width={800} height={384} className="w-full max-h-96 object-cover rounded-lg mb-6" />
+            <Image src={post.cover_img} alt="cover" width={800} height={384} className="w-full max-h-64 md:max-h-96 object-cover rounded-lg mb-6" />
           )}
-          <article>
+          <article className="prose prose-sm md:prose-lg max-w-none dark:prose-invert">
             <MarkdownPreview content={post.content} />
           </article>
           {/* 版权信息区 */}
-          <div className="mt-10 p-4 rounded-lg bg-gray-50 dark:bg-[#232426] border border-gray-100 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
-            <div>
-              本文链接：<span className="break-all">{`${process.env.BASE_HOST || ''}/posts/${post._id}`}</span>
+          <div className="mt-8 md:mt-10 p-3 md:p-4 rounded-lg bg-gray-50 dark:bg-[#232426] border border-gray-100 dark:border-gray-700 text-xs md:text-sm text-gray-600 dark:text-gray-400">
+            <div className="break-all">
+              本文链接：<span>{`${process.env.BASE_HOST || ''}/posts/${post._id}`}</span>
             </div>
             <div className="mt-2">
               版权声明：本文由 <span className="font-semibold">{post.author}</span> 原创发布，如需转载请遵循
@@ -58,13 +65,18 @@ const PostDetail: React.FC<PostDetailProps> = ({ post }) => {
             </div>
           </div>
         </div>
-        {/* 右侧悬浮区：操作区在上，目录在下，整体 sticky，避免重叠 */}
+        {/* 右侧悬浮区：操作区在上，目录在下，整体 sticky，避免重叠。移动端隐藏 */}
         <div className="w-80 hidden lg:flex flex-col gap-4 sticky top-24 h-fit">
           <PostActions postId={post._id} />
           <Toc toc={toc} />
         </div>
       </div>
-      <div className="w-full max-w-7xl mx-auto mt-0 mb-12">
+      </div>
+      {/* 移动端操作按钮，固定在底部 */}
+      <div className="lg:hidden fixed bottom-4 right-4 z-50">
+        <PostActions postId={post._id} />
+      </div>
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-0 mt-0 mb-12">
         <Comments postId={post._id} />
       </div>
     </>
