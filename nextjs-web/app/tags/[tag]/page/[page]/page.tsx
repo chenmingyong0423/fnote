@@ -6,8 +6,9 @@ import { getWebsiteStats } from "@/src/api/stats";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-export async function generateMetadata({ params }: { params: { tag: string; page: string } }): Promise<Metadata> {
-  const tagName = await getTagNameByRoute(params.tag);
+export async function generateMetadata({ params }: { params: Promise<{ tag: string; page: string }> }): Promise<Metadata> {
+  const { tag, page } = await params;
+  const tagName = await getTagNameByRoute(tag);
   const config = await getCommonConfig();
   return {
     title: `${tagName} - 标签文章 - ${config.seo_meta.title || config.website_meta.website_name}`,
@@ -15,7 +16,7 @@ export async function generateMetadata({ params }: { params: { tag: string; page
     openGraph: {
       title: `${tagName} - 标签文章 - ${config.seo_meta.og_title || config.website_meta.website_name}`,
       description: `浏览${tagName}标签下的全部文章。`,
-      url: process.env.BASE_HOST + `/tags/${params.tag}/page/${params.page}`,
+      url: process.env.BASE_HOST + `/tags/${tag}/page/${page}`,
       images: config.seo_meta.og_image ? [{ url: process.env.SERVER_HOST + config.seo_meta.og_image }] : undefined,
       siteName: config.website_meta.website_name,
       type: "website",
@@ -23,12 +24,14 @@ export async function generateMetadata({ params }: { params: { tag: string; page
   };
 }
 
-export default async function TagPageWithPagination({ params, searchParams }: { params: { tag: string; page: string }, searchParams: { filter?: string, pageSize?: string } }) {
-  const field = (searchParams?.filter as "latest" | "oldest" | "likes") || "latest";
-  const pageNumber = Number(params.page || 1);
-  const pageSize = Number(searchParams?.pageSize || 10);
+export default async function TagPageWithPagination({ params, searchParams }: { params: Promise<{ tag: string; page: string }>; searchParams: Promise<{ filter?: string, pageSize?: string }> }) {
+  const { tag, page } = await params;
+  const resolvedSearchParams = await searchParams;
+  const field = (resolvedSearchParams?.filter as "latest" | "oldest" | "likes") || "latest";
+  const pageNumber = Number(page || 1);
+  const pageSize = Number(resolvedSearchParams?.pageSize || 10);
 
-  const tagName = await getTagNameByRoute(params.tag);
+  const tagName = await getTagNameByRoute(tag);
   if (!tagName) return notFound();
   const posts = await getPostList({
     pageNo: pageNumber,

@@ -1,6 +1,5 @@
 import { request } from "../utils/http";
 import type { Response } from "./types";
-import { unstable_cache } from 'next/cache';
 
 export interface SeoMetaConfigVO {
   title: string;
