@@ -22,29 +22,32 @@ export default async function Home() {
     const stats = await getWebsiteStats();
 
     return (
-        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8">
-            {/* 左侧主内容区 8/12 */}
-            <div className="md:col-span-8 flex flex-col gap-8 min-w-0">
-                {/* Banner 区 */}
-                <section>
-                    <FeaturedCarousel items={carouselItems}/>
-                </section>
-                {/* 内容卡片区 2列 */}
-                <section>
-                    <LatestPosts articles={latestArticles}/>
-                </section>
-            </div>
-            {/* 右侧信息区 4/12 */}
-            <div className="md:col-span-4 flex flex-col gap-8 min-w-0">
-                {/* 用户卡片 */}
-                <SiteOwnerCard
-                    name={config.website_owner}
-                    avatar={config.website_owner_avatar}
-                    bio={config.website_owner_profile}
-                    stats={stats}
-                />
-                {/* 最新评论卡片 */}
-                <LatestComments comments={latestComments}/>
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
+            {/* 移动端：纵向布局，桌面端：网格布局 */}
+            <div className="flex flex-col md:grid md:grid-cols-12 gap-6 md:gap-8">
+                {/* 左侧主内容区 - 移动端全宽，桌面端 8/12 */}
+                <div className="w-full md:col-span-8 flex flex-col gap-6 md:gap-8 min-w-0">
+                    {/* Banner 区 */}
+                    <section>
+                        <FeaturedCarousel items={carouselItems}/>
+                    </section>
+                    {/* 内容卡片区 */}
+                    <section>
+                        <LatestPosts articles={latestArticles}/>
+                    </section>
+                </div>
+                {/* 右侧信息区 - 移动端全宽，桌面端 4/12 */}
+                <div className="w-full md:col-span-4 flex flex-col gap-6 md:gap-8 min-w-0">
+                    {/* 用户卡片 */}
+                    <SiteOwnerCard
+                        name={config.website_owner}
+                        avatar={config.website_owner_avatar}
+                        bio={config.website_owner_profile}
+                        stats={stats}
+                    />
+                    {/* 最新评论卡片 */}
+                    <LatestComments comments={latestComments}/>
+                </div>
             </div>
         </div>
     );
