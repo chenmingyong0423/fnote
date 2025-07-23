@@ -25,6 +25,7 @@ function SearchPage({
 }) {
   const router = useRouter();
   const params = useSearchParams();
+  
   const handleSearch = (value: string) => {
     const newParams = new URLSearchParams(params?.toString());
     if (value) {
@@ -33,8 +34,23 @@ function SearchPage({
       newParams.delete("keyword");
     }
     newParams.delete("page"); // 搜索时重置分页
-    router.replace("?" + newParams.toString());
+    router.replace("/search?" + newParams.toString());
   };
+
+  // 搜索页面专用的分页处理函数
+  const handlePageChange = (targetPage: number, size: number, currentField: string) => {
+    const newParams = new URLSearchParams(params?.toString());
+    newParams.set("pageSize", String(size));
+    newParams.set("filter", currentField);
+    
+    // 搜索页面的分页跳转逻辑
+    if (targetPage === 1) {
+      router.push(`/search?${newParams.toString()}`);
+    } else {
+      router.push(`/search/page/${targetPage}?${newParams.toString()}`);
+    }
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto">
       <div className="mb-6 flex md:justify-start justify-center">
@@ -56,6 +72,7 @@ function SearchPage({
         field={field}
         currentPage={page}
         pageSize={pageSize}
+        onPageChange={handlePageChange}
       />
     </div>
   );
