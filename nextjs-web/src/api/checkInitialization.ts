@@ -1,3 +1,4 @@
+import "server-only";
 import { request } from "../utils/http";
 import type { Response } from "./types";
 
