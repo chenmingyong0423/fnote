@@ -9,6 +9,8 @@ import SeoHead from "../src/components/SeoHead";
 import { getCommonConfig } from "@/src/api/config";
 import { AntdThemeProvider } from "@/src/components/AntdThemeProvider";
 import LogVisitClient from "../src/components/LogVisitClient";
+import { checkInitialization } from "@/src/api/checkInitialization";
+import { redirect } from "next/navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,8 +22,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+let initPromise: Promise<void> | null = null;
+async function guardInitialization() {
+  const initRes = await checkInitialization();
+  if (initRes.code === 0 && initRes.data && !initRes.data.initStatus) {
+    const adminHost = process.env.NEXT_PUBLIC_ADMIN_HOST || process.env.ADMIN_HOST;
+    if (adminHost) {
+      redirect(adminHost);
+    }
+    throw new Error("Site not initialized and admin host is not configured");
+  }
+}
+
+function ensureInitialized() {
+  if (!initPromise) {
+    initPromise = guardInitialization();
+  }
+  return initPromise;
+}
+
 // 动态生成 metadata
 export async function generateMetadata(): Promise<Metadata> {
+  await ensureInitialized();
   const config = await getCommonConfig();
   return {
     title: config.seo_meta.title || config.website_meta.website_name,
@@ -56,7 +78,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
+  await ensureInitialized();
   const config = await getCommonConfig();
 
   return (
