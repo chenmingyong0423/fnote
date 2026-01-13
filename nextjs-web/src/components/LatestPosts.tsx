@@ -1,11 +1,24 @@
 "use client";
-import { Card, Tag } from "antd";
+import { Card, Empty, Tag } from "antd";
 import Image from "next/image";
 import React from "react";
 import type { LatestPostVO } from "../api/posts";
 import { EyeOutlined, LikeOutlined, MessageOutlined } from "@ant-design/icons";
 
 export default function LatestArticles({ articles }: { articles: LatestPostVO[] }) {
+  const hasArticles = Array.isArray(articles) && articles.length > 0;
+
+  if (!hasArticles) {
+    return (
+      <section>
+        <h2 className="text-xl font-bold mb-4">最新文章</h2>
+        <Card className="flex items-center justify-center py-10">
+          <Empty description="暂无文章" />
+        </Card>
+      </section>
+    );
+  }
+
   return (
     <section>
       <h2 className="text-xl font-bold mb-4">最新文章</h2>

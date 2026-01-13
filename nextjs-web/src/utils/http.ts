@@ -23,8 +23,7 @@ export async function request<T = never>(
   }
   const res = await fetch(url, init);
   if (!res.ok) {
-    // 可根据需要自定义错误处理
-    throw new Error(res.statusText);
+    return { code: res.status, message: res.statusText, data: null } as unknown as T;
   }
   return res.json();
 }
