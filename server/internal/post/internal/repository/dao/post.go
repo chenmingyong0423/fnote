@@ -19,15 +19,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox"
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"github.com/chenmingyong0423/go-mongox/builder/update"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type Post struct {
@@ -64,7 +63,7 @@ type Tag4Post struct {
 
 type IPostDao interface {
 	GetFrontPosts(ctx context.Context, count int64) ([]*Post, error)
-	QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error)
+	QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptionsBuilder) ([]*Post, int64, error)
 	GetPunishedPostById(ctx context.Context, sug string) (*Post, error)
 	FindByIdAndIp(ctx context.Context, sug string, ip string) (*Post, error)
 	AddLike(ctx context.Context, sug string, ip string) error
@@ -83,9 +82,9 @@ type IPostDao interface {
 
 var _ IPostDao = (*PostDao)(nil)
 
-func NewPostDao(db *mongo.Database) *PostDao {
+func NewPostDao(db *mongox.Database) *PostDao {
 	return &PostDao{
-		coll: mongox.NewCollection[Post](db.Collection("posts")),
+		coll: mongox.NewCollection[Post](db, "posts"),
 	}
 }
 
@@ -131,7 +130,7 @@ func (d *PostDao) UpdateIsDisplayedById(ctx context.Context, id string, isDispla
 }
 
 func (d *PostDao) SavePost(ctx context.Context, post *Post) error {
-	result, err := d.coll.Updater().Filter(query.Id(post.Id)).UpdatesWithOperator("$set", post).UpdateOne(ctx, options.Update().SetUpsert(true))
+	result, err := d.coll.Updater().Filter(query.Id(post.Id)).Updates(update.SetFields(post)).Upsert(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update a post, post=%v", post)
 	}
@@ -236,7 +235,7 @@ func (d *PostDao) GetPunishedPostById(ctx context.Context, id string) (*Post, er
 	return post, nil
 }
 
-func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error) {
+func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptionsBuilder) ([]*Post, int64, error) {
 	cnt, err := d.coll.Finder().Filter(con).Count(ctx)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "fails to find the count of documents from post, con=%v", con)

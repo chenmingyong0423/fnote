@@ -16,13 +16,15 @@ package dao
 
 import (
 	"context"
-	"github.com/chenmingyong0423/go-mongox"
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"github.com/chenmingyong0423/go-mongox/builder/update"
+
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+
 	"time"
 )
 
@@ -33,39 +35,39 @@ type AssetFolder struct {
 	// 文件夹归属的素材类型，image ···
 	AssetType string `bson:"asset_type"`
 	// 文件夹类型，post-editor ···
-	Type          string               `bson:"type"`
-	Assets        []primitive.ObjectID `bson:"assets,omitempty"`
-	ChildFolders  []AssetFolder        `bson:"child_folders,omitempty"`
-	SupportDelete bool                 `bson:"support_delete"`
-	SupportEdit   bool                 `bson:"support_edit"`
-	SupportAdd    bool                 `bson:"support_add"`
+	Type          string          `bson:"type"`
+	Assets        []bson.ObjectID `bson:"assets,omitempty"`
+	ChildFolders  []AssetFolder   `bson:"child_folders,omitempty"`
+	SupportDelete bool            `bson:"support_delete"`
+	SupportEdit   bool            `bson:"support_edit"`
+	SupportAdd    bool            `bson:"support_add"`
 }
 
 type IAssetFolderDao interface {
 	FindByAssetTypeAndType(ctx context.Context, assertType string, typ string) ([]*AssetFolder, error)
-	Add(ctx context.Context, assetFolder *AssetFolder) (primitive.ObjectID, error)
+	Add(ctx context.Context, assetFolder *AssetFolder) (bson.ObjectID, error)
 	ModifyById(ctx context.Context, assetFolder *AssetFolder) (int64, error)
-	FindById(ctx context.Context, objectID primitive.ObjectID) (*AssetFolder, error)
-	DeleteById(ctx context.Context, objectID primitive.ObjectID) (int64, error)
-	AddSubFolder(ctx context.Context, id primitive.ObjectID, assetFolder *AssetFolder) (int64, error)
-	ModifySubFolderById(ctx context.Context, objectID primitive.ObjectID, assetFolder *AssetFolder) (int64, error)
-	DeleteSubFolderById(ctx context.Context, objectID primitive.ObjectID, subObjID primitive.ObjectID) (int64, error)
-	ModifyNameById(ctx context.Context, objectID primitive.ObjectID, name string) (int64, error)
-	PutAssetId(ctx context.Context, folderObjID primitive.ObjectID, assetObjID primitive.ObjectID) (int64, error)
-	PullAssetId(ctx context.Context, folderObjID primitive.ObjectID, assetObjID primitive.ObjectID) (int64, error)
+	FindById(ctx context.Context, objectID bson.ObjectID) (*AssetFolder, error)
+	DeleteById(ctx context.Context, objectID bson.ObjectID) (int64, error)
+	AddSubFolder(ctx context.Context, id bson.ObjectID, assetFolder *AssetFolder) (int64, error)
+	ModifySubFolderById(ctx context.Context, objectID bson.ObjectID, assetFolder *AssetFolder) (int64, error)
+	DeleteSubFolderById(ctx context.Context, objectID bson.ObjectID, subObjID bson.ObjectID) (int64, error)
+	ModifyNameById(ctx context.Context, objectID bson.ObjectID, name string) (int64, error)
+	PutAssetId(ctx context.Context, folderObjID bson.ObjectID, assetObjID bson.ObjectID) (int64, error)
+	PullAssetId(ctx context.Context, folderObjID bson.ObjectID, assetObjID bson.ObjectID) (int64, error)
 }
 
 var _ IAssetFolderDao = (*AssetFolderDao)(nil)
 
-func NewAssetFolderDao(db *mongo.Database) *AssetFolderDao {
-	return &AssetFolderDao{coll: mongox.NewCollection[AssetFolder](db.Collection("asset_folders"))}
+func NewAssetFolderDao(db *mongox.Database) *AssetFolderDao {
+	return &AssetFolderDao{coll: mongox.NewCollection[AssetFolder](db, "asset_folders")}
 }
 
 type AssetFolderDao struct {
 	coll *mongox.Collection[AssetFolder]
 }
 
-func (d *AssetFolderDao) PullAssetId(ctx context.Context, folderObjID primitive.ObjectID, assetObjID primitive.ObjectID) (int64, error) {
+func (d *AssetFolderDao) PullAssetId(ctx context.Context, folderObjID bson.ObjectID, assetObjID bson.ObjectID) (int64, error) {
 	updateResult, err := d.coll.Updater().
 		Filter(query.Id(folderObjID)).
 		Updates(update.NewBuilder().Pull("assets", assetObjID).Set("updated_at", time.Now()).Build()).
@@ -76,7 +78,7 @@ func (d *AssetFolderDao) PullAssetId(ctx context.Context, folderObjID primitive.
 	return updateResult.ModifiedCount, nil
 }
 
-func (d *AssetFolderDao) PutAssetId(ctx context.Context, folderObjID primitive.ObjectID, assetObjID primitive.ObjectID) (int64, error) {
+func (d *AssetFolderDao) PutAssetId(ctx context.Context, folderObjID bson.ObjectID, assetObjID bson.ObjectID) (int64, error) {
 	updateResult, err := d.coll.Updater().
 		Filter(query.Id(folderObjID)).
 		Updates(update.NewBuilder().Push("assets", assetObjID).Set("updated_at", time.Now()).Build()).
@@ -87,7 +89,7 @@ func (d *AssetFolderDao) PutAssetId(ctx context.Context, folderObjID primitive.O
 	return updateResult.ModifiedCount, nil
 }
 
-func (d *AssetFolderDao) ModifyNameById(ctx context.Context, objectID primitive.ObjectID, name string) (int64, error) {
+func (d *AssetFolderDao) ModifyNameById(ctx context.Context, objectID bson.ObjectID, name string) (int64, error) {
 	updateResult, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.NewBuilder().Set("name", name).Set("updated_at", time.Now()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return 0, err
@@ -95,7 +97,7 @@ func (d *AssetFolderDao) ModifyNameById(ctx context.Context, objectID primitive.
 	return updateResult.ModifiedCount, nil
 }
 
-func (d *AssetFolderDao) DeleteSubFolderById(ctx context.Context, objectID primitive.ObjectID, subObjID primitive.ObjectID) (int64, error) {
+func (d *AssetFolderDao) DeleteSubFolderById(ctx context.Context, objectID bson.ObjectID, subObjID bson.ObjectID) (int64, error) {
 	updateResult, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.NewBuilder().Pull("child_folders", bsonx.Id(subObjID)).Set("updated_at", time.Now()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return 0, err
@@ -103,7 +105,7 @@ func (d *AssetFolderDao) DeleteSubFolderById(ctx context.Context, objectID primi
 	return updateResult.ModifiedCount, nil
 }
 
-func (d *AssetFolderDao) ModifySubFolderById(ctx context.Context, objectID primitive.ObjectID, assetFolder *AssetFolder) (int64, error) {
+func (d *AssetFolderDao) ModifySubFolderById(ctx context.Context, objectID bson.ObjectID, assetFolder *AssetFolder) (int64, error) {
 	updateResult, err := d.coll.Updater().Filter(query.NewBuilder().Id(objectID).Eq("child_folders._id", assetFolder.ID).Build()).Updates(update.NewBuilder().Set("child_folders.$", assetFolder).Set("updated_at", assetFolder.UpdatedAt).Build()).UpdateOne(ctx)
 	if err != nil {
 		return 0, err
@@ -111,7 +113,7 @@ func (d *AssetFolderDao) ModifySubFolderById(ctx context.Context, objectID primi
 	return updateResult.ModifiedCount, nil
 }
 
-func (d *AssetFolderDao) AddSubFolder(ctx context.Context, id primitive.ObjectID, assetFolder *AssetFolder) (int64, error) {
+func (d *AssetFolderDao) AddSubFolder(ctx context.Context, id bson.ObjectID, assetFolder *AssetFolder) (int64, error) {
 	updateResult, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.NewBuilder().Push("child_folders", assetFolder).Set("updated_at", assetFolder.CreatedAt).Build()).UpdateOne(ctx)
 	if err != nil {
 		return 0, err
@@ -119,7 +121,7 @@ func (d *AssetFolderDao) AddSubFolder(ctx context.Context, id primitive.ObjectID
 	return updateResult.ModifiedCount, nil
 }
 
-func (d *AssetFolderDao) DeleteById(ctx context.Context, objectID primitive.ObjectID) (int64, error) {
+func (d *AssetFolderDao) DeleteById(ctx context.Context, objectID bson.ObjectID) (int64, error) {
 	deleteResult, err := d.coll.Deleter().Filter(query.Id(objectID)).DeleteOne(ctx)
 	if err != nil {
 		return 0, err
@@ -127,7 +129,7 @@ func (d *AssetFolderDao) DeleteById(ctx context.Context, objectID primitive.Obje
 	return deleteResult.DeletedCount, nil
 }
 
-func (d *AssetFolderDao) FindById(ctx context.Context, objectID primitive.ObjectID) (*AssetFolder, error) {
+func (d *AssetFolderDao) FindById(ctx context.Context, objectID bson.ObjectID) (*AssetFolder, error) {
 	return d.coll.Finder().Filter(query.Id(objectID)).FindOne(ctx)
 }
 
@@ -139,13 +141,13 @@ func (d *AssetFolderDao) ModifyById(ctx context.Context, assetFolder *AssetFolde
 	return updateResult.ModifiedCount, nil
 }
 
-func (d *AssetFolderDao) Add(ctx context.Context, assetFolder *AssetFolder) (objID primitive.ObjectID, err error) {
+func (d *AssetFolderDao) Add(ctx context.Context, assetFolder *AssetFolder) (objID bson.ObjectID, err error) {
 	var insertOneResult *mongo.InsertOneResult
 	insertOneResult, err = d.coll.Creator().InsertOne(ctx, assetFolder)
 	if err != nil {
 		return
 	}
-	return insertOneResult.InsertedID.(primitive.ObjectID), nil
+	return insertOneResult.InsertedID.(bson.ObjectID), nil
 }
 
 func (d *AssetFolderDao) FindByAssetTypeAndType(ctx context.Context, assertType string, typ string) ([]*AssetFolder, error) {

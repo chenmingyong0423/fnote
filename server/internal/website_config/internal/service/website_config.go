@@ -18,7 +18,8 @@ import (
 	"context"
 	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/domain"
 
@@ -27,7 +28,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type IWebsiteConfigService interface {

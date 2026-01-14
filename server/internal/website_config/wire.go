@@ -21,8 +21,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/web"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var ConfigProviders = wire.NewSet(web.NewWebsiteConfigHandler, service.NewWebsiteConfigService, repository.NewWebsiteConfigRepository, dao.NewWebsiteConfigDao,
@@ -30,7 +30,7 @@ var ConfigProviders = wire.NewSet(web.NewWebsiteConfigHandler, service.NewWebsit
 	wire.Bind(new(repository.IWebsiteConfigRepository), new(*repository.WebsiteConfigRepository)),
 	wire.Bind(new(dao.IWebsiteConfigDao), new(*dao.WebsiteConfigDao)))
 
-func InitWebsiteConfigModule(mongoDB *mongo.Database) *Module {
+func InitWebsiteConfigModule(db *mongox.Database) *Module {
 	panic(wire.Build(
 		ConfigProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),

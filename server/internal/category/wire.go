@@ -22,8 +22,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/category/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/category/internal/web"
 	"github.com/chenmingyong0423/go-eventbus"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var CategoryProviders = wire.NewSet(web.NewCategoryHandler, service.NewCategoryService, repository.NewCategoryRepository, dao.NewCategoryDao,
@@ -31,7 +31,7 @@ var CategoryProviders = wire.NewSet(web.NewCategoryHandler, service.NewCategoryS
 	wire.Bind(new(repository.ICategoryRepository), new(*repository.CategoryRepository)),
 	wire.Bind(new(dao.ICategoryDao), new(*dao.CategoryDao)))
 
-func InitCategoryModule(mongoDB *mongo.Database, eventBus *eventbus.EventBus) *Module {
+func InitCategoryModule(db *mongox.Database, eventBus *eventbus.EventBus) *Module {
 	panic(wire.Build(
 		CategoryProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),

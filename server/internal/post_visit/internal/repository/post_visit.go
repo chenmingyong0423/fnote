@@ -18,10 +18,9 @@ import (
 	"context"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"github.com/chenmingyong0423/fnote/server/internal/post_visit/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/post_visit/internal/repository/dao"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type IPostVisitRepository interface {
@@ -40,7 +39,7 @@ type PostVisitRepository struct {
 
 func (r *PostVisitRepository) Insert(ctx context.Context, postVisit domain.PostVisit) error {
 	_, err := r.dao.Insert(ctx, &dao.PostVisit{
-		Id:        primitive.NewObjectID(),
+		Id:        bson.NewObjectID(),
 		PostId:    postVisit.PostId,
 		Ip:        postVisit.Ip,
 		UserAgent: postVisit.UserAgent,

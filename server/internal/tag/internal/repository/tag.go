@@ -22,11 +22,11 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/repository/dao"
 	"github.com/chenmingyong0423/gkit/slice"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type ITagRepository interface {
@@ -62,11 +62,11 @@ func (r *TagRepository) FindEnabledTags(ctx context.Context) ([]domain.Tag, erro
 }
 
 func (r *TagRepository) DecreasePostCountByIds(ctx context.Context, tagIds []string) (err error) {
-	tagObjectIds := slice.Map(tagIds, func(_ int, t string) (objId primitive.ObjectID) {
+	tagObjectIds := slice.Map(tagIds, func(_ int, t string) (objId bson.ObjectID) {
 		if err != nil {
 			return objId
 		}
-		objId, err = primitive.ObjectIDFromHex(t)
+		objId, err = bson.ObjectIDFromHex(t)
 		return objId
 	})
 	if err != nil {
@@ -76,11 +76,11 @@ func (r *TagRepository) DecreasePostCountByIds(ctx context.Context, tagIds []str
 }
 
 func (r *TagRepository) IncreasePostCountByIds(ctx context.Context, tagIds []string) (err error) {
-	tagObjectIds := slice.Map(tagIds, func(_ int, t string) (objId primitive.ObjectID) {
+	tagObjectIds := slice.Map(tagIds, func(_ int, t string) (objId bson.ObjectID) {
 		if err != nil {
 			return objId
 		}
-		objId, err = primitive.ObjectIDFromHex(t)
+		objId, err = bson.ObjectIDFromHex(t)
 		return objId
 	})
 	if err != nil {
@@ -98,7 +98,7 @@ func (r *TagRepository) GetSelectTags(ctx context.Context) ([]domain.Tag, error)
 }
 
 func (r *TagRepository) DeleteTagById(ctx context.Context, id string) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (r *TagRepository) DeleteTagById(ctx context.Context, id string) error {
 }
 
 func (r *TagRepository) GetTagById(ctx context.Context, id string) (t domain.Tag, err error) {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return
 	}
@@ -118,7 +118,7 @@ func (r *TagRepository) GetTagById(ctx context.Context, id string) (t domain.Tag
 }
 
 func (r *TagRepository) ModifyTagEnabled(ctx context.Context, id string, enabled bool) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}

@@ -19,21 +19,20 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"github.com/chenmingyong0423/go-mongox"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/chenmingyong0423/go-mongox/v2"
 )
 
 type PostVisit struct {
-	Id        primitive.ObjectID `bson:"_id"`
-	PostId    string             `bson:"post_id"`
-	Ip        string             `bson:"ip"`
-	UserAgent string             `bson:"user_agent"`
-	Origin    string             `bson:"origin"`
-	Referer   string             `bson:"referer"`
-	StayTime  int64              `bson:"stay_time"`
-	VisitAt   time.Time          `bson:"visit_at"`
+	Id        bson.ObjectID `bson:"_id"`
+	PostId    string        `bson:"post_id"`
+	Ip        string        `bson:"ip"`
+	UserAgent string        `bson:"user_agent"`
+	Origin    string        `bson:"origin"`
+	Referer   string        `bson:"referer"`
+	StayTime  int64         `bson:"stay_time"`
+	VisitAt   time.Time     `bson:"visit_at"`
 }
 
 type IPostVisitDao interface {
@@ -42,8 +41,8 @@ type IPostVisitDao interface {
 
 var _ IPostVisitDao = (*PostVisitDao)(nil)
 
-func NewPostVisitDao(db *mongo.Database) *PostVisitDao {
-	return &PostVisitDao{coll: mongox.NewCollection[PostVisit](db.Collection("post_visits"))}
+func NewPostVisitDao(db *mongox.Database) *PostVisitDao {
+	return &PostVisitDao{coll: mongox.NewCollection[PostVisit](db, "post_visits")}
 }
 
 type PostVisitDao struct {
@@ -55,5 +54,5 @@ func (d *PostVisitDao) Insert(ctx context.Context, postVisit *PostVisit) (string
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to insert post visit, postVisit: %+v", postVisit)
 	}
-	return insertOneResult.InsertedID.(primitive.ObjectID).Hex(), nil
+	return insertOneResult.InsertedID.(bson.ObjectID).Hex(), nil
 }

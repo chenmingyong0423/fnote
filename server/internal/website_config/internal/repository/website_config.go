@@ -28,10 +28,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"github.com/chenmingyong0423/go-mongox/builder/update"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
 
 	"github.com/pkg/errors"
 )

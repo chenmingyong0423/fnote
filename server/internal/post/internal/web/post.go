@@ -35,7 +35,7 @@ import (
 	"github.com/chenmingyong0423/gkit/slice"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"github.com/gin-gonic/gin"
 )

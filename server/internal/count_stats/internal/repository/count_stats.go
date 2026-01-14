@@ -20,8 +20,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/repository/dao"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 )
 
 type ICountStatsRepository interface {

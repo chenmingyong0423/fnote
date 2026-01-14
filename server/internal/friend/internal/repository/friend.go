@@ -21,12 +21,11 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/repository/dao"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
 	"github.com/pkg/errors"
 )
@@ -56,7 +55,7 @@ type FriendRepository struct {
 }
 
 func (r *FriendRepository) UpdateFriendRejected(ctx context.Context, id string) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
@@ -64,7 +63,7 @@ func (r *FriendRepository) UpdateFriendRejected(ctx context.Context, id string) 
 }
 
 func (r *FriendRepository) UpdateFriendApproved(ctx context.Context, id string) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
@@ -72,7 +71,7 @@ func (r *FriendRepository) UpdateFriendApproved(ctx context.Context, id string) 
 }
 
 func (r *FriendRepository) FindById(ctx context.Context, id string) (domain.Friend, error) {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return domain.Friend{}, err
 	}
@@ -84,7 +83,7 @@ func (r *FriendRepository) FindById(ctx context.Context, id string) (domain.Frie
 }
 
 func (r *FriendRepository) DeleteById(ctx context.Context, id string) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
@@ -92,7 +91,7 @@ func (r *FriendRepository) DeleteById(ctx context.Context, id string) error {
 }
 
 func (r *FriendRepository) UpdateById(ctx context.Context, friend domain.Friend) error {
-	id, err := primitive.ObjectIDFromHex(friend.Id)
+	id, err := bson.ObjectIDFromHex(friend.Id)
 	if err != nil {
 		return err
 	}

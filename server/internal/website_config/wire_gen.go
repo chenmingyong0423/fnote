@@ -11,14 +11,14 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/web"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Injectors from wire.go:
 
-func InitWebsiteConfigModule(mongoDB *mongo.Database) *Module {
-	websiteConfigDao := dao.NewWebsiteConfigDao(mongoDB)
+func InitWebsiteConfigModule(db *mongox.Database) *Module {
+	websiteConfigDao := dao.NewWebsiteConfigDao(db)
 	websiteConfigRepository := repository.NewWebsiteConfigRepository(websiteConfigDao)
 	websiteConfigService := service.NewWebsiteConfigService(websiteConfigRepository)
 	websiteConfigHandler := web.NewWebsiteConfigHandler(websiteConfigService)

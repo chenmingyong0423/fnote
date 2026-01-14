@@ -45,7 +45,7 @@ import (
 	"github.com/chenmingyong0423/gkit/uuidx"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"github.com/spf13/viper"
 )

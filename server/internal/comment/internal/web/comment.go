@@ -38,7 +38,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 func NewCommentHandler(serv service.ICommentService, cfgService website_config.Service, postServ post.Service, msgServ message.Service) *CommentHandler {

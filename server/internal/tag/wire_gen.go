@@ -12,14 +12,14 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/web"
 	"github.com/chenmingyong0423/go-eventbus"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Injectors from wire.go:
 
-func InitTagModule(mongoDB *mongo.Database, eventBus *eventbus.EventBus) *Module {
-	tagDao := dao.NewTagDao(mongoDB)
+func InitTagModule(db *mongox.Database, eventBus *eventbus.EventBus) *Module {
+	tagDao := dao.NewTagDao(db)
 	tagRepository := repository.NewTagRepository(tagDao)
 	tagService := service.NewTagService(tagRepository, eventBus)
 	tagHandler := web.NewTagHandler(tagService)

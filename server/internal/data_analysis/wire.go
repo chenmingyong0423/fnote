@@ -23,14 +23,14 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/data_analysis/internal/web"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var DataAnalysisProviders = wire.NewSet(web.NewDataAnalysisHandler, service2.NewIpApiService,
 	wire.Bind(new(service2.IIpApiService), new(*service2.IpApiService)))
 
-func InitDataAnalysisModule(mongoDB *mongo.Database, countStatsModule *count_stats.Module, posLikeModule *post_like.Module, commentModule *comment.Module, visitLogModule *visit_log.Module) *Module {
+func InitDataAnalysisModule(db *mongox.Database, countStatsModule *count_stats.Module, posLikeModule *post_like.Module, commentModule *comment.Module, visitLogModule *visit_log.Module) *Module {
 	panic(wire.Build(
 		DataAnalysisProviders,
 		wire.FieldsOf(new(*post_like.Module), "Svc"),

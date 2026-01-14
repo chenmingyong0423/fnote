@@ -23,8 +23,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/web"
 	"github.com/chenmingyong0423/fnote/server/internal/message"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var FriendProviders = wire.NewSet(web.NewFriendHandler, service.NewFriendService, repository.NewFriendRepository, dao.NewFriendDao,
@@ -32,7 +32,7 @@ var FriendProviders = wire.NewSet(web.NewFriendHandler, service.NewFriendService
 	wire.Bind(new(repository.IFriendRepository), new(*repository.FriendRepository)),
 	wire.Bind(new(dao.IFriendDao), new(*dao.FriendDao)))
 
-func InitFriendModule(mongoDB *mongo.Database, messageModule *message.Module, cfgModule *website_config.Module) *Module {
+func InitFriendModule(db *mongox.Database, messageModule *message.Module, cfgModule *website_config.Module) *Module {
 	panic(wire.Build(
 		FriendProviders,
 		wire.FieldsOf(new(*website_config.Module), "Svc"),

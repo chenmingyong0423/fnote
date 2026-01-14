@@ -18,13 +18,13 @@ package email
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/email/internal/service"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var EmailProviders = wire.NewSet(service.NewEmailService, wire.Bind(new(service.IEmailService), new(*service.EmailService)))
 
-func InitEmailModule(mongoDB *mongo.Database) *Module {
+func InitEmailModule(db *mongox.Database) *Module {
 	panic(wire.Build(
 		EmailProviders,
 		wire.Struct(new(Module), "Svc"),

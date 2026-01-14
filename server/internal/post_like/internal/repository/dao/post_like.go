@@ -19,11 +19,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type PostLike struct {
@@ -35,15 +34,15 @@ type PostLike struct {
 
 type IPostLikeDao interface {
 	Add(ctx context.Context, postLike *PostLike) (string, error)
-	DeleteById(ctx context.Context, objectID primitive.ObjectID) error
+	DeleteById(ctx context.Context, objectID bson.ObjectID) error
 	FindByPostIdAndIp(ctx context.Context, postId string, ip string) (*PostLike, error)
 	CountOfToday(ctx context.Context) (int64, error)
 }
 
 var _ IPostLikeDao = (*PostLikeDao)(nil)
 
-func NewPostLikeDao(db *mongo.Database) *PostLikeDao {
-	return &PostLikeDao{coll: mongox.NewCollection[PostLike](db.Collection("post_likes"))}
+func NewPostLikeDao(db *mongox.Database) *PostLikeDao {
+	return &PostLikeDao{coll: mongox.NewCollection[PostLike](db, "post_likes")}
 }
 
 type PostLikeDao struct {
@@ -63,7 +62,7 @@ func (d *PostLikeDao) FindByPostIdAndIp(ctx context.Context, postId string, ip s
 	return postLike, nil
 }
 
-func (d *PostLikeDao) DeleteById(ctx context.Context, objectID primitive.ObjectID) error {
+func (d *PostLikeDao) DeleteById(ctx context.Context, objectID bson.ObjectID) error {
 	deleteResult, err := d.coll.Deleter().Filter(query.Id(objectID)).DeleteOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to delete post_likes by id: %s", objectID.Hex())
@@ -79,7 +78,7 @@ func (d *PostLikeDao) Add(ctx context.Context, postLike *PostLike) (string, erro
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to insert one into post_likes: %v", postLike)
 	}
-	return insertOneResult.InsertedID.(primitive.ObjectID).Hex(), nil
+	return insertOneResult.InsertedID.(bson.ObjectID).Hex(), nil
 }
 
 func (d *PostLikeDao) getBeginAndEndTime() (time.Time, time.Time) {

@@ -19,17 +19,15 @@ import (
 	"sort"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-
-	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/aggregation"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/domain"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/repository/dao"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
 	"github.com/google/uuid"
 )
@@ -49,12 +47,12 @@ type ICommentRepository interface {
 	DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error
 	CountOfToday(ctx context.Context) (int64, error)
 	AdminFindCommentsWithPagination(ctx context.Context, page domain.Page) ([]domain.AdminComment, int64, error)
-	UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) error
-	FindCommentByObjectIDs(ctx context.Context, ids []primitive.ObjectID) ([]domain.AdminComment, error)
+	UpdateCommentStatus2TrueByIds(ctx context.Context, ids []bson.ObjectID) error
+	FindCommentByObjectIDs(ctx context.Context, ids []bson.ObjectID) ([]domain.AdminComment, error)
 	UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentId string, replyIds []string) error
 	FindCommentWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentId string, replyIds []string) (*domain.AdminComment, error)
-	FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]domain.AdminComment, error)
-	DeleteCommentByIds(ctx context.Context, ids []primitive.ObjectID) error
+	FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []bson.ObjectID) ([]domain.AdminComment, error)
+	DeleteCommentByIds(ctx context.Context, ids []bson.ObjectID) error
 	PullReplyByCIdAndRIds(ctx context.Context, commentId string, replyIds []string) error
 	DeleteManyByPostId(ctx context.Context, postId string) error
 	FindCommentsByPostId(ctx context.Context, postId string) ([]domain.AdminComment, error)
@@ -85,18 +83,18 @@ func (r *CommentRepository) DeleteManyByPostId(ctx context.Context, postId strin
 }
 
 func (r *CommentRepository) PullReplyByCIdAndRIds(ctx context.Context, commentId string, replyIds []string) error {
-	objectID, err := primitive.ObjectIDFromHex(commentId)
+	objectID, err := bson.ObjectIDFromHex(commentId)
 	if err != nil {
 		return err
 	}
 	return r.dao.PullReplyByCIdAndRIds(ctx, objectID, replyIds)
 }
 
-func (r *CommentRepository) DeleteCommentByIds(ctx context.Context, ids []primitive.ObjectID) error {
+func (r *CommentRepository) DeleteCommentByIds(ctx context.Context, ids []bson.ObjectID) error {
 	return r.dao.DeleteByIds(ctx, ids)
 }
 
-func (r *CommentRepository) FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]domain.AdminComment, error) {
+func (r *CommentRepository) FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []bson.ObjectID) ([]domain.AdminComment, error) {
 	comments, err := r.dao.FindDisapprovedCommentByObjectIDs(ctx, commentObjectIDs)
 	if err != nil {
 		return nil, err
@@ -105,7 +103,7 @@ func (r *CommentRepository) FindDisapprovedCommentByObjectIDs(ctx context.Contex
 }
 
 func (r *CommentRepository) FindCommentWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentId string, replyIds []string) (*domain.AdminComment, error) {
-	commentObjID, err := primitive.ObjectIDFromHex(commentId)
+	commentObjID, err := bson.ObjectIDFromHex(commentId)
 	if err != nil {
 		return nil, err
 	}
@@ -118,14 +116,14 @@ func (r *CommentRepository) FindCommentWithDisapprovedReplyByCidAndRIds(ctx cont
 }
 
 func (r *CommentRepository) UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentId string, replyIds []string) error {
-	objectID, err := primitive.ObjectIDFromHex(commentId)
+	objectID, err := bson.ObjectIDFromHex(commentId)
 	if err != nil {
 		return err
 	}
 	return r.dao.UpdateCReplyStatus2TrueByCidAndRIds(ctx, objectID, replyIds)
 }
 
-func (r *CommentRepository) FindCommentByObjectIDs(ctx context.Context, ids []primitive.ObjectID) ([]domain.AdminComment, error) {
+func (r *CommentRepository) FindCommentByObjectIDs(ctx context.Context, ids []bson.ObjectID) ([]domain.AdminComment, error) {
 	comments, err := r.dao.FindByObjectIDs(ctx, ids)
 	if err != nil {
 		return nil, err
@@ -133,7 +131,7 @@ func (r *CommentRepository) FindCommentByObjectIDs(ctx context.Context, ids []pr
 	return r.toDomainAdminComments(comments), nil
 }
 
-func (r *CommentRepository) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) error {
+func (r *CommentRepository) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []bson.ObjectID) error {
 	return r.dao.UpdateCommentStatus2TrueByIds(ctx, ids)
 }
 
@@ -227,7 +225,7 @@ func (r *CommentRepository) CountOfToday(ctx context.Context) (int64, error) {
 }
 
 func (r *CommentRepository) DeleteReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) error {
-	objectID, err := primitive.ObjectIDFromHex(commentId)
+	objectID, err := bson.ObjectIDFromHex(commentId)
 	if err != nil {
 		return err
 	}
@@ -235,7 +233,7 @@ func (r *CommentRepository) DeleteReplyByCIdAndRId(ctx context.Context, commentI
 }
 
 func (r *CommentRepository) DeleteCommentById(ctx context.Context, id string) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
@@ -243,7 +241,7 @@ func (r *CommentRepository) DeleteCommentById(ctx context.Context, id string) er
 }
 
 func (r *CommentRepository) FindCommentWithRepliesById(ctx context.Context, id string) (*domain.CommentWithReplies, error) {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
@@ -255,7 +253,7 @@ func (r *CommentRepository) FindCommentWithRepliesById(ctx context.Context, id s
 }
 
 func (r *CommentRepository) UpdateCommentReplyStatus(ctx context.Context, commentId string, replyId string, approvalStatus bool) error {
-	objectID, err := primitive.ObjectIDFromHex(commentId)
+	objectID, err := bson.ObjectIDFromHex(commentId)
 	if err != nil {
 		return err
 	}
@@ -263,7 +261,7 @@ func (r *CommentRepository) UpdateCommentReplyStatus(ctx context.Context, commen
 }
 
 func (r *CommentRepository) FindReplyByCIdAndRId(ctx context.Context, commentId string, replyId string) (*domain.CommentReplyWithPostInfo, error) {
-	objectCommentID, err := primitive.ObjectIDFromHex(commentId)
+	objectCommentID, err := bson.ObjectIDFromHex(commentId)
 	if err != nil {
 		return nil, err
 	}
@@ -286,7 +284,7 @@ func (r *CommentRepository) FindReplyByCIdAndRId(ctx context.Context, commentId 
 }
 
 func (r *CommentRepository) UpdateCommentStatus2True(ctx context.Context, id string) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
@@ -294,7 +292,7 @@ func (r *CommentRepository) UpdateCommentStatus2True(ctx context.Context, id str
 }
 
 func (r *CommentRepository) FindCommentById(ctx context.Context, id string) (*domain.Comment, error) {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
@@ -334,7 +332,7 @@ func (r *CommentRepository) FineLatestCommentAndReply(ctx context.Context, cnt i
 func (r *CommentRepository) AddReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) (string, error) {
 	now := time.Now().Local()
 	id := uuid.NewString()
-	objectID, err := primitive.ObjectIDFromHex(cmtId)
+	objectID, err := bson.ObjectIDFromHex(cmtId)
 	if err != nil {
 		return "", err
 	}
@@ -351,7 +349,7 @@ func (r *CommentRepository) AddReply(ctx context.Context, cmtId string, commentR
 }
 
 func (r *CommentRepository) FindApprovedCommentById(ctx context.Context, cmtId string) (*domain.CommentWithReplies, error) {
-	objectID, err := primitive.ObjectIDFromHex(cmtId)
+	objectID, err := bson.ObjectIDFromHex(cmtId)
 	if err != nil {
 		return nil, err
 	}

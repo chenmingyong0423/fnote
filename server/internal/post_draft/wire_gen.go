@@ -11,14 +11,14 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/web"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Injectors from wire.go:
 
-func InitPostDraftModule(mongoDB *mongo.Database) *Module {
-	postDraftDao := dao.NewPostDraftDao(mongoDB)
+func InitPostDraftModule(db *mongox.Database) *Module {
+	postDraftDao := dao.NewPostDraftDao(db)
 	postDraftRepository := repository.NewPostDraftRepository(postDraftDao)
 	postDraftService := service.NewPostDraftService(postDraftRepository)
 	postDraftHandler := web.NewPostDraftHandler(postDraftService)

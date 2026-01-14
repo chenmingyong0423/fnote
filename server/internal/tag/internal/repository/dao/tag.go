@@ -19,17 +19,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"github.com/chenmingyong0423/go-mongox/builder/update"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
-	"github.com/chenmingyong0423/go-mongox"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 )
 
 type Tags struct {
@@ -43,22 +41,22 @@ type Tags struct {
 type ITagDao interface {
 	GetTags(ctx context.Context) ([]*Tags, error)
 	GetByRoute(ctx context.Context, route string) (*Tags, error)
-	QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Tags, int64, error)
+	QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptionsBuilder) ([]*Tags, int64, error)
 	Create(ctx context.Context, tag *Tags) (string, error)
-	ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error
-	GetById(ctx context.Context, id primitive.ObjectID) (*Tags, error)
-	DeleteById(ctx context.Context, id primitive.ObjectID) error
+	ModifyEnabled(ctx context.Context, id bson.ObjectID, enabled bool) error
+	GetById(ctx context.Context, id bson.ObjectID) (*Tags, error)
+	DeleteById(ctx context.Context, id bson.ObjectID) error
 	RecoverTag(ctx context.Context, tag *Tags) error
 	GetEnabled(ctx context.Context) ([]*Tags, error)
-	IncreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error
-	DecreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error
+	IncreasePostCountByIds(ctx context.Context, tagObjectIds []bson.ObjectID) error
+	DecreasePostCountByIds(ctx context.Context, tagObjectIds []bson.ObjectID) error
 	FindEnabledTags(ctx context.Context) ([]*Tags, error)
 }
 
 var _ ITagDao = (*TagDao)(nil)
 
-func NewTagDao(db *mongo.Database) *TagDao {
-	return &TagDao{coll: mongox.NewCollection[Tags](db.Collection("tags"))}
+func NewTagDao(db *mongox.Database) *TagDao {
+	return &TagDao{coll: mongox.NewCollection[Tags](db, "tags")}
 }
 
 type TagDao struct {
@@ -69,7 +67,7 @@ func (d *TagDao) FindEnabledTags(ctx context.Context) ([]*Tags, error) {
 	return d.coll.Finder().Filter(query.Eq("enabled", true)).Find(ctx)
 }
 
-func (d *TagDao) DecreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error {
+func (d *TagDao) DecreasePostCountByIds(ctx context.Context, tagObjectIds []bson.ObjectID) error {
 	updateResult, err := d.coll.Updater().
 		Filter(query.In("_id", tagObjectIds...)).
 		Updates(update.NewBuilder().Inc("post_count", -1).Set("updated_at", time.Now().Local()).Build()).
@@ -83,7 +81,7 @@ func (d *TagDao) DecreasePostCountByIds(ctx context.Context, tagObjectIds []prim
 	return nil
 }
 
-func (d *TagDao) IncreasePostCountByIds(ctx context.Context, tagObjectIds []primitive.ObjectID) error {
+func (d *TagDao) IncreasePostCountByIds(ctx context.Context, tagObjectIds []bson.ObjectID) error {
 	updateResult, err := d.coll.Updater().
 		Filter(query.In("_id", tagObjectIds...)).
 		Updates(update.NewBuilder().Inc("post_count", 1).Set("updated_at", time.Now().Local()).Build()).
@@ -113,7 +111,7 @@ func (d *TagDao) RecoverTag(ctx context.Context, tag *Tags) error {
 	return err
 }
 
-func (d *TagDao) DeleteById(ctx context.Context, id primitive.ObjectID) error {
+func (d *TagDao) DeleteById(ctx context.Context, id bson.ObjectID) error {
 	deleteOne, err := d.coll.Deleter().Filter(query.Id(id)).DeleteOne(ctx)
 	if err != nil {
 		return err
@@ -124,7 +122,7 @@ func (d *TagDao) DeleteById(ctx context.Context, id primitive.ObjectID) error {
 	return nil
 }
 
-func (d *TagDao) GetById(ctx context.Context, id primitive.ObjectID) (*Tags, error) {
+func (d *TagDao) GetById(ctx context.Context, id bson.ObjectID) (*Tags, error) {
 	tag, err := d.coll.Finder().Filter(query.Id(id)).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Get tag by id failed, id: %s", id.Hex())
@@ -132,7 +130,7 @@ func (d *TagDao) GetById(ctx context.Context, id primitive.ObjectID) (*Tags, err
 	return tag, nil
 }
 
-func (d *TagDao) ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error {
+func (d *TagDao) ModifyEnabled(ctx context.Context, id bson.ObjectID, enabled bool) error {
 	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.NewBuilder().Set("enabled", enabled).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
@@ -148,10 +146,10 @@ func (d *TagDao) Create(ctx context.Context, tag *Tags) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return oneResult.InsertedID.(primitive.ObjectID).Hex(), nil
+	return oneResult.InsertedID.(bson.ObjectID).Hex(), nil
 }
 
-func (d *TagDao) QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Tags, int64, error) {
+func (d *TagDao) QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptionsBuilder) ([]*Tags, int64, error) {
 	finder := d.coll.Finder()
 	count, err := finder.Filter(cond).Count(ctx)
 	if err != nil {

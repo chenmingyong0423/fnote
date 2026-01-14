@@ -17,7 +17,6 @@ package main
 import (
 	"bytes"
 	"flag"
-	"github.com/chenmingyong0423/go-mongox"
 	"os"
 	"time"
 
@@ -51,13 +50,7 @@ func main() {
 			panic(err)
 		}
 	}
-	mongox.InitPlugin(&mongox.PluginConfig{
-		EnableDefaultFieldHook: true,
-		EnableModelHook:        false,
-		EnableValidationHook:   false,
-		// 覆盖默认的校验器，当 EnableValidationHook 为 true 时生效
-		Validate: nil,
-	})
+
 	app, err := initializeApp()
 	if err != nil {
 		panic(err)

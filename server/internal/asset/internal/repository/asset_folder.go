@@ -16,10 +16,12 @@ package repository
 
 import (
 	"context"
+
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/repository/dao"
-	"github.com/chenmingyong0423/go-mongox"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"go.mongodb.org/mongo-driver/v2/bson"
+
 	"time"
 )
 
@@ -48,11 +50,11 @@ type AssetFolderRepository struct {
 }
 
 func (r *AssetFolderRepository) PullAssetId(ctx context.Context, folderId string, assetId string) (int64, error) {
-	objID, err := primitive.ObjectIDFromHex(folderId)
+	objID, err := bson.ObjectIDFromHex(folderId)
 	if err != nil {
 		return 0, err
 	}
-	assetObjID, err := primitive.ObjectIDFromHex(assetId)
+	assetObjID, err := bson.ObjectIDFromHex(assetId)
 	if err != nil {
 		return 0, err
 	}
@@ -60,11 +62,11 @@ func (r *AssetFolderRepository) PullAssetId(ctx context.Context, folderId string
 }
 
 func (r *AssetFolderRepository) PutAssetId(ctx context.Context, folderId string, assetId string) (int64, error) {
-	objID, err := primitive.ObjectIDFromHex(folderId)
+	objID, err := bson.ObjectIDFromHex(folderId)
 	if err != nil {
 		return 0, err
 	}
-	assetObjID, err := primitive.ObjectIDFromHex(assetId)
+	assetObjID, err := bson.ObjectIDFromHex(assetId)
 	if err != nil {
 		return 0, err
 	}
@@ -72,7 +74,7 @@ func (r *AssetFolderRepository) PutAssetId(ctx context.Context, folderId string,
 }
 
 func (r *AssetFolderRepository) ModifyFolderNameById(ctx context.Context, id string, name string) (int64, error) {
-	objID, err := primitive.ObjectIDFromHex(id)
+	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return 0, err
 	}
@@ -80,11 +82,11 @@ func (r *AssetFolderRepository) ModifyFolderNameById(ctx context.Context, id str
 }
 
 func (r *AssetFolderRepository) DeleteSubFolderById(ctx context.Context, id string, subId string) (int64, error) {
-	objID, err := primitive.ObjectIDFromHex(id)
+	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return 0, err
 	}
-	subObjID, err := primitive.ObjectIDFromHex(subId)
+	subObjID, err := bson.ObjectIDFromHex(subId)
 	if err != nil {
 		return 0, err
 	}
@@ -92,11 +94,11 @@ func (r *AssetFolderRepository) DeleteSubFolderById(ctx context.Context, id stri
 }
 
 func (r *AssetFolderRepository) ModifySubFolderById(ctx context.Context, id string, assetFolder *domain.AssetFolder) (int64, error) {
-	objID, err := primitive.ObjectIDFromHex(id)
+	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return 0, err
 	}
-	subObjID, err := primitive.ObjectIDFromHex(assetFolder.Id)
+	subObjID, err := bson.ObjectIDFromHex(assetFolder.Id)
 	if err != nil {
 		return 0, err
 	}
@@ -115,13 +117,13 @@ func (r *AssetFolderRepository) ModifySubFolderById(ctx context.Context, id stri
 }
 
 func (r *AssetFolderRepository) AddSubFolder(ctx context.Context, id string, assetFolder *domain.AssetFolder) (int64, string, error) {
-	objID, err := primitive.ObjectIDFromHex(id)
+	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return 0, "", err
 	}
 	modifyCnt, err := r.dao.AddSubFolder(ctx, objID, &dao.AssetFolder{
 		Model: mongox.Model{
-			ID:        primitive.NewObjectID(),
+			ID:        bson.NewObjectID(),
 			CreatedAt: time.Now(),
 		},
 		Name:          assetFolder.Name,
@@ -138,7 +140,7 @@ func (r *AssetFolderRepository) AddSubFolder(ctx context.Context, id string, ass
 }
 
 func (r *AssetFolderRepository) DeleteById(ctx context.Context, id string) (int64, error) {
-	objID, err := primitive.ObjectIDFromHex(id)
+	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return 0, err
 	}
@@ -146,7 +148,7 @@ func (r *AssetFolderRepository) DeleteById(ctx context.Context, id string) (int6
 }
 
 func (r *AssetFolderRepository) FindById(ctx context.Context, id string) (*domain.AssetFolder, error) {
-	objID, err := primitive.ObjectIDFromHex(id)
+	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +160,7 @@ func (r *AssetFolderRepository) FindById(ctx context.Context, id string) (*domai
 }
 
 func (r *AssetFolderRepository) ModifyById(ctx context.Context, assetFolder *domain.AssetFolder) (int64, error) {
-	objID, err := primitive.ObjectIDFromHex(assetFolder.Id)
+	objID, err := bson.ObjectIDFromHex(assetFolder.Id)
 	if err != nil {
 		return 0, err
 	}
