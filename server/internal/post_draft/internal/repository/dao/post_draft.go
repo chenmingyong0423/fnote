@@ -19,14 +19,13 @@ import (
 	"fmt"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
 	"github.com/chenmingyong0423/gkit/uuidx"
-	"github.com/chenmingyong0423/go-mongox"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type PostDraft struct {
@@ -78,20 +77,20 @@ type IPostDraftDao interface {
 	Save(ctx context.Context, postDraft *PostDraft) (string, error)
 	GetById(ctx context.Context, id string) (*PostDraft, error)
 	DeleteById(ctx context.Context, id string) (int64, error)
-	QueryPage(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*PostDraft, int64, error)
+	QueryPage(ctx context.Context, cond bson.D, findOptions *options.FindOptionsBuilder) ([]*PostDraft, int64, error)
 }
 
 var _ IPostDraftDao = (*PostDraftDao)(nil)
 
-func NewPostDraftDao(db *mongo.Database) *PostDraftDao {
-	return &PostDraftDao{coll: mongox.NewCollection[PostDraft](db.Collection("post_draft"))}
+func NewPostDraftDao(db *mongox.Database) *PostDraftDao {
+	return &PostDraftDao{coll: mongox.NewCollection[PostDraft](db, "post_draft")}
 }
 
 type PostDraftDao struct {
 	coll *mongox.Collection[PostDraft]
 }
 
-func (d *PostDraftDao) QueryPage(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*PostDraft, int64, error) {
+func (d *PostDraftDao) QueryPage(ctx context.Context, cond bson.D, findOptions *options.FindOptionsBuilder) ([]*PostDraft, int64, error) {
 	count, err := d.coll.Finder().Filter(cond).Count(ctx)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "failed to query the count of post draft: %v", cond)

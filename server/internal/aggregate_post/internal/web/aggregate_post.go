@@ -24,7 +24,7 @@ import (
 	"github.com/chenmingyong0423/gkit/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 func NewAggregatePostHandler(postServ postPkg.Service, postDraftServ post_draft.Service) *AggregatePostHandler {

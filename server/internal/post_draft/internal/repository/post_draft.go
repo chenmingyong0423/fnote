@@ -20,9 +20,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
 	"github.com/chenmingyong0423/gkit/uuidx"
 

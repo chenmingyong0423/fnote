@@ -20,17 +20,15 @@ import (
 	"time"
 
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/domain"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-
-	"github.com/chenmingyong0423/go-mongox"
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/update"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // WebsiteConfig defines for the MongoDB Collection "website_config"
@@ -56,9 +54,9 @@ type IWebsiteConfigDao interface {
 
 var _ IWebsiteConfigDao = (*WebsiteConfigDao)(nil)
 
-func NewWebsiteConfigDao(db *mongo.Database) *WebsiteConfigDao {
+func NewWebsiteConfigDao(db *mongox.Database) *WebsiteConfigDao {
 	return &WebsiteConfigDao{
-		coll: mongox.NewCollection[WebsiteConfig](db.Collection("configs")),
+		coll: mongox.NewCollection[WebsiteConfig](db, "configs"),
 	}
 }
 

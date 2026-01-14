@@ -19,7 +19,7 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/repository/dao"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type IPostLikeRepository interface {
@@ -52,7 +52,7 @@ func (r *PostLikeRepository) FindByPostIdAndIp(ctx context.Context, postId strin
 }
 
 func (r *PostLikeRepository) DeleteById(ctx context.Context, id string) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}

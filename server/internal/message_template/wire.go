@@ -21,8 +21,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/message_template/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/message_template/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/message_template/internal/web"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var MessageTemplateProviders = wire.NewSet(web.NewMessageTemplateHandler, service.NewMessageTemplateService, repository.NewMessageTemplateRepository, dao.NewMessageTemplateDao,
@@ -30,7 +30,7 @@ var MessageTemplateProviders = wire.NewSet(web.NewMessageTemplateHandler, servic
 	wire.Bind(new(repository.IMessageTemplateRepository), new(*repository.MessageTemplateRepository)),
 	wire.Bind(new(dao.IMessageTemplateDao), new(*dao.MessageTemplateDao)))
 
-func InitMessageTemplateModule(mongoDB *mongo.Database) *Module {
+func InitMessageTemplateModule(db *mongox.Database) *Module {
 	panic(wire.Build(
 		MessageTemplateProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),

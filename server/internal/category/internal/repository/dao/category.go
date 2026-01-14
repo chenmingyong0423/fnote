@@ -19,21 +19,17 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"github.com/chenmingyong0423/go-mongox/builder/update"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 
-	"go.mongodb.org/mongo-driver/bson"
-
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Category struct {
@@ -50,26 +46,26 @@ type Category struct {
 type ICategoryDao interface {
 	GetAll(ctx context.Context) ([]*Category, error)
 	GetByRoute(ctx context.Context, route string) (*Category, error)
-	QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Category, int64, error)
+	QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptionsBuilder) ([]*Category, int64, error)
 	Create(ctx context.Context, category *Category) (string, error)
-	ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error
-	ModifyCategory(ctx context.Context, id primitive.ObjectID, description string) error
-	DeleteById(ctx context.Context, id primitive.ObjectID) error
+	ModifyEnabled(ctx context.Context, id bson.ObjectID, enabled bool) error
+	ModifyCategory(ctx context.Context, id bson.ObjectID, description string) error
+	DeleteById(ctx context.Context, id bson.ObjectID) error
 	GetByShowInNav(ctx context.Context) ([]*Category, error)
-	ModifyCategoryNavigation(ctx context.Context, id primitive.ObjectID, showInNav bool) error
-	GetById(ctx context.Context, id primitive.ObjectID) (*Category, error)
+	ModifyCategoryNavigation(ctx context.Context, id bson.ObjectID, showInNav bool) error
+	GetById(ctx context.Context, id bson.ObjectID) (*Category, error)
 	RecoverCategory(ctx context.Context, category *Category) error
 	GetEnabled(ctx context.Context) ([]*Category, error)
-	IncreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error
-	DecreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error
+	IncreasePostCountByIds(ctx context.Context, categoryObjectIds []bson.ObjectID) error
+	DecreasePostCountByIds(ctx context.Context, categoryObjectIds []bson.ObjectID) error
 	FindEnabledCategories(ctx context.Context) ([]*Category, error)
 }
 
 var _ ICategoryDao = (*CategoryDao)(nil)
 
-func NewCategoryDao(db *mongo.Database) *CategoryDao {
+func NewCategoryDao(db *mongox.Database) *CategoryDao {
 	return &CategoryDao{
-		coll: mongox.NewCollection[Category](db.Collection("categories")),
+		coll: mongox.NewCollection[Category](db, "categories"),
 	}
 }
 
@@ -81,7 +77,7 @@ func (d *CategoryDao) FindEnabledCategories(ctx context.Context) ([]*Category, e
 	return d.coll.Finder().Filter(query.Eq("enabled", true)).Find(ctx)
 }
 
-func (d *CategoryDao) DecreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error {
+func (d *CategoryDao) DecreasePostCountByIds(ctx context.Context, categoryObjectIds []bson.ObjectID) error {
 	updateResult, err := d.coll.Updater().Filter(query.In("_id", categoryObjectIds...)).Updates(update.NewBuilder().Inc("post_count", -1).Set("updated_at", time.Now().Local()).Build()).UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to decrease post count by ids, ids=%+v", categoryObjectIds)
@@ -92,7 +88,7 @@ func (d *CategoryDao) DecreasePostCountByIds(ctx context.Context, categoryObject
 	return nil
 }
 
-func (d *CategoryDao) IncreasePostCountByIds(ctx context.Context, categoryObjectIds []primitive.ObjectID) error {
+func (d *CategoryDao) IncreasePostCountByIds(ctx context.Context, categoryObjectIds []bson.ObjectID) error {
 	updateResult, err := d.coll.Updater().Filter(query.In("_id", categoryObjectIds...)).Updates(update.NewBuilder().Inc("post_count", 1).Set("updated_at", time.Now().Local()).Build()).UpdateMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to increase post count by ids, ids=%+v", categoryObjectIds)
@@ -119,7 +115,7 @@ func (d *CategoryDao) RecoverCategory(ctx context.Context, category *Category) e
 	return err
 }
 
-func (d *CategoryDao) GetById(ctx context.Context, id primitive.ObjectID) (*Category, error) {
+func (d *CategoryDao) GetById(ctx context.Context, id bson.ObjectID) (*Category, error) {
 	category, err := d.coll.Finder().Filter(query.Id(id)).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Get category by id failed, id=%s", id)
@@ -127,7 +123,7 @@ func (d *CategoryDao) GetById(ctx context.Context, id primitive.ObjectID) (*Cate
 	return category, nil
 }
 
-func (d *CategoryDao) ModifyCategoryNavigation(ctx context.Context, id primitive.ObjectID, showInNav bool) error {
+func (d *CategoryDao) ModifyCategoryNavigation(ctx context.Context, id bson.ObjectID, showInNav bool) error {
 	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.NewBuilder().Set("show_in_nav", showInNav).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "Modify category navigation failed, id=%s, showInNav=%v", id, showInNav)
@@ -146,7 +142,7 @@ func (d *CategoryDao) GetByShowInNav(ctx context.Context) ([]*Category, error) {
 	return categories, nil
 }
 
-func (d *CategoryDao) DeleteById(ctx context.Context, id primitive.ObjectID) error {
+func (d *CategoryDao) DeleteById(ctx context.Context, id bson.ObjectID) error {
 	deleteOne, err := d.coll.Deleter().Filter(bsonx.Id(id)).DeleteOne(ctx)
 	if err != nil {
 		return err
@@ -157,7 +153,7 @@ func (d *CategoryDao) DeleteById(ctx context.Context, id primitive.ObjectID) err
 	return nil
 }
 
-func (d *CategoryDao) ModifyCategory(ctx context.Context, id primitive.ObjectID, description string) error {
+func (d *CategoryDao) ModifyCategory(ctx context.Context, id bson.ObjectID, description string) error {
 	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.NewBuilder().Set("description", description).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
@@ -168,7 +164,7 @@ func (d *CategoryDao) ModifyCategory(ctx context.Context, id primitive.ObjectID,
 	return nil
 }
 
-func (d *CategoryDao) ModifyEnabled(ctx context.Context, id primitive.ObjectID, enabled bool) error {
+func (d *CategoryDao) ModifyEnabled(ctx context.Context, id bson.ObjectID, enabled bool) error {
 	updateOne, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.NewBuilder().Set("enabled", enabled).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return err
@@ -184,10 +180,10 @@ func (d *CategoryDao) Create(ctx context.Context, category *Category) (string, e
 	if err != nil {
 		return "", err
 	}
-	return oneResult.InsertedID.(primitive.ObjectID).Hex(), nil
+	return oneResult.InsertedID.(bson.ObjectID).Hex(), nil
 }
 
-func (d *CategoryDao) QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Category, int64, error) {
+func (d *CategoryDao) QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptionsBuilder) ([]*Category, int64, error) {
 	finder := d.coll.Finder()
 	count, err := finder.Filter(cond).Count(ctx)
 	if err != nil {

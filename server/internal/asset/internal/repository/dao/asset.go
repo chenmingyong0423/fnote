@@ -16,10 +16,10 @@ package dao
 
 import (
 	"context"
-	"github.com/chenmingyong0423/go-mongox"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type Asset struct {
@@ -39,22 +39,22 @@ type Asset struct {
 }
 
 type IAssetDao interface {
-	FindByIds(ctx context.Context, objIDs []primitive.ObjectID) ([]*Asset, error)
-	Add(ctx context.Context, asset *Asset) (primitive.ObjectID, error)
-	DeleteById(ctx context.Context, objectID primitive.ObjectID) (int64, error)
+	FindByIds(ctx context.Context, objIDs []bson.ObjectID) ([]*Asset, error)
+	Add(ctx context.Context, asset *Asset) (bson.ObjectID, error)
+	DeleteById(ctx context.Context, objectID bson.ObjectID) (int64, error)
 }
 
 var _ IAssetDao = (*AssetDao)(nil)
 
-func NewAssetDao(db *mongo.Database) *AssetDao {
-	return &AssetDao{coll: mongox.NewCollection[Asset](db.Collection("assets"))}
+func NewAssetDao(db *mongox.Database) *AssetDao {
+	return &AssetDao{coll: mongox.NewCollection[Asset](db, "assets")}
 }
 
 type AssetDao struct {
 	coll *mongox.Collection[Asset]
 }
 
-func (d *AssetDao) DeleteById(ctx context.Context, objectID primitive.ObjectID) (int64, error) {
+func (d *AssetDao) DeleteById(ctx context.Context, objectID bson.ObjectID) (int64, error) {
 	deleteResult, err := d.coll.Deleter().Filter(query.Id(objectID)).DeleteOne(ctx)
 	if err != nil {
 		return 0, err
@@ -62,14 +62,14 @@ func (d *AssetDao) DeleteById(ctx context.Context, objectID primitive.ObjectID) 
 	return deleteResult.DeletedCount, nil
 }
 
-func (d *AssetDao) Add(ctx context.Context, asset *Asset) (primitive.ObjectID, error) {
+func (d *AssetDao) Add(ctx context.Context, asset *Asset) (bson.ObjectID, error) {
 	insertOneResult, err := d.coll.Creator().InsertOne(ctx, asset)
 	if err != nil {
-		return primitive.NilObjectID, err
+		return bson.NilObjectID, err
 	}
-	return insertOneResult.InsertedID.(primitive.ObjectID), nil
+	return insertOneResult.InsertedID.(bson.ObjectID), nil
 }
 
-func (d *AssetDao) FindByIds(ctx context.Context, objIDs []primitive.ObjectID) ([]*Asset, error) {
+func (d *AssetDao) FindByIds(ctx context.Context, objIDs []bson.ObjectID) ([]*Asset, error) {
 	return d.coll.Finder().Filter(query.In("_id", objIDs...)).Find(ctx)
 }

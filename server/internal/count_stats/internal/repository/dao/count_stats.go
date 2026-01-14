@@ -19,16 +19,12 @@ import (
 	"fmt"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"github.com/chenmingyong0423/go-mongox/builder/update"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"github.com/chenmingyong0423/go-mongox"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type CountStats struct {
@@ -47,9 +43,9 @@ type ICountStatsDao interface {
 
 var _ ICountStatsDao = (*CountStatsDao)(nil)
 
-func NewCountStatsDao(db *mongo.Database) *CountStatsDao {
+func NewCountStatsDao(db *mongox.Database) *CountStatsDao {
 	return &CountStatsDao{
-		coll: mongox.NewCollection[CountStats](db.Collection("count_stats")),
+		coll: mongox.NewCollection[CountStats](db, "count_stats"),
 	}
 }
 
@@ -103,5 +99,5 @@ func (d *CountStatsDao) Create(ctx context.Context, countStats *CountStats) (str
 	if err != nil {
 		return "", err
 	}
-	return oneResult.InsertedID.(primitive.ObjectID).Hex(), nil
+	return oneResult.InsertedID.(bson.ObjectID).Hex(), nil
 }

@@ -22,8 +22,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/file/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/file/internal/web"
 	"github.com/chenmingyong0423/go-eventbus"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var FileProviders = wire.NewSet(web.NewFileHandler, service.NewFileService, repository.NewFileRepository, dao.NewFileDao,
@@ -31,7 +31,7 @@ var FileProviders = wire.NewSet(web.NewFileHandler, service.NewFileService, repo
 	wire.Bind(new(repository.IFileRepository), new(*repository.FileRepository)),
 	wire.Bind(new(dao.IFileDao), new(*dao.FileDao)))
 
-func InitFileModule(mongoDB *mongo.Database, eventBus *eventbus.EventBus) *Module {
+func InitFileModule(db *mongox.Database, eventBus *eventbus.EventBus) *Module {
 	panic(wire.Build(
 		FileProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),

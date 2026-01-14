@@ -16,9 +16,10 @@ package repository
 
 import (
 	"context"
+
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/repository/dao"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type IAssetRepository interface {
@@ -38,7 +39,7 @@ type AssetRepository struct {
 }
 
 func (r *AssetRepository) DeleteById(ctx context.Context, id string) (int64, error) {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return 0, err
 	}
@@ -54,9 +55,9 @@ func (r *AssetRepository) Add(ctx context.Context, asset *domain.Asset) (string,
 }
 
 func (r *AssetRepository) FindByIds(ctx context.Context, ids []string) ([]*domain.Asset, error) {
-	objIDs := make([]primitive.ObjectID, 0, len(ids))
+	objIDs := make([]bson.ObjectID, 0, len(ids))
 	for _, id := range ids {
-		objID, err := primitive.ObjectIDFromHex(id)
+		objID, err := bson.ObjectIDFromHex(id)
 		if err != nil {
 			return nil, err
 		}

@@ -24,14 +24,14 @@ import (
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"github.com/chenmingyong0423/go-eventbus"
 	"github.com/google/uuid"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/domain"
 	"github.com/chenmingyong0423/gkit/slice"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/repository"
@@ -77,9 +77,9 @@ type CommentService struct {
 
 func (s *CommentService) FindCommentByIds(ctx context.Context, commentIds []string) ([]domain.AdminComment, error) {
 	var err error
-	objectIDs := slice.Map(commentIds, func(i int, id string) primitive.ObjectID {
-		var objectID primitive.ObjectID
-		objectID, err = primitive.ObjectIDFromHex(id)
+	objectIDs := slice.Map(commentIds, func(i int, id string) bson.ObjectID {
+		var objectID bson.ObjectID
+		objectID, err = bson.ObjectIDFromHex(id)
 		return objectID
 	})
 	if err != nil {
@@ -97,13 +97,13 @@ func (s *CommentService) BatchDeleteComments(ctx context.Context, commentIds []s
 	if len(comments) > 0 {
 		eg.Go(func() error {
 			var gErr error
-			objectIDs := slice.Map(commentIds, func(i int, id string) primitive.ObjectID {
-				var objectID primitive.ObjectID
-				objectID, gErr = primitive.ObjectIDFromHex(id)
+			objectIDs := slice.Map(commentIds, func(i int, id string) bson.ObjectID {
+				var objectID bson.ObjectID
+				objectID, gErr = bson.ObjectIDFromHex(id)
 				return objectID
 			})
 			if gErr != nil {
-				return errors.Wrap(gErr, "primitive.ObjectIDFromHex")
+				return errors.Wrap(gErr, "bson.ObjectIDFromHex")
 			}
 			gErr = s.repo.DeleteCommentByIds(ctx, objectIDs)
 			if gErr != nil {
@@ -181,9 +181,9 @@ func (s *CommentService) BatchApproveComments(ctx context.Context, commentIds []
 	approvalEmails := make([]domain.EmailInfo, 0, len(commentIds)+len(replies))
 	// 评论被回复的邮件
 	repliedEmails := make([]domain.EmailInfo, 0)
-	commentObjectIDs := make([]primitive.ObjectID, len(commentIds))
+	commentObjectIDs := make([]bson.ObjectID, len(commentIds))
 	for i, commentId := range commentIds {
-		objectID, err := primitive.ObjectIDFromHex(commentId)
+		objectID, err := bson.ObjectIDFromHex(commentId)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -197,8 +197,8 @@ func (s *CommentService) BatchApproveComments(ctx context.Context, commentIds []
 			if err != nil {
 				return err
 			}
-			commentObjectIDs = slice.Map(comments, func(_ int, c domain.AdminComment) primitive.ObjectID {
-				ojbId, _ := primitive.ObjectIDFromHex(c.Id)
+			commentObjectIDs = slice.Map(comments, func(_ int, c domain.AdminComment) bson.ObjectID {
+				ojbId, _ := bson.ObjectIDFromHex(c.Id)
 				return ojbId
 			})
 			if len(commentObjectIDs) == 0 {

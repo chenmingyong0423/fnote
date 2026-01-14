@@ -21,8 +21,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/web"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var PostLikeProviders = wire.NewSet(web.NewPostLikeHandler, service.NewPostLikeService, repository.NewPostLikeRepository, dao.NewPostLikeDao,
@@ -30,7 +30,7 @@ var PostLikeProviders = wire.NewSet(web.NewPostLikeHandler, service.NewPostLikeS
 	wire.Bind(new(repository.IPostLikeRepository), new(*repository.PostLikeRepository)),
 	wire.Bind(new(dao.IPostLikeDao), new(*dao.PostLikeDao)))
 
-func InitPostLikeModule(mongoDB *mongo.Database) *Module {
+func InitPostLikeModule(db *mongox.Database) *Module {
 	panic(wire.Build(
 		PostLikeProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),

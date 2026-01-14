@@ -18,15 +18,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/aggregation"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 
-	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/v2"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type VisitHistory struct {
@@ -103,11 +102,14 @@ func (d *VisitLogDao) GetViewTendencyStats4PV(ctx context.Context, days int) ([]
 
 func (d *VisitLogDao) CountOfTodayByIp(ctx context.Context) (int64, error) {
 	startOfDayUnix, endOfDayUnix := d.getBeginSecondsAndEnd()
-	distinct, err := d.coll.Collection().Distinct(ctx, "ip", query.NewBuilder().Gte("created_at", startOfDayUnix).Lte("created_at", endOfDayUnix).Build())
+
+	distinct := d.coll.Finder().Filter(query.NewBuilder().Gte("created_at", startOfDayUnix).Lte("created_at", endOfDayUnix).Build()).Distinct(ctx, "ip")
+	result := make([]string, 0)
+	err := distinct.Decode(&result)
 	if err != nil {
-		return 0, errors.Wrap(err, "fails to find the count of today from visit_logs")
+		return 0, errors.Wrap(err, "fails to distinct ip from visit_logs")
 	}
-	return int64(len(distinct)), nil
+	return int64(len(result)), nil
 }
 
 func (d *VisitLogDao) getBeginSecondsAndEnd() (time.Time, time.Time) {
@@ -139,6 +141,6 @@ func (d *VisitLogDao) Add(ctx context.Context, visitHistory *VisitHistory) error
 	return nil
 }
 
-func NewVisitLogDao(db *mongo.Database) *VisitLogDao {
-	return &VisitLogDao{coll: mongox.NewCollection[VisitHistory](db.Collection("visit_logs"))}
+func NewVisitLogDao(db *mongox.Database) *VisitLogDao {
+	return &VisitLogDao{coll: mongox.NewCollection[VisitHistory](db, "visit_logs")}
 }

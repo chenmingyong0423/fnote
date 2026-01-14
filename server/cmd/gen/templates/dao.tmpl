@@ -15,8 +15,8 @@
 package dao
 
 import (
-	"github.com/chenmingyong0423/go-mongox"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type {{.DomainName}} struct {
@@ -27,7 +27,7 @@ type I{{.DomainName}}Dao interface {
 
 var _ I{{.DomainName}}Dao = (*{{.DomainName}}Dao)(nil)
 
-func New{{.DomainName}}Dao(db *mongo.Database) *{{.DomainName}}Dao {
+func New{{.DomainName}}Dao(db *mongox.Database) *{{.DomainName}}Dao {
 	return &{{.DomainName}}Dao{coll: mongox.NewCollection[{{.DomainName}}](db.Collection("{{.TableName}}"))}
 }
 

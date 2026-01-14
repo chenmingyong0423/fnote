@@ -19,19 +19,17 @@ import (
 	"fmt"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
-	"github.com/chenmingyong0423/go-mongox"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
 
-	"github.com/chenmingyong0423/go-mongox/builder/update"
-
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/aggregation"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type Comment struct {
@@ -112,35 +110,35 @@ type AdminComment struct {
 
 type ICommentDao interface {
 	AddComment(ctx context.Context, comment *Comment) (string, error)
-	FindApprovedCommentById(ctx context.Context, objectID primitive.ObjectID) (*Comment, error)
-	AddCommentReply(ctx context.Context, objectID primitive.ObjectID, commentReply Reply) error
+	FindApprovedCommentById(ctx context.Context, objectID bson.ObjectID) (*Comment, error)
+	AddCommentReply(ctx context.Context, objectID bson.ObjectID, commentReply Reply) error
 	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error)
 	FindApprovedCommentsByPostId(ctx context.Context, postId string) ([]*Comment, error)
-	AggregationQuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]AdminComment, int64, error)
-	FindCommentById(ctx context.Context, objectID primitive.ObjectID) (*Comment, error)
-	UpdateCommentStatus2True(ctx context.Context, objectID primitive.ObjectID) error
-	FindReplyByCIdAndRId(ctx context.Context, objectCommentID primitive.ObjectID, replyId string) (*ReplyWithPostInfo, error)
-	UpdateCommentReplyStatus(ctx context.Context, objectID primitive.ObjectID, replyId string, commentStatus bool) error
-	FindCommentWithRepliesById(ctx context.Context, objectID primitive.ObjectID) (*Comment, error)
-	DeleteById(ctx context.Context, objectID primitive.ObjectID) error
-	DeleteReplyByCIdAndRId(ctx context.Context, objectID primitive.ObjectID, replyId string) error
+	AggregationQuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptionsBuilder) ([]AdminComment, int64, error)
+	FindCommentById(ctx context.Context, objectID bson.ObjectID) (*Comment, error)
+	UpdateCommentStatus2True(ctx context.Context, objectID bson.ObjectID) error
+	FindReplyByCIdAndRId(ctx context.Context, objectCommentID bson.ObjectID, replyId string) (*ReplyWithPostInfo, error)
+	UpdateCommentReplyStatus(ctx context.Context, objectID bson.ObjectID, replyId string, commentStatus bool) error
+	FindCommentWithRepliesById(ctx context.Context, objectID bson.ObjectID) (*Comment, error)
+	DeleteById(ctx context.Context, objectID bson.ObjectID) error
+	DeleteReplyByCIdAndRId(ctx context.Context, objectID bson.ObjectID, replyId string) error
 	CountOfToday(ctx context.Context) (int64, error)
-	Find(ctx context.Context, findOptions *options.FindOptions) ([]*Comment, int64, error)
-	UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) error
-	FindByObjectIDs(ctx context.Context, ids []primitive.ObjectID) ([]*Comment, error)
-	UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentObjectID primitive.ObjectID, replyIds []string) error
-	FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentObjID primitive.ObjectID, replyIds []string) (*Comment, error)
-	FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]*Comment, error)
+	Find(ctx context.Context, findOptions *options.FindOptionsBuilder) ([]*Comment, int64, error)
+	UpdateCommentStatus2TrueByIds(ctx context.Context, ids []bson.ObjectID) error
+	FindByObjectIDs(ctx context.Context, ids []bson.ObjectID) ([]*Comment, error)
+	UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentObjectID bson.ObjectID, replyIds []string) error
+	FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentObjID bson.ObjectID, replyIds []string) (*Comment, error)
+	FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []bson.ObjectID) ([]*Comment, error)
 	FindByAggregation(ctx context.Context, pipeline mongo.Pipeline) ([]*Comment, error)
-	DeleteByIds(ctx context.Context, ids []primitive.ObjectID) error
-	PullReplyByCIdAndRIds(ctx context.Context, commentId primitive.ObjectID, replyIds []string) error
+	DeleteByIds(ctx context.Context, ids []bson.ObjectID) error
+	PullReplyByCIdAndRIds(ctx context.Context, commentId bson.ObjectID, replyIds []string) error
 	DeleteManyByPostId(ctx context.Context, postId string) error
 	FindCommentsByPostId(ctx context.Context, postId string) ([]*Comment, error)
 }
 
-func NewCommentDao(db *mongo.Database) *CommentDao {
+func NewCommentDao(db *mongox.Database) *CommentDao {
 	return &CommentDao{
-		coll: mongox.NewCollection[Comment](db.Collection("comments")),
+		coll: mongox.NewCollection[Comment](db, "comments"),
 	}
 }
 
@@ -169,7 +167,7 @@ func (d *CommentDao) DeleteManyByPostId(ctx context.Context, postId string) erro
 	return nil
 }
 
-func (d *CommentDao) PullReplyByCIdAndRIds(ctx context.Context, commentObjID primitive.ObjectID, replyIds []string) error {
+func (d *CommentDao) PullReplyByCIdAndRIds(ctx context.Context, commentObjID bson.ObjectID, replyIds []string) error {
 	updateResult, err := d.coll.Updater().Filter(query.Id(commentObjID)).
 		Updates(update.Pull("replies", query.In("reply_id", replyIds...))).UpdateOne(ctx)
 	if err != nil {
@@ -181,7 +179,7 @@ func (d *CommentDao) PullReplyByCIdAndRIds(ctx context.Context, commentObjID pri
 	return nil
 }
 
-func (d *CommentDao) DeleteByIds(ctx context.Context, ids []primitive.ObjectID) error {
+func (d *CommentDao) DeleteByIds(ctx context.Context, ids []bson.ObjectID) error {
 	deleteResult, err := d.coll.Deleter().Filter(query.In("_id", ids...)).DeleteMany(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to delete comment by ids: %v", ids)
@@ -196,7 +194,7 @@ func (d *CommentDao) FindByAggregation(ctx context.Context, pipeline mongo.Pipel
 	return d.coll.Aggregator().Pipeline(pipeline).Aggregate(ctx)
 }
 
-func (d *CommentDao) FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []primitive.ObjectID) ([]*Comment, error) {
+func (d *CommentDao) FindDisapprovedCommentByObjectIDs(ctx context.Context, commentObjectIDs []bson.ObjectID) ([]*Comment, error) {
 	anyIds := make([]any, 0, len(commentObjectIDs))
 	for _, objectID := range commentObjectIDs {
 		anyIds = append(anyIds, objectID)
@@ -204,7 +202,7 @@ func (d *CommentDao) FindDisapprovedCommentByObjectIDs(ctx context.Context, comm
 	return d.coll.Finder().Filter(query.NewBuilder().In("_id", anyIds...).Eq("approval_status", false).Build()).Find(ctx)
 }
 
-func (d *CommentDao) FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentObjID primitive.ObjectID, replyIds []string) (*Comment, error) {
+func (d *CommentDao) FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, commentObjID bson.ObjectID, replyIds []string) (*Comment, error) {
 	pipeline := aggregation.NewStageBuilder().
 		Match(query.Id(commentObjID)).
 		Project(
@@ -232,11 +230,11 @@ func (d *CommentDao) FindWithDisapprovedReplyByCidAndRIds(ctx context.Context, c
 	return comments[0], nil
 }
 
-func (d *CommentDao) UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentObjectID primitive.ObjectID, replyIds []string) error {
+func (d *CommentDao) UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, commentObjectID bson.ObjectID, replyIds []string) error {
 	now := time.Now().Local()
 	updateResult, err := d.coll.Updater().Filter(query.Id(commentObjectID)).
 		Updates(update.NewBuilder().Set("updated_at", now).Set("replies.$[elem].approval_status", true).Set("replies.$[elem].updated_at", now).Build()).
-		UpdateMany(ctx, options.Update().SetArrayFilters(options.ArrayFilters{Filters: []any{query.In("elem.reply_id", replyIds...)}}))
+		UpdateMany(ctx, options.UpdateMany().SetArrayFilters([]any{query.In("elem.reply_id", replyIds...)}))
 	if err != nil {
 		return errors.Wrapf(err, "failed to update reply approval_status, commentId=%s, replyIds=%v", commentObjectID, replyIds)
 	}
@@ -246,11 +244,11 @@ func (d *CommentDao) UpdateCReplyStatus2TrueByCidAndRIds(ctx context.Context, co
 	return nil
 }
 
-func (d *CommentDao) FindByObjectIDs(ctx context.Context, ids []primitive.ObjectID) ([]*Comment, error) {
+func (d *CommentDao) FindByObjectIDs(ctx context.Context, ids []bson.ObjectID) ([]*Comment, error) {
 	return d.coll.Finder().Filter(query.In("_id", ids...)).Find(ctx)
 }
 
-func (d *CommentDao) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []primitive.ObjectID) error {
+func (d *CommentDao) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []bson.ObjectID) error {
 	anyIds := make([]any, 0, len(ids))
 	for _, objectID := range ids {
 		anyIds = append(anyIds, objectID)
@@ -265,7 +263,7 @@ func (d *CommentDao) UpdateCommentStatus2TrueByIds(ctx context.Context, ids []pr
 	return nil
 }
 
-func (d *CommentDao) Find(ctx context.Context, findOptions *options.FindOptions) ([]*Comment, int64, error) {
+func (d *CommentDao) Find(ctx context.Context, findOptions *options.FindOptionsBuilder) ([]*Comment, int64, error) {
 	count, err := d.coll.Finder().Filter(bson.D{}).Count(ctx)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "failed to count from comment, cond={}, findOptions=%v", findOptions)
@@ -282,7 +280,7 @@ func (d *CommentDao) CountOfToday(ctx context.Context) (int64, error) {
 	return d.coll.Finder().Filter(query.NewBuilder().Gte("created_at", startOfDayUnix).Lte("created_at", endOfDayUnix).Build()).Count(ctx)
 }
 
-func (d *CommentDao) DeleteReplyByCIdAndRId(ctx context.Context, objectID primitive.ObjectID, replyId string) error {
+func (d *CommentDao) DeleteReplyByCIdAndRId(ctx context.Context, objectID bson.ObjectID, replyId string) error {
 	result, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.Pull("replies", bsonx.M("reply_id", replyId))).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update one from comment, commentId=%s, replyId=%s", objectID.Hex(), replyId)
@@ -293,7 +291,7 @@ func (d *CommentDao) DeleteReplyByCIdAndRId(ctx context.Context, objectID primit
 	return nil
 }
 
-func (d *CommentDao) DeleteById(ctx context.Context, objectID primitive.ObjectID) error {
+func (d *CommentDao) DeleteById(ctx context.Context, objectID bson.ObjectID) error {
 	result, err := d.coll.Deleter().Filter(query.Id(objectID)).DeleteOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to delete one from comment, id=%s", objectID.Hex())
@@ -304,7 +302,7 @@ func (d *CommentDao) DeleteById(ctx context.Context, objectID primitive.ObjectID
 	return nil
 }
 
-func (d *CommentDao) FindCommentWithRepliesById(ctx context.Context, objectID primitive.ObjectID) (*Comment, error) {
+func (d *CommentDao) FindCommentWithRepliesById(ctx context.Context, objectID bson.ObjectID) (*Comment, error) {
 	comment, err := d.coll.Finder().Filter(query.Id(objectID)).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the document from comment, id=%s", objectID.Hex())
@@ -312,7 +310,7 @@ func (d *CommentDao) FindCommentWithRepliesById(ctx context.Context, objectID pr
 	return comment, nil
 }
 
-func (d *CommentDao) UpdateCommentReplyStatus(ctx context.Context, objectID primitive.ObjectID, replyId string, commentStatus bool) error {
+func (d *CommentDao) UpdateCommentReplyStatus(ctx context.Context, objectID bson.ObjectID, replyId string, commentStatus bool) error {
 	filter := query.NewBuilder().Id(objectID).KeyValue("replies.reply_id", replyId).Build()
 	updates := update.NewBuilder().Set("replies.$.approval_status", commentStatus).Set("replies.$.updated_at", time.Now().Local()).Build()
 	result, err := d.coll.Updater().Filter(filter).Updates(updates).UpdateOne(ctx)
@@ -325,7 +323,7 @@ func (d *CommentDao) UpdateCommentReplyStatus(ctx context.Context, objectID prim
 	return nil
 }
 
-func (d *CommentDao) FindReplyByCIdAndRId(ctx context.Context, objectCommentID primitive.ObjectID, replyId string) (*ReplyWithPostInfo, error) {
+func (d *CommentDao) FindReplyByCIdAndRId(ctx context.Context, objectCommentID bson.ObjectID, replyId string) (*ReplyWithPostInfo, error) {
 	pipeline := aggregation.NewStageBuilder().
 		Match(query.Id(objectCommentID)).
 		Unwind("$replies", nil).
@@ -343,7 +341,7 @@ func (d *CommentDao) FindReplyByCIdAndRId(ctx context.Context, objectCommentID p
 	return &result[0], nil
 }
 
-func (d *CommentDao) UpdateCommentStatus2True(ctx context.Context, objectID primitive.ObjectID) error {
+func (d *CommentDao) UpdateCommentStatus2True(ctx context.Context, objectID bson.ObjectID) error {
 	result, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(update.NewBuilder().Set("approval_status", true).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update one from comment, id=%s, commentStatus=%v", objectID.Hex(), true)
@@ -354,7 +352,7 @@ func (d *CommentDao) UpdateCommentStatus2True(ctx context.Context, objectID prim
 	return nil
 }
 
-func (d *CommentDao) FindCommentById(ctx context.Context, objectID primitive.ObjectID) (*Comment, error) {
+func (d *CommentDao) FindCommentById(ctx context.Context, objectID bson.ObjectID) (*Comment, error) {
 	comment, err := d.coll.Finder().Filter(query.Id(objectID)).FindOne(ctx, options.FindOne().SetProjection(bsonx.M("replies", 0)))
 	if err != nil {
 		return nil, err
@@ -362,7 +360,7 @@ func (d *CommentDao) FindCommentById(ctx context.Context, objectID primitive.Obj
 	return comment, nil
 }
 
-func (d *CommentDao) AggregationQuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]AdminComment, int64, error) {
+func (d *CommentDao) AggregationQuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptionsBuilder) ([]AdminComment, int64, error) {
 	pipeline := aggregation.NewStageBuilder().
 		Match(bson.D{}).
 		Project(aggregation.ConcatArrays("combined", []any{
@@ -458,7 +456,7 @@ func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]
 	return results, nil
 }
 
-func (d *CommentDao) AddCommentReply(ctx context.Context, objectID primitive.ObjectID, commentReply Reply) error {
+func (d *CommentDao) AddCommentReply(ctx context.Context, objectID bson.ObjectID, commentReply Reply) error {
 	// 构建查询条件
 	filter := query.Id(objectID)
 	// 构建更新操作
@@ -474,7 +472,7 @@ func (d *CommentDao) AddCommentReply(ctx context.Context, objectID primitive.Obj
 	return nil
 }
 
-func (d *CommentDao) FindApprovedCommentById(ctx context.Context, objectID primitive.ObjectID) (*Comment, error) {
+func (d *CommentDao) FindApprovedCommentById(ctx context.Context, objectID bson.ObjectID) (*Comment, error) {
 	comment, err := d.coll.Finder().Filter(
 		query.NewBuilder().Id(objectID).Eq("approval_status", true).Build()).FindOne(ctx)
 	if err != nil {
@@ -488,7 +486,7 @@ func (d *CommentDao) AddComment(ctx context.Context, comment *Comment) (string, 
 	if err != nil {
 		return "", errors.Wrapf(err, "fails to insert into comment, comment=%v", comment)
 	}
-	return result.InsertedID.(primitive.ObjectID).Hex(), nil
+	return result.InsertedID.(bson.ObjectID).Hex(), nil
 }
 
 func (d *CommentDao) getBeginSecondsAndEndSeconds() (int64, int64) {

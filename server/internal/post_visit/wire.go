@@ -21,8 +21,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post_visit/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/post_visit/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_visit/internal/web"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var PostVisitProviders = wire.NewSet(web.NewPostVisitHandler, service.NewPostVisitService, repository.NewPostVisitRepository, dao.NewPostVisitDao,
@@ -30,7 +30,7 @@ var PostVisitProviders = wire.NewSet(web.NewPostVisitHandler, service.NewPostVis
 	wire.Bind(new(repository.IPostVisitRepository), new(*repository.PostVisitRepository)),
 	wire.Bind(new(dao.IPostVisitDao), new(*dao.PostVisitDao)))
 
-func InitPostVisitModule(mongoDB *mongo.Database) *Module {
+func InitPostVisitModule(db *mongox.Database) *Module {
 	panic(wire.Build(
 		PostVisitProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),

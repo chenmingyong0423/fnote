@@ -22,8 +22,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/count_stats/internal/web"
 	"github.com/chenmingyong0423/go-eventbus"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var CountStatsProviders = wire.NewSet(web.NewCountStatsHandler, service.NewCountStatsService, repository.NewCountStatsRepository, dao.NewCountStatsDao,
@@ -31,7 +31,7 @@ var CountStatsProviders = wire.NewSet(web.NewCountStatsHandler, service.NewCount
 	wire.Bind(new(repository.ICountStatsRepository), new(*repository.CountStatsRepository)),
 	wire.Bind(new(dao.ICountStatsDao), new(*dao.CountStatsDao)))
 
-func InitCountStatsModule(mongoDB *mongo.Database, eventbus *eventbus.EventBus) *Module {
+func InitCountStatsModule(db *mongox.Database, eventbus *eventbus.EventBus) *Module {
 	panic(wire.Build(
 		CountStatsProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),

@@ -17,20 +17,20 @@ package dao
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 
 	"github.com/pkg/errors"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 
-	"github.com/chenmingyong0423/go-mongox/builder/update"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
 
-	"github.com/chenmingyong0423/go-mongox"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/chenmingyong0423/go-mongox/v2"
 )
 
 type File struct {
@@ -66,8 +66,8 @@ type IFileDao interface {
 
 var _ IFileDao = (*FileDao)(nil)
 
-func NewFileDao(db *mongo.Database) *FileDao {
-	return &FileDao{coll: mongox.NewCollection[File](db.Collection("file_meta"))}
+func NewFileDao(db *mongox.Database) *FileDao {
+	return &FileDao{coll: mongox.NewCollection[File](db, "file_meta")}
 }
 
 type FileDao struct {
@@ -122,5 +122,5 @@ func (d *FileDao) Save(ctx context.Context, file *File) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return oneResult.InsertedID.(primitive.ObjectID).Hex(), nil
+	return oneResult.InsertedID.(bson.ObjectID).Hex(), nil
 }

@@ -28,12 +28,11 @@ import (
 	"strings"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type IBackupService interface {
@@ -43,8 +42,8 @@ type IBackupService interface {
 
 var _ IBackupService = (*BackupService)(nil)
 
-func NewBackupService(db *mongo.Database) *BackupService {
-	return &BackupService{db: db}
+func NewBackupService(db *mongox.Database) *BackupService {
+	return &BackupService{db: db.Database()}
 }
 
 type BackupService struct {
@@ -128,11 +127,11 @@ func (s *BackupService) GetBackups(ctx context.Context) (zipFileName string, err
 			if collectionName == "configs" {
 				for _, document := range documents {
 					if typ, ok := document["typ"]; ok && typ == "social" {
-						props := document["props"].(primitive.M)
-						socialList := props["social_info_list"].(primitive.A)
+						props := document["props"].(bson.M)
+						socialList := props["social_info_list"].(bson.A)
 						for _, m := range socialList {
-							obj := m.(primitive.M)
-							obj["id"] = hex.EncodeToString(obj["id"].(primitive.Binary).Data)
+							obj := m.(bson.M)
+							obj["id"] = hex.EncodeToString(obj["id"].(bson.Binary).Data)
 						}
 					}
 				}
@@ -231,7 +230,7 @@ func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colNam
 	}
 	col := s.db.Collection(colName)
 	for _, doc := range documents {
-		objectID, fErr := primitive.ObjectIDFromHex(doc["_id"].(string))
+		objectID, fErr := bson.ObjectIDFromHex(doc["_id"].(string))
 		// 部分集合的 id 不是 objectID
 		if fErr == nil {
 			doc["_id"] = objectID

@@ -19,21 +19,17 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/builder/update"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-
-	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/chenmingyong0423/go-mongox"
-	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Friend struct {
@@ -65,19 +61,19 @@ type IFriendDao interface {
 	FindDisplaying(ctx context.Context) ([]*Friend, error)
 	Add(ctx context.Context, friend *Friend) error
 	FindByUrl(ctx context.Context, url string) (*Friend, error)
-	QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Friend, int64, error)
-	UpdateById(ctx context.Context, objectID primitive.ObjectID, friend Friend) error
-	DeleteById(ctx context.Context, objectID primitive.ObjectID) error
-	FindById(ctx context.Context, objectID primitive.ObjectID) (*Friend, error)
-	UpdateApproved(ctx context.Context, objectID primitive.ObjectID) error
-	UpdateRejected(ctx context.Context, id primitive.ObjectID) error
+	QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptionsBuilder) ([]*Friend, int64, error)
+	UpdateById(ctx context.Context, objectID bson.ObjectID, friend Friend) error
+	DeleteById(ctx context.Context, objectID bson.ObjectID) error
+	FindById(ctx context.Context, objectID bson.ObjectID) (*Friend, error)
+	UpdateApproved(ctx context.Context, objectID bson.ObjectID) error
+	UpdateRejected(ctx context.Context, id bson.ObjectID) error
 }
 
 var _ IFriendDao = (*FriendDao)(nil)
 
-func NewFriendDao(db *mongo.Database) *FriendDao {
+func NewFriendDao(db *mongox.Database) *FriendDao {
 	return &FriendDao{
-		coll: mongox.NewCollection[Friend](db.Collection("friends")),
+		coll: mongox.NewCollection[Friend](db, "friends"),
 	}
 }
 
@@ -85,7 +81,7 @@ type FriendDao struct {
 	coll *mongox.Collection[Friend]
 }
 
-func (d *FriendDao) UpdateRejected(ctx context.Context, id primitive.ObjectID) error {
+func (d *FriendDao) UpdateRejected(ctx context.Context, id bson.ObjectID) error {
 	updateOne, err := d.coll.Updater().Filter(query.NewBuilder().Id(id).Ne("status", FriendStatusRejected).Build()).Updates(update.NewBuilder().Set("status", FriendStatusRejected).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the document from friends, id=%s", id.Hex())
@@ -96,7 +92,7 @@ func (d *FriendDao) UpdateRejected(ctx context.Context, id primitive.ObjectID) e
 	return nil
 }
 
-func (d *FriendDao) UpdateApproved(ctx context.Context, objectID primitive.ObjectID) error {
+func (d *FriendDao) UpdateApproved(ctx context.Context, objectID bson.ObjectID) error {
 	updateOne, err := d.coll.Updater().Filter(query.NewBuilder().Id(objectID).Ne("status", FriendStatusApproved).Build()).Updates(update.NewBuilder().Set("status", FriendStatusApproved).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the document from friends, id=%s", objectID.Hex())
@@ -107,7 +103,7 @@ func (d *FriendDao) UpdateApproved(ctx context.Context, objectID primitive.Objec
 	return nil
 }
 
-func (d *FriendDao) FindById(ctx context.Context, objectID primitive.ObjectID) (*Friend, error) {
+func (d *FriendDao) FindById(ctx context.Context, objectID bson.ObjectID) (*Friend, error) {
 	friend, err := d.coll.Finder().Filter(query.Id(objectID)).FindOne(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fails to find the document from friends, id=%s", objectID.Hex())
@@ -115,7 +111,7 @@ func (d *FriendDao) FindById(ctx context.Context, objectID primitive.ObjectID) (
 	return friend, nil
 }
 
-func (d *FriendDao) DeleteById(ctx context.Context, objectID primitive.ObjectID) error {
+func (d *FriendDao) DeleteById(ctx context.Context, objectID bson.ObjectID) error {
 	deleteOne, err := d.coll.Deleter().Filter(query.Id(objectID)).DeleteOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to delete the document from friends, id=%s", objectID.Hex())
@@ -126,7 +122,7 @@ func (d *FriendDao) DeleteById(ctx context.Context, objectID primitive.ObjectID)
 	return nil
 }
 
-func (d *FriendDao) UpdateById(ctx context.Context, objectID primitive.ObjectID, friend Friend) error {
+func (d *FriendDao) UpdateById(ctx context.Context, objectID bson.ObjectID, friend Friend) error {
 	updateOne, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(
 		update.NewBuilder().Set("name", friend.Name).Set("logo", friend.Logo).Set("description", friend.Description).Set("status", friend.Status).Set("updated_at", time.Now().Local()).Build(),
 	).UpdateOne(ctx)
@@ -139,7 +135,7 @@ func (d *FriendDao) UpdateById(ctx context.Context, objectID primitive.ObjectID,
 	return nil
 }
 
-func (d *FriendDao) QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptions) ([]*Friend, int64, error) {
+func (d *FriendDao) QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptionsBuilder) ([]*Friend, int64, error) {
 	count, err := d.coll.Finder().Filter(cond).Count(ctx)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "fails to count the documents from friends, cond=%v", cond)

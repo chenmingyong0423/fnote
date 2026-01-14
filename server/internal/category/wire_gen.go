@@ -12,14 +12,14 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/category/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/category/internal/web"
 	"github.com/chenmingyong0423/go-eventbus"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Injectors from wire.go:
 
-func InitCategoryModule(mongoDB *mongo.Database, eventBus *eventbus.EventBus) *Module {
-	categoryDao := dao.NewCategoryDao(mongoDB)
+func InitCategoryModule(db *mongox.Database, eventBus *eventbus.EventBus) *Module {
+	categoryDao := dao.NewCategoryDao(db)
 	categoryRepository := repository.NewCategoryRepository(categoryDao)
 	categoryService := service.NewCategoryService(categoryRepository, eventBus)
 	categoryHandler := web.NewCategoryHandler(categoryService)

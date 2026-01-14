@@ -20,17 +20,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
 	"github.com/chenmingyong0423/fnote/server/internal/category/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/category/internal/repository/dao"
 	"github.com/chenmingyong0423/gkit/slice"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type ICategoryRepository interface {
@@ -72,11 +71,11 @@ func (r *CategoryRepository) FindEnabledCategories(ctx context.Context) ([]domai
 }
 
 func (r *CategoryRepository) DecreasePostCountByIds(ctx context.Context, categoryIds []string) (err error) {
-	categoryObjectIds := slice.Map(categoryIds, func(_ int, id string) (ojbId primitive.ObjectID) {
+	categoryObjectIds := slice.Map(categoryIds, func(_ int, id string) (ojbId bson.ObjectID) {
 		if err != nil {
 			return ojbId
 		}
-		ojbId, err = primitive.ObjectIDFromHex(id)
+		ojbId, err = bson.ObjectIDFromHex(id)
 		return ojbId
 	})
 	if err != nil {
@@ -86,11 +85,11 @@ func (r *CategoryRepository) DecreasePostCountByIds(ctx context.Context, categor
 }
 
 func (r *CategoryRepository) IncreasePostCountByIds(ctx context.Context, categoryIds []string) (err error) {
-	categoryObjectIds := slice.Map(categoryIds, func(_ int, id string) (ojbId primitive.ObjectID) {
+	categoryObjectIds := slice.Map(categoryIds, func(_ int, id string) (ojbId bson.ObjectID) {
 		if err != nil {
 			return ojbId
 		}
-		ojbId, err = primitive.ObjectIDFromHex(id)
+		ojbId, err = bson.ObjectIDFromHex(id)
 		return ojbId
 	})
 	if err != nil {
@@ -123,7 +122,7 @@ func (r *CategoryRepository) RecoverCategory(ctx context.Context, category domai
 }
 
 func (r *CategoryRepository) GetCategoryById(ctx context.Context, id string) (t domain.Category, err error) {
-	objId, err := primitive.ObjectIDFromHex(id)
+	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return
 	}
@@ -135,7 +134,7 @@ func (r *CategoryRepository) GetCategoryById(ctx context.Context, id string) (t 
 }
 
 func (r *CategoryRepository) ModifyCategoryNavigation(ctx context.Context, id string, showInNav bool) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
@@ -151,7 +150,7 @@ func (r *CategoryRepository) GetNavigations(ctx context.Context) ([]domain.Categ
 }
 
 func (r *CategoryRepository) DeleteCategory(ctx context.Context, id string) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
@@ -159,7 +158,7 @@ func (r *CategoryRepository) DeleteCategory(ctx context.Context, id string) erro
 }
 
 func (r *CategoryRepository) ModifyCategory(ctx context.Context, id string, description string) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
@@ -167,7 +166,7 @@ func (r *CategoryRepository) ModifyCategory(ctx context.Context, id string, desc
 }
 
 func (r *CategoryRepository) ModifyCategoryEnabled(ctx context.Context, id string, enabled bool) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}

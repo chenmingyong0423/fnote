@@ -21,8 +21,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/web"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var AssetProviders = wire.NewSet(web.NewAssetHandler, service.NewAssetService, repository.NewAssetRepository, dao.NewAssetDao,
@@ -35,7 +35,7 @@ var AssetProviders = wire.NewSet(web.NewAssetHandler, service.NewAssetService, r
 	wire.Bind(new(dao.IAssetFolderDao), new(*dao.AssetFolderDao)),
 )
 
-func InitAssetModule(mongoDB *mongo.Database) *Module {
+func InitAssetModule(db *mongox.Database) *Module {
 	panic(wire.Build(
 		AssetProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),

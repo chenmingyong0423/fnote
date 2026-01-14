@@ -11,14 +11,14 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/web"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Injectors from wire.go:
 
-func InitPostLikeModule(mongoDB *mongo.Database) *Module {
-	postLikeDao := dao.NewPostLikeDao(mongoDB)
+func InitPostLikeModule(db *mongox.Database) *Module {
+	postLikeDao := dao.NewPostLikeDao(db)
 	postLikeRepository := repository.NewPostLikeRepository(postLikeDao)
 	postLikeService := service.NewPostLikeService(postLikeRepository)
 	postLikeHandler := web.NewPostLikeHandler(postLikeService)

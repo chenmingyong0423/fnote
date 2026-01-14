@@ -15,7 +15,7 @@
 package dao
 
 import (
-	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"time"
 )
 
