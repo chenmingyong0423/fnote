@@ -32,7 +32,7 @@ import (
 
 type IFriendRepository interface {
 	FindDisplaying(ctx context.Context) ([]domain.Friend, error)
-	Add(ctx context.Context, friend domain.Friend) error
+	Save(ctx context.Context, friend domain.Friend) error
 	FindByUrl(ctx context.Context, url string) (domain.Friend, error)
 	FindAll(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Friend, int64, error)
 	UpdateById(ctx context.Context, friend domain.Friend) error
@@ -130,8 +130,10 @@ func (r *FriendRepository) FindByUrl(ctx context.Context, url string) (friend do
 	return
 }
 
-func (r *FriendRepository) Add(ctx context.Context, friend domain.Friend) error {
-	err := r.dao.Add(ctx, &dao.Friend{
+func (r *FriendRepository) Save(ctx context.Context, friend domain.Friend) error {
+	q := query.NewBuilder().Eq("url", friend.Url).Eq("status", dao.FriendStatusRejected).Build()
+
+	err := r.dao.Upsert(ctx, q, &dao.Friend{
 		Name:        friend.Name,
 		Url:         friend.Url,
 		Logo:        friend.Logo,
@@ -140,8 +142,9 @@ func (r *FriendRepository) Add(ctx context.Context, friend domain.Friend) error 
 		Ip:          friend.Ip,
 		Status:      dao.FriendStatusPending,
 	})
+
 	if err != nil {
-		return errors.WithMessage(err, "r.dao.Add failed")
+		return errors.WithMessage(err, "r.dao.Upsert failed")
 	}
 	return nil
 }
