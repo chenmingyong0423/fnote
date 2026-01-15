@@ -34,3 +34,31 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Deployment (Docker)
+
+### Environment files
+- `.env.local`: local dev (already present)
+- `.env.production`: production values for running Next.js (example domains)
+- `.env.docker`: defaults for container network (`api` service on 8080)
+- `.env.nginx`: vars for nginx reverse proxy (`UPSTREAM_WEB`, `SERVER_NAME`)
+
+### Build & run Next.js container
+```bash
+# build
+DOCKER_BUILDKIT=1 docker build -t nextjs-web:latest -f Dockerfile .
+
+# run with production env file
+docker run --env-file .env.production -p 3000:3000 nextjs-web:latest
+```
+
+### Build & run nginx reverse proxy
+```bash
+# build
+DOCKER_BUILDKIT=1 docker build -t nextjs-web-nginx:latest -f Dockerfile.nginx .
+
+# run and point to a running Next.js container named "web"
+docker run --env-file .env.nginx --link web -p 80:80 nextjs-web-nginx:latest
+```
+
+> Tip: prefer docker-compose to wire `web` + `nginx` services if you need both running together.
