@@ -8,6 +8,7 @@ import type { MenuVO } from "../api/category";
 const staticNav = [
   { label: "首页", href: "/" },
   { label: "文章导航", href: "/navigation" },
+  { label: "友链", href: "/friend" },
   { label: "关于", href: "/about" },
 ];
 
@@ -17,7 +18,7 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({ menus, loadi
   const getSelectedKeys = (pathname: string) => {
     pathname = pathname.replace(/\/$/, ""); // 去除末尾 /
     if (pathname === "" || pathname === "/") return ["/"];
-    if (pathname === "/navigation" || pathname === "/about") {
+    if (pathname === "/navigation" || pathname === "/friend" || pathname === "/about") {
       return [pathname];
     }
     // 其它如 /categories/frontend => ["categories", "frontend"]
@@ -52,6 +53,10 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({ menus, loadi
     {
       key: staticNav[2].href,
       label: <Link href={staticNav[2].href}>{staticNav[2].label}</Link>,
+    },
+    {
+      key: staticNav[3].href,
+      label: <Link href={staticNav[3].href}>{staticNav[3].label}</Link>,
     },
   ];
 
