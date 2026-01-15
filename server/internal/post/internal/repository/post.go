@@ -85,32 +85,24 @@ func (r *PostRepository) UpdatePostIsDisplayedById(ctx context.Context, id strin
 }
 
 func (r *PostRepository) SavePost(ctx context.Context, post *domain.Post) error {
-	now := time.Now().Local()
 	categories := r.toDaoCategory4Post(post.Categories)
 	tags := r.toDaoTags4Post(post.Tags)
-	return r.dao.SavePost(ctx, &dao.Post{
-		Id:               post.Id,
-		Author:           post.Author,
-		Title:            post.Title,
-		Summary:          post.Summary,
-		Content:          post.Content,
-		CoverImg:         post.CoverImg,
-		Categories:       categories,
-		Tags:             tags,
-		IsDisplayed:      post.IsDisplayed,
-		StickyWeight:     post.StickyWeight,
-		MetaDescription:  post.MetaDescription,
-		MetaKeywords:     post.MetaKeywords,
-		WordCount:        post.WordCount,
-		IsCommentAllowed: post.IsCommentAllowed,
-		CreatedAt: func() time.Time {
-			if post.CreatedAt == 0 {
-				return now
-			} else {
-				return time.Unix(post.CreatedAt, 0)
-			}
-		}(),
-		UpdatedAt: now,
+	return r.dao.SavePost(ctx, post.Id, &dao.PostUpdate{
+		PostFields: dao.PostFields{
+			Author:           post.Author,
+			Title:            post.Title,
+			Summary:          post.Summary,
+			Content:          post.Content,
+			CoverImg:         post.CoverImg,
+			Categories:       categories,
+			Tags:             tags,
+			IsDisplayed:      post.IsDisplayed,
+			StickyWeight:     post.StickyWeight,
+			MetaDescription:  post.MetaDescription,
+			MetaKeywords:     post.MetaKeywords,
+			WordCount:        post.WordCount,
+			IsCommentAllowed: post.IsCommentAllowed,
+		},
 	})
 }
 
@@ -157,25 +149,27 @@ func (r *PostRepository) AddPost(ctx context.Context, post *domain.Post) error {
 		})
 	}
 	err := r.dao.AddPost(ctx, &dao.Post{
-		Id:               post.Id,
-		Author:           post.Author,
-		Title:            post.Title,
-		Summary:          post.Summary,
-		Content:          post.Content,
-		CoverImg:         post.CoverImg,
-		Categories:       categories,
-		Tags:             tags,
-		IsDisplayed:      post.IsDisplayed,
-		LikeCount:        0,
-		CommentCount:     0,
-		VisitCount:       0,
-		StickyWeight:     post.StickyWeight,
-		MetaDescription:  post.MetaDescription,
-		MetaKeywords:     post.MetaKeywords,
-		WordCount:        0,
-		IsCommentAllowed: post.IsCommentAllowed,
-		CreatedAt:        now,
-		UpdatedAt:        now,
+		Id: post.Id,
+		PostFields: dao.PostFields{
+			Author:           post.Author,
+			Title:            post.Title,
+			Summary:          post.Summary,
+			Content:          post.Content,
+			CoverImg:         post.CoverImg,
+			Categories:       categories,
+			Tags:             tags,
+			IsDisplayed:      post.IsDisplayed,
+			LikeCount:        0,
+			CommentCount:     0,
+			VisitCount:       0,
+			StickyWeight:     post.StickyWeight,
+			MetaDescription:  post.MetaDescription,
+			MetaKeywords:     post.MetaKeywords,
+			WordCount:        0,
+			IsCommentAllowed: post.IsCommentAllowed,
+		},
+		CreatedAt: now,
+		UpdatedAt: now,
 	})
 	if err != nil {
 		return err

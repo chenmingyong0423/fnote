@@ -59,7 +59,7 @@ const (
 
 type IFriendDao interface {
 	FindDisplaying(ctx context.Context) ([]*Friend, error)
-	Add(ctx context.Context, friend *Friend) error
+	Upsert(ctx context.Context, q bson.D, friend *Friend) error
 	FindByUrl(ctx context.Context, url string) (*Friend, error)
 	QuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptionsBuilder) ([]*Friend, int64, error)
 	UpdateById(ctx context.Context, objectID bson.ObjectID, friend Friend) error
@@ -155,13 +155,23 @@ func (d *FriendDao) FindByUrl(ctx context.Context, url string) (*Friend, error) 
 	return friend, nil
 }
 
-func (d *FriendDao) Add(ctx context.Context, friend *Friend) error {
-	result, err := d.coll.Creator().InsertOne(ctx, friend)
+func (d *FriendDao) Upsert(ctx context.Context, q bson.D, friend *Friend) error {
+	updateResult, err := d.coll.Updater().Filter(q).Updates(
+		update.NewBuilder().
+			Set("name", friend.Name).
+			Set("logo", friend.Logo).
+			Set("description", friend.Description).
+			Set("email", friend.Email).
+			Set("ip", friend.Ip).
+			Set("status", friend.Status).
+			Build(),
+	).Upsert(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fails to insert into friends, friend=%v", friend)
+		return errors.Wrapf(err, "fails to upsert into friends, q=%v, friend=%v", q, friend)
 	}
-	if result.InsertedID == nil {
-		return errors.Wrapf(err, "InsertedID=nil, fails to insert into friends, friend=%v", friend)
+
+	if updateResult.ModifiedCount == 0 && updateResult.UpsertedCount == 0 {
+		return fmt.Errorf("fails to upsert into friends, modifiedCount=0, upsertedCount=0, q=%v, friend=%v", q, friend)
 	}
 	return nil
 }

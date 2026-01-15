@@ -30,7 +30,17 @@ import (
 )
 
 type Post struct {
-	Id               string          `bson:"_id"`
+	Id         string    `bson:"_id"`
+	CreatedAt  time.Time `bson:"created_at"`
+	UpdatedAt  time.Time `bson:"updated_at"`
+	PostFields `bson:",inline"`
+}
+
+type PostUpdate struct {
+	PostFields `bson:",inline"`
+}
+
+type PostFields struct {
 	Author           string          `bson:"author"`
 	Title            string          `bson:"title"`
 	Summary          string          `bson:"summary"`
@@ -47,8 +57,6 @@ type Post struct {
 	MetaKeywords     string          `bson:"meta_keywords"`
 	WordCount        int             `bson:"word_count"`
 	IsCommentAllowed bool            `bson:"is_comment_allowed"`
-	CreatedAt        time.Time       `bson:"created_at"`
-	UpdatedAt        time.Time       `bson:"updated_at"`
 }
 
 type Category4Post struct {
@@ -73,7 +81,7 @@ type IPostDao interface {
 	DeleteById(ctx context.Context, id string) error
 	FindById(ctx context.Context, id string) (*Post, error)
 	DecreaseByField(ctx context.Context, id string, filedName string, cnt int) error
-	SavePost(ctx context.Context, post *Post) error
+	SavePost(ctx context.Context, ID string, postUpdate *PostUpdate) error
 	UpdateIsDisplayedById(ctx context.Context, id string, isDisplayed bool) error
 	UpdateIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error
 	IncreasePostLikeCount(ctx context.Context, postId string) error
@@ -129,13 +137,13 @@ func (d *PostDao) UpdateIsDisplayedById(ctx context.Context, id string, isDispla
 	return nil
 }
 
-func (d *PostDao) SavePost(ctx context.Context, post *Post) error {
-	result, err := d.coll.Updater().Filter(query.Id(post.Id)).Updates(update.SetFields(post)).Upsert(ctx)
+func (d *PostDao) SavePost(ctx context.Context, ID string, postUpdate *PostUpdate) error {
+	result, err := d.coll.Updater().Filter(query.Id(ID)).Updates(update.SetFields(postUpdate)).Upsert(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fails to update a post, post=%v", post)
+		return errors.Wrapf(err, "fails to update a post, id=%s, post=%v", ID, postUpdate)
 	}
 	if result.ModifiedCount == 0 && result.UpsertedCount == 0 {
-		return fmt.Errorf("fails to update a post, post=%v", post)
+		return fmt.Errorf("fails to update a post, id=%s, post=%v", ID, postUpdate)
 	}
 	return nil
 }
