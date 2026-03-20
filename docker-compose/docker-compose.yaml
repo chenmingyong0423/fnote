@@ -25,7 +25,10 @@ services:
     image: fnote/fnote-server:latest
     build:
       dockerfile: Dockerfile
-      context: ./server
+      context: ../server
+    environment:
+      WEBSITE_BASE_HOST: ${WEBSITE_BASE_HOST}
+      UPLOADER_HOST: ${WEBSITE_SERVER_HOST}
     ports:
       - "8080:8080"
     depends_on:
@@ -40,7 +43,7 @@ services:
     image: fnote/fnote-admin:latest
     build:
       dockerfile: Dockerfile
-      context: ./admin
+      context: ../admin
     ports:
       - "8081:80"
     depends_on:
@@ -52,11 +55,19 @@ services:
     image: fnote/fnote-web:latest
     build:
       dockerfile: Dockerfile
-      context: ./web
+      context: ../nextjs-web
+      args:
+        SERVER_HOST: http://fnote-server:8080
+    environment:
+        BASE_HOST: ${WEBSITE_BASE_HOST}
+        ADMIN_HOST: ${WEBSITE_ADMIN_HOST}
+        SERVER_HOST: http://fnote-server:8080
+        NEXT_PUBLIC_SERVER_HOST: ${WEBSITE_SERVER_HOST}
     ports:
       - "3000:3000"
     depends_on:
       - server
+      - admin
     networks:
       - fnote-network
 networks:
