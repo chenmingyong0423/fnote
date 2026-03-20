@@ -23,6 +23,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/pkg"
 	"github.com/chenmingyong0423/fnote/server/internal/tag"
 
 	"github.com/chenmingyong0423/fnote/server/internal/category"
@@ -98,7 +99,7 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 	sitemapBuilder := sitemap.NewSitemap().
 		XmlnsImage("https://www.google.com/schemas/sitemap-image/1.1").
 		Url(
-			viper.GetString("website.base_host"),
+			pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000"),
 			sitemap.WithLastMod(time.Now().Format(time.DateOnly)),
 			sitemap.WithChangeFreq("always"),
 			sitemap.WithPriority(1.0),
@@ -109,16 +110,16 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 			continue
 		}
 		sitemapBuilder.Url(
-			fmt.Sprintf("%s/posts/%s", viper.GetString("website.base_host"), p.Id),
+			fmt.Sprintf("%s/posts/%s", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000"), p.Id),
 			sitemap.WithLastMod(time.Unix(p.UpdatedAt, 0).Format(time.DateOnly)),
 			sitemap.WithChangeFreq("monthly"),
 			sitemap.WithPriority(0.9),
-			sitemap.WithImage(sitemap.NewUrlImage(fmt.Sprintf("%s%s", viper.GetString("uploader.host"), p.CoverImg))),
+			sitemap.WithImage(sitemap.NewUrlImage(fmt.Sprintf("%s%s", pkg.GetOrDefault4String(os.Getenv("UPLOADER_HOST"), "http://localhost:8080"), p.CoverImg))),
 		)
 	}
 	for _, c := range categories {
 		sitemapBuilder.Url(
-			fmt.Sprintf("%s/categories/%s", viper.GetString("website.base_host"), c.Route),
+			fmt.Sprintf("%s/categories/%s", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000"), c.Route),
 			sitemap.WithLastMod(time.Unix(c.UpdatedAt, 0).Format(time.DateOnly)),
 			sitemap.WithChangeFreq("weekly"),
 			sitemap.WithPriority(0.8),
@@ -126,25 +127,25 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 	}
 	for _, t := range tags {
 		sitemapBuilder.Url(
-			fmt.Sprintf("%s/tags/%s", viper.GetString("website.base_host"), t.Route),
+			fmt.Sprintf("%s/tags/%s", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000"), t.Route),
 			sitemap.WithLastMod(time.Unix(t.UpdatedAt, 0).Format(time.DateOnly)),
 			sitemap.WithChangeFreq("weekly"),
 			sitemap.WithPriority(0.8),
 		)
 	}
 	sitemapBuilder.Url(
-		fmt.Sprintf("%s/about-me", viper.GetString("website.base_host")),
+		fmt.Sprintf("%s/about-me", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000")),
 		sitemap.WithLastMod(aboutMeLastMod),
 		sitemap.WithChangeFreq("monthly"),
 		sitemap.WithPriority(0.9),
 	)
 	sitemapBuilder.Url(
-		fmt.Sprintf("%s/search", viper.GetString("website.base_host")),
+		fmt.Sprintf("%s/search", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000")),
 		sitemap.WithChangeFreq("weekly"),
 		sitemap.WithPriority(0.7),
 	)
 	sitemapBuilder.Url(
-		fmt.Sprintf("%s/friend", viper.GetString("website.base_host")),
+		fmt.Sprintf("%s/friend", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000")),
 		sitemap.WithChangeFreq("always"),
 		sitemap.WithPriority(0.5),
 	)
