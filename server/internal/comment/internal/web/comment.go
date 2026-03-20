@@ -20,11 +20,12 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 
-	"github.com/chenmingyong0423/fnote/server/internal/message"
-
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/message"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/service"
 
@@ -106,7 +107,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiw
 		PostInfo: domain.PostInfo{
 			PostId:    req.PostId,
 			PostTitle: p.Title,
-			PostUrl:   fmt.Sprintf("%s/posts/%s", viper.GetString("website.base_host"), req.PostId),
+			PostUrl:   fmt.Sprintf("%s/posts/%s", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000"), req.PostId),
 		},
 		Content: req.Content,
 		UserInfo: domain.UserInfo{
