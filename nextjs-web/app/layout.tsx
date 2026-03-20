@@ -11,6 +11,7 @@ import { AntdThemeProvider } from "@/src/components/AntdThemeProvider";
 import LogVisitClient from "../src/components/LogVisitClient";
 import { checkInitialization } from "@/src/api/checkInitialization";
 import { redirect } from "next/navigation";
+export const dynamic = 'force-dynamic'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,7 +23,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-let initPromise: Promise<void> | null = null;
+type InitCache = {
+  promise: Promise<void> | null;
+  expiresAt: number;
+};
+
+const INIT_TTL_MS = 30_000; // 30s，可按需调整
+const initCache: InitCache = {
+  promise: null,
+  expiresAt: 0,
+};
+
 async function guardInitialization() {
   const initRes = await checkInitialization();
   if (initRes.code === 0 && initRes.data && !initRes.data.initStatus) {
@@ -35,10 +46,23 @@ async function guardInitialization() {
 }
 
 function ensureInitialized() {
-  if (!initPromise) {
-    initPromise = guardInitialization();
+  const now = Date.now();
+
+  // 缓存未过期，直接复用
+  if (initCache.promise && now < initCache.expiresAt) {
+    return initCache.promise;
   }
-  return initPromise;
+
+  // 重新发起检查，并刷新过期时间
+  initCache.expiresAt = now + INIT_TTL_MS;
+  initCache.promise = guardInitialization().catch((err) => {
+    // 失败时清空，避免后续一直复用失败 Promise
+    initCache.promise = null;
+    initCache.expiresAt = 0;
+    throw err;
+  });
+
+  return initCache.promise;
 }
 
 // 动态生成 metadata
