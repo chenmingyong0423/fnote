@@ -4,6 +4,7 @@ import {message} from "antd";
 import {addComment, AddCommentBody} from "@/src/api/comments";
 import {BaseCommentForm} from "./BaseCommentForm";
 import type { FormInstance } from 'antd';
+import {getUserFriendlyError} from "@/src/utils/errorMessage";
 
 interface CommentFormProps {
     postId: string;
@@ -21,7 +22,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({postId, onSuccessAction
             setPreview(false);
             onSuccessAction();
         } catch (e: unknown) {
-            message.error((e instanceof Error ? e.message : String(e)) || "评论失败");
+            message.error(getUserFriendlyError(e));
         }
     };
     return (

@@ -1,5 +1,11 @@
 // src/utils/http.ts
 
+type ApiLikeResponse<T = unknown> = {
+  code?: number;
+  message?: string;
+  data?: T;
+};
+
 /**
  * 通用 HTTP 请求方法，服务端和客户端均可用。
  * @param input 请求地址或 Request 对象
@@ -22,8 +28,19 @@ export async function request<T = never>(
     url = serverHost.replace(/\/$/, '') + path;
   }
   const res = await fetch(url, init);
-  if (!res.ok) {
-    return { code: res.status, message: res.statusText, data: null } as unknown as T;
+
+  let body: ApiLikeResponse | null = null;
+  try {
+    body = (await res.json()) as ApiLikeResponse;
+  } catch {
+    body = null;
   }
-  return res.json();
+
+  if (!res.ok) {
+    const backendMessage =
+        body?.message?.trim() || res.statusText || "请求失败";
+    throw new Error(backendMessage);
+  }
+
+  return (body as T) ?? ({} as T);
 }
