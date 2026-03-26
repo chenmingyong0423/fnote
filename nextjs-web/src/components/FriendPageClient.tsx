@@ -5,6 +5,7 @@ import { Button, Card, Col, Empty, Form, Input, Row, Space, Typography, message 
 import { MarkdownPreview } from "@/src/components/MarkdownPreview";
 import { createFriend, type FriendItem } from "@/src/api/friend";
 import '@ant-design/v5-patch-for-react-19';
+import {getUserFriendlyError} from "@/src/utils/errorMessage";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -55,8 +56,8 @@ export const FriendPageClient: React.FC<Props> = ({ friends, summary }) => {
       } else {
         messageApi.error(res.message || "申请失败，请稍后再试");
       }
-    } catch (err: any) {
-      messageApi.error(err?.message || "申请失败，请稍后再试");
+    } catch (e: unknown) {
+      messageApi.error(getUserFriendlyError(e));
     } finally {
       setSubmitting(false);
     }

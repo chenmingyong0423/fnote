@@ -3,6 +3,7 @@ import React from "react";
 import { message } from "antd";
 import { addReply, AddReplyBody } from "@/src/api/comments";
 import { BaseCommentForm } from "./BaseCommentForm";
+import {getUserFriendlyError} from "@/src/utils/errorMessage";
 
 interface ReplyFormProps {
   postId: string;
@@ -23,7 +24,7 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({ postId, commentId, replyTo
       setPreview(false);
       onSuccessAction();
     } catch (e: unknown) {
-      message.error((e instanceof Error ? e.message : String(e)) || "回复失败");
+      message.error(getUserFriendlyError(e));
     }
   };
   return (
