@@ -111,7 +111,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (*ap
 	})
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key error") {
-			return nil, apiwrap.NewErrorResponseBody(http.StatusTooManyRequests, "Already applied for")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusTooManyRequests, "Already applied for friendship, please wait for review.")
 		}
 		return nil, err
 	}

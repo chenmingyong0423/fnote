@@ -101,7 +101,7 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiw
 		return nil, apiwrap.NewErrorResponseBody(http.StatusNotFound, "Post not found.")
 	}
 	if !p.IsCommentAllowed {
-		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comments are disabled for this post.")
 	}
 	id, err := h.serv.AddComment(ctx, domain.Comment{
 		PostInfo: domain.PostInfo{
@@ -167,7 +167,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*a
 		return nil, err
 	}
 	if !p.IsCommentAllowed {
-		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comment are disabled for this post.")
 	}
 	id, err := h.serv.AddReply(ctx, commentId, req.PostId, domain.CommentReply{
 		Content:   req.Content,
