@@ -133,7 +133,7 @@ func ErrorHandler(ctx *gin.Context, err error) {
 	switch {
 	case errors.As(err, &e):
 		l.ErrorContext(ctx, e.Error())
-		ctx.JSON(e.HttpCode, nil)
+		ctx.JSON(e.HttpCode, map[string]string{"message": e.Message})
 	case errors.As(err, &r):
 		ctx.JSON(http.StatusOK, r)
 	default:
