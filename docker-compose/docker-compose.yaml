@@ -44,6 +44,9 @@ services:
     build:
       dockerfile: Dockerfile
       context: ../admin
+    environment:
+      VITE_BASE_HOST: ${WEBSITE_BASE_HOST}
+      VITE_API_HOST: ${WEBSITE_SERVER_HOST}
     ports:
       - "8081:80"
     depends_on:
