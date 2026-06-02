@@ -64,6 +64,15 @@ https://你的域名
 https://你的域名/admin
 ```
 
+## 上传限制
+
+Nginx 默认请求体限制为 `20m`。后台文件上传接口允许 `100m`，备份恢复接口允许 `512m`：
+
+```text
+/admin-api/files/upload
+/admin-api/recovery
+```
+
 ## 停止服务
 
 在 `docker-compose` 目录执行：
