@@ -59,11 +59,11 @@ services:
       dockerfile: Dockerfile
       context: ../nextjs-web
       args:
-        SERVER_HOST: http://fnote-server:8080
+        SERVER_HOST: http://server:8080
     environment:
         BASE_HOST: ${WEBSITE_BASE_HOST}
         ADMIN_HOST: ${WEBSITE_ADMIN_HOST}
-        SERVER_HOST: http://fnote-server:8080
+        SERVER_HOST: http://server:8080
         NEXT_PUBLIC_SERVER_HOST: ${WEBSITE_SERVER_HOST}
     ports:
       - "3000:3000"
