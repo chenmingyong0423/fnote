@@ -64,3 +64,22 @@ https://你的域名
 https://你的域名/admin
 ```
 
+## 停止服务
+
+在 `docker-compose` 目录执行：
+
+```bash
+bash script/stop-nginx.sh
+```
+
+脚本会停止并移除 Nginx 部署相关容器和网络，不会删除 `/tmp/fnote` 下的数据目录。
+
+## 重启服务
+
+在 `docker-compose` 目录执行：
+
+```bash
+bash script/restart-nginx.sh
+```
+
+脚本会重启当前 Nginx 部署相关容器，不会重新构建镜像，也不会删除数据目录。
