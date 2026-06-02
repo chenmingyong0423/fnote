@@ -41,10 +41,3 @@ admin/dist
 
 */.DS_Store
 .DS_Store
-
-# Deployment secrets
-docker-compose/.env
-docker-compose/.env.*
-!docker-compose/.env.nginx.example
-docker-compose/nginx/ssl/*
-!docker-compose/nginx/ssl/.gitkeep
