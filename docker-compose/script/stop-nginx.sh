@@ -18,5 +18,4 @@ cd "$COMPOSE_DIR"
 docker compose "${compose_env_args[@]}" -f "$COMPOSE_FILE" down
 
 echo "Nginx 部署已停止。"
-echo "数据目录不会被删除: /tmp/fnote/mongo_data /tmp/fnote/logs /tmp/fnote/static"
-
+echo "数据目录不会被删除: $COMPOSE_DIR/data/mongo $COMPOSE_DIR/data/logs $COMPOSE_DIR/data/static"

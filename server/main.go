@@ -65,6 +65,7 @@ func main() {
 
 func initViper(cfgPath string) error {
 	viper.SetConfigType("yaml")
+
 	readFile, err := os.ReadFile(cfgPath)
 	if err != nil {
 		return err
@@ -74,5 +75,25 @@ func initViper(cfgPath string) error {
 	if err != nil {
 		return err
 	}
+	if err = bindEnv(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func bindEnv() error {
+	envBindings := map[string]string{
+		"mongodb.username":    "MONGODB_USERNAME",
+		"mongodb.password":    "MONGODB_PASSWORD",
+		"mongodb.auth_source": "MONGODB_AUTH_SOURCE",
+		"mongodb.database":    "MONGODB_DATABASE",
+	}
+
+	for key, env := range envBindings {
+		if err := viper.BindEnv(key, env); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

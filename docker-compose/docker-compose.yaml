@@ -4,13 +4,13 @@ services:
     container_name: fnote-mongo
     image: mongo:latest
     environment:
-      MONGO_INITDB_ROOT_USERNAME: fnote
-      MONGO_INITDB_ROOT_PASSWORD: fnote
-      MONGO_INITDB_DATABASE: fnote
-      MONGO_USERNAME: fnote-user
-      MONGO_PASSWORD: 12345678
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-fnote}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-fnote}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-fnote}
+      MONGO_USERNAME: ${MONGO_USERNAME:-fnote-user}
+      MONGO_PASSWORD: ${MONGO_PASSWORD:-12345678}
     volumes:
-      - /tmp/fnote/mongo_data:/data/db
+      - ./data/mongo:/data/db
       - ./script/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
       - ./script/mongo-data-init.sh:/docker-entrypoint-initdb.d/mongo-data-init.sh
     ports:
@@ -28,13 +28,17 @@ services:
     environment:
       WEBSITE_BASE_HOST: ${WEBSITE_BASE_HOST}
       UPLOADER_HOST: ${WEBSITE_SERVER_HOST}
+      MONGODB_USERNAME: ${MONGO_USERNAME:-fnote-user}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-12345678}
+      MONGODB_AUTH_SOURCE: ${MONGO_DATABASE:-fnote}
+      MONGODB_DATABASE: ${MONGO_DATABASE:-fnote}
     ports:
       - "8080:8080"
     depends_on:
       - mongo
     volumes:
-      - /tmp/fnote/logs:/fnote/logs
-      - /tmp/fnote/static:/fnote/static
+      - ./data/logs:/fnote/logs
+      - ./data/static:/fnote/static
     networks:
       - fnote-network
   admin:
