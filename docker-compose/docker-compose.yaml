@@ -10,7 +10,7 @@ services:
       MONGO_USERNAME: ${MONGO_USERNAME:-fnote-user}
       MONGO_PASSWORD: ${MONGO_PASSWORD:-12345678}
     volumes:
-      - ./data/mongo:/data/db
+      - /fnote/data/mongo:/data/db
       - ./script/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
       - ./script/mongo-data-init.sh:/docker-entrypoint-initdb.d/mongo-data-init.sh
     ports:
@@ -37,8 +37,8 @@ services:
     depends_on:
       - mongo
     volumes:
-      - ./data/logs:/fnote/logs
-      - ./data/static:/fnote/static
+      - /fnote/data/logs:/fnote/logs
+      - /fnote/data/static:/fnote/static
     networks:
       - fnote-network
   admin:
