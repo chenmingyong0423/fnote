@@ -19,14 +19,14 @@ package backup
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/backup/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/backup/internal/web"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var BackupProviders = wire.NewSet(web.NewBackupHandler, service.NewBackupService,
 	wire.Bind(new(service.IBackupService), new(*service.BackupService)))
 
-func InitBackupModule(mongoDB *mongo.Database) *Module {
+func InitBackupModule(db *mongox.Database) *Module {
 	panic(wire.Build(
 		BackupProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),

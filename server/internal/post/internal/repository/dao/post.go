@@ -19,19 +19,28 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox"
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"github.com/chenmingyong0423/go-mongox/builder/update"
+	"github.com/chenmingyong0423/go-mongox/v2"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type Post struct {
-	Id               string          `bson:"_id"`
+	Id         string    `bson:"_id"`
+	CreatedAt  time.Time `bson:"created_at"`
+	UpdatedAt  time.Time `bson:"updated_at"`
+	PostFields `bson:",inline"`
+}
+
+type PostUpdate struct {
+	PostFields `bson:",inline"`
+}
+
+type PostFields struct {
 	Author           string          `bson:"author"`
 	Title            string          `bson:"title"`
 	Summary          string          `bson:"summary"`
@@ -48,8 +57,6 @@ type Post struct {
 	MetaKeywords     string          `bson:"meta_keywords"`
 	WordCount        int             `bson:"word_count"`
 	IsCommentAllowed bool            `bson:"is_comment_allowed"`
-	CreatedAt        time.Time       `bson:"created_at"`
-	UpdatedAt        time.Time       `bson:"updated_at"`
 }
 
 type Category4Post struct {
@@ -64,7 +71,7 @@ type Tag4Post struct {
 
 type IPostDao interface {
 	GetFrontPosts(ctx context.Context, count int64) ([]*Post, error)
-	QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error)
+	QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptionsBuilder) ([]*Post, int64, error)
 	GetPunishedPostById(ctx context.Context, sug string) (*Post, error)
 	FindByIdAndIp(ctx context.Context, sug string, ip string) (*Post, error)
 	AddLike(ctx context.Context, sug string, ip string) error
@@ -74,7 +81,7 @@ type IPostDao interface {
 	DeleteById(ctx context.Context, id string) error
 	FindById(ctx context.Context, id string) (*Post, error)
 	DecreaseByField(ctx context.Context, id string, filedName string, cnt int) error
-	SavePost(ctx context.Context, post *Post) error
+	SavePost(ctx context.Context, ID string, postUpdate *PostUpdate) error
 	UpdateIsDisplayedById(ctx context.Context, id string, isDisplayed bool) error
 	UpdateIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error
 	IncreasePostLikeCount(ctx context.Context, postId string) error
@@ -83,9 +90,9 @@ type IPostDao interface {
 
 var _ IPostDao = (*PostDao)(nil)
 
-func NewPostDao(db *mongo.Database) *PostDao {
+func NewPostDao(db *mongox.Database) *PostDao {
 	return &PostDao{
-		coll: mongox.NewCollection[Post](db.Collection("posts")),
+		coll: mongox.NewCollection[Post](db, "posts"),
 	}
 }
 
@@ -130,13 +137,13 @@ func (d *PostDao) UpdateIsDisplayedById(ctx context.Context, id string, isDispla
 	return nil
 }
 
-func (d *PostDao) SavePost(ctx context.Context, post *Post) error {
-	result, err := d.coll.Updater().Filter(query.Id(post.Id)).UpdatesWithOperator("$set", post).UpdateOne(ctx, options.Update().SetUpsert(true))
+func (d *PostDao) SavePost(ctx context.Context, ID string, postUpdate *PostUpdate) error {
+	result, err := d.coll.Updater().Filter(query.Id(ID)).Updates(update.SetFields(postUpdate)).Upsert(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fails to update a post, post=%v", post)
+		return errors.Wrapf(err, "fails to update a post, id=%s, post=%v", ID, postUpdate)
 	}
 	if result.ModifiedCount == 0 && result.UpsertedCount == 0 {
-		return fmt.Errorf("fails to update a post, post=%v", post)
+		return fmt.Errorf("fails to update a post, id=%s, post=%v", ID, postUpdate)
 	}
 	return nil
 }
@@ -236,7 +243,7 @@ func (d *PostDao) GetPunishedPostById(ctx context.Context, id string) (*Post, er
 	return post, nil
 }
 
-func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptions) ([]*Post, int64, error) {
+func (d *PostDao) QueryPostsPage(ctx context.Context, con bson.D, findOptions *options.FindOptionsBuilder) ([]*Post, int64, error) {
 	cnt, err := d.coll.Finder().Filter(con).Count(ctx)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "fails to find the count of documents from post, con=%v", con)

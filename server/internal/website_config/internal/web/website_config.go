@@ -26,7 +26,7 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/global"
 
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/jwtutil"
 

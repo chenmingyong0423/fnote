@@ -17,11 +17,10 @@ package dao
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 
-	"github.com/chenmingyong0423/go-mongox"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type MessageTemplate struct {
@@ -41,8 +40,8 @@ type IMessageTemplateDao interface {
 
 var _ IMessageTemplateDao = (*MessageTemplateDao)(nil)
 
-func NewMessageTemplateDao(db *mongo.Database) *MessageTemplateDao {
-	return &MessageTemplateDao{coll: mongox.NewCollection[MessageTemplate](db.Collection("message_templates"))}
+func NewMessageTemplateDao(db *mongox.Database) *MessageTemplateDao {
+	return &MessageTemplateDao{coll: mongox.NewCollection[MessageTemplate](db, "message_templates")}
 }
 
 type MessageTemplateDao struct {

@@ -18,15 +18,14 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 
-	"github.com/chenmingyong0423/fnote/server/internal/message"
-
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/service"
-
-	"github.com/spf13/viper"
+	"github.com/chenmingyong0423/fnote/server/internal/message"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg"
 
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 
@@ -112,7 +111,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (*ap
 	})
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key error") {
-			return nil, apiwrap.NewErrorResponseBody(http.StatusTooManyRequests, "Already applied for")
+			return nil, apiwrap.NewErrorResponseBody(http.StatusTooManyRequests, "Already applied for friendship, please wait for review.")
 		}
 		return nil, err
 	}
@@ -186,7 +185,7 @@ func (h *FriendHandler) AdminApproveFriend(ctx *gin.Context) (*apiwrap.ResponseB
 	}
 	// 发送邮件通知朋友
 	go func() {
-		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-approval", []string{email}, "text/plain", viper.GetString("website.base_host")+"/friend")
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-approval", []string{email}, "text/plain", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000")+"/friend")
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))
@@ -202,7 +201,7 @@ func (h *FriendHandler) AdminRejectFriend(ctx *gin.Context, req FriendRejectReq)
 	}
 	// 发送邮件通知朋友
 	go func() {
-		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-rejection", []string{email}, "text/plain", viper.GetString("website.base_host")+"/friend", req.Reason)
+		gErr := h.msgServ.SendEmailWithEmail(ctx, "friend-rejection", []string{email}, "text/plain", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000")+"/friend", req.Reason)
 		if gErr != nil {
 			l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 			l.WarnContext(ctx, fmt.Sprintf("%+v", gErr))

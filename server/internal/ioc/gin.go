@@ -15,13 +15,14 @@
 package ioc
 
 import (
-	"github.com/chenmingyong0423/fnote/server/internal/asset"
 	"io"
 	"log/slog"
 	"net/http"
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/chenmingyong0423/fnote/server/internal/asset"
 
 	"github.com/chenmingyong0423/fnote/server/internal/backup"
 
@@ -145,7 +146,7 @@ func InitMiddlewares(writer io.Writer, isWebsiteInitialized func() bool) []gin.H
 		}),
 		func(ctx *gin.Context) {
 			uri := ctx.Request.RequestURI
-			if (isWebsiteInitialized() || strings.HasPrefix(uri, "/static")) || uri == "/admin-api/files/upload" || uri == "/admin-api/configs/initialization" {
+			if (isWebsiteInitialized() || strings.HasPrefix(uri, "/static")) || uri == "/admin-api/files/upload" || uri == "/admin-api/configs/initialization" || uri == "/configs/check-initialization" {
 				ctx.Next()
 			} else {
 				ctx.JSON(http.StatusServiceUnavailable, nil)

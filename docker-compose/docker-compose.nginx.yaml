@@ -1,0 +1,100 @@
+services:
+  mongo:
+    container_name: fnote-mongo
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-fnote}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-fnote}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-fnote}
+      MONGO_USERNAME: ${MONGO_USERNAME:-fnote-user}
+      MONGO_PASSWORD: ${MONGO_PASSWORD:-12345678}
+    volumes:
+      - ./data/mongo:/data/db
+      - ./script/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
+      - ./script/mongo-data-init.sh:/docker-entrypoint-initdb.d/mongo-data-init.sh
+    ports:
+      - "27017:27017"
+    command:
+      - --auth
+    networks:
+      - fnote-network
+
+  server:
+    container_name: fnote-server
+    image: fnote/fnote-server:latest
+    build:
+      dockerfile: DockerfileNginx
+      context: ../server
+    environment:
+      WEBSITE_BASE_HOST: ${WEBSITE_BASE_HOST}
+      UPLOADER_HOST: ${WEBSITE_SERVER_HOST}
+      MONGODB_USERNAME: ${MONGO_USERNAME:-fnote-user}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-12345678}
+      MONGODB_AUTH_SOURCE: ${MONGO_DATABASE:-fnote}
+      MONGODB_DATABASE: ${MONGO_DATABASE:-fnote}
+    depends_on:
+      - mongo
+    volumes:
+      - ./data/logs:/fnote/logs
+      - ./data/static:/fnote/static
+    networks:
+      - fnote-network
+
+  admin:
+    container_name: fnote-admin
+    image: fnote/fnote-admin:latest
+    build:
+      dockerfile: DockerfileNginx
+      context: ../admin
+      args:
+        VITE_BASE_HOST: ${WEBSITE_BASE_HOST}
+        VITE_API_HOST: ${WEBSITE_SERVER_HOST}
+    depends_on:
+      - server
+    networks:
+      - fnote-network
+
+  web:
+    container_name: fnote-web
+    image: fnote/fnote-web:latest
+    build:
+      dockerfile: Dockerfile
+      context: ../nextjs-web
+      args:
+        SERVER_HOST: http://server:8080
+    environment:
+      BASE_HOST: ${WEBSITE_BASE_HOST}
+      ADMIN_HOST: ${WEBSITE_ADMIN_HOST}
+      SERVER_HOST: http://server:8080
+      NEXT_PUBLIC_SERVER_HOST: ${WEBSITE_SERVER_HOST}
+    depends_on:
+      - server
+      - admin
+    networks:
+      - fnote-network
+
+  nginx:
+    container_name: fnote-nginx
+    image: nginx:1.27-alpine
+    depends_on:
+      - web
+      - admin
+      - server
+    environment:
+      SERVER_NAME: ${SERVER_NAME}
+      SSL_CERT_FILE: ${SSL_CERT_FILE}
+      SSL_KEY_FILE: ${SSL_KEY_FILE}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d/default.conf:/etc/nginx/templates/default.conf.template:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    command: >
+      /bin/sh -c "envsubst '$$SERVER_NAME $$SSL_CERT_FILE $$SSL_KEY_FILE' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    networks:
+      - fnote-network
+
+networks:
+  fnote-network:
+    driver: bridge

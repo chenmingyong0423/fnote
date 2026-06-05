@@ -17,13 +17,11 @@ package global
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"go.mongodb.org/mongo-driver/bson"
-
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 )
 
 var Config = &config{}
@@ -37,24 +35,36 @@ func IsWebsiteInitialized() bool {
 	return Config.IsWebsiteInitialized
 }
 
-func IsWebsiteInitializedFn(db *mongo.Database) (func() bool, error) {
+func IsWebsiteInitializedFn(db *mongox.Database) (func() bool, error) {
 	var ok bool
 	ctx := context.Background()
 	result := bson.M{}
-	err := db.Collection("configs").FindOne(ctx, query.Eq("typ", "website")).Decode(&result)
+	err := db.Database().Collection("configs").FindOne(ctx, query.Eq("typ", "website")).Decode(&result)
 	if err != nil {
 		return nil, err
 	}
-	props := result["props"].(bson.M)
+	props := result["props"].(bson.D)
 	if props == nil {
 		return nil, errors.New("The collections of config does not have a field named initialized.")
 	}
 
-	if Config.IsWebsiteInitialized, ok = props["website_init"].(bool); !ok {
-		return nil, errors.New("The collections of config does not have a field named initialized.")
-	} else {
-		return func() bool {
-			return Config.IsWebsiteInitialized
-		}, nil
+	hasWebsiteInitField := false
+	for _, prop := range props {
+		if prop.Key == "website_init" {
+			Config.IsWebsiteInitialized, ok = prop.Value.(bool)
+			if !ok {
+				return nil, errors.New("The collections of config does not have a field named initialized.")
+			}
+			hasWebsiteInitField = true
+			break
+		}
 	}
+
+	if !hasWebsiteInitField {
+		return nil, errors.New("The collections of config does not have a field named initialized.")
+	}
+
+	return func() bool {
+		return Config.IsWebsiteInitialized
+	}, nil
 }

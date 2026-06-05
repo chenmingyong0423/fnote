@@ -38,10 +38,6 @@ mongodb:
   password: 12345678
   auth_source: fnote
   database: fnote
-website:
-  base_host: http://localhost:3000 # 网站域名，对应前端的 host
-uploader:
-  host: http://localhost:8080 # 后端 host
 gravatar:
   api: https://dn-qiniu-avatar.qbox.me/avatar/
 push:

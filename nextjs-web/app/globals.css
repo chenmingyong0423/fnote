@@ -1,0 +1,69 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+@import "github-markdown-css/github-markdown.css";
+@import "highlight.js/styles/github.css";
+
+:root {
+  --background: #f3f4f6;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* 优化 github-markdown-css 的 li 样式 */
+.markdown-body ul {
+  list-style-type: disc;
+}
+.markdown-body ol {
+  list-style-type: decimal;
+}
+.markdown-body ul, .markdown-body ol {
+  padding-left: 2em;
+}
+.markdown-body li {
+  margin-bottom: 0.3em;
+}
+
+/* 暗黑模式支持 */
+.dark .markdown-body {
+  background: #181a1b;
+  color: #e6e6e6;
+}
+.dark .markdown-body pre,
+.dark .markdown-body code {
+  background: #23272e;
+  color: #e6e6e6;
+}
+.dark .markdown-body blockquote {
+  color: #b4b4b4;
+  border-left-color: #444c56;
+}
+.dark .markdown-body table {
+  background: #23272e;
+}
+.dark .markdown-body hr {
+  border-color: #444c56;
+}

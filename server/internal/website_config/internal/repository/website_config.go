@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config/internal/repository/dao"
@@ -28,10 +28,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"github.com/chenmingyong0423/go-mongox/builder/update"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
 
 	"github.com/pkg/errors"
 )

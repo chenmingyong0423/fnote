@@ -21,8 +21,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/web"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var PostDraftProviders = wire.NewSet(web.NewPostDraftHandler, service.NewPostDraftService, repository.NewPostDraftRepository, dao.NewPostDraftDao,
@@ -30,7 +30,7 @@ var PostDraftProviders = wire.NewSet(web.NewPostDraftHandler, service.NewPostDra
 	wire.Bind(new(repository.IPostDraftRepository), new(*repository.PostDraftRepository)),
 	wire.Bind(new(dao.IPostDraftDao), new(*dao.PostDraftDao)))
 
-func InitPostDraftModule(mongoDB *mongo.Database) *Module {
+func InitPostDraftModule(db *mongox.Database) *Module {
 	panic(wire.Build(
 		PostDraftProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),

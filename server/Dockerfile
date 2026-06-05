@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM golang:1.26-alpine3.23 AS builder
 
 ENV APP_HOME /fnote/server
 WORKDIR "$APP_HOME"

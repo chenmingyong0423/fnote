@@ -25,8 +25,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"github.com/chenmingyong0423/go-eventbus"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var CommentProviders = wire.NewSet(web.NewCommentHandler, service.NewCommentService, repository.NewCommentRepository, dao.NewCommentDao,
@@ -34,7 +34,7 @@ var CommentProviders = wire.NewSet(web.NewCommentHandler, service.NewCommentServ
 	wire.Bind(new(repository.ICommentRepository), new(*repository.CommentRepository)),
 	wire.Bind(new(dao.ICommentDao), new(*dao.CommentDao)))
 
-func InitCommentModule(mongoDB *mongo.Database, messageModule *message.Module, cfgModule *website_config.Module, postModule *post.Module, eventBus *eventbus.EventBus) *Module {
+func InitCommentModule(db *mongox.Database, messageModule *message.Module, cfgModule *website_config.Module, postModule *post.Module, eventBus *eventbus.EventBus) *Module {
 	panic(wire.Build(
 		CommentProviders,
 		wire.FieldsOf(new(*website_config.Module), "Svc"),

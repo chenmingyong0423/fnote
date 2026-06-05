@@ -22,7 +22,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/{{.UnderlineName}}/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/{{.UnderlineName}}/internal/web"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 var {{.DomainName}}Providers = wire.NewSet(web.New{{.DomainName}}Handler, service.New{{.DomainName}}Service, repository.New{{.DomainName}}Repository, dao.New{{.DomainName}}Dao,
@@ -30,7 +30,7 @@ var {{.DomainName}}Providers = wire.NewSet(web.New{{.DomainName}}Handler, servic
 	wire.Bind(new(repository.I{{.DomainName}}Repository), new(*repository.{{.DomainName}}Repository)),
 	wire.Bind(new(dao.I{{.DomainName}}Dao), new(*dao.{{.DomainName}}Dao)))
 	
-func Init{{.DomainName}}Module(mongoDB *mongo.Database) *Module {
+func Init{{.DomainName}}Module(db *mongox.Database) *Module {
 	panic(wire.Build(
 		{{.DomainName}}Providers,
 		wire.Struct(new(Module), "Svc", "Hdl"),

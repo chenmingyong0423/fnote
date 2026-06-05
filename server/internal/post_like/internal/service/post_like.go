@@ -21,7 +21,7 @@ import (
 
 	"github.com/chenmingyong0423/fnote/server/internal/post_like/internal/repository"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type IPostLikeService interface {

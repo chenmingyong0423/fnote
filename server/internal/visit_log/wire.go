@@ -22,8 +22,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/visit_log/internal/web"
 	"github.com/chenmingyong0423/go-eventbus"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var VisitLogProviders = wire.NewSet(web.NewVisitLogHandler, service.NewVisitLogService, repository.NewVisitLogRepository, dao.NewVisitLogDao,
@@ -31,7 +31,7 @@ var VisitLogProviders = wire.NewSet(web.NewVisitLogHandler, service.NewVisitLogS
 	wire.Bind(new(repository.IVisitLogRepository), new(*repository.VisitLogRepository)),
 	wire.Bind(new(dao.IVisitLogDao), new(*dao.VisitLogDao)))
 
-func InitVisitLogModule(mongoDB *mongo.Database, eventBus *eventbus.EventBus) *Module {
+func InitVisitLogModule(db *mongox.Database, eventBus *eventbus.EventBus) *Module {
 	panic(wire.Build(
 		VisitLogProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),

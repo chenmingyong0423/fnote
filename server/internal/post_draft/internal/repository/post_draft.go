@@ -18,11 +18,10 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
 	"github.com/chenmingyong0423/gkit/uuidx"
 
@@ -84,14 +83,6 @@ func (r *PostDraftRepository) GetById(ctx context.Context, id string) (*domain.P
 }
 
 func (r *PostDraftRepository) Save(ctx context.Context, postDraft domain.PostDraft) (string, error) {
-	var (
-		createdAt time.Time
-	)
-
-	if postDraft.CreatedAt != 0 {
-		createdAt = time.Unix(postDraft.CreatedAt, 0).Local()
-	}
-
 	if postDraft.Id == "" {
 		postDraft.Id = uuidx.RearrangeUUID4()
 	}
@@ -109,22 +100,22 @@ func (r *PostDraftRepository) Save(ctx context.Context, postDraft domain.PostDra
 		}
 	})
 
-	return r.dao.Save(ctx, &dao.PostDraft{
-		ID:               postDraft.Id,
-		CreatedAt:        createdAt,
-		Author:           postDraft.Author,
-		Title:            postDraft.Title,
-		Summary:          postDraft.Summary,
-		Content:          postDraft.Content,
-		CoverImg:         postDraft.CoverImg,
-		Categories:       categories,
-		Tags:             tags,
-		IsDisplayed:      postDraft.IsDisplayed,
-		StickyWeight:     postDraft.StickyWeight,
-		MetaDescription:  postDraft.MetaDescription,
-		MetaKeywords:     postDraft.MetaKeywords,
-		WordCount:        postDraft.WordCount,
-		IsCommentAllowed: postDraft.IsCommentAllowed,
+	return r.dao.Save(ctx, postDraft.Id, &dao.PostDraftUpdate{
+		PostDraftFields: dao.PostDraftFields{
+			Author:           postDraft.Author,
+			Title:            postDraft.Title,
+			Summary:          postDraft.Summary,
+			Content:          postDraft.Content,
+			CoverImg:         postDraft.CoverImg,
+			Categories:       categories,
+			Tags:             tags,
+			IsDisplayed:      postDraft.IsDisplayed,
+			StickyWeight:     postDraft.StickyWeight,
+			MetaDescription:  postDraft.MetaDescription,
+			MetaKeywords:     postDraft.MetaKeywords,
+			WordCount:        postDraft.WordCount,
+			IsCommentAllowed: postDraft.IsCommentAllowed,
+		},
 	})
 }
 

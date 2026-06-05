@@ -17,7 +17,6 @@ package main
 import (
 	"bytes"
 	"flag"
-	"github.com/chenmingyong0423/go-mongox"
 	"os"
 	"time"
 
@@ -51,13 +50,7 @@ func main() {
 			panic(err)
 		}
 	}
-	mongox.InitPlugin(&mongox.PluginConfig{
-		EnableDefaultFieldHook: true,
-		EnableModelHook:        false,
-		EnableValidationHook:   false,
-		// 覆盖默认的校验器，当 EnableValidationHook 为 true 时生效
-		Validate: nil,
-	})
+
 	app, err := initializeApp()
 	if err != nil {
 		panic(err)
@@ -72,6 +65,7 @@ func main() {
 
 func initViper(cfgPath string) error {
 	viper.SetConfigType("yaml")
+
 	readFile, err := os.ReadFile(cfgPath)
 	if err != nil {
 		return err
@@ -81,5 +75,25 @@ func initViper(cfgPath string) error {
 	if err != nil {
 		return err
 	}
+	if err = bindEnv(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func bindEnv() error {
+	envBindings := map[string]string{
+		"mongodb.username":    "MONGODB_USERNAME",
+		"mongodb.password":    "MONGODB_PASSWORD",
+		"mongodb.auth_source": "MONGODB_AUTH_SOURCE",
+		"mongodb.database":    "MONGODB_DATABASE",
+	}
+
+	for key, env := range envBindings {
+		if err := viper.BindEnv(key, env); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

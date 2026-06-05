@@ -22,8 +22,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/web"
 	"github.com/chenmingyong0423/go-eventbus"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var TagProviders = wire.NewSet(web.NewTagHandler, service.NewTagService, repository.NewTagRepository, dao.NewTagDao,
@@ -31,7 +31,7 @@ var TagProviders = wire.NewSet(web.NewTagHandler, service.NewTagService, reposit
 	wire.Bind(new(repository.ITagRepository), new(*repository.TagRepository)),
 	wire.Bind(new(dao.ITagDao), new(*dao.TagDao)))
 
-func InitTagModule(mongoDB *mongo.Database, eventBus *eventbus.EventBus) *Module {
+func InitTagModule(db *mongox.Database, eventBus *eventbus.EventBus) *Module {
 	panic(wire.Build(
 		TagProviders,
 		wire.Struct(new(Module), "Svc", "Hdl"),

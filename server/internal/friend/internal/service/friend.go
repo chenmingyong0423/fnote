@@ -23,7 +23,7 @@ import (
 
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"github.com/pkg/errors"
 )
@@ -113,9 +113,9 @@ func (s *FriendService) AdminGetFriends(ctx context.Context, pageDTO domain.Page
 }
 
 func (s *FriendService) ApplyForFriend(ctx context.Context, friend domain.Friend) error {
-	err := s.repo.Add(ctx, friend)
+	err := s.repo.Save(ctx, friend)
 	if err != nil {
-		return errors.WithMessage(err, "s.repo.Add failed")
+		return errors.WithMessage(err, "s.repo.Save failed")
 	}
 	return nil
 }

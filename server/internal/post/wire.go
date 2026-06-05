@@ -24,8 +24,8 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post_like"
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
 	"github.com/chenmingyong0423/go-eventbus"
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var PostProviders = wire.NewSet(web.NewPostHandler, service.NewPostService, repository.NewPostRepository, dao.NewPostDao,
@@ -33,7 +33,7 @@ var PostProviders = wire.NewSet(web.NewPostHandler, service.NewPostService, repo
 	wire.Bind(new(repository.IPostRepository), new(*repository.PostRepository)),
 	wire.Bind(new(dao.IPostDao), new(*dao.PostDao)))
 
-func InitPostModule(mongoDB *mongo.Database, cfgModel *website_config.Module, postLikeModel *post_like.Module, eventBus *eventbus.EventBus) *Module {
+func InitPostModule(db *mongox.Database, cfgModel *website_config.Module, postLikeModel *post_like.Module, eventBus *eventbus.EventBus) *Module {
 	panic(wire.Build(
 		PostProviders,
 		wire.FieldsOf(new(*website_config.Module), "Svc"),

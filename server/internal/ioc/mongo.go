@@ -18,18 +18,17 @@ import (
 	"context"
 	"time"
 
+	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/spf13/viper"
-
-	"go.mongodb.org/mongo-driver/mongo/readpref"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
-func NewMongoDB() *mongo.Database {
+func NewMongoDB() *mongox.Database {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(viper.GetString("mongodb.uri")).SetAuth(options.Credential{
+	mongoClient, err := mongo.Connect(options.Client().ApplyURI(viper.GetString("mongodb.uri")).SetAuth(options.Credential{
 		Username:   viper.GetString("mongodb.username"),
 		Password:   viper.GetString("mongodb.password"),
 		AuthSource: viper.GetString("mongodb.auth_source"),
@@ -37,9 +36,12 @@ func NewMongoDB() *mongo.Database {
 	if err != nil {
 		panic(err)
 	}
-	err = client.Ping(ctx, readpref.Primary())
+	err = mongoClient.Ping(ctx, readpref.Primary())
 	if err != nil {
 		panic(err)
 	}
-	return client.Database(viper.GetString("mongodb.database"))
+
+	client := mongox.NewClient(mongoClient, &mongox.Config{})
+
+	return client.NewDatabase(viper.GetString("mongodb.database"))
 }

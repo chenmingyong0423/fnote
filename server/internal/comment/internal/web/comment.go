@@ -20,11 +20,12 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 
-	"github.com/chenmingyong0423/fnote/server/internal/message"
-
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/message"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg"
 
 	"github.com/chenmingyong0423/fnote/server/internal/comment/internal/service"
 
@@ -38,7 +39,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 func NewCommentHandler(serv service.ICommentService, cfgService website_config.Service, postServ post.Service, msgServ message.Service) *CommentHandler {
@@ -100,13 +101,13 @@ func (h *CommentHandler) AddComment(ctx *gin.Context, req CommentRequest) (*apiw
 		return nil, apiwrap.NewErrorResponseBody(http.StatusNotFound, "Post not found.")
 	}
 	if !p.IsCommentAllowed {
-		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comments are disabled for this post.")
 	}
 	id, err := h.serv.AddComment(ctx, domain.Comment{
 		PostInfo: domain.PostInfo{
 			PostId:    req.PostId,
 			PostTitle: p.Title,
-			PostUrl:   fmt.Sprintf("%s/posts/%s", viper.GetString("website.base_host"), req.PostId),
+			PostUrl:   fmt.Sprintf("%s/posts/%s", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000"), req.PostId),
 		},
 		Content: req.Content,
 		UserInfo: domain.UserInfo{
@@ -166,7 +167,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*a
 		return nil, err
 	}
 	if !p.IsCommentAllowed {
-		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comment module is closed.")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusForbidden, "Comment are disabled for this post.")
 	}
 	id, err := h.serv.AddReply(ctx, commentId, req.PostId, domain.CommentReply{
 		Content:   req.Content,
