@@ -50,6 +50,7 @@ type IPostRepository interface {
 	UpdatePostIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error
 	IncreasePostLikeCount(ctx context.Context, postId string) error
 	FindDisplayedPosts(ctx context.Context) ([]domain.Post, error)
+	UpdateCoverImage(ctx context.Context, id string, coverImage string) error
 }
 
 var _ IPostRepository = (*PostRepository)(nil)
@@ -62,6 +63,10 @@ func NewPostRepository(dao dao.IPostDao) *PostRepository {
 
 type PostRepository struct {
 	dao dao.IPostDao
+}
+
+func (r *PostRepository) UpdateCoverImage(ctx context.Context, id string, coverImage string) error {
+	return r.dao.UpdateCoverImageById(ctx, id, coverImage)
 }
 
 func (r *PostRepository) FindDisplayedPosts(ctx context.Context) ([]domain.Post, error) {

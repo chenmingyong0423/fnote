@@ -64,3 +64,7 @@ type Tag4PostRequest struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
 }
+
+type PostCoverImageReq struct {
+	CoverImage string `json:"cover_image"`
+}

@@ -54,6 +54,7 @@ type IPostService interface {
 	SavePost(ctx context.Context, originalPost *domain.Post, savedPost *domain.Post, isNewPost bool) error
 	IncreasePostLikeCount(ctx context.Context, postId string) error
 	FindDisplayedPosts(ctx context.Context) ([]domain.Post, error)
+	UpdatePostCoverImage(ctx context.Context, postId string, coverImage string) error
 }
 
 var _ IPostService = (*PostService)(nil)
@@ -72,6 +73,10 @@ type PostService struct {
 	repo       repository.IPostRepository
 	cfgService website_config.Service
 	eventBus   *eventbus.EventBus
+}
+
+func (s *PostService) UpdatePostCoverImage(ctx context.Context, postId string, coverImage string) error {
+	return s.repo.UpdateCoverImage(ctx, postId, coverImage)
 }
 
 func (s *PostService) FindDisplayedPosts(ctx context.Context) ([]domain.Post, error) {
