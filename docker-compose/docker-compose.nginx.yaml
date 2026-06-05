@@ -59,7 +59,7 @@ services:
     image: fnote/fnote-web:latest
     build:
       dockerfile: Dockerfile
-      context: ../nextjs-web
+      context: ../web
       args:
         SERVER_HOST: http://server:8080
     environment:
