@@ -86,6 +86,7 @@ type IPostDao interface {
 	UpdateIsCommentAllowedById(ctx context.Context, id string, isCommentAllowed bool) error
 	IncreasePostLikeCount(ctx context.Context, postId string) error
 	FindDisplayedPosts(ctx context.Context) ([]*Post, error)
+	UpdateCoverImageById(ctx context.Context, id string, coverImage string) error
 }
 
 var _ IPostDao = (*PostDao)(nil)
@@ -98,6 +99,17 @@ func NewPostDao(db *mongox.Database) *PostDao {
 
 type PostDao struct {
 	coll *mongox.Collection[Post]
+}
+
+func (d *PostDao) UpdateCoverImageById(ctx context.Context, id string, coverImage string) error {
+	updateResult, err := d.coll.Updater().Filter(query.Id(id)).Updates(update.Set("cover_img", coverImage)).UpdateOne(ctx)
+	if err != nil {
+		return errors.Wrapf(err, "fails to update cover_image of post, id=%s, cover_image=%s", id, coverImage)
+	}
+	if updateResult.ModifiedCount == 0 {
+		return fmt.Errorf("updateResult.ModifiedCount = 0, fails to update cover_image of post, id=%s, cover_image=%s", id, coverImage)
+	}
+	return nil
 }
 
 func (d *PostDao) FindDisplayedPosts(ctx context.Context) ([]*Post, error) {

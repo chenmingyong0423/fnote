@@ -86,6 +86,7 @@ func (h *PostHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup.DELETE("/:id", apiwrap.Wrap(h.DeletePost))
 	adminGroup.PUT("/:id/display", apiwrap.WrapWithBody(h.UpdatePostIsDisplayed))
 	adminGroup.PUT("/:id/comment-allowed", apiwrap.WrapWithBody(h.UpdatePostIsCommentAllowed))
+	adminGroup.PUT("/:id/cover", apiwrap.WrapWithBody(h.UpdatePostCoverImage))
 }
 
 func (h *PostHandler) GetLatestPosts(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[*SummaryPostVO]], error) {
@@ -346,4 +347,8 @@ func (h *PostHandler) UpdatePostIsDisplayed(ctx *gin.Context, req PostDisplayReq
 
 func (h *PostHandler) UpdatePostIsCommentAllowed(ctx *gin.Context, req PostCommentAllowedReq) (*apiwrap.ResponseBody[any], error) {
 	return apiwrap.SuccessResponse(), h.serv.UpdatePostIsCommentAllowed(ctx, ctx.Param("id"), req.IsCommentAllowed)
+}
+
+func (h *PostHandler) UpdatePostCoverImage(ctx *gin.Context, req PostCoverImageReq) (*apiwrap.ResponseBody[any], error) {
+	return apiwrap.SuccessResponse(), h.serv.UpdatePostCoverImage(ctx, ctx.Param("id"), req.CoverImage)
 }
