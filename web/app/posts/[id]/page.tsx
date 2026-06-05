@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       title: `${post.title} - ${config.seo_meta.og_title || config.website_meta.website_name}`,
       description: post.meta_description || post.summary,
       url: process.env.BASE_HOST + `/posts/${id}`,
-      images: post.cover_img ? [{ url: post.cover_img }] : (config.seo_meta.og_image ? [{ url: process.env.SERVER_HOST + config.seo_meta.og_image }] : undefined),
+      images: post.cover_img ? [{ url: post.cover_img }] : (config.seo_meta.og_image ? [{ url: process.env.NEXT_PUBLIC_SERVER_HOST + config.seo_meta.og_image }] : undefined),
       siteName: config.website_meta.website_name,
       type: "article",
     },
