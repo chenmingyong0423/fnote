@@ -21,6 +21,28 @@
         />
       </div>
     </div>
+    <a-modal
+      v-model:open="coverEditorVisible"
+      title="编辑文章封面"
+      ok-text="保存"
+      cancel-text="取消"
+      :confirm-loading="coverSaving"
+      @ok="updateCover"
+      @cancel="closeCoverEditor"
+    >
+      <a-form layout="vertical">
+        <a-form-item label="文章">
+          <a-input :value="currentPost?.title" disabled />
+        </a-form-item>
+        <a-form-item label="封面" required>
+          <StaticUpload
+            :image-url="coverImage"
+            @update:imageUrl="(value) => (coverImage = value)"
+            :authorization="userStore.token"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
     <a-spin :spinning="loading">
       <a-table
         :columns="columns"
@@ -94,6 +116,9 @@
               <span>
                 <a @click="router.push(`/home/post/draft/${record.id}`)">编辑</a>
               </span>
+              <span>
+                <a @click="openCoverEditor(record)">编辑封面</a>
+              </span>
               <a-popconfirm v-if="posts.length" title="确认删除？" @confirm="deletePost(record)">
                 <a>删除</a>
               </a-popconfirm>
@@ -113,6 +138,7 @@ import {
   DeletePost,
   GetPost,
   GetPostById,
+  UpdatePostCover,
   type IPost,
   type PageRequest
 } from '@/interfaces/Post'
@@ -122,8 +148,12 @@ import { message } from 'ant-design-vue'
 import type { TableColumnType, TableProps } from 'ant-design-vue'
 import { GetSelectedCategories, type SelectCategory } from '@/interfaces/Category'
 import { GetSelectedTags, type SelectTag } from '@/interfaces/Tag'
+import StaticUpload from '@/components/upload/StaticUpload.vue'
+import { useUserStore } from '@/stores/user'
 
 document.title = '文章列表 - 后台管理'
+
+const userStore = useUserStore()
 
 const showSorterTooltip = ref('点击升序排序')
 const columns = computed<TableColumnType[]>(() => {
@@ -235,6 +265,10 @@ const change: TableProps<IPost>['onChange'] = (pagination, filters, sorter: any)
 }
 
 const loading = ref(false)
+const coverEditorVisible = ref(false)
+const coverSaving = ref(false)
+const currentPost = ref<IPost | null>(null)
+const coverImage = ref('')
 
 const getPosts = async () => {
   try {
@@ -296,6 +330,45 @@ const changeCommentAllowedStatus = async (id: string, is_comment_allowed: boolea
 
 const searchPost = () => {
   getPosts()
+}
+
+const openCoverEditor = (record: IPost) => {
+  currentPost.value = record
+  coverImage.value = record.cover_img
+  coverEditorVisible.value = true
+}
+
+const closeCoverEditor = () => {
+  currentPost.value = null
+  coverImage.value = ''
+}
+
+const updateCover = async () => {
+  if (!currentPost.value) {
+    return
+  }
+
+  if (!coverImage.value) {
+    message.warning('请选择封面')
+    return
+  }
+
+  try {
+    coverSaving.value = true
+    const response: any = await UpdatePostCover(currentPost.value.id, coverImage.value)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
+      return
+    }
+    message.success('更新成功')
+    coverEditorVisible.value = false
+    closeCoverEditor()
+    await getPosts()
+  } catch (error) {
+    console.log(error)
+  } finally {
+    coverSaving.value = false
+  }
 }
 
 interface Filter {

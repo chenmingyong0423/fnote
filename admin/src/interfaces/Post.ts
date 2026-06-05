@@ -112,6 +112,16 @@ export const ChangeCommentAllowedStatus = (id: string, isCommentAllowed: boolean
   })
 }
 
+export const UpdatePostCover = (id: string, coverImage: string) => {
+  return instance({
+    url: `/posts/${id}/cover`,
+    method: 'put',
+    data: {
+      cover_image: coverImage
+    }
+  })
+}
+
 export const PublishPost = (post: PostRequest) => {
   return instance({
     url: `/post-draft/${post.id}/publish`,
