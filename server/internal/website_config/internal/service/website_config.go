@@ -57,7 +57,7 @@ type IWebsiteConfigService interface {
 	UpdateSocialInfo(ctx context.Context, socialInfo domain.SocialInfo) error
 	DeleteSocialInfo(ctx context.Context, id []byte) error
 	GetAdminConfig(ctx context.Context) (*domain.AdminConfig, error)
-	InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfig domain.WebsiteConfig, emailConfig domain.EmailConfig) error
+	InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfig domain.WebsiteConfig) error
 	UpdateWebsiteConfig(ctx context.Context, websiteConfig domain.WebsiteConfig, now time.Time) error
 	GetTPSVConfig(ctx context.Context) (*domain.TPSVConfig, error)
 	AddTPSVConfig(ctx context.Context, tpsv domain.TPSV) error
@@ -72,6 +72,8 @@ type IWebsiteConfigService interface {
 	IsCarouselElemExist(ctx context.Context, id string) (bool, error)
 	UpdateIntroduction4FriendConfig(ctx context.Context, introduction string) error
 	GetCommonConfig(ctx context.Context) (*domain.CommonConfig, error)
+	GetConfigHealth(ctx context.Context) (*domain.ConfigHealth, error)
+	UpdateConfigCheckState(ctx context.Context, state domain.ConfigCheckState) error
 }
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
@@ -176,14 +178,9 @@ func (s *WebsiteConfigService) GetTPSVConfig(ctx context.Context) (*domain.TPSVC
 	return s.repo.GetTPSVConfig(ctx)
 }
 
-func (s *WebsiteConfigService) InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfig domain.WebsiteConfig, emailConfig domain.EmailConfig) error {
+func (s *WebsiteConfigService) InitializeWebsite(ctx context.Context, adminConfig domain.AdminConfig, webSiteConfig domain.WebsiteConfig) error {
 	now := time.Now().Local()
 	err := s.UpdateAdminConfig(ctx, adminConfig, now)
-	if err != nil {
-		return err
-	}
-
-	err = s.repo.UpdateEmailConfig(ctx, &emailConfig, now)
 	if err != nil {
 		return err
 	}

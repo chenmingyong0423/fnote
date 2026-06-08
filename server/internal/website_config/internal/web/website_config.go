@@ -75,6 +75,9 @@ func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	// website
 	adminGroup.GET("/website", apiwrap.Wrap(h.AdminGetWebsiteConfig))
 	adminGroup.GET("/website/meta", apiwrap.Wrap(h.AdminGetWebsiteConfig4Meta))
+	adminGroup.GET("/completion", apiwrap.Wrap(h.AdminGetConfigCompletion))
+	adminGroup.GET("/health", apiwrap.Wrap(h.AdminGetConfigHealth))
+	adminGroup.PUT("/health/:key/state", apiwrap.WrapWithBody(h.AdminUpdateConfigCheckState))
 	adminGroup.PUT("/website", apiwrap.WrapWithBody(h.AdminUpdateWebsiteConfig))
 	adminGroup.POST("/website/records", apiwrap.WrapWithBody(h.AdminAddRecordInWebsiteConfig))
 	adminGroup.DELETE("/website/records", apiwrap.Wrap(h.AdminDeleteRecordInWebsiteConfig))
@@ -472,12 +475,6 @@ func (h *WebsiteConfigHandler) InitializeWebsite(ctx *gin.Context, req InitReque
 		WebsiteOwnerProfile: req.WebsiteOwnerProfile,
 		WebsiteOwnerAvatar:  req.WebsiteOwnerAvatar,
 		WebsiteInit:         gkit.ToPtr(true),
-	}, domain.EmailConfig{
-		Host:     req.EmailServer.Host,
-		Port:     req.EmailServer.Port,
-		Username: req.EmailServer.Username,
-		Password: req.EmailServer.Password,
-		Email:    req.EmailServer.Email,
 	})
 	if err == nil {
 		global.Config.IsWebsiteInitialized = true

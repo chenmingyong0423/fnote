@@ -95,13 +95,12 @@ type LoginRequest struct {
 }
 
 type InitRequest struct {
-	WebsiteName         string      `json:"website_name" binding:"required"`
-	WebsiteIcon         string      `json:"website_icon" binding:"required"`
-	WebsiteOwner        string      `json:"website_owner" binding:"required"`
-	WebsiteOwnerProfile string      `json:"website_owner_profile" binding:"required"`
-	WebsiteOwnerAvatar  string      `json:"website_owner_avatar" binding:"required"`
-	EmailServer         EmailServer `json:"email_server" binding:"required"`
-	Admin               Admin       `json:"admin" binding:"required"`
+	WebsiteName         string `json:"website_name" binding:"required"`
+	WebsiteIcon         string `json:"website_icon" binding:"required"`
+	WebsiteOwner        string `json:"website_owner" binding:"required"`
+	WebsiteOwnerProfile string `json:"website_owner_profile" binding:"required"`
+	WebsiteOwnerAvatar  string `json:"website_owner_avatar" binding:"required"`
+	Admin               Admin  `json:"admin" binding:"required"`
 }
 
 type EmailServer struct {
@@ -141,4 +140,11 @@ type CarouselRequest struct {
 
 type CarouselShowRequest struct {
 	Show bool `json:"show"`
+}
+
+type UpdateConfigCheckStateReq struct {
+	Status        string `json:"status" binding:"required"`
+	IgnoredReason string `json:"ignored_reason,omitempty"`
+	SnoozeDays    int    `json:"snooze_days,omitempty"`
+	SnoozedUntil  *int64 `json:"snoozed_until,omitempty"`
 }
