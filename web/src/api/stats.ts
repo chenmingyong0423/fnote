@@ -10,6 +10,15 @@ export interface WebsiteCountStatsVO {
   website_view_count: number;
 }
 
+export const DEFAULT_WEBSITE_STATS: WebsiteCountStatsVO = {
+  post_count: 0,
+  category_count: 0,
+  tag_count: 0,
+  comment_count: 0,
+  like_count: 0,
+  website_view_count: 0,
+};
+
 export async function getWebsiteStats(): Promise<WebsiteCountStatsVO> {
   const res = await request<Response<WebsiteCountStatsVO>>("/api/stats");
   if (res.code !== 0 || !res.data) {

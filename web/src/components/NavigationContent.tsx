@@ -1,6 +1,11 @@
 "use client";
 
-import { AppstoreOutlined, BookOutlined, ProductOutlined, TagsOutlined } from "@ant-design/icons";
+import {
+  AppstoreOutlined,
+  BookOutlined,
+  ProductOutlined,
+  TagsOutlined,
+} from "@ant-design/icons";
 import { Empty } from "antd";
 import type { CategoryWithCountVO } from "@/src/api/category";
 import type { TagVO } from "@/src/api/tags";
@@ -8,9 +13,16 @@ import type { TagVO } from "@/src/api/tags";
 type NavigationContentProps = {
   categories: CategoryWithCountVO[];
   tags: TagVO[];
+  hasCategoryError?: boolean;
+  hasTagError?: boolean;
 };
 
-export default function NavigationContent({ categories, tags }: NavigationContentProps) {
+export default function NavigationContent({
+  categories,
+  tags,
+  hasCategoryError = false,
+  hasTagError = false,
+}: NavigationContentProps) {
   const hasCategories = categories.length > 0;
   const hasTags = tags.length > 0;
 
@@ -30,9 +42,13 @@ export default function NavigationContent({ categories, tags }: NavigationConten
               >
                 <div className="flex flex-col items-start mb-2 dark:text-gray-300">
                   <ProductOutlined className="mb-1 text-lg md:text-3xl" />
-                  <span className="text-sm md:text-3xl font-bold text-left line-clamp-2">{cat.name}</span>
+                  <span className="text-sm md:text-3xl font-bold text-left line-clamp-2">
+                    {cat.name}
+                  </span>
                 </div>
-                <div className="text-xs truncate mb-2 text-left dark:text-gray-400 line-clamp-2">{cat.description}</div>
+                <div className="text-xs truncate mb-2 text-left dark:text-gray-400 line-clamp-2">
+                  {cat.description}
+                </div>
                 <div className="flex items-center gap-1 text-xs mt-auto">
                   <BookOutlined />
                   <span className="dark:text-gray-400">{cat.count}</span>
@@ -42,7 +58,11 @@ export default function NavigationContent({ categories, tags }: NavigationConten
           </div>
         ) : (
           <div className="py-6 flex justify-center">
-            <Empty description="暂无分类" />
+            <Empty
+              description={
+                hasCategoryError ? "网站数据暂时异常" : "暂无分类"
+              }
+            />
           </div>
         )}
       </section>
@@ -65,7 +85,7 @@ export default function NavigationContent({ categories, tags }: NavigationConten
           </div>
         ) : (
           <div className="py-6 flex justify-center">
-            <Empty description="暂无标签" />
+            <Empty description={hasTagError ? "网站数据暂时异常" : "暂无标签"} />
           </div>
         )}
       </section>

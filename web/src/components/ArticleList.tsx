@@ -15,6 +15,7 @@ interface ArticleListProps {
   field?: "latest" | "oldest" | "likes";
   currentPage?: number;
   pageSize?: number;
+  hasError?: boolean;
   onPageChange?: (page: number, pageSize: number, field: string) => void;
 }
 
@@ -25,6 +26,7 @@ export default function ArticleList({
   field = "latest",
   currentPage = 1,
   pageSize = 10,
+  hasError = false,
   onPageChange,
 }: ArticleListProps) {
   const [localField, setLocalField] = useState(field);
@@ -119,7 +121,9 @@ export default function ArticleList({
               ))}
             </div>
           ) : (
-            <div className="py-8 text-center text-gray-400">暂无数据</div>
+            <div className="py-8 text-center text-gray-400">
+              {hasError ? "网站数据暂时异常" : "暂无数据"}
+            </div>
           )}
           <div className="flex justify-end mt-4">
             <Pagination
@@ -147,6 +151,7 @@ export default function ArticleList({
             avatar={siteOwner.avatar}
             bio={siteOwner.bio}
             stats={siteOwner.stats}
+            hasError={siteOwner.hasError}
           />
         )}
       </div>
