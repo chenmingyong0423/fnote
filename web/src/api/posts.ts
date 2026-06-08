@@ -111,6 +111,30 @@ export async function getPostDetail(id: string) {
   return request<PostDetailResponse>(`/api/posts/${id}`);
 }
 
+const POST_NOT_FOUND_MESSAGES = new Set([
+  "The postId does not exist.",
+  "Post not found.",
+]);
+
+function isPostNotFoundError(error: unknown) {
+  return error instanceof Error && POST_NOT_FOUND_MESSAGES.has(error.message);
+}
+
+export async function getPostDetailOrNull(id: string): Promise<PostDetail | null> {
+  try {
+    const res = await getPostDetail(id);
+    if (res.code !== 0 || !res.data) {
+      return null;
+    }
+    return res.data;
+  } catch (error) {
+    if (isPostNotFoundError(error)) {
+      return null;
+    }
+    throw error;
+  }
+}
+
 /**
  * 文章点赞
  * @param id 文章ID

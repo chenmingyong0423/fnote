@@ -1,14 +1,13 @@
 import PostDetail from "@/src/components/PostDetail";
-import { getPostDetail } from "@/src/api/posts";
+import { getPostDetailOrNull } from "@/src/api/posts";
 import { notFound } from "next/navigation";
 import { getCommonConfig } from "@/src/api/config";
 import type { Metadata } from "next";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const res = await getPostDetail(id);
-  if (res.code !== 0 || !res.data) return {};
-  const post = res.data;
+  const post = await getPostDetailOrNull(id);
+  if (!post) return {};
   const config = await getCommonConfig();
   return {
     title: `${post.title} - ${config.seo_meta.title || config.website_meta.website_name}`,
@@ -31,7 +30,7 @@ type Params = Promise<{
 
 export default async function PostDetailPage({ params }: { params: Params }) {
   const { id } = await params
-  const res = await getPostDetail(id);
-  if (res.code !== 0 || !res.data) return notFound();
-  return <PostDetail post={res.data} />;
+  const post = await getPostDetailOrNull(id);
+  if (!post) return notFound();
+  return <PostDetail post={post} />;
 }

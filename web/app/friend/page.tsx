@@ -2,7 +2,6 @@ import { getCommonConfig } from "@/src/api/config";
 import { getFriendSummary, getFriends } from "@/src/api/friend";
 import FriendPageClient from "@/src/components/FriendPageClient";
 import type { Metadata } from "next";
-import '@ant-design/v5-patch-for-react-19';
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getCommonConfig().catch(() => null);

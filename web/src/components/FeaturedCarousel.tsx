@@ -8,8 +8,10 @@ export default function FeaturedCarousel({ items }: { items: CarouselItemVO[] })
   return (
     <section>
       {items.length === 0 ? (
-        <div className="h-56 sm:h-72 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 shadow">
-          暂无轮播图
+        <div className="h-56 sm:h-72 flex items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-100 text-gray-500 shadow dark:border-gray-700 dark:bg-[#141414] dark:text-gray-400">
+          <span className="rounded-full border border-gray-200 bg-white/70 px-4 py-1.5 text-sm dark:border-gray-700 dark:bg-[#232426] dark:text-gray-300">
+            暂无轮播图
+          </span>
         </div>
       ) : (
         <Carousel autoplay arrows className="rounded-lg overflow-hidden shadow">

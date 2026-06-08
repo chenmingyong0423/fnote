@@ -6,7 +6,6 @@ import { CommentOutlined } from "@ant-design/icons";
 
 import { CommentForm } from "./CommentForm";
 import { CommentList } from "./CommentList";
-import '@ant-design/v5-patch-for-react-19';
 
 interface CommentsProps {
   postId: string;
