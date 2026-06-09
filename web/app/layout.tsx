@@ -6,11 +6,12 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import Footer from "../src/components/Footer";
 import Header from "../src/components/Header";
 import SeoHead from "../src/components/SeoHead";
-import { getCommonConfig } from "@/src/api/config";
+import { DEFAULT_COMMON_CONFIG, getCommonConfig } from "@/src/api/config";
 import { AntdThemeProvider } from "@/src/components/AntdThemeProvider";
 import LogVisitClient from "../src/components/LogVisitClient";
 import { checkInitialization } from "@/src/api/checkInitialization";
 import { redirect } from "next/navigation";
+import { isBackendUnavailableError } from "@/src/utils/http";
 export const dynamic = 'force-dynamic'
 
 const geistSans = Geist({
@@ -67,34 +68,45 @@ function ensureInitialized() {
 
 // 动态生成 metadata
 export async function generateMetadata(): Promise<Metadata> {
-  await ensureInitialized();
-  const config = await getCommonConfig();
-  return {
-    title: config.seo_meta.title || config.website_meta.website_name,
-    description: config.seo_meta.description,
-    keywords: config.seo_meta.keywords,
-    authors: [{ name: config.seo_meta.author || config.website_meta.website_owner }],
-    robots: config.seo_meta.robots || "index, follow",
-    openGraph: {
-      title: config.seo_meta.og_title || config.website_meta.website_name,
+  try {
+    await ensureInitialized();
+    const config = await getCommonConfig();
+    return {
+      title: config.seo_meta.title || config.website_meta.website_name,
       description: config.seo_meta.description,
-      url: process.env.BASE_HOST,
-      images: config.seo_meta.og_image ? [{ url: process.env.SERVER_HOST + config.seo_meta.og_image }] : undefined,
-      siteName: config.website_meta.website_name,
-      type: "website",
-    },
-    verification: {
-      // 百度验证通过 other 字段处理
-      google: undefined, // 可以根据需要添加谷歌验证
-    },
-    other: {
-      // 第三方站点验证
-      ...config.third_party_site_verification.reduce((acc, item) => {
-        acc[item.key] = item.value;
-        return acc;
-      }, {} as Record<string, string>),
-    },
-  };
+      keywords: config.seo_meta.keywords,
+      authors: [{ name: config.seo_meta.author || config.website_meta.website_owner }],
+      robots: config.seo_meta.robots || "index, follow",
+      openGraph: {
+        title: config.seo_meta.og_title || config.website_meta.website_name,
+        description: config.seo_meta.description,
+        url: process.env.BASE_HOST,
+        images: config.seo_meta.og_image ? [{ url: process.env.NEXT_PUBLIC_SERVER_HOST + config.seo_meta.og_image }] : undefined,
+        siteName: config.website_meta.website_name,
+        type: "website",
+      },
+      verification: {
+        // 百度验证通过 other 字段处理
+        google: undefined, // 可以根据需要添加谷歌验证
+      },
+      other: {
+        // 第三方站点验证
+        ...config.third_party_site_verification.reduce((acc, item) => {
+          acc[item.key] = item.value;
+          return acc;
+        }, {} as Record<string, string>),
+      },
+    };
+  } catch (error) {
+    if (isBackendUnavailableError(error)) {
+      return {
+        title: DEFAULT_COMMON_CONFIG.seo_meta.title,
+        description: DEFAULT_COMMON_CONFIG.seo_meta.description,
+        robots: DEFAULT_COMMON_CONFIG.seo_meta.robots,
+      };
+    }
+    throw error;
+  }
 }
 
 export default async function RootLayout({
@@ -102,8 +114,17 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  await ensureInitialized();
-  const config = await getCommonConfig();
+  let config = DEFAULT_COMMON_CONFIG;
+  let hasSiteIssue = false;
+  try {
+    await ensureInitialized();
+    config = await getCommonConfig();
+  } catch (error) {
+    if (!isBackendUnavailableError(error)) {
+      throw error;
+    }
+    hasSiteIssue = true;
+  }
 
   return (
     <html lang="en">
@@ -113,7 +134,12 @@ export default async function RootLayout({
         <AntdRegistry>
           <AntdThemeProvider>
             <div className="min-h-screen flex flex-col">
-              <Header />
+              <Header websiteMetaConfig={config.website_meta} />
+              {hasSiteIssue && (
+                <div className="mx-auto mb-6 w-full max-w-7xl rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  网站数据暂时异常，部分内容可能无法显示，请稍后再试。
+                </div>
+              )}
               <SeoHead config={config} />
               <main>{children}</main>
               <LogVisitClient />

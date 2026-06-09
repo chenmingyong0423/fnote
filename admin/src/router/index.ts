@@ -25,6 +25,7 @@ const router = createRouter({
     {
       path: '/home',
       name: 'home',
+      redirect: '/home/dashboard/traffic-stats',
       component: () => import('../views/HomeView.vue'),
       children: [
         {
@@ -92,10 +93,9 @@ const router = createRouter({
   ]
 })
 
-let flag = true
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
-  if (flag) {
+  if (!userStore.initialization) {
     await isInit()
       .then((res) => {
         if (res.data.code === 0) {
@@ -105,7 +105,6 @@ router.beforeEach(async (to, from, next) => {
       .catch((err) => {
         console.error(err)
       })
-    flag = false
   }
   if (!userStore.initialization) {
     if (to.name !== 'init') {
@@ -123,7 +122,7 @@ router.beforeEach(async (to, from, next) => {
     next({ name: 'login' })
   } else if (to.name == 'init') {
     message.warn('网站已经初始化').then((r) => r)
-    next({ name: 'home' })
+    next({ path: '/home/dashboard/traffic-stats' })
   } else {
     // 如果用户已登录，或者访问的是登录页面，正常导航
     next()

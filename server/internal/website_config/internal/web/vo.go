@@ -147,3 +147,46 @@ type CommonConfigVO struct {
 	TPSVVO      []TPSVVO            `json:"third_party_site_verification"`
 	Records     []string            `json:"records"`
 }
+
+type ConfigCompletionVO struct {
+	Completed bool                     `json:"completed"`
+	Total     int                      `json:"total"`
+	Done      int                      `json:"done"`
+	Items     []ConfigCompletionItemVO `json:"items"`
+}
+
+type ConfigCompletionItemVO struct {
+	Key           string   `json:"key"`
+	Label         string   `json:"label"`
+	Configured    bool     `json:"configured"`
+	MissingFields []string `json:"missing_fields,omitempty"`
+	Href          string   `json:"href,omitempty"`
+	Description   string   `json:"description,omitempty"`
+}
+
+type ConfigHealthVO struct {
+	Score       int                  `json:"score"`
+	Required    ConfigHealthGroupVO  `json:"required"`
+	Recommended ConfigHealthGroupVO  `json:"recommended"`
+	Optional    ConfigHealthGroupVO  `json:"optional"`
+	Items       []ConfigHealthItemVO `json:"items"`
+}
+
+type ConfigHealthGroupVO struct {
+	Done      int  `json:"done"`
+	Total     int  `json:"total"`
+	Completed bool `json:"completed"`
+}
+
+type ConfigHealthItemVO struct {
+	Key           string   `json:"key"`
+	Label         string   `json:"label"`
+	Level         string   `json:"level"`
+	Status        string   `json:"status"`
+	Configured    bool     `json:"configured"`
+	MissingFields []string `json:"missing_fields,omitempty"`
+	Description   string   `json:"description,omitempty"`
+	Href          string   `json:"href,omitempty"`
+	SnoozedUntil  *int64   `json:"snoozed_until,omitempty"`
+	IgnoredReason string   `json:"ignored_reason,omitempty"`
+}

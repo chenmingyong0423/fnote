@@ -4,12 +4,14 @@ import Navbar from "./Navbar";
 import Link from "next/link";
 import { getMenus } from "../api/category";
 import HeaderActions from "./HeaderActions";
-import {getCommonConfig} from "@/src/api/config";
+import type { WebsiteMetaVO } from "@/src/api/config";
 
-const Header = async () => {
-  const menus = await getMenus();
-  const config = await getCommonConfig();
-  const websiteMetaConfig = config?.website_meta;
+type HeaderProps = {
+  websiteMetaConfig?: WebsiteMetaVO;
+};
+
+const Header = async ({ websiteMetaConfig }: HeaderProps) => {
+  const menus = await getMenus().catch(() => []);
 
   return (
     <header

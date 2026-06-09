@@ -350,13 +350,6 @@ export interface InitReq {
   website_owner: string
   website_owner_profile: string
   website_owner_avatar: string
-  email_server: {
-    host: string
-    port: number
-    username: string
-    password: string
-    email: string
-  }
   admin: {
     username: string
     password: string
@@ -374,6 +367,82 @@ export const Init = (req: InitReq) => {
   return instance({
     url: '/configs/initialization',
     method: 'post',
+    data: req
+  })
+}
+
+export interface ConfigCompletionItem {
+  key: string
+  label: string
+  configured: boolean
+  missing_fields?: string[]
+  href?: string
+  description?: string
+}
+
+export interface ConfigCompletion {
+  completed: boolean
+  total: number
+  done: number
+  items: ConfigCompletionItem[]
+}
+
+export const GetConfigCompletion = () => {
+  return instance({
+    url: '/configs/completion',
+    method: 'get'
+  })
+}
+
+export type ConfigHealthLevel = 'required' | 'recommended' | 'optional'
+export type ConfigHealthStatus = 'ok' | 'missing' | 'ignored' | 'snoozed'
+export type ConfigCheckStateStatus = 'active' | 'ignored' | 'snoozed'
+
+export interface ConfigHealthGroup {
+  done: number
+  total: number
+  completed: boolean
+}
+
+export interface ConfigHealthItem {
+  key: string
+  label: string
+  level: ConfigHealthLevel
+  status: ConfigHealthStatus
+  configured: boolean
+  missing_fields?: string[]
+  href?: string
+  description?: string
+  snoozed_until?: number
+  ignored_reason?: string
+}
+
+export interface ConfigHealth {
+  score: number
+  required: ConfigHealthGroup
+  recommended: ConfigHealthGroup
+  optional: ConfigHealthGroup
+  items: ConfigHealthItem[]
+}
+
+export interface UpdateConfigCheckStateRequest {
+  status: ConfigCheckStateStatus
+  ignored_reason?: string
+  snooze_days?: number
+  snoozed_until?: number
+}
+
+export const GetConfigHealth = () => {
+  return instance({
+    url: '/configs/health',
+    method: 'get'
+  })
+}
+
+export const UpdateConfigCheckState = (key: string, req: UpdateConfigCheckStateRequest) => {
+  return instance({
+    url: `/configs/health/${key}/state`,
+    method: 'put',
     data: req
   })
 }

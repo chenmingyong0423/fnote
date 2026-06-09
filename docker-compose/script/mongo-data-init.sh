@@ -45,6 +45,16 @@ db.getCollection("configs").createIndex({
     name: "unique_typ",
     unique: true
 });
+
+// config health check states
+db.createCollection("config_check_states");
+db.getCollection("config_check_states").createIndex({
+    check_key: NumberInt("1")
+}, {
+    name: "unique_check_key",
+    unique: true
+});
+
 // 站点信息
 db.getCollection("configs").insertOne({
   "created_at": new Date(),

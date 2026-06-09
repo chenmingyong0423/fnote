@@ -5,7 +5,6 @@ import { LikeOutlined, MessageOutlined, ShareAltOutlined, GiftOutlined, WechatOu
 import { QRCodeCanvas } from "qrcode.react";
 import { likePost } from "@/src/api/posts";
 import Image from "next/image";
-import '@ant-design/v5-patch-for-react-19';
 
 const rewardList = [
   { name: "微信赞赏码", img: "/file.svg" },

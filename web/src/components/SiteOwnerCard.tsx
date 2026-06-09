@@ -8,9 +8,16 @@ export interface SiteOwnerCardProps {
   avatar?: string;
   bio?: string;
   stats?: SiteStatsProps;
+  hasError?: boolean;
 }
 
-export default function SiteOwnerCard({ name, avatar, bio, stats }: SiteOwnerCardProps) {
+export default function SiteOwnerCard({
+  name,
+  avatar,
+  bio,
+  stats,
+  hasError = false,
+}: SiteOwnerCardProps) {
   return (
     <Card className="text-center p-6">
       <div className="flex flex-col items-center gap-3">
@@ -21,7 +28,9 @@ export default function SiteOwnerCard({ name, avatar, bio, stats }: SiteOwnerCar
         {/* 名字 */}
         <div className="font-bold text-lg dark:text-gray-200">{name}</div>
         {/* 简介 */}
-        <div className="text-gray-500 text-sm dark:text-gray-400">{bio}</div>
+        <div className="text-gray-500 text-sm dark:text-gray-400">
+          {hasError ? "网站数据暂时异常" : bio}
+        </div>
         {/* 指标区 */}
         <SiteStats stats={stats} />
       </div>

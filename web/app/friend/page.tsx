@@ -1,20 +1,31 @@
-import { getCommonConfig } from "@/src/api/config";
+import { DEFAULT_COMMON_CONFIG, getCommonConfig } from "@/src/api/config";
 import { getFriendSummary, getFriends } from "@/src/api/friend";
 import FriendPageClient from "@/src/components/FriendPageClient";
 import type { Metadata } from "next";
-import '@ant-design/v5-patch-for-react-19';
+
+async function settleWithFallback<T>(promise: Promise<T>, fallback: T) {
+  try {
+    return { data: await promise, failed: false };
+  } catch {
+    return { data: fallback, failed: true };
+  }
+}
 
 export async function generateMetadata(): Promise<Metadata> {
-  const config = await getCommonConfig().catch(() => null);
-  if (!config) return {};
+  const config = await getCommonConfig().catch(() => DEFAULT_COMMON_CONFIG);
+
   return {
     title: `友链 - ${config.seo_meta.title || config.website_meta.website_name}`,
     description: config.seo_meta.description || config.website_meta.website_name,
     openGraph: {
-      title: `友链 - ${config.seo_meta.og_title || config.website_meta.website_name}`,
+      title: `友链 - ${
+        config.seo_meta.og_title || config.website_meta.website_name
+      }`,
       description: config.seo_meta.description,
-      url: process.env.BASE_HOST + "/friends",
-      images: config.seo_meta.og_image ? [{ url: process.env.SERVER_HOST + config.seo_meta.og_image }] : undefined,
+      url: process.env.BASE_HOST + "/friend",
+      images: config.seo_meta.og_image
+        ? [{ url: process.env.NEXT_PUBLIC_SERVER_HOST + config.seo_meta.og_image }]
+        : undefined,
       siteName: config.website_meta.website_name,
       type: "website",
     },
@@ -23,8 +34,16 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function FriendPage() {
   const [friends, summary] = await Promise.all([
-    getFriends().catch(() => []),
-    getFriendSummary().catch(() => ""),
+    settleWithFallback(getFriends(), []),
+    settleWithFallback(getFriendSummary(), ""),
   ]);
-  return <FriendPageClient friends={friends} summary={summary} />;
+
+  return (
+    <FriendPageClient
+      friends={friends.data}
+      summary={summary.data}
+      hasFriendError={friends.failed}
+      hasSummaryError={summary.failed}
+    />
+  );
 }
