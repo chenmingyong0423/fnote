@@ -27,6 +27,7 @@ import {
   SavePostDraft
 } from '@/interfaces/PostDraft'
 import axios from 'axios'
+import { toErrorMessage } from '@/utils/error'
 
 document.title = '编辑草稿 - 后台管理'
 
@@ -75,7 +76,7 @@ const saveDraft = async (post4Edit: Post4Edit) => {
       message.error(res.data.message)
     }
   } catch (error) {
-    message.error(error)
+    message.error(toErrorMessage(error))
   }
 }
 
@@ -115,7 +116,7 @@ const getPostDraftById = async (id: string) => {
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (!error.response) {
-        message.error(error)
+        message.error(toErrorMessage(error))
         return
       }
       switch (error.response.status) {
@@ -125,7 +126,7 @@ const getPostDraftById = async (id: string) => {
           break
       }
     } else {
-      message.error(error)
+      message.error(toErrorMessage(error))
     }
   }
 }

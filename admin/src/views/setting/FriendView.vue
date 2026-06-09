@@ -51,6 +51,7 @@ import { h, ref } from 'vue'
 import { FileUpload } from '@/interfaces/File'
 import type { IBaseResponse, IResponse } from '@/interfaces/Common'
 import { ReloadOutlined } from '@ant-design/icons-vue'
+import { toErrorMessage } from '@/utils/error'
 
 const enableFriendCommit = ref(false)
 const introduction = ref('')
@@ -109,7 +110,7 @@ const handleUploadImage = async (_event: any, insertImage: any, files: any) => {
         desc: '请在此添加图片描述'
       })
     } catch (error) {
-      message.error(error)
+      message.error(toErrorMessage(error))
     }
   } catch (error) {
     console.log(error)

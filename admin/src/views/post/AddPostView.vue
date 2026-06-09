@@ -20,6 +20,7 @@ import PostEditView from '@/views/post/PostEditView.vue'
 import originalAxios from 'axios'
 import { type PostDraftRequest, SavePostDraft } from '@/interfaces/PostDraft'
 import router from '@/router'
+import { toErrorMessage } from '@/utils/error'
 
 document.title = '文章发布 - 后台管理'
 
@@ -44,7 +45,7 @@ const saveDraft = async (post4Edit: Post4Edit) => {
       message.error(res.data.message)
     }
   } catch (error) {
-    message.error(error)
+    message.error(toErrorMessage(error))
   }
 }
 

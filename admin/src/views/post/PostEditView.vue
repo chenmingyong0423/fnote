@@ -166,6 +166,7 @@ import { FileUpload } from '@/interfaces/File'
 import { useUserStore } from '@/stores/user'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
 import ImageLIstView from '@/views/post/editor/ImageLIstView.vue'
+import { toErrorMessage } from '@/utils/error'
 
 const emit = defineEmits(['publish', 'saveDraft'])
 const userStore = useUserStore()
@@ -322,7 +323,7 @@ const handleUploadImage = async (event: any, insertImage: any, files: any) => {
         desc: '请在此添加图片描述'
       })
     } catch (error) {
-      message.error(error)
+      message.error(toErrorMessage(error))
     }
   } catch (error) {
     console.log(error)
