@@ -5,6 +5,7 @@ import { getCommonConfig } from "@/src/api/config";
 import { getWebsiteStats } from "@/src/api/stats";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { resolvePublicUrl } from "@/src/utils/publicUrl";
 
 export async function generateMetadata({ params }: { params: Promise<{ category: string; page: string }> }): Promise<Metadata> {
   const { category, page } = await params;
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
       title: `${categoryName} - 分类文章 - ${config.seo_meta.og_title || config.website_meta.website_name}`,
       description: `浏览${categoryName}分类下的全部文章。`,
       url: process.env.BASE_HOST + `/categories/${category}/page/${page}`,
-      images: config.seo_meta.og_image ? [{ url: process.env.NEXT_PUBLIC_SERVER_HOST + config.seo_meta.og_image }] : undefined,
+      images: config.seo_meta.og_image ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }] : undefined,
       siteName: config.website_meta.website_name,
       type: "website",
     },

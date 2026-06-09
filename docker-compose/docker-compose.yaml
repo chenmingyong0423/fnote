@@ -64,6 +64,9 @@ services:
       context: ../web
       args:
         SERVER_HOST: http://server:8080
+        BASE_HOST: ${WEBSITE_BASE_HOST}
+        ADMIN_HOST: ${WEBSITE_ADMIN_HOST}
+        NEXT_PUBLIC_SERVER_HOST: ${WEBSITE_SERVER_HOST}
     environment:
         BASE_HOST: ${WEBSITE_BASE_HOST}
         ADMIN_HOST: ${WEBSITE_ADMIN_HOST}

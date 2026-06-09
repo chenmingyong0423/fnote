@@ -12,6 +12,7 @@ import LogVisitClient from "../src/components/LogVisitClient";
 import { checkInitialization } from "@/src/api/checkInitialization";
 import { redirect } from "next/navigation";
 import { isBackendUnavailableError } from "@/src/utils/http";
+import { resolvePublicUrl } from "@/src/utils/publicUrl";
 export const dynamic = 'force-dynamic'
 
 const geistSans = Geist({
@@ -81,7 +82,7 @@ export async function generateMetadata(): Promise<Metadata> {
         title: config.seo_meta.og_title || config.website_meta.website_name,
         description: config.seo_meta.description,
         url: process.env.BASE_HOST,
-        images: config.seo_meta.og_image ? [{ url: process.env.NEXT_PUBLIC_SERVER_HOST + config.seo_meta.og_image }] : undefined,
+        images: config.seo_meta.og_image ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }] : undefined,
         siteName: config.website_meta.website_name,
         type: "website",
       },

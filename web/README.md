@@ -52,13 +52,4 @@ DOCKER_BUILDKIT=1 docker build -t nextjs-web:latest -f Dockerfile .
 docker run --env-file .env.production -p 3000:3000 nextjs-web:latest
 ```
 
-### Build & run nginx reverse proxy
-```bash
-# build
-DOCKER_BUILDKIT=1 docker build -t nextjs-web-nginx:latest -f Dockerfile.nginx .
-
-# run and point to a running Next.js container named "web"
-docker run --env-file .env.nginx --link web -p 80:80 nextjs-web-nginx:latest
-```
-
-> Tip: prefer docker-compose to wire `web` + `nginx` services if you need both running together.
+> Tip: use `docker-compose/docker-compose.nginx.yaml` when deploying with nginx.

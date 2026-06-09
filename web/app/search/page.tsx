@@ -7,6 +7,7 @@ import {
 import { DEFAULT_WEBSITE_STATS, getWebsiteStats } from "@/src/api/stats";
 import type { Metadata } from "next";
 import SearchPageClient from "./SearchPageClient";
+import { resolvePublicUrl } from "@/src/utils/publicUrl";
 
 const DEFAULT_POST_LIST: PostListResponse = {
   PageNo: 1,
@@ -49,7 +50,7 @@ export async function generateMetadata({
         `/search` +
         (keyword ? `?keyword=${encodeURIComponent(keyword)}` : ""),
       images: config.seo_meta.og_image
-        ? [{ url: process.env.NEXT_PUBLIC_SERVER_HOST + config.seo_meta.og_image }]
+        ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }]
         : undefined,
       siteName: config.website_meta.website_name,
       type: "website",

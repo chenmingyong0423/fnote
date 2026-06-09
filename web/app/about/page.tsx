@@ -2,6 +2,7 @@ import PostDetail from "@/src/components/PostDetail";
 import { getPostDetailOrNull, type PostDetail as PostDetailType } from "@/src/api/posts";
 import type { Metadata } from "next";
 import { DEFAULT_COMMON_CONFIG, getCommonConfig } from "@/src/api/config";
+import { resolvePublicUrl } from "@/src/utils/publicUrl";
 
 async function getAboutPost() {
   try {
@@ -36,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
         description,
         url: process.env.BASE_HOST + "/about",
         images: config.seo_meta.og_image
-          ? [{ url: process.env.NEXT_PUBLIC_SERVER_HOST + config.seo_meta.og_image }]
+          ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }]
           : undefined,
         siteName: config.website_meta.website_name,
         type: "website",
@@ -52,7 +53,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: `${post.data.title} - ${config.seo_meta.og_title || siteTitle}`,
       description: post.data.meta_description || post.data.summary,
       url: process.env.BASE_HOST + "/about",
-      images: post.data.cover_img ? [{ url: post.data.cover_img }] : undefined,
+      images: post.data.cover_img ? [{ url: resolvePublicUrl(post.data.cover_img) }] : undefined,
       siteName: config.website_meta.website_name,
       type: "article",
     },

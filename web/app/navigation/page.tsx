@@ -3,6 +3,7 @@ import { getTags } from "@/src/api/tags";
 import type { Metadata } from "next";
 import { DEFAULT_COMMON_CONFIG, getCommonConfig } from "@/src/api/config";
 import NavigationContent from "@/src/components/NavigationContent";
+import { resolvePublicUrl } from "@/src/utils/publicUrl";
 
 async function settleWithFallback<T>(promise: Promise<T>, fallback: T) {
   try {
@@ -27,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "浏览本站文章分类与标签。",
       url: process.env.BASE_HOST + "/navigation",
       images: config.seo_meta.og_image
-        ? [{ url: process.env.NEXT_PUBLIC_SERVER_HOST + config.seo_meta.og_image }]
+        ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }]
         : undefined,
       siteName: config.website_meta.website_name,
       type: "website",

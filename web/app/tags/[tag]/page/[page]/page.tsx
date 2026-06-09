@@ -5,6 +5,7 @@ import { getCommonConfig } from "@/src/api/config";
 import { getWebsiteStats } from "@/src/api/stats";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { resolvePublicUrl } from "@/src/utils/publicUrl";
 
 export async function generateMetadata({ params }: { params: Promise<{ tag: string; page: string }> }): Promise<Metadata> {
   const { tag, page } = await params;
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ tag: stri
       title: `${tagName} - 标签文章 - ${config.seo_meta.og_title || config.website_meta.website_name}`,
       description: `浏览${tagName}标签下的全部文章。`,
       url: process.env.BASE_HOST + `/tags/${tag}/page/${page}`,
-      images: config.seo_meta.og_image ? [{ url: process.env.NEXT_PUBLIC_SERVER_HOST + config.seo_meta.og_image }] : undefined,
+      images: config.seo_meta.og_image ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }] : undefined,
       siteName: config.website_meta.website_name,
       type: "website",
     },

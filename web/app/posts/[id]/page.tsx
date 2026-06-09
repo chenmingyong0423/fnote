@@ -3,6 +3,7 @@ import { getPostDetailOrNull } from "@/src/api/posts";
 import { notFound } from "next/navigation";
 import { getCommonConfig } from "@/src/api/config";
 import type { Metadata } from "next";
+import { resolvePublicUrl } from "@/src/utils/publicUrl";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       title: `${post.title} - ${config.seo_meta.og_title || config.website_meta.website_name}`,
       description: post.meta_description || post.summary,
       url: process.env.BASE_HOST + `/posts/${id}`,
-      images: post.cover_img ? [{ url: post.cover_img }] : (config.seo_meta.og_image ? [{ url: process.env.NEXT_PUBLIC_SERVER_HOST + config.seo_meta.og_image }] : undefined),
+      images: post.cover_img ? [{ url: resolvePublicUrl(post.cover_img) }] : (config.seo_meta.og_image ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }] : undefined),
       siteName: config.website_meta.website_name,
       type: "article",
     },
