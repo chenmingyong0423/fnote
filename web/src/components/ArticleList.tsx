@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Pagination, List, Tag, Tabs } from "antd";
+import { Pagination, Tag, Tabs } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { EyeOutlined, LikeOutlined, MessageOutlined } from "@ant-design/icons";
@@ -15,6 +15,7 @@ interface ArticleListProps {
   field?: "latest" | "oldest" | "likes";
   currentPage?: number;
   pageSize?: number;
+  hasError?: boolean;
   onPageChange?: (page: number, pageSize: number, field: string) => void;
 }
 
@@ -25,6 +26,7 @@ export default function ArticleList({
   field = "latest",
   currentPage = 1,
   pageSize = 10,
+  hasError = false,
   onPageChange,
 }: ArticleListProps) {
   const [localField, setLocalField] = useState(field);
@@ -78,12 +80,9 @@ export default function ArticleList({
                 ]}
               />
             </div>
-          <List
-            itemLayout="horizontal"
-            dataSource={list}
-            locale={{ emptyText: <div className="py-8 text-center text-gray-400">暂无数据</div> }}
-            renderItem={item => (
-              <List.Item className="!p-0 !bg-transparent !border-none my-4">
+          {list.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              {list.map(item => (
                 <div className="w-full bg-white dark:bg-[#141414] dark:border dark:border-[#303030] rounded-lg shadow-sm overflow-hidden transition-transform duration-200 group/article hover:-translate-y-2 relative">
                   {/* 下划线动画，item hover 时从中间向两边展开 */}
                   <span className="pointer-events-none absolute left-1/2 bottom-0 w-0 h-0.5 bg-blue-500 rounded-full transition-all duration-300 group-hover/article:w-full group-hover/article:left-0"></span>
@@ -119,9 +118,13 @@ export default function ArticleList({
                     </div>
                   </Link>
                 </div>
-              </List.Item>
-            )}
-          />
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-gray-400">
+              {hasError ? "网站数据暂时异常" : "暂无数据"}
+            </div>
+          )}
           <div className="flex justify-end mt-4">
             <Pagination
               current={localPage}
@@ -148,6 +151,7 @@ export default function ArticleList({
             avatar={siteOwner.avatar}
             bio={siteOwner.bio}
             stats={siteOwner.stats}
+            hasError={siteOwner.hasError}
           />
         )}
       </div>

@@ -6,6 +6,19 @@ type ApiLikeResponse<T = unknown> = {
   data?: T;
 };
 
+export class BackendUnavailableError extends Error {
+  constructor(message = "后端服务暂不可用") {
+    super(message);
+    this.name = "BackendUnavailableError";
+  }
+}
+
+export function isBackendUnavailableError(error: unknown): error is BackendUnavailableError {
+  return error instanceof BackendUnavailableError || (
+    error instanceof Error && error.name === "BackendUnavailableError"
+  );
+}
+
 /**
  * 通用 HTTP 请求方法，服务端和客户端均可用。
  * @param input 请求地址或 Request 对象
@@ -27,7 +40,12 @@ export async function request<T = never>(
     }
     url = serverHost.replace(/\/$/, '') + path;
   }
-  const res = await fetch(url, init);
+  let res: Response;
+  try {
+    res = await fetch(url, init);
+  } catch {
+    throw new BackendUnavailableError("无法连接后端服务，请确认后端已经启动。");
+  }
 
   let body: ApiLikeResponse | null = null;
   try {

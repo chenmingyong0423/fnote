@@ -5,7 +5,13 @@ import React from "react";
 import type { LatestPostVO } from "../api/posts";
 import { EyeOutlined, LikeOutlined, MessageOutlined } from "@ant-design/icons";
 
-export default function LatestArticles({ articles }: { articles: LatestPostVO[] }) {
+export default function LatestArticles({
+  articles,
+  hasError = false,
+}: {
+  articles: LatestPostVO[];
+  hasError?: boolean;
+}) {
   const hasArticles = Array.isArray(articles) && articles.length > 0;
 
   if (!hasArticles) {
@@ -13,7 +19,7 @@ export default function LatestArticles({ articles }: { articles: LatestPostVO[] 
       <section>
         <h2 className="text-xl font-bold mb-4">最新文章</h2>
         <Card className="flex items-center justify-center py-10">
-          <Empty description="暂无文章" />
+          <Empty description={hasError ? "网站数据暂时异常" : "暂无文章"} />
         </Card>
       </section>
     );

@@ -8,7 +8,9 @@ export default function LogVisitClient() {
     const user_agent = navigator.userAgent;
     const origin = window.location.origin;
     const referer = document.referrer;
-    logVisit({ url, user_agent, origin, referer });
+    void logVisit({ url, user_agent, origin, referer }).catch(() => {
+      // Visit logging is best-effort and should not break page rendering.
+    });
   }, []);
   return null;
 }

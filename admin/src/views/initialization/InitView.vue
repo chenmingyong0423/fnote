@@ -96,12 +96,9 @@
               type="primary"
               class="login-form-button w-40% h-10 float-right"
               @click="
-                validate(
-                  ['website_name', 'website_owner', 'website_owner_email', 'website_owner_profile'],
-                  () => {
-                    step++
-                  }
-                )
+                validate(['website_name', 'website_owner', 'website_owner_profile'], () => {
+                  step++
+                })
               "
             >
               下一步
@@ -139,74 +136,10 @@
               type="primary"
               class="login-form-button w-40% h-10 float-right"
               @click="
-                validate(
-                  [
-                    'website_icon',
-                    'website_owner_avatar',
-                    'website_owner_email',
-                    'website_owner_profile'
-                  ],
-                  () => {
-                    step++
-                  }
-                )
+                validate(['website_icon', 'website_owner_avatar'], () => {
+                  initWebsite()
+                })
               "
-            >
-              下一步
-            </a-button>
-          </a-form-item>
-        </div>
-
-        <div v-show="step == 4">
-          <a-form-item
-            label="host"
-            :name="['email_server', 'host']"
-            :rules="[{ required: true, message: '请输入邮件服务的 host' }]"
-          >
-            <a-input v-model:value="formState.email_server.host" />
-          </a-form-item>
-
-          <a-form-item
-            label="port"
-            :name="['email_server', 'port']"
-            :rules="[{ required: true, message: '请输入邮件服务的 port' }]"
-          >
-            <a-input v-model:value="formState.email_server.port" />
-          </a-form-item>
-
-          <a-form-item
-            label="username"
-            :name="['email_server', 'username']"
-            :rules="[{ required: true, message: '请输入邮件服务的 username' }]"
-          >
-            <a-input v-model:value="formState.email_server.username" />
-          </a-form-item>
-
-          <a-form-item
-            label="password"
-            :name="['email_server', 'password']"
-            :rules="[{ required: true, message: '请输入邮件服务的 password' }]"
-          >
-            <a-input v-model:value="formState.email_server.password" />
-          </a-form-item>
-
-          <a-form-item
-            label="email"
-            :name="['email_server', 'email']"
-            :rules="[{ required: true, message: '请输入接收邮件的 email' }]"
-            tooltip="接收通知时使用"
-          >
-            <a-input v-model:value="formState.email_server.email" />
-          </a-form-item>
-
-          <a-form-item>
-            <a-button type="primary" class="login-form-button w-40% h-10" @click="step--">
-              上一步
-            </a-button>
-            <a-button
-              type="primary"
-              class="login-form-button w-40% h-10 float-right"
-              @click="initWebsite"
             >
               初始化
             </a-button>
@@ -237,13 +170,6 @@ const formState: UnwrapRef<InitReq> = reactive({
   website_owner: '',
   website_owner_profile: '',
   website_owner_avatar: '',
-  email_server: {
-    host: '',
-    port: 0,
-    username: '',
-    password: '',
-    email: ''
-  },
   admin: {
     username: '',
     password: ''
@@ -252,8 +178,8 @@ const formState: UnwrapRef<InitReq> = reactive({
 
 const step = ref(1)
 
-const stepInfo = ['管理员信息', '站点信息', '站点信息', '邮件服务器信息']
-const labelCols = [0, 7, 7, 7]
+const stepInfo = ['管理员信息', '站点信息', '站点信息']
+const labelCols = [0, 7, 7]
 
 const onFinishFailed = (errorInfo: any) => {
   console.log('Failed:', errorInfo)
@@ -280,7 +206,6 @@ const initWebsite = () => {
   formRef.value
     .validate()
     .then(async () => {
-      formState.email_server.port = Number(formState.email_server.port)
       const response: any = await Init(toRaw(formState))
       if (response.data.code !== 0) {
         message.error(response.data.message)
@@ -288,7 +213,7 @@ const initWebsite = () => {
       }
       userStore.initialization = true
       message.success('初始化成功')
-      await router.push('/login')
+      await router.replace('/login')
     })
     .catch((error: any) => {
       console.log('error', error)

@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.0.2",
-    "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "antd": "^5.29.3",
     "blueimp-md5": "^2.19.0",
     "github-markdown-css": "^5.8.1",
     "next": "15.3.3",

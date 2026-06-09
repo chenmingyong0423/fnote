@@ -39,6 +39,7 @@ type WebsiteConfig struct {
 }
 
 type IWebsiteConfigDao interface {
+	IConfigCheckStateDao
 	FindByTyp(ctx context.Context, typ string) (*WebsiteConfig, error)
 	Increase(ctx context.Context, field string) error
 	GetByTypes(ctx context.Context, types ...string) ([]*WebsiteConfig, error)
@@ -56,12 +57,14 @@ var _ IWebsiteConfigDao = (*WebsiteConfigDao)(nil)
 
 func NewWebsiteConfigDao(db *mongox.Database) *WebsiteConfigDao {
 	return &WebsiteConfigDao{
-		coll: mongox.NewCollection[WebsiteConfig](db, "configs"),
+		coll:                 mongox.NewCollection[WebsiteConfig](db, "configs"),
+		configCheckStateColl: mongox.NewCollection[ConfigCheckState](db, "config_check_states"),
 	}
 }
 
 type WebsiteConfigDao struct {
-	coll *mongox.Collection[WebsiteConfig]
+	coll                 *mongox.Collection[WebsiteConfig]
+	configCheckStateColl *mongox.Collection[ConfigCheckState]
 }
 
 func (d *WebsiteConfigDao) FindByFilter(ctx context.Context, filter bson.D) (*WebsiteConfig, error) {
