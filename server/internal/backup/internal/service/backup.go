@@ -15,8 +15,8 @@
 package service
 
 import (
-	"archive/tar"
 	"archive/zip"
+	"bytes"
 	"context"
 	"encoding/hex"
 	"encoding/json"
@@ -64,17 +64,25 @@ func (s *BackupService) Recovery(ctx context.Context, file *multipart.FileHeader
 	}
 	defer src.Close()
 
-	if err = s.recoveryZip(ctx, src, file.Size); err == nil {
-		return nil
-	}
-
-	if _, seekErr := src.Seek(0, io.SeekStart); seekErr != nil {
+	content, err := io.ReadAll(src)
+	if err != nil {
 		return err
 	}
-	return s.recoveryTar(ctx, src)
+	if len(content) == 0 {
+		return fmt.Errorf("backup file is empty")
+	}
+	if !isZipFile(content) {
+		return fmt.Errorf("unsupported backup file format: only zip backup files are supported")
+	}
+
+	err = s.recoveryZip(ctx, bytes.NewReader(content), int64(len(content)))
+	if err != nil {
+		return fmt.Errorf("restore zip backup failed: %w", err)
+	}
+	return nil
 }
 
-func (s *BackupService) recoveryZip(ctx context.Context, src multipart.File, size int64) error {
+func (s *BackupService) recoveryZip(ctx context.Context, src io.ReaderAt, size int64) error {
 	zipReader, err := zip.NewReader(src, size)
 	if err != nil {
 		return err
@@ -85,6 +93,7 @@ func (s *BackupService) recoveryZip(ctx context.Context, src multipart.File, siz
 		if name == "" {
 			continue
 		}
+		name = normalizeBackupEntryName(name)
 		if file.FileInfo().IsDir() {
 			if strings.HasPrefix(name, backupStaticDir+"/") {
 				if err = mkdirStaticDir(strings.TrimPrefix(name, backupStaticDir+"/")); err != nil {
@@ -101,59 +110,6 @@ func (s *BackupService) recoveryZip(ctx context.Context, src multipart.File, siz
 			}
 		case strings.HasPrefix(name, backupStaticDir+"/"):
 			if err = restoreZipStaticFile(file, strings.TrimPrefix(name, backupStaticDir+"/")); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (s *BackupService) recoveryTar(ctx context.Context, src io.Reader) error {
-	tarReader := tar.NewReader(src)
-	for {
-		header, err := tarReader.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		name := cleanArchiveName(header.Name)
-		if name == "" {
-			continue
-		}
-		if header.FileInfo().IsDir() {
-			if strings.HasPrefix(name, backupStaticDir+"/") {
-				if err = mkdirStaticDir(strings.TrimPrefix(name, backupStaticDir+"/")); err != nil {
-					return err
-				}
-			}
-			continue
-		}
-		if header.Typeflag != tar.TypeReg && header.Typeflag != tar.TypeRegA {
-			continue
-		}
-
-		switch {
-		case strings.HasPrefix(name, backupDataDir+"/") && strings.HasSuffix(name, ".json"):
-			content, err := io.ReadAll(tarReader)
-			if err != nil {
-				return err
-			}
-			if err = s.restoreCollection(ctx, path.Base(name), content); err != nil {
-				return err
-			}
-		case strings.HasPrefix(name, backupStaticDir+"/"):
-			if err = restoreStaticFile(tarReader, strings.TrimPrefix(name, backupStaticDir+"/"), header.FileInfo().Mode()); err != nil {
-				return err
-			}
-		case !strings.Contains(name, "/") && strings.HasSuffix(name, ".json"):
-			content, err := io.ReadAll(tarReader)
-			if err != nil {
-				return err
-			}
-			if err = s.restoreCollection(ctx, path.Base(name), content); err != nil {
 				return err
 			}
 		}
@@ -269,11 +225,12 @@ func (s *BackupService) exportCollections(ctx context.Context, dataDir string) e
 						if prop.Key == "social_info_list" {
 							socialList := prop.Value.(bson.A)
 							for _, m := range socialList {
-								obj := m.(bson.M)
-								obj["id"] = hex.EncodeToString(obj["id"].(bson.Binary).Data)
+								encodeSocialID(m)
 							}
+							break
 						}
 					}
+					break
 				}
 			}
 		}
@@ -481,6 +438,24 @@ func cleanArchiveName(name string) string {
 	return cleaned
 }
 
+func normalizeBackupEntryName(name string) string {
+	if strings.HasPrefix(name, backupDataDir+"/") || strings.HasPrefix(name, backupStaticDir+"/") {
+		return name
+	}
+	parts := strings.SplitN(name, "/", 2)
+	if len(parts) != 2 {
+		return name
+	}
+	if strings.HasPrefix(parts[1], backupDataDir+"/") || strings.HasPrefix(parts[1], backupStaticDir+"/") {
+		return parts[1]
+	}
+	return name
+}
+
+func isZipFile(content []byte) bool {
+	return len(content) >= 2 && bytes.Equal(content[:2], []byte{'P', 'K'})
+}
+
 func isBackupArchive(filename string) bool {
 	base := filepath.Base(filename)
 	matched, err := filepath.Match("backup_*.zip", base)
@@ -507,7 +482,7 @@ func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colNam
 				for _, m := range socialList {
 					obj := m.(map[string]any)
 					var fErr2 error
-					obj["id"], fErr2 = hex.DecodeString(obj["id"].(string))
+					obj["id"], fErr2 = decodeSocialID(obj["id"])
 					if fErr2 != nil {
 						return fErr2
 					}
@@ -579,4 +554,35 @@ func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colNam
 		return err
 	}
 	return nil
+}
+
+func encodeSocialID(value any) {
+	switch obj := value.(type) {
+	case bson.M:
+		if binary, ok := obj["id"].(bson.Binary); ok {
+			obj["id"] = hex.EncodeToString(binary.Data)
+		}
+	case bson.D:
+		for i := range obj {
+			if obj[i].Key != "id" {
+				continue
+			}
+			if binary, ok := obj[i].Value.(bson.Binary); ok {
+				obj[i].Value = hex.EncodeToString(binary.Data)
+			}
+			return
+		}
+	}
+}
+
+func decodeSocialID(value any) ([]byte, error) {
+	switch v := value.(type) {
+	case string:
+		return hex.DecodeString(v)
+	case map[string]any:
+		if data, ok := v["Data"].(string); ok {
+			return hex.DecodeString(data)
+		}
+	}
+	return nil, fmt.Errorf("invalid social id format")
 }
