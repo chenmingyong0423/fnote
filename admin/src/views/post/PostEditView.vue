@@ -50,12 +50,22 @@
             label="分类"
             :rules="[{ required: true, message: '请选择分类' }]"
           >
+            <div class="taxonomy-tools">
+              <a-alert
+                v-if="categoryOptions.length === 0"
+                message="当前还没有分类，可以先快速创建后继续发布。"
+                type="info"
+                show-icon
+              />
+              <a-button type="link" size="small" @click="openQuickCategory">+ 新建分类</a-button>
+            </div>
             <a-select
               v-model:value="post4Edit.tempCategories"
               mode="multiple"
+              show-search
               style="width: 100%"
               placeholder="请选择分类"
-              :options="props.categories"
+              :options="categoryOptions"
             ></a-select>
           </a-form-item>
           <a-form-item
@@ -63,12 +73,22 @@
             label="标签"
             :rules="[{ required: true, message: '请选择标签' }]"
           >
+            <div class="taxonomy-tools">
+              <a-alert
+                v-if="tagOptions.length === 0"
+                message="当前还没有标签，可以先快速创建后继续发布。"
+                type="info"
+                show-icon
+              />
+              <a-button type="link" size="small" @click="openQuickTag">+ 新建标签</a-button>
+            </div>
             <a-select
               v-model:value="post4Edit.tempTags"
               mode="multiple"
+              show-search
               style="width: 100%"
               placeholder="请选择标签"
-              :options="props.tags"
+              :options="tagOptions"
             ></a-select>
           </a-form-item>
           <a-form-item
@@ -131,6 +151,72 @@
           </a-form-item>
         </a-form>
       </a-modal>
+      <a-modal
+        v-model:open="quickCategoryVisible"
+        title="新建分类"
+        ok-text="创建"
+        cancel-text="取消"
+        :confirm-loading="quickCategoryLoading"
+        @ok="createCategory"
+      >
+        <a-form ref="quickCategoryFormRef" :model="quickCategoryForm" layout="vertical">
+          <a-form-item
+            name="name"
+            label="分类名称"
+            :rules="[{ required: true, message: '请输入分类名称' }]"
+          >
+            <a-input v-model:value="quickCategoryForm.name" placeholder="请输入分类名称" />
+          </a-form-item>
+          <a-form-item
+            name="route"
+            label="路由"
+            :rules="[{ required: true, message: '请输入分类路由' }]"
+          >
+            <a-input v-model:value="quickCategoryForm.route" placeholder="例如 tech-note" />
+          </a-form-item>
+          <a-form-item name="description" label="描述">
+            <a-textarea
+              v-model:value="quickCategoryForm.description"
+              placeholder="可选"
+              allow-clear
+            />
+          </a-form-item>
+          <a-form-item name="show_in_nav" label="显示在导航">
+            <a-switch v-model:checked="quickCategoryForm.show_in_nav" />
+          </a-form-item>
+          <a-form-item name="enabled" label="启用">
+            <a-switch v-model:checked="quickCategoryForm.enabled" />
+          </a-form-item>
+        </a-form>
+      </a-modal>
+      <a-modal
+        v-model:open="quickTagVisible"
+        title="新建标签"
+        ok-text="创建"
+        cancel-text="取消"
+        :confirm-loading="quickTagLoading"
+        @ok="createTag"
+      >
+        <a-form ref="quickTagFormRef" :model="quickTagForm" layout="vertical">
+          <a-form-item
+            name="name"
+            label="标签名称"
+            :rules="[{ required: true, message: '请输入标签名称' }]"
+          >
+            <a-input v-model:value="quickTagForm.name" placeholder="请输入标签名称" />
+          </a-form-item>
+          <a-form-item
+            name="route"
+            label="路由"
+            :rules="[{ required: true, message: '请输入标签路由' }]"
+          >
+            <a-input v-model:value="quickTagForm.route" placeholder="例如 vue" />
+          </a-form-item>
+          <a-form-item name="enabled" label="启用">
+            <a-switch v-model:checked="quickTagForm.enabled" />
+          </a-form-item>
+        </a-form>
+      </a-modal>
     </div>
     <div>
       <v-md-editor
@@ -157,11 +243,16 @@
 </template>
 
 <script lang="ts" setup>
-import { type PropType, reactive, ref, defineEmits } from 'vue'
+import { type PropType, reactive, ref, defineEmits, watch } from 'vue'
 import type { Post4Edit } from '@/interfaces/Post'
 import { type FormInstance, message } from 'ant-design-vue'
-import type { SelectCategory } from '@/interfaces/Category'
-import type { SelectTag } from '@/interfaces/Tag'
+import {
+  AddCategory,
+  GetSelectedCategories,
+  type CategoryRequest,
+  type SelectCategory
+} from '@/interfaces/Category'
+import { AddTag, GetSelectedTags, type SelectTag, type TagRequest } from '@/interfaces/Tag'
 import { FileUpload } from '@/interfaces/File'
 import { useUserStore } from '@/stores/user'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
@@ -201,6 +292,25 @@ const imageUrl = ref<string>('')
 const formRef = ref<FormInstance>()
 const visible = ref(false)
 const post4Edit = reactive<Post4Edit>(props.post || ({} as Post4Edit))
+const categoryOptions = ref<SelectCategory[]>([])
+const tagOptions = ref<SelectTag[]>([])
+
+watch(
+  () => props.categories,
+  (categories) => {
+    categoryOptions.value = [...categories]
+  },
+  { immediate: true, deep: true }
+)
+
+watch(
+  () => props.tags,
+  (tags) => {
+    tagOptions.value = [...tags]
+  },
+  { immediate: true, deep: true }
+)
+
 const submit = () => {
   if (formRef.value) {
     formRef.value
@@ -212,7 +322,7 @@ const submit = () => {
         }
         post4Edit.categories = []
         values.tempCategories.forEach((item: string) => {
-          props.categories.forEach((category) => {
+          categoryOptions.value.forEach((category) => {
             if (category.value === item) {
               post4Edit.categories.push({
                 id: category.id,
@@ -223,7 +333,7 @@ const submit = () => {
         })
         post4Edit.tags = []
         values.tempTags.forEach((item: string) => {
-          props.tags.forEach((tag) => {
+          tagOptions.value.forEach((tag) => {
             if (tag.value === item) {
               post4Edit.tags.push({
                 id: tag.id,
@@ -261,7 +371,7 @@ const saveDraft = () => {
   if (!!post4Edit.title && !!post4Edit.author && !!post4Edit.content) {
     post4Edit.categories = []
     post4Edit.tempCategories?.forEach((item: string) => {
-      props.categories.forEach((category) => {
+      categoryOptions.value.forEach((category) => {
         if (category.value === item) {
           post4Edit.categories.push({
             id: category.id,
@@ -272,7 +382,7 @@ const saveDraft = () => {
     })
     post4Edit.tags = []
     post4Edit.tempTags?.forEach((item: string) => {
-      props.tags.forEach((tag) => {
+      tagOptions.value.forEach((tag) => {
         if (tag.value === item) {
           post4Edit.tags.push({
             id: tag.id,
@@ -368,4 +478,144 @@ const insertImg = (content: string) => {
   visible4Template.value = false
   globalEditor.value = null
 }
+
+const quickCategoryVisible = ref(false)
+const quickCategoryLoading = ref(false)
+const quickCategoryFormRef = ref<FormInstance>()
+const quickCategoryForm = reactive<CategoryRequest>({
+  name: '',
+  route: '',
+  description: '',
+  show_in_nav: true,
+  enabled: true
+})
+
+const quickTagVisible = ref(false)
+const quickTagLoading = ref(false)
+const quickTagFormRef = ref<FormInstance>()
+const quickTagForm = reactive<TagRequest>({
+  name: '',
+  route: '',
+  enabled: true
+})
+
+const resetQuickCategoryForm = () => {
+  quickCategoryForm.name = ''
+  quickCategoryForm.route = ''
+  quickCategoryForm.description = ''
+  quickCategoryForm.show_in_nav = true
+  quickCategoryForm.enabled = true
+  quickCategoryFormRef.value?.clearValidate()
+}
+
+const resetQuickTagForm = () => {
+  quickTagForm.name = ''
+  quickTagForm.route = ''
+  quickTagForm.enabled = true
+  quickTagFormRef.value?.clearValidate()
+}
+
+const openQuickCategory = () => {
+  resetQuickCategoryForm()
+  quickCategoryVisible.value = true
+}
+
+const openQuickTag = () => {
+  resetQuickTagForm()
+  quickTagVisible.value = true
+}
+
+const refreshCategoryOptions = async () => {
+  const response: any = await GetSelectedCategories()
+  categoryOptions.value = response.data.data?.list || response.data.data || []
+}
+
+const refreshTagOptions = async () => {
+  const response: any = await GetSelectedTags()
+  tagOptions.value = response.data.data?.list || response.data.data || []
+}
+
+const isFormValidateError = (error: unknown) => {
+  return typeof error === 'object' && error !== null && 'errorFields' in error
+}
+
+const createCategory = async () => {
+  if (!quickCategoryFormRef.value) {
+    return
+  }
+  try {
+    await quickCategoryFormRef.value.validateFields()
+    quickCategoryLoading.value = true
+    const response: any = await AddCategory({ ...quickCategoryForm })
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
+      return
+    }
+    const createdName = quickCategoryForm.name
+    await refreshCategoryOptions()
+    const createdOption = categoryOptions.value.find((category) => category.value === createdName)
+    if (createdOption) {
+      post4Edit.tempCategories = Array.from(
+        new Set([...(post4Edit.tempCategories || []), createdOption.value])
+      )
+    }
+    message.success('分类创建成功')
+    quickCategoryVisible.value = false
+    resetQuickCategoryForm()
+  } catch (error) {
+    if (isFormValidateError(error)) {
+      message.warning('请检查分类信息是否填写正确')
+      return
+    }
+    message.error(toErrorMessage(error, '分类创建失败'))
+  } finally {
+    quickCategoryLoading.value = false
+  }
+}
+
+const createTag = async () => {
+  if (!quickTagFormRef.value) {
+    return
+  }
+  try {
+    await quickTagFormRef.value.validateFields()
+    quickTagLoading.value = true
+    const response: any = await AddTag({ ...quickTagForm })
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
+      return
+    }
+    const createdName = quickTagForm.name
+    await refreshTagOptions()
+    const createdOption = tagOptions.value.find((tag) => tag.value === createdName)
+    if (createdOption) {
+      post4Edit.tempTags = Array.from(new Set([...(post4Edit.tempTags || []), createdOption.value]))
+    }
+    message.success('标签创建成功')
+    quickTagVisible.value = false
+    resetQuickTagForm()
+  } catch (error) {
+    if (isFormValidateError(error)) {
+      message.warning('请检查标签信息是否填写正确')
+      return
+    }
+    message.error(toErrorMessage(error, '标签创建失败'))
+  } finally {
+    quickTagLoading.value = false
+  }
+}
 </script>
+
+<style scoped>
+.taxonomy-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.taxonomy-tools :deep(.ant-btn) {
+  align-self: flex-start;
+  padding-left: 0;
+}
+</style>
