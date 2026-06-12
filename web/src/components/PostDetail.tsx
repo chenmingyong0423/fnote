@@ -4,7 +4,6 @@ import { extractToc, Toc } from "@/src/components/Toc";
 import { PostActions } from "@/src/components/PostActions";
 import { Comments } from "@/src/components/Comments";
 import PostSeoClient from "@/src/components/PostSeoClient";
-import Image from "next/image";
 
 interface PostDetailProps {
   post: import("@/src/api/posts").PostDetail;
@@ -40,9 +39,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ post }) => {
             <div className="sm:hidden mb-4 text-xs text-gray-500 dark:text-gray-400">
               标签：{post.tags.map(t => t.name).join(', ')}
             </div>
-          {post.cover_img && (
-            <Image src={post.cover_img} alt="cover" width={800} height={384} className="w-full max-h-64 md:max-h-96 object-cover rounded-lg mb-6" />
-          )}
           <article className="prose prose-sm md:prose-lg max-w-none dark:prose-invert">
             <MarkdownPreview content={post.content} />
           </article>
