@@ -16,14 +16,17 @@ package service
 
 import (
 	"archive/tar"
+	"archive/zip"
 	"context"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/fs"
 	"log/slog"
 	"mime/multipart"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -31,8 +34,12 @@ import (
 	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/v2/bson"
-
 	"go.mongodb.org/mongo-driver/v2/mongo"
+)
+
+const (
+	backupDataDir   = "data"
+	backupStaticDir = "static"
 )
 
 type IBackupService interface {
@@ -56,178 +63,431 @@ func (s *BackupService) Recovery(ctx context.Context, file *multipart.FileHeader
 		return err
 	}
 	defer src.Close()
-	// 创建一个tar的读取器
+
+	if err = s.recoveryZip(ctx, src, file.Size); err == nil {
+		return nil
+	}
+
+	if _, seekErr := src.Seek(0, io.SeekStart); seekErr != nil {
+		return err
+	}
+	return s.recoveryTar(ctx, src)
+}
+
+func (s *BackupService) recoveryZip(ctx context.Context, src multipart.File, size int64) error {
+	zipReader, err := zip.NewReader(src, size)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range zipReader.File {
+		name := cleanArchiveName(file.Name)
+		if name == "" {
+			continue
+		}
+		if file.FileInfo().IsDir() {
+			if strings.HasPrefix(name, backupStaticDir+"/") {
+				if err = mkdirStaticDir(strings.TrimPrefix(name, backupStaticDir+"/")); err != nil {
+					return err
+				}
+			}
+			continue
+		}
+
+		switch {
+		case strings.HasPrefix(name, backupDataDir+"/") && strings.HasSuffix(name, ".json"):
+			if err = s.restoreZipCollection(ctx, file); err != nil {
+				return err
+			}
+		case strings.HasPrefix(name, backupStaticDir+"/"):
+			if err = restoreZipStaticFile(file, strings.TrimPrefix(name, backupStaticDir+"/")); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (s *BackupService) recoveryTar(ctx context.Context, src io.Reader) error {
 	tarReader := tar.NewReader(src)
 	for {
-		var (
-			header      *tar.Header
-			fileContent []byte
-		)
-		header, err = tarReader.Next()
+		header, err := tarReader.Next()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
 			return err
 		}
-		// 读取文件内容
-		fileContent, err = io.ReadAll(tarReader)
-		if err != nil {
-			return err
+
+		name := cleanArchiveName(header.Name)
+		if name == "" {
+			continue
 		}
-		// 将文件内容写入到 MongoDB 的集合中
-		// header.Name 为文件名.后缀，获取到文件名，去除 fnote_ 和后缀
-		// 例如：fnote_config.json，获取到 config
-		split := strings.Split(header.Name, ".")
-		colName := ""
-		if len(split) != 2 {
-			return fmt.Errorf("file name error: %s", header.Name)
+		if header.FileInfo().IsDir() {
+			if strings.HasPrefix(name, backupStaticDir+"/") {
+				if err = mkdirStaticDir(strings.TrimPrefix(name, backupStaticDir+"/")); err != nil {
+					return err
+				}
+			}
+			continue
 		}
-		colName = strings.Replace(split[0], "fnote_", "", 1)
-		err = s.DeleteAndInsertCollectionDoc(ctx, colName, fileContent)
-		if err != nil {
-			return err
+		if header.Typeflag != tar.TypeReg && header.Typeflag != tar.TypeRegA {
+			continue
+		}
+
+		switch {
+		case strings.HasPrefix(name, backupDataDir+"/") && strings.HasSuffix(name, ".json"):
+			content, err := io.ReadAll(tarReader)
+			if err != nil {
+				return err
+			}
+			if err = s.restoreCollection(ctx, path.Base(name), content); err != nil {
+				return err
+			}
+		case strings.HasPrefix(name, backupStaticDir+"/"):
+			if err = restoreStaticFile(tarReader, strings.TrimPrefix(name, backupStaticDir+"/"), header.FileInfo().Mode()); err != nil {
+				return err
+			}
+		case !strings.Contains(name, "/") && strings.HasSuffix(name, ".json"):
+			content, err := io.ReadAll(tarReader)
+			if err != nil {
+				return err
+			}
+			if err = s.restoreCollection(ctx, path.Base(name), content); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
+func (s *BackupService) restoreZipCollection(ctx context.Context, file *zip.File) error {
+	reader, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	content, err := io.ReadAll(reader)
+	if err != nil {
+		return err
+	}
+	return s.restoreCollection(ctx, path.Base(cleanArchiveName(file.Name)), content)
+}
+
+func (s *BackupService) restoreCollection(ctx context.Context, filename string, content []byte) error {
+	colName, err := s.collectionNameFromBackupFile(filename)
+	if err != nil {
+		return err
+	}
+	return s.DeleteAndInsertCollectionDoc(ctx, colName, content)
+}
+
+func (s *BackupService) collectionNameFromBackupFile(filename string) (string, error) {
+	base := filepath.Base(filename)
+	if filepath.Ext(base) != ".json" {
+		return "", fmt.Errorf("file name error: %s", filename)
+	}
+
+	name := strings.TrimSuffix(base, ".json")
+	dbPrefix := s.db.Name() + "_"
+	if strings.HasPrefix(name, dbPrefix) {
+		return strings.TrimPrefix(name, dbPrefix), nil
+	}
+
+	if strings.HasPrefix(name, "fnote_") {
+		return strings.TrimPrefix(name, "fnote_"), nil
+	}
+
+	return "", fmt.Errorf("file name error: %s", filename)
+}
+
 func (s *BackupService) GetBackups(ctx context.Context) (zipFileName string, err error) {
-	var files []string
-	defer func() {
-		for _, file := range files {
-			fErr := os.Remove(file)
-			if fErr != nil {
-				slog.Error("remove file: %s failed, error: %v", file, fErr)
-			}
-		}
-	}()
-	dbName := s.db.Name()
-	// 获取到所有的 db 集合
-	collections, err := s.db.ListCollectionNames(ctx, bson.M{})
+	staticPath := viper.GetString("system.static_path")
+	if staticPath == "" {
+		return "", fmt.Errorf("system.static_path is empty")
+	}
+
+	if err = os.MkdirAll(staticPath, os.ModePerm); err != nil {
+		return "", err
+	}
+
+	tempDir, err := os.MkdirTemp("", "fnote-backup-*")
 	if err != nil {
 		return "", err
 	}
+	defer func() {
+		if fErr := os.RemoveAll(tempDir); fErr != nil {
+			slog.Error("remove backup temp dir failed", "dir", tempDir, "error", fErr)
+		}
+	}()
+
+	if err = s.exportCollections(ctx, filepath.Join(tempDir, backupDataDir)); err != nil {
+		return "", err
+	}
+
+	zipFileName = filepath.Join(staticPath, fmt.Sprintf("backup_%s.zip", time.Now().Local().Format("2006-01-02_150405")))
+	fileCount, err := s.createZip(zipFileName, filepath.Join(tempDir, backupDataDir), staticPath)
+	if err != nil {
+		return "", err
+	}
+	if fileCount == 0 {
+		if fErr := os.Remove(zipFileName); fErr != nil && !os.IsNotExist(fErr) {
+			slog.Error("remove empty backup file failed", "file", zipFileName, "error", fErr)
+		}
+		return "", nil
+	}
+	return zipFileName, nil
+}
+
+func (s *BackupService) exportCollections(ctx context.Context, dataDir string) error {
+	dbName := s.db.Name()
+	collections, err := s.db.ListCollectionNames(ctx, bson.M{})
+	if err != nil {
+		return err
+	}
+
 	for _, collectionName := range collections {
-		var (
-			cur         *mongo.Cursor
-			documents   []bson.M
-			fileContent []byte
-		)
-		cur, err = s.db.Collection(collectionName).Find(ctx, bson.M{})
+		cur, err := s.db.Collection(collectionName).Find(ctx, bson.M{})
 		if err != nil {
-			return "", err
+			return err
 		}
 
+		var documents []bson.M
 		if err = cur.All(ctx, &documents); err != nil {
-			return "", err
+			return err
 		}
-		if len(documents) > 0 {
-			filename := fmt.Sprintf("%s%s_%s.json", viper.GetString("system.static_path"), dbName, collectionName)
-			if collectionName == "configs" {
-				for _, document := range documents {
-					if typ, ok := document["typ"]; ok && typ == "social" {
-						props := document["props"].(bson.D)
-						for _, prop := range props {
-							if prop.Key == "social_info_list" {
-								socialList := prop.Value.(bson.A)
-								for _, m := range socialList {
-									obj := m.(bson.M)
-									obj["id"] = hex.EncodeToString(obj["id"].(bson.Binary).Data)
-								}
+		if len(documents) == 0 {
+			continue
+		}
+
+		if collectionName == "configs" {
+			for _, document := range documents {
+				if typ, ok := document["typ"]; ok && typ == "social" {
+					props := document["props"].(bson.D)
+					for _, prop := range props {
+						if prop.Key == "social_info_list" {
+							socialList := prop.Value.(bson.A)
+							for _, m := range socialList {
+								obj := m.(bson.M)
+								obj["id"] = hex.EncodeToString(obj["id"].(bson.Binary).Data)
 							}
 						}
 					}
 				}
 			}
-			fileContent, err = json.MarshalIndent(documents, "", "    ")
-			if err != nil {
-				return "", err
-			}
-			if err = os.WriteFile(filename, fileContent, 0644); err != nil {
-				return "", err
-			}
-			files = append(files, filename)
 		}
-	}
-	if len(files) == 0 {
-		return "", nil
-	}
-	zipFileName = fmt.Sprintf("%sbackup_%s.zip", viper.GetString("system.static_path"), time.Now().Local().Format(time.DateOnly))
-	if err = s.createTar(zipFileName, files); err != nil {
-		return "", err
-	}
-	return zipFileName, nil
-}
 
-// createTar 创建一个tar文件，并将files列表中的文件添加到这个tar文件中。
-func (s *BackupService) createTar(tarFileName string, files []string) error {
-	createSuccess := false
-	// 创建tar文件
-	newTarFile, err := os.Create(tarFileName)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		fErr := newTarFile.Close()
-		if fErr != nil {
-			slog.Error("close file: %s failed, error: %v", tarFileName, fErr)
+		fileContent, err := json.MarshalIndent(documents, "", "    ")
+		if err != nil {
+			return err
 		}
-		if err != nil && createSuccess {
-			fErr = os.Remove(tarFileName)
-			if fErr != nil {
-				slog.Error("remove file: %s failed, error: %v", tarFileName, fErr)
-			}
+		if err = os.MkdirAll(dataDir, os.ModePerm); err != nil {
+			return err
 		}
-	}()
-	createSuccess = true
-	// 创建一个tar的写入器
-	tarWriter := tar.NewWriter(newTarFile)
-	defer tarWriter.Close()
 
-	// 遍历files列表，将每个文件添加到tar中
-	for _, file := range files {
-		if err := s.addFileToTar(tarWriter, file); err != nil {
+		filename := filepath.Join(dataDir, fmt.Sprintf("%s_%s.json", dbName, collectionName))
+		if err = os.WriteFile(filename, fileContent, 0644); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// addFileToTar 向tar文件中添加一个文件。
-func (s *BackupService) addFileToTar(tarWriter *tar.Writer, filename string) error {
-	// 打开需要添加到tar的文件
-	fileToTar, err := os.Open(filename)
+func (s *BackupService) createZip(zipFileName, dataDir, staticPath string) (int, error) {
+	newZipFile, err := os.Create(zipFileName)
+	if err != nil {
+		return 0, err
+	}
+
+	createSuccess := false
+	defer func() {
+		if fErr := newZipFile.Close(); fErr != nil {
+			slog.Error("close backup file failed", "file", zipFileName, "error", fErr)
+		}
+		if !createSuccess {
+			if fErr := os.Remove(zipFileName); fErr != nil && !os.IsNotExist(fErr) {
+				slog.Error("remove failed backup file failed", "file", zipFileName, "error", fErr)
+			}
+		}
+	}()
+
+	zipWriter := zip.NewWriter(newZipFile)
+
+	fileCount := 0
+	if err = filepath.WalkDir(dataDir, func(filePath string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() {
+			return nil
+		}
+
+		archiveName := path.Join(backupDataDir, filepath.Base(filePath))
+		if err = addFileToZip(zipWriter, filePath, archiveName); err != nil {
+			return err
+		}
+		fileCount++
+		return nil
+	}); err != nil && !os.IsNotExist(err) {
+		return 0, err
+	}
+
+	zipAbs, err := filepath.Abs(zipFileName)
+	if err != nil {
+		return 0, err
+	}
+	if err = filepath.WalkDir(staticPath, func(filePath string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() {
+			return nil
+		}
+
+		fileAbs, err := filepath.Abs(filePath)
+		if err != nil {
+			return err
+		}
+		if fileAbs == zipAbs || isBackupArchive(filePath) {
+			return nil
+		}
+
+		relPath, err := filepath.Rel(staticPath, filePath)
+		if err != nil {
+			return err
+		}
+		archiveName := path.Join(backupStaticDir, filepath.ToSlash(relPath))
+		if err = addFileToZip(zipWriter, filePath, archiveName); err != nil {
+			return err
+		}
+		fileCount++
+		return nil
+	}); err != nil {
+		return 0, err
+	}
+
+	if err = zipWriter.Close(); err != nil {
+		return 0, err
+	}
+	createSuccess = true
+	return fileCount, nil
+}
+
+func addFileToZip(zipWriter *zip.Writer, filename, archiveName string) error {
+	fileToZip, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
-	defer fileToTar.Close()
+	defer fileToZip.Close()
 
-	// 获取文件信息，用于设置tar头信息
-	info, err := fileToTar.Stat()
+	info, err := fileToZip.Stat()
 	if err != nil {
 		return err
 	}
 
-	// 创建一个对应于当前文件的tar头
-	header, err := tar.FileInfoHeader(info, "")
+	header, err := zip.FileInfoHeader(info)
 	if err != nil {
 		return err
 	}
-	// 确保使用相对路径或文件名，避免在tar中创建不必要的目录结构
-	header.Name = filepath.Base(filename)
+	header.Name = filepath.ToSlash(archiveName)
+	header.Method = zip.Deflate
 
-	// 写入文件头到tar
-	if err := tarWriter.WriteHeader(header); err != nil {
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
 		return err
 	}
-	// 将文件内容写入tar
-	_, err = io.Copy(tarWriter, fileToTar)
+
+	_, err = io.Copy(writer, fileToZip)
 	return err
 }
 
+func restoreZipStaticFile(file *zip.File, relPath string) error {
+	reader, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	mode := file.Mode()
+	if mode == 0 {
+		mode = 0644
+	}
+	return restoreStaticFile(reader, relPath, mode)
+}
+
+func restoreStaticFile(reader io.Reader, relPath string, mode fs.FileMode) error {
+	targetPath, err := staticTargetPath(relPath)
+	if err != nil {
+		return err
+	}
+	if err = os.MkdirAll(filepath.Dir(targetPath), os.ModePerm); err != nil {
+		return err
+	}
+
+	if mode == 0 {
+		mode = 0644
+	}
+	file, err := os.OpenFile(targetPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, mode)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = io.Copy(file, reader)
+	return err
+}
+
+func mkdirStaticDir(relPath string) error {
+	targetPath, err := staticTargetPath(relPath)
+	if err != nil {
+		return err
+	}
+	return os.MkdirAll(targetPath, os.ModePerm)
+}
+
+func staticTargetPath(relPath string) (string, error) {
+	staticPath := viper.GetString("system.static_path")
+	if staticPath == "" {
+		return "", fmt.Errorf("system.static_path is empty")
+	}
+
+	cleanRel := filepath.Clean(filepath.FromSlash(relPath))
+	if cleanRel == "." || cleanRel == ".." || filepath.IsAbs(cleanRel) || strings.HasPrefix(cleanRel, ".."+string(os.PathSeparator)) {
+		return "", fmt.Errorf("invalid static file path: %s", relPath)
+	}
+
+	baseAbs, err := filepath.Abs(staticPath)
+	if err != nil {
+		return "", err
+	}
+	targetAbs, err := filepath.Abs(filepath.Join(baseAbs, cleanRel))
+	if err != nil {
+		return "", err
+	}
+
+	basePrefix := strings.TrimRight(baseAbs, `\/`) + string(os.PathSeparator)
+	if targetAbs != baseAbs && !strings.HasPrefix(targetAbs, basePrefix) {
+		return "", fmt.Errorf("invalid static file path: %s", relPath)
+	}
+	return targetAbs, nil
+}
+
+func cleanArchiveName(name string) string {
+	cleaned := path.Clean(strings.ReplaceAll(name, "\\", "/"))
+	if cleaned == "." || cleaned == ".." || strings.HasPrefix(cleaned, "../") || strings.HasPrefix(cleaned, "/") {
+		return ""
+	}
+	return cleaned
+}
+
+func isBackupArchive(filename string) bool {
+	base := filepath.Base(filename)
+	matched, err := filepath.Match("backup_*.zip", base)
+	return err == nil && matched
+}
+
 func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colName string, content []byte) error {
-	// content 是一个 json 数组，将其插入到集合中
 	var documents []map[string]any
 	if err := json.Unmarshal(content, &documents); err != nil {
 		return err
@@ -235,7 +495,7 @@ func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colNam
 	col := s.db.Collection(colName)
 	for _, doc := range documents {
 		objectID, fErr := bson.ObjectIDFromHex(doc["_id"].(string))
-		// 部分集合的 id 不是 objectID
+		// Some collections use custom string IDs instead of ObjectIDs.
 		if fErr == nil {
 			doc["_id"] = objectID
 		}
@@ -306,7 +566,6 @@ func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colNam
 			doc["updated_at"] = parse
 		}
 	}
-	// 先清空数据
 	_, err := col.DeleteMany(ctx, bson.M{})
 	if err != nil {
 		return err
