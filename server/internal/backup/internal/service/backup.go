@@ -127,11 +127,15 @@ func (s *BackupService) GetBackups(ctx context.Context) (zipFileName string, err
 			if collectionName == "configs" {
 				for _, document := range documents {
 					if typ, ok := document["typ"]; ok && typ == "social" {
-						props := document["props"].(bson.M)
-						socialList := props["social_info_list"].(bson.A)
-						for _, m := range socialList {
-							obj := m.(bson.M)
-							obj["id"] = hex.EncodeToString(obj["id"].(bson.Binary).Data)
+						props := document["props"].(bson.D)
+						for _, prop := range props {
+							if prop.Key == "social_info_list" {
+								socialList := prop.Value.(bson.A)
+								for _, m := range socialList {
+									obj := m.(bson.M)
+									obj["id"] = hex.EncodeToString(obj["id"].(bson.Binary).Data)
+								}
+							}
 						}
 					}
 				}
