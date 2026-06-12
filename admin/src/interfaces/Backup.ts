@@ -3,7 +3,8 @@ import instance from '@/utils/axios'
 export const Backup = () => {
   return instance({
     url: `/backup`,
-    method: 'get'
+    method: 'get',
+    responseType: 'blob'
   })
 }
 export const Recovery = (data: any) => {
