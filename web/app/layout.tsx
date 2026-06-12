@@ -137,7 +137,7 @@ export default async function RootLayout({
             <div className="min-h-screen flex flex-col">
               <Header websiteMetaConfig={config.website_meta} />
               {hasSiteIssue && (
-                <div className="mx-auto mb-6 w-full max-w-7xl rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <div className="mx-auto mb-5 md:mb-6 w-[calc(100%-2rem)] md:w-full max-w-7xl rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                   网站数据暂时异常，部分内容可能无法显示，请稍后再试。
                 </div>
               )}

@@ -9,7 +9,7 @@ const HeaderActions = () => {
   const toggleDarkMode = useThemeStore((s) => s.toggleDark);
 
   return (
-    <Space size="middle">
+    <Space size={4} className="md:[&_.ant-space-item:not(:last-child)]:mr-2">
       <Button
         type="text"
         shape="circle"

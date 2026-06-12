@@ -58,7 +58,7 @@ function SearchPage({
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
-      <div className="mb-6 bg-white dark:bg-[#141414] rounded-lg shadow-sm p-4 md:p-6">
+      <div className="mb-5 md:mb-6 bg-white dark:bg-[#141414] rounded-lg shadow-sm p-4 md:p-6">
         <h1 className="text-xl md:text-2xl font-bold mb-4 dark:text-gray-100">
           搜索文章
         </h1>
@@ -74,13 +74,13 @@ function SearchPage({
           />
         </div>
         {keyword && (
-          <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-3 text-sm text-gray-500 dark:text-gray-400 break-words">
             搜索关键词：
             <span className="font-medium text-blue-600 dark:text-blue-400">
               "{keyword}"
             </span>
             {total > 0 && (
-              <span className="ml-2">找到 {total} 篇相关文章</span>
+              <span className="block sm:inline sm:ml-2">找到 {total} 篇相关文章</span>
             )}
           </div>
         )}

@@ -69,8 +69,8 @@ export const BaseCommentForm = forwardRef<BaseCommentFormRef, BaseCommentFormPro
         </Form.Item>
         <Form.Item noStyle shouldUpdate>
           {() => (
-            <div className="w-full flex items-center gap-3 mb-4">
-              <Form.Item>
+            <div className="w-full flex flex-col sm:flex-row sm:items-start gap-3 mb-4">
+              <Form.Item className="mb-0 flex justify-center sm:block">
                 <Avatar
                   src={getGravatar(form.getFieldValue("email") || "")}
                   size={40}
@@ -111,7 +111,7 @@ export const BaseCommentForm = forwardRef<BaseCommentFormRef, BaseCommentFormPro
             </div>
           )}
         </Form.Item>
-        <div className="flex gap-2 items-center justify-center">
+        <div className="flex flex-wrap gap-2 items-center justify-center">
           <Form.Item noStyle>
             <Button
               type="primary"

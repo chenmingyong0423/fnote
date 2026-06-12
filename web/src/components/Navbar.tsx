@@ -61,10 +61,11 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({ menus, loadi
   ];
 
   return (
+    <div className="w-full min-w-0 overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
     <Menu
       mode="horizontal"
       selectable={false}
-      className="bg-transparent border-none shadow-none"
+      className="min-w-max bg-transparent border-none shadow-none [&_.ant-menu-item]:px-2 md:[&_.ant-menu-item]:px-4"
       items={items}
       style={{ flex: 1, minWidth: 0 }}
       selectedKeys={selectedKeys}
@@ -75,6 +76,7 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({ menus, loadi
         router.push(url);
       }}
     />
+    </div>
   );
 };
 

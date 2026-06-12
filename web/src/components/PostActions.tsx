@@ -45,7 +45,7 @@ export const PostActions: React.FC<{ postId: string; isLiked?: boolean }> = ({ p
   };
 
   return (
-      <div className="flex flex-row items-center justify-center gap-3 bg-white dark:bg-[#232426] rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="flex flex-row items-center justify-center gap-1.5 md:gap-3 bg-white dark:bg-[#232426] rounded-lg p-2 md:p-3 shadow-sm border border-gray-100 dark:border-gray-700">
         <Tooltip title={liked ? "已点赞" : "点赞"}>
           <Button
             type="text"

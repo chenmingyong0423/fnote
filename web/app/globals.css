@@ -31,6 +31,14 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
 }
 
 /* 优化 github-markdown-css 的 li 样式 */
@@ -45,6 +53,22 @@ body {
 }
 .markdown-body li {
   margin-bottom: 0.3em;
+}
+
+.markdown-body {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.markdown-body pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.markdown-body table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /* 暗黑模式支持 */

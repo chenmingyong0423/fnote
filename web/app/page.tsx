@@ -1,7 +1,6 @@
-import LatestComments from "@/src/components/LatestComments";
 import FeaturedCarousel from "../src/components/FeaturedCarousel";
+import HomeSidebar from "@/src/components/HomeSidebar";
 import LatestPosts from "../src/components/LatestPosts";
-import SiteOwnerCard from "../src/components/SiteOwnerCard";
 import { getLatestPosts } from "@/src/api/posts";
 import { getCarouselList } from "@/src/api/carousel";
 import { getLatestComments } from "@/src/api/comments";
@@ -46,19 +45,17 @@ export default async function Home() {
             />
           </section>
         </div>
-        <div className="w-full md:col-span-4 flex flex-col gap-6 md:gap-8 min-w-0">
-          <SiteOwnerCard
-            name={config.data.website_owner}
-            avatar={config.data.website_owner_avatar}
-            bio={config.data.website_owner_profile}
-            stats={stats.data}
-            hasError={config.failed || stats.failed}
-          />
-          <LatestComments
-            comments={latestComments.data}
-            hasError={latestComments.failed}
-          />
-        </div>
+        <HomeSidebar
+          siteOwner={{
+            name: config.data.website_owner,
+            avatar: config.data.website_owner_avatar,
+            bio: config.data.website_owner_profile,
+            stats: stats.data,
+            hasError: config.failed || stats.failed,
+          }}
+          comments={latestComments.data}
+          hasCommentError={latestComments.failed}
+        />
       </div>
     </div>
   );

@@ -19,16 +19,16 @@ export default function SiteOwnerCard({
   hasError = false,
 }: SiteOwnerCardProps) {
   return (
-    <Card className="text-center p-6">
+    <Card className="text-center [&_.ant-card-body]:!p-4 md:[&_.ant-card-body]:!p-6">
       <div className="flex flex-col items-center gap-3">
         {/* 头像 */}
         {avatar && avatar !== "" ? (
           <Avatar src={avatar} size={64} />
         ) : null}
         {/* 名字 */}
-        <div className="font-bold text-lg dark:text-gray-200">{name}</div>
+        <div className="break-words font-bold text-base dark:text-gray-200 md:text-lg">{name}</div>
         {/* 简介 */}
-        <div className="text-gray-500 text-sm dark:text-gray-400">
+        <div className="break-words text-gray-500 text-sm dark:text-gray-400">
           {hasError ? "网站数据暂时异常" : bio}
         </div>
         {/* 指标区 */}

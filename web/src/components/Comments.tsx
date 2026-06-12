@@ -52,8 +52,8 @@ export const Comments: React.FC<CommentsProps> = ({ postId }) => {
 
   return (
     <Card
-      className="mt-10 !rounded-xl shadow-sm"
-      style={{ padding: "12px" }}
+      className="mt-8 md:mt-10 !rounded-xl shadow-sm"
+      styles={{ body: { padding: "12px" } }}
       id="comments"
       title={
         <div className="flex items-center gap-2">

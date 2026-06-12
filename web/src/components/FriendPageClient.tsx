@@ -20,7 +20,7 @@ import { getUserFriendlyError } from "@/src/utils/errorMessage";
 const { Title, Paragraph } = Typography;
 
 const sectionClassName =
-  "p-6 rounded-md border border-gray-200 bg-white dark:border-[#303030] dark:bg-[#1b1c1f] dark:text-gray-300";
+  "p-4 md:p-6 rounded-md border border-gray-200 bg-white dark:border-[#303030] dark:bg-[#1b1c1f] dark:text-gray-300";
 const titleClassName = "!text-gray-900 dark:!text-gray-100";
 const secondaryTextClassName = "!text-gray-500 dark:!text-gray-400";
 const inputClassName =
@@ -67,8 +67,8 @@ export const FriendPageClient: React.FC<Props> = ({
             </a>
           }
         >
-          <Space align="start" direction="horizontal" size="middle">
-            <div className="w-14 h-14 flex items-center justify-center rounded bg-gray-100 text-lg font-semibold text-gray-500 overflow-hidden dark:bg-[#141414] dark:text-gray-400 dark:border dark:border-gray-700">
+          <Space align="start" direction="horizontal" size="middle" className="w-full min-w-0">
+            <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 flex items-center justify-center rounded bg-gray-100 text-lg font-semibold text-gray-500 overflow-hidden dark:bg-[#141414] dark:text-gray-400 dark:border dark:border-gray-700">
               {item.logo ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -80,7 +80,7 @@ export const FriendPageClient: React.FC<Props> = ({
                 item.name.slice(0, 1)
               )}
             </div>
-            <Paragraph className="!mb-0 dark:!text-gray-300">
+            <Paragraph className="!mb-0 min-w-0 break-words dark:!text-gray-300">
               {item.description || "这个站长很神秘，还没有写描述。"}
             </Paragraph>
           </Space>
@@ -113,7 +113,7 @@ export const FriendPageClient: React.FC<Props> = ({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto md:px-4 py-6 md:py-8 flex flex-col gap-8 md:gap-12 bg-white p-4 md:p-6 rounded-xl shadow-sm dark:bg-[#141414] dark:text-gray-300 dark:border dark:border-[#303030]">
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-6 py-5 md:py-8 flex flex-col gap-7 md:gap-12 bg-white rounded-xl shadow-sm dark:bg-[#141414] dark:text-gray-300 dark:border dark:border-[#303030]">
       {contextHolder}
       <section className={sectionClassName}>
         <Title level={2} className={titleClassName}>
@@ -137,7 +137,7 @@ export const FriendPageClient: React.FC<Props> = ({
           友链列表
         </Title>
         {friends && friends.length > 0 ? (
-          <Row gutter={[16, 16]} className="mt-4">
+          <Row gutter={[12, 12]} className="mt-4 md:[--ant-row-gap:16px]">
             {friendCards}
           </Row>
         ) : (
@@ -232,7 +232,7 @@ export const FriendPageClient: React.FC<Props> = ({
             />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={submitting}>
+            <Button type="primary" htmlType="submit" loading={submitting} className="w-full sm:w-auto">
               提交申请
             </Button>
           </Form.Item>

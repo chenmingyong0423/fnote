@@ -28,7 +28,7 @@ export default function LatestArticles({
   return (
     <section>
       <h2 className="text-xl font-bold mb-4">最新文章</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
         {articles
           .slice()
           .sort((a, b) => (b.sticky_weight || 0) - (a.sticky_weight || 0))
@@ -47,7 +47,7 @@ export default function LatestArticles({
                 styles={{ body: { padding: 12, display: 'flex', flexDirection: 'column', height: '100%' } }}
               >
                 {/* 标签区：左上角绝对定位，使用 antd Tag */}
-                <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+                <div className="absolute top-3 left-3 right-3 flex flex-wrap gap-1.5 md:gap-2 z-10">
                   {item.sticky_weight > 0 && (
                     <Tag color="success">置顶</Tag>
                   )}
@@ -59,18 +59,18 @@ export default function LatestArticles({
                   ))}
                 </div>
                 {/* 封面图片 */}
-                <div className="h-40 w-full relative rounded-t-lg overflow-hidden bg-gray-50">
+                <div className="h-36 sm:h-40 w-full relative rounded-t-lg overflow-hidden bg-gray-50">
                   <Image src={item.cover_img} alt={item.title} fill sizes="60" className="object-cover" />
                 </div>
                 {/* 标题 */}
-                <div className="pt-4 text-lg font-bold">
+                <div className="pt-3 md:pt-4 text-base md:text-lg font-bold line-clamp-2">
                   {item.title}
                 </div>
                 {/* 摘要 */}
                 <div className="pt-2 pb-4 text-gray-500 h-13 text-sm line-clamp-2">{item.summary}</div>
                 {/* 数据区 */}
-                <div className="flex items-center justify-between pb-2 text-xs text-gray-400 mt-auto">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pb-2 text-xs text-gray-400 mt-auto">
+                  <div className="flex flex-wrap items-center gap-3 md:gap-4">
                     {/* 浏览量 */}
                     <span className="flex items-center gap-1"><EyeOutlined /> {item.visit_count}</span>
                     {/* 点赞数 */}
@@ -78,7 +78,7 @@ export default function LatestArticles({
                     {/* 评论数 */}
                     <span className="flex items-center gap-1"><MessageOutlined /> {item.comment_count}</span>
                   </div>
-                  <div className="text-right whitespace-nowrap">{new Date(item.created_at * 1000).toLocaleDateString()}</div>
+                  <div className="sm:text-right whitespace-nowrap">{new Date(item.created_at * 1000).toLocaleDateString()}</div>
                 </div>
               </Card>
             </a>

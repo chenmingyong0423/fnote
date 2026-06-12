@@ -63,14 +63,14 @@ export async function generateMetadata(): Promise<Metadata> {
 function AboutState({ hasError }: { hasError: boolean }) {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
-      <section className="rounded-xl border border-dashed border-gray-200 bg-white p-8 text-center shadow-sm dark:border-gray-700 dark:bg-[#141414]">
+      <section className="rounded-xl border border-dashed border-gray-200 bg-white p-5 text-center shadow-sm dark:border-gray-700 dark:bg-[#141414] md:p-8">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-xl dark:bg-[#232426]">
           i
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 md:text-2xl">
           {hasError ? "网站数据暂时异常" : "关于页面未配置"}
         </h1>
-        <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-3 break-words text-sm text-gray-500 dark:text-gray-400">
           {hasError ? (
             "关于页面内容暂时无法加载，请稍后再试。"
           ) : (
