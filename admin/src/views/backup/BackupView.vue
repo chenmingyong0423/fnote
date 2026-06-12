@@ -1,64 +1,127 @@
 <template>
-  <div class="flex gap-x-2">
-    <a-button @click="DownloadBackup">导出数据</a-button>
-    <a-button @click="RecoveryBackup">导入数据</a-button>
-  </div>
+  <a-card title="数据备份">
+    <div class="flex flex-col gap-y-4">
+      <div class="flex gap-x-2">
+        <a-button
+          type="primary"
+          :loading="exporting"
+          :disabled="importing"
+          @click="downloadBackup"
+        >
+          {{ exporting ? '导出中...' : '导出数据' }}
+        </a-button>
+        <a-button
+          :loading="importing"
+          :disabled="exporting"
+          @click="selectBackupFile"
+        >
+          {{ importing ? '导入中...' : '导入数据' }}
+        </a-button>
+      </div>
+
+      <a-alert
+        v-if="runningTip"
+        type="info"
+        show-icon
+        banner
+        :message="runningTip"
+      />
+    </div>
+  </a-card>
 </template>
 
 <script lang="ts" setup>
+import { computed, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import { Backup, Recovery } from '@/interfaces/Backup'
+import { toErrorMessage } from '@/utils/error'
 
 document.title = '备份 - 后台管理'
 
-const RecoveryBackup = async () => {
+const exporting = ref(false)
+const importing = ref(false)
+
+const runningTip = computed(() => {
+  if (exporting.value) return '正在导出数据，请不要关闭页面或重复点击。'
+  if (importing.value) return '正在导入数据，请不要关闭页面或重复点击。'
+  return ''
+})
+
+function getBackupFilename(contentDisposition?: string) {
+  if (!contentDisposition) return `fnote-backup-${Date.now()}.zip`
+
+  const utf8Filename = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i)
+  if (utf8Filename?.[1]) {
+    return decodeURIComponent(utf8Filename[1])
+  }
+
+  const filename = contentDisposition.match(/filename="?([^"]+)"?/i)
+  return filename?.[1] || `fnote-backup-${Date.now()}.zip`
+}
+
+function downloadBlob(data: BlobPart, filename: string) {
+  const fileBlob = new Blob([data], { type: 'application/zip' })
+  const fileURL = window.URL.createObjectURL(fileBlob)
+  const fileLink = document.createElement('a')
+  fileLink.href = fileURL
+  fileLink.setAttribute('download', filename)
+  document.body.appendChild(fileLink)
+  fileLink.click()
+  document.body.removeChild(fileLink)
+  window.URL.revokeObjectURL(fileURL)
+}
+
+const selectBackupFile = () => {
+  if (importing.value || exporting.value) return
+
   const input = document.createElement('input')
   input.type = 'file'
   input.accept = '.zip'
-  input.onchange = async (e: any) => {
-    const file = e.target.files[0]
+  input.onchange = async (event: Event) => {
+    const target = event.target as HTMLInputElement
+    const file = target.files?.[0]
+    if (!file) return
+
     const formData = new FormData()
     formData.append('file', file)
+
+    importing.value = true
+    const hide = message.loading('正在导入数据，请稍候...', 0)
     try {
       await Recovery(formData)
       message.success('导入成功')
     } catch (error) {
-      console.log(error)
+      message.error(toErrorMessage(error, '导入失败，请稍后再试'))
+    } finally {
+      hide()
+      importing.value = false
     }
   }
   input.click()
 }
 
-const DownloadBackup = async () => {
+const downloadBackup = async () => {
+  if (exporting.value || importing.value) return
+
+  exporting.value = true
+  const hide = message.loading('正在导出数据，请稍候...', 0)
   try {
-    const response: any = await Backup()
+    const response = await Backup()
+    const contentType = String(response.headers['content-type'] || '')
 
-    // 首先检查Content-Type来决定是否是文件
-    const contentType = response.headers['content-type']
     if (contentType.includes('application/json')) {
-      message.error(response.message)
-    } else {
-      // 提取文件名
-      const contentDisposition = response.headers.get('Content-Disposition')
-      console.log(contentDisposition)
-      const filename = contentDisposition.split('filename=')[1].replace(/"/g, '')
-      // 创建一个URL指向返回的Blob对象
-      console.log(response.data)
-      const fileBlob = new Blob([response.data], { type: 'application/tar' })
-      const fileURL = window.URL.createObjectURL(fileBlob)
-      // 创建一个临时a标签用于下载文件
-      const fileLink = document.createElement('a')
-      fileLink.href = fileURL
-      fileLink.setAttribute('download', filename) // 设定下载文件的名称和格式
-      document.body.appendChild(fileLink)
-      fileLink.click()
-
-      // 清理操作
-      document.body.removeChild(fileLink)
-      window.URL.revokeObjectURL(fileURL)
+      message.error(response.data?.message || '导出失败，请稍后再试')
+      return
     }
+
+    const filename = getBackupFilename(String(response.headers['content-disposition'] || ''))
+    downloadBlob(response.data, filename)
+    message.success('导出成功')
   } catch (error) {
-    console.log(error)
+    message.error(toErrorMessage(error, '导出失败，请稍后再试'))
+  } finally {
+    hide()
+    exporting.value = false
   }
 }
 </script>
