@@ -63,6 +63,7 @@ const submit = async (post4Edit: Post4Edit) => {
     }
     message.success('添加成功')
     postEditRef.value.clearReq()
+    await router.push('/home/post/list')
   } catch (error) {
     console.log(error)
     if (originalAxios.isAxiosError(error)) {
