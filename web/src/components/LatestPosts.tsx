@@ -36,6 +36,8 @@ export default function LatestArticles({
             <a
               key={item.sug}
               href={`/posts/${item.sug}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="block h-full"
               tabIndex={0}
             >

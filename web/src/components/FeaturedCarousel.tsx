@@ -25,6 +25,8 @@ export default function FeaturedCarousel({
             <a
               key={item.id}
               href={`/posts/${item.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="block relative h-56 sm:h-72 focus:outline-none"
               tabIndex={0}
             >

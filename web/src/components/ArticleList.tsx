@@ -82,22 +82,30 @@ export default function ArticleList({
             </div>
           {list.length > 0 ? (
             <div className="flex flex-col gap-4">
-              {list.map(item => (
-                <div className="w-full bg-white dark:bg-[#141414] dark:border dark:border-[#303030] rounded-lg shadow-sm overflow-hidden transition-transform duration-200 group/article hover:-translate-y-2 relative">
+              {list.map((item) => (
+                <div
+                  key={item.sug}
+                  className="w-full bg-white dark:bg-[#141414] dark:border dark:border-[#303030] rounded-lg shadow-sm overflow-hidden transition-transform duration-200 group/article hover:-translate-y-2 relative"
+                >
                   {/* 下划线动画，item hover 时从中间向两边展开 */}
                   <span className="pointer-events-none absolute left-1/2 bottom-0 w-0 h-0.5 bg-blue-500 rounded-full transition-all duration-300 group-hover/article:w-full group-hover/article:left-0"></span>
-                  <Link href={`/posts/${item.sug}`} className="w-full group block">
+                  <Link
+                    href={`/posts/${item.sug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full group block"
+                  >
                     {/* 移动端：纵向布局，桌面端：横向布局 */}
                     <div className="flex flex-col md:grid md:grid-cols-6">
                       {/* 图片区域 - 移动端全宽，桌面端 2/6 */}
                       <div className="w-full md:col-span-2 h-48 md:h-32 relative flex items-center justify-center bg-gray-50 overflow-hidden md:pr-4">
                         {/* 标签区悬浮在图片左上角，初始隐藏，hover 时滑入 */}
                         <div className="absolute top-2 left-2 flex flex-wrap gap-2 z-10 transition-all duration-300 -translate-x-6 opacity-0 group-hover/article:translate-x-0 group-hover/article:opacity-100">
-                          {item.categories?.map((cat) => (
-                            <Tag key={cat} color="#2DB7F5" style={{ color: '#fff', border: 'none', fontSize: '12px' }}>{cat}</Tag>
+                          {item.categories?.map((cat, index) => (
+                            <Tag key={`category-${cat}-${index}`} color="#2DB7F5" style={{ color: '#fff', border: 'none', fontSize: '12px' }}>{cat}</Tag>
                           ))}
-                          {item.tags?.map((tag) => (
-                            <Tag key={tag} color="#FB923C" style={{ color: '#fff', border: 'none', fontSize: '12px' }}>#{tag}</Tag>
+                          {item.tags?.map((tag, index) => (
+                            <Tag key={`tag-${tag}-${index}`} color="#FB923C" style={{ color: '#fff', border: 'none', fontSize: '12px' }}>#{tag}</Tag>
                           ))}
                         </div>
                         <Image src={item.cover_img} alt={item.title} fill className="object-cover" />
