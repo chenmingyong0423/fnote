@@ -28,6 +28,8 @@ admin/.idea
 web/node_modules
 admin/node_modules
 
+/server/data/
+
 *.log*
 
 web/.nuxt
