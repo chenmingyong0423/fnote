@@ -22,7 +22,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post }) => {
         coverImg={post.cover_img}
       />
       <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
-        <div className="flex flex-col lg:flex-row gap-5 lg:gap-8 bg-white dark:bg-[#141414] rounded-xl shadow-sm p-4 md:p-6 mb-8 md:mb-12">
+        <div className="glass-surface flex flex-col lg:flex-row gap-5 lg:gap-8 rounded-xl p-4 md:p-6 mb-8 md:mb-12">
           <div className="flex-1 min-w-0">
             <h1 className="text-xl leading-snug md:text-3xl font-bold mb-4 dark:text-gray-100">{post.title}</h1>
             <div className="flex flex-wrap gap-x-3 gap-y-2 md:gap-4 text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-5 md:mb-6">
@@ -44,7 +44,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post }) => {
             <MarkdownPreview content={post.content} />
           </article>
           {/* 版权信息区 */}
-          <div className="mt-8 md:mt-10 p-3 md:p-4 rounded-lg bg-gray-50 dark:bg-[#232426] border border-gray-100 dark:border-gray-700 text-xs md:text-sm text-gray-600 dark:text-gray-400">
+          <div className="mt-8 md:mt-10 p-3 md:p-4 rounded-lg border border-white/70 bg-white/45 text-xs md:text-sm text-gray-600 backdrop-blur dark:border-white/10 dark:bg-slate-900/35 dark:text-gray-400">
             <div className="break-all">
               本文链接：<span>{`${process.env.BASE_HOST || ''}/posts/${post._id}`}</span>
             </div>

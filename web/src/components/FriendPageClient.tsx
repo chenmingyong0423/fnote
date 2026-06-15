@@ -20,7 +20,7 @@ import { getUserFriendlyError } from "@/src/utils/errorMessage";
 const { Title, Paragraph } = Typography;
 
 const sectionClassName =
-  "p-4 md:p-6 rounded-md border border-gray-200 bg-white dark:border-[#303030] dark:bg-[#1b1c1f] dark:text-gray-300";
+  "glass-surface p-4 md:p-6 rounded-lg dark:text-gray-300";
 const titleClassName = "!text-gray-900 dark:!text-gray-100";
 const secondaryTextClassName = "!text-gray-500 dark:!text-gray-400";
 const inputClassName =
@@ -29,7 +29,7 @@ const emptyClassName = "dark:[&_.ant-empty-description]:!text-gray-400";
 const formClassName =
   "dark:[&_.ant-form-item-label>label]:!text-gray-300 dark:[&_.ant-input-data-count]:!text-gray-500";
 const friendCardClassName =
-  "h-full dark:!border-[#303030] dark:!bg-[#232426] dark:[&_.ant-card-head]:!border-[#303030] dark:[&_.ant-card-body]:!text-gray-300";
+  "glass-card h-full dark:[&_.ant-card-head]:!border-white/10 dark:[&_.ant-card-body]:!text-gray-300";
 
 interface Props {
   friends: FriendItem[];
@@ -113,7 +113,7 @@ export const FriendPageClient: React.FC<Props> = ({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 md:px-6 py-5 md:py-8 flex flex-col gap-7 md:gap-12 bg-white rounded-xl shadow-sm dark:bg-[#141414] dark:text-gray-300 dark:border dark:border-[#303030]">
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-6 py-5 md:py-8 flex flex-col gap-7 md:gap-12 dark:text-gray-300">
       {contextHolder}
       <section className={sectionClassName}>
         <Title level={2} className={titleClassName}>

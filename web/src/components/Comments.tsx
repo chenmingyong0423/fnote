@@ -52,7 +52,7 @@ export const Comments: React.FC<CommentsProps> = ({ postId }) => {
 
   return (
     <Card
-      className="mt-8 md:mt-10 !rounded-xl shadow-sm"
+      className="glass-surface mt-8 md:mt-10 !rounded-xl [&_.ant-card-head]:!border-white/60 dark:[&_.ant-card-head]:!border-white/10"
       styles={{ body: { padding: "12px" } }}
       id="comments"
       title={

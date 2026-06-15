@@ -65,7 +65,7 @@ export function extractToc(markdown: string): TocItem[] {
 export const Toc: React.FC<{ toc: TocItem[] }> = ({ toc }) => {
   if (!toc.length) return null;
   return (
-    <nav className="sticky top-24 max-h-[70vh] overflow-auto bg-white dark:bg-[#232426] rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-sm">
+    <nav className="glass-surface sticky top-24 max-h-[70vh] overflow-auto rounded-lg p-4 text-sm">
       <div className="font-bold mb-3 text-base text-gray-700 dark:text-gray-200 flex items-center gap-2">
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
           <path
