@@ -4,7 +4,7 @@ import { MoreOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Menu, Spin } from "antd";
 import type { MenuProps } from "antd";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import React from "react";
 import type { MenuVO } from "../api/category";
 
@@ -28,7 +28,6 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({
   loading,
 }) => {
   const pathname = usePathname();
-  const router = useRouter();
   const [mobileMoreOpen, setMobileMoreOpen] = React.useState(false);
   const [mobileVisibleCount, setMobileVisibleCount] = React.useState(2);
   const mobileContainerRef = React.useRef<HTMLDivElement | null>(null);
@@ -101,7 +100,9 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({
       disabled: item.disabled,
       label:
         useLink && item.href ? (
-          <Link href={item.href}>{item.label}</Link>
+          <Link href={item.href} target="_blank" rel="noopener noreferrer">
+            {item.label}
+          </Link>
         ) : (
           item.label
         ),
@@ -163,16 +164,15 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({
     return () => resizeObserver.disconnect();
   }, [navSignature]);
 
-  const navigateByKey = (key: string) => {
+  const openByKey = (key: string) => {
     const url = hrefByKey.get(key);
     if (url) {
-      router.push(url);
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 
   const handleSelect = ({ keyPath }: { keyPath: string[] }) => {
     setSelectedKeys(keyPath);
-    navigateByKey(keyPath[0]);
   };
 
   return (
@@ -187,6 +187,8 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({
               <Link
                 key={item.key}
                 href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={`flex h-[46px] shrink-0 items-center whitespace-nowrap px-2 text-sm transition-colors ${
                   selectedKeys.includes(item.key)
                     ? "text-blue-600 dark:text-blue-400"
@@ -216,7 +218,7 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({
               selectable: false,
               onClick: ({ key }) => {
                 setMobileMoreOpen(false);
-                navigateByKey(String(key));
+                openByKey(String(key));
               },
             }}
           >
