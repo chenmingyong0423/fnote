@@ -477,7 +477,7 @@ func (h *WebsiteConfigHandler) InitializeWebsite(ctx *gin.Context, req InitReque
 		WebsiteInit:         gkit.ToPtr(true),
 	})
 	if err == nil {
-		global.Config.IsWebsiteInitialized = true
+		global.SetWebsiteInitialized(true)
 	}
 	return apiwrap.SuccessResponse(), err
 }

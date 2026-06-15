@@ -31,6 +31,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/global"
 	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -78,6 +79,9 @@ func (s *BackupService) Recovery(ctx context.Context, file *multipart.FileHeader
 	err = s.recoveryZip(ctx, bytes.NewReader(content), int64(len(content)))
 	if err != nil {
 		return fmt.Errorf("restore zip backup failed: %w", err)
+	}
+	if err = global.RefreshWebsiteInitialized(ctx, s.db); err != nil {
+		return fmt.Errorf("refresh website initialized status failed: %w", err)
 	}
 	return nil
 }
