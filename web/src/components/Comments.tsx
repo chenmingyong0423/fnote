@@ -9,10 +9,11 @@ import { CommentList } from "./CommentList";
 
 interface CommentsProps {
   postId: string;
+  initialComments?: CommentItem[];
 }
 
-export const Comments: React.FC<CommentsProps> = ({ postId }) => {
-  const [comments, setComments] = useState<CommentItem[]>([]);
+export const Comments: React.FC<CommentsProps> = ({ postId, initialComments }) => {
+  const [comments, setComments] = useState<CommentItem[]>(initialComments ?? []);
   const [loading, setLoading] = useState(false);
   // 用于标记当前在哪条评论下方显示回复表单
   const [replying, setReplying] = useState<
@@ -32,8 +33,12 @@ export const Comments: React.FC<CommentsProps> = ({ postId }) => {
   }, [postId]);
 
   useEffect(() => {
+    if (initialComments) {
+      setComments(initialComments);
+      return;
+    }
     fetchComments().catch();
-  }, [postId, fetchComments]);
+  }, [initialComments, fetchComments]);
 
   // 点击回复按钮时，设置当前回复的评论id
   const handleReply = (

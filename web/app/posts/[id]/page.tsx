@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getCommonConfig } from "@/src/api/config";
 import type { Metadata } from "next";
 import { resolvePublicUrl } from "@/src/utils/publicUrl";
+import { getCommentsByPostId } from "@/src/api/comments";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -33,5 +34,7 @@ export default async function PostDetailPage({ params }: { params: Params }) {
   const { id } = await params
   const post = await getPostDetailOrNull(id);
   if (!post) return notFound();
-  return <PostDetail post={post} />;
+
+  const comments = await getCommentsByPostId(post._id).catch(() => []);
+  return <PostDetail post={post} initialComments={comments} />;
 }

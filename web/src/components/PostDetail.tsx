@@ -5,12 +5,14 @@ import { PostActions } from "@/src/components/PostActions";
 import { Comments } from "@/src/components/Comments";
 import PostSeoClient from "@/src/components/PostSeoClient";
 import { formatDate } from "@/src/utils/date";
+import type { CommentItem } from "@/src/api/comments";
 
 interface PostDetailProps {
   post: import("@/src/api/posts").PostDetail;
+  initialComments?: CommentItem[];
 }
 
-const PostDetail: React.FC<PostDetailProps> = ({ post }) => {
+const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
   const toc = extractToc(post.content);
 
   return (
@@ -74,7 +76,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post }) => {
         <PostActions postId={post._id} />
       </div>
       <div className="w-full max-w-7xl mx-auto px-4 md:px-0 mt-0 mb-10 md:mb-12">
-        <Comments postId={post._id} />
+        <Comments postId={post._id} initialComments={initialComments} />
       </div>
     </>
   );

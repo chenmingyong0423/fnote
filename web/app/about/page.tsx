@@ -3,6 +3,7 @@ import { getPostDetailOrNull, type PostDetail as PostDetailType } from "@/src/ap
 import type { Metadata } from "next";
 import { DEFAULT_COMMON_CONFIG, getCommonConfig } from "@/src/api/config";
 import { resolvePublicUrl } from "@/src/utils/publicUrl";
+import { getCommentsByPostId } from "@/src/api/comments";
 
 async function getAboutPost() {
   try {
@@ -91,5 +92,7 @@ function AboutState({ hasError }: { hasError: boolean }) {
 export default async function AboutPage() {
   const post = await getAboutPost();
   if (!post.data) return <AboutState hasError={post.failed} />;
-  return <PostDetail post={post.data} />;
+
+  const comments = await getCommentsByPostId(post.data._id).catch(() => []);
+  return <PostDetail post={post.data} initialComments={comments} />;
 }
