@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeHighlight from "rehype-highlight";
+import { extractHeadingIdsByLine, genHeadingId } from "./Toc";
 
 interface MarkdownPreviewProps {
     content: string;
@@ -12,18 +13,27 @@ interface MarkdownPreviewProps {
 }
 
 export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({content, className = ''}) => {
+    const headingIdsByLine = React.useMemo(
+        () => extractHeadingIdsByLine(content),
+        [content]
+    );
+    const getHeadingId = (children: React.ReactNode, node: unknown) => {
+        const line = (node as { position?: { start?: { line?: number } } })?.position?.start?.line;
+        return (line ? headingIdsByLine.get(line) : undefined) || genHeadingId(String(children));
+    };
+
     return (
         <div className={`markdown-body ${className}`}>
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw, rehypeHighlight]}
                 components={{
-                    h1: ({children, ...props}) => <h1 id={genHeadingId(String(children))} {...props}>{children}</h1>,
-                    h2: ({children, ...props}) => <h2 id={genHeadingId(String(children))} {...props}>{children}</h2>,
-                    h3: ({children, ...props}) => <h3 id={genHeadingId(String(children))} {...props}>{children}</h3>,
-                    h4: ({children, ...props}) => <h4 id={genHeadingId(String(children))} {...props}>{children}</h4>,
-                    h5: ({children, ...props}) => <h5 id={genHeadingId(String(children))} {...props}>{children}</h5>,
-                    h6: ({children, ...props}) => <h6 id={genHeadingId(String(children))} {...props}>{children}</h6>,
+                    h1: ({children, node, ...props}) => <h1 id={getHeadingId(children, node)} {...props}>{children}</h1>,
+                    h2: ({children, node, ...props}) => <h2 id={getHeadingId(children, node)} {...props}>{children}</h2>,
+                    h3: ({children, node, ...props}) => <h3 id={getHeadingId(children, node)} {...props}>{children}</h3>,
+                    h4: ({children, node, ...props}) => <h4 id={getHeadingId(children, node)} {...props}>{children}</h4>,
+                    h5: ({children, node, ...props}) => <h5 id={getHeadingId(children, node)} {...props}>{children}</h5>,
+                    h6: ({children, node, ...props}) => <h6 id={getHeadingId(children, node)} {...props}>{children}</h6>,
                 }}
             >
                 {content}
@@ -31,7 +41,3 @@ export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({content, classN
         </div>
     );
 };
-
-export function genHeadingId(text: string) {
-    return text.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-").replace(/^-+|-+$/g, "");
-}

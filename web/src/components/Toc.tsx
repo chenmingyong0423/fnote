@@ -6,20 +6,60 @@ export interface TocItem {
   level: number;
 }
 
-export function extractToc(markdown: string): TocItem[] {
+export function genHeadingId(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "heading";
+}
+
+export function createHeadingIdGenerator() {
+  const idCounts = new Map<string, number>();
+
+  return (text: string) => {
+    const baseId = genHeadingId(text);
+    const count = (idCounts.get(baseId) || 0) + 1;
+    idCounts.set(baseId, count);
+
+    return count === 1 ? baseId : `${baseId}-${count}`;
+  };
+}
+
+function collectMarkdownHeadings(markdown: string) {
   const lines = markdown.split("\n");
-  const toc: TocItem[] = [];
+  const headings: Array<TocItem & { line: number }> = [];
   const headingRegex = /^(#{1,6})\s+(.+)/;
-  lines.forEach((line) => {
+  const headingIdGenerator = createHeadingIdGenerator();
+
+  lines.forEach((line, index) => {
     const match = line.match(headingRegex);
     if (match) {
       const level = match[1].length;
       const text = match[2].trim();
-      const id = text.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-").replace(/^-+|-+$/g, "");
-      toc.push({ id, text, level });
+      const id = headingIdGenerator(text);
+      headings.push({ id, text, level, line: index + 1 });
     }
   });
-  return toc;
+
+  return headings;
+}
+
+export function extractHeadingIdsByLine(markdown: string) {
+  const headingIdsByLine = new Map<number, string>();
+
+  collectMarkdownHeadings(markdown).forEach((item) => {
+    headingIdsByLine.set(item.line, item.id);
+  });
+
+  return headingIdsByLine;
+}
+
+export function extractToc(markdown: string): TocItem[] {
+  return collectMarkdownHeadings(markdown).map(({ id, text, level }) => ({
+    id,
+    text,
+    level,
+  }));
 }
 
 export const Toc: React.FC<{ toc: TocItem[] }> = ({ toc }) => {
