@@ -7,6 +7,17 @@
       <div class="flex justify-center mb-6">
         {{ stepInfo[step - 1] }}
       </div>
+      <div class="mb-6">
+        <a-button
+          class="w-full h-10"
+          :loading="importing"
+          :disabled="initializing"
+          @click="selectBackupFile"
+        >
+          <template #icon><UploadOutlined /></template>
+          {{ importing ? '导入中...' : '从备份文件导入' }}
+        </a-button>
+      </div>
       <a-form
         ref="formRef"
         :model="formState"
@@ -44,6 +55,7 @@
             <a-button
               type="primary"
               class="login-form-button w-full h-10"
+              :disabled="importing"
               @click="
                 validate(
                   [
@@ -89,12 +101,18 @@
           </a-form-item>
 
           <a-form-item>
-            <a-button type="primary" class="login-form-button w-40% h-10" @click="step--">
+            <a-button
+              type="primary"
+              class="login-form-button w-40% h-10"
+              :disabled="importing"
+              @click="step--"
+            >
               上一步
             </a-button>
             <a-button
               type="primary"
               class="login-form-button w-40% h-10 float-right"
+              :disabled="importing"
               @click="
                 validate(['website_name', 'website_owner', 'website_owner_profile'], () => {
                   step++
@@ -129,12 +147,19 @@
           </a-form-item>
 
           <a-form-item>
-            <a-button type="primary" class="login-form-button w-40% h-10" @click="step--">
+            <a-button
+              type="primary"
+              class="login-form-button w-40% h-10"
+              :disabled="importing || initializing"
+              @click="step--"
+            >
               上一步
             </a-button>
             <a-button
               type="primary"
               class="login-form-button w-40% h-10 float-right"
+              :loading="initializing"
+              :disabled="importing"
               @click="
                 validate(['website_icon', 'website_owner_avatar'], () => {
                   initWebsite()
@@ -152,13 +177,15 @@
 
 <script lang="ts" setup>
 import { reactive, ref, type UnwrapRef, toRaw } from 'vue'
-import { UserOutlined, LockOutlined } from '@ant-design/icons-vue'
+import { UserOutlined, LockOutlined, UploadOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
-import { Init, type InitReq } from '@/interfaces/Config'
+import { Init, isInit, type InitReq } from '@/interfaces/Config'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
 import type { NamePath } from 'ant-design-vue/es/form/interface'
+import { Recovery } from '@/interfaces/Backup'
+import { toErrorMessage } from '@/utils/error'
 
 document.title = '内容发布统计 - 后台管理'
 
@@ -177,6 +204,8 @@ const formState: UnwrapRef<InitReq> = reactive({
 })
 
 const step = ref(1)
+const importing = ref(false)
+const initializing = ref(false)
 
 const stepInfo = ['管理员信息', '站点信息', '站点信息']
 const labelCols = [0, 7, 7]
@@ -202,7 +231,53 @@ const validate = (fields: NamePath[] | string, callback: () => void) => {
   formRef.value?.validateFields(fields).then(() => callback())
 }
 
+const refreshInitStatus = async () => {
+  const response: any = await isInit()
+  if (response.data.code !== 0) {
+    return false
+  }
+  const initStatus = Boolean(response.data.data?.initStatus)
+  userStore.initialization = initStatus
+  return initStatus
+}
+
+const selectBackupFile = () => {
+  if (importing.value || initializing.value) return
+
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.zip'
+  input.onchange = async (event: Event) => {
+    const target = event.target as HTMLInputElement
+    const file = target.files?.[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    importing.value = true
+    const hide = message.loading('正在导入备份，请稍候...', 0)
+    try {
+      await Recovery(formData)
+      const initialized = await refreshInitStatus()
+      if (!initialized) {
+        message.warning('导入成功，但备份中未包含已初始化配置，请继续手动初始化')
+        return
+      }
+      message.success('导入成功，初始化已完成')
+      await router.replace('/login')
+    } catch (error) {
+      message.error(toErrorMessage(error, '导入失败，请稍后再试'))
+    } finally {
+      hide()
+      importing.value = false
+    }
+  }
+  input.click()
+}
+
 const initWebsite = () => {
+  initializing.value = true
   formRef.value
     .validate()
     .then(async () => {
@@ -217,6 +292,9 @@ const initWebsite = () => {
     })
     .catch((error: any) => {
       console.log('error', error)
+    })
+    .finally(() => {
+      initializing.value = false
     })
 }
 </script>
