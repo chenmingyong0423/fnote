@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 
 export interface SiteStatsProps {
@@ -12,36 +13,30 @@ export interface SiteStatsProps {
 
 export default function SiteStats({ stats }: { stats?: SiteStatsProps }) {
   if (!stats) return null;
+
+  const items = [
+    { label: "文章", value: stats.post_count },
+    { label: "分类", value: stats.category_count },
+    { label: "标签", value: stats.tag_count },
+    { label: "评论", value: stats.comment_count },
+    { label: "点赞", value: stats.like_count },
+    { label: "浏览", value: stats.website_view_count },
+  ];
+
   return (
-    <div className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#141414] p-3 text-xs text-gray-600 dark:text-gray-400 md:p-4">
-      <div className="grid grid-cols-3 gap-x-1 gap-y-2">
-        <div className="flex flex-col items-center">
-          <span>文章</span>
-          <span className="font-bold">{stats.post_count}</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <span>分类</span>
-          <span className="font-bold">{stats.category_count}</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <span>标签</span>
-          <span className="font-bold">{stats.tag_count}</span>
-        </div>
-      </div>
-      <div className="my-3 border-t border-gray-100 dark:border-gray-700" />
-      <div className="grid grid-cols-3 gap-x-1 gap-y-2">
-        <div className="flex flex-col items-center">
-          <span>评论</span>
-          <span className="font-bold">{stats.comment_count}</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <span>点赞</span>
-          <span className="font-bold">{stats.like_count}</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <span>浏览</span>
-          <span className="font-bold">{stats.website_view_count}</span>
-        </div>
+    <div className="mt-1 w-full rounded-lg border border-gray-200/80 bg-gray-50/70 p-2.5 text-xs text-gray-500 dark:border-[#303030] dark:bg-[#1b1b1b] dark:text-gray-400 md:p-3">
+      <div className="grid grid-cols-3 gap-2">
+        {items.map((item) => (
+          <div
+            key={item.label}
+            className="rounded-md px-1.5 py-2 transition-colors hover:bg-white dark:hover:bg-[#232426]"
+          >
+            <div>{item.label}</div>
+            <div className="mt-1 truncate font-semibold text-gray-900 dark:text-gray-100">
+              {item.value}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

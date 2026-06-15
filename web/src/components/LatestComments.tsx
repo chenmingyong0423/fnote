@@ -1,7 +1,7 @@
 "use client";
 
 import { BookOutlined } from "@ant-design/icons";
-import { Avatar, Card, Empty } from "antd";
+import { Avatar, Empty } from "antd";
 import React from "react";
 
 export interface LatestComment {
@@ -21,35 +21,42 @@ export default function LatestComments({
   hasError?: boolean;
 }) {
   return (
-    <Card
-      title="最新评论"
-      className="[&_.ant-card-body]:!p-4 md:[&_.ant-card-body]:!p-6"
-    >
+    <section className="rounded-lg border border-gray-200/80 bg-white shadow-sm dark:border-[#303030] dark:bg-[#141414]">
+      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-[#303030]">
+        <h2 className="text-base font-bold text-gray-950 dark:text-gray-100">
+          最新评论
+        </h2>
+      </div>
       {comments.length === 0 ? (
-        <Empty description={hasError ? "网站数据暂时异常" : "暂无评论"} />
+        <div className="p-6">
+          <Empty description={hasError ? "网站数据暂时异常" : "暂无评论"} />
+        </div>
       ) : (
-        <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+        <ul className="px-5 py-2">
           {comments.map((item) => (
-            <li key={item.id} className="flex gap-2 py-3 md:gap-3">
-              <Avatar src={item.avatar} />
+            <li
+              key={item.id}
+              className="flex gap-3 border-b border-gray-100 py-4 last:border-b-0 dark:border-[#252525]"
+            >
+              <Avatar src={item.avatar} size={36} />
               <div className="min-w-0 flex-1">
-                <div className="flex flex-col">
-                  <span className="break-all font-medium text-sm text-gray-800 dark:text-gray-200">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="break-all text-sm font-medium text-gray-800 dark:text-gray-200">
                     {item.user}
                   </span>
-                  <span className="text-xs text-gray-400 mt-1 dark:text-gray-400">
+                  <span className="shrink-0 text-xs text-gray-400 dark:text-gray-500">
                     {new Date(
                       item.created_at ? item.created_at * 1000 : Date.now()
-                    ).toLocaleString()}
+                    ).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="mt-1 flex flex-col gap-1">
-                  <div className="truncate text-sm text-gray-700 dark:text-gray-200">
+                <div className="mt-2 flex flex-col gap-1.5">
+                  <div className="line-clamp-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
                     {item.content}
                   </div>
                   <a
                     href={item.article.link}
-                    className="mt-1 flex min-w-0 items-center gap-1 truncate text-xs text-blue-600 hover:underline"
+                    className="flex min-w-0 items-center gap-1.5 truncate text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                   >
                     <BookOutlined />
                     <span className="truncate">{item.article.title}</span>
@@ -60,6 +67,6 @@ export default function LatestComments({
           ))}
         </ul>
       )}
-    </Card>
+    </section>
   );
 }
