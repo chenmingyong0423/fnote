@@ -24,7 +24,7 @@ const Header = async ({ websiteMetaConfig }: HeaderProps) => {
         </Link>
       </div>
       {/* 菜单区 7/12，左对齐，紧挨logo */}
-      <div className="min-w-0 overflow-hidden md:col-span-7 flex items-center justify-start">
+      <div className="min-w-0 overflow-visible md:col-span-7 flex items-center justify-start">
         <Navbar menus={menus} />
       </div>
       {/* 右侧按钮区 4/12 */}
