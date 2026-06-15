@@ -5,10 +5,7 @@ import Image from "next/image";
 import React from "react";
 import type { LatestPostVO } from "../api/posts";
 import { EyeOutlined, LikeOutlined, MessageOutlined } from "@ant-design/icons";
-
-function formatDate(timestamp: number) {
-  return new Date(timestamp * 1000).toLocaleDateString();
-}
+import { formatDate } from "../utils/date";
 
 function applyInteractiveCardMotion(event: React.PointerEvent<HTMLElement>) {
   if (event.pointerType === "touch") return;

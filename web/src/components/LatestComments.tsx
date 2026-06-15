@@ -3,6 +3,7 @@
 import { BookOutlined } from "@ant-design/icons";
 import { Avatar, Empty } from "antd";
 import React from "react";
+import { formatDate } from "../utils/date";
 
 export interface LatestComment {
   id: number;
@@ -45,9 +46,7 @@ export default function LatestComments({
                     {item.user}
                   </span>
                   <span className="shrink-0 text-xs text-gray-400 dark:text-gray-500">
-                    {new Date(
-                      item.created_at ? item.created_at * 1000 : Date.now()
-                    ).toLocaleDateString()}
+                    {formatDate(item.created_at)}
                   </span>
                 </div>
                 <div className="mt-2 flex flex-col gap-1.5">

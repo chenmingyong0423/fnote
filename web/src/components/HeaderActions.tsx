@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 import { Button, Space } from "antd";
 import { BulbOutlined, SearchOutlined } from "@ant-design/icons";
 import Link from "next/link";
@@ -6,7 +7,12 @@ import { useThemeStore } from "../store/theme";
 
 const HeaderActions = () => {
   const isDark = useThemeStore((s) => s.isDark);
+  const hydrateDark = useThemeStore((s) => s.hydrateDark);
   const toggleDarkMode = useThemeStore((s) => s.toggleDark);
+
+  useEffect(() => {
+    hydrateDark();
+  }, [hydrateDark]);
 
   return (
     <Space size={4} className="md:[&_.ant-space-item:not(:last-child)]:mr-2">

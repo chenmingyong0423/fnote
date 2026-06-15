@@ -2,11 +2,12 @@ import { create } from "zustand";
 
 interface ThemeState {
   isDark: boolean;
+  hydrateDark: () => void;
   toggleDark: () => void;
   setDark: (val: boolean) => void;
 }
 
-function getInitialDark() {
+function getPreferredDark() {
   if (typeof window === "undefined") return false;
 
   const saved = localStorage.getItem("theme-dark");
@@ -17,7 +18,14 @@ function getInitialDark() {
 }
 
 export const useThemeStore = create<ThemeState>((set, get) => ({
-  isDark: getInitialDark(),
+  isDark: false,
+  hydrateDark: () => {
+    const next = getPreferredDark();
+    set({ isDark: next });
+    if (typeof window !== "undefined") {
+      document.documentElement.classList.toggle("dark", next);
+    }
+  },
   toggleDark: () => {
     const next = !get().isDark;
     set({ isDark: next });

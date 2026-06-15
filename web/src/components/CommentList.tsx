@@ -4,6 +4,7 @@ import { Button, Avatar } from "antd";
 import { CommentItem } from "@/src/api/comments";
 import { ReplyForm } from "./ReplyForm";
 import { MarkdownPreview } from "./MarkdownPreview";
+import { formatDateTime } from "@/src/utils/date";
 
 interface CommentListProps {
   comments: CommentItem[];
@@ -33,7 +34,7 @@ export const CommentList: React.FC<CommentListProps & {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="min-w-0 break-all">
                 {item.username}
-                <span className="text-xs text-gray-400 ml-2">{new Date(item.comment_time * 1000).toLocaleString()}</span>
+                <span className="text-xs text-gray-400 ml-2">{formatDateTime(item.comment_time)}</span>
               </span>
               <div className="flex items-center gap-1">
                 {(!replying || replying.commentId !== item.id || replying.replyToId) && (
@@ -64,7 +65,7 @@ export const CommentList: React.FC<CommentListProps & {
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="min-w-0 break-all">
                           {reply.name}
-                          <span className="text-xs text-gray-400 ml-2">{new Date(reply.reply_time * 1000).toLocaleString()}</span>
+                          <span className="text-xs text-gray-400 ml-2">{formatDateTime(reply.reply_time)}</span>
                           {reply.reply_to && <span className="text-xs text-blue-400 ml-2">@{reply.reply_to}</span>}
                         </span>
                         <Button size="small" type="link" onClick={() => onReplyAction(item.id, reply.id, reply.name)}>回复</Button>

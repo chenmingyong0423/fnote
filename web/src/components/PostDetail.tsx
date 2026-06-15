@@ -4,6 +4,7 @@ import { extractToc, Toc } from "@/src/components/Toc";
 import { PostActions } from "@/src/components/PostActions";
 import { Comments } from "@/src/components/Comments";
 import PostSeoClient from "@/src/components/PostSeoClient";
+import { formatDate } from "@/src/utils/date";
 
 interface PostDetailProps {
   post: import("@/src/api/posts").PostDetail;
@@ -28,7 +29,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post }) => {
               <span>作者：{post.author}</span>
               <span>分类：{post.category.map(c => c.name).join(', ')}</span>
               <span className="hidden sm:inline">标签：{post.tags.map(t => t.name).join(', ')}</span>
-              <span>发布：{new Date(post.created_at * 1000).toLocaleDateString()}</span>
+              <span>发布：{formatDate(post.created_at)}</span>
               <span className="flex flex-wrap items-center gap-2 md:gap-3">
                 <span>浏览：{post.visit_count}</span>
                 <span>评论：{post.comment_count}</span>

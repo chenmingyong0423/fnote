@@ -7,6 +7,7 @@ import { EyeOutlined, LikeOutlined, MessageOutlined } from "@ant-design/icons";
 import SiteOwnerCard, { SiteOwnerCardProps } from "./SiteOwnerCard";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { LatestPostVO } from "../api/posts";
+import { formatDate } from "../utils/date";
 
 interface ArticleListProps {
   list: LatestPostVO[];
@@ -123,7 +124,7 @@ export default function ArticleList({
                             <span className="flex items-center gap-1"><LikeOutlined /> {item.like_count}</span>
                             <span className="flex items-center gap-1"><MessageOutlined /> {item.comment_count}</span>
                           </div>
-                          <div className="sm:text-right whitespace-nowrap text-xs">{new Date(item.created_at * 1000).toLocaleDateString()}</div>
+                          <div className="sm:text-right whitespace-nowrap text-xs">{formatDate(item.created_at)}</div>
                         </div>
                       </div>
                     </div>
