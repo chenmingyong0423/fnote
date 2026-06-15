@@ -14,6 +14,7 @@ import { checkInitialization } from "@/src/api/checkInitialization";
 import { redirect } from "next/navigation";
 import { isBackendUnavailableError } from "@/src/utils/http";
 import { resolvePublicUrl } from "@/src/utils/publicUrl";
+import BackTopButton from "@/src/components/BackTopButton";
 export const dynamic = 'force-dynamic'
 
 const geistSans = Geist({
@@ -153,6 +154,7 @@ export default async function RootLayout({
               <main>{children}</main>
               <LogVisitClient />
               <Footer websiteRecords={config.records || []} />
+              <BackTopButton />
             </div>
           </AntdThemeProvider>
         </AntdRegistry>
