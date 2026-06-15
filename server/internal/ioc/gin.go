@@ -145,8 +145,8 @@ func InitMiddlewares(writer io.Writer, isWebsiteInitialized func() bool) []gin.H
 			MaxAge:        12 * time.Hour,
 		}),
 		func(ctx *gin.Context) {
-			uri := ctx.Request.RequestURI
-			if (isWebsiteInitialized() || strings.HasPrefix(uri, "/static")) || uri == "/admin-api/files/upload" || uri == "/admin-api/configs/initialization" || uri == "/configs/check-initialization" {
+			uri := ctx.Request.URL.Path
+			if (isWebsiteInitialized() || strings.HasPrefix(uri, "/static")) || isUninitializedAdminPath(uri) || uri == "/configs/check-initialization" {
 				ctx.Next()
 			} else {
 				ctx.JSON(http.StatusServiceUnavailable, nil)
