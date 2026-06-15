@@ -6,8 +6,18 @@ interface ThemeState {
   setDark: (val: boolean) => void;
 }
 
+function getInitialDark() {
+  if (typeof window === "undefined") return false;
+
+  const saved = localStorage.getItem("theme-dark");
+  if (saved === "1") return true;
+  if (saved === "0") return false;
+
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+}
+
 export const useThemeStore = create<ThemeState>((set, get) => ({
-  isDark: false,
+  isDark: getInitialDark(),
   toggleDark: () => {
     const next = !get().isDark;
     set({ isDark: next });
@@ -24,15 +34,3 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
     }
   },
 }));
-
-// 初始化时自动读取 localStorage
-if (typeof window !== "undefined") {
-  const saved = localStorage.getItem("theme-dark");
-  if (saved === "1") {
-    document.documentElement.classList.add("dark");
-    useThemeStore.getState().setDark(true);
-  } else if (saved === "0") {
-    document.documentElement.classList.remove("dark");
-    useThemeStore.getState().setDark(false);
-  }
-}

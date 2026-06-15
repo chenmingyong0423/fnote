@@ -1,5 +1,4 @@
 import React from "react";
-import { Avatar } from "antd";
 import Navbar from "./Navbar";
 import Link from "next/link";
 import { getMenus } from "../api/category";
@@ -20,7 +19,14 @@ const Header = async ({ websiteMetaConfig }: HeaderProps) => {
       {/* 左侧 Logo 区 1/12 */}
       <div className="md:col-span-1 flex items-center">
         <Link href="/">
-          <Avatar src={websiteMetaConfig?.website_icon || "/logo.png"} alt="logo" size={36} className="md:!w-10 md:!h-10" />
+          <img
+            src={websiteMetaConfig?.website_icon || "/logo.png"}
+            alt="logo"
+            width={36}
+            height={36}
+            loading="lazy"
+            className="h-9 w-9 rounded-full object-cover md:h-10 md:w-10"
+          />
         </Link>
       </div>
       {/* 菜单区 7/12，左对齐，紧挨logo */}

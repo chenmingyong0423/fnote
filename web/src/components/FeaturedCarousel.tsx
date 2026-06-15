@@ -33,7 +33,13 @@ export default function FeaturedCarousel({
               <div className="w-full h-full flex items-center justify-center bg-gray-100 relative">
                 {/* 图片展示 */}
                 {item.cover_img && (
-                  <Image src={item.cover_img} alt={item.title} fill sizes="60" className="rounded-lg" priority />
+                  <Image
+                    src={item.cover_img}
+                    alt={item.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 66vw"
+                    className="rounded-lg object-cover"
+                  />
                 )}
                 {/* 文字遮罩 */}
                 <div className="absolute bottom-0 left-0 right-0 bg-black/55 text-white p-3 md:p-4 rounded-b-lg">

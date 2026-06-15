@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ant-design/nextjs-registry": "^1.0.2",
+    "@ant-design/nextjs-registry": "1.2.0",
     "antd": "^5.29.3",
     "blueimp-md5": "^2.19.0",
     "github-markdown-css": "^5.8.1",
