@@ -14,18 +14,18 @@ const Header = async ({ websiteMetaConfig }: HeaderProps) => {
 
   return (
     <header
-      className="w-[calc(100%-2rem)] md:w-full bg-white/95 dark:bg-[#141414]/95 border border-gray-200/80 dark:border-[#303030] shadow-sm shadow-gray-200/70 dark:shadow-none rounded-lg px-3 md:px-4 mx-auto max-w-7xl grid grid-cols-[auto_1fr_auto] md:grid-cols-12 items-center gap-2 md:gap-0 min-h-[56px] md:h-[60px] mt-3 md:mt-4 mb-5 md:mb-8 backdrop-blur"
+      className="glass-surface w-[calc(100%-2rem)] md:w-full rounded-lg px-3 md:px-4 mx-auto max-w-7xl grid grid-cols-[auto_1fr_auto] md:grid-cols-12 items-center gap-2 md:gap-0 min-h-[56px] md:h-[60px] mt-3 md:mt-4 mb-5 md:mb-8"
     >
       {/* 左侧 Logo 区 1/12 */}
       <div className="md:col-span-1 flex items-center">
-        <Link href="/">
+        <Link href="/" className="flex min-w-0 items-center">
           <img
             src={websiteMetaConfig?.website_icon || "/logo.png"}
             alt="logo"
             width={36}
             height={36}
             loading="lazy"
-            className="h-9 w-9 rounded-full object-cover ring-2 ring-gray-100 transition-transform hover:scale-105 dark:ring-[#303030] md:h-10 md:w-10"
+            className="h-9 w-9 rounded-full object-cover ring-2 ring-gray-100 transition-transform duration-700 hover:rotate-[360deg] dark:ring-[#303030] md:h-10 md:w-10"
           />
         </Link>
       </div>

@@ -15,7 +15,7 @@ export default function FeaturedCarousel({
   return (
     <section>
       {items.length === 0 ? (
-        <div className="flex h-44 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-white text-gray-500 shadow-sm dark:border-gray-700 dark:bg-[#141414] dark:text-gray-400 sm:h-64">
+        <div className="glass-surface flex h-44 items-center justify-center rounded-lg border-dashed text-gray-500 dark:text-gray-400 sm:h-64">
           <span className="rounded-full border border-gray-200 bg-white/80 px-3 py-1.5 text-xs dark:border-gray-700 dark:bg-[#232426] dark:text-gray-300 md:px-4 md:text-sm">
             {hasError ? "网站数据暂时异常" : "暂无轮播图"}
           </span>
@@ -24,7 +24,7 @@ export default function FeaturedCarousel({
         <Carousel
           autoplay
           arrows
-          className="overflow-hidden rounded-lg border border-white/80 bg-white shadow-sm shadow-gray-200/70 dark:border-[#303030] dark:bg-[#141414] dark:shadow-none [&_.slick-dots-bottom]:bottom-3 [&_.slick-dots_li_button]:!h-1.5 [&_.slick-dots_li_button]:!rounded-full"
+          className="glass-surface overflow-hidden rounded-lg [&_.slick-dots-bottom]:bottom-3 [&_.slick-dots_li_button]:!h-1.5 [&_.slick-dots_li_button]:!rounded-full"
         >
           {items.map((item) => (
             <a

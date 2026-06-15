@@ -88,7 +88,7 @@ export default function HomeSidebar({
 
   if (isDesktop) {
     return (
-      <div className="w-full md:col-span-4 flex flex-col gap-6 md:gap-8 min-w-0">
+      <div className="w-full md:col-span-4 flex flex-col gap-6 md:gap-8 min-w-0 md:sticky md:top-4 md:self-start">
         <SiteOwnerCard {...siteOwner} />
         <LatestComments comments={comments} hasError={hasCommentError} />
       </div>

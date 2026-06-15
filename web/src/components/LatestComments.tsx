@@ -21,8 +21,8 @@ export default function LatestComments({
   hasError?: boolean;
 }) {
   return (
-    <section className="rounded-lg border border-gray-200/80 bg-white shadow-sm dark:border-[#303030] dark:bg-[#141414]">
-      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-[#303030]">
+    <section className="glass-surface rounded-lg">
+      <div className="glass-divider flex items-center justify-between border-b px-5 py-4">
         <h2 className="text-base font-bold text-gray-950 dark:text-gray-100">
           最新评论
         </h2>
@@ -36,7 +36,7 @@ export default function LatestComments({
           {comments.map((item) => (
             <li
               key={item.id}
-              className="flex gap-3 border-b border-gray-100 py-4 last:border-b-0 dark:border-[#252525]"
+              className="glass-divider flex gap-3 border-b py-4 last:border-b-0"
             >
               <Avatar src={item.avatar} size={36} />
               <div className="min-w-0 flex-1">

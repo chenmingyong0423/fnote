@@ -20,15 +20,17 @@ export default function SiteOwnerCard({
   hasError = false,
 }: SiteOwnerCardProps) {
   return (
-    <section className="overflow-hidden rounded-lg border border-gray-200/80 bg-white p-5 text-center shadow-sm dark:border-[#303030] dark:bg-[#141414] md:p-6">
+    <section className="glass-surface overflow-hidden rounded-lg p-5 text-center md:p-6">
       <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-blue-500/80" />
       <div className="flex flex-col items-center gap-3">
         {avatar && avatar !== "" ? (
-          <Avatar
-            src={avatar}
-            size={64}
-            className="ring-4 ring-gray-100 dark:ring-[#232426]"
-          />
+          <span className="inline-flex rounded-full transition-transform duration-700 hover:rotate-[360deg]">
+            <Avatar
+              src={avatar}
+              size={64}
+              className="ring-4 ring-gray-100 dark:ring-[#232426]"
+            />
+          </span>
         ) : null}
         <div className="break-words text-base font-bold text-gray-950 dark:text-gray-100 md:text-lg">
           {name}
