@@ -100,7 +100,7 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({
       disabled: item.disabled,
       label:
         useLink && item.href ? (
-          <Link href={item.href} target="_blank" rel="noopener noreferrer">
+          <Link href={item.href} rel="noopener noreferrer">
             {item.label}
           </Link>
         ) : (
