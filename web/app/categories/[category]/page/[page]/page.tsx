@@ -54,6 +54,7 @@ export default async function CategoryPageWithPagination({ params, searchParams 
         bio: config.website_meta.website_owner_profile,
         stats,
       }}
+      hideSiteOwnerOnMobile
       field={field}
       currentPage={pageNumber}
       pageSize={pageSize}

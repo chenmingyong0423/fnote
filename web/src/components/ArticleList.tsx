@@ -16,6 +16,7 @@ interface ArticleListProps {
   currentPage?: number;
   pageSize?: number;
   hasError?: boolean;
+  hideSiteOwnerOnMobile?: boolean;
   onPageChange?: (page: number, pageSize: number, field: string) => void;
 }
 
@@ -27,6 +28,7 @@ export default function ArticleList({
   currentPage = 1,
   pageSize = 10,
   hasError = false,
+  hideSiteOwnerOnMobile = false,
   onPageChange,
 }: ArticleListProps) {
   const [localField, setLocalField] = useState(field);
@@ -65,7 +67,7 @@ export default function ArticleList({
       {/* 移动端：纵向布局，桌面端：网格布局 */}
       <div className="flex flex-col md:grid md:grid-cols-12 gap-6 md:gap-8 dark:text-gray-200">
         {/* 左侧主内容区 - 移动端全宽，桌面端 8/12 */}
-        <div className="w-full md:col-span-8 flex flex-col gap-5 md:gap-8 min-w-0">
+        <div className={`w-full ${siteOwner ? "md:col-span-8" : "md:col-span-12"} flex flex-col gap-5 md:gap-8 min-w-0`}>
           <section>
             {/* 排序过滤选项 */}
             <div className="mb-4 overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -153,8 +155,8 @@ export default function ArticleList({
         </section>
       </div>
       {/* 右侧信息区 - 移动端全宽，桌面端 4/12 */}
-      <div className="w-full md:col-span-4 flex flex-col gap-6 md:gap-8 min-w-0">
-        {siteOwner && (
+      {siteOwner && (
+        <div className={`w-full md:col-span-4 ${hideSiteOwnerOnMobile ? "hidden md:flex" : "flex"} flex-col gap-6 md:gap-8 min-w-0`}>
           <SiteOwnerCard
             name={siteOwner.name}
             avatar={siteOwner.avatar}
@@ -162,8 +164,8 @@ export default function ArticleList({
             stats={siteOwner.stats}
             hasError={siteOwner.hasError}
           />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   </div>
   );

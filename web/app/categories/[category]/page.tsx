@@ -54,6 +54,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
         bio: config.website_meta.website_owner_profile,
         stats,
       }}
+      hideSiteOwnerOnMobile
       field={field}
       currentPage={page}
       pageSize={pageSize}
