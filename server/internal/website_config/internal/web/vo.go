@@ -142,10 +142,11 @@ type CarouselVO struct {
 }
 
 type CommonConfigVO struct {
-	WebsiteMeta WebsiteConfigMetaVO `json:"website_meta"`
-	SeoMeta     SeoMetaConfigVO     `json:"seo_meta"`
-	TPSVVO      []TPSVVO            `json:"third_party_site_verification"`
-	Records     []string            `json:"records"`
+	WebsiteMeta     WebsiteConfigMetaVO `json:"website_meta"`
+	SeoMeta         SeoMetaConfigVO     `json:"seo_meta"`
+	PayInfoConfigVO []PayInfoConfigVO   `json:"pay_info_config"`
+	TPSVVO          []TPSVVO            `json:"third_party_site_verification"`
+	Records         []string            `json:"records"`
 }
 
 type ConfigCompletionVO struct {

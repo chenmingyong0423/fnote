@@ -89,7 +89,7 @@ type WebsiteConfigService struct {
 }
 
 func (s *WebsiteConfigService) GetCommonConfig(ctx context.Context) (*domain.CommonConfig, error) {
-	configs, err := s.repo.FindConfigByTypes(ctx, "website", "seo meta", "third party site verification")
+	configs, err := s.repo.FindConfigByTypes(ctx, "website", "seo meta", "pay", "third party site verification")
 	if err != nil {
 		return nil, err
 	}
@@ -109,6 +109,13 @@ func (s *WebsiteConfigService) GetCommonConfig(ctx context.Context) (*domain.Com
 				return nil, err
 			}
 			cfg.SeoMetaConfig = seoMetaConfig
+		} else if config.Typ == "pay" {
+			payInfoConfig := domain.PayInfoConfig{List: make([]domain.PayInfoConfigElem, 0)}
+			err = s.anyToStruct(config.Props, &payInfoConfig)
+			if err != nil {
+				return nil, err
+			}
+			cfg.PayInfoConfig = payInfoConfig.List
 		} else if config.Typ == "third party site verification" {
 			tpsvConfig := domain.TPSVConfig{}
 			err = s.anyToStruct(config.Props, &tpsvConfig)

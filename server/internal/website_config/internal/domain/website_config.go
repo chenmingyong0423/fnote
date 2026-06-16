@@ -36,6 +36,7 @@ type IndexConfig struct {
 type CommonConfig struct {
 	WebSiteConfig WebsiteConfig
 	SeoMetaConfig SeoMetaConfig
+	PayInfoConfig []PayInfoConfigElem
 	TPSVConfig    []TPSV
 }
 
