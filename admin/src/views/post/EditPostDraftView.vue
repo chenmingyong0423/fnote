@@ -10,6 +10,7 @@
       :saving-draft="savingDraft"
       :auto-save="autoSaveEnabled"
       :last-saved-at="lastSavedAt"
+      :baseline-key="baselineKey"
       @publish="submit"
       @saveDraft="saveDraft"
     ></PostEditView>
@@ -68,6 +69,7 @@ const publishing = ref(false)
 const savingDraft = ref(false)
 const autoSaveEnabled = ref(false)
 const lastSavedAt = ref(0)
+const baselineKey = ref(0)
 
 type SaveDraftOptions = {
   silent?: boolean
@@ -134,6 +136,7 @@ const getPostDraftById = async (id: string) => {
       postDraft.tags.forEach((item: Tag4Post) => {
         post4Edit.tempTags?.push(item.name)
       })
+      baselineKey.value += 1
       autoSaveEnabled.value = true
     }
   } catch (error) {

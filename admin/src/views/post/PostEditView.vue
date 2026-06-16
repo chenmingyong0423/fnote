@@ -30,6 +30,7 @@
       <span v-if="props.lastSavedAt" class="save-status">
         最近保存 {{ formatSaveTime(props.lastSavedAt) }}
       </span>
+      <span v-if="hasUnsavedChanges" class="save-status">有未保存更改</span>
       <a-modal
         v-model:open="visible"
         title="文章元数据"
@@ -266,7 +267,8 @@
 </template>
 
 <script lang="ts" setup>
-import { type PropType, reactive, ref, defineEmits, onBeforeUnmount, watch } from 'vue'
+import { type PropType, reactive, ref, defineEmits, onBeforeUnmount, onMounted, watch } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
 import type { Post4Edit } from '@/interfaces/Post'
 import { type FormInstance, message } from 'ant-design-vue'
 import {
@@ -323,6 +325,10 @@ const props = defineProps({
   lastSavedAt: {
     type: Number,
     default: 0
+  },
+  baselineKey: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -334,6 +340,8 @@ const post4Edit = reactive<Post4Edit>(props.post || ({} as Post4Edit))
 const categoryOptions = ref<SelectCategory[]>([])
 const tagOptions = ref<SelectTag[]>([])
 const autoSaveTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+const savedSnapshot = ref('')
+const hasUnsavedChanges = ref(false)
 
 watch(
   () => props.categories,
@@ -489,6 +497,37 @@ const scheduleAutoSave = () => {
   }, 8000)
 }
 
+const getPostSnapshot = () => {
+  return JSON.stringify({
+    id: post4Edit.id || '',
+    title: post4Edit.title || '',
+    author: post4Edit.author || '',
+    summary: post4Edit.summary || '',
+    content: post4Edit.content || '',
+    cover_img: post4Edit.cover_img || '',
+    meta_description: post4Edit.meta_description || '',
+    meta_keywords: post4Edit.meta_keywords || '',
+    is_comment_allowed: post4Edit.is_comment_allowed,
+    is_displayed: post4Edit.is_displayed,
+    sticky_weight: post4Edit.sticky_weight,
+    tempCategories: [...(post4Edit.tempCategories || [])].sort(),
+    tempTags: [...(post4Edit.tempTags || [])].sort()
+  })
+}
+
+const markSavedSnapshot = () => {
+  savedSnapshot.value = getPostSnapshot()
+  hasUnsavedChanges.value = false
+}
+
+const updateUnsavedState = () => {
+  if (!savedSnapshot.value) {
+    markSavedSnapshot()
+    return
+  }
+  hasUnsavedChanges.value = savedSnapshot.value !== getPostSnapshot()
+}
+
 watch(
   () => [
     post4Edit.id,
@@ -505,11 +544,55 @@ watch(
     JSON.stringify(post4Edit.tempCategories || []),
     JSON.stringify(post4Edit.tempTags || [])
   ],
-  scheduleAutoSave
+  () => {
+    updateUnsavedState()
+    scheduleAutoSave()
+  }
 )
+
+watch(
+  () => props.lastSavedAt,
+  (lastSavedAt) => {
+    if (lastSavedAt) {
+      markSavedSnapshot()
+    }
+  }
+)
+
+watch(
+  () => props.baselineKey,
+  () => {
+    markSavedSnapshot()
+  }
+)
+
+const confirmLeave = () => {
+  if (!hasUnsavedChanges.value || props.savingDraft || props.publishing) {
+    return true
+  }
+  return window.confirm('当前文章有未保存更改，确认离开吗？')
+}
+
+const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+  if (!hasUnsavedChanges.value || props.savingDraft || props.publishing) {
+    return
+  }
+  event.preventDefault()
+  event.returnValue = ''
+}
+
+onMounted(() => {
+  markSavedSnapshot()
+  window.addEventListener('beforeunload', handleBeforeUnload)
+})
 
 onBeforeUnmount(() => {
   clearAutoSaveTimer()
+  window.removeEventListener('beforeunload', handleBeforeUnload)
+})
+
+onBeforeRouteLeave(() => {
+  return confirmLeave()
 })
 
 const clearReq = () => {
@@ -525,6 +608,7 @@ const clearReq = () => {
     post4Edit.tempTags = []
   }
   visible.value = false
+  markSavedSnapshot()
 }
 
 defineExpose({
