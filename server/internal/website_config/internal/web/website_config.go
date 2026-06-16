@@ -158,7 +158,7 @@ func (h *WebsiteConfigHandler) toWebsiteOwnerVO(webMasterCfg *domain.WebsiteConf
 }
 
 func (h *WebsiteConfigHandler) toNoticeConfigVO(noticeCfg *domain.NoticeConfig) NoticeConfigVO {
-	return NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, PublishTime: noticeCfg.PublishTime.Unix()}
+	return NoticeConfigVO{Title: noticeCfg.Title, Content: noticeCfg.Content, Enabled: noticeCfg.Enabled, PublishTime: noticeCfg.PublishTime.Unix()}
 }
 
 func (h *WebsiteConfigHandler) toSocialInfoConfigVO(socialINfoConfig *domain.SocialInfoConfig) SocialInfoConfigVO {

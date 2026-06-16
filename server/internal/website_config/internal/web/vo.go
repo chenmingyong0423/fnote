@@ -38,6 +38,7 @@ type PayInfoConfigVO struct {
 type NoticeConfigVO struct {
 	Title       string `json:"title" `
 	Content     string `json:"content"`
+	Enabled     bool   `json:"enabled"`
 	PublishTime int64  `json:"publish_time"`
 }
 
