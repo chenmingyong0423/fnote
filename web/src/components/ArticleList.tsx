@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Pagination, Tag, Tabs } from "antd";
 import Image from "next/image";
 import Link from "next/link";
@@ -38,6 +38,12 @@ export default function ArticleList({
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  useEffect(() => {
+    setLocalField(field);
+    setLocalPage(currentPage);
+    setLocalPageSize(pageSize);
+  }, [currentPage, field, pageSize]);
+
   // 排序切换
   const handleFilterChange = (value: string) => {
     setLocalField(value as "latest" | "oldest" | "likes");
@@ -48,7 +54,7 @@ export default function ArticleList({
     params.set("filter", value);
     params.delete("page");
     const base = window.location.pathname.replace(/\/page\/[0-9]+$/, "");
-    router.push(`${base}?${params.toString()}`);
+    router.push(`${base}?${params.toString()}`, { scroll: true });
   };
 
   // 分页切换
@@ -60,7 +66,7 @@ export default function ArticleList({
     params.set("pageSize", String(size));
     const base = window.location.pathname.replace(/\/page\/[0-9]+$/, "");
     const targetPage = page === 1 ? "" : `/page/${page}`;
-    router.push(`${base}${targetPage}?${params.toString()}`);
+    router.push(`${base}${targetPage}?${params.toString()}`, { scroll: true });
   };
 
   return (
@@ -137,20 +143,26 @@ export default function ArticleList({
               {hasError ? "网站数据暂时异常" : "暂无数据"}
             </div>
           )}
-          <div className="flex justify-start sm:justify-end mt-4 overflow-x-auto pb-1">
+          <div className="article-pagination glass-surface mt-4 overflow-x-auto rounded-lg px-3 py-2">
             <Pagination
               current={localPage}
               pageSize={localPageSize}
               total={total}
               onChange={handlePageChange}
-              showSizeChanger={true}
+              showSizeChanger={{
+                getPopupContainer: () => document.body,
+                classNames: {
+                  popup: {
+                    root: "article-pagination-size-dropdown",
+                  },
+                },
+              }}
               pageSizeOptions={["5", "10", "20", "50"]}
               onShowSizeChange={(_, size) => handlePageChange(1, size)}
               showQuickJumper={true}
               showTotal={total => `共 ${total} 篇文章`}
               responsive={true}
               simple={false}
-              size="small"
             />
           </div>
         </section>
