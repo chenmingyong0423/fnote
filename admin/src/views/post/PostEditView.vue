@@ -7,20 +7,34 @@
         @ok="handleOk"
         :cancelText="'取消'"
         :okText="'确认'"
+        :confirm-loading="props.savingDraft"
       >
         <p>检测到没有自定义文章 id，保存草稿之后将会自动生成且后续无法修改，是否继续保存？</p>
       </a-modal>
       <a-input v-model:value="post4Edit.title" addon-before="标题" class="w-59%" />
       <a-input v-model:value="post4Edit.author" addon-before="作者" class="w-30% ml-1%" />
-      <a-button type="primary" @click="visible = true" class="w-9% ml-1%"
+      <a-button
+        type="primary"
+        @click="visible = true"
+        class="w-9% ml-1%"
+        :loading="props.publishing"
+        :disabled="props.savingDraft"
         >{{ props.isNewPost ? '发布' : '更新' }}
       </a-button>
-      <a-button type="primary" @click="preSave" class="w-9% ml-1%">保存草稿</a-button>
+      <a-button
+        type="primary"
+        @click="preSave"
+        class="w-9% ml-1%"
+        :loading="props.savingDraft"
+        :disabled="props.publishing"
+        >保存草稿</a-button
+      >
       <a-modal
         v-model:open="visible"
         title="文章元数据"
         ok-text="提交"
         cancel-text="取消"
+        :confirm-loading="props.publishing"
         @ok="submit"
       >
         <a-form ref="formRef" :model="post4Edit" name="form_in_modal">
@@ -284,6 +298,14 @@ const props = defineProps({
   isNewPost: {
     type: Boolean,
     default: true
+  },
+  publishing: {
+    type: Boolean,
+    default: false
+  },
+  savingDraft: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -312,6 +334,9 @@ watch(
 )
 
 const submit = () => {
+  if (props.publishing || props.savingDraft) {
+    return
+  }
   if (formRef.value) {
     formRef.value
       .validateFields()
@@ -360,6 +385,13 @@ const handleOk = () => {
 }
 
 const preSave = () => {
+  if (props.publishing || props.savingDraft) {
+    return
+  }
+  if (!hasDraftTitle()) {
+    message.warning('保存草稿前请先填写标题')
+    return
+  }
   if (!post4Edit.id || post4Edit.id === '') {
     open.value = true
   } else {
@@ -368,7 +400,10 @@ const preSave = () => {
 }
 
 const saveDraft = () => {
-  if (!!post4Edit.title && !!post4Edit.author && !!post4Edit.content) {
+  if (props.publishing || props.savingDraft) {
+    return
+  }
+  if (hasDraftTitle()) {
     post4Edit.categories = []
     post4Edit.tempCategories?.forEach((item: string) => {
       categoryOptions.value.forEach((category) => {
@@ -394,8 +429,12 @@ const saveDraft = () => {
     // 告诉父组件
     emit('saveDraft', post4Edit)
   } else {
-    message.warning('保存草稿时，标题和作者以及内容必填。')
+    message.warning('保存草稿前请先填写标题')
   }
+}
+
+const hasDraftTitle = () => {
+  return typeof post4Edit.title === 'string' && post4Edit.title.trim().length > 0
 }
 
 const clearReq = () => {
