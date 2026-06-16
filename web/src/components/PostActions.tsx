@@ -5,11 +5,25 @@ import { LikeOutlined, MessageOutlined, ShareAltOutlined, GiftOutlined, WechatOu
 import { QRCodeCanvas } from "qrcode.react";
 import { getCommonConfig, type PayInfoConfigVO } from "@/src/api/config";
 import { likePost } from "@/src/api/posts";
-import { resolvePublicUrl } from "@/src/utils/publicUrl";
-import Image from "next/image";
 
 let payInfoCache: PayInfoConfigVO[] | null = null;
 let payInfoRequest: Promise<PayInfoConfigVO[]> | null = null;
+
+function getPayImageSrc(value: string) {
+  const src = value.trim();
+  if (!src) return src;
+
+  try {
+    const url = new URL(src);
+    if (url.pathname.startsWith("/static/")) {
+      return `${url.pathname}${url.search}${url.hash}`;
+    }
+  } catch {
+    return src;
+  }
+
+  return src;
+}
 
 async function getCachedPayInfo() {
   if (payInfoCache !== null) return payInfoCache;
@@ -134,7 +148,15 @@ export const PostActions: React.FC<{ postId: string; isLiked?: boolean }> = ({ p
               ) : payInfoList.length > 0 ? (
                 payInfoList.map(item => (
                   <div key={`${item.name}-${item.image}`} className="flex flex-col items-center">
-                    <Image src={resolvePublicUrl(item.image)} alt={item.name} width={96} height={96} className="h-24 w-24 rounded border border-gray-200 object-contain dark:border-gray-700" />
+                    <img
+                      src={getPayImageSrc(item.image)}
+                      alt={item.name}
+                      width={96}
+                      height={96}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-24 w-24 rounded border border-gray-200 object-contain dark:border-gray-700"
+                    />
                     <span className="text-xs text-gray-500 dark:text-gray-400">{item.name}</span>
                   </div>
                 ))
