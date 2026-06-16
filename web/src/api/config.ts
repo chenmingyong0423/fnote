@@ -27,9 +27,15 @@ export interface WebsiteMetaVO {
   website_runtime: number;
 }
 
+export interface PayInfoConfigVO {
+  name: string;
+  image: string;
+}
+
 export interface CommonConfigVO {
   website_meta: WebsiteMetaVO;
   seo_meta: SeoMetaConfigVO;
+  pay_info_config: PayInfoConfigVO[];
   third_party_site_verification: TPSVVO[];
   records: string[];
 }
@@ -53,6 +59,7 @@ export const DEFAULT_COMMON_CONFIG: CommonConfigVO = {
     author: "Fnote",
     robots: "noindex, nofollow",
   },
+  pay_info_config: [],
   third_party_site_verification: [],
   records: [],
 };

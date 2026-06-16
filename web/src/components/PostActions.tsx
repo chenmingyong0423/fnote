@@ -3,21 +3,64 @@ import React, { useState, useEffect } from "react";
 import { Button, Tooltip, Popover, message } from "antd";
 import { LikeOutlined, MessageOutlined, ShareAltOutlined, GiftOutlined, WechatOutlined, LinkOutlined, LikeFilled } from "@ant-design/icons";
 import { QRCodeCanvas } from "qrcode.react";
+import { getCommonConfig, type PayInfoConfigVO } from "@/src/api/config";
 import { likePost } from "@/src/api/posts";
+import { resolvePublicUrl } from "@/src/utils/publicUrl";
 import Image from "next/image";
 
-const rewardList = [
-  { name: "微信赞赏码", img: "/file.svg" },
-  { name: "支付宝赞赏码", img: "/globe.svg" },
-];
+let payInfoCache: PayInfoConfigVO[] | null = null;
+let payInfoRequest: Promise<PayInfoConfigVO[]> | null = null;
+
+async function getCachedPayInfo() {
+  if (payInfoCache !== null) return payInfoCache;
+
+  if (!payInfoRequest) {
+    payInfoRequest = getCommonConfig()
+      .then(config => (config.pay_info_config ?? []).filter(item => item.name && item.image))
+      .catch(error => {
+        payInfoRequest = null;
+        throw error;
+      });
+  }
+
+  payInfoCache = await payInfoRequest;
+  return payInfoCache;
+}
 
 export const PostActions: React.FC<{ postId: string; isLiked?: boolean }> = ({ postId, isLiked = false }) => {
   const [liked, setLiked] = useState(isLiked);
   const [likeLoading, setLikeLoading] = useState(false);
   const [currentUrl, setCurrentUrl] = useState("");
+  const [payInfoList, setPayInfoList] = useState<PayInfoConfigVO[]>(payInfoCache ?? []);
+  const [payInfoLoading, setPayInfoLoading] = useState(payInfoCache === null);
 
   useEffect(() => {
     setCurrentUrl(window.location.href);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getCachedPayInfo()
+      .then(list => {
+        if (!cancelled) {
+          setPayInfoList(list);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPayInfoList([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setPayInfoLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleCopy = () => {
@@ -85,13 +128,19 @@ export const PostActions: React.FC<{ postId: string; isLiked?: boolean }> = ({ p
         <Popover
           placement="bottom"
           content={
-            <div className="flex flex-col gap-2">
-              {rewardList.map(item => (
-                <div key={item.name} className="flex flex-col items-center">
-                  <Image src={item.img} alt={item.name} width={80} height={80} className="w-20 h-20 object-contain rounded border mb-1" />
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{item.name}</span>
-                </div>
-              ))}
+            <div className="flex min-w-24 flex-col gap-3">
+              {payInfoLoading ? (
+                <span className="text-xs text-gray-500 dark:text-gray-400">加载中...</span>
+              ) : payInfoList.length > 0 ? (
+                payInfoList.map(item => (
+                  <div key={`${item.name}-${item.image}`} className="flex flex-col items-center">
+                    <Image src={resolvePublicUrl(item.image)} alt={item.name} width={96} height={96} className="h-24 w-24 rounded border border-gray-200 object-contain dark:border-gray-700" />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{item.name}</span>
+                  </div>
+                ))
+              ) : (
+                <span className="text-xs text-gray-500 dark:text-gray-400">暂无赞赏码</span>
+              )}
             </div>
           }
           trigger="hover"
