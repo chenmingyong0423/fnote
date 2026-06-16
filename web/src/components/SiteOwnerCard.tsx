@@ -1,7 +1,8 @@
 "use client";
-import { Card, Avatar } from "antd";
+
+import { Avatar } from "antd";
 import React from "react";
-import SiteStats, {SiteStatsProps} from "./SiteStats";
+import SiteStats, { SiteStatsProps } from "./SiteStats";
 
 export interface SiteOwnerCardProps {
   name: string;
@@ -19,21 +20,26 @@ export default function SiteOwnerCard({
   hasError = false,
 }: SiteOwnerCardProps) {
   return (
-    <Card className="text-center [&_.ant-card-body]:!p-4 md:[&_.ant-card-body]:!p-6">
+    <section className="glass-surface overflow-hidden rounded-lg p-5 text-center md:p-6">
+      <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-blue-500/80" />
       <div className="flex flex-col items-center gap-3">
-        {/* 头像 */}
         {avatar && avatar !== "" ? (
-          <Avatar src={avatar} size={64} />
+          <span className="inline-flex rounded-full transition-transform duration-700 hover:rotate-[360deg]">
+            <Avatar
+              src={avatar}
+              size={64}
+              className="ring-4 ring-gray-100 dark:ring-[#232426]"
+            />
+          </span>
         ) : null}
-        {/* 名字 */}
-        <div className="break-words font-bold text-base dark:text-gray-200 md:text-lg">{name}</div>
-        {/* 简介 */}
-        <div className="break-words text-gray-500 text-sm dark:text-gray-400">
+        <div className="break-words text-base font-bold text-gray-950 dark:text-gray-100 md:text-lg">
+          {name}
+        </div>
+        <div className="max-w-[18rem] break-words text-sm leading-6 text-gray-500 dark:text-gray-400">
           {hasError ? "网站数据暂时异常" : bio}
         </div>
-        {/* 指标区 */}
         <SiteStats stats={stats} />
       </div>
-    </Card>
+    </section>
   );
 }

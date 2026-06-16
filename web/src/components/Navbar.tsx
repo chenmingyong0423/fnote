@@ -100,7 +100,7 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({
       disabled: item.disabled,
       label:
         useLink && item.href ? (
-          <Link href={item.href} target="_blank" rel="noopener noreferrer">
+          <Link href={item.href} rel="noopener noreferrer">
             {item.label}
           </Link>
         ) : (
@@ -257,7 +257,7 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({
           mode="horizontal"
           selectable={false}
           triggerSubMenuAction="click"
-          className="w-full bg-transparent border-none shadow-none md:[&_.ant-menu-item]:px-4"
+          className="w-full bg-transparent border-none shadow-none md:[&_.ant-menu-item]:mx-0.5 md:[&_.ant-menu-item]:rounded-md md:[&_.ant-menu-item]:px-3 md:[&_.ant-menu-item-selected]:bg-blue-50 md:[&_.ant-menu-item-selected]:font-medium md:[&_.ant-menu-item:after]:hidden dark:md:[&_.ant-menu-item-selected]:bg-blue-950/30"
           items={menuItems}
           style={{ flex: 1, minWidth: 0 }}
           selectedKeys={selectedKeys}

@@ -24,8 +24,8 @@ import (
 // JwtParseMiddleware jwt 解析中间件
 func JwtParseMiddleware(isWebsiteInitialized func() bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		uri := ctx.Request.RequestURI
-		if !isWebsiteInitialized() && (uri == "/admin-api/files/upload" || uri == "/admin-api/configs/initialization") {
+		uri := ctx.Request.URL.Path
+		if !isWebsiteInitialized() && isUninitializedAdminPath(uri) {
 			ctx.Next()
 			return
 		}
@@ -53,5 +53,14 @@ func JwtParseMiddleware(isWebsiteInitialized func() bool) gin.HandlerFunc {
 		}
 		ctx.Set("jwtClaims", claims)
 		ctx.Next()
+	}
+}
+
+func isUninitializedAdminPath(uri string) bool {
+	switch uri {
+	case "/admin-api/files/upload", "/admin-api/recovery", "/admin-api/configs/initialization":
+		return true
+	default:
+		return false
 	}
 }

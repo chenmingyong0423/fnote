@@ -3,6 +3,7 @@ import { getPostDetailOrNull, type PostDetail as PostDetailType } from "@/src/ap
 import type { Metadata } from "next";
 import { DEFAULT_COMMON_CONFIG, getCommonConfig } from "@/src/api/config";
 import { resolvePublicUrl } from "@/src/utils/publicUrl";
+import { getCommentsByPostId } from "@/src/api/comments";
 
 async function getAboutPost() {
   try {
@@ -63,7 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
 function AboutState({ hasError }: { hasError: boolean }) {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
-      <section className="rounded-xl border border-dashed border-gray-200 bg-white p-5 text-center shadow-sm dark:border-gray-700 dark:bg-[#141414] md:p-8">
+      <section className="glass-surface rounded-xl border-dashed p-5 text-center md:p-8">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-xl dark:bg-[#232426]">
           i
         </div>
@@ -91,5 +92,7 @@ function AboutState({ hasError }: { hasError: boolean }) {
 export default async function AboutPage() {
   const post = await getAboutPost();
   if (!post.data) return <AboutState hasError={post.failed} />;
-  return <PostDetail post={post.data} />;
+
+  const comments = await getCommentsByPostId(post.data._id).catch(() => []);
+  return <PostDetail post={post.data} initialComments={comments} />;
 }

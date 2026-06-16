@@ -3,10 +3,7 @@ import React, { useEffect, useState } from "react";
 import { ConfigProvider, theme as antdTheme } from "antd";
 
 export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof document === "undefined") return false;
-    return document.documentElement.classList.contains("dark");
-  });
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     const checkDark = () => {

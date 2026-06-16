@@ -20,6 +20,7 @@ import (
 	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 )
@@ -35,17 +36,20 @@ func IsWebsiteInitialized() bool {
 	return Config.IsWebsiteInitialized
 }
 
-func IsWebsiteInitializedFn(db *mongox.Database) (func() bool, error) {
+func SetWebsiteInitialized(initialized bool) {
+	Config.IsWebsiteInitialized = initialized
+}
+
+func RefreshWebsiteInitialized(ctx context.Context, db *mongo.Database) error {
 	var ok bool
-	ctx := context.Background()
 	result := bson.M{}
-	err := db.Database().Collection("configs").FindOne(ctx, query.Eq("typ", "website")).Decode(&result)
+	err := db.Collection("configs").FindOne(ctx, query.Eq("typ", "website")).Decode(&result)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	props := result["props"].(bson.D)
 	if props == nil {
-		return nil, errors.New("The collections of config does not have a field named initialized.")
+		return errors.New("The collections of config does not have a field named initialized.")
 	}
 
 	hasWebsiteInitField := false
@@ -53,7 +57,7 @@ func IsWebsiteInitializedFn(db *mongox.Database) (func() bool, error) {
 		if prop.Key == "website_init" {
 			Config.IsWebsiteInitialized, ok = prop.Value.(bool)
 			if !ok {
-				return nil, errors.New("The collections of config does not have a field named initialized.")
+				return errors.New("The collections of config does not have a field named initialized.")
 			}
 			hasWebsiteInitField = true
 			break
@@ -61,9 +65,16 @@ func IsWebsiteInitializedFn(db *mongox.Database) (func() bool, error) {
 	}
 
 	if !hasWebsiteInitField {
-		return nil, errors.New("The collections of config does not have a field named initialized.")
+		return errors.New("The collections of config does not have a field named initialized.")
 	}
 
+	return nil
+}
+
+func IsWebsiteInitializedFn(db *mongox.Database) (func() bool, error) {
+	if err := RefreshWebsiteInitialized(context.Background(), db.Database()); err != nil {
+		return nil, err
+	}
 	return func() bool {
 		return Config.IsWebsiteInitialized
 	}, nil

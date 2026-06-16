@@ -27,31 +27,31 @@ export default function NavigationContent({
   const hasTags = tags.length > 0;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 md:px-6 py-5 md:py-8 flex flex-col gap-7 md:gap-12 bg-white rounded-xl shadow-sm dark:bg-[#141414] dark:text-gray-300 dark:border dark:border-[#303030]">
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-6 py-5 md:py-8 flex flex-col gap-7 md:gap-12 text-gray-900 dark:text-gray-100">
       <section>
-        <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 flex items-center gap-2 dark:text-gray-300">
+        <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 flex items-center gap-2 text-gray-900 dark:text-gray-100">
           <AppstoreOutlined /> 分类导航
         </h2>
         {hasCategories ? (
-          <div className="grid grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6 dark:text-gray-300">
+          <div className="grid grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
             {categories.map((cat) => (
               <a
                 key={cat.route}
                 href={`/categories/${cat.route}`}
-                className="group block bg-white rounded-lg md:rounded-xl p-3 md:p-5 transition-transform duration-200 md:hover:-translate-y-2 hover:shadow-lg border border-gray-200 h-full flex flex-col delay-500 dark:bg-[#232426] dark:border-gray-700 dark:hover:border-gray-600"
+                className="glass-card group block rounded-lg p-3 md:p-5 transition-transform duration-200 md:hover:-translate-y-2 h-full flex flex-col delay-500"
               >
-                <div className="flex flex-col items-start mb-2 dark:text-gray-300">
+                <div className="flex flex-col items-start mb-2 text-gray-900 dark:text-gray-100">
                   <ProductOutlined className="mb-1 text-lg md:text-2xl" />
                   <span className="text-sm md:text-xl font-bold text-left line-clamp-2">
                     {cat.name}
                   </span>
                 </div>
-                <div className="text-xs truncate mb-2 text-left dark:text-gray-400 line-clamp-2">
+                <div className="text-xs truncate mb-2 text-left text-gray-600 dark:text-gray-400 line-clamp-2">
                   {cat.description}
                 </div>
-                <div className="flex items-center gap-1 text-xs mt-auto">
+                <div className="flex items-center gap-1 text-xs mt-auto text-gray-500 dark:text-gray-400">
                   <BookOutlined />
-                  <span className="dark:text-gray-400">{cat.count}</span>
+                  <span>{cat.count}</span>
                 </div>
               </a>
             ))}
@@ -68,7 +68,7 @@ export default function NavigationContent({
       </section>
 
       <section>
-        <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 flex items-center gap-2">
+        <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 flex items-center gap-2 text-gray-900 dark:text-gray-100">
           <TagsOutlined /> 标签导航
         </h2>
         {hasTags ? (
@@ -77,7 +77,7 @@ export default function NavigationContent({
               <a
                 key={tag.route}
                 href={`/tags/${tag.route}`}
-                className="max-w-full break-all px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium cursor-pointer transition-transform duration-200 md:hover:-translate-y-2 border border-gray-200 delay-50 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-500"
+                className="max-w-full break-all px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium cursor-pointer transition-transform duration-200 md:hover:-translate-y-2 border border-white/70 bg-white/50 text-gray-700 backdrop-blur delay-50 dark:border-white/10 dark:bg-slate-900/45 dark:text-gray-300 dark:hover:border-gray-500"
               >
                 #{tag.name}
               </a>

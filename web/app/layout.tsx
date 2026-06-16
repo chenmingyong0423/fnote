@@ -15,6 +15,7 @@ import { redirect } from "next/navigation";
 import { isBackendUnavailableError } from "@/src/utils/http";
 import { resolvePublicUrl } from "@/src/utils/publicUrl";
 import BackTopButton from "@/src/components/BackTopButton";
+import InteractiveBackdrop from "@/src/components/InteractiveBackdrop";
 export const dynamic = 'force-dynamic'
 
 const geistSans = Geist({
@@ -143,7 +144,8 @@ export default async function RootLayout({
       >
         <AntdRegistry>
           <AntdThemeProvider>
-            <div className="min-h-screen flex flex-col">
+            <InteractiveBackdrop />
+            <div className="relative z-10 min-h-screen flex flex-col">
               <Header websiteMetaConfig={config.website_meta} />
               {hasSiteIssue && (
                 <div className="mx-auto mb-5 md:mb-6 w-[calc(100%-2rem)] md:w-full max-w-7xl rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
