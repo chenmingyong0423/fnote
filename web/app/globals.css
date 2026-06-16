@@ -21,20 +21,32 @@
 }
 
 body {
-  background:
-    linear-gradient(180deg, rgba(246, 248, 252, 0.58) 0, rgba(243, 244, 246, 0.64) 260px, rgba(243, 244, 246, 0.84) 720px),
-    url("/backgrounds/blog-home-light.webp") center top / cover fixed no-repeat,
-    var(--background);
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
 }
 
-.dark body {
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(7, 10, 16, 0.36) 0, rgba(10, 10, 10, 0.5) 340px, rgba(10, 10, 10, 0.76) 860px),
-    url("/backgrounds/blog-home-dark.webp") center top / cover fixed no-repeat,
-    var(--background);
+    linear-gradient(180deg, rgba(246, 248, 252, 0.58) 0, rgba(243, 244, 246, 0.64) 260px, rgba(243, 244, 246, 0.84) 720px) center top / cover no-repeat,
+    url("/backgrounds/blog-home-light.webp") center top / cover no-repeat;
+  background-color: var(--background);
+}
+
+.dark body::before {
+  background:
+    linear-gradient(180deg, rgba(7, 10, 16, 0.36) 0, rgba(10, 10, 10, 0.5) 340px, rgba(10, 10, 10, 0.76) 860px) center top / cover no-repeat,
+    url("/backgrounds/blog-home-dark.webp") center top / cover no-repeat;
+  background-color: var(--background);
 }
 
 .glass-surface {
