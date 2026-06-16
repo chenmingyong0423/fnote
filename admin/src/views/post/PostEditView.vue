@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="flex h-15 items-center">
+    <div class="flex h-15 items-center gap-x-2">
       <a-modal
         v-model:open="open"
         title="温馨提示"
@@ -11,12 +11,11 @@
       >
         <p>检测到没有自定义文章 id，保存草稿之后将会自动生成且后续无法修改，是否继续保存？</p>
       </a-modal>
-      <a-input v-model:value="post4Edit.title" addon-before="标题" class="w-59%" />
-      <a-input v-model:value="post4Edit.author" addon-before="作者" class="w-30% ml-1%" />
+      <a-input v-model:value="post4Edit.title" addon-before="标题" class="min-w-0 flex-1" />
+      <a-input v-model:value="post4Edit.author" addon-before="作者" class="w-56" />
       <a-button
         type="primary"
         @click="visible = true"
-        class="w-9% ml-1%"
         :loading="props.publishing"
         :disabled="props.savingDraft"
         >{{ props.isNewPost ? '发布' : '更新' }}
@@ -24,11 +23,13 @@
       <a-button
         type="primary"
         @click="preSave"
-        class="w-9% ml-1%"
         :loading="props.savingDraft"
         :disabled="props.publishing"
         >保存草稿</a-button
       >
+      <span v-if="props.lastSavedAt" class="save-status">
+        最近保存 {{ formatSaveTime(props.lastSavedAt) }}
+      </span>
       <a-modal
         v-model:open="visible"
         title="文章元数据"
@@ -186,7 +187,11 @@
             label="路由"
             :rules="[{ required: true, message: '请输入分类路由' }]"
           >
-            <a-input v-model:value="quickCategoryForm.route" placeholder="例如 tech-note" />
+            <a-input
+              v-model:value="quickCategoryForm.route"
+              placeholder="例如 tech-note"
+              @input="quickCategoryRouteTouched = true"
+            />
           </a-form-item>
           <a-form-item name="description" label="描述">
             <a-textarea
@@ -224,7 +229,11 @@
             label="路由"
             :rules="[{ required: true, message: '请输入标签路由' }]"
           >
-            <a-input v-model:value="quickTagForm.route" placeholder="例如 vue" />
+            <a-input
+              v-model:value="quickTagForm.route"
+              placeholder="例如 vue"
+              @input="quickTagRouteTouched = true"
+            />
           </a-form-item>
           <a-form-item name="enabled" label="启用">
             <a-switch v-model:checked="quickTagForm.enabled" />
@@ -257,7 +266,7 @@
 </template>
 
 <script lang="ts" setup>
-import { type PropType, reactive, ref, defineEmits, watch } from 'vue'
+import { type PropType, reactive, ref, defineEmits, onBeforeUnmount, watch } from 'vue'
 import type { Post4Edit } from '@/interfaces/Post'
 import { type FormInstance, message } from 'ant-design-vue'
 import {
@@ -306,6 +315,14 @@ const props = defineProps({
   savingDraft: {
     type: Boolean,
     default: false
+  },
+  autoSave: {
+    type: Boolean,
+    default: false
+  },
+  lastSavedAt: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -316,6 +333,7 @@ const visible = ref(false)
 const post4Edit = reactive<Post4Edit>(props.post || ({} as Post4Edit))
 const categoryOptions = ref<SelectCategory[]>([])
 const tagOptions = ref<SelectTag[]>([])
+const autoSaveTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 
 watch(
   () => props.categories,
@@ -399,7 +417,7 @@ const preSave = () => {
   }
 }
 
-const saveDraft = () => {
+const saveDraft = (options?: { silent?: boolean }) => {
   if (props.publishing || props.savingDraft) {
     return
   }
@@ -427,7 +445,7 @@ const saveDraft = () => {
       })
     })
     // 告诉父组件
-    emit('saveDraft', post4Edit)
+    emit('saveDraft', post4Edit, options)
   } else {
     message.warning('保存草稿前请先填写标题')
   }
@@ -436,6 +454,63 @@ const saveDraft = () => {
 const hasDraftTitle = () => {
   return typeof post4Edit.title === 'string' && post4Edit.title.trim().length > 0
 }
+
+const formatSaveTime = (timestamp: number) => {
+  return new Date(timestamp).toLocaleTimeString('zh-CN', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+}
+
+const clearAutoSaveTimer = () => {
+  if (autoSaveTimer.value) {
+    clearTimeout(autoSaveTimer.value)
+    autoSaveTimer.value = null
+  }
+}
+
+const scheduleAutoSave = () => {
+  clearAutoSaveTimer()
+  if (
+    !props.autoSave ||
+    props.isNewPost ||
+    props.publishing ||
+    props.savingDraft ||
+    !post4Edit.id ||
+    !hasDraftTitle()
+  ) {
+    return
+  }
+
+  autoSaveTimer.value = setTimeout(() => {
+    saveDraft({ silent: true })
+  }, 8000)
+}
+
+watch(
+  () => [
+    post4Edit.id,
+    post4Edit.title,
+    post4Edit.author,
+    post4Edit.summary,
+    post4Edit.content,
+    post4Edit.cover_img,
+    post4Edit.meta_description,
+    post4Edit.meta_keywords,
+    post4Edit.is_comment_allowed,
+    post4Edit.is_displayed,
+    post4Edit.sticky_weight,
+    JSON.stringify(post4Edit.tempCategories || []),
+    JSON.stringify(post4Edit.tempTags || [])
+  ],
+  scheduleAutoSave
+)
+
+onBeforeUnmount(() => {
+  clearAutoSaveTimer()
+})
 
 const clearReq = () => {
   if (formRef.value) {
@@ -521,6 +596,7 @@ const insertImg = (content: string) => {
 const quickCategoryVisible = ref(false)
 const quickCategoryLoading = ref(false)
 const quickCategoryFormRef = ref<FormInstance>()
+const quickCategoryRouteTouched = ref(false)
 const quickCategoryForm = reactive<CategoryRequest>({
   name: '',
   route: '',
@@ -532,6 +608,7 @@ const quickCategoryForm = reactive<CategoryRequest>({
 const quickTagVisible = ref(false)
 const quickTagLoading = ref(false)
 const quickTagFormRef = ref<FormInstance>()
+const quickTagRouteTouched = ref(false)
 const quickTagForm = reactive<TagRequest>({
   name: '',
   route: '',
@@ -544,6 +621,7 @@ const resetQuickCategoryForm = () => {
   quickCategoryForm.description = ''
   quickCategoryForm.show_in_nav = true
   quickCategoryForm.enabled = true
+  quickCategoryRouteTouched.value = false
   quickCategoryFormRef.value?.clearValidate()
 }
 
@@ -551,8 +629,41 @@ const resetQuickTagForm = () => {
   quickTagForm.name = ''
   quickTagForm.route = ''
   quickTagForm.enabled = true
+  quickTagRouteTouched.value = false
   quickTagFormRef.value?.clearValidate()
 }
+
+const normalizeRoute = (value: string) => {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+const shouldAutoFillRoute = (value: string) => {
+  return !/[\u4e00-\u9fa5]/.test(value)
+}
+
+watch(
+  () => quickCategoryForm.name,
+  (name) => {
+    if (!quickCategoryRouteTouched.value) {
+      quickCategoryForm.route = shouldAutoFillRoute(name) ? normalizeRoute(name) : ''
+    }
+  }
+)
+
+watch(
+  () => quickTagForm.name,
+  (name) => {
+    if (!quickTagRouteTouched.value) {
+      quickTagForm.route = shouldAutoFillRoute(name) ? normalizeRoute(name) : ''
+    }
+  }
+)
 
 const openQuickCategory = () => {
   resetQuickCategoryForm()
@@ -656,5 +767,12 @@ const createTag = async () => {
 .taxonomy-tools :deep(.ant-btn) {
   align-self: flex-start;
   padding-left: 0;
+}
+
+.save-status {
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+  white-space: nowrap;
 }
 </style>

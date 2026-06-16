@@ -8,6 +8,8 @@
       :is-new-post="false"
       :publishing="publishing"
       :saving-draft="savingDraft"
+      :auto-save="autoSaveEnabled"
+      :last-saved-at="lastSavedAt"
       @publish="submit"
       @saveDraft="saveDraft"
     ></PostEditView>
@@ -64,8 +66,14 @@ const categories = ref<SelectCategory[]>([])
 const tags = ref<SelectTag[]>([])
 const publishing = ref(false)
 const savingDraft = ref(false)
+const autoSaveEnabled = ref(false)
+const lastSavedAt = ref(0)
 
-const saveDraft = async (post4Edit: Post4Edit) => {
+type SaveDraftOptions = {
+  silent?: boolean
+}
+
+const saveDraft = async (post4Edit: Post4Edit, options: SaveDraftOptions = {}) => {
   if (savingDraft.value || publishing.value) {
     return
   }
@@ -78,8 +86,11 @@ const saveDraft = async (post4Edit: Post4Edit) => {
     const res: any = await SavePostDraft(postDraftReq)
     if (res.data.code === 0) {
       console.log(res.data)
-      message.success('保存成功')
-      await getPostDraftById(res.data.data.id)
+      lastSavedAt.value = Date.now()
+      if (!options.silent) {
+        message.success('保存成功')
+        await getPostDraftById(res.data.data.id)
+      }
     } else {
       message.error(res.data.message)
     }
@@ -92,6 +103,7 @@ const saveDraft = async (post4Edit: Post4Edit) => {
 
 const getPostDraftById = async (id: string) => {
   try {
+    autoSaveEnabled.value = false
     const response: any = await GetPostDraftDetail(id)
     if (response.data.code !== 0) {
       message.error(response.data.message)
@@ -122,6 +134,7 @@ const getPostDraftById = async (id: string) => {
       postDraft.tags.forEach((item: Tag4Post) => {
         post4Edit.tempTags?.push(item.name)
       })
+      autoSaveEnabled.value = true
     }
   } catch (error) {
     if (axios.isAxiosError(error)) {
