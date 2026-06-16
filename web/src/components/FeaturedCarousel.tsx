@@ -1,6 +1,7 @@
 "use client";
 
 import { Carousel } from "antd";
+import type { CarouselRef } from "antd/es/carousel";
 import Image from "next/image";
 import React from "react";
 import type { CarouselItemVO } from "../api/carousel";
@@ -12,6 +13,44 @@ export default function FeaturedCarousel({
   items: CarouselItemVO[];
   hasError?: boolean;
 }) {
+  const carouselRef = React.useRef<CarouselRef | null>(null);
+  const carouselWrapperRef = React.useRef<HTMLDivElement | null>(null);
+  const lastWheelAtRef = React.useRef(0);
+
+  React.useEffect(() => {
+    const wrapper = carouselWrapperRef.current;
+    if (!wrapper) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      if (window.innerWidth < 768 || items.length <= 1) return;
+
+      const delta =
+        Math.abs(event.deltaY) >= Math.abs(event.deltaX)
+          ? event.deltaY
+          : event.deltaX;
+      if (Math.abs(delta) < 12) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const now = window.performance.now();
+      if (now - lastWheelAtRef.current < 550) return;
+
+      lastWheelAtRef.current = now;
+      if (delta > 0) {
+        carouselRef.current?.next();
+      } else {
+        carouselRef.current?.prev();
+      }
+    };
+
+    wrapper.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      wrapper.removeEventListener("wheel", handleWheel);
+    };
+  }, [items.length]);
+
   return (
     <section>
       {items.length === 0 ? (
@@ -21,11 +60,13 @@ export default function FeaturedCarousel({
           </span>
         </div>
       ) : (
-        <Carousel
-          autoplay
-          arrows
-          className="glass-surface overflow-hidden rounded-lg [&_.slick-dots-bottom]:bottom-3 [&_.slick-dots_li_button]:!h-1.5 [&_.slick-dots_li_button]:!rounded-full"
-        >
+        <div ref={carouselWrapperRef}>
+          <Carousel
+            ref={carouselRef}
+            autoplay
+            arrows
+            className="glass-surface overflow-hidden rounded-lg [&_.slick-dots-bottom]:bottom-3 [&_.slick-dots_li_button]:!h-1.5 [&_.slick-dots_li_button]:!rounded-full"
+          >
           {items.map((item) => (
             <a
               key={item.id}
@@ -62,7 +103,8 @@ export default function FeaturedCarousel({
               </div>
             </a>
           ))}
-        </Carousel>
+          </Carousel>
+        </div>
       )}
     </section>
   );
