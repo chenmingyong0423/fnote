@@ -112,7 +112,7 @@ type ICommentDao interface {
 	AddComment(ctx context.Context, comment *Comment) (string, error)
 	FindApprovedCommentById(ctx context.Context, objectID bson.ObjectID) (*Comment, error)
 	AddCommentReply(ctx context.Context, objectID bson.ObjectID, commentReply Reply) error
-	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error)
+	FindLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error)
 	FindApprovedCommentsByPostId(ctx context.Context, postId string) ([]*Comment, error)
 	AggregationQuerySkipAndSetLimit(ctx context.Context, cond bson.D, findOptions *options.FindOptionsBuilder) ([]AdminComment, int64, error)
 	FindCommentById(ctx context.Context, objectID bson.ObjectID) (*Comment, error)
@@ -395,7 +395,7 @@ func (d *CommentDao) FindApprovedCommentsByPostId(ctx context.Context, postId st
 	return result, nil
 }
 
-func (d *CommentDao) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error) {
+func (d *CommentDao) FindLatestCommentAndReply(ctx context.Context, cnt int) ([]LatestComment, error) {
 	pipeline := aggregation.NewStageBuilder().
 		Match(bsonx.M("approval_status", true)).
 		Project(aggregation.ConcatArrays("combined", []any{

@@ -194,7 +194,7 @@ func (h *CommentHandler) AddCommentReply(ctx *gin.Context, req ReplyRequest) (*a
 }
 
 func (h *CommentHandler) GetLatestCommentAndReply(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[LatestCommentVO]], error) {
-	latestComments, err := h.serv.FineLatestCommentAndReply(ctx)
+	latestComments, err := h.serv.FindLatestCommentAndReply(ctx)
 	if err != nil {
 		return nil, err
 	}

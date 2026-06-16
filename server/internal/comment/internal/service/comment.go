@@ -42,7 +42,7 @@ import (
 type ICommentService interface {
 	AddComment(ctx context.Context, comment domain.Comment) (string, error)
 	AddReply(ctx context.Context, cmtId string, postId string, commentReply domain.CommentReply) (string, error)
-	FineLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error)
+	FindLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error)
 	FindCommentsByPostId(ctx context.Context, postId string) ([]domain.CommentWithReplies, error)
 	AdminFindCommentsWithPagination(ctx context.Context, page domain.Page) ([]domain.AdminComment, int64, error)
 	AdminApproveComment(ctx context.Context, id string) error
@@ -349,9 +349,9 @@ func (s *CommentService) FindCommentsByPostId(ctx context.Context, postId string
 	return s.repo.FindCommentsByPostIdAndCmtStatus(ctx, postId)
 }
 
-func (s *CommentService) FineLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error) {
+func (s *CommentService) FindLatestCommentAndReply(ctx context.Context) ([]domain.LatestComment, error) {
 	// todo 默认查找最新的前 5 条，后续可能考虑动态配置
-	return s.repo.FineLatestCommentAndReply(ctx, 5)
+	return s.repo.FindLatestCommentAndReply(ctx, 5)
 }
 
 func (s *CommentService) AddReply(ctx context.Context, cmtId string, postId string, commentReply domain.CommentReply) (string, error) {

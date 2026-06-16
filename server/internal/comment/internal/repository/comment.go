@@ -36,7 +36,7 @@ type ICommentRepository interface {
 	AddComment(ctx context.Context, comment domain.Comment) (string, error)
 	FindApprovedCommentById(ctx context.Context, cmtId string) (*domain.CommentWithReplies, error)
 	AddReply(ctx context.Context, cmtId string, commentReply domain.CommentReply) (string, error)
-	FineLatestCommentAndReply(ctx context.Context, cnt int) ([]domain.LatestComment, error)
+	FindLatestCommentAndReply(ctx context.Context, cnt int) ([]domain.LatestComment, error)
 	FindCommentsByPostIdAndCmtStatus(ctx context.Context, postId string) ([]domain.CommentWithReplies, error)
 	FindCommentById(ctx context.Context, id string) (*domain.Comment, error)
 	UpdateCommentStatus2True(ctx context.Context, id string) error
@@ -311,8 +311,8 @@ func (r *CommentRepository) FindCommentsByPostIdAndCmtStatus(ctx context.Context
 	return r.toDomainComments(comments), nil
 }
 
-func (r *CommentRepository) FineLatestCommentAndReply(ctx context.Context, cnt int) ([]domain.LatestComment, error) {
-	latestComments, err := r.dao.FineLatestCommentAndReply(ctx, cnt)
+func (r *CommentRepository) FindLatestCommentAndReply(ctx context.Context, cnt int) ([]domain.LatestComment, error) {
+	latestComments, err := r.dao.FindLatestCommentAndReply(ctx, cnt)
 	if err != nil {
 		return nil, err
 	}
