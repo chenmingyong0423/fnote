@@ -55,11 +55,16 @@
             {{ post4Edit.author }}
           </a-form-item>
           <a-form-item name="id" label="自定义 id">
-            <a-input
-              v-model:value="post4Edit.id"
-              :disabled="!props.isNewPost"
-              placeholder="与文章关联的英文的 id 有助于 seo 优化"
-            />
+            <div class="field-with-action">
+              <a-input
+                v-model:value="post4Edit.id"
+                :disabled="!props.isNewPost"
+                placeholder="与文章关联的英文的 id 有助于 seo 优化"
+              />
+              <a-button type="link" size="small" :disabled="!props.isNewPost" @click="fillPostId">
+                根据标题生成
+              </a-button>
+            </div>
           </a-form-item>
           <a-form-item
             name="tempCategories"
@@ -153,17 +158,28 @@
             label="文章摘要"
             :rules="[{ required: true, message: '请输入摘要' }]"
           >
-            <a-textarea v-model:value="post4Edit.summary" placeholder="请输入摘要" allow-clear />
+            <div class="field-with-action">
+              <a-textarea v-model:value="post4Edit.summary" placeholder="请输入摘要" allow-clear />
+              <a-button type="link" size="small" @click="fillSummary">从正文生成</a-button>
+            </div>
           </a-form-item>
           <a-form-item name="meta_description" label="seo description">
-            <a-textarea
-              v-model:value="post4Edit.meta_description"
-              placeholder="请输入描述"
-              allow-clear
-            />
+            <div class="field-with-action">
+              <a-textarea
+                v-model:value="post4Edit.meta_description"
+                placeholder="请输入描述"
+                allow-clear
+              />
+              <a-button type="link" size="small" @click="fillMetaDescription"> 同步摘要 </a-button>
+            </div>
           </a-form-item>
           <a-form-item name="meta_keywords" label="seo keywords">
-            <a-input v-model:value="post4Edit.meta_keywords" placeholder="请输入关键字" />
+            <div class="field-with-action">
+              <a-input v-model:value="post4Edit.meta_keywords" placeholder="请输入关键字" />
+              <a-button type="link" size="small" @click="fillMetaKeywords">
+                从分类标签生成
+              </a-button>
+            </div>
           </a-form-item>
         </a-form>
       </a-modal>
@@ -461,6 +477,83 @@ const saveDraft = (options?: { silent?: boolean }) => {
 
 const hasDraftTitle = () => {
   return typeof post4Edit.title === 'string' && post4Edit.title.trim().length > 0
+}
+
+const stripMarkdown = (content: string) => {
+  return content
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/!\[[^\]]*]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]+)]\([^)]*\)/g, '$1')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^>\s?/gm, '')
+    .replace(/^[\s>*+-]*\d+\.\s+/gm, '')
+    .replace(/^[\s>*+-]+/gm, '')
+    .replace(/[*_~>#|[\]()]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+const truncateText = (content: string, maxLength: number) => {
+  if (content.length <= maxLength) {
+    return content
+  }
+  return `${content.slice(0, maxLength).trim()}...`
+}
+
+const fillSummary = () => {
+  const content = stripMarkdown(post4Edit.content || '')
+  if (!content) {
+    message.warning('正文为空，无法生成摘要')
+    return
+  }
+  post4Edit.summary = truncateText(content, 160)
+}
+
+const fillMetaDescription = () => {
+  const content = post4Edit.summary?.trim() || stripMarkdown(post4Edit.content || '')
+  if (!content) {
+    message.warning('摘要和正文为空，无法生成 SEO 描述')
+    return
+  }
+  post4Edit.meta_description = truncateText(content, 160)
+}
+
+const fillMetaKeywords = () => {
+  const keywords = [
+    ...(post4Edit.tempCategories || []),
+    ...(post4Edit.tempTags || []),
+    ...(post4Edit.categories || []).map((category) => category.name),
+    ...(post4Edit.tags || []).map((tag) => tag.name)
+  ]
+    .map((keyword) => keyword.trim())
+    .filter(Boolean)
+
+  const uniqueKeywords = Array.from(new Set(keywords))
+  if (uniqueKeywords.length === 0) {
+    message.warning('请先选择分类或标签')
+    return
+  }
+  post4Edit.meta_keywords = uniqueKeywords.join(',')
+}
+
+const fillPostId = () => {
+  const title = post4Edit.title?.trim() || ''
+  if (!title) {
+    message.warning('请先填写标题')
+    return
+  }
+  if (!shouldAutoFillRoute(title)) {
+    message.warning('中文标题请手动填写自定义 id')
+    return
+  }
+  const id = normalizeRoute(title)
+  if (!id) {
+    message.warning('当前标题无法生成有效 id')
+    return
+  }
+  post4Edit.id = id
 }
 
 const formatSaveTime = (timestamp: number) => {
@@ -849,6 +942,17 @@ const createTag = async () => {
 }
 
 .taxonomy-tools :deep(.ant-btn) {
+  align-self: flex-start;
+  padding-left: 0;
+}
+
+.field-with-action {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-with-action :deep(.ant-btn) {
   align-self: flex-start;
   padding-left: 0;
 }
