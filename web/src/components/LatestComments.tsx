@@ -55,6 +55,7 @@ export default function LatestComments({
                   </div>
                   <a
                     href={item.article.link}
+                    target={"_blank"}
                     className="flex min-w-0 items-center gap-1.5 truncate text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                   >
                     <BookOutlined />

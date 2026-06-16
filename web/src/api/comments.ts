@@ -25,7 +25,7 @@ export async function getLatestComments(): Promise<LatestComment[]> {
     user: item.name,
     avatar: item.picture,
     content: item.content,
-    article: { title: item.post_title, link: item.post_url },
+    article: { title: item.post_title, link: "/posts/" + item.post_id },
     created_at: item.created_at,
   }));
 }
