@@ -32,6 +32,13 @@ export interface PayInfoConfigVO {
   image: string;
 }
 
+export interface NoticeConfigVO {
+  title: string;
+  content: string;
+  enabled: boolean;
+  publish_time: number;
+}
+
 export interface CommonConfigVO {
   website_meta: WebsiteMetaVO;
   seo_meta: SeoMetaConfigVO;
@@ -67,6 +74,19 @@ export const DEFAULT_COMMON_CONFIG: CommonConfigVO = {
 // 获取通用配置信息
 export async function getCommonConfig(): Promise<CommonConfigVO> {
   const res = await request<Response<CommonConfigVO>>("/api/configs/common");
+  if (res.code !== 0) throw new Error(res.message);
+  return res.data;
+}
+
+export const DEFAULT_NOTICE_CONFIG: NoticeConfigVO = {
+  title: "",
+  content: "",
+  enabled: false,
+  publish_time: 0,
+};
+
+export async function getNoticeConfig(): Promise<NoticeConfigVO> {
+  const res = await request<Response<NoticeConfigVO>>("/api/configs/notice");
   if (res.code !== 0) throw new Error(res.message);
   return res.data;
 }
