@@ -15,6 +15,9 @@ const staticNav = [
   { label: "关于", href: "/about" },
 ];
 
+const mobileNavLinkClass =
+  "relative flex h-[46px] shrink-0 items-center whitespace-nowrap px-2 text-sm transition-colors after:absolute after:bottom-1 after:left-2 after:right-2 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-blue-500 after:transition-transform after:duration-200 hover:text-blue-600 hover:after:scale-x-100 dark:hover:text-blue-400";
+
 type NavEntry = {
   disabled?: boolean;
   href: string;
@@ -188,9 +191,9 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({
               <Link
                 key={item.key}
                 href={item.href}
-                className={`flex h-[46px] shrink-0 items-center whitespace-nowrap px-2 text-sm transition-colors ${
+                className={`${mobileNavLinkClass} ${
                   selectedKeys.includes(item.key)
-                    ? "text-blue-600 dark:text-blue-400"
+                    ? "text-blue-600 after:scale-x-100 dark:text-blue-400"
                     : "text-gray-700 dark:text-gray-200"
                 }`}
               >
@@ -256,7 +259,7 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({
           mode="horizontal"
           selectable={false}
           triggerSubMenuAction="click"
-          className="w-full bg-transparent border-none shadow-none md:[&_.ant-menu-item]:mx-0.5 md:[&_.ant-menu-item]:rounded-md md:[&_.ant-menu-item]:px-3 md:[&_.ant-menu-item-selected]:bg-blue-50 md:[&_.ant-menu-item-selected]:font-medium md:[&_.ant-menu-item:after]:hidden dark:md:[&_.ant-menu-item-selected]:bg-blue-950/30"
+          className="w-full bg-transparent border-none shadow-none md:[&_.ant-menu-item]:mx-0.5 md:[&_.ant-menu-item]:rounded-md md:[&_.ant-menu-item]:px-3 md:[&_.ant-menu-item-selected]:bg-blue-50 md:[&_.ant-menu-item-selected]:font-medium dark:md:[&_.ant-menu-item-selected]:bg-blue-950/30 md:[&_.ant-menu-item:after]:left-3 md:[&_.ant-menu-item:after]:right-3 md:[&_.ant-menu-item:after]:bottom-1 md:[&_.ant-menu-item:after]:rounded-full md:[&_.ant-menu-item:after]:border-b-2 md:[&_.ant-menu-item:after]:border-blue-500 md:[&_.ant-menu-item:after]:transition-all md:[&_.ant-menu-item:after]:duration-200"
           items={menuItems}
           style={{ flex: 1, minWidth: 0 }}
           selectedKeys={selectedKeys}
