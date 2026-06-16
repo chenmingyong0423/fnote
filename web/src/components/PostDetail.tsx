@@ -42,7 +42,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
             <div className="sm:hidden mb-4 text-xs text-gray-500 dark:text-gray-400">
               标签：{post.tags.map(t => t.name).join(', ')}
             </div>
-          <article className="prose prose-sm md:prose-lg max-w-none dark:prose-invert">
+          <article className="glass-card overflow-hidden rounded-lg px-4 py-5 md:px-7 md:py-6 prose prose-sm md:prose-lg max-w-none dark:prose-invert">
             <MarkdownPreview content={post.content} />
           </article>
           {/* 版权信息区 */}

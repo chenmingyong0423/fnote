@@ -118,6 +118,7 @@ svg {
 }
 
 .markdown-body {
+  background: transparent;
   max-width: 100%;
   overflow-wrap: anywhere;
 }
@@ -135,7 +136,7 @@ svg {
 
 /* 暗黑模式支持 */
 .dark .markdown-body {
-  background: #181a1b;
+  background: transparent;
   color: #e6e6e6;
 }
 .dark .markdown-body pre,
