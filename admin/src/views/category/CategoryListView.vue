@@ -13,53 +13,24 @@
       </div>
     </template>
     <div>
-      <a-button @click="visible = true" class="mb-5">新增分类</a-button>
+      <a-button @click="openCreateCategory" class="mb-5">新增分类</a-button>
       <a-modal
         v-model:open="visible"
         title="新增分类"
         ok-text="提交"
         cancel-text="取消"
         @ok="addCategory"
+        @cancel="resetCategoryForm"
       >
-        <a-form ref="formRef" :model="formState" layout="vertical" name="form_in_modal">
-          <a-form-item
-            name="name"
-            label="名称"
-            :rules="[{ required: true, message: '请输入分类名称' }]"
-          >
-            <a-input v-model:value="formState.name" />
-          </a-form-item>
-          <a-form-item
-            name="route"
-            label="前端路由"
-            :rules="[{ required: true, message: '请输入前端路由' }]"
-          >
-            <a-input v-model:value="formState.route" />
-          </a-form-item>
-          <a-form-item name="description" label="描述">
-            <a-textarea v-model:value="formState.description" />
-          </a-form-item>
-          <a-form-item
-            label="是否显示在导航栏上"
-            name="show_in_nav"
-            class="collection-create-form_last-form-item"
-          >
-            <a-radio-group v-model:value="formState.show_in_nav">
-              <a-radio :value="true">true</a-radio>
-              <a-radio :value="false">false</a-radio>
-            </a-radio-group>
-          </a-form-item>
-          <a-form-item
-            label="是否启用"
-            name="enabled"
-            class="collection-create-form_last-form-item"
-          >
-            <a-radio-group v-model:value="formState.enabled">
-              <a-radio :value="true">true</a-radio>
-              <a-radio :value="false">false</a-radio>
-            </a-radio-group>
-          </a-form-item>
-        </a-form>
+        <TaxonomyCreateForm
+          ref="formRef"
+          v-model:name="formState.name"
+          v-model:route="formState.route"
+          v-model:description="formState.description"
+          v-model:enabled="formState.enabled"
+          v-model:show-in-nav="formState.show_in_nav"
+          type="category"
+        />
       </a-modal>
     </div>
     <div>
@@ -127,7 +98,6 @@
 <script lang="ts" setup>
 import originalAxios from 'axios'
 import { ref, reactive, type UnwrapRef, computed, h } from 'vue'
-import type { FormInstance } from 'ant-design-vue'
 import type { PageRequest } from '@/interfaces/Common'
 import {
   AddCategory,
@@ -144,6 +114,7 @@ import { message } from 'ant-design-vue'
 import { cloneDeep } from 'lodash-es'
 import dayjs from 'dayjs'
 import { ReloadOutlined } from '@ant-design/icons-vue'
+import TaxonomyCreateForm from '@/components/form/TaxonomyCreateForm.vue'
 
 document.title = '分类列表 - 后台管理'
 
@@ -229,7 +200,7 @@ const getCategories = async () => {
 getCategories()
 
 // 添加分类
-const formRef = ref<FormInstance>()
+const formRef = ref<InstanceType<typeof TaxonomyCreateForm>>()
 const visible = ref(false)
 const formState = reactive<CategoryRequest>({
   name: '',
@@ -238,6 +209,21 @@ const formState = reactive<CategoryRequest>({
   show_in_nav: false,
   enabled: true
 })
+
+const resetCategoryForm = () => {
+  formState.name = ''
+  formState.route = ''
+  formState.description = ''
+  formState.show_in_nav = false
+  formState.enabled = true
+  formRef.value?.resetRouteTouched()
+  formRef.value?.clearValidate()
+}
+
+const openCreateCategory = () => {
+  resetCategoryForm()
+  visible.value = true
+}
 
 const addCategory = () => {
   if (formRef.value) {
@@ -252,9 +238,7 @@ const addCategory = () => {
           }
           message.success('添加成功')
           visible.value = false
-          if (formRef.value) {
-            formRef.value.resetFields()
-          }
+          resetCategoryForm()
           await getCategories()
         } catch (error) {
           if (originalAxios.isAxiosError(error)) {

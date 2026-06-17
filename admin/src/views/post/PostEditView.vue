@@ -197,40 +197,15 @@
         :confirm-loading="quickCategoryLoading"
         @ok="createCategory"
       >
-        <a-form ref="quickCategoryFormRef" :model="quickCategoryForm" layout="vertical">
-          <a-form-item
-            name="name"
-            label="分类名称"
-            :rules="[{ required: true, message: '请输入分类名称' }]"
-          >
-            <a-input v-model:value="quickCategoryForm.name" placeholder="请输入分类名称" />
-          </a-form-item>
-          <a-form-item
-            name="route"
-            label="路由"
-            :rules="taxonomyRouteRules"
-            :extra="taxonomyRouteExtra"
-          >
-            <a-input
-              v-model:value="quickCategoryForm.route"
-              placeholder="例如 tech-note"
-              @input="quickCategoryRouteTouched = true"
-            />
-          </a-form-item>
-          <a-form-item name="description" label="描述">
-            <a-textarea
-              v-model:value="quickCategoryForm.description"
-              placeholder="可选"
-              allow-clear
-            />
-          </a-form-item>
-          <a-form-item name="show_in_nav" label="显示在导航">
-            <a-switch v-model:checked="quickCategoryForm.show_in_nav" />
-          </a-form-item>
-          <a-form-item name="enabled" label="启用">
-            <a-switch v-model:checked="quickCategoryForm.enabled" />
-          </a-form-item>
-        </a-form>
+        <TaxonomyCreateForm
+          ref="quickCategoryFormRef"
+          v-model:name="quickCategoryForm.name"
+          v-model:route="quickCategoryForm.route"
+          v-model:description="quickCategoryForm.description"
+          v-model:enabled="quickCategoryForm.enabled"
+          v-model:show-in-nav="quickCategoryForm.show_in_nav"
+          type="category"
+        />
       </a-modal>
       <a-modal
         v-model:open="quickTagVisible"
@@ -240,30 +215,13 @@
         :confirm-loading="quickTagLoading"
         @ok="createTag"
       >
-        <a-form ref="quickTagFormRef" :model="quickTagForm" layout="vertical">
-          <a-form-item
-            name="name"
-            label="标签名称"
-            :rules="[{ required: true, message: '请输入标签名称' }]"
-          >
-            <a-input v-model:value="quickTagForm.name" placeholder="请输入标签名称" />
-          </a-form-item>
-          <a-form-item
-            name="route"
-            label="路由"
-            :rules="taxonomyRouteRules"
-            :extra="taxonomyRouteExtra"
-          >
-            <a-input
-              v-model:value="quickTagForm.route"
-              placeholder="例如 vue"
-              @input="quickTagRouteTouched = true"
-            />
-          </a-form-item>
-          <a-form-item name="enabled" label="启用">
-            <a-switch v-model:checked="quickTagForm.enabled" />
-          </a-form-item>
-        </a-form>
+        <TaxonomyCreateForm
+          ref="quickTagFormRef"
+          v-model:name="quickTagForm.name"
+          v-model:route="quickTagForm.route"
+          v-model:enabled="quickTagForm.enabled"
+          type="tag"
+        />
       </a-modal>
     </div>
     <div>
@@ -316,6 +274,8 @@ import { useUserStore } from '@/stores/user'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
 import ImageLIstView from '@/views/post/editor/ImageLIstView.vue'
 import { toErrorMessage } from '@/utils/error'
+import TaxonomyCreateForm from '@/components/form/TaxonomyCreateForm.vue'
+import { normalizeSlug, shouldAutoFillSlug, validateSlug } from '@/utils/slug'
 
 const emit = defineEmits(['publish', 'saveDraft'])
 const userStore = useUserStore()
@@ -575,25 +535,6 @@ const postIdRules = [
   }
 ]
 
-const validateSlug = (value: string, label: string) => {
-  if (!value) {
-    throw new Error(`请输入${label}`)
-  }
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
-    throw new Error(`${label}仅支持小写英文、数字和短横线，且不能以短横线开头或结尾`)
-  }
-}
-
-const taxonomyRouteExtra = '用于前台 URL，建议使用小写英文、数字和短横线，例如 tech-note'
-
-const taxonomyRouteRules = [
-  {
-    validator: async (_rule: unknown, value: string) => {
-      validateSlug(value, '路由')
-    }
-  }
-]
-
 const syncWordCount = () => {
   post4Edit.word_count = contentWordCount.value
 }
@@ -647,11 +588,11 @@ const fillPostId = () => {
     message.warning('请先填写标题')
     return
   }
-  if (!shouldAutoFillRoute(title)) {
+  if (!shouldAutoFillSlug(title)) {
     message.warning('中文标题请手动填写自定义 id')
     return
   }
-  const id = normalizeRoute(title)
+  const id = normalizeSlug(title)
   if (!id) {
     message.warning('当前标题无法生成有效 id')
     return
@@ -875,8 +816,7 @@ const insertImg = (content: string) => {
 
 const quickCategoryVisible = ref(false)
 const quickCategoryLoading = ref(false)
-const quickCategoryFormRef = ref<FormInstance>()
-const quickCategoryRouteTouched = ref(false)
+const quickCategoryFormRef = ref<InstanceType<typeof TaxonomyCreateForm>>()
 const quickCategoryForm = reactive<CategoryRequest>({
   name: '',
   route: '',
@@ -887,8 +827,7 @@ const quickCategoryForm = reactive<CategoryRequest>({
 
 const quickTagVisible = ref(false)
 const quickTagLoading = ref(false)
-const quickTagFormRef = ref<FormInstance>()
-const quickTagRouteTouched = ref(false)
+const quickTagFormRef = ref<InstanceType<typeof TaxonomyCreateForm>>()
 const quickTagForm = reactive<TagRequest>({
   name: '',
   route: '',
@@ -901,7 +840,7 @@ const resetQuickCategoryForm = () => {
   quickCategoryForm.description = ''
   quickCategoryForm.show_in_nav = true
   quickCategoryForm.enabled = true
-  quickCategoryRouteTouched.value = false
+  quickCategoryFormRef.value?.resetRouteTouched()
   quickCategoryFormRef.value?.clearValidate()
 }
 
@@ -909,41 +848,9 @@ const resetQuickTagForm = () => {
   quickTagForm.name = ''
   quickTagForm.route = ''
   quickTagForm.enabled = true
-  quickTagRouteTouched.value = false
+  quickTagFormRef.value?.resetRouteTouched()
   quickTagFormRef.value?.clearValidate()
 }
-
-const normalizeRoute = (value: string) => {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-}
-
-const shouldAutoFillRoute = (value: string) => {
-  return !/[\u4e00-\u9fa5]/.test(value)
-}
-
-watch(
-  () => quickCategoryForm.name,
-  (name) => {
-    if (!quickCategoryRouteTouched.value) {
-      quickCategoryForm.route = shouldAutoFillRoute(name) ? normalizeRoute(name) : ''
-    }
-  }
-)
-
-watch(
-  () => quickTagForm.name,
-  (name) => {
-    if (!quickTagRouteTouched.value) {
-      quickTagForm.route = shouldAutoFillRoute(name) ? normalizeRoute(name) : ''
-    }
-  }
-)
 
 const openQuickCategory = () => {
   resetQuickCategoryForm()
