@@ -31,6 +31,7 @@
         最近保存 {{ formatSaveTime(props.lastSavedAt) }}
       </span>
       <span v-if="hasUnsavedChanges" class="save-status">有未保存更改</span>
+      <span v-if="contentStatsText" class="save-status">{{ contentStatsText }}</span>
       <a-modal
         v-model:open="visible"
         title="文章元数据"
@@ -283,7 +284,16 @@
 </template>
 
 <script lang="ts" setup>
-import { type PropType, reactive, ref, defineEmits, onBeforeUnmount, onMounted, watch } from 'vue'
+import {
+  type PropType,
+  computed,
+  reactive,
+  ref,
+  defineEmits,
+  onBeforeUnmount,
+  onMounted,
+  watch
+} from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import type { Post4Edit } from '@/interfaces/Post'
 import { type FormInstance, message } from 'ant-design-vue'
@@ -387,6 +397,7 @@ const submit = () => {
           message.warning('请填写文章内容')
           return
         }
+        syncWordCount()
         post4Edit.categories = []
         values.tempCategories.forEach((item: string) => {
           categoryOptions.value.forEach((category) => {
@@ -446,6 +457,7 @@ const saveDraft = (options?: { silent?: boolean }) => {
     return
   }
   if (hasDraftTitle()) {
+    syncWordCount()
     post4Edit.categories = []
     post4Edit.tempCategories?.forEach((item: string) => {
       categoryOptions.value.forEach((category) => {
@@ -493,6 +505,35 @@ const stripMarkdown = (content: string) => {
     .replace(/[*_~>#|[\]()]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+const countReadableWords = (content: string) => {
+  const chineseCount = content.match(/[\u4e00-\u9fa5]/g)?.length || 0
+  const latinContent = content.replace(/[\u4e00-\u9fa5]/g, ' ')
+  const latinWordCount = latinContent.match(/[a-zA-Z0-9]+(?:[-'][a-zA-Z0-9]+)*/g)?.length || 0
+  return chineseCount + latinWordCount
+}
+
+const readableContent = computed(() => stripMarkdown(post4Edit.content || ''))
+
+const contentWordCount = computed(() => countReadableWords(readableContent.value))
+
+const readingMinutes = computed(() => {
+  if (contentWordCount.value === 0) {
+    return 0
+  }
+  return Math.max(1, Math.ceil(contentWordCount.value / 400))
+})
+
+const contentStatsText = computed(() => {
+  if (contentWordCount.value === 0) {
+    return ''
+  }
+  return `字数 ${contentWordCount.value} · 约 ${readingMinutes.value} 分钟`
+})
+
+const syncWordCount = () => {
+  post4Edit.word_count = contentWordCount.value
 }
 
 const truncateText = (content: string, maxLength: number) => {

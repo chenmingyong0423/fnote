@@ -23,6 +23,7 @@ export interface PostDraftRequest {
   sticky_weight: number
   meta_description: string
   meta_keywords: string
+  word_count: number
   is_comment_allowed: boolean
   created_at: number
 }

@@ -51,6 +51,7 @@ const post4Edit = reactive<Post4Edit>({
   sticky_weight: 0,
   meta_description: '',
   meta_keywords: '',
+  word_count: 0,
   is_comment_allowed: true,
   tempCategories: [],
   tempTags: [],
@@ -122,6 +123,7 @@ const getPostDraftById = async (id: string) => {
       post4Edit.sticky_weight = postDraft.sticky_weight
       post4Edit.meta_description = postDraft.meta_description
       post4Edit.meta_keywords = postDraft.meta_keywords
+      post4Edit.word_count = postDraft.word_count
       post4Edit.is_comment_allowed = postDraft.is_comment_allowed
       post4Edit.categories = postDraft.categories
       post4Edit.is_displayed = postDraft.is_displayed

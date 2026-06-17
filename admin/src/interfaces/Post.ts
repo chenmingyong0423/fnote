@@ -24,6 +24,7 @@ export interface PostDetailVO {
   sticky_weight: number
   meta_description: string
   meta_keywords: string
+  word_count: number
   is_comment_allowed: boolean
 }
 
@@ -66,6 +67,7 @@ export interface PostRequest {
   sticky_weight: number
   meta_description: string
   meta_keywords: string
+  word_count: number
   is_comment_allowed: boolean
 }
 
