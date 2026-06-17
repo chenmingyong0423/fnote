@@ -48,7 +48,7 @@
         :columns="columns"
         :data-source="posts"
         :pagination="pagination"
-        :scroll="{ x: 1320 }"
+        :scroll="{ x: 1470 }"
         row-key="id"
         @change="change"
         bordered
@@ -74,6 +74,9 @@
             <a-tooltip :title="record.summary">
               <div class="summary-text">{{ record.summary }}</div>
             </a-tooltip>
+          </template>
+          <template v-else-if="column.key === 'word_count'">
+            <span>{{ formatPostStats(record.word_count) }}</span>
           </template>
           <template v-else-if="column.key === 'categories'">
             <span class="taxonomy-tags">
@@ -200,6 +203,12 @@ const columns = computed<TableColumnType[]>(() => {
       width: 260
     },
     {
+      title: '字数',
+      dataIndex: 'word_count',
+      key: 'word_count',
+      width: 150
+    },
+    {
       title: '分类',
       key: 'categories',
       dataIndex: 'categories',
@@ -320,6 +329,13 @@ const isCommentUpdating = (id: string) => commentUpdatingIds.value.has(id)
 const isDeleting = (id: string) => deletingIds.value.has(id)
 
 const isContentCopying = (id: string) => contentCopyingIds.value.has(id)
+
+const formatPostStats = (wordCount?: number) => {
+  if (!wordCount) {
+    return '-'
+  }
+  return `${wordCount} 字 / 约 ${Math.max(1, Math.ceil(wordCount / 400))} 分钟`
+}
 
 const getPosts = async () => {
   try {

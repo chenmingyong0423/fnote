@@ -38,6 +38,12 @@
           <template v-else-if="column.key === 'created_at'">
             <span>{{ formatTime(record.created_at) }}</span>
           </template>
+          <template v-else-if="column.key === 'updated_at'">
+            <span>{{ formatTime(record.updated_at) }}</span>
+          </template>
+          <template v-else-if="column.key === 'word_count'">
+            <span>{{ formatDraftStats(record.word_count) }}</span>
+          </template>
           <template v-else-if="column.key === 'operation'">
             <div class="draft-actions">
               <a @click="router.push(`/home/post/draft/${record.id}`)">编辑</a>
@@ -87,8 +93,14 @@ const columns = computed<TableColumnType<PostDraftBrief>[]>(() => [
     title: '草稿 ID',
     dataIndex: 'id',
     key: 'id',
-    width: 260,
+    width: 220,
     ellipsis: true
+  },
+  {
+    title: '字数',
+    dataIndex: 'word_count',
+    key: 'word_count',
+    width: 150
   },
   {
     title: '创建时间',
@@ -96,6 +108,13 @@ const columns = computed<TableColumnType<PostDraftBrief>[]>(() => [
     key: 'created_at',
     sorter: true,
     defaultSortOrder: 'descend',
+    width: 180
+  },
+  {
+    title: '更新时间',
+    dataIndex: 'updated_at',
+    key: 'updated_at',
+    sorter: true,
     width: 180
   },
   {
@@ -118,7 +137,19 @@ const pagination = computed(() => ({
 const loading = ref(false)
 const deletingIds = ref<Set<string>>(new Set())
 
-const formatTime = (timestamp: number) => dayjs.unix(timestamp).format('YYYY-MM-DD HH:mm:ss')
+const formatTime = (timestamp?: number) => {
+  if (!timestamp) {
+    return '-'
+  }
+  return dayjs.unix(timestamp).format('YYYY-MM-DD HH:mm:ss')
+}
+
+const formatDraftStats = (wordCount?: number) => {
+  if (!wordCount) {
+    return '-'
+  }
+  return `${wordCount} 字 / 约 ${Math.max(1, Math.ceil(wordCount / 400))} 分钟`
+}
 
 const setDeleting = (id: string, deleting: boolean) => {
   const next = new Set(deletingIds.value)

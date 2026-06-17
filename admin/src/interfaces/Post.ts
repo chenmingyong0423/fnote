@@ -5,6 +5,7 @@ export interface IPost {
   cover_img: string
   title: string
   summary: string
+  word_count: number
   categories: Category4Post[]
   tags: Tag4Post[]
   is_displayed: boolean
