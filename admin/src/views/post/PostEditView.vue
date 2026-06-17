@@ -55,12 +55,12 @@
           >
             {{ post4Edit.author }}
           </a-form-item>
-          <a-form-item name="id" label="自定义 id">
+          <a-form-item name="id" label="自定义 id" :rules="postIdRules" :extra="postIdExtra">
             <div class="field-with-action">
               <a-input
                 v-model:value="post4Edit.id"
                 :disabled="!props.isNewPost"
-                placeholder="与文章关联的英文的 id 有助于 seo 优化"
+                placeholder="例如 vue-router-note"
               />
               <a-button type="link" size="small" :disabled="!props.isNewPost" @click="fillPostId">
                 根据标题生成
@@ -158,13 +158,18 @@
             name="summary"
             label="文章摘要"
             :rules="[{ required: true, message: '请输入摘要' }]"
+            :extra="summaryExtra"
           >
             <div class="field-with-action">
               <a-textarea v-model:value="post4Edit.summary" placeholder="请输入摘要" allow-clear />
               <a-button type="link" size="small" @click="fillSummary">从正文生成</a-button>
             </div>
           </a-form-item>
-          <a-form-item name="meta_description" label="seo description">
+          <a-form-item
+            name="meta_description"
+            label="seo description"
+            :extra="metaDescriptionExtra"
+          >
             <div class="field-with-action">
               <a-textarea
                 v-model:value="post4Edit.meta_description"
@@ -531,6 +536,44 @@ const contentStatsText = computed(() => {
   }
   return `字数 ${contentWordCount.value} · 约 ${readingMinutes.value} 分钟`
 })
+
+const summaryLength = computed(() => post4Edit.summary?.trim().length || 0)
+
+const metaDescriptionLength = computed(() => post4Edit.meta_description?.trim().length || 0)
+
+const summaryExtra = computed(() => {
+  if (summaryLength.value === 0) {
+    return '建议 80-160 字，便于列表页和搜索摘要展示'
+  }
+  return `当前 ${summaryLength.value} 字，建议 80-160 字`
+})
+
+const metaDescriptionExtra = computed(() => {
+  if (metaDescriptionLength.value === 0) {
+    return '建议 120-160 字，留空时可同步摘要'
+  }
+  return `当前 ${metaDescriptionLength.value} 字，建议 120-160 字`
+})
+
+const postIdExtra = computed(() => {
+  if (!props.isNewPost) {
+    return '文章 id 发布后不可修改'
+  }
+  return '建议使用小写英文、数字和短横线，留空保存草稿时会自动生成'
+})
+
+const postIdRules = [
+  {
+    validator: async (_rule: unknown, value: string) => {
+      if (!props.isNewPost || !value) {
+        return
+      }
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
+        throw new Error('自定义 id 仅支持小写英文、数字和短横线，且不能以短横线开头或结尾')
+      }
+    }
+  }
+]
 
 const syncWordCount = () => {
   post4Edit.word_count = contentWordCount.value
