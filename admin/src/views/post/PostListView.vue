@@ -99,14 +99,16 @@
           </template>
           <template v-if="column.key === 'is_displayed'">
             <a-switch
-              v-model:checked="record.is_displayed"
-              @change="changeDisplayStatus(record.id, record.is_displayed)"
+              :checked="record.is_displayed"
+              :loading="isDisplayUpdating(record.id)"
+              @change="changeDisplayStatus(record, Boolean($event))"
             />
           </template>
           <template v-if="column.key === 'is_comment_allowed'">
             <a-switch
-              v-model:checked="record.is_comment_allowed"
-              @change="changeCommentAllowedStatus(record.id, record.is_comment_allowed)"
+              :checked="record.is_comment_allowed"
+              :loading="isCommentUpdating(record.id)"
+              @change="changeCommentAllowedStatus(record, Boolean($event))"
             />
           </template>
           <template v-else-if="column.key === 'created_at' || column.key === 'updated_at'">
@@ -115,7 +117,14 @@
           <template v-else-if="column.dataIndex === 'operation'">
             <div class="post-actions">
               <span>
-                <a @click="copyPostContent(record.id)">复制正文</a>
+                <a-button
+                  type="link"
+                  size="small"
+                  :loading="isContentCopying(record.id)"
+                  @click="copyPostContent(record.id)"
+                >
+                  复制正文
+                </a-button>
               </span>
               <span>
                 <a @click="router.push(`/home/post/draft/${record.id}`)">编辑</a>
@@ -124,7 +133,9 @@
                 <a @click="openCoverEditor(record)">编辑封面</a>
               </span>
               <a-popconfirm v-if="posts.length" title="确认删除？" @confirm="deletePost(record)">
-                <a>删除</a>
+                <a-button type="link" size="small" danger :loading="isDeleting(record.id)">
+                  删除
+                </a-button>
               </a-popconfirm>
             </div>
           </template>
@@ -154,6 +165,7 @@ import { GetSelectedCategories, type SelectCategory } from '@/interfaces/Categor
 import { GetSelectedTags, type SelectTag } from '@/interfaces/Tag'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
 import { useUserStore } from '@/stores/user'
+import { toErrorMessage } from '@/utils/error'
 
 document.title = '文章列表 - 后台管理'
 
@@ -286,6 +298,28 @@ const coverEditorVisible = ref(false)
 const coverSaving = ref(false)
 const currentPost = ref<IPost | null>(null)
 const coverImage = ref('')
+const displayUpdatingIds = ref<Set<string>>(new Set())
+const commentUpdatingIds = ref<Set<string>>(new Set())
+const deletingIds = ref<Set<string>>(new Set())
+const contentCopyingIds = ref<Set<string>>(new Set())
+
+const setPending = (source: typeof displayUpdatingIds, id: string, pending: boolean) => {
+  const next = new Set(source.value)
+  if (pending) {
+    next.add(id)
+  } else {
+    next.delete(id)
+  }
+  source.value = next
+}
+
+const isDisplayUpdating = (id: string) => displayUpdatingIds.value.has(id)
+
+const isCommentUpdating = (id: string) => commentUpdatingIds.value.has(id)
+
+const isDeleting = (id: string) => deletingIds.value.has(id)
+
+const isContentCopying = (id: string) => contentCopyingIds.value.has(id)
 
 const getPosts = async () => {
   try {
@@ -301,8 +335,11 @@ const getPosts = async () => {
 }
 
 const deletePost = async (record: IPost) => {
+  if (isDeleting(record.id)) {
+    return
+  }
   try {
-    console.log(record)
+    setPending(deletingIds, record.id, true)
     const response: any = await DeletePost(record.id)
     if (response.data.code !== 0) {
       message.error(response.data.message)
@@ -311,37 +348,59 @@ const deletePost = async (record: IPost) => {
     message.success('删除成功')
     await getPosts()
   } catch (error) {
-    console.log(error)
+    message.error(toErrorMessage(error, '删除失败'))
+  } finally {
+    setPending(deletingIds, record.id, false)
   }
 }
 
 getPosts()
 
-const changeDisplayStatus = async (id: string, is_displayed: boolean) => {
+const changeDisplayStatus = async (record: IPost, isDisplayed: boolean) => {
+  if (isDisplayUpdating(record.id)) {
+    return
+  }
+  const previous = record.is_displayed
   try {
-    const response: any = await ChangePostDisplayStatus(id, is_displayed)
+    record.is_displayed = isDisplayed
+    setPending(displayUpdatingIds, record.id, true)
+    const response: any = await ChangePostDisplayStatus(record.id, isDisplayed)
     if (response.data.code !== 0) {
+      record.is_displayed = previous
       message.error(response.data.message)
       return
     }
     message.success('更新成功')
     await getPosts()
   } catch (error) {
-    console.log(error)
+    record.is_displayed = previous
+    message.error(toErrorMessage(error, '更新显示状态失败'))
+  } finally {
+    setPending(displayUpdatingIds, record.id, false)
   }
 }
 
-const changeCommentAllowedStatus = async (id: string, is_comment_allowed: boolean) => {
+const changeCommentAllowedStatus = async (record: IPost, isCommentAllowed: boolean) => {
+  if (isCommentUpdating(record.id)) {
+    return
+  }
+  const previous = record.is_comment_allowed
   try {
-    const response: any = await ChangeCommentAllowedStatus(id, is_comment_allowed)
+    record.is_comment_allowed = isCommentAllowed
+    setPending(commentUpdatingIds, record.id, true)
+    const response: any = await ChangeCommentAllowedStatus(record.id, isCommentAllowed)
     if (response.data.code !== 0) {
+      record.is_comment_allowed = previous
       message.error(response.data.message)
       return
     }
     message.success('更新成功')
     await getPosts()
   } catch (error) {
-    console.log(error)
+    record.is_comment_allowed = previous
+    message.error(toErrorMessage(error, '更新评论状态失败'))
+  } finally {
+    setPending(commentUpdatingIds, record.id, false)
   }
 }
 
@@ -437,14 +496,24 @@ const copyPostLink = async (id: string) => {
 }
 
 const copyPostContent = async (id: string) => {
-  const response = await GetPostById(id)
-  if (response.data.code !== 0) {
-    message.error(response.data.message)
+  if (isContentCopying(id)) {
     return
   }
-  const content = response.data.data?.content
-  await navigator.clipboard.writeText(content)
-  message.success('正文复制成功')
+  try {
+    setPending(contentCopyingIds, id, true)
+    const response = await GetPostById(id)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
+      return
+    }
+    const content = response.data.data?.content || ''
+    await navigator.clipboard.writeText(content)
+    message.success('正文复制成功')
+  } catch (error) {
+    message.error(toErrorMessage(error, '正文复制失败'))
+  } finally {
+    setPending(contentCopyingIds, id, false)
+  }
 }
 </script>
 
@@ -478,6 +547,10 @@ const copyPostContent = async (id: string) => {
 }
 
 .post-link-cell :deep(.ant-btn) {
+  padding: 0;
+}
+
+.post-actions :deep(.ant-btn) {
   padding: 0;
 }
 </style>
