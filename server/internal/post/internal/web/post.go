@@ -250,6 +250,7 @@ func (h *PostHandler) postsToAdminPost(posts []*domain.Post) []AdminPostVO {
 			CoverImg:         post.CoverImg,
 			Title:            post.Title,
 			Summary:          post.Summary,
+			WordCount:        post.WordCount,
 			Categories:       categories,
 			Tags:             tags,
 			IsDisplayed:      post.IsDisplayed,
@@ -337,6 +338,7 @@ func (h *PostHandler) AdminGetPostById(ctx *gin.Context) (*apiwrap.ResponseBody[
 		StickyWeight:     post.StickyWeight,
 		MetaDescription:  post.MetaDescription,
 		MetaKeywords:     post.MetaKeywords,
+		WordCount:        post.WordCount,
 		IsCommentAllowed: post.IsCommentAllowed,
 	}), nil
 }

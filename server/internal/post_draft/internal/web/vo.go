@@ -30,10 +30,13 @@ type PostDraftVO struct {
 	WordCount        int                  `json:"word_count"`
 	IsCommentAllowed bool                 `json:"is_comment_allowed"`
 	CreatedAt        int64                `json:"created_at"`
+	UpdatedAt        int64                `json:"updated_at"`
 }
 
 type PostDraftBriefVO struct {
 	Id        string `json:"id"`
 	Title     string `json:"title"`
+	WordCount int    `json:"word_count"`
 	CreatedAt int64  `json:"created_at"`
+	UpdatedAt int64  `json:"updated_at"`
 }

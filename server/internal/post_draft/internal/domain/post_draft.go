@@ -30,6 +30,7 @@ type PostDraft struct {
 	IsDisplayed      bool                 `json:"is_displayed"`
 	IsCommentAllowed bool                 `json:"is_comment_allowed"`
 	CreatedAt        int64                `json:"created_at"`
+	UpdatedAt        int64                `json:"updated_at"`
 }
 
 type Category4PostDraft struct {

@@ -92,7 +92,9 @@ func (h *PostDraftHandler) GetPostDraftPage(ctx *gin.Context, req PageRequest) (
 		return PostDraftBriefVO{
 			Id:        pd.Id,
 			Title:     pd.Title,
+			WordCount: pd.WordCount,
 			CreatedAt: pd.CreatedAt,
+			UpdatedAt: pd.UpdatedAt,
 		}
 	}))), nil
 }
