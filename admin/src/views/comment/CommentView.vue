@@ -1,94 +1,119 @@
 <template>
   <a-card title="评论列表">
     <template #extra>
-      <div class="flex gap-x-3">
-        <a-tooltip title="刷新数据">
-          <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="refresh" />
-        </a-tooltip>
-      </div>
+      <a-tooltip title="刷新数据">
+        <a-button shape="circle" :icon="h(ReloadOutlined)" :loading="loading" @click="refresh" />
+      </a-tooltip>
     </template>
-    <div class="flex mb-3 gap-x-2">
-      <div class="flex gap-x-2" v-if="data.length > 0">
-        <a-button @click="expandOrHideRows">{{
-          expandedRowKeys.length === 0 ? '全部展开' : '全部折叠'
-        }}</a-button>
+
+    <div class="comment-toolbar">
+      <div class="comment-toolbar-actions">
+        <a-button v-if="data.length > 0" @click="expandOrHideRows">
+          {{ expandedRowKeys.length === 0 ? '全部展开' : '全部折叠' }}
+        </a-button>
+        <template v-if="selectedRowKeys.length > 0">
+          <span class="selection-count">已选 {{ selectedRowKeys.length }} 条</span>
+          <a-button type="primary" :loading="batchApproving" @click="batchApproveComment">
+            通过所选
+          </a-button>
+          <a-button type="primary" danger :loading="batchDeleting" @click="batchDeleteComment">
+            删除所选
+          </a-button>
+        </template>
       </div>
-      <div class="flex gap-x-2" v-if="selectedRowKeys.length > 0">
-        <a-button type="primary" @click="batchApproveComment">通过所选</a-button>
-        <a-button type="primary" danger @click="batchDeleteComment">删除所选</a-button>
-      </div>
-      <div class="ml-auto">
-        状态：
+
+      <div class="comment-filter">
+        <span>状态：</span>
         <a-select
-          ref="select"
-          class="w-120px"
           v-model:value="approveStatus"
+          class="status-select"
           :options="statusList"
           @change="handleChange"
-        ></a-select>
+        />
       </div>
     </div>
+
     <a-spin :spinning="loading">
       <a-table
         :columns="columns"
         :data-source="data"
         :pagination="pagination"
-        @change="change"
+        :row-key="getRowKey"
         :row-selection="selection"
-        childrenColumnName="replies"
+        :scroll="{ x: 1280 }"
+        children-column-name="replies"
         v-model:expandedRowKeys="expandedRowKeys"
+        bordered
+        @change="change"
         @expandedRowsChange="expandedRowsChange"
       >
         <template #bodyCell="{ column, text, record }">
-          <template v-if="column.dataIndex === 'user_info'">
-            <div class="flex gap-x-3">
-              <div>
-                <a-avatar :src="record.user_info.picture" />
-              </div>
-              <div class="flex-col">
-                <div>
-                  <a
-                    :href="record.user_info.website"
-                    target="_blank"
-                    v-if="record.user_info.website"
-                    >{{ record.user_info.name }}</a
-                  >
-                  <span class="font-bold" v-else>{{ record.user_info.name }}</span>
-                </div>
-                <div class="text-gray-5">{{ record.user_info.email }}</div>
+          <template v-if="column.key === 'user_info'">
+            <div class="comment-user">
+              <a-avatar :src="record.user_info.picture" />
+              <div class="comment-user-meta">
+                <a
+                  v-if="record.user_info.website"
+                  :href="record.user_info.website"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ record.user_info.name }}
+                </a>
+                <span v-else class="comment-user-name">{{ record.user_info.name }}</span>
+                <span class="comment-user-email">{{ record.user_info.email }}</span>
+                <span v-if="record.user_info.ip" class="comment-user-ip">{{
+                  record.user_info.ip
+                }}</span>
               </div>
             </div>
           </template>
-          <template v-if="column.dataIndex === 'post.post_url'">
-            <a :href="record.post_info.post_url" target="_blank">{{
-              record.post_info.post_title
-            }}</a>
+
+          <template v-else-if="column.key === 'post'">
+            <a :href="record.post_info.post_url" target="_blank" rel="noopener noreferrer">
+              {{ record.post_info.post_title }}
+            </a>
           </template>
-          <template v-if="column.dataIndex === 'content'">
-            {{ text }}
+
+          <template v-else-if="column.key === 'content'">
+            <a-tooltip :title="record.content">
+              <div class="comment-content">{{ record.content }}</div>
+            </a-tooltip>
           </template>
-          <template v-if="column.dataIndex === 'approval_status'">
-            <a-tag :color="record.approval_status ? 'success' : 'processing'"
-              >{{ text ? '审核通过' : '未审核' }}
+
+          <template v-else-if="column.key === 'reply_count'">
+            <span>{{ record.type === 'comment' ? record.reply_count : '-' }}</span>
+          </template>
+
+          <template v-else-if="column.key === 'approval_status'">
+            <a-tag :color="record.approval_status ? 'success' : 'processing'">
+              {{ record.approval_status ? '审核通过' : '待审核' }}
             </a-tag>
           </template>
-          <template v-if="column.dataIndex === 'type'">
-            <a-tag color="success">{{ record.type === 'comment' ? '评论' : '回复' }}</a-tag>
+
+          <template v-else-if="column.key === 'type'">
+            <a-tag :color="record.type === 'comment' ? 'blue' : 'cyan'">
+              {{ record.type === 'comment' ? '评论' : '回复' }}
+            </a-tag>
           </template>
-          <template v-if="['created_at', 'updated_at'].includes(column.dataIndex)">
-            {{ dayjs.unix(text).format('YYYY-MM-DD HH:mm:ss') }}
+
+          <template v-else-if="column.key === 'created_at' || column.key === 'updated_at'">
+            {{ formatTime(Number(text)) }}
           </template>
-          <template v-else-if="column.dataIndex === 'operation'">
-            <div class="editable-row-operations">
+
+          <template v-else-if="column.key === 'operation'">
+            <div class="comment-actions">
               <a-popconfirm
-                v-if="data.length && !record.approval_status"
+                v-if="!record.approval_status"
                 title="确认通过？"
                 @confirm="approveComment(record)"
               >
-                <a>通过</a>
+                <a-button type="link" size="small" :loading="isApproving(record)"> 通过 </a-button>
               </a-popconfirm>
-              <a-popconfirm v-if="data.length" title="确认删除？" @confirm="deleteById(record)">
-                <a>删除</a>
+              <a-popconfirm title="确认删除？" @confirm="deleteById(record)">
+                <a-button type="link" size="small" danger :loading="isDeleting(record)">
+                  删除
+                </a-button>
               </a-popconfirm>
             </div>
           </template>
@@ -97,9 +122,10 @@
     </a-spin>
   </a-card>
 </template>
+
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import { computed, ref } from 'vue'
+import { computed, h, ref } from 'vue'
 import type { IPageData, IResponse, PageRequest } from '@/interfaces/Common'
 import {
   ApproveCommentById,
@@ -112,45 +138,53 @@ import {
   type BatchApprovedCommentRequest,
   batchDelete
 } from '@/interfaces/Comment'
-import { message } from 'ant-design-vue'
-import { Table } from 'ant-design-vue'
-import { h } from 'vue'
+import { message, Table } from 'ant-design-vue'
+import type { TableColumnType, TableProps } from 'ant-design-vue'
 import { ReloadOutlined } from '@ant-design/icons-vue'
-import originalAxios from 'axios'
+import { toErrorMessage } from '@/utils/error'
 
 document.title = '评论列表 - 后台管理'
-const showSorterTooltip = ref('点击升序排序')
 
-const columns = [
+type Key = string | number
+
+const showSorterTooltip = ref('点击升序排序')
+const columns = computed<TableColumnType<AdminCommentVO>[]>(() => [
   {
     title: '用户',
     dataIndex: 'user_info',
-    key: 'user_info'
+    key: 'user_info',
+    width: 240
   },
   {
     title: '文章',
-    dataIndex: 'post.post_url',
-    key: 'post.post_url'
+    dataIndex: ['post_info', 'post_url'],
+    key: 'post',
+    width: 220,
+    ellipsis: true
   },
   {
     title: '内容',
     dataIndex: 'content',
-    key: 'content'
+    key: 'content',
+    width: 300
   },
   {
     title: '回复数',
     dataIndex: 'reply_count',
-    key: 'reply_count'
+    key: 'reply_count',
+    width: 90
   },
   {
     title: '状态',
     key: 'approval_status',
-    dataIndex: 'approval_status'
+    dataIndex: 'approval_status',
+    width: 110
   },
   {
     title: '类型',
     key: 'type',
-    dataIndex: 'type'
+    dataIndex: 'type',
+    width: 90
   },
   {
     title: '提交时间',
@@ -159,26 +193,49 @@ const columns = [
     sorter: (c1: AdminCommentVO, c2: AdminCommentVO) => c1.created_at - c2.created_at,
     defaultSortOrder: 'descend',
     sortDirections: ['descend', 'ascend'],
-    showSorterTooltip: { title: showSorterTooltip.value }
+    showSorterTooltip: { title: showSorterTooltip.value },
+    width: 170
   },
   {
     title: '更新时间',
     key: 'updated_at',
-    dataIndex: 'updated_at'
+    dataIndex: 'updated_at',
+    width: 170
   },
   {
-    title: 'operation',
-    dataIndex: 'operation'
+    title: '操作',
+    key: 'operation',
+    dataIndex: 'operation',
+    fixed: 'right',
+    width: 120
   }
-]
+])
 
 const data = ref<AdminCommentVO[]>([])
 const pageReq = ref<PageRequest>({
   pageNo: 1,
   pageSize: 5
 } as PageRequest)
-
 const total = ref(0)
+const loading = ref(false)
+const batchApproving = ref(false)
+const batchDeleting = ref(false)
+const approvingKeys = ref<Set<string>>(new Set())
+const deletingKeys = ref<Set<string>>(new Set())
+const commentMap = new Map<string, AdminCommentVO>()
+const selectedComments = ref<BatchApprovedCommentRequest>({
+  comment_ids: [],
+  replies: {}
+})
+const selectedRowKeys = ref<Key[]>([])
+const expandedRowKeys = ref<Key[]>([])
+const approveStatus = ref(-1)
+
+const statusList = [
+  { label: '全部', value: -1 },
+  { label: '待审核', value: 0 },
+  { label: '已审核', value: 1 }
+]
 
 const pagination = computed(() => ({
   total: total.value,
@@ -186,15 +243,89 @@ const pagination = computed(() => ({
   pageSize: pageReq.value.pageSize
 }))
 
-const loading = ref(false)
-
 const generateDefaultSort = () => {
   if (!pageReq.value.sort || pageReq.value.sort.length === 0) {
     pageReq.value.sort = '-created_at'
   }
 }
 
-const commentMap: Map<string, AdminCommentVO> = new Map<string, AdminCommentVO>()
+const getRowKey = (record: AdminCommentVO) => record.key || record.id
+
+const formatTime = (timestamp?: number) => {
+  if (!timestamp) {
+    return '-'
+  }
+  return dayjs.unix(timestamp).format('YYYY-MM-DD HH:mm:ss')
+}
+
+const toCommentKey = (record: AdminCommentVO) => record.key || record.id
+
+const setPending = (source: typeof approvingKeys, key: string, pending: boolean) => {
+  const next = new Set(source.value)
+  if (pending) {
+    next.add(key)
+  } else {
+    next.delete(key)
+  }
+  source.value = next
+}
+
+const isApproving = (record: AdminCommentVO) => approvingKeys.value.has(toCommentKey(record))
+
+const isDeleting = (record: AdminCommentVO) => deletingKeys.value.has(toCommentKey(record))
+
+const clearTableState = () => {
+  selectedRowKeys.value = []
+  selectedComments.value = {
+    comment_ids: [],
+    replies: {}
+  }
+  expandedRowKeys.value = []
+}
+
+const normalizeComments = (comments: AdminCommentVO[]) => {
+  commentMap.clear()
+  comments.forEach((commentVO) => {
+    commentVO.key = commentVO.id
+    commentVO.replies?.forEach((replyVO) => {
+      replyVO.fid = commentVO.id
+      replyVO.key = `${commentVO.id}~${replyVO.id}`
+      commentMap.set(replyVO.key, replyVO)
+    })
+    commentMap.set(commentVO.key, commentVO)
+  })
+  return comments
+}
+
+const buildSelectedComments = (keys: Key[]) => {
+  const next: BatchApprovedCommentRequest = {
+    comment_ids: [],
+    replies: {}
+  }
+
+  keys.forEach((key) => {
+    const stringKey = String(key)
+    const record = commentMap.get(stringKey)
+    if (!record) {
+      return
+    }
+
+    if (stringKey.includes('~')) {
+      const [commentId, replyId] = stringKey.split('~')
+      next.replies[commentId] = next.replies[commentId] || []
+      next.replies[commentId].push(replyId)
+    } else {
+      next.comment_ids.push(stringKey)
+    }
+  })
+
+  return next
+}
+
+const updateSelectedRows = (keys: Key[]) => {
+  selectedRowKeys.value = keys
+  selectedComments.value = buildSelectedComments(keys)
+}
 
 const get = async () => {
   try {
@@ -202,32 +333,25 @@ const get = async () => {
     loading.value = true
     const response: any = await GetComments(pageReq.value)
     const result: IResponse<IPageData<AdminCommentVO>> = response.data
-    if (result.code === 0) {
-      commentMap.clear()
-      data.value = response.data.data?.list || []
-      data.value.forEach((commentVO: AdminCommentVO) => {
-        commentVO.key = commentVO.id
-        commentVO.replies?.forEach((replyVO: AdminCommentVO) => {
-          replyVO.fid = commentVO.id
-          replyVO.key = commentVO.id + '~' + replyVO.id
-          commentMap.set(replyVO.key, replyVO)
-        })
-        commentMap.set(commentVO.key, commentVO)
-      })
-      total.value = response.data.data?.totalCount || 0
+    if (result.code !== 0) {
+      message.error(result.message || '评论列表加载失败')
+      return
     }
+    data.value = normalizeComments(result.data?.list || [])
+    total.value = result.data?.totalCount || 0
   } catch (error) {
-    console.log(error)
+    message.error(toErrorMessage(error, '评论列表加载失败'))
   } finally {
     loading.value = false
   }
 }
+
 get()
 
-const change = (pagination: any, _filters: any, sorter: any) => {
-  pageReq.value.pageNo = pagination.current
-  pageReq.value.pageSize = pagination.pageSize
-  expandedRowKeys.value = []
+const change: TableProps<AdminCommentVO>['onChange'] = (pagination, _filters, sorter: any) => {
+  pageReq.value.pageNo = Number(pagination.current || 1)
+  pageReq.value.pageSize = Number(pagination.pageSize || 5)
+  clearTableState()
   switch (sorter.order) {
     case 'ascend':
       pageReq.value.sort = '+created_at'
@@ -244,256 +368,241 @@ const change = (pagination: any, _filters: any, sorter: any) => {
   get()
 }
 
-const approveComment = (record: AdminCommentVO) => {
-  if (record.type === 'comment') {
-    approveCommentById(record.id)
-  } else {
-    approveReplyById(record.fid || '', record.id)
+const approveComment = async (record: AdminCommentVO) => {
+  const key = toCommentKey(record)
+  if (approvingKeys.value.has(key)) {
+    return
   }
-}
 
-const approveCommentById = async (id: string) => {
   try {
-    const response: any = await ApproveCommentById(id)
+    setPending(approvingKeys, key, true)
+    const response: any =
+      record.type === 'comment'
+        ? await ApproveCommentById(record.id)
+        : await ApproveReplyById(record.fid || '', record.id)
+
     if (response.data.code !== 0) {
       message.error(response.data.message)
       return
     }
     message.success('审核成功')
+    clearTableState()
     await get()
   } catch (error) {
-    console.log(error)
+    message.error(toErrorMessage(error, '审核失败'))
+  } finally {
+    setPending(approvingKeys, key, false)
   }
 }
 
-const approveReplyById = async (fid: string, id: string) => {
+const deleteById = async (record: AdminCommentVO) => {
+  const key = toCommentKey(record)
+  if (deletingKeys.value.has(key)) {
+    return
+  }
+
   try {
-    const response: any = await ApproveReplyById(fid, id)
-    if (response.data.code !== 0) {
-      message.error(response.data.message)
-      return
-    }
-    message.success('审核成功')
-    await get()
-  } catch (error) {
-    console.log(error)
-  }
-}
+    setPending(deletingKeys, key, true)
+    const response: any =
+      record.type === 'comment'
+        ? await DeleteCommentById(record.id)
+        : await DeleteReplyById(record.fid || '', record.id)
 
-const deleteById = (record: AdminCommentVO) => {
-  if (record.type === 'comment') {
-    deleteCommentById(record.id)
-  } else {
-    deleteReplyById(record.fid || '', record.id)
-  }
-}
-
-const deleteCommentById = async (id: string) => {
-  try {
-    const response: any = await DeleteCommentById(id)
     if (response.data.code !== 0) {
       message.error(response.data.message)
       return
     }
     message.success('删除成功')
+    clearTableState()
     await get()
   } catch (error) {
-    console.log(error)
+    message.error(toErrorMessage(error, '删除失败'))
+  } finally {
+    setPending(deletingKeys, key, false)
   }
 }
 
-const deleteReplyById = async (fid: string, id: string) => {
-  try {
-    const response: any = await DeleteReplyById(fid, id)
-    if (response.data.code !== 0) {
-      message.error(response.data.message)
-      return
-    }
-    message.success('删除成功')
-    await get()
-  } catch (error) {
-    console.log(error)
-    message.error('删除失败')
-  }
+const onChange = (keys: Key[]) => {
+  updateSelectedRows(keys)
 }
 
-const selectedComments = ref<BatchApprovedCommentRequest>({
-  comment_ids: [],
-  replies: {}
-})
-
-type Key = string | number
-const selectedRowKeys = ref<Key[]>([])
-
-const onChange = (srks: Key[], selectedRows: AdminCommentVO[]) => {
-  selectedRowKeys.value = srks
-  selectedComments.value.comment_ids = []
-  selectedComments.value.replies = {}
-  selectedRows.forEach((row) => {
-    if (row.key) {
-      if (row.key.includes('~')) {
-        // 如果字符串包含 '~'，按第二种数据处理
-        // 假设需要分割存储两部分的数据
-        const parts = row.key.split('~')
-        const commentId = parts[0]
-        const replyId = parts[1]
-        if (selectedComments.value.replies[commentId]) {
-          selectedComments.value.replies[commentId].push(replyId)
-        } else {
-          selectedComments.value.replies[commentId] = [replyId]
-        }
-      } else {
-        selectedComments.value.comment_ids.push(row.key)
-      }
+const buildDeleteRequest = () => {
+  const deleteRequest: BatchApprovedCommentRequest = JSON.parse(
+    JSON.stringify(selectedComments.value)
+  )
+  deleteRequest.comment_ids.forEach((commentId) => {
+    if (deleteRequest.replies[commentId]) {
+      delete deleteRequest.replies[commentId]
     }
   })
+  return deleteRequest
 }
+
 const batchApproveComment = async () => {
+  if (selectedRowKeys.value.length === 0 || batchApproving.value) {
+    return
+  }
+
   try {
+    batchApproving.value = true
     const apiResponse = await batchApproved(selectedComments.value)
-    if (apiResponse.data?.code === 0) {
-      message.success('批量审核成功')
-      await get()
-      selectedRowKeys.value = []
-      return true
-    } else {
-      message.error('批量审核失败')
-      return false
+    if (apiResponse.data?.code !== 0) {
+      message.error(apiResponse.data?.message || '批量审核失败')
+      return
     }
+    message.success('批量审核成功')
+    clearTableState()
+    await get()
   } catch (error) {
-    if (originalAxios.isAxiosError(error)) {
-      // 这是一个由 axios 抛出的错误
-      if (error.response) {
-        if (error.response.status === 400) {
-          message.error('请选中需要审核的评论或回复')
-          return
-        }
-      } else if (error.request) {
-        // 请求已发出，但没有收到响应
-        console.log('No response received:', error.request)
-      } else {
-        // 在设置请求时触发了一个错误
-        console.log('Error Message:', error.message)
-      }
-    } else {
-      console.log(error)
-      message.error('未知错误，批量审核失败')
-    }
-    return false
+    message.error(toErrorMessage(error, '批量审核失败'))
+  } finally {
+    batchApproving.value = false
   }
 }
 
-const approveStatus = ref(-1)
+const batchDeleteComment = async () => {
+  if (selectedRowKeys.value.length === 0 || batchDeleting.value) {
+    return
+  }
 
-const statusList = [
-  { label: '全部', value: -1 },
-  { label: '待审核', value: 0 },
-  { label: '已审核', value: 1 }
-]
+  try {
+    batchDeleting.value = true
+    const apiResponse = await batchDelete(buildDeleteRequest())
+    if (apiResponse.data?.code !== 0) {
+      message.error(apiResponse.data?.message || '批量删除失败')
+      return
+    }
+    message.success('批量删除成功')
+    clearTableState()
+    await get()
+  } catch (error) {
+    message.error(toErrorMessage(error, '批量删除失败'))
+  } finally {
+    batchDeleting.value = false
+  }
+}
+
 const handleChange = (value: number) => {
+  pageReq.value.pageNo = 1
   pageReq.value.approvalStatus = value === -1 ? undefined : value !== 0
+  clearTableState()
   get()
 }
 
-const selection = computed(() => {
+const selection = computed<TableProps<AdminCommentVO>['rowSelection']>(() => {
   return {
-    selectedRowKeys: selectedRowKeys,
-    onChange: onChange,
+    selectedRowKeys: selectedRowKeys.value,
+    onChange,
     hideDefaultSelections: true,
     selections: [
       Table.SELECTION_ALL,
       Table.SELECTION_NONE,
       {
-        key: 'approval',
-        text: '选中审核',
-        onSelect: (changableRowKeys: string[]) => {
-          let newSelectedRowKeys: string[]
-          newSelectedRowKeys = changableRowKeys.filter((_key: string) => {
-            return commentMap.get(_key)?.approval_status
-          })
-          selectedRowKeys.value = newSelectedRowKeys
+        key: 'approved',
+        text: '选中已审核',
+        onSelect: (changeableRowKeys: Key[]) => {
+          updateSelectedRows(
+            changeableRowKeys.filter((key) => commentMap.get(String(key))?.approval_status)
+          )
         }
       },
       {
-        key: 'disapproval',
+        key: 'unapproved',
         text: '选中未审核',
-        onSelect: (changableRowKeys: string[]) => {
-          let newSelectedRowKeys: string[]
-          newSelectedRowKeys = changableRowKeys.filter((_key) => {
-            return !commentMap.get(_key)?.approval_status
-          })
-          selectedRowKeys.value = newSelectedRowKeys
+        onSelect: (changeableRowKeys: Key[]) => {
+          updateSelectedRows(
+            changeableRowKeys.filter((key) => !commentMap.get(String(key))?.approval_status)
+          )
         }
       }
     ]
   }
 })
 
-const expandedRowKeys = ref<String[]>([])
-const expandedRowsChange = (rowKeys: String[]) => {
+const expandedRowsChange = (rowKeys: Key[]) => {
   expandedRowKeys.value = rowKeys
 }
 
 const expandOrHideRows = () => {
-  if (expandedRowKeys.value?.length === 0) {
-    expandedRowKeys.value = data.value.map((item) => item.key || '')
+  if (expandedRowKeys.value.length === 0) {
+    expandedRowKeys.value = data.value.map((item) => item.key || item.id)
   } else {
     expandedRowKeys.value = []
   }
 }
 
-const batchDeleteComment = async () => {
-  const deleteRequest: BatchApprovedCommentRequest = JSON.parse(
-    JSON.stringify(selectedComments.value)
-  )
-  deleteRequest.comment_ids.forEach((commentId: string) => {
-    if (deleteRequest.replies[commentId]) {
-      delete deleteRequest.replies[commentId]
-    }
-  })
-  try {
-    const apiResponse = await batchDelete(deleteRequest)
-    if (apiResponse.data?.code === 0) {
-      message.success('批量删除成功')
-      await get()
-      selectedRowKeys.value = []
-      return true
-    } else {
-      message.error('批量删除失败')
-      return false
-    }
-  } catch (error) {
-    if (originalAxios.isAxiosError(error)) {
-      // 这是一个由 axios 抛出的错误
-      if (error.response) {
-        if (error.response.status === 400) {
-          message.error('请选中需要删除的评论或回复')
-          return
-        }
-      } else if (error.request) {
-        // 请求已发出，但没有收到响应
-        console.log('No response received:', error.request)
-      } else {
-        // 在设置请求时触发了一个错误
-        console.log('Error Message:', error.message)
-      }
-    } else {
-      console.log(error)
-      message.error('未知错误，批量删除失败')
-    }
-    return false
-  }
-}
-
-const refresh = () => {
-  get()
-  selectedRowKeys.value = []
-  expandedRowKeys.value = []
+const refresh = async () => {
+  clearTableState()
+  await get()
 }
 </script>
 
 <style scoped>
-.editable-row-operations a {
-  margin-right: 8px;
+.comment-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.comment-toolbar-actions,
+.comment-filter,
+.comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comment-filter {
+  margin-left: auto;
+}
+
+.status-select {
+  width: 120px;
+}
+
+.selection-count,
+.comment-user-email,
+.comment-user-ip {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.comment-user {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.comment-user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.5;
+}
+
+.comment-user-name {
+  font-weight: 600;
+}
+
+.comment-user-email,
+.comment-user-ip {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comment-content {
+  display: -webkit-box;
+  overflow: hidden;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.comment-actions :deep(.ant-btn) {
+  padding: 0;
 }
 </style>
