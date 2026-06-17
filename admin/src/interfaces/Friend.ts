@@ -13,9 +13,10 @@ export interface Friend {
 
 export interface FriendReq {
   name: string
+  url: string
   logo: string
   description: string
-  show?: boolean
+  status: number
 }
 
 export const GetFriends = (pageReq: PageRequest) => {
