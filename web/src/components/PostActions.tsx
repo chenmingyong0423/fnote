@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Button, Tooltip, Popover, message } from "antd";
+import { App, Button, Tooltip, Popover } from "antd";
 import {
   LikeOutlined,
   MessageOutlined,
@@ -66,6 +66,7 @@ export const PostActions: React.FC<PostActionsProps> = ({
   likeCount = 0,
   commentCount = 0,
 }) => {
+  const { message } = App.useApp();
   const [liked, setLiked] = useState(isLiked);
   const [currentLikeCount, setCurrentLikeCount] = useState(likeCount);
   const [likeLoading, setLikeLoading] = useState(false);
