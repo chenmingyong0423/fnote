@@ -208,7 +208,8 @@
           <a-form-item
             name="route"
             label="路由"
-            :rules="[{ required: true, message: '请输入分类路由' }]"
+            :rules="taxonomyRouteRules"
+            :extra="taxonomyRouteExtra"
           >
             <a-input
               v-model:value="quickCategoryForm.route"
@@ -250,7 +251,8 @@
           <a-form-item
             name="route"
             label="路由"
-            :rules="[{ required: true, message: '请输入标签路由' }]"
+            :rules="taxonomyRouteRules"
+            :extra="taxonomyRouteExtra"
           >
             <a-input
               v-model:value="quickTagForm.route"
@@ -568,9 +570,26 @@ const postIdRules = [
       if (!props.isNewPost || !value) {
         return
       }
-      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
-        throw new Error('自定义 id 仅支持小写英文、数字和短横线，且不能以短横线开头或结尾')
-      }
+      validateSlug(value, '自定义 id')
+    }
+  }
+]
+
+const validateSlug = (value: string, label: string) => {
+  if (!value) {
+    throw new Error(`请输入${label}`)
+  }
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
+    throw new Error(`${label}仅支持小写英文、数字和短横线，且不能以短横线开头或结尾`)
+  }
+}
+
+const taxonomyRouteExtra = '用于前台 URL，建议使用小写英文、数字和短横线，例如 tech-note'
+
+const taxonomyRouteRules = [
+  {
+    validator: async (_rule: unknown, value: string) => {
+      validateSlug(value, '路由')
     }
   }
 ]
