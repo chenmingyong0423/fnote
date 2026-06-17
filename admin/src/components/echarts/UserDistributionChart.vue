@@ -1,8 +1,13 @@
 <template>
-  <a-card title="用户分布图" class="mt-5">
+  <a-card title="用户分布">
     <template #extra>
-      <div class="flex gap-x-3">
-        <a-range-picker v-model:value="datetime" show-time @change="datetimeChanged" />
+      <div class="dashboard-chart-extra">
+        <a-range-picker
+          v-model:value="datetime"
+          show-time
+          :allow-clear="false"
+          @change="datetimeChanged"
+        />
         <a-tooltip title="刷新数据">
           <a-button
             shape="circle"
@@ -13,15 +18,14 @@
         </a-tooltip>
       </div>
     </template>
-    <div>
-      <a-spin :spinning="userDistributionLoading">
-        <div id="user-distribution" class="w-full h-120" />
-      </a-spin>
-    </div>
+    <a-spin :spinning="userDistributionLoading">
+      <div id="user-distribution" class="user-distribution-chart" />
+    </a-spin>
   </a-card>
 </template>
+
 <script setup lang="ts">
-import { h, onMounted, reactive, ref, watch } from 'vue'
+import { h, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 import type { EChartsType } from 'echarts/core'
 import dayjs, { type Dayjs } from 'dayjs'
@@ -29,6 +33,7 @@ import { GetUserDistributionStats, type UserDistributionVO } from '@/interfaces/
 import type { IListData, IResponse } from '@/interfaces/Common'
 import { message } from 'ant-design-vue'
 import { echarts } from '@/utils/echarts-setup'
+import { toErrorMessage } from '@/utils/error'
 
 const userDistributionData = reactive<{
   seriesData: { name: string; value: number }[]
@@ -37,11 +42,12 @@ const userDistributionData = reactive<{
 }>({ seriesData: [], legendData: [], totalUsers: 0 })
 
 let userDistributionChart: EChartsType | null = null
+
 const setUserDistributionChart = () => {
   userDistributionChart?.setOption({
     title: {
-      text: '用户分布图',
-      subtext: `总用户：${userDistributionData.totalUsers}, 地区个数：${userDistributionData.legendData.length}`,
+      text: '用户分布',
+      subtext: `总用户：${userDistributionData.totalUsers}，地区数：${userDistributionData.legendData.length}`,
       left: 'center'
     },
     tooltip: {
@@ -78,10 +84,7 @@ type RangeValue = [Dayjs, Dayjs]
 
 const datetimeFormat = 'YYYY-MM-DD HH:mm:ss'
 
-const datetime = ref<RangeValue>([
-  dayjs().startOf('day'), // 当天的00:00:00
-  dayjs().endOf('day') // 当天的23:59:59
-])
+const datetime = ref<RangeValue>([dayjs().startOf('day'), dayjs().endOf('day')])
 
 const datetimeChanged = () => {
   getUserDistribution()
@@ -98,7 +101,7 @@ const getUserDistribution = async () => {
     )
     const apiResponse: IResponse<IListData<UserDistributionVO>> = response.data
     if (apiResponse.code !== 0) {
-      message.error(apiResponse.message)
+      message.error(apiResponse.message || '用户分布加载失败')
       return
     }
     userDistributionData.seriesData = []
@@ -110,15 +113,16 @@ const getUserDistribution = async () => {
       userDistributionData.totalUsers += item.user_count
     })
   } catch (error) {
-    console.log(error)
+    message.error(toErrorMessage(error, '用户分布加载失败'))
   } finally {
     userDistributionLoading.value = false
   }
 }
 
-getUserDistribution()
+const resizeChart = () => {
+  userDistributionChart?.resize()
+}
 
-// 计算属性
 watch(
   () => userDistributionData,
   () => {
@@ -128,7 +132,34 @@ watch(
 )
 
 onMounted(() => {
-  userDistributionChart = echarts.init(document.getElementById('user-distribution'))
+  const chartElement = document.getElementById('user-distribution')
+  if (!chartElement) {
+    return
+  }
+  userDistributionChart = echarts.init(chartElement)
   setUserDistributionChart()
+  getUserDistribution()
+  window.addEventListener('resize', resizeChart)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resizeChart)
+  userDistributionChart?.dispose()
+  userDistributionChart = null
 })
 </script>
+
+<style scoped>
+.dashboard-chart-extra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.user-distribution-chart {
+  width: 100%;
+  height: 420px;
+}
+</style>
