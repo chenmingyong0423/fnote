@@ -1,7 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Button, Tooltip, Popover, message } from "antd";
-import { LikeOutlined, MessageOutlined, ShareAltOutlined, GiftOutlined, WechatOutlined, LinkOutlined, LikeFilled } from "@ant-design/icons";
+import {
+  LikeOutlined,
+  MessageOutlined,
+  ShareAltOutlined,
+  GiftOutlined,
+  WechatOutlined,
+  LinkOutlined,
+  LikeFilled,
+} from "@ant-design/icons";
 import { QRCodeCanvas } from "qrcode.react";
 import { getCommonConfig, type PayInfoConfigVO } from "@/src/api/config";
 import { likePost } from "@/src/api/posts";
@@ -30,8 +38,12 @@ async function getCachedPayInfo() {
 
   if (!payInfoRequest) {
     payInfoRequest = getCommonConfig()
-      .then(config => (config.pay_info_config ?? []).filter(item => item.name && item.image))
-      .catch(error => {
+      .then((config) =>
+        (config.pay_info_config ?? []).filter(
+          (item) => item.name && item.image,
+        ),
+      )
+      .catch((error) => {
         payInfoRequest = null;
         throw error;
       });
@@ -41,11 +53,26 @@ async function getCachedPayInfo() {
   return payInfoCache;
 }
 
-export const PostActions: React.FC<{ postId: string; isLiked?: boolean }> = ({ postId, isLiked = false }) => {
+interface PostActionsProps {
+  postId: string;
+  isLiked?: boolean;
+  likeCount?: number;
+  commentCount?: number;
+}
+
+export const PostActions: React.FC<PostActionsProps> = ({
+  postId,
+  isLiked = false,
+  likeCount = 0,
+  commentCount = 0,
+}) => {
   const [liked, setLiked] = useState(isLiked);
+  const [currentLikeCount, setCurrentLikeCount] = useState(likeCount);
   const [likeLoading, setLikeLoading] = useState(false);
   const [currentUrl, setCurrentUrl] = useState("");
-  const [payInfoList, setPayInfoList] = useState<PayInfoConfigVO[]>(payInfoCache ?? []);
+  const [payInfoList, setPayInfoList] = useState<PayInfoConfigVO[]>(
+    payInfoCache ?? [],
+  );
   const [payInfoLoading, setPayInfoLoading] = useState(payInfoCache === null);
 
   useEffect(() => {
@@ -53,10 +80,15 @@ export const PostActions: React.FC<{ postId: string; isLiked?: boolean }> = ({ p
   }, []);
 
   useEffect(() => {
+    setLiked(isLiked);
+    setCurrentLikeCount(likeCount);
+  }, [isLiked, likeCount]);
+
+  useEffect(() => {
     let cancelled = false;
 
     getCachedPayInfo()
-      .then(list => {
+      .then((list) => {
         if (!cancelled) {
           setPayInfoList(list);
         }
@@ -90,87 +122,112 @@ export const PostActions: React.FC<{ postId: string; isLiked?: boolean }> = ({ p
       const res = await likePost(postId);
       if (res.code === 0) {
         setLiked(true);
+        setCurrentLikeCount((count) => count + 1);
         message.success("点赞成功");
       } else {
         message.error(res.message || "点赞失败");
       }
     } catch (e: unknown) {
-        message.error((e instanceof Error ? e.message : String(e)) || "点赞失败");
+      message.error((e instanceof Error ? e.message : String(e)) || "点赞失败");
     } finally {
       setLikeLoading(false);
     }
   };
 
   return (
-      <div className="glass-surface flex flex-row items-center justify-center gap-1.5 md:gap-3 rounded-lg p-2 md:p-3">
-        <Tooltip title={liked ? "已点赞" : "点赞"}>
-          <Button
-            type="text"
-            icon={liked ? <LikeFilled style={{ color: '#eb2f96' }} /> : <LikeOutlined />}
-            loading={likeLoading}
-            onClick={handleLike}
-            disabled={liked}
-          />
-        </Tooltip>
-        <Tooltip title="评论">
-          <Button type="text" icon={<MessageOutlined />} href="#comments" />
-        </Tooltip>
-        <Popover
-          placement="bottom"
-          content={
-            <div className="flex flex-row items-center gap-3">
-              <Popover
-                placement="right"
-                content={<QRCodeCanvas value={currentUrl} size={120} />}
-                trigger="hover"
-              >
-                <Tooltip title="微信">
-                  <Button type="text" shape="circle" icon={<WechatOutlined />} />
-                </Tooltip>
-              </Popover>
-              <Tooltip title="复制链接">
-                <Button type="text" shape="circle" icon={<LinkOutlined />} onClick={handleCopy} />
+    <div className="glass-surface flex flex-row items-center justify-center gap-1.5 md:gap-3 rounded-lg p-2 md:p-3">
+      <Tooltip title={liked ? "已点赞" : "点赞"}>
+        <Button
+          type="text"
+          icon={
+            liked ? (
+              <LikeFilled style={{ color: "#eb2f96" }} />
+            ) : (
+              <LikeOutlined />
+            )
+          }
+          loading={likeLoading}
+          onClick={handleLike}
+          disabled={liked}
+        >
+          {currentLikeCount}
+        </Button>
+      </Tooltip>
+      <Tooltip title="评论">
+        <Button type="text" icon={<MessageOutlined />} href="#comments">
+          {commentCount}
+        </Button>
+      </Tooltip>
+      <Popover
+        placement="bottom"
+        content={
+          <div className="flex flex-row items-center gap-3">
+            <Popover
+              placement="right"
+              content={<QRCodeCanvas value={currentUrl} size={120} />}
+              trigger="hover"
+            >
+              <Tooltip title="微信">
+                <Button type="text" shape="circle" icon={<WechatOutlined />} />
               </Tooltip>
-            </div>
-          }
-          trigger="hover"
-        >
-          <Tooltip title="分享">
-            <Button type="text" icon={<ShareAltOutlined />} />
-          </Tooltip>
-        </Popover>
-        <Popover
-          placement="bottom"
-          content={
-            <div className="flex min-w-24 flex-col gap-3">
-              {payInfoLoading ? (
-                <span className="text-xs text-gray-500 dark:text-gray-400">加载中...</span>
-              ) : payInfoList.length > 0 ? (
-                payInfoList.map(item => (
-                  <div key={`${item.name}-${item.image}`} className="flex flex-col items-center">
-                    <img
-                      src={getPayImageSrc(item.image)}
-                      alt={item.name}
-                      width={96}
-                      height={96}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-24 w-24 rounded border border-gray-200 object-contain dark:border-gray-700"
-                    />
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{item.name}</span>
-                  </div>
-                ))
-              ) : (
-                <span className="text-xs text-gray-500 dark:text-gray-400">暂无赞赏码</span>
-              )}
-            </div>
-          }
-          trigger="hover"
-        >
-          <Tooltip title="赞赏">
-            <Button type="text" icon={<GiftOutlined />} />
-          </Tooltip>
-        </Popover>
-      </div>
+            </Popover>
+            <Tooltip title="复制链接">
+              <Button
+                type="text"
+                shape="circle"
+                icon={<LinkOutlined />}
+                onClick={handleCopy}
+              />
+            </Tooltip>
+          </div>
+        }
+        trigger="hover"
+      >
+        <Tooltip title="分享">
+          <Button type="text" icon={<ShareAltOutlined />} />
+        </Tooltip>
+      </Popover>
+      <Popover
+        placement="bottom"
+        content={
+          <div className="flex min-w-24 flex-col gap-3">
+            {payInfoLoading ? (
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                加载中...
+              </span>
+            ) : payInfoList.length > 0 ? (
+              payInfoList.map((item) => (
+                <div
+                  key={`${item.name}-${item.image}`}
+                  className="flex flex-col items-center"
+                >
+                  <img
+                    src={getPayImageSrc(item.image)}
+                    alt={item.name}
+                    width={96}
+                    height={96}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-24 w-24 rounded border border-gray-200 object-contain dark:border-gray-700"
+                  />
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {item.name}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                暂无赞赏码
+              </span>
+            )}
+          </div>
+        }
+        trigger="hover"
+      >
+        <Tooltip title="赞赏">
+          <Button type="text" icon={<GiftOutlined />} />
+        </Tooltip>
+      </Popover>
+    </div>
   );
 };

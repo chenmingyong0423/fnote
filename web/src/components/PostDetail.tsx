@@ -84,8 +84,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
               )}
               <span className="flex flex-wrap items-center gap-2 md:gap-3">
                 <span>浏览：{post.visit_count}</span>
-                <span>评论：{post.comment_count}</span>
-                <span>点赞：{post.like_count}</span>
               </span>
             </div>
             {/* 移动端显示标签 */}
@@ -119,14 +117,24 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
           </div>
           {/* 右侧悬浮区：操作区在上，目录在下，整体 sticky，避免重叠。移动端隐藏 */}
           <div className="w-80 hidden lg:flex flex-col gap-4 sticky top-24 h-fit">
-            <PostActions postId={post._id} />
+            <PostActions
+              postId={post._id}
+              isLiked={post.is_liked}
+              likeCount={post.like_count}
+              commentCount={post.comment_count}
+            />
             <Toc toc={toc} />
           </div>
         </div>
       </div>
       {/* 移动端操作按钮，固定在底部 */}
       <div className="lg:hidden fixed bottom-3 right-3 z-50 max-w-[calc(100vw-1.5rem)]">
-        <PostActions postId={post._id} />
+        <PostActions
+          postId={post._id}
+          isLiked={post.is_liked}
+          likeCount={post.like_count}
+          commentCount={post.comment_count}
+        />
       </div>
       <div className="w-full max-w-7xl mx-auto px-4 md:px-0 mt-0 mb-10 md:mb-12">
         <Comments postId={post._id} initialComments={initialComments} />
