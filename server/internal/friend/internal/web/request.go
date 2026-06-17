@@ -24,6 +24,7 @@ type FriendRequest struct {
 
 type FriendReq struct {
 	Name        string `json:"name" binding:"required"`
+	Url         string `json:"url" binding:"required"`
 	Logo        string `json:"logo" binding:"required"`
 	Description string `json:"description" binding:"required"`
 	Status      int    `json:"status" binding:"required"`
@@ -44,4 +45,6 @@ type PageRequest struct {
 	Order string `form:"sortOrder,omitempty"`
 	// 搜索内容
 	Keyword string `form:"keyword,omitempty"`
+	// 状态
+	Status *int `form:"status,omitempty"`
 }

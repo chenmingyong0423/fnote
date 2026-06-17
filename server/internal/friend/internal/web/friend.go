@@ -135,6 +135,7 @@ func (h *FriendHandler) AdminGetFriends(ctx *gin.Context, req PageRequest) (*api
 		Field:    req.Field,
 		Order:    req.Order,
 		Keyword:  req.Keyword,
+		Status:   req.Status,
 	})
 	if err != nil {
 		return nil, err
@@ -166,9 +167,10 @@ func (h *FriendHandler) friendToAdminVO(friends []domain.Friend) []AdminFriendVO
 func (h *FriendHandler) AdminUpdateFriend(ctx *gin.Context, req FriendReq) (*apiwrap.ResponseBody[any], error) {
 	return apiwrap.SuccessResponse(), h.serv.AdminUpdateFriend(ctx, domain.Friend{
 		Id:          ctx.Param("id"),
-		Name:        req.Name,
-		Logo:        req.Logo,
-		Description: req.Description,
+		Name:        strings.TrimSpace(req.Name),
+		Url:         strings.TrimSpace(req.Url),
+		Logo:        strings.TrimSpace(req.Logo),
+		Description: strings.TrimSpace(req.Description),
 		Status:      req.Status,
 	})
 }
