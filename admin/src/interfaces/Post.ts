@@ -7,6 +7,8 @@ export interface IPost {
   summary: string
   categories: Category4Post[]
   tags: Tag4Post[]
+  is_displayed: boolean
+  is_comment_allowed: boolean
   created_at: number
   updated_at: number
 }

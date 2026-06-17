@@ -32,163 +32,191 @@
       </span>
       <span v-if="hasUnsavedChanges" class="save-status">有未保存更改</span>
       <span v-if="contentStatsText" class="save-status">{{ contentStatsText }}</span>
-      <a-modal
+      <a-drawer
         v-model:open="visible"
         title="文章元数据"
-        ok-text="提交"
-        cancel-text="取消"
-        :confirm-loading="props.publishing"
-        @ok="submit"
+        placement="right"
+        width="720"
+        :body-style="{ paddingBottom: '80px' }"
       >
-        <a-form ref="formRef" :model="post4Edit" name="form_in_modal">
-          <a-form-item
-            name="title"
-            label="标题"
-            :rules="[{ required: true, message: '请输入标题' }]"
-          >
-            {{ post4Edit.title }}
-          </a-form-item>
-          <a-form-item
-            name="author"
-            label="作者"
-            :rules="[{ required: true, message: '请输入作者' }]"
-          >
-            {{ post4Edit.author }}
-          </a-form-item>
-          <a-form-item name="id" label="自定义 id" :rules="postIdRules" :extra="postIdExtra">
-            <div class="field-with-action">
-              <a-input
-                v-model:value="post4Edit.id"
-                :disabled="!props.isNewPost"
-                placeholder="例如 vue-router-note"
+        <template #extra>
+          <a-space>
+            <a-button @click="visible = false">取消</a-button>
+            <a-button type="primary" :loading="props.publishing" @click="submit">提交</a-button>
+          </a-space>
+        </template>
+        <a-form ref="formRef" :model="post4Edit" layout="vertical" name="form_in_drawer">
+          <section class="metadata-section">
+            <h3 class="metadata-section-title">基础信息</h3>
+            <a-form-item
+              name="title"
+              label="标题"
+              :rules="[{ required: true, message: '请输入标题' }]"
+            >
+              {{ post4Edit.title }}
+            </a-form-item>
+            <a-form-item
+              name="author"
+              label="作者"
+              :rules="[{ required: true, message: '请输入作者' }]"
+            >
+              {{ post4Edit.author }}
+            </a-form-item>
+            <a-form-item name="id" label="自定义 id" :rules="postIdRules" :extra="postIdExtra">
+              <div class="field-with-action">
+                <a-input
+                  v-model:value="post4Edit.id"
+                  :disabled="!props.isNewPost"
+                  placeholder="例如 vue-router-note"
+                />
+                <a-button type="link" size="small" :disabled="!props.isNewPost" @click="fillPostId">
+                  根据标题生成
+                </a-button>
+              </div>
+            </a-form-item>
+          </section>
+
+          <section class="metadata-section">
+            <h3 class="metadata-section-title">分类与封面</h3>
+            <a-form-item
+              name="tempCategories"
+              label="分类"
+              :rules="[{ required: true, message: '请选择分类' }]"
+            >
+              <div class="taxonomy-tools">
+                <a-alert
+                  v-if="categoryOptions.length === 0"
+                  message="当前还没有分类，可以先快速创建后继续发布。"
+                  type="info"
+                  show-icon
+                />
+                <a-button type="link" size="small" @click="openQuickCategory">+ 新建分类</a-button>
+              </div>
+              <a-select
+                v-model:value="post4Edit.tempCategories"
+                mode="multiple"
+                show-search
+                style="width: 100%"
+                placeholder="请选择分类"
+                :options="categoryOptions"
+              ></a-select>
+            </a-form-item>
+            <a-form-item
+              name="tempTags"
+              label="标签"
+              :rules="[{ required: true, message: '请选择标签' }]"
+            >
+              <div class="taxonomy-tools">
+                <a-alert
+                  v-if="tagOptions.length === 0"
+                  message="当前还没有标签，可以先快速创建后继续发布。"
+                  type="info"
+                  show-icon
+                />
+                <a-button type="link" size="small" @click="openQuickTag">+ 新建标签</a-button>
+              </div>
+              <a-select
+                v-model:value="post4Edit.tempTags"
+                mode="multiple"
+                show-search
+                style="width: 100%"
+                placeholder="请选择标签"
+                :options="tagOptions"
+              ></a-select>
+            </a-form-item>
+            <a-form-item
+              name="cover_img"
+              label="封面"
+              :rules="[{ required: true, message: '请选择封面' }]"
+            >
+              <StaticUpload
+                :image-url="post4Edit.cover_img"
+                @update:imageUrl="(value) => (post4Edit.cover_img = value)"
+                :authorization="userStore.token"
               />
-              <a-button type="link" size="small" :disabled="!props.isNewPost" @click="fillPostId">
-                根据标题生成
-              </a-button>
+            </a-form-item>
+          </section>
+
+          <section class="metadata-section">
+            <h3 class="metadata-section-title">发布设置</h3>
+            <div class="metadata-settings-grid">
+              <a-form-item
+                name="is_comment_allowed"
+                label="开启评论"
+                :rules="[{ required: true, message: '请设置评论开关' }]"
+              >
+                <a-radio-group v-model:value="post4Edit.is_comment_allowed" name="radioGroup">
+                  <a-radio :value="false">否</a-radio>
+                  <a-radio :value="true">是</a-radio>
+                </a-radio-group>
+              </a-form-item>
+              <a-form-item
+                name="sticky_weight"
+                label="置顶状态"
+                :rules="[{ required: true, message: '请选择置顶状态' }]"
+              >
+                <a-radio-group v-model:value="post4Edit.sticky_weight" name="radioGroup">
+                  <a-radio :value="0">否</a-radio>
+                  <a-radio :value="1">是</a-radio>
+                </a-radio-group>
+              </a-form-item>
+              <a-form-item
+                name="is_displayed"
+                label="文章状态"
+                :rules="[{ required: true, message: '请选择状态' }]"
+              >
+                <a-radio-group v-model:value="post4Edit.is_displayed" name="radioGroup">
+                  <a-radio :value="false">隐藏</a-radio>
+                  <a-radio :value="true">显示</a-radio>
+                </a-radio-group>
+              </a-form-item>
             </div>
-          </a-form-item>
-          <a-form-item
-            name="tempCategories"
-            label="分类"
-            :rules="[{ required: true, message: '请选择分类' }]"
-          >
-            <div class="taxonomy-tools">
-              <a-alert
-                v-if="categoryOptions.length === 0"
-                message="当前还没有分类，可以先快速创建后继续发布。"
-                type="info"
-                show-icon
-              />
-              <a-button type="link" size="small" @click="openQuickCategory">+ 新建分类</a-button>
-            </div>
-            <a-select
-              v-model:value="post4Edit.tempCategories"
-              mode="multiple"
-              show-search
-              style="width: 100%"
-              placeholder="请选择分类"
-              :options="categoryOptions"
-            ></a-select>
-          </a-form-item>
-          <a-form-item
-            name="tempTags"
-            label="标签"
-            :rules="[{ required: true, message: '请选择标签' }]"
-          >
-            <div class="taxonomy-tools">
-              <a-alert
-                v-if="tagOptions.length === 0"
-                message="当前还没有标签，可以先快速创建后继续发布。"
-                type="info"
-                show-icon
-              />
-              <a-button type="link" size="small" @click="openQuickTag">+ 新建标签</a-button>
-            </div>
-            <a-select
-              v-model:value="post4Edit.tempTags"
-              mode="multiple"
-              show-search
-              style="width: 100%"
-              placeholder="请选择标签"
-              :options="tagOptions"
-            ></a-select>
-          </a-form-item>
-          <a-form-item
-            name="cover_img"
-            label="封面"
-            :rules="[{ required: true, message: '请选择封面' }]"
-          >
-            <StaticUpload
-              :image-url="post4Edit.cover_img"
-              @update:imageUrl="(value) => (post4Edit.cover_img = value)"
-              :authorization="userStore.token"
-            />
-          </a-form-item>
-          <a-form-item
-            name="is_comment_allowed"
-            label="开启评论"
-            :rules="[{ required: true, message: '请设置评论开关' }]"
-          >
-            <a-radio-group v-model:value="post4Edit.is_comment_allowed" name="radioGroup">
-              <a-radio :value="false">否</a-radio>
-              <a-radio :value="true">是</a-radio>
-            </a-radio-group>
-          </a-form-item>
-          <a-form-item
-            name="sticky_weight"
-            label="置顶状态"
-            :rules="[{ required: true, message: '请选择置顶状态' }]"
-          >
-            <a-radio-group v-model:value="post4Edit.sticky_weight" name="radioGroup">
-              <a-radio :value="0">否</a-radio>
-              <a-radio :value="1">是</a-radio>
-            </a-radio-group>
-          </a-form-item>
-          <a-form-item
-            name="is_displayed"
-            label="文章状态"
-            :rules="[{ required: true, message: '请选择状态' }]"
-          >
-            <a-radio-group v-model:value="post4Edit.is_displayed" name="radioGroup">
-              <a-radio :value="false">隐藏</a-radio>
-              <a-radio :value="true">显示</a-radio>
-            </a-radio-group>
-          </a-form-item>
-          <a-form-item
-            name="summary"
-            label="文章摘要"
-            :rules="[{ required: true, message: '请输入摘要' }]"
-            :extra="summaryExtra"
-          >
-            <div class="field-with-action">
-              <a-textarea v-model:value="post4Edit.summary" placeholder="请输入摘要" allow-clear />
-              <a-button type="link" size="small" @click="fillSummary">从正文生成</a-button>
-            </div>
-          </a-form-item>
-          <a-form-item
-            name="meta_description"
-            label="seo description"
-            :extra="metaDescriptionExtra"
-          >
-            <div class="field-with-action">
-              <a-textarea
-                v-model:value="post4Edit.meta_description"
-                placeholder="请输入描述"
-                allow-clear
-              />
-              <a-button type="link" size="small" @click="fillMetaDescription"> 同步摘要 </a-button>
-            </div>
-          </a-form-item>
-          <a-form-item name="meta_keywords" label="seo keywords">
-            <div class="field-with-action">
-              <a-input v-model:value="post4Edit.meta_keywords" placeholder="请输入关键字" />
-              <a-button type="link" size="small" @click="fillMetaKeywords">
-                从分类标签生成
-              </a-button>
-            </div>
-          </a-form-item>
+          </section>
+
+          <section class="metadata-section">
+            <h3 class="metadata-section-title">SEO 信息</h3>
+            <a-form-item
+              name="summary"
+              label="文章摘要"
+              :rules="[{ required: true, message: '请输入摘要' }]"
+              :extra="summaryExtra"
+            >
+              <div class="field-with-action">
+                <a-textarea
+                  v-model:value="post4Edit.summary"
+                  placeholder="请输入摘要"
+                  allow-clear
+                />
+                <a-button type="link" size="small" @click="fillSummary">从正文生成</a-button>
+              </div>
+            </a-form-item>
+            <a-form-item
+              name="meta_description"
+              label="seo description"
+              :extra="metaDescriptionExtra"
+            >
+              <div class="field-with-action">
+                <a-textarea
+                  v-model:value="post4Edit.meta_description"
+                  placeholder="请输入描述"
+                  allow-clear
+                />
+                <a-button type="link" size="small" @click="fillMetaDescription">
+                  同步摘要
+                </a-button>
+              </div>
+            </a-form-item>
+            <a-form-item name="meta_keywords" label="seo keywords">
+              <div class="field-with-action">
+                <a-input v-model:value="post4Edit.meta_keywords" placeholder="请输入关键字" />
+                <a-button type="link" size="small" @click="fillMetaKeywords">
+                  从分类标签生成
+                </a-button>
+              </div>
+            </a-form-item>
+          </section>
         </a-form>
-      </a-modal>
+      </a-drawer>
       <a-modal
         v-model:open="quickCategoryVisible"
         title="新建分类"
@@ -967,10 +995,43 @@ const createTag = async () => {
   padding-left: 0;
 }
 
+.metadata-section {
+  padding: 4px 0 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.metadata-section + .metadata-section {
+  margin-top: 18px;
+}
+
+.metadata-section-title {
+  margin: 0 0 16px;
+  color: rgba(0, 0, 0, 0.88);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.metadata-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 16px;
+}
+
 .save-status {
   flex-shrink: 0;
   color: rgba(0, 0, 0, 0.45);
   font-size: 12px;
   white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  :deep(.ant-drawer-content-wrapper) {
+    width: 100% !important;
+  }
+
+  .metadata-settings-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

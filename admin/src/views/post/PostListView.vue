@@ -48,48 +48,52 @@
         :columns="columns"
         :data-source="posts"
         :pagination="pagination"
+        :scroll="{ x: 1320 }"
+        row-key="id"
         @change="change"
         bordered
       >
-        <template #headerCell="{ column }">
-          <template v-if="column.key === 'name'">
-            <span>
-              <smile-outlined />
-              Name
-            </span>
-          </template>
-        </template>
-
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'id'">
-            <a :href="baseHost + '/posts/' + record.id" target="_blank">{{
-              `${baseHost}/posts/${record.id}`
-            }}</a>
+            <div class="post-link-cell">
+              <a :href="getPostUrl(record.id)" target="_blank" rel="noopener noreferrer">查看</a>
+              <a-button type="link" size="small" @click="copyPostLink(record.id)">
+                复制链接
+              </a-button>
+            </div>
           </template>
           <template v-if="column.key === 'cover_img'">
-            <a-image :width="200" :src="serverHost + record.cover_img" />
+            <a-image
+              :width="88"
+              :height="56"
+              :src="serverHost + record.cover_img"
+              class="cover-img"
+            />
+          </template>
+          <template v-else-if="column.key === 'summary'">
+            <a-tooltip :title="record.summary">
+              <div class="summary-text">{{ record.summary }}</div>
+            </a-tooltip>
           </template>
           <template v-else-if="column.key === 'categories'">
-            <span>
+            <span class="taxonomy-tags">
               <a-tag
                 v-for="category in record.categories"
-                :key="category"
-                :color="
-                  category === 'loser' ? 'volcano' : category.length > 5 ? 'geekblue' : 'green'
-                "
+                :key="category.id"
+                :color="category.name.length > 5 ? 'geekblue' : 'green'"
               >
-                {{ category.name.toUpperCase() }}
+                {{ category.name }}
               </a-tag>
             </span>
           </template>
           <template v-else-if="column.key === 'tags'">
-            <span>
+            <span class="taxonomy-tags">
               <a-tag
                 v-for="tag in record.tags"
-                :key="tag"
-                :color="tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'"
+                :key="tag.id"
+                :color="tag.name.length > 5 ? 'geekblue' : 'green'"
               >
-                {{ tag.name.toUpperCase() }}
+                {{ tag.name }}
               </a-tag>
             </span>
           </template>
@@ -109,9 +113,9 @@
             <span>{{ dayjs.unix(record[column.key]).format('YYYY-MM-DD HH:mm:ss') }}</span>
           </template>
           <template v-else-if="column.dataIndex === 'operation'">
-            <div class="flex gap-x-1">
+            <div class="post-actions">
               <span>
-                <a @click="copyContent(record.id)">复制</a>
+                <a @click="copyPostContent(record.id)">复制正文</a>
               </span>
               <span>
                 <a @click="router.push(`/home/post/draft/${record.id}`)">编辑</a>
@@ -130,7 +134,7 @@
   </a-card>
 </template>
 <script lang="ts" setup>
-import { ReloadOutlined, SmileOutlined } from '@ant-design/icons-vue'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 import { computed, h, ref } from 'vue'
 import {
   ChangeCommentAllowedStatus,
@@ -161,44 +165,53 @@ const columns = computed<TableColumnType[]>(() => {
     {
       title: '封面',
       dataIndex: 'cover_img',
-      key: 'cover_img'
+      key: 'cover_img',
+      width: 120
     },
     {
       title: '标题',
       dataIndex: 'title',
-      key: 'title'
+      key: 'title',
+      width: 220,
+      ellipsis: true
     },
     {
-      title: 'url',
+      title: '链接',
       dataIndex: 'id',
-      key: 'id'
+      key: 'id',
+      width: 150
     },
     {
       title: '摘要',
       dataIndex: 'summary',
-      key: 'summary'
+      key: 'summary',
+      width: 260
     },
     {
       title: '分类',
       key: 'categories',
       dataIndex: 'categories',
+      width: 180,
       filters: categories.value
     },
     {
       title: '标签',
       key: 'tags',
       dataIndex: 'tags',
+      width: 180,
       filters: tags.value
     },
     {
-      title: '是否显示',
+      title: '显示',
       key: 'is_displayed',
-      dataIndex: 'is_displayed'
+      dataIndex: 'is_displayed',
+      width: 90
     },
     {
-      title: '是否允许评论',
+      title: '评论',
       key: 'is_comment_allowed',
-      dataIndex: 'is_comment_allowed'
+      dataIndex: 'is_comment_allowed',
+      width: 90
     },
     {
       title: '发布时间',
@@ -207,16 +220,20 @@ const columns = computed<TableColumnType[]>(() => {
       sorter: (p1: IPost, p2: IPost) => p1.created_at - p2.created_at,
       defaultSortOrder: 'descend',
       sortDirections: ['descend', 'ascend'],
-      showSorterTooltip: { title: showSorterTooltip.value }
+      showSorterTooltip: { title: showSorterTooltip.value },
+      width: 170
     },
     {
-      title: '最后一次修改的时间',
+      title: '更新时间',
       key: 'updated_at',
-      dataIndex: 'updated_at'
+      dataIndex: 'updated_at',
+      width: 170
     },
     {
-      title: 'operation',
-      dataIndex: 'operation'
+      title: '操作',
+      dataIndex: 'operation',
+      width: 210,
+      fixed: 'right'
     }
   ]
 })
@@ -329,6 +346,7 @@ const changeCommentAllowedStatus = async (id: string, is_comment_allowed: boolea
 }
 
 const searchPost = () => {
+  req.value.pageNo = 1
   getPosts()
 }
 
@@ -409,7 +427,16 @@ const getTags = async () => {
 }
 getTags()
 
-const copyContent = async (id: string) => {
+const getPostUrl = (id: string) => {
+  return `${baseHost}/posts/${id}`
+}
+
+const copyPostLink = async (id: string) => {
+  await navigator.clipboard.writeText(getPostUrl(id))
+  message.success('链接复制成功')
+}
+
+const copyPostContent = async (id: string) => {
   const response = await GetPostById(id)
   if (response.data.code !== 0) {
     message.error(response.data.message)
@@ -417,6 +444,40 @@ const copyContent = async (id: string) => {
   }
   const content = response.data.data?.content
   await navigator.clipboard.writeText(content)
-  message.success('复制成功')
+  message.success('正文复制成功')
 }
 </script>
+
+<style scoped>
+.cover-img {
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.summary-text {
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.65);
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.taxonomy-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.post-link-cell,
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.post-link-cell :deep(.ant-btn) {
+  padding: 0;
+}
+</style>
