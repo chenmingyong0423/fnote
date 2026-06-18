@@ -1,6 +1,6 @@
 <template>
-  <div class="flex items-center justify-center h-screen bg-light-blue">
-    <div class="w-96 p-8 bg-white rounded-lg shadow-md modal">
+  <div class="theme-page flex items-center justify-center h-screen">
+    <div class="theme-panel w-96 p-8 rounded-lg modal">
       <div class="flex justify-center mb-6">
         <img src="@/assets/logo.png" alt="Logo" class="w-80 h-40" />
       </div>

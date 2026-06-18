@@ -1,7 +1,7 @@
 <template>
   <a-card>
-    <div class="flex h-500px text-#8491a5">
-      <div class="w-30% h-500px border-r-1 border-r-solid border-r-#f0f0f0 relative">
+    <div class="asset-browser flex h-500px">
+      <div class="asset-browser-sidebar w-30% h-500px border-r-1 border-r-solid relative">
         <div>
           <ul class="h-full overflow-y-auto p-1">
             <li
@@ -9,13 +9,13 @@
               :key="item.id"
               class=""
               :class="[
-                'box-border flex items-center justify-between p-4 rounded-lg cursor-pointer hover:bg-gray-100 group h-54px m-y-2',
-                { 'bg-gray-100': state.selectedMenuItem == item.id }
+                'asset-folder box-border flex items-center justify-between p-4 rounded-lg cursor-pointer group h-54px m-y-2',
+                { 'asset-folder-selected': state.selectedMenuItem == item.id }
               ]"
               @click="menuItemChanged(item.id)"
             >
               <div>
-                <span class="text-gray-600">
+                <span class="asset-folder-icon">
                   <component :is="item.icon" />
                 </span>
                 <span class="ml-2">{{ item.name }}</span>
@@ -28,7 +28,7 @@
                   @click="preEdit(item)"
                 >
                   <template #icon>
-                    <FormOutlined style="color: #8491a5" />
+                    <FormOutlined />
                   </template>
                 </a-button>
 
@@ -40,7 +40,7 @@
                       cancel-text="否"
                       @confirm="deleteAssetFolder(item.id)"
                     >
-                      <DeleteOutlined style="color: #8491a5" />
+                      <DeleteOutlined />
                     </a-popconfirm>
                   </template>
                 </a-button>
@@ -49,7 +49,7 @@
           </ul>
         </div>
         <a-button
-          class="absolute bottom-0 text-#8491a5"
+          class="asset-folder-add absolute bottom-0"
           @click="
             () => {
               visible = true
@@ -433,3 +433,20 @@ const deleteAsset = async () => {
   }
 }
 </script>
+
+<style scoped>
+.asset-browser,
+.asset-folder-icon,
+.asset-folder-add {
+  color: var(--app-text-secondary);
+}
+
+.asset-browser-sidebar {
+  border-right-color: var(--app-border);
+}
+
+.asset-folder:hover,
+.asset-folder-selected {
+  background: var(--app-surface-muted);
+}
+</style>

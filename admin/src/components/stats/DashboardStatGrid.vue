@@ -46,15 +46,15 @@ withDefaults(
 .dashboard-stat-item {
   min-width: 0;
   padding: 14px 16px;
-  background: #fafafa;
-  border: 1px solid #f0f0f0;
+  background: var(--app-surface-muted);
+  border: 1px solid var(--app-border);
   border-radius: 6px;
 }
 
 .dashboard-stat-label,
 .dashboard-stat-description {
   display: block;
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--app-text-secondary);
   line-height: 1.5;
 }
 
@@ -69,7 +69,7 @@ withDefaults(
 }
 
 .dashboard-stat-value :deep(.ant-statistic-content) {
-  color: rgba(0, 0, 0, 0.88);
+  color: var(--app-text);
   font-size: 24px;
   line-height: 1.2;
 }

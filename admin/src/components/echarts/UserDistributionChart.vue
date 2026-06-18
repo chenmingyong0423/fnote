@@ -34,6 +34,9 @@ import type { IListData, IResponse } from '@/interfaces/Common'
 import { message } from 'ant-design-vue'
 import { echarts } from '@/utils/echarts-setup'
 import { toErrorMessage } from '@/utils/error'
+import { useThemeStore } from '@/stores/theme'
+
+const themeStore = useThemeStore()
 
 const userDistributionData = reactive<{
   seriesData: { name: string; value: number }[]
@@ -44,11 +47,15 @@ const userDistributionData = reactive<{
 let userDistributionChart: EChartsType | null = null
 
 const setUserDistributionChart = () => {
+  const textColor = themeStore.mode === 'dark' ? 'rgba(255, 255, 255, 0.65)' : '#666'
   userDistributionChart?.setOption({
+    textStyle: { color: textColor },
     title: {
       text: '用户分布',
       subtext: `总用户：${userDistributionData.totalUsers}，地区数：${userDistributionData.legendData.length}`,
-      left: 'center'
+      left: 'center',
+      textStyle: { color: textColor },
+      subtextStyle: { color: textColor }
     },
     tooltip: {
       trigger: 'item',
@@ -60,7 +67,8 @@ const setUserDistributionChart = () => {
       right: 10,
       top: 20,
       bottom: 20,
-      data: userDistributionData.legendData
+      data: userDistributionData.legendData,
+      textStyle: { color: textColor }
     },
     series: [
       {
@@ -130,6 +138,8 @@ watch(
   },
   { deep: true }
 )
+
+watch(() => themeStore.mode, setUserDistributionChart)
 
 onMounted(() => {
   const chartElement = document.getElementById('user-distribution')

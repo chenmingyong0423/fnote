@@ -1,15 +1,10 @@
 <template>
-  <a-layout>
-    <a-layout-header style="background: #fff" class="drop-shadow-xl mb-3 flex items-center">
-      <div class="w-32 h-32px lh-32px bg-black/5 text-center text-blue">后台管理</div>
+  <a-layout class="admin-shell">
+    <a-layout-header class="admin-header mb-3 flex items-center">
+      <div class="admin-title w-32 h-32px lh-32px text-center text-blue">后台管理</div>
     </a-layout-header>
     <a-layout>
-      <a-layout-sider
-        v-model:collapsed="collapsed"
-        collapsible
-        :trigger="null"
-        style="background: #fff"
-      >
+      <a-layout-sider v-model:collapsed="collapsed" collapsible :trigger="null" class="admin-sider">
         <div class="flex justify-center p-5">
           <menu-unfold-outlined
             v-if="collapsed"
@@ -22,7 +17,7 @@
           v-model:openKeys="state.openKeys"
           v-model:selectedKeys="state.selectedKeys"
           mode="inline"
-          theme="light"
+          :theme="themeStore.mode"
           :inline-collapsed="state.collapsed"
           :items="items"
           @click="itemClick"
@@ -36,7 +31,9 @@
 </template>
 <script lang="ts" setup>
 import { ref } from 'vue'
+import { useThemeStore } from '@/stores/theme'
 const collapsed = ref<boolean>(false)
+const themeStore = useThemeStore()
 import router from '@/router'
 
 import { reactive, h } from 'vue'
@@ -175,6 +172,24 @@ const itemClick = (item: any) => {
 }
 </script>
 <style scoped>
+.admin-shell,
+.admin-shell :deep(.ant-layout) {
+  background: var(--app-bg);
+}
+
+.admin-header,
+.admin-sider {
+  background: var(--app-surface);
+}
+
+.admin-header {
+  box-shadow: var(--app-shadow);
+}
+
+.admin-title {
+  background: var(--app-surface-muted);
+}
+
 .trigger {
   font-size: 18px;
   line-height: 64px;

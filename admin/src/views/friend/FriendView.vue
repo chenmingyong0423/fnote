@@ -525,7 +525,7 @@ const cancel = (id: string) => {
 
 .friend-url {
   overflow: hidden;
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--app-text-secondary);
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;

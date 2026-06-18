@@ -373,7 +373,7 @@ onMounted(() => {
 }
 
 .setting-heading span {
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--app-text-secondary);
   font-size: 13px;
 }
 
@@ -416,7 +416,7 @@ onMounted(() => {
   justify-content: space-between;
   gap: 12px;
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.65);
+  background: var(--app-surface-translucent);
   border-radius: 6px;
 }
 
@@ -426,7 +426,7 @@ onMounted(() => {
 }
 
 .health-item-note {
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--app-text-secondary);
   font-size: 12px;
 }
 
@@ -449,7 +449,7 @@ onMounted(() => {
   position: sticky;
   top: 16px;
   overflow: hidden;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--app-border);
   border-radius: 6px;
 }
 

@@ -123,7 +123,7 @@ getContentStatsVO()
 }
 
 .dashboard-updated-at {
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--app-text-secondary);
   font-size: 12px;
   white-space: nowrap;
 }

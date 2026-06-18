@@ -6,6 +6,11 @@
 import type { EChartsType } from 'echarts/core'
 import { echarts } from '@/utils/echarts-setup.js'
 import { onBeforeUnmount, onMounted, type PropType, watch } from 'vue'
+import { useThemeStore } from '@/stores/theme'
+
+const themeStore = useThemeStore()
+const chartTextColor = () => (themeStore.mode === 'dark' ? 'rgba(255, 255, 255, 0.65)' : '#666')
+const chartLineColor = () => (themeStore.mode === 'dark' ? '#303030' : '#e8e8e8')
 
 const props = defineProps({
   id: {
@@ -43,7 +48,10 @@ const resizeChart = () => {
 }
 
 const setOption = () => {
+  const textColor = chartTextColor()
+  const lineColor = chartLineColor()
   chart?.setOption({
+    textStyle: { color: textColor },
     tooltip: {
       trigger: 'axis',
       position: function (pt: any) {
@@ -51,16 +59,19 @@ const setOption = () => {
       }
     },
     legend: {
-      data: legend()
+      data: legend(),
+      textStyle: { color: textColor }
     },
     title: {
       text: props.data.title,
-      left: '5%'
+      left: '5%',
+      textStyle: { color: textColor }
     },
     xAxis: {
       type: 'time',
       boundaryGap: false,
       axisLabel: {
+        color: textColor,
         formatter: function (value: number) {
           const date = new Date(value)
           const year = date.getFullYear()
@@ -68,15 +79,20 @@ const setOption = () => {
           const day = ('0' + date.getDate()).slice(-2)
           return year + '-' + month + '-' + day
         }
-      }
+      },
+      axisLine: { lineStyle: { color: lineColor } }
     },
     yAxis: {
       type: 'value',
-      boundaryGap: [0, '100%']
+      boundaryGap: [0, '100%'],
+      axisLabel: { color: textColor },
+      splitLine: { lineStyle: { color: lineColor } }
     },
     series: props.data.series
   })
 }
+
+watch(() => themeStore.mode, setOption)
 
 onMounted(() => {
   const chartElement = document.getElementById(props.id)

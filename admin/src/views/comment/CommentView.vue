@@ -565,7 +565,7 @@ const refresh = async () => {
 .selection-count,
 .comment-user-email,
 .comment-user-ip {
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--app-text-secondary);
 }
 
 .comment-user {

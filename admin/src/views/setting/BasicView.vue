@@ -306,7 +306,7 @@ const pullRecord = async (r: string) => {
 .record-section {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--app-border);
 }
 
 .record-heading,
@@ -346,27 +346,27 @@ const pullRecord = async (r: string) => {
   align-items: flex-start;
   gap: 12px;
   padding: 10px 12px;
-  background: #fafafa;
+  background: var(--app-surface-muted);
   border-radius: 6px;
   overflow-wrap: anywhere;
 }
 
 .record-preview > span {
   flex: 0 0 auto;
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--app-text-secondary);
   font-size: 12px;
 }
 
 .record-list {
   margin-top: 14px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--app-border);
 }
 
 .record-item {
   min-height: 52px;
   gap: 12px;
   padding: 8px 4px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--app-border);
 }
 
 .record-content {

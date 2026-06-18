@@ -997,7 +997,7 @@ const createTag = async () => {
 
 .metadata-section {
   padding: 4px 0 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--app-border);
 }
 
 .metadata-section + .metadata-section {
@@ -1006,7 +1006,7 @@ const createTag = async () => {
 
 .metadata-section-title {
   margin: 0 0 16px;
-  color: rgba(0, 0, 0, 0.88);
+  color: var(--app-text);
   font-size: 15px;
   font-weight: 600;
   line-height: 1.4;
@@ -1020,7 +1020,7 @@ const createTag = async () => {
 
 .save-status {
   flex-shrink: 0;
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--app-text-secondary);
   font-size: 12px;
   white-space: nowrap;
 }

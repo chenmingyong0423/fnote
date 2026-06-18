@@ -1,0 +1,201 @@
+/* v-md-editor ships with a light-only GitHub theme, so map it onto the admin dark palette. */
+.theme-dark .v-md-editor,
+.theme-dark .v-md-editor__editor-wrapper,
+.theme-dark .v-md-editor__preview-wrapper,
+.theme-dark .v-md-textarea-editor textarea,
+.theme-dark .v-md-textarea-editor pre {
+  color: var(--app-text);
+  background: var(--app-surface);
+}
+
+.theme-dark .v-md-editor {
+  box-shadow: 0 2px 12px rgb(0 0 0 / 45%);
+}
+
+.theme-dark .v-md-editor__toolbar,
+.theme-dark .v-md-editor__left-area,
+.theme-dark .v-md-editor--left-area-reverse .v-md-editor__left-area,
+.theme-dark .v-md-editor--editable .v-md-editor__editor-wrapper {
+  border-color: var(--app-border);
+}
+
+.theme-dark .v-md-editor__toolbar-divider::before,
+.theme-dark .v-md-editor__left-area-title::after {
+  border-color: var(--app-border);
+}
+
+.theme-dark .v-md-editor__toolbar-item,
+.theme-dark .v-md-editor__left-area-title,
+.theme-dark .v-md-editor__toc-nav-item,
+.theme-dark .v-md-editor__menu-item {
+  color: var(--app-text);
+}
+
+.theme-dark .v-md-editor__toolbar-item:hover,
+.theme-dark .v-md-editor__menu-item:hover {
+  background: var(--app-surface-muted);
+}
+
+.theme-dark .v-md-editor__toolbar-item--active,
+.theme-dark .v-md-editor__toolbar-item--active:hover {
+  background: #303030;
+}
+
+.theme-dark .v-md-editor__menu {
+  background: var(--app-surface-muted);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow);
+}
+
+.theme-dark .v-md-textarea-editor textarea::placeholder {
+  color: var(--app-text-secondary);
+}
+
+.theme-dark .v-md-editor .CodeMirror,
+.theme-dark .v-md-editor .CodeMirror-gutters {
+  color: var(--app-text);
+  background: var(--app-surface);
+  border-color: var(--app-border);
+}
+
+.theme-dark .v-md-editor .CodeMirror-cursor {
+  border-left-color: var(--app-text);
+}
+
+.theme-dark .v-md-editor .CodeMirror-selected,
+.theme-dark .v-md-editor .CodeMirror-focused .CodeMirror-selected {
+  background: #264f78;
+}
+
+.theme-dark .v-md-editor .CodeMirror-linenumber {
+  color: var(--app-text-secondary);
+}
+
+.theme-dark .github-markdown-body {
+  color: var(--app-text);
+  background: var(--app-surface);
+}
+
+.theme-dark .github-markdown-body a {
+  color: #58a6ff;
+}
+
+.theme-dark .github-markdown-body h1,
+.theme-dark .github-markdown-body h2 {
+  border-bottom-color: var(--app-border);
+}
+
+.theme-dark .github-markdown-body h6,
+.theme-dark .github-markdown-body blockquote {
+  color: #8b949e;
+}
+
+.theme-dark .github-markdown-body h1 .octicon-link,
+.theme-dark .github-markdown-body h2 .octicon-link,
+.theme-dark .github-markdown-body h3 .octicon-link,
+.theme-dark .github-markdown-body h4 .octicon-link,
+.theme-dark .github-markdown-body h5 .octicon-link,
+.theme-dark .github-markdown-body h6 .octicon-link {
+  color: var(--app-text);
+}
+
+.theme-dark .github-markdown-body blockquote {
+  border-left-color: #3b434b;
+}
+
+.theme-dark .github-markdown-body hr {
+  background-color: #30363d;
+}
+
+.theme-dark .github-markdown-body code,
+.theme-dark .github-markdown-body tt {
+  background-color: rgb(110 118 129 / 40%);
+}
+
+.theme-dark .github-markdown-body pre,
+.theme-dark .github-markdown-body div[class*='v-md-pre-wrapper-'],
+.theme-dark .github-markdown-body .hljs {
+  color: #c9d1d9;
+  background: #0d1117;
+}
+
+.theme-dark .github-markdown-body div[class*='v-md-pre-wrapper-'].line-numbers-mode::after {
+  background-color: #0d1117;
+  border-right-color: #30363d;
+}
+
+.theme-dark .github-markdown-body pre code,
+.theme-dark .github-markdown-body pre tt {
+  color: #c9d1d9;
+  background: transparent;
+}
+
+.theme-dark .github-markdown-body table td,
+.theme-dark .github-markdown-body table th {
+  border-color: #30363d;
+}
+
+.theme-dark .github-markdown-body table tr {
+  background-color: var(--app-surface);
+  border-top-color: #30363d;
+}
+
+.theme-dark .github-markdown-body table tr:nth-child(2n),
+.theme-dark .github-markdown-body .csv-data th {
+  background-color: var(--app-surface-muted);
+}
+
+.theme-dark .github-markdown-body .csv-data .blob-num {
+  background-color: var(--app-surface);
+}
+
+.theme-dark .github-markdown-body kbd {
+  color: var(--app-text);
+  background-color: var(--app-surface-muted);
+  border-color: #3b434b;
+  box-shadow: inset 0 -1px 0 #3b434b;
+}
+
+.theme-dark .github-markdown-body img {
+  background-color: transparent;
+}
+
+.theme-dark .github-markdown-body .hljs-comment,
+.theme-dark .github-markdown-body .hljs-quote {
+  color: #8b949e;
+}
+
+.theme-dark .github-markdown-body .hljs-keyword,
+.theme-dark .github-markdown-body .hljs-selector-tag,
+.theme-dark .github-markdown-body .hljs-subst,
+.theme-dark .github-markdown-body .hljs-doctag,
+.theme-dark .github-markdown-body .hljs-meta {
+  color: #ff7b72;
+}
+
+.theme-dark .github-markdown-body .hljs-title,
+.theme-dark .github-markdown-body .hljs-section,
+.theme-dark .github-markdown-body .hljs-selector-id,
+.theme-dark .github-markdown-body .hljs-selector-class {
+  color: #d2a8ff;
+}
+
+.theme-dark .github-markdown-body .hljs-string,
+.theme-dark .github-markdown-body .hljs-attr,
+.theme-dark .github-markdown-body .hljs-regexp {
+  color: #a5d6ff;
+}
+
+.theme-dark .github-markdown-body .hljs-number,
+.theme-dark .github-markdown-body .hljs-literal,
+.theme-dark .github-markdown-body .hljs-variable,
+.theme-dark .github-markdown-body .hljs-template-variable {
+  color: #79c0ff;
+}
+
+.theme-dark .github-markdown-body .hljs-built_in,
+.theme-dark .github-markdown-body .hljs-builtin-name,
+.theme-dark .github-markdown-body .hljs-type,
+.theme-dark .github-markdown-body .hljs-class .hljs-title {
+  color: #ffa657;
+}

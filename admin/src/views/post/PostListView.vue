@@ -542,7 +542,7 @@ const copyPostContent = async (id: string) => {
 .summary-text {
   display: -webkit-box;
   overflow: hidden;
-  color: rgba(0, 0, 0, 0.65);
+  color: var(--app-text);
   line-height: 1.5;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
