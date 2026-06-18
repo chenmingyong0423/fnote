@@ -5,7 +5,7 @@
 <script lang="ts" setup>
 import type { EChartsType } from 'echarts/core'
 import { echarts } from '@/utils/echarts-setup.js'
-import { onMounted, type PropType, watch } from 'vue'
+import { onBeforeUnmount, onMounted, type PropType, watch } from 'vue'
 
 const props = defineProps({
   id: {
@@ -16,8 +16,8 @@ const props = defineProps({
     type: Object as PropType<{
       title: string
       series: {
-        name: String
-        type: String
+        name: string
+        type: string
         data: number[][]
       }[]
     }>,
@@ -33,16 +33,15 @@ watch(
   { deep: true }
 )
 
-onMounted(() => {
-  chart = echarts.init(document.getElementById(props.id))
-  setOption()
-})
-
 const legend = () => {
   return props.data.series.map((item) => item.name)
 }
 
 let chart: EChartsType | null = null
+const resizeChart = () => {
+  chart?.resize()
+}
+
 const setOption = () => {
   chart?.setOption({
     tooltip: {
@@ -52,7 +51,7 @@ const setOption = () => {
       }
     },
     legend: {
-      data: legend
+      data: legend()
     },
     title: {
       text: props.data.title,
@@ -78,4 +77,20 @@ const setOption = () => {
     series: props.data.series
   })
 }
+
+onMounted(() => {
+  const chartElement = document.getElementById(props.id)
+  if (!chartElement) {
+    return
+  }
+  chart = echarts.init(chartElement)
+  setOption()
+  window.addEventListener('resize', resizeChart)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resizeChart)
+  chart?.dispose()
+  chart = null
+})
 </script>

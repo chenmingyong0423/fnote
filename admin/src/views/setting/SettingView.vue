@@ -1,50 +1,83 @@
 <template>
-  <div>
+  <div class="setting-page">
+    <div class="setting-heading">
+      <div>
+        <h1>博客设置</h1>
+        <span>{{ activeSetting.label }}</span>
+      </div>
+      <a-tooltip title="重新检查配置">
+        <a-button
+          shape="circle"
+          :icon="h(ReloadOutlined)"
+          :loading="healthLoading"
+          @click="loadConfigHealth"
+        />
+      </a-tooltip>
+    </div>
+
     <a-alert
       v-if="health"
-      class="mb-4"
+      class="health-alert"
       :type="health.required.completed ? (activeItems.length ? 'warning' : 'success') : 'error'"
       show-icon
     >
       <template #message>
-        配置健康分：{{ health.score }}，必须项 {{ health.required.done }}/{{
-          health.required.total
-        }}，推荐项 {{ health.recommended.done }}/{{ health.recommended.total }}
-      </template>
-      <template #description>
-        <div class="flex flex-col gap-3">
-          <a-space wrap>
+        <div class="health-summary">
+          <span class="health-score">配置健康分 {{ health.score }}</span>
+          <a-space wrap size="small">
             <a-tag :color="health.required.completed ? 'success' : 'error'">
-              必须项：{{ health.required.done }}/{{ health.required.total }}
+              必须 {{ health.required.done }}/{{ health.required.total }}
             </a-tag>
             <a-tag :color="health.recommended.completed ? 'success' : 'warning'">
-              推荐项：{{ health.recommended.done }}/{{ health.recommended.total }}
+              推荐 {{ health.recommended.done }}/{{ health.recommended.total }}
             </a-tag>
-            <a-tag color="processing">
-              可选增强：{{ health.optional.done }}/{{ health.optional.total }}
-            </a-tag>
+            <a-tag v-if="activeItems.length" color="warning">待完善 {{ activeItems.length }}</a-tag>
           </a-space>
-
-          <div v-if="activeItems.length" class="flex flex-col gap-2">
-            <div
-              v-for="item in activeItems"
-              :key="item.key"
-              class="flex flex-wrap items-center justify-between gap-2 rounded bg-white/70 px-3 py-2"
-            >
-              <div>
+          <a-button
+            v-if="activeItems.length || quietItems.length"
+            type="link"
+            size="small"
+            @click="healthExpanded = !healthExpanded"
+          >
+            {{ healthExpanded ? '收起' : '查看详情' }}
+            <template #icon>
+              <DownOutlined :class="{ 'is-expanded': healthExpanded }" />
+            </template>
+          </a-button>
+        </div>
+      </template>
+      <template v-if="healthExpanded" #description>
+        <div class="health-details">
+          <div v-if="activeItems.length" class="health-list">
+            <div v-for="item in activeItems" :key="item.key" class="health-item">
+              <div class="health-item-content">
                 <a-tag :color="levelColor(item.level)">{{ levelText(item.level) }}</a-tag>
-                <span class="font-medium">{{ item.label }}</span>
-                <span class="text-gray-500">
-                  {{ item.missing_fields?.length ? `缺少：${item.missing_fields.join('、')}` : '' }}
-                </span>
+                <div>
+                  <div class="font-medium">{{ item.label }}</div>
+                  <div v-if="item.missing_fields?.length" class="health-item-note">
+                    缺少：{{ item.missing_fields.join('、') }}
+                  </div>
+                </div>
               </div>
-              <a-space>
-                <a-button size="small" type="link" @click="openItem(item)">
-                  <template #icon><ArrowRightOutlined /></template>
-                  去配置
+              <a-space wrap>
+                <a-button size="small" type="link" @click="openItem(item)">去配置</a-button>
+                <a-button
+                  size="small"
+                  type="link"
+                  :loading="updatingKey === item.key"
+                  @click="snoozeItem(item)"
+                >
+                  7 天后提醒
                 </a-button>
-                <a-button size="small" type="link" @click="snoozeItem(item)">7 天后提醒</a-button>
-                <a-button size="small" type="link" danger @click="ignoreItem(item)">忽略</a-button>
+                <a-button
+                  size="small"
+                  type="link"
+                  danger
+                  :loading="updatingKey === item.key"
+                  @click="ignoreItem(item)"
+                >
+                  忽略
+                </a-button>
               </a-space>
             </div>
           </div>
@@ -59,28 +92,57 @@
       </template>
     </a-alert>
 
-    <a-tabs v-model:activeKey="activeKey" :destroyInactiveTabPane="true" @change="switchTab">
-      <a-tab-pane key="basic" tab="站点信息"><BasicView /></a-tab-pane>
-      <a-tab-pane key="carousel" tab="轮播图配置"><CarouselView /></a-tab-pane>
-      <a-tab-pane key="seo" tab="seo 配置"><SeoView /></a-tab-pane>
-      <a-tab-pane key="sitemap" tab="sitemap 配置"><SiteMapVIew /></a-tab-pane>
-      <a-tab-pane key="verification" tab="站点验证"><VerificationView /></a-tab-pane>
-      <a-tab-pane key="push" tab="文章推送配置"><PushView /></a-tab-pane>
-      <a-tab-pane key="comment" tab="评论配置"><CommentSwitchView /></a-tab-pane>
-      <a-tab-pane key="friend" tab="友链配置"><FriendSwitchView /></a-tab-pane>
-      <a-tab-pane key="email" tab="邮件配置"><EmailView /></a-tab-pane>
-      <a-tab-pane key="notice" tab="公告配置"><NoticeView /></a-tab-pane>
-      <a-tab-pane key="front-post-count" tab="首页展示文章数量配置"><FrontPostCountView /></a-tab-pane>
-      <a-tab-pane key="pay" tab="支付二维码配置"><RecordView /></a-tab-pane>
-      <a-tab-pane key="social" tab="社交信息配置"><SocialView /></a-tab-pane>
-    </a-tabs>
+    <a-select
+      class="setting-select"
+      :value="activeKey"
+      :options="settingOptions"
+      @change="switchTab"
+    />
+
+    <div class="setting-layout">
+      <nav class="setting-nav" aria-label="博客设置导航">
+        <a-menu
+          mode="inline"
+          :selected-keys="[activeKey]"
+          :inline-indent="16"
+          @click="handleMenuClick"
+        >
+          <a-menu-item-group v-for="group in settingGroups" :key="group.key" :title="group.label">
+            <a-menu-item v-for="item in group.items" :key="item.key">
+              <template #icon><component :is="item.icon" /></template>
+              {{ item.label }}
+            </a-menu-item>
+          </a-menu-item-group>
+        </a-menu>
+      </nav>
+
+      <main class="setting-content">
+        <component :is="activeSetting.component" :key="activeSetting.key" />
+      </main>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue'
-import { message } from 'ant-design-vue'
-import { ArrowRightOutlined } from '@ant-design/icons-vue'
+import { computed, h, onMounted, ref, watch, type Component } from 'vue'
+import { message, type MenuProps } from 'ant-design-vue'
+import {
+  CommentOutlined,
+  DownOutlined,
+  FileSearchOutlined,
+  GlobalOutlined,
+  LinkOutlined,
+  MailOutlined,
+  NotificationOutlined,
+  OrderedListOutlined,
+  PictureOutlined,
+  QrcodeOutlined,
+  ReloadOutlined,
+  SafetyCertificateOutlined,
+  SearchOutlined,
+  SendOutlined,
+  ShareAltOutlined
+} from '@ant-design/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
 import BasicView from '@/views/setting/BasicView.vue'
 import SeoView from '@/views/setting/SeoView.vue'
@@ -104,10 +166,83 @@ import {
   type ConfigHealthStatus
 } from '@/interfaces/Config'
 
+interface SettingItem {
+  key: string
+  label: string
+  icon: Component
+  component: Component
+}
+
+interface SettingGroup {
+  key: string
+  label: string
+  items: SettingItem[]
+}
+
+const settingGroups: SettingGroup[] = [
+  {
+    key: 'site',
+    label: '站点与展示',
+    items: [
+      { key: 'basic', label: '站点信息', icon: GlobalOutlined, component: BasicView },
+      { key: 'carousel', label: '首页轮播', icon: PictureOutlined, component: CarouselView },
+      { key: 'notice', label: '站点公告', icon: NotificationOutlined, component: NoticeView },
+      {
+        key: 'front-post-count',
+        label: '首页文章数量',
+        icon: OrderedListOutlined,
+        component: FrontPostCountView
+      }
+    ]
+  },
+  {
+    key: 'discovery',
+    label: '搜索与分发',
+    items: [
+      { key: 'seo', label: 'SEO 元信息', icon: SearchOutlined, component: SeoView },
+      { key: 'sitemap', label: '站点地图', icon: FileSearchOutlined, component: SiteMapVIew },
+      {
+        key: 'verification',
+        label: '站点验证',
+        icon: SafetyCertificateOutlined,
+        component: VerificationView
+      },
+      { key: 'push', label: '文章推送', icon: SendOutlined, component: PushView }
+    ]
+  },
+  {
+    key: 'interaction',
+    label: '互动与联系',
+    items: [
+      { key: 'comment', label: '评论设置', icon: CommentOutlined, component: CommentSwitchView },
+      { key: 'friend', label: '友链申请', icon: LinkOutlined, component: FriendSwitchView },
+      { key: 'email', label: '邮件通知', icon: MailOutlined, component: EmailView },
+      { key: 'social', label: '社交信息', icon: ShareAltOutlined, component: SocialView },
+      { key: 'pay', label: '支付二维码', icon: QrcodeOutlined, component: RecordView }
+    ]
+  }
+]
+
+const settingItems = settingGroups.flatMap((group) => group.items)
+const settingOptions = settingGroups.map((group) => ({
+  label: group.label,
+  options: group.items.map((item) => ({ label: item.label, value: item.key }))
+}))
+const defaultKey = 'basic'
 const route = useRoute()
 const router = useRouter()
-const activeKey = ref(typeof route.query.tab === 'string' ? route.query.tab : 'basic')
+
+const resolveKey = (tab: unknown) =>
+  typeof tab === 'string' && settingItems.some((item) => item.key === tab) ? tab : defaultKey
+
+const activeKey = ref(resolveKey(route.query.tab))
+const activeSetting = computed(
+  () => settingItems.find((item) => item.key === activeKey.value) || settingItems[0]
+)
 const health = ref<ConfigHealth>()
+const healthLoading = ref(false)
+const healthExpanded = ref(false)
+const updatingKey = ref('')
 
 const activeItems = computed(
   () => health.value?.items.filter((item) => item.status === 'missing') || []
@@ -119,18 +254,31 @@ const quietItems = computed(
 )
 
 const switchTab = (key: string | number) => {
-  activeKey.value = String(key)
-  router.replace({ path: route.path, query: { ...route.query, tab: activeKey.value } })
+  const nextKey = resolveKey(String(key))
+  activeKey.value = nextKey
+  if (route.query.tab !== nextKey) {
+    router.replace({ path: route.path, query: { ...route.query, tab: nextKey } })
+  }
 }
 
+const handleMenuClick: MenuProps['onClick'] = ({ key }) => switchTab(String(key))
+
 const openItem = (item: ConfigHealthItem) => {
-  const tab = item.href?.split('tab=')[1]
+  const tab = item.href ? new URL(item.href, window.location.origin).searchParams.get('tab') : null
   switchTab(tab || activeKey.value)
 }
 
 const loadConfigHealth = async () => {
-  const response = await GetConfigHealth()
-  health.value = response.data.data
+  try {
+    healthLoading.value = true
+    const response = await GetConfigHealth()
+    health.value = response.data.data
+  } catch (error) {
+    console.error(error)
+    message.error('配置检查加载失败')
+  } finally {
+    healthLoading.value = false
+  }
 }
 
 const updateState = async (
@@ -138,8 +286,13 @@ const updateState = async (
   status: 'active' | 'ignored' | 'snoozed',
   snoozeDays?: number
 ) => {
-  await UpdateConfigCheckState(item.key, { status, snooze_days: snoozeDays })
-  await loadConfigHealth()
+  try {
+    updatingKey.value = item.key
+    await UpdateConfigCheckState(item.key, { status, snooze_days: snoozeDays })
+    await loadConfigHealth()
+  } finally {
+    updatingKey.value = ''
+  }
 }
 
 const snoozeItem = async (item: ConfigHealthItem) => {
@@ -157,38 +310,17 @@ const activateItem = async (item: ConfigHealthItem) => {
   message.success('已恢复提醒')
 }
 
-const levelText = (level: ConfigHealthLevel) => {
-  const mapping = {
-    required: '必须',
-    recommended: '推荐',
-    optional: '可选'
-  }
-  return mapping[level]
-}
+const levelText = (level: ConfigHealthLevel) =>
+  ({ required: '必须', recommended: '推荐', optional: '可选' })[level]
 
-const levelColor = (level: ConfigHealthLevel) => {
-  const mapping = {
-    required: 'error',
-    recommended: 'warning',
-    optional: 'processing'
-  }
-  return mapping[level]
-}
+const levelColor = (level: ConfigHealthLevel) =>
+  ({ required: 'error', recommended: 'warning', optional: 'processing' })[level]
 
-const statusColor = (status: ConfigHealthStatus) => {
-  const mapping = {
-    ok: 'success',
-    missing: 'warning',
-    ignored: 'default',
-    snoozed: 'processing'
-  }
-  return mapping[status]
-}
+const statusColor = (status: ConfigHealthStatus) =>
+  ({ ok: 'success', missing: 'warning', ignored: 'default', snoozed: 'processing' })[status]
 
 const statusText = (item: ConfigHealthItem) => {
-  if (item.status === 'ignored') {
-    return '已忽略'
-  }
+  if (item.status === 'ignored') return '已忽略'
   if (item.status === 'snoozed') {
     return item.snoozed_until
       ? `${new Date(item.snoozed_until * 1000).toLocaleDateString()} 后提醒`
@@ -200,13 +332,158 @@ const statusText = (item: ConfigHealthItem) => {
 watch(
   () => route.query.tab,
   (tab) => {
-    if (typeof tab === 'string') {
-      activeKey.value = tab
+    const nextKey = resolveKey(tab)
+    activeKey.value = nextKey
+    if (tab !== nextKey) {
+      router.replace({ path: route.path, query: { ...route.query, tab: nextKey } })
     }
   }
 )
 
 onMounted(() => {
+  document.title = '博客设置 - 后台管理'
+  if (route.query.tab !== activeKey.value) {
+    router.replace({ path: route.path, query: { ...route.query, tab: activeKey.value } })
+  }
   loadConfigHealth()
 })
 </script>
+
+<style scoped>
+.setting-page {
+  min-width: 0;
+}
+
+.setting-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.setting-heading h1 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+.setting-heading span {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+
+.health-alert {
+  margin-bottom: 16px;
+}
+
+.health-summary,
+.health-item,
+.health-item-content {
+  display: flex;
+  align-items: center;
+}
+
+.health-summary {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.health-summary > :last-child {
+  margin-left: auto;
+}
+
+.health-score {
+  font-weight: 600;
+}
+
+.health-details,
+.health-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.health-details {
+  padding-top: 8px;
+}
+
+.health-item {
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 6px;
+}
+
+.health-item-content {
+  min-width: 0;
+  gap: 6px;
+}
+
+.health-item-note {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+}
+
+.health-summary :deep(.anticon-down) {
+  transition: transform 0.2s;
+}
+
+.health-summary :deep(.anticon-down.is-expanded) {
+  transform: rotate(180deg);
+}
+
+.setting-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.setting-nav {
+  position: sticky;
+  top: 16px;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+}
+
+.setting-nav :deep(.ant-menu) {
+  border-inline-end: 0;
+}
+
+.setting-content {
+  min-width: 0;
+}
+
+.setting-select {
+  display: none;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .setting-layout {
+    display: block;
+  }
+
+  .setting-nav {
+    display: none;
+  }
+
+  .setting-select {
+    display: block;
+  }
+
+  .health-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .health-summary > :last-child {
+    margin-left: 0;
+  }
+}
+</style>

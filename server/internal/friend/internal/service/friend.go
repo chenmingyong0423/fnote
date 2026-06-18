@@ -105,7 +105,21 @@ func (s *FriendService) AdminUpdateFriend(ctx context.Context, friend domain.Fri
 		}
 		return errors.WithMessage(err, "s.repo.FindById failed")
 	}
-	return s.repo.UpdateById(ctx, friend)
+	existingFriend, err := s.repo.FindByUrl(ctx, friend.Url)
+	if err == nil && existingFriend.Id != friend.Id {
+		return apiwrap.NewErrorResponseBody(http.StatusConflict, "friend url already exists")
+	}
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+		return errors.WithMessage(err, "s.repo.FindByUrl failed")
+	}
+	err = s.repo.UpdateById(ctx, friend)
+	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return apiwrap.NewErrorResponseBody(http.StatusConflict, "friend url already exists")
+		}
+		return err
+	}
+	return nil
 }
 
 func (s *FriendService) AdminGetFriends(ctx context.Context, pageDTO domain.PageDTO) ([]domain.Friend, int64, error) {

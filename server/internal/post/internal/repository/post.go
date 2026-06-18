@@ -170,7 +170,7 @@ func (r *PostRepository) AddPost(ctx context.Context, post *domain.Post) error {
 			StickyWeight:     post.StickyWeight,
 			MetaDescription:  post.MetaDescription,
 			MetaKeywords:     post.MetaKeywords,
-			WordCount:        0,
+			WordCount:        post.WordCount,
 			IsCommentAllowed: post.IsCommentAllowed,
 		},
 		CreatedAt: now,

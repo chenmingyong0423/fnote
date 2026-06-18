@@ -25,9 +25,10 @@ type IndexConfigVO struct {
 }
 
 type OwnerConfigVO struct {
-	WebsiteOwner        string `json:"website_owner"`
-	WebsiteOwnerProfile string `json:"website_owner_profile"`
-	WebsiteOwnerAvatar  string `json:"website_owner_avatar"`
+	WebsiteOwner        string         `json:"website_owner"`
+	WebsiteOwnerProfile string         `json:"website_owner_profile"`
+	WebsiteOwnerAvatar  string         `json:"website_owner_avatar"`
+	SocialInfoList      []SocialInfoVO `json:"social_info_list"`
 }
 
 type PayInfoConfigVO struct {

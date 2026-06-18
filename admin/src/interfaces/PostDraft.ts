@@ -23,6 +23,7 @@ export interface PostDraftRequest {
   sticky_weight: number
   meta_description: string
   meta_keywords: string
+  word_count: number
   is_comment_allowed: boolean
   created_at: number
 }
@@ -30,7 +31,9 @@ export interface PostDraftRequest {
 export interface PostDraftBrief {
   id: string
   title: string
+  word_count: number
   created_at: number
+  updated_at: number
 }
 
 export interface PostDraftDetail {
@@ -50,6 +53,7 @@ export interface PostDraftDetail {
   meta_keywords: string
   is_comment_allowed: boolean
   created_at: number
+  updated_at: number
 }
 
 export const SavePostDraft = (data: PostDraftRequest) => {

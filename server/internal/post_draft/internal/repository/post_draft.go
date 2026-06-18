@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
@@ -147,7 +148,8 @@ func (r *PostDraftRepository) toDomain(postDraft *dao.PostDraft) *domain.PostDra
 		WordCount:        postDraft.WordCount,
 		IsDisplayed:      postDraft.IsDisplayed,
 		IsCommentAllowed: postDraft.IsCommentAllowed,
-		CreatedAt:        postDraft.CreatedAt.Unix(),
+		CreatedAt:        unixOrZero(postDraft.CreatedAt),
+		UpdatedAt:        unixOrZero(postDraft.UpdatedAt),
 	}
 }
 
@@ -157,4 +159,11 @@ func (r *PostDraftRepository) toDomains(postDrafts []*dao.PostDraft) []*domain.P
 		result = append(result, r.toDomain(postDraft))
 	}
 	return result
+}
+
+func unixOrZero(t time.Time) int64 {
+	if t.IsZero() {
+		return 0
+	}
+	return t.Unix()
 }

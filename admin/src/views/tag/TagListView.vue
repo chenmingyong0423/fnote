@@ -8,40 +8,22 @@
       </div>
     </template>
     <div>
-      <a-button @click="visible = true" class="mb-5">新增标签</a-button>
+      <a-button @click="openCreateTag" class="mb-5">新增标签</a-button>
       <a-modal
         v-model:open="visible"
         title="新增标签"
         ok-text="提交"
         cancel-text="取消"
         @ok="addTag"
+        @cancel="resetTagForm"
       >
-        <a-form ref="formRef" :model="formState" layout="vertical" name="form_in_modal">
-          <a-form-item
-            name="name"
-            label="名称"
-            :rules="[{ required: true, message: '请输入标签名称' }]"
-          >
-            <a-input v-model:value="formState.name" />
-          </a-form-item>
-          <a-form-item
-            name="route"
-            label="前端路由"
-            :rules="[{ required: true, message: '请输入前端路由' }]"
-          >
-            <a-input v-model:value="formState.route" />
-          </a-form-item>
-          <a-form-item
-            label="是否启用"
-            name="enabled"
-            class="collection-create-form_last-form-item"
-          >
-            <a-radio-group v-model:value="formState.enabled">
-              <a-radio :value="true">true</a-radio>
-              <a-radio :value="false">false</a-radio>
-            </a-radio-group>
-          </a-form-item>
-        </a-form>
+        <TaxonomyCreateForm
+          ref="formRef"
+          v-model:name="formState.name"
+          v-model:route="formState.route"
+          v-model:enabled="formState.enabled"
+          type="tag"
+        />
       </a-modal>
     </div>
     <div>
@@ -78,7 +60,6 @@
 <script lang="ts" setup>
 import originalAxios from 'axios'
 import { ref, reactive, computed, h } from 'vue'
-import type { FormInstance } from 'ant-design-vue'
 import type { PageRequest } from '@/interfaces/Common'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
@@ -91,6 +72,7 @@ import {
   type TagRequest
 } from '@/interfaces/Tag'
 import { ReloadOutlined } from '@ant-design/icons-vue'
+import TaxonomyCreateForm from '@/components/form/TaxonomyCreateForm.vue'
 
 document.title = '标签列表 - 后台管理'
 
@@ -166,13 +148,26 @@ const getTags = async () => {
 getTags()
 
 // 添加标签
-const formRef = ref<FormInstance>()
+const formRef = ref<InstanceType<typeof TaxonomyCreateForm>>()
 const visible = ref(false)
 const formState = reactive<TagRequest>({
   name: '',
   route: '',
   enabled: true
 })
+
+const resetTagForm = () => {
+  formState.name = ''
+  formState.route = ''
+  formState.enabled = true
+  formRef.value?.resetRouteTouched()
+  formRef.value?.clearValidate()
+}
+
+const openCreateTag = () => {
+  resetTagForm()
+  visible.value = true
+}
 
 const addTag = () => {
   if (formRef.value) {
@@ -187,9 +182,7 @@ const addTag = () => {
           }
           message.success('添加成功')
           visible.value = false
-          if (formRef.value) {
-            formRef.value.resetFields()
-          }
+          resetTagForm()
           await getTags()
         } catch (error) {
           if (originalAxios.isAxiosError(error)) {

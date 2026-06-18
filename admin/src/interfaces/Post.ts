@@ -5,8 +5,11 @@ export interface IPost {
   cover_img: string
   title: string
   summary: string
+  word_count: number
   categories: Category4Post[]
   tags: Tag4Post[]
+  is_displayed: boolean
+  is_comment_allowed: boolean
   created_at: number
   updated_at: number
 }
@@ -24,6 +27,7 @@ export interface PostDetailVO {
   sticky_weight: number
   meta_description: string
   meta_keywords: string
+  word_count: number
   is_comment_allowed: boolean
 }
 
@@ -66,6 +70,7 @@ export interface PostRequest {
   sticky_weight: number
   meta_description: string
   meta_keywords: string
+  word_count: number
   is_comment_allowed: boolean
 }
 

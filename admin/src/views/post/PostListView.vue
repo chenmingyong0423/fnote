@@ -48,70 +48,86 @@
         :columns="columns"
         :data-source="posts"
         :pagination="pagination"
+        :scroll="{ x: 1470 }"
+        row-key="id"
         @change="change"
         bordered
       >
-        <template #headerCell="{ column }">
-          <template v-if="column.key === 'name'">
-            <span>
-              <smile-outlined />
-              Name
-            </span>
-          </template>
-        </template>
-
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'id'">
-            <a :href="baseHost + '/posts/' + record.id" target="_blank">{{
-              `${baseHost}/posts/${record.id}`
-            }}</a>
+            <div class="post-link-cell">
+              <a :href="getPostUrl(record.id)" target="_blank" rel="noopener noreferrer">查看</a>
+              <a-button type="link" size="small" @click="copyPostLink(record.id)">
+                复制链接
+              </a-button>
+            </div>
           </template>
           <template v-if="column.key === 'cover_img'">
-            <a-image :width="200" :src="serverHost + record.cover_img" />
+            <a-image
+              :width="88"
+              :height="56"
+              :src="serverHost + record.cover_img"
+              class="cover-img"
+            />
+          </template>
+          <template v-else-if="column.key === 'summary'">
+            <a-tooltip :title="record.summary">
+              <div class="summary-text">{{ record.summary }}</div>
+            </a-tooltip>
+          </template>
+          <template v-else-if="column.key === 'word_count'">
+            <span>{{ formatPostStats(record.word_count) }}</span>
           </template>
           <template v-else-if="column.key === 'categories'">
-            <span>
+            <span class="taxonomy-tags">
               <a-tag
                 v-for="category in record.categories"
-                :key="category"
-                :color="
-                  category === 'loser' ? 'volcano' : category.length > 5 ? 'geekblue' : 'green'
-                "
+                :key="category.id"
+                :color="category.name.length > 5 ? 'geekblue' : 'green'"
               >
-                {{ category.name.toUpperCase() }}
+                {{ category.name }}
               </a-tag>
             </span>
           </template>
           <template v-else-if="column.key === 'tags'">
-            <span>
+            <span class="taxonomy-tags">
               <a-tag
                 v-for="tag in record.tags"
-                :key="tag"
-                :color="tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'"
+                :key="tag.id"
+                :color="tag.name.length > 5 ? 'geekblue' : 'green'"
               >
-                {{ tag.name.toUpperCase() }}
+                {{ tag.name }}
               </a-tag>
             </span>
           </template>
           <template v-if="column.key === 'is_displayed'">
             <a-switch
-              v-model:checked="record.is_displayed"
-              @change="changeDisplayStatus(record.id, record.is_displayed)"
+              :checked="record.is_displayed"
+              :loading="isDisplayUpdating(record.id)"
+              @change="changeDisplayStatus(record, Boolean($event))"
             />
           </template>
           <template v-if="column.key === 'is_comment_allowed'">
             <a-switch
-              v-model:checked="record.is_comment_allowed"
-              @change="changeCommentAllowedStatus(record.id, record.is_comment_allowed)"
+              :checked="record.is_comment_allowed"
+              :loading="isCommentUpdating(record.id)"
+              @change="changeCommentAllowedStatus(record, Boolean($event))"
             />
           </template>
           <template v-else-if="column.key === 'created_at' || column.key === 'updated_at'">
             <span>{{ dayjs.unix(record[column.key]).format('YYYY-MM-DD HH:mm:ss') }}</span>
           </template>
           <template v-else-if="column.dataIndex === 'operation'">
-            <div class="flex gap-x-1">
+            <div class="post-actions">
               <span>
-                <a @click="copyContent(record.id)">复制</a>
+                <a-button
+                  type="link"
+                  size="small"
+                  :loading="isContentCopying(record.id)"
+                  @click="copyPostContent(record.id)"
+                >
+                  复制正文
+                </a-button>
               </span>
               <span>
                 <a @click="router.push(`/home/post/draft/${record.id}`)">编辑</a>
@@ -120,7 +136,9 @@
                 <a @click="openCoverEditor(record)">编辑封面</a>
               </span>
               <a-popconfirm v-if="posts.length" title="确认删除？" @confirm="deletePost(record)">
-                <a>删除</a>
+                <a-button type="link" size="small" danger :loading="isDeleting(record.id)">
+                  删除
+                </a-button>
               </a-popconfirm>
             </div>
           </template>
@@ -130,7 +148,7 @@
   </a-card>
 </template>
 <script lang="ts" setup>
-import { ReloadOutlined, SmileOutlined } from '@ant-design/icons-vue'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 import { computed, h, ref } from 'vue'
 import {
   ChangeCommentAllowedStatus,
@@ -150,6 +168,7 @@ import { GetSelectedCategories, type SelectCategory } from '@/interfaces/Categor
 import { GetSelectedTags, type SelectTag } from '@/interfaces/Tag'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
 import { useUserStore } from '@/stores/user'
+import { toErrorMessage } from '@/utils/error'
 
 document.title = '文章列表 - 后台管理'
 
@@ -161,44 +180,59 @@ const columns = computed<TableColumnType[]>(() => {
     {
       title: '封面',
       dataIndex: 'cover_img',
-      key: 'cover_img'
+      key: 'cover_img',
+      width: 120
     },
     {
       title: '标题',
       dataIndex: 'title',
-      key: 'title'
+      key: 'title',
+      width: 220,
+      ellipsis: true
     },
     {
-      title: 'url',
+      title: '链接',
       dataIndex: 'id',
-      key: 'id'
+      key: 'id',
+      width: 150
     },
     {
       title: '摘要',
       dataIndex: 'summary',
-      key: 'summary'
+      key: 'summary',
+      width: 260
+    },
+    {
+      title: '字数',
+      dataIndex: 'word_count',
+      key: 'word_count',
+      width: 150
     },
     {
       title: '分类',
       key: 'categories',
       dataIndex: 'categories',
+      width: 180,
       filters: categories.value
     },
     {
       title: '标签',
       key: 'tags',
       dataIndex: 'tags',
+      width: 180,
       filters: tags.value
     },
     {
-      title: '是否显示',
+      title: '显示',
       key: 'is_displayed',
-      dataIndex: 'is_displayed'
+      dataIndex: 'is_displayed',
+      width: 90
     },
     {
-      title: '是否允许评论',
+      title: '评论',
       key: 'is_comment_allowed',
-      dataIndex: 'is_comment_allowed'
+      dataIndex: 'is_comment_allowed',
+      width: 90
     },
     {
       title: '发布时间',
@@ -207,16 +241,20 @@ const columns = computed<TableColumnType[]>(() => {
       sorter: (p1: IPost, p2: IPost) => p1.created_at - p2.created_at,
       defaultSortOrder: 'descend',
       sortDirections: ['descend', 'ascend'],
-      showSorterTooltip: { title: showSorterTooltip.value }
+      showSorterTooltip: { title: showSorterTooltip.value },
+      width: 170
     },
     {
-      title: '最后一次修改的时间',
+      title: '更新时间',
       key: 'updated_at',
-      dataIndex: 'updated_at'
+      dataIndex: 'updated_at',
+      width: 170
     },
     {
-      title: 'operation',
-      dataIndex: 'operation'
+      title: '操作',
+      dataIndex: 'operation',
+      width: 210,
+      fixed: 'right'
     }
   ]
 })
@@ -269,6 +307,35 @@ const coverEditorVisible = ref(false)
 const coverSaving = ref(false)
 const currentPost = ref<IPost | null>(null)
 const coverImage = ref('')
+const displayUpdatingIds = ref<Set<string>>(new Set())
+const commentUpdatingIds = ref<Set<string>>(new Set())
+const deletingIds = ref<Set<string>>(new Set())
+const contentCopyingIds = ref<Set<string>>(new Set())
+
+const setPending = (source: typeof displayUpdatingIds, id: string, pending: boolean) => {
+  const next = new Set(source.value)
+  if (pending) {
+    next.add(id)
+  } else {
+    next.delete(id)
+  }
+  source.value = next
+}
+
+const isDisplayUpdating = (id: string) => displayUpdatingIds.value.has(id)
+
+const isCommentUpdating = (id: string) => commentUpdatingIds.value.has(id)
+
+const isDeleting = (id: string) => deletingIds.value.has(id)
+
+const isContentCopying = (id: string) => contentCopyingIds.value.has(id)
+
+const formatPostStats = (wordCount?: number) => {
+  if (!wordCount) {
+    return '-'
+  }
+  return `${wordCount} 字 / 约 ${Math.max(1, Math.ceil(wordCount / 400))} 分钟`
+}
 
 const getPosts = async () => {
   try {
@@ -284,8 +351,11 @@ const getPosts = async () => {
 }
 
 const deletePost = async (record: IPost) => {
+  if (isDeleting(record.id)) {
+    return
+  }
   try {
-    console.log(record)
+    setPending(deletingIds, record.id, true)
     const response: any = await DeletePost(record.id)
     if (response.data.code !== 0) {
       message.error(response.data.message)
@@ -294,41 +364,64 @@ const deletePost = async (record: IPost) => {
     message.success('删除成功')
     await getPosts()
   } catch (error) {
-    console.log(error)
+    message.error(toErrorMessage(error, '删除失败'))
+  } finally {
+    setPending(deletingIds, record.id, false)
   }
 }
 
 getPosts()
 
-const changeDisplayStatus = async (id: string, is_displayed: boolean) => {
+const changeDisplayStatus = async (record: IPost, isDisplayed: boolean) => {
+  if (isDisplayUpdating(record.id)) {
+    return
+  }
+  const previous = record.is_displayed
   try {
-    const response: any = await ChangePostDisplayStatus(id, is_displayed)
+    record.is_displayed = isDisplayed
+    setPending(displayUpdatingIds, record.id, true)
+    const response: any = await ChangePostDisplayStatus(record.id, isDisplayed)
     if (response.data.code !== 0) {
+      record.is_displayed = previous
       message.error(response.data.message)
       return
     }
     message.success('更新成功')
     await getPosts()
   } catch (error) {
-    console.log(error)
+    record.is_displayed = previous
+    message.error(toErrorMessage(error, '更新显示状态失败'))
+  } finally {
+    setPending(displayUpdatingIds, record.id, false)
   }
 }
 
-const changeCommentAllowedStatus = async (id: string, is_comment_allowed: boolean) => {
+const changeCommentAllowedStatus = async (record: IPost, isCommentAllowed: boolean) => {
+  if (isCommentUpdating(record.id)) {
+    return
+  }
+  const previous = record.is_comment_allowed
   try {
-    const response: any = await ChangeCommentAllowedStatus(id, is_comment_allowed)
+    record.is_comment_allowed = isCommentAllowed
+    setPending(commentUpdatingIds, record.id, true)
+    const response: any = await ChangeCommentAllowedStatus(record.id, isCommentAllowed)
     if (response.data.code !== 0) {
+      record.is_comment_allowed = previous
       message.error(response.data.message)
       return
     }
     message.success('更新成功')
     await getPosts()
   } catch (error) {
-    console.log(error)
+    record.is_comment_allowed = previous
+    message.error(toErrorMessage(error, '更新评论状态失败'))
+  } finally {
+    setPending(commentUpdatingIds, record.id, false)
   }
 }
 
 const searchPost = () => {
+  req.value.pageNo = 1
   getPosts()
 }
 
@@ -409,14 +502,71 @@ const getTags = async () => {
 }
 getTags()
 
-const copyContent = async (id: string) => {
-  const response = await GetPostById(id)
-  if (response.data.code !== 0) {
-    message.error(response.data.message)
+const getPostUrl = (id: string) => {
+  return `${baseHost}/posts/${id}`
+}
+
+const copyPostLink = async (id: string) => {
+  await navigator.clipboard.writeText(getPostUrl(id))
+  message.success('链接复制成功')
+}
+
+const copyPostContent = async (id: string) => {
+  if (isContentCopying(id)) {
     return
   }
-  const content = response.data.data?.content
-  await navigator.clipboard.writeText(content)
-  message.success('复制成功')
+  try {
+    setPending(contentCopyingIds, id, true)
+    const response = await GetPostById(id)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
+      return
+    }
+    const content = response.data.data?.content || ''
+    await navigator.clipboard.writeText(content)
+    message.success('正文复制成功')
+  } catch (error) {
+    message.error(toErrorMessage(error, '正文复制失败'))
+  } finally {
+    setPending(contentCopyingIds, id, false)
+  }
 }
 </script>
+
+<style scoped>
+.cover-img {
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.summary-text {
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.65);
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.taxonomy-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.post-link-cell,
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.post-link-cell :deep(.ant-btn) {
+  padding: 0;
+}
+
+.post-actions :deep(.ant-btn) {
+  padding: 0;
+}
+</style>

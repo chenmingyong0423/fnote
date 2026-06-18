@@ -46,6 +46,8 @@ type PageDTO struct {
 	Order string `form:"sortOrder,omitempty"`
 	// 搜索内容
 	Keyword string `form:"keyword,omitempty"`
+	// 状态
+	Status *int `form:"status,omitempty"`
 }
 
 func (p *PageDTO) OrderConvertToInt() int {

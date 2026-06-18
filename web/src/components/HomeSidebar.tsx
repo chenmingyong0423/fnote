@@ -5,6 +5,7 @@ import { Avatar, Button } from "antd";
 import React, { useEffect, useRef, useState } from "react";
 import LatestComments, { type LatestComment } from "./LatestComments";
 import SiteOwnerCard, { type SiteOwnerCardProps } from "./SiteOwnerCard";
+import SocialLinks from "./SocialLinks";
 
 interface HomeSidebarProps {
   siteOwner: SiteOwnerCardProps;
@@ -165,6 +166,12 @@ export default function HomeSidebar({
                 ? "网站数据暂时异常"
                 : siteOwner.bio || "这个站长还没有填写简介。"}
             </div>
+
+            {!siteOwner.hasError && siteOwner.socialInfo?.length ? (
+              <div className="mt-4">
+                <SocialLinks items={siteOwner.socialInfo} />
+              </div>
+            ) : null}
 
             {statsItems.length > 0 && (
               <div className="mt-4 grid grid-cols-2 gap-2 text-center text-xs">

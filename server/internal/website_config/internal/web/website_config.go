@@ -17,6 +17,7 @@ package web
 import (
 	"encoding/hex"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -340,13 +341,17 @@ func (h *WebsiteConfigHandler) AdminUpdateFPCConfig(ctx *gin.Context, req Update
 }
 
 func (h *WebsiteConfigHandler) AdminAddRecordInWebsiteConfig(ctx *gin.Context, req AddRecordInWebsiteConfig) (*apiwrap.ResponseBody[any], error) {
-	return apiwrap.SuccessResponse(), h.serv.AddRecordInWebsiteConfig(ctx, req.Record)
+	record := strings.TrimSpace(req.Record)
+	if record == "" {
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "website record is empty")
+	}
+	return apiwrap.SuccessResponse(), h.serv.AddRecordInWebsiteConfig(ctx, record)
 }
 
 func (h *WebsiteConfigHandler) AdminDeleteRecordInWebsiteConfig(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
-	record := ctx.Query("website_record")
+	record := strings.TrimSpace(ctx.Query("website_record"))
 	if record == "" {
-		return nil, errors.New("record is empty")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "website record is empty")
 	}
 	return apiwrap.SuccessResponse(), h.serv.DeleteRecordInWebsiteConfig(ctx, record)
 }
@@ -641,7 +646,13 @@ func (h *WebsiteConfigHandler) GetWebsiteOwnerConfig(ctx *gin.Context) (*apiwrap
 	if err != nil {
 		return nil, err
 	}
-	return apiwrap.SuccessResponseWithData(h.toWebsiteOwnerVO(config)), nil
+	socialConfig, err := h.serv.GetSocialConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ownerVO := h.toWebsiteOwnerVO(config)
+	ownerVO.SocialInfoList = h.toSocialInfoConfigVO(&socialConfig).SocialInfoList
+	return apiwrap.SuccessResponseWithData(ownerVO), nil
 }
 
 func (h *WebsiteConfigHandler) GetCommonConfig(ctx *gin.Context) (*apiwrap.ResponseBody[CommonConfigVO], error) {

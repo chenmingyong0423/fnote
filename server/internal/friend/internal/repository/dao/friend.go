@@ -124,12 +124,12 @@ func (d *FriendDao) DeleteById(ctx context.Context, objectID bson.ObjectID) erro
 
 func (d *FriendDao) UpdateById(ctx context.Context, objectID bson.ObjectID, friend Friend) error {
 	updateOne, err := d.coll.Updater().Filter(query.Id(objectID)).Updates(
-		update.NewBuilder().Set("name", friend.Name).Set("logo", friend.Logo).Set("description", friend.Description).Set("status", friend.Status).Set("updated_at", time.Now().Local()).Build(),
+		update.NewBuilder().Set("name", friend.Name).Set("url", friend.Url).Set("logo", friend.Logo).Set("description", friend.Description).Set("status", friend.Status).Set("updated_at", time.Now().Local()).Build(),
 	).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fails to update the document from friends, id=%s, friend=%v", objectID.Hex(), friend)
 	}
-	if updateOne.ModifiedCount == 0 {
+	if updateOne.MatchedCount == 0 {
 		return fmt.Errorf("fails to update the document from friends, id=%s, friend=%v", objectID.Hex(), friend)
 	}
 	return nil

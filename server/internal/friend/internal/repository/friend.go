@@ -97,6 +97,7 @@ func (r *FriendRepository) UpdateById(ctx context.Context, friend domain.Friend)
 	}
 	return r.dao.UpdateById(ctx, id, dao.Friend{
 		Name:        friend.Name,
+		Url:         friend.Url,
 		Logo:        friend.Logo,
 		Description: friend.Description,
 		Status:      dao.FriendStatus(friend.Status),
@@ -107,6 +108,9 @@ func (r *FriendRepository) FindAll(ctx context.Context, pageDTO domain.PageDTO) 
 	condBuilder := query.NewBuilder()
 	if pageDTO.Keyword != "" {
 		condBuilder.RegexOptions("name", fmt.Sprintf(".*%s.*", strings.TrimSpace(pageDTO.Keyword)), "i")
+	}
+	if pageDTO.Status != nil {
+		condBuilder.Eq("status", dao.FriendStatus(*pageDTO.Status))
 	}
 	cond := condBuilder.Build()
 

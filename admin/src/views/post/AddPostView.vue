@@ -4,6 +4,9 @@
       ref="postEditRef"
       :categories="categories"
       :tags="tags"
+      :publishing="publishing"
+      :saving-draft="savingDraft"
+      :last-saved-at="lastSavedAt"
       @publish="submit"
       @saveDraft="saveDraft"
     ></PostEditView>
@@ -29,33 +32,53 @@ const postEditRef = ref()
 const categories = ref<SelectCategory[]>([])
 
 const tags = ref<SelectTag[]>([])
+const publishing = ref(false)
+const savingDraft = ref(false)
+const lastSavedAt = ref(0)
 
-const saveDraft = async (post4Edit: Post4Edit) => {
+type SaveDraftOptions = {
+  silent?: boolean
+}
+
+const saveDraft = async (post4Edit: Post4Edit, options: SaveDraftOptions = {}) => {
+  if (savingDraft.value || publishing.value) {
+    return
+  }
   const postDraftReq = {} as PostDraftRequest
   Object.assign(postDraftReq, post4Edit)
   delete (postDraftReq as any).tempCategories
   delete (postDraftReq as any).tempTags
   try {
+    savingDraft.value = true
     const res: any = await SavePostDraft(postDraftReq)
     if (res.data.code === 0) {
       console.log(res.data)
-      message.success('保存成功')
+      lastSavedAt.value = Date.now()
+      if (!options.silent) {
+        message.success('保存成功')
+      }
       await router.push(`/home/post/draft/${res.data.data.id}`)
     } else {
       message.error(res.data.message)
     }
   } catch (error) {
     message.error(toErrorMessage(error))
+  } finally {
+    savingDraft.value = false
   }
 }
 
 const submit = async (post4Edit: Post4Edit) => {
+  if (publishing.value || savingDraft.value) {
+    return
+  }
   console.log()
   const postReq = {} as PostRequest
   Object.assign(postReq, post4Edit)
   delete (postReq as any).tempCategories
   delete (postReq as any).tempTags
   try {
+    publishing.value = true
     const response: any = await AddPost(postReq)
     if (response.data.code !== 0) {
       message.error(response.data.message)
@@ -82,6 +105,8 @@ const submit = async (post4Edit: Post4Edit) => {
       }
     }
     message.error('添加失败')
+  } finally {
+    publishing.value = false
   }
 }
 

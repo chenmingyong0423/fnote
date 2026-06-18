@@ -55,6 +55,7 @@ export default async function Home() {
             name: config.data.website_owner,
             avatar: config.data.website_owner_avatar,
             bio: config.data.website_owner_profile,
+            socialInfo: config.data.social_info_list,
             stats: stats.data,
             hasError: config.failed || stats.failed,
           }}

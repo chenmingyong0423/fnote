@@ -19,6 +19,7 @@ type AdminPostVO struct {
 	CoverImg         string            `json:"cover_img"`
 	Title            string            `json:"title"`
 	Summary          string            `json:"summary"`
+	WordCount        int               `json:"word_count"`
 	Categories       []Category4PostVO `json:"categories"`
 	Tags             []Tag4PostVO      `json:"tags"`
 	IsDisplayed      bool              `json:"is_displayed"`
@@ -50,5 +51,6 @@ type PostDetailVO struct {
 	StickyWeight     int               `json:"sticky_weight"`
 	MetaDescription  string            `json:"meta_description"`
 	MetaKeywords     string            `json:"meta_keywords"`
+	WordCount        int               `json:"word_count"`
 	IsCommentAllowed bool              `json:"is_comment_allowed"`
 }

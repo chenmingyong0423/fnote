@@ -39,6 +39,13 @@ export interface NoticeConfigVO {
   publish_time: number;
 }
 
+export interface SocialInfoVO {
+  social_name: string;
+  social_value: string;
+  css_class: string;
+  is_link: boolean;
+}
+
 export interface CommonConfigVO {
   website_meta: WebsiteMetaVO;
   seo_meta: SeoMetaConfigVO;
@@ -95,17 +102,20 @@ export interface WebsiteOwnerConfigVO {
   website_owner: string;
   website_owner_profile: string;
   website_owner_avatar: string;
+  social_info_list: SocialInfoVO[];
 }
 
 export const DEFAULT_WEBSITE_OWNER_CONFIG: WebsiteOwnerConfigVO = {
   website_owner: "Fnote",
   website_owner_profile: "站点信息暂时无法加载",
   website_owner_avatar: "",
+  social_info_list: [],
 };
 
 // 获取网站主信息
 export async function getWebsiteOwnerConfig(): Promise<WebsiteOwnerConfigVO> {
-  const res = await request<Response<WebsiteOwnerConfigVO>>("/api/configs/owner");
+  const res =
+    await request<Response<WebsiteOwnerConfigVO>>("/api/configs/owner");
   if (res.code !== 0) throw new Error(res.message);
   return res.data;
 }
