@@ -59,9 +59,7 @@ export default function NavigationContent({
         ) : (
           <div className="py-6 flex justify-center">
             <Empty
-              description={
-                hasCategoryError ? "网站数据暂时异常" : "暂无分类"
-              }
+              description={hasCategoryError ? "网站数据暂时异常" : "暂无分类"}
             />
           </div>
         )}
@@ -77,15 +75,21 @@ export default function NavigationContent({
               <a
                 key={tag.route}
                 href={`/tags/${tag.route}`}
-                className="max-w-full break-all px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium cursor-pointer transition-transform duration-200 md:hover:-translate-y-2 border border-white/70 bg-white/50 text-gray-700 backdrop-blur delay-50 dark:border-white/10 dark:bg-slate-900/45 dark:text-gray-300 dark:hover:border-gray-500"
+                className="inline-flex max-w-full items-center gap-2 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium cursor-pointer transition-transform duration-200 md:hover:-translate-y-2 border border-white/70 bg-white/50 text-gray-700 backdrop-blur delay-50 dark:border-white/10 dark:bg-slate-900/45 dark:text-gray-300 dark:hover:border-gray-500"
               >
-                #{tag.name}
+                <span className="min-w-0 break-all">#{tag.name}</span>
+                <span className="inline-flex shrink-0 items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
+                  <BookOutlined />
+                  {tag.count}
+                </span>
               </a>
             ))}
           </div>
         ) : (
           <div className="py-6 flex justify-center">
-            <Empty description={hasTagError ? "网站数据暂时异常" : "暂无标签"} />
+            <Empty
+              description={hasTagError ? "网站数据暂时异常" : "暂无标签"}
+            />
           </div>
         )}
       </section>
