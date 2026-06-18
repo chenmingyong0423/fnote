@@ -130,6 +130,7 @@ import {
   CommentOutlined,
   DownOutlined,
   FileSearchOutlined,
+  FileTextOutlined,
   GlobalOutlined,
   LinkOutlined,
   MailOutlined,
@@ -157,6 +158,7 @@ import VerificationView from '@/views/setting/VerificationView.vue'
 import PushView from '@/views/setting/PushView.vue'
 import CarouselView from '@/views/setting/CarouselView.vue'
 import SiteMapVIew from '@/views/setting/SiteMapVIew.vue'
+import RobotsView from '@/views/setting/RobotsView.vue'
 import {
   GetConfigHealth,
   UpdateConfigCheckState,
@@ -201,6 +203,7 @@ const settingGroups: SettingGroup[] = [
     items: [
       { key: 'seo', label: 'SEO 元信息', icon: SearchOutlined, component: SeoView },
       { key: 'sitemap', label: '站点地图', icon: FileSearchOutlined, component: SiteMapVIew },
+      { key: 'robots', label: 'Robots 文件', icon: FileTextOutlined, component: RobotsView },
       {
         key: 'verification',
         label: '站点验证',

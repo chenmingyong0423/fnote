@@ -11,7 +11,12 @@
           />
         </a-tooltip>
         <a-tooltip title="复制 sitemap 的内容">
-          <a-button shape="circle" :icon="h(CopyrightOutlined)" @click="copySitemap" />
+          <a-button
+            shape="circle"
+            :icon="h(CopyrightOutlined)"
+            :disabled="!sitemap"
+            @click="copySitemap"
+          />
         </a-tooltip>
       </div>
     </template>
@@ -29,23 +34,22 @@
 <script lang="ts" setup>
 import { h, ref } from 'vue'
 import { ReloadOutlined, CopyrightOutlined } from '@ant-design/icons-vue'
-import { GenerateSitemap } from '@/interfaces/PostIndex'
+import { GenerateSitemap, GetSitemap, type SitemapData } from '@/interfaces/PostIndex'
 import { message } from 'ant-design-vue'
 import type { IBaseResponse } from '@/interfaces/Common'
 
 const loading = ref(false)
 const sitemap = ref('')
 const activeKey = ref(['1'])
-const serverHost = import.meta.env.VITE_API_HOST
-
 const getSitemap = async () => {
   try {
-    const sitemapUrl = serverHost + '/static/sitemap.xml'
-    const response = await fetch(`${sitemapUrl}?t=${new Date().getTime()}`)
-    sitemap.value = await response.text()
     loading.value = true
+    const response = await GetSitemap()
+    const result = response.data as IBaseResponse & { data: SitemapData }
+    sitemap.value = result.data?.content || ''
   } catch (e) {
-    console.log(e)
+    console.error(e)
+    message.error('sitemap 加载失败')
   } finally {
     loading.value = false
   }
