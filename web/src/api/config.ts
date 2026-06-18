@@ -39,9 +39,21 @@ export interface NoticeConfigVO {
   publish_time: number;
 }
 
+export interface SocialInfoVO {
+  social_name: string;
+  social_value: string;
+  css_class: string;
+  is_link: boolean;
+}
+
+export interface SocialInfoConfigVO {
+  social_info_list: SocialInfoVO[];
+}
+
 export interface CommonConfigVO {
   website_meta: WebsiteMetaVO;
   seo_meta: SeoMetaConfigVO;
+  social_info_config: SocialInfoConfigVO;
   pay_info_config: PayInfoConfigVO[];
   third_party_site_verification: TPSVVO[];
   records: string[];
@@ -65,6 +77,9 @@ export const DEFAULT_COMMON_CONFIG: CommonConfigVO = {
     keywords: "",
     author: "Fnote",
     robots: "noindex, nofollow",
+  },
+  social_info_config: {
+    social_info_list: [],
   },
   pay_info_config: [],
   third_party_site_verification: [],
@@ -105,7 +120,8 @@ export const DEFAULT_WEBSITE_OWNER_CONFIG: WebsiteOwnerConfigVO = {
 
 // 获取网站主信息
 export async function getWebsiteOwnerConfig(): Promise<WebsiteOwnerConfigVO> {
-  const res = await request<Response<WebsiteOwnerConfigVO>>("/api/configs/owner");
+  const res =
+    await request<Response<WebsiteOwnerConfigVO>>("/api/configs/owner");
   if (res.code !== 0) throw new Error(res.message);
   return res.data;
 }

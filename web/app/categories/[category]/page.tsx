@@ -7,7 +7,11 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { resolvePublicUrl } from "@/src/utils/publicUrl";
 
-export async function generateMetadata({ params }: { params: Promise<{ category: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}): Promise<Metadata> {
   const { category } = await params;
   const categoryName = await getCategoryNameStringByRoute(category);
   const config = await getCommonConfig();
@@ -18,17 +22,26 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
       title: `${categoryName} - 分类文章 - ${config.seo_meta.og_title || config.website_meta.website_name}`,
       description: `浏览${categoryName}分类下的全部文章。`,
       url: process.env.BASE_HOST + `/categories/${category}`,
-      images: config.seo_meta.og_image ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }] : undefined,
+      images: config.seo_meta.og_image
+        ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }]
+        : undefined,
       siteName: config.website_meta.website_name,
       type: "website",
     },
   };
 }
 
-export default async function CategoryPage({ params, searchParams }: { params: Promise<{ category: string }>; searchParams: Promise<{ filter?: string, pageSize?: string, page?: string }> }) {
+export default async function CategoryPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ category: string }>;
+  searchParams: Promise<{ filter?: string; pageSize?: string; page?: string }>;
+}) {
   const { category } = await params;
   const resolvedSearchParams = await searchParams;
-  const field = (resolvedSearchParams?.filter as "latest" | "oldest" | "likes") || "latest";
+  const field =
+    (resolvedSearchParams?.filter as "latest" | "oldest" | "likes") || "latest";
   const pageSize = Number(resolvedSearchParams?.pageSize || 10);
   const page = Number(resolvedSearchParams?.page || 1);
 
@@ -52,6 +65,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
         name: config.website_meta.website_owner,
         avatar: config.website_meta.website_owner_avatar,
         bio: config.website_meta.website_owner_profile,
+        socialInfo: config.social_info_config?.social_info_list || [],
         stats,
       }}
       hideSiteOwnerOnMobile

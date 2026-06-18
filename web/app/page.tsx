@@ -6,10 +6,10 @@ import { getLatestPosts } from "@/src/api/posts";
 import { getCarouselList } from "@/src/api/carousel";
 import { getLatestComments } from "@/src/api/comments";
 import {
+  DEFAULT_COMMON_CONFIG,
   DEFAULT_NOTICE_CONFIG,
-  DEFAULT_WEBSITE_OWNER_CONFIG,
+  getCommonConfig,
   getNoticeConfig,
-  getWebsiteOwnerConfig,
 } from "@/src/api/config";
 import { DEFAULT_WEBSITE_STATS, getWebsiteStats } from "@/src/api/stats";
 
@@ -28,7 +28,7 @@ export default async function Home() {
       settleWithFallback(getCarouselList(), []),
       settleWithFallback(getLatestComments(), []),
       settleWithFallback(getNoticeConfig(), DEFAULT_NOTICE_CONFIG),
-      settleWithFallback(getWebsiteOwnerConfig(), DEFAULT_WEBSITE_OWNER_CONFIG),
+      settleWithFallback(getCommonConfig(), DEFAULT_COMMON_CONFIG),
       settleWithFallback(getWebsiteStats(), DEFAULT_WEBSITE_STATS),
     ]);
 
@@ -52,9 +52,10 @@ export default async function Home() {
         </div>
         <HomeSidebar
           siteOwner={{
-            name: config.data.website_owner,
-            avatar: config.data.website_owner_avatar,
-            bio: config.data.website_owner_profile,
+            name: config.data.website_meta.website_owner,
+            avatar: config.data.website_meta.website_owner_avatar,
+            bio: config.data.website_meta.website_owner_profile,
+            socialInfo: config.data.social_info_config?.social_info_list || [],
             stats: stats.data,
             hasError: config.failed || stats.failed,
           }}

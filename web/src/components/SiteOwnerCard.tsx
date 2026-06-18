@@ -3,11 +3,14 @@
 import { Avatar } from "antd";
 import React from "react";
 import SiteStats, { SiteStatsProps } from "./SiteStats";
+import SocialLinks from "./SocialLinks";
+import type { SocialInfoVO } from "../api/config";
 
 export interface SiteOwnerCardProps {
   name: string;
   avatar?: string;
   bio?: string;
+  socialInfo?: SocialInfoVO[];
   stats?: SiteStatsProps;
   hasError?: boolean;
 }
@@ -16,6 +19,7 @@ export default function SiteOwnerCard({
   name,
   avatar,
   bio,
+  socialInfo,
   stats,
   hasError = false,
 }: SiteOwnerCardProps) {
@@ -38,6 +42,7 @@ export default function SiteOwnerCard({
         <div className="max-w-[18rem] break-words text-sm leading-6 text-gray-500 dark:text-gray-400">
           {hasError ? "网站数据暂时异常" : bio}
         </div>
+        {!hasError && <SocialLinks items={socialInfo} />}
         <SiteStats stats={stats} />
       </div>
     </section>
