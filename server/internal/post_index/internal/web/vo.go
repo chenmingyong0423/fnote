@@ -28,3 +28,13 @@ type BaiduPushVO struct {
 	// 错误描述
 	Message string `json:"message,omitempty"`
 }
+
+type RobotsTxtVO struct {
+	Content string `json:"content"`
+	Exists  bool   `json:"exists"`
+}
+
+type SitemapVO struct {
+	Content string `json:"content"`
+	Exists  bool   `json:"exists"`
+}

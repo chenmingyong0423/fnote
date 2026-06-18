@@ -16,6 +16,8 @@ package service
 
 import (
 	"context"
+	"os"
+	"strings"
 
 	"github.com/chenmingyong0423/fnote/server/internal/category"
 	"github.com/chenmingyong0423/fnote/server/internal/tag"
@@ -32,6 +34,10 @@ import (
 type IPostIndexService interface {
 	PushUrls2Baidu(ctx context.Context, urls string) (*domain.BaiduResponse, error)
 	GenerateSitemap(ctx context.Context) error
+	GetSitemap(ctx context.Context) (string, bool, error)
+	GetRobotsTxt(ctx context.Context) (string, bool, error)
+	GenerateRobotsTxt(ctx context.Context) (string, error)
+	SaveRobotsTxt(ctx context.Context, content string) error
 }
 
 var _ IPostIndexService = (*PostIndexService)(nil)
@@ -83,6 +89,27 @@ func (s *PostIndexService) GenerateSitemap(ctx context.Context) error {
 		return err
 	}
 	return s.fileServ.GenerateSitemap(ctx, postBytes, categoryBytes, tagBytes)
+}
+
+func (s *PostIndexService) GetSitemap(ctx context.Context) (string, bool, error) {
+	return s.fileServ.GetSitemap(ctx)
+}
+
+func (s *PostIndexService) GetRobotsTxt(ctx context.Context) (string, bool, error) {
+	return s.fileServ.GetRobotsTxt(ctx)
+}
+
+func (s *PostIndexService) GenerateRobotsTxt(ctx context.Context) (string, error) {
+	websiteBaseHost := strings.TrimRight(os.Getenv("WEBSITE_BASE_HOST"), "/")
+	if websiteBaseHost == "" {
+		websiteBaseHost = "http://localhost:3000"
+	}
+	content := "User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: " + websiteBaseHost + "/sitemap.xml\n"
+	return content, s.fileServ.SaveRobotsTxt(ctx, content)
+}
+
+func (s *PostIndexService) SaveRobotsTxt(ctx context.Context, content string) error {
+	return s.fileServ.SaveRobotsTxt(ctx, content)
 }
 
 func (s *PostIndexService) PushUrls2Baidu(ctx context.Context, urls string) (*domain.BaiduResponse, error) {

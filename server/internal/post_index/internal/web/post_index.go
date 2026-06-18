@@ -15,6 +15,8 @@
 package web
 
 import (
+	"net/http"
+
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/chenmingyong0423/fnote/server/internal/post_index/internal/service"
 	"github.com/gin-gonic/gin"
@@ -33,7 +35,11 @@ type PostIndexHandler struct {
 func (h *PostIndexHandler) RegisterGinRoutes(engine *gin.Engine) {
 	engine.POST("/post-index/baidu/push", apiwrap.WrapWithBody(h.BaiduPostIndex))
 	adminGroup := engine.Group("/admin-api")
+	adminGroup.GET("/post-index/sitemap", apiwrap.Wrap(h.GetSitemap))
 	adminGroup.POST("/post-index/sitemap", apiwrap.Wrap(h.GenerateSitemap))
+	adminGroup.GET("/post-index/robots", apiwrap.Wrap(h.GetRobotsTxt))
+	adminGroup.PUT("/post-index/robots", apiwrap.WrapWithBody(h.SaveRobotsTxt))
+	adminGroup.POST("/post-index/robots/generate", apiwrap.Wrap(h.GenerateRobotsTxt))
 }
 
 func (h *PostIndexHandler) BaiduPostIndex(ctx *gin.Context, req PostIndexRequest) (*apiwrap.ResponseBody[BaiduPushVO], error) {
@@ -56,4 +62,35 @@ func (h *PostIndexHandler) BaiduPostIndex(ctx *gin.Context, req PostIndexRequest
 
 func (h *PostIndexHandler) GenerateSitemap(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
 	return apiwrap.SuccessResponse(), h.serv.GenerateSitemap(ctx)
+}
+
+func (h *PostIndexHandler) GetSitemap(ctx *gin.Context) (*apiwrap.ResponseBody[SitemapVO], error) {
+	content, exists, err := h.serv.GetSitemap(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponseWithData(SitemapVO{Content: content, Exists: exists}), nil
+}
+
+func (h *PostIndexHandler) GetRobotsTxt(ctx *gin.Context) (*apiwrap.ResponseBody[RobotsTxtVO], error) {
+	content, exists, err := h.serv.GetRobotsTxt(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponseWithData(RobotsTxtVO{Content: content, Exists: exists}), nil
+}
+
+func (h *PostIndexHandler) GenerateRobotsTxt(ctx *gin.Context) (*apiwrap.ResponseBody[RobotsTxtVO], error) {
+	content, err := h.serv.GenerateRobotsTxt(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponseWithData(RobotsTxtVO{Content: content, Exists: true}), nil
+}
+
+func (h *PostIndexHandler) SaveRobotsTxt(ctx *gin.Context, req RobotsTxtRequest) (*apiwrap.ResponseBody[any], error) {
+	if len(req.Content) > 100*1024 {
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "robots.txt content is too large")
+	}
+	return apiwrap.SuccessResponse(), h.serv.SaveRobotsTxt(ctx, req.Content)
 }

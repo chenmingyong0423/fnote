@@ -21,6 +21,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg"
@@ -56,6 +57,9 @@ type IFileService interface {
 	IndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	DeleteIndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	GenerateSitemap(ctx context.Context, postBytes, categoryBytes, tagBytes []byte) error
+	GetSitemap(ctx context.Context) (string, bool, error)
+	GetRobotsTxt(ctx context.Context) (string, bool, error)
+	SaveRobotsTxt(ctx context.Context, content string) error
 	GetFiles(ctx context.Context, pageDTO domain.PageDTO) ([]*domain.File, int64, error)
 }
 
@@ -103,7 +107,7 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 			sitemap.WithLastMod(time.Now().Format(time.DateOnly)),
 			sitemap.WithChangeFreq("always"),
 			sitemap.WithPriority(1.0),
-		).Output(viper.GetString("system.static_path") + "/sitemap.xml")
+		).Output(filepath.Join(viper.GetString("system.static_path"), "sitemap.xml"))
 	for _, p := range posts {
 		if p.Id == "about-me" {
 			aboutMeLastMod = time.Unix(p.UpdatedAt, 0).Format(time.DateOnly)
@@ -154,6 +158,33 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 		return err
 	}
 	return nil
+}
+
+func (s *FileService) GetSitemap(_ context.Context) (string, bool, error) {
+	return s.getStaticTextFile("sitemap.xml")
+}
+
+func (s *FileService) GetRobotsTxt(_ context.Context) (string, bool, error) {
+	return s.getStaticTextFile("robots.txt")
+}
+
+func (s *FileService) getStaticTextFile(filename string) (string, bool, error) {
+	content, err := os.ReadFile(filepath.Join(viper.GetString("system.static_path"), filename))
+	if errors.Is(err, os.ErrNotExist) {
+		return "", false, nil
+	}
+	if err != nil {
+		return "", false, err
+	}
+	return string(content), true, nil
+}
+
+func (s *FileService) SaveRobotsTxt(_ context.Context, content string) error {
+	staticPath := viper.GetString("system.static_path")
+	if err := os.MkdirAll(staticPath, os.ModePerm); err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(staticPath, "robots.txt"), []byte(content), 0o644)
 }
 
 func (s *FileService) DeleteIndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error {

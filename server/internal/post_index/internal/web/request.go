@@ -17,3 +17,7 @@ package web
 type PostIndexRequest struct {
 	Urls string `json:"urls"`
 }
+
+type RobotsTxtRequest struct {
+	Content string `json:"content"`
+}
