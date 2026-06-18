@@ -34,11 +34,10 @@ type IndexConfig struct {
 }
 
 type CommonConfig struct {
-	WebSiteConfig    WebsiteConfig
-	SeoMetaConfig    SeoMetaConfig
-	SocialInfoConfig SocialInfoConfig
-	PayInfoConfig    []PayInfoConfigElem
-	TPSVConfig       []TPSV
+	WebSiteConfig WebsiteConfig
+	SeoMetaConfig SeoMetaConfig
+	PayInfoConfig []PayInfoConfigElem
+	TPSVConfig    []TPSV
 }
 
 type PayInfoConfigElem struct {

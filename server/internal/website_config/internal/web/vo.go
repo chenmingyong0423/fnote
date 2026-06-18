@@ -25,9 +25,10 @@ type IndexConfigVO struct {
 }
 
 type OwnerConfigVO struct {
-	WebsiteOwner        string `json:"website_owner"`
-	WebsiteOwnerProfile string `json:"website_owner_profile"`
-	WebsiteOwnerAvatar  string `json:"website_owner_avatar"`
+	WebsiteOwner        string         `json:"website_owner"`
+	WebsiteOwnerProfile string         `json:"website_owner_profile"`
+	WebsiteOwnerAvatar  string         `json:"website_owner_avatar"`
+	SocialInfoList      []SocialInfoVO `json:"social_info_list"`
 }
 
 type PayInfoConfigVO struct {
@@ -143,12 +144,11 @@ type CarouselVO struct {
 }
 
 type CommonConfigVO struct {
-	WebsiteMeta      WebsiteConfigMetaVO `json:"website_meta"`
-	SeoMeta          SeoMetaConfigVO     `json:"seo_meta"`
-	SocialInfoConfig SocialInfoConfigVO  `json:"social_info_config"`
-	PayInfoConfigVO  []PayInfoConfigVO   `json:"pay_info_config"`
-	TPSVVO           []TPSVVO            `json:"third_party_site_verification"`
-	Records          []string            `json:"records"`
+	WebsiteMeta     WebsiteConfigMetaVO `json:"website_meta"`
+	SeoMeta         SeoMetaConfigVO     `json:"seo_meta"`
+	PayInfoConfigVO []PayInfoConfigVO   `json:"pay_info_config"`
+	TPSVVO          []TPSVVO            `json:"third_party_site_verification"`
+	Records         []string            `json:"records"`
 }
 
 type ConfigCompletionVO struct {

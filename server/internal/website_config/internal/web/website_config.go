@@ -646,7 +646,13 @@ func (h *WebsiteConfigHandler) GetWebsiteOwnerConfig(ctx *gin.Context) (*apiwrap
 	if err != nil {
 		return nil, err
 	}
-	return apiwrap.SuccessResponseWithData(h.toWebsiteOwnerVO(config)), nil
+	socialConfig, err := h.serv.GetSocialConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ownerVO := h.toWebsiteOwnerVO(config)
+	ownerVO.SocialInfoList = h.toSocialInfoConfigVO(&socialConfig).SocialInfoList
+	return apiwrap.SuccessResponseWithData(ownerVO), nil
 }
 
 func (h *WebsiteConfigHandler) GetCommonConfig(ctx *gin.Context) (*apiwrap.ResponseBody[CommonConfigVO], error) {
@@ -656,12 +662,11 @@ func (h *WebsiteConfigHandler) GetCommonConfig(ctx *gin.Context) (*apiwrap.Respo
 	}
 
 	return apiwrap.SuccessResponseWithData(CommonConfigVO{
-		WebsiteMeta:      h.toMetaConfigVO(&config.WebSiteConfig),
-		SeoMeta:          h.toSeoMetaConfigVO(&config.SeoMetaConfig),
-		SocialInfoConfig: h.toSocialInfoConfigVO(&config.SocialInfoConfig),
-		PayInfoConfigVO:  h.toPayInfoConfigVO(config.PayInfoConfig),
-		TPSVVO:           h.toTPSVVO(config.TPSVConfig),
-		Records:          config.WebSiteConfig.WebsiteRecords,
+		WebsiteMeta:     h.toMetaConfigVO(&config.WebSiteConfig),
+		SeoMeta:         h.toSeoMetaConfigVO(&config.SeoMetaConfig),
+		PayInfoConfigVO: h.toPayInfoConfigVO(config.PayInfoConfig),
+		TPSVVO:          h.toTPSVVO(config.TPSVConfig),
+		Records:         config.WebSiteConfig.WebsiteRecords,
 	}), nil
 
 }
