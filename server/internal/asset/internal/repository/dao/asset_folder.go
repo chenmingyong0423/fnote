@@ -81,7 +81,7 @@ func (d *AssetFolderDao) PullAssetId(ctx context.Context, folderObjID bson.Objec
 func (d *AssetFolderDao) PutAssetId(ctx context.Context, folderObjID bson.ObjectID, assetObjID bson.ObjectID) (int64, error) {
 	updateResult, err := d.coll.Updater().
 		Filter(query.Id(folderObjID)).
-		Updates(update.NewBuilder().Push("assets", assetObjID).Set("updated_at", time.Now()).Build()).
+		Updates(update.NewBuilder().AddToSet("assets", assetObjID).Set("updated_at", time.Now()).Build()).
 		UpdateOne(ctx)
 	if err != nil {
 		return 0, err
@@ -106,7 +106,19 @@ func (d *AssetFolderDao) DeleteSubFolderById(ctx context.Context, objectID bson.
 }
 
 func (d *AssetFolderDao) ModifySubFolderById(ctx context.Context, objectID bson.ObjectID, assetFolder *AssetFolder) (int64, error) {
-	updateResult, err := d.coll.Updater().Filter(query.NewBuilder().Id(objectID).Eq("child_folders._id", assetFolder.ID).Build()).Updates(update.NewBuilder().Set("child_folders.$", assetFolder).Set("updated_at", assetFolder.UpdatedAt).Build()).UpdateOne(ctx)
+	updateResult, err := d.coll.Updater().
+		Filter(query.NewBuilder().Id(objectID).Eq("child_folders._id", assetFolder.ID).Build()).
+		Updates(update.NewBuilder().
+			Set("child_folders.$.name", assetFolder.Name).
+			Set("child_folders.$.asset_type", assetFolder.AssetType).
+			Set("child_folders.$.type", assetFolder.Type).
+			Set("child_folders.$.support_delete", assetFolder.SupportDelete).
+			Set("child_folders.$.support_edit", assetFolder.SupportEdit).
+			Set("child_folders.$.support_add", assetFolder.SupportAdd).
+			Set("child_folders.$.updated_at", assetFolder.UpdatedAt).
+			Set("updated_at", assetFolder.UpdatedAt).
+			Build()).
+		UpdateOne(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -134,7 +146,18 @@ func (d *AssetFolderDao) FindById(ctx context.Context, objectID bson.ObjectID) (
 }
 
 func (d *AssetFolderDao) ModifyById(ctx context.Context, assetFolder *AssetFolder) (int64, error) {
-	updateResult, err := d.coll.Updater().Filter(query.Id(assetFolder.ID)).Updates(bsonx.M("$set", assetFolder)).UpdateOne(ctx)
+	updateResult, err := d.coll.Updater().
+		Filter(query.Id(assetFolder.ID)).
+		Updates(update.NewBuilder().
+			Set("name", assetFolder.Name).
+			Set("asset_type", assetFolder.AssetType).
+			Set("type", assetFolder.Type).
+			Set("support_delete", assetFolder.SupportDelete).
+			Set("support_edit", assetFolder.SupportEdit).
+			Set("support_add", assetFolder.SupportAdd).
+			Set("updated_at", assetFolder.UpdatedAt).
+			Build()).
+		UpdateOne(ctx)
 	if err != nil {
 		return 0, err
 	}

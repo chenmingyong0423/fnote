@@ -16,11 +16,13 @@ package service
 
 import (
 	"context"
+	"log/slog"
+	"net/http"
+
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/repository"
-	"github.com/gin-gonic/gin"
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/pkg/errors"
-	"log/slog"
 )
 
 type IAssetService interface {
@@ -75,6 +77,14 @@ func (s *AssetService) DeleteAsset(ctx context.Context, folderId string, assetId
 }
 
 func (s *AssetService) AddAsset(ctx context.Context, folderId string, asset *domain.Asset) (string, error) {
+	folder, err := s.assetFolderRepo.FindById(ctx, folderId)
+	if err != nil {
+		return "", err
+	}
+	if folder.AssetType != asset.AssetType || folder.Type != asset.Type {
+		return "", apiwrap.NewErrorResponseBody(http.StatusBadRequest, "asset type does not match folder")
+	}
+
 	// todo 后面考虑事务
 	assetId, err := s.assetRepo.Add(ctx, asset)
 	if err != nil {
@@ -95,12 +105,12 @@ func (s *AssetService) AddAsset(ctx context.Context, folderId string, asset *dom
 func (s *AssetService) recovery4AddAsset(ctx context.Context, assetId string) {
 	deletedCnt, recoverErr := s.DeleteAssetById(ctx, assetId)
 	if recoverErr != nil {
-		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-		l.ErrorContext(ctx, "failed to delete asset", recoverErr.Error())
+		l := assetLogger(ctx)
+		l.ErrorContext(ctx, "failed to delete asset", "error", recoverErr)
 	}
 	if deletedCnt == 0 {
-		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-		l.ErrorContext(ctx, "failed to delete asset", "DeletedCount = 0")
+		l := assetLogger(ctx)
+		l.ErrorContext(ctx, "failed to delete asset", "deleted_count", 0)
 	}
 }
 
@@ -109,26 +119,87 @@ func (s *AssetService) GetAssetFolderById(ctx context.Context, id string) (*doma
 }
 
 func (s *AssetService) ModifyFolderNameById(ctx context.Context, id string, name string) (int64, error) {
+	folder, err := s.assetFolderRepo.FindById(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	if !folder.SupportEdit {
+		return 0, apiwrap.NewErrorResponseBody(http.StatusForbidden, "asset folder does not support editing")
+	}
 	return s.assetFolderRepo.ModifyFolderNameById(ctx, id, name)
 }
 
 func (s *AssetService) AddSubFolder(ctx context.Context, id string, assetFolder *domain.AssetFolder) (int64, string, error) {
+	folder, err := s.assetFolderRepo.FindById(ctx, id)
+	if err != nil {
+		return 0, "", err
+	}
+	if !folder.SupportAdd {
+		return 0, "", apiwrap.NewErrorResponseBody(http.StatusForbidden, "asset folder does not support adding subfolders")
+	}
+	if folder.AssetType != assetFolder.AssetType || folder.Type != assetFolder.Type {
+		return 0, "", apiwrap.NewErrorResponseBody(http.StatusBadRequest, "subfolder type does not match parent folder")
+	}
 	return s.assetFolderRepo.AddSubFolder(ctx, id, assetFolder)
 }
 
 func (s *AssetService) ModifySubFolderById(ctx context.Context, id string, assetFolder *domain.AssetFolder) (int64, error) {
+	folder, err := s.assetFolderRepo.FindById(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	existing := findChildFolder(folder.ChildFolders, assetFolder.Id)
+	if existing == nil {
+		return 0, apiwrap.NewErrorResponseBody(http.StatusNotFound, "asset subfolder not found")
+	}
+	if !existing.SupportEdit {
+		return 0, apiwrap.NewErrorResponseBody(http.StatusForbidden, "asset subfolder does not support editing")
+	}
+	assetFolder.Assets = existing.Assets
+	assetFolder.ChildFolders = existing.ChildFolders
 	return s.assetFolderRepo.ModifySubFolderById(ctx, id, assetFolder)
 }
 
 func (s *AssetService) DeleteSubFolderById(ctx context.Context, id string, subId string) (int64, error) {
+	folder, err := s.assetFolderRepo.FindById(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	subfolder := findChildFolder(folder.ChildFolders, subId)
+	if subfolder == nil {
+		return 0, apiwrap.NewErrorResponseBody(http.StatusNotFound, "asset subfolder not found")
+	}
+	if !subfolder.SupportDelete {
+		return 0, apiwrap.NewErrorResponseBody(http.StatusForbidden, "asset subfolder does not support deletion")
+	}
+	if len(subfolder.Assets) > 0 || len(subfolder.ChildFolders) > 0 {
+		return 0, apiwrap.NewErrorResponseBody(http.StatusConflict, "asset subfolder is not empty")
+	}
 	return s.assetFolderRepo.DeleteSubFolderById(ctx, id, subId)
 }
 
 func (s *AssetService) DeleteFolderById(ctx context.Context, id string) (int64, error) {
+	folder, err := s.assetFolderRepo.FindById(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	if !folder.SupportDelete {
+		return 0, apiwrap.NewErrorResponseBody(http.StatusForbidden, "asset folder does not support deletion")
+	}
+	if len(folder.Assets) > 0 || len(folder.ChildFolders) > 0 {
+		return 0, apiwrap.NewErrorResponseBody(http.StatusConflict, "asset folder is not empty")
+	}
 	return s.assetFolderRepo.DeleteById(ctx, id)
 }
 
 func (s *AssetService) ModifyFolderById(ctx context.Context, assetFolder *domain.AssetFolder) (int64, error) {
+	existing, err := s.assetFolderRepo.FindById(ctx, assetFolder.Id)
+	if err != nil {
+		return 0, err
+	}
+	if !existing.SupportEdit {
+		return 0, apiwrap.NewErrorResponseBody(http.StatusForbidden, "asset folder does not support editing")
+	}
 	return s.assetFolderRepo.ModifyById(ctx, assetFolder)
 }
 
@@ -156,13 +227,30 @@ func (s *AssetService) DeleteAssetById(ctx context.Context, id string) (int64, e
 }
 
 func (s *AssetService) recovery4PullAssetId(ctx context.Context, folderId string, assetId string) {
-	cnt, err := s.assetFolderRepo.PullAssetId(ctx, folderId, assetId)
+	cnt, err := s.assetFolderRepo.PutAssetId(ctx, folderId, assetId)
 	if err != nil {
-		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-		l.ErrorContext(ctx, "failed to recovery 4 PullAssetId", err.Error())
+		l := assetLogger(ctx)
+		l.ErrorContext(ctx, "failed to recover asset folder reference", "error", err)
 	}
 	if cnt == 0 {
-		l := slog.Default().With("X-Request-ID", ctx.(*gin.Context).GetString("X-Request-ID"))
-		l.ErrorContext(ctx, "failed to recovery 4 PullAssetId", "ModifiedCount = 0")
+		l := assetLogger(ctx)
+		l.ErrorContext(ctx, "failed to recover asset folder reference", "modified_count", 0)
 	}
+}
+
+func findChildFolder(folders []*domain.AssetFolder, id string) *domain.AssetFolder {
+	for _, folder := range folders {
+		if folder.Id == id {
+			return folder
+		}
+	}
+	return nil
+}
+
+func assetLogger(ctx context.Context) *slog.Logger {
+	requestID := ""
+	if getter, ok := ctx.(interface{ GetString(string) string }); ok {
+		requestID = getter.GetString("X-Request-ID")
+	}
+	return slog.Default().With("X-Request-ID", requestID)
 }

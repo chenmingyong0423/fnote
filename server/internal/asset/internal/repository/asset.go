@@ -67,7 +67,19 @@ func (r *AssetRepository) FindByIds(ctx context.Context, ids []string) ([]*domai
 	if err != nil {
 		return nil, err
 	}
-	return r.toDomains(assets), nil
+	domains := r.toDomains(assets)
+	assetsByID := make(map[string]*domain.Asset, len(domains))
+	for _, asset := range domains {
+		assetsByID[asset.Id] = asset
+	}
+
+	ordered := make([]*domain.Asset, 0, len(domains))
+	for _, id := range ids {
+		if asset, ok := assetsByID[id]; ok {
+			ordered = append(ordered, asset)
+		}
+	}
+	return ordered, nil
 }
 
 func (r *AssetRepository) toDomains(assets []*dao.Asset) []*domain.Asset {

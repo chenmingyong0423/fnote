@@ -140,7 +140,7 @@ func (h *AssetHandler) AddSubAssetFolder(ctx *gin.Context, req AssetFolderReques
 	folderId := ctx.Param("folderId")
 	modifyCnt, _, err := h.assetServ.AddSubFolder(ctx, folderId, &domain.AssetFolder{
 		Name:          req.Name,
-		AssetType:     req.Type,
+		AssetType:     req.AssetType,
 		Type:          req.Type,
 		SupportDelete: gkit.GetValueOrDefault(req.SupportDelete),
 		SupportEdit:   gkit.GetValueOrDefault(req.SupportEdit),
@@ -161,7 +161,7 @@ func (h *AssetHandler) ModifySubAssetFolder(ctx *gin.Context, req AssetFolderReq
 	modifyCnt, err := h.assetServ.ModifySubFolderById(ctx, folderId, &domain.AssetFolder{
 		Id:            subId,
 		Name:          req.Name,
-		AssetType:     req.Type,
+		AssetType:     req.AssetType,
 		Type:          req.Type,
 		SupportDelete: gkit.GetValueOrDefault(req.SupportDelete),
 		SupportEdit:   gkit.GetValueOrDefault(req.SupportEdit),

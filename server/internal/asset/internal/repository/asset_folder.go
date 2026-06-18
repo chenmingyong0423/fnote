@@ -121,9 +121,10 @@ func (r *AssetFolderRepository) AddSubFolder(ctx context.Context, id string, ass
 	if err != nil {
 		return 0, "", err
 	}
+	subfolderID := bson.NewObjectID()
 	modifyCnt, err := r.dao.AddSubFolder(ctx, objID, &dao.AssetFolder{
 		Model: mongox.Model{
-			ID:        bson.NewObjectID(),
+			ID:        subfolderID,
 			CreatedAt: time.Now(),
 		},
 		Name:          assetFolder.Name,
@@ -136,7 +137,7 @@ func (r *AssetFolderRepository) AddSubFolder(ctx context.Context, id string, ass
 	if err != nil {
 		return 0, "", err
 	}
-	return modifyCnt, objID.Hex(), nil
+	return modifyCnt, subfolderID.Hex(), nil
 }
 
 func (r *AssetFolderRepository) DeleteById(ctx context.Context, id string) (int64, error) {
@@ -174,6 +175,7 @@ func (r *AssetFolderRepository) ModifyById(ctx context.Context, assetFolder *dom
 		Type:          assetFolder.Type,
 		SupportDelete: assetFolder.SupportDelete,
 		SupportEdit:   assetFolder.SupportEdit,
+		SupportAdd:    assetFolder.SupportAdd,
 	})
 }
 
@@ -184,6 +186,7 @@ func (r *AssetFolderRepository) Add(ctx context.Context, assetFolder *domain.Ass
 		Type:          assetFolder.Type,
 		SupportDelete: assetFolder.SupportDelete,
 		SupportEdit:   assetFolder.SupportEdit,
+		SupportAdd:    assetFolder.SupportAdd,
 	})
 	if err != nil {
 		return "", err
@@ -209,6 +212,7 @@ func (r *AssetFolderRepository) toDomain(assetFolder *dao.AssetFolder) *domain.A
 		ChildFolders:  nil,
 		SupportDelete: assetFolder.SupportDelete,
 		SupportEdit:   assetFolder.SupportEdit,
+		SupportAdd:    assetFolder.SupportAdd,
 	}
 	// 转换 AssetFolder
 	if assetFolder.Assets != nil {
