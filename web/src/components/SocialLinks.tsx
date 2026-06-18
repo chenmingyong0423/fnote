@@ -65,18 +65,17 @@ export default function SocialLinks({ items }: { items?: SocialInfoVO[] }) {
   };
 
   const itemClass =
-    "inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white/60 text-base text-gray-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:border-blue-500 dark:hover:bg-blue-500/10 dark:hover:text-blue-400";
+    "group relative inline-flex h-9 min-w-9 max-w-40 items-center overflow-hidden rounded-full border border-gray-200 bg-white/95 px-[9px] text-base !text-gray-600 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:!text-blue-600 focus-visible:border-blue-300 focus-visible:bg-blue-50 focus-visible:!text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:!text-gray-200 dark:shadow-black/20 dark:hover:border-blue-400 dark:hover:bg-gray-700 dark:hover:!text-blue-300 dark:focus-visible:border-blue-400 dark:focus-visible:bg-gray-700 dark:focus-visible:!text-blue-300 dark:focus-visible:ring-blue-400";
+  const labelClass =
+    "ml-0 max-w-0 overflow-hidden whitespace-nowrap text-xs font-medium opacity-0 transition-[max-width,margin,opacity] duration-[360ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:ml-2 group-hover:max-w-28 group-hover:opacity-100 group-focus-visible:ml-2 group-focus-visible:max-w-28 group-focus-visible:opacity-100";
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-2">
       {items.map((item) => {
         const key = `${item.social_name}-${item.social_value}`;
-        const tooltip = item.is_link
-          ? item.social_name
-          : `${item.social_name}：${item.social_value}`;
 
         return (
-          <Tooltip key={key} title={tooltip}>
+          <span key={key} className="inline-flex h-9 shrink-0">
             {item.is_link ? (
               <a
                 href={resolveHref(item.social_value)}
@@ -85,19 +84,30 @@ export default function SocialLinks({ items }: { items?: SocialInfoVO[] }) {
                 className={itemClass}
                 aria-label={`打开${item.social_name}`}
               >
-                <SocialIcon cssClass={item.css_class} />
+                <span className="inline-flex shrink-0">
+                  <SocialIcon cssClass={item.css_class} />
+                </span>
+                <span className={labelClass}>{item.social_name}</span>
               </a>
             ) : (
-              <button
-                type="button"
-                className={itemClass}
-                aria-label={`复制${item.social_name}`}
-                onClick={() => handleCopy(item)}
+              <Tooltip
+                title={`${item.social_name}：${item.social_value}`}
+                placement="top"
               >
-                <SocialIcon cssClass={item.css_class} />
-              </button>
+                <button
+                  type="button"
+                  className={itemClass}
+                  aria-label={`复制${item.social_name}`}
+                  onClick={() => handleCopy(item)}
+                >
+                  <span className="inline-flex shrink-0">
+                    <SocialIcon cssClass={item.css_class} />
+                  </span>
+                  <span className={labelClass}>{item.social_name}</span>
+                </button>
+              </Tooltip>
             )}
-          </Tooltip>
+          </span>
         );
       })}
     </div>

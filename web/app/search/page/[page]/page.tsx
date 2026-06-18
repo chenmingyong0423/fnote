@@ -3,6 +3,7 @@ import {
   DEFAULT_COMMON_CONFIG,
   DEFAULT_WEBSITE_OWNER_CONFIG,
   getCommonConfig,
+  getWebsiteOwnerConfig,
 } from "@/src/api/config";
 import { DEFAULT_WEBSITE_STATS, getWebsiteStats } from "@/src/api/stats";
 import type { Metadata } from "next";
@@ -79,7 +80,7 @@ export default async function SearchPageWithPagination({
   const pageSize = Number(resolvedSearchParams?.pageSize || 10);
   const keyword = resolvedSearchParams?.keyword || "";
 
-  const [posts, config, stats] = await Promise.all([
+  const [posts, owner, stats] = await Promise.all([
     settleWithFallback(
       getPostList({
         pageNo: pageNumber,
@@ -90,7 +91,7 @@ export default async function SearchPageWithPagination({
       }),
       { ...DEFAULT_POST_LIST, PageNo: pageNumber, PageSize: pageSize },
     ),
-    settleWithFallback(getCommonConfig(), DEFAULT_COMMON_CONFIG),
+    settleWithFallback(getWebsiteOwnerConfig(), DEFAULT_WEBSITE_OWNER_CONFIG),
     settleWithFallback(getWebsiteStats(), DEFAULT_WEBSITE_STATS),
   ]);
 
@@ -104,20 +105,12 @@ export default async function SearchPageWithPagination({
       total={posts.data.totalCount}
       hasError={posts.failed}
       siteOwner={{
-        name: config.failed
-          ? DEFAULT_WEBSITE_OWNER_CONFIG.website_owner
-          : config.data.website_meta.website_owner,
-        avatar: config.failed
-          ? ""
-          : config.data.website_meta.website_owner_avatar,
-        bio: config.failed
-          ? DEFAULT_WEBSITE_OWNER_CONFIG.website_owner_profile
-          : config.data.website_meta.website_owner_profile,
-        socialInfo: config.failed
-          ? []
-          : config.data.social_info_config?.social_info_list || [],
+        name: owner.data.website_owner,
+        avatar: owner.data.website_owner_avatar,
+        bio: owner.data.website_owner_profile,
+        socialInfo: owner.data.social_info_list,
         stats: stats.data,
-        hasError: config.failed || stats.failed,
+        hasError: owner.failed || stats.failed,
       }}
     />
   );

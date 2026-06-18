@@ -46,14 +46,9 @@ export interface SocialInfoVO {
   is_link: boolean;
 }
 
-export interface SocialInfoConfigVO {
-  social_info_list: SocialInfoVO[];
-}
-
 export interface CommonConfigVO {
   website_meta: WebsiteMetaVO;
   seo_meta: SeoMetaConfigVO;
-  social_info_config: SocialInfoConfigVO;
   pay_info_config: PayInfoConfigVO[];
   third_party_site_verification: TPSVVO[];
   records: string[];
@@ -77,9 +72,6 @@ export const DEFAULT_COMMON_CONFIG: CommonConfigVO = {
     keywords: "",
     author: "Fnote",
     robots: "noindex, nofollow",
-  },
-  social_info_config: {
-    social_info_list: [],
   },
   pay_info_config: [],
   third_party_site_verification: [],
@@ -110,12 +102,14 @@ export interface WebsiteOwnerConfigVO {
   website_owner: string;
   website_owner_profile: string;
   website_owner_avatar: string;
+  social_info_list: SocialInfoVO[];
 }
 
 export const DEFAULT_WEBSITE_OWNER_CONFIG: WebsiteOwnerConfigVO = {
   website_owner: "Fnote",
   website_owner_profile: "站点信息暂时无法加载",
   website_owner_avatar: "",
+  social_info_list: [],
 };
 
 // 获取网站主信息

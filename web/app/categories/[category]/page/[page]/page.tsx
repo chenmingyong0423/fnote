@@ -1,7 +1,7 @@
 import ArticleList from "@/src/components/ArticleList";
 import { getPostList } from "@/src/api/posts";
 import { getCategoryNameStringByRoute } from "@/src/api/category";
-import { getCommonConfig } from "@/src/api/config";
+import { getCommonConfig, getWebsiteOwnerConfig } from "@/src/api/config";
 import { getWebsiteStats } from "@/src/api/stats";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -54,7 +54,7 @@ export default async function CategoryPageWithPagination({
     sortOrder: field === "oldest" ? "ASC" : "DESC",
     categories: [categoryName],
   });
-  const config = await getCommonConfig();
+  const owner = await getWebsiteOwnerConfig();
   const stats = await getWebsiteStats();
 
   return (
@@ -62,10 +62,10 @@ export default async function CategoryPageWithPagination({
       list={posts.list}
       total={posts.totalCount}
       siteOwner={{
-        name: config.website_meta.website_owner,
-        avatar: config.website_meta.website_owner_avatar,
-        bio: config.website_meta.website_owner_profile,
-        socialInfo: config.social_info_config?.social_info_list || [],
+        name: owner.website_owner,
+        avatar: owner.website_owner_avatar,
+        bio: owner.website_owner_profile,
+        socialInfo: owner.social_info_list,
         stats,
       }}
       hideSiteOwnerOnMobile
