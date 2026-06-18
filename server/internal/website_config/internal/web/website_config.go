@@ -656,11 +656,12 @@ func (h *WebsiteConfigHandler) GetCommonConfig(ctx *gin.Context) (*apiwrap.Respo
 	}
 
 	return apiwrap.SuccessResponseWithData(CommonConfigVO{
-		WebsiteMeta:     h.toMetaConfigVO(&config.WebSiteConfig),
-		SeoMeta:         h.toSeoMetaConfigVO(&config.SeoMetaConfig),
-		PayInfoConfigVO: h.toPayInfoConfigVO(config.PayInfoConfig),
-		TPSVVO:          h.toTPSVVO(config.TPSVConfig),
-		Records:         config.WebSiteConfig.WebsiteRecords,
+		WebsiteMeta:      h.toMetaConfigVO(&config.WebSiteConfig),
+		SeoMeta:          h.toSeoMetaConfigVO(&config.SeoMetaConfig),
+		SocialInfoConfig: h.toSocialInfoConfigVO(&config.SocialInfoConfig),
+		PayInfoConfigVO:  h.toPayInfoConfigVO(config.PayInfoConfig),
+		TPSVVO:           h.toTPSVVO(config.TPSVConfig),
+		Records:          config.WebSiteConfig.WebsiteRecords,
 	}), nil
 
 }
