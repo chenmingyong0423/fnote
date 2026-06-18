@@ -18,6 +18,8 @@
 - `/admin` -> `admin:80`
 - `/api/*` -> `web:3000`（由 Next.js 继续转发到后端）
 - `/static/*` -> `server:8080`
+- `/sitemap.xml` -> `server:8080/static/sitemap.xml`
+- `/robots.txt` -> `server:8080/static/robots.txt`
 
 ## HTTPS 与安全配置
 
