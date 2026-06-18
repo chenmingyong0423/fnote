@@ -2,6 +2,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/operation-timer.sh"
+start_operation_timer "部署"
+
 COMPOSE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 ENV_FILE="${ENV_FILE:-$COMPOSE_DIR/.env.nginx}"
 COMPOSE_FILE="$COMPOSE_DIR/docker-compose.nginx.yaml"
