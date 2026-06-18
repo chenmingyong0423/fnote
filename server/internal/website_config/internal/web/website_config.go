@@ -17,6 +17,7 @@ package web
 import (
 	"encoding/hex"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -340,13 +341,17 @@ func (h *WebsiteConfigHandler) AdminUpdateFPCConfig(ctx *gin.Context, req Update
 }
 
 func (h *WebsiteConfigHandler) AdminAddRecordInWebsiteConfig(ctx *gin.Context, req AddRecordInWebsiteConfig) (*apiwrap.ResponseBody[any], error) {
-	return apiwrap.SuccessResponse(), h.serv.AddRecordInWebsiteConfig(ctx, req.Record)
+	record := strings.TrimSpace(req.Record)
+	if record == "" {
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "website record is empty")
+	}
+	return apiwrap.SuccessResponse(), h.serv.AddRecordInWebsiteConfig(ctx, record)
 }
 
 func (h *WebsiteConfigHandler) AdminDeleteRecordInWebsiteConfig(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
-	record := ctx.Query("website_record")
+	record := strings.TrimSpace(ctx.Query("website_record"))
 	if record == "" {
-		return nil, errors.New("record is empty")
+		return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "website record is empty")
 	}
 	return apiwrap.SuccessResponse(), h.serv.DeleteRecordInWebsiteConfig(ctx, record)
 }

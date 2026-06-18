@@ -247,7 +247,7 @@ func (r *WebsiteConfigRepository) AddRecordInWebsiteConfig(ctx context.Context, 
 	return r.dao.UpdateByConditionAndUpdates(
 		ctx,
 		query.Eq("typ", "website"),
-		update.NewBuilder().Push("props.website_records", record).Set("updated_at", time.Now().Local()).Build(),
+		update.NewBuilder().AddToSet("props.website_records", record).Set("updated_at", time.Now().Local()).Build(),
 	)
 }
 

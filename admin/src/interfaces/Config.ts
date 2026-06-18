@@ -136,8 +136,11 @@ export const AddRecord = (record: string) => {
 
 export const DeleteRecord = (record: string) => {
   return instance({
-    url: '/configs/website/records?website_record=' + record,
-    method: 'delete'
+    url: '/configs/website/records',
+    method: 'delete',
+    params: {
+      website_record: record
+    }
   })
 }
 
