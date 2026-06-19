@@ -22,6 +22,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/web"
 	"github.com/chenmingyong0423/fnote/server/internal/file"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/mongotx"
 	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
 )
@@ -34,6 +35,8 @@ var AssetProviders = wire.NewSet(web.NewAssetHandler, service.NewAssetService, r
 	repository.NewAssetFolderRepository, dao.NewAssetFolderDao,
 	wire.Bind(new(repository.IAssetFolderRepository), new(*repository.AssetFolderRepository)),
 	wire.Bind(new(dao.IAssetFolderDao), new(*dao.AssetFolderDao)),
+	mongotx.NewManager,
+	wire.Bind(new(mongotx.Runner), new(*mongotx.Manager)),
 )
 
 func InitAssetModule(db *mongox.Database, fileModule *file.Module) *Module {

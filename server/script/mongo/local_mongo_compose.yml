@@ -10,11 +10,30 @@ services:
       MONGO_INITDB_DATABASE: fnote
       MONGO_USERNAME: fnote-user
       MONGO_PASSWORD: 12345678
+      MONGO_REPLICA_SET_NAME: rs0
+      MONGO_REPLICA_SET_KEY: fnote-local-replica-set-key-change-me
     volumes:
       - /tmp/fnote/mongo_data:/data/db
       - ./mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
       - ./mongo-data-init.sh:/docker-entrypoint-initdb.d/mongo-data-init.sh
+      - ./mongo-replica-entrypoint.sh:/usr/local/bin/mongo-replica-entrypoint.sh:ro
     ports:
       - "27017:27017"
+    entrypoint: ["/bin/bash", "/usr/local/bin/mongo-replica-entrypoint.sh"]
+    command: ["mongod", "--auth"]
+
+  mongo-rs-init:
+    image: mongo:latest
+    environment:
+      MONGO_ROOT_USERNAME: fnote
+      MONGO_ROOT_PASSWORD: fnote
+      MONGO_REPLICA_SET_NAME: rs0
+    depends_on:
+      - mongo
     command:
-      - --auth
+      - /bin/bash
+      - -c
+      - |
+        until mongosh --host mongo --username "$${MONGO_ROOT_USERNAME}" --password "$${MONGO_ROOT_PASSWORD}" --authenticationDatabase admin --quiet --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do sleep 2; done
+        mongosh --host mongo --username "$${MONGO_ROOT_USERNAME}" --password "$${MONGO_ROOT_PASSWORD}" --authenticationDatabase admin --quiet --eval "try { rs.status() } catch (e) { rs.initiate({ _id: '$${MONGO_REPLICA_SET_NAME}', members: [{ _id: 0, host: 'mongo:27017' }] }) }"
+        until mongosh --host mongo --username "$${MONGO_ROOT_USERNAME}" --password "$${MONGO_ROOT_PASSWORD}" --authenticationDatabase admin --quiet --eval "if (!db.hello().isWritablePrimary) { quit(1) }" >/dev/null 2>&1; do sleep 2; done

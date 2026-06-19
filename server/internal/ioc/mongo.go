@@ -32,7 +32,7 @@ func NewMongoDB() *mongox.Database {
 		Username:   viper.GetString("mongodb.username"),
 		Password:   viper.GetString("mongodb.password"),
 		AuthSource: viper.GetString("mongodb.auth_source"),
-	}).SetDirect(true))
+	}))
 	if err != nil {
 		panic(err)
 	}

@@ -49,6 +49,15 @@ type fakeFileUsageService struct {
 	inUse   bool
 }
 
+type fakeTransactionRunner struct {
+	calls int
+}
+
+func (f *fakeTransactionRunner) WithinTransaction(ctx context.Context, fn func(context.Context) error) error {
+	f.calls++
+	return fn(ctx)
+}
+
 func (f *fakeFileUsageService) HasOtherUsages(context.Context, []byte, string, string) (bool, error) {
 	return f.inUse, nil
 }
@@ -109,10 +118,11 @@ func (f *fakeAssetFolderRepository) PullAssetId(context.Context, string, string)
 	return 1, nil
 }
 
-func TestDeleteAssetRestoresFolderReferenceWhenAssetDeleteFails(t *testing.T) {
+func TestDeleteAssetReturnsErrorWithoutManualCompensation(t *testing.T) {
 	folderRepo := &fakeAssetFolderRepository{}
 	assetRepo := &fakeAssetRepository{deleteCount: 0}
-	service := NewAssetService(folderRepo, assetRepo, &fakeFileUsageService{})
+	txRunner := &fakeTransactionRunner{}
+	service := NewAssetService(folderRepo, assetRepo, &fakeFileUsageService{}, txRunner)
 
 	err := service.DeleteAsset(context.Background(), "folder-id", "asset-id")
 	if err == nil {
@@ -121,15 +131,18 @@ func TestDeleteAssetRestoresFolderReferenceWhenAssetDeleteFails(t *testing.T) {
 	if folderRepo.pullCalls != 1 {
 		t.Fatalf("expected one pull, got %d", folderRepo.pullCalls)
 	}
-	if folderRepo.putCalls != 1 {
-		t.Fatalf("expected compensation to restore the reference once, got %d", folderRepo.putCalls)
+	if folderRepo.putCalls != 0 {
+		t.Fatalf("manual compensation should not run, got %d put calls", folderRepo.putCalls)
+	}
+	if txRunner.calls != 1 {
+		t.Fatalf("expected one transaction, got %d", txRunner.calls)
 	}
 }
 
 func TestAddAssetRejectsMismatchedFolderType(t *testing.T) {
 	folderRepo := &fakeAssetFolderRepository{folder: &domain.AssetFolder{AssetType: "image", Type: "post-editor"}}
 	assetRepo := &fakeAssetRepository{}
-	service := NewAssetService(folderRepo, assetRepo, &fakeFileUsageService{})
+	service := NewAssetService(folderRepo, assetRepo, &fakeFileUsageService{}, &fakeTransactionRunner{})
 
 	_, err := service.AddAsset(context.Background(), "folder-id", &domain.Asset{AssetType: "video", Type: "post-editor"})
 	if err == nil {
@@ -160,7 +173,7 @@ func TestDeleteFolderHonorsCapabilitiesAndContent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			service := NewAssetService(&fakeAssetFolderRepository{folder: tt.folder}, &fakeAssetRepository{}, &fakeFileUsageService{})
+			service := NewAssetService(&fakeAssetFolderRepository{folder: tt.folder}, &fakeAssetRepository{}, &fakeFileUsageService{}, &fakeTransactionRunner{})
 			_, err := service.DeleteFolderById(context.Background(), "folder-id")
 			if err == nil {
 				t.Fatal("expected folder deletion to be rejected")
@@ -189,6 +202,7 @@ func TestAddAndDeleteImageAssetMaintainFileUsage(t *testing.T) {
 		&fakeAssetFolderRepository{folder: &domain.AssetFolder{AssetType: "image", Type: "post-editor"}},
 		assetRepo,
 		fileUsage,
+		&fakeTransactionRunner{},
 	)
 
 	if _, err := service.AddAsset(context.Background(), "folder-id", asset); err != nil {
@@ -215,6 +229,7 @@ func TestDeleteImageAssetRejectsReferencedFile(t *testing.T) {
 		&fakeAssetFolderRepository{},
 		&fakeAssetRepository{deleteCount: 1, asset: asset},
 		fileUsage,
+		&fakeTransactionRunner{},
 	)
 
 	err := service.DeleteAsset(context.Background(), "folder-id", "asset-id")

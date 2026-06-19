@@ -34,7 +34,7 @@ logger:
   time_format: "2006-01-02 15:04:05"
 mongodb:
   # Compose 部署中使用服务名连接 mongo
-  uri: mongodb://mongo:27017
+  uri: mongodb://mongo:27017/?replicaSet=rs0
   username: fnote-user
   password: 12345678
   auth_source: fnote

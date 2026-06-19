@@ -12,6 +12,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/web"
 	"github.com/chenmingyong0423/fnote/server/internal/file"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/mongotx"
 	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
 )
@@ -24,7 +25,8 @@ func InitAssetModule(db *mongox.Database, fileModule *file.Module) *Module {
 	assetDao := dao.NewAssetDao(db)
 	assetRepository := repository.NewAssetRepository(assetDao)
 	service2 := fileModule.Svc
-	assetService := service.NewAssetService(assetFolderRepository, assetRepository, service2)
+	manager := mongotx.NewManager(db)
+	assetService := service.NewAssetService(assetFolderRepository, assetRepository, service2, manager)
 	assetHandler := web.NewAssetHandler(assetService)
 	module := &Module{
 		Svc: assetService,
@@ -35,4 +37,4 @@ func InitAssetModule(db *mongox.Database, fileModule *file.Module) *Module {
 
 // wire.go:
 
-var AssetProviders = wire.NewSet(web.NewAssetHandler, service.NewAssetService, repository.NewAssetRepository, dao.NewAssetDao, wire.Bind(new(service.IAssetService), new(*service.AssetService)), wire.Bind(new(repository.IAssetRepository), new(*repository.AssetRepository)), wire.Bind(new(dao.IAssetDao), new(*dao.AssetDao)), repository.NewAssetFolderRepository, dao.NewAssetFolderDao, wire.Bind(new(repository.IAssetFolderRepository), new(*repository.AssetFolderRepository)), wire.Bind(new(dao.IAssetFolderDao), new(*dao.AssetFolderDao)))
+var AssetProviders = wire.NewSet(web.NewAssetHandler, service.NewAssetService, repository.NewAssetRepository, dao.NewAssetDao, wire.Bind(new(service.IAssetService), new(*service.AssetService)), wire.Bind(new(repository.IAssetRepository), new(*repository.AssetRepository)), wire.Bind(new(dao.IAssetDao), new(*dao.AssetDao)), repository.NewAssetFolderRepository, dao.NewAssetFolderDao, wire.Bind(new(repository.IAssetFolderRepository), new(*repository.AssetFolderRepository)), wire.Bind(new(dao.IAssetFolderDao), new(*dao.AssetFolderDao)), mongotx.NewManager, wire.Bind(new(mongotx.Runner), new(*mongotx.Manager)))

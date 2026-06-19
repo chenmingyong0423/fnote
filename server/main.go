@@ -84,6 +84,7 @@ func initViper(cfgPath string) error {
 func bindEnv() error {
 	envBindings := map[string]string{
 		"mongodb.username":    "MONGODB_USERNAME",
+		"mongodb.uri":         "MONGODB_URI",
 		"mongodb.password":    "MONGODB_PASSWORD",
 		"mongodb.auth_source": "MONGODB_AUTH_SOURCE",
 		"mongodb.database":    "MONGODB_DATABASE",

@@ -37,9 +37,13 @@ MONGO_ROOT_PASSWORD=fnote
 MONGO_DATABASE=fnote
 MONGO_USERNAME=fnote-user
 MONGO_PASSWORD=你的密码
+MONGO_REPLICA_SET_NAME=rs0
+MONGO_REPLICA_SET_KEY=请替换为足够长的随机字符串
 ```
 
 如果 `data/mongo` 已经初始化过，修改这些变量不会自动修改已有 MongoDB 用户，需要手动改密码或清空数据后重新初始化。
+
+MongoDB 以单节点副本集运行，以支持素材模块的多文档事务。已有数据卷无需清空，部署时的 `mongo-rs-init` 服务会在首次升级时初始化副本集；之后重复执行是幂等的。`MONGO_REPLICA_SET_KEY` 必须在后续部署中保持不变。
 
 ## 放置证书
 

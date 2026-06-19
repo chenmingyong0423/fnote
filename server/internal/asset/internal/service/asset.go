@@ -17,12 +17,12 @@ package service
 import (
 	"context"
 	"encoding/hex"
-	"log/slog"
 	"net/http"
 
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/repository"
 	"github.com/chenmingyong0423/fnote/server/internal/file"
+	"github.com/chenmingyong0423/fnote/server/internal/pkg/mongotx"
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/pkg/errors"
 )
@@ -39,17 +39,17 @@ type IAssetService interface {
 	GetAssetFolderById(ctx context.Context, id string) (*domain.AssetFolder, error)
 	GetAssetsByIDs(ctx context.Context, id string) ([]*domain.Asset, error)
 	AddAsset(ctx context.Context, folderId string, asset *domain.Asset) (string, error)
-	DeleteAssetById(ctx context.Context, id string) (int64, error)
 	DeleteAsset(ctx context.Context, folderId string, assetId string) error
 }
 
 var _ IAssetService = (*AssetService)(nil)
 
-func NewAssetService(repo repository.IAssetFolderRepository, assetRepo repository.IAssetRepository, fileService file.Service) *AssetService {
+func NewAssetService(repo repository.IAssetFolderRepository, assetRepo repository.IAssetRepository, fileService file.Service, txManager mongotx.Runner) *AssetService {
 	return &AssetService{
 		assetFolderRepo: repo,
 		assetRepo:       assetRepo,
 		fileService:     fileService,
+		txManager:       txManager,
 	}
 }
 
@@ -57,90 +57,85 @@ type AssetService struct {
 	assetFolderRepo repository.IAssetFolderRepository
 	assetRepo       repository.IAssetRepository
 	fileService     file.Service
+	txManager       mongotx.Runner
 }
 
 func (s *AssetService) DeleteAsset(ctx context.Context, folderId string, assetId string) error {
-	asset, err := s.assetRepo.FindById(ctx, assetId)
-	if err != nil {
-		return err
-	}
-	fileID, hasFile, err := assetFileID(asset)
-	if err != nil {
-		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, err.Error())
-	}
-	if hasFile {
-		inUse, usageErr := s.fileService.HasOtherUsages(ctx, fileID, assetId, "asset")
-		if usageErr != nil {
-			return usageErr
-		}
-		if inUse {
-			return apiwrap.NewErrorResponseBody(http.StatusConflict, "asset is still referenced by a post or draft")
-		}
-		if err = s.fileService.DeleteIndexFileMeta(ctx, fileID, assetId, "asset"); err != nil {
+	return s.txManager.WithinTransaction(ctx, func(txCtx context.Context) error {
+		asset, err := s.assetRepo.FindById(txCtx, assetId)
+		if err != nil {
 			return err
 		}
-	}
-	// todo 后面考虑事务
-	cnt, err := s.assetFolderRepo.PullAssetId(ctx, folderId, assetId)
-	if err != nil {
-		s.recoverFileUsage(ctx, fileID, hasFile, assetId)
-		return err
-	}
-	if cnt == 0 {
-		s.recoverFileUsage(ctx, fileID, hasFile, assetId)
-		return errors.New("failed to pull assetId, ModifiedCount = 0")
-	}
-	cnt, err = s.assetRepo.DeleteById(ctx, assetId)
-	if err != nil {
-		s.recovery4PullAssetId(ctx, folderId, assetId)
-		s.recoverFileUsage(ctx, fileID, hasFile, assetId)
-		return err
-	}
-	if cnt == 0 {
-		s.recovery4PullAssetId(ctx, folderId, assetId)
-		s.recoverFileUsage(ctx, fileID, hasFile, assetId)
-		return errors.New("failed to delete asset, DeletedCount = 0")
-	}
-	return nil
+		fileID, hasFile, err := assetFileID(asset)
+		if err != nil {
+			return apiwrap.NewErrorResponseBody(http.StatusBadRequest, err.Error())
+		}
+		if hasFile {
+			inUse, usageErr := s.fileService.HasOtherUsages(txCtx, fileID, assetId, "asset")
+			if usageErr != nil {
+				return usageErr
+			}
+			if inUse {
+				return apiwrap.NewErrorResponseBody(http.StatusConflict, "asset is still referenced by a post or draft")
+			}
+			if err = s.fileService.DeleteIndexFileMeta(txCtx, fileID, assetId, "asset"); err != nil {
+				return err
+			}
+		}
+
+		cnt, err := s.assetFolderRepo.PullAssetId(txCtx, folderId, assetId)
+		if err != nil {
+			return err
+		}
+		if cnt == 0 {
+			return errors.New("failed to pull assetId, ModifiedCount = 0")
+		}
+		cnt, err = s.assetRepo.DeleteById(txCtx, assetId)
+		if err != nil {
+			return err
+		}
+		if cnt == 0 {
+			return errors.New("failed to delete asset, DeletedCount = 0")
+		}
+		return nil
+	})
 }
 
 func (s *AssetService) AddAsset(ctx context.Context, folderId string, asset *domain.Asset) (string, error) {
-	folder, err := s.assetFolderRepo.FindById(ctx, folderId)
-	if err != nil {
-		return "", err
-	}
-	if folder.AssetType != asset.AssetType || folder.Type != asset.Type {
-		return "", apiwrap.NewErrorResponseBody(http.StatusBadRequest, "asset type does not match folder")
-	}
 	fileID, hasFile, err := assetFileID(asset)
 	if err != nil {
 		return "", apiwrap.NewErrorResponseBody(http.StatusBadRequest, err.Error())
 	}
 
-	// todo 后面考虑事务
-	assetId, err := s.assetRepo.Add(ctx, asset)
-	if err != nil {
-		return "", err
-	}
-	cnt, err := s.assetFolderRepo.PutAssetId(ctx, folderId, assetId)
-	if err != nil {
-		s.recovery4AddAsset(ctx, assetId)
-		return "", err
-	}
-	if cnt == 0 {
-		s.recovery4AddAsset(ctx, assetId)
-		return "", errors.New("failed to put assetId, DeletedCount = 0")
-	}
-	if hasFile {
-		if err = s.fileService.IndexFileMeta(ctx, fileID, assetId, "asset"); err != nil {
-			if _, pullErr := s.assetFolderRepo.PullAssetId(ctx, folderId, assetId); pullErr != nil {
-				assetLogger(ctx).ErrorContext(ctx, "failed to rollback asset folder reference", "error", pullErr)
-			}
-			s.recovery4AddAsset(ctx, assetId)
-			return "", err
+	var assetId string
+	err = s.txManager.WithinTransaction(ctx, func(txCtx context.Context) error {
+		folder, txErr := s.assetFolderRepo.FindById(txCtx, folderId)
+		if txErr != nil {
+			return txErr
 		}
-	}
-	return assetId, nil
+		if folder.AssetType != asset.AssetType || folder.Type != asset.Type {
+			return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "asset type does not match folder")
+		}
+
+		assetId, txErr = s.assetRepo.Add(txCtx, asset)
+		if txErr != nil {
+			return txErr
+		}
+		cnt, txErr := s.assetFolderRepo.PutAssetId(txCtx, folderId, assetId)
+		if txErr != nil {
+			return txErr
+		}
+		if cnt == 0 {
+			return errors.New("failed to put assetId, ModifiedCount = 0")
+		}
+		if hasFile {
+			if txErr = s.fileService.IndexFileMeta(txCtx, fileID, assetId, "asset"); txErr != nil {
+				return txErr
+			}
+		}
+		return nil
+	})
+	return assetId, err
 }
 
 func assetFileID(asset *domain.Asset) ([]byte, bool, error) {
@@ -160,27 +155,6 @@ func assetFileID(asset *domain.Asset) ([]byte, bool, error) {
 		return nil, false, errors.New("image asset metadata.file_id is invalid")
 	}
 	return decoded, true, nil
-}
-
-func (s *AssetService) recoverFileUsage(ctx context.Context, fileID []byte, hasFile bool, assetID string) {
-	if !hasFile {
-		return
-	}
-	if err := s.fileService.IndexFileMeta(ctx, fileID, assetID, "asset"); err != nil {
-		assetLogger(ctx).ErrorContext(ctx, "failed to recover file usage", "error", err)
-	}
-}
-
-func (s *AssetService) recovery4AddAsset(ctx context.Context, assetId string) {
-	deletedCnt, recoverErr := s.DeleteAssetById(ctx, assetId)
-	if recoverErr != nil {
-		l := assetLogger(ctx)
-		l.ErrorContext(ctx, "failed to delete asset", "error", recoverErr)
-	}
-	if deletedCnt == 0 {
-		l := assetLogger(ctx)
-		l.ErrorContext(ctx, "failed to delete asset", "deleted_count", 0)
-	}
 }
 
 func (s *AssetService) GetAssetFolderById(ctx context.Context, id string) (*domain.AssetFolder, error) {
@@ -291,22 +265,6 @@ func (s *AssetService) GetAssetsByIDs(ctx context.Context, id string) ([]*domain
 	return nil, nil
 }
 
-func (s *AssetService) DeleteAssetById(ctx context.Context, id string) (int64, error) {
-	return s.assetRepo.DeleteById(ctx, id)
-}
-
-func (s *AssetService) recovery4PullAssetId(ctx context.Context, folderId string, assetId string) {
-	cnt, err := s.assetFolderRepo.PutAssetId(ctx, folderId, assetId)
-	if err != nil {
-		l := assetLogger(ctx)
-		l.ErrorContext(ctx, "failed to recover asset folder reference", "error", err)
-	}
-	if cnt == 0 {
-		l := assetLogger(ctx)
-		l.ErrorContext(ctx, "failed to recover asset folder reference", "modified_count", 0)
-	}
-}
-
 func findChildFolder(folders []*domain.AssetFolder, id string) *domain.AssetFolder {
 	for _, folder := range folders {
 		if folder.Id == id {
@@ -314,12 +272,4 @@ func findChildFolder(folders []*domain.AssetFolder, id string) *domain.AssetFold
 		}
 	}
 	return nil
-}
-
-func assetLogger(ctx context.Context) *slog.Logger {
-	requestID := ""
-	if getter, ok := ctx.(interface{ GetString(string) string }); ok {
-		requestID = getter.GetString("X-Request-ID")
-	}
-	return slog.Default().With("X-Request-ID", requestID)
 }

@@ -8,14 +8,35 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-fnote}
       MONGO_USERNAME: ${MONGO_USERNAME:-fnote-user}
       MONGO_PASSWORD: ${MONGO_PASSWORD:-12345678}
+      MONGO_REPLICA_SET_NAME: ${MONGO_REPLICA_SET_NAME:-rs0}
+      MONGO_REPLICA_SET_KEY: ${MONGO_REPLICA_SET_KEY:-fnote-local-replica-set-key-change-me}
     volumes:
       - /fnote/data/mongo:/data/db
       - ./script/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
       - ./script/mongo-data-init.sh:/docker-entrypoint-initdb.d/mongo-data-init.sh
+      - ./script/mongo-replica-entrypoint.sh:/usr/local/bin/mongo-replica-entrypoint.sh:ro
     ports:
       - "27017:27017"
+    entrypoint: ["/bin/bash", "/usr/local/bin/mongo-replica-entrypoint.sh"]
+    command: ["mongod", "--auth"]
+    networks:
+      - fnote-network
+
+  mongo-rs-init:
+    image: mongo:latest
+    environment:
+      MONGO_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-fnote}
+      MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-fnote}
+      MONGO_REPLICA_SET_NAME: ${MONGO_REPLICA_SET_NAME:-rs0}
+    depends_on:
+      - mongo
     command:
-      - --auth
+      - /bin/bash
+      - -c
+      - |
+        until mongosh --host mongo --username "$${MONGO_ROOT_USERNAME}" --password "$${MONGO_ROOT_PASSWORD}" --authenticationDatabase admin --quiet --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do sleep 2; done
+        mongosh --host mongo --username "$${MONGO_ROOT_USERNAME}" --password "$${MONGO_ROOT_PASSWORD}" --authenticationDatabase admin --quiet --eval "try { rs.status() } catch (e) { rs.initiate({ _id: '$${MONGO_REPLICA_SET_NAME}', members: [{ _id: 0, host: 'mongo:27017' }] }) }"
+        until mongosh --host mongo --username "$${MONGO_ROOT_USERNAME}" --password "$${MONGO_ROOT_PASSWORD}" --authenticationDatabase admin --quiet --eval "if (!db.hello().isWritablePrimary) { quit(1) }" >/dev/null 2>&1; do sleep 2; done
     networks:
       - fnote-network
 
@@ -32,8 +53,10 @@ services:
       MONGODB_PASSWORD: ${MONGO_PASSWORD:-12345678}
       MONGODB_AUTH_SOURCE: ${MONGO_DATABASE:-fnote}
       MONGODB_DATABASE: ${MONGO_DATABASE:-fnote}
+      MONGODB_URI: mongodb://mongo:27017/?replicaSet=${MONGO_REPLICA_SET_NAME:-rs0}
     depends_on:
-      - mongo
+      mongo-rs-init:
+        condition: service_completed_successfully
     volumes:
       - /fnote/data/logs:/fnote/logs
       - /fnote/data/static:/fnote/static
