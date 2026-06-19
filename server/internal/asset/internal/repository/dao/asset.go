@@ -39,6 +39,7 @@ type Asset struct {
 }
 
 type IAssetDao interface {
+	FindById(ctx context.Context, objectID bson.ObjectID) (*Asset, error)
 	FindByIds(ctx context.Context, objIDs []bson.ObjectID) ([]*Asset, error)
 	Add(ctx context.Context, asset *Asset) (bson.ObjectID, error)
 	DeleteById(ctx context.Context, objectID bson.ObjectID) (int64, error)
@@ -52,6 +53,10 @@ func NewAssetDao(db *mongox.Database) *AssetDao {
 
 type AssetDao struct {
 	coll *mongox.Collection[Asset]
+}
+
+func (d *AssetDao) FindById(ctx context.Context, objectID bson.ObjectID) (*Asset, error) {
+	return d.coll.Finder().Filter(query.Id(objectID)).FindOne(ctx)
 }
 
 func (d *AssetDao) DeleteById(ctx context.Context, objectID bson.ObjectID) (int64, error) {

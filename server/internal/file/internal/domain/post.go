@@ -22,5 +22,13 @@ type PostEvent struct {
 	DeletedTagId      []string `json:"deleted_tag_id,omitempty"`
 	NewFileId         string   `json:"new_file_id,omitempty"`
 	OldFileId         string   `json:"old_file_id,omitempty"`
+	AddedFileIds      []string `json:"added_file_ids,omitempty"`
+	DeletedFileIds    []string `json:"deleted_file_ids,omitempty"`
 	Type              string   `json:"type"`
+}
+
+type ContentFileEvent struct {
+	EntityId       string   `json:"entity_id"`
+	AddedFileIds   []string `json:"added_file_ids,omitempty"`
+	DeletedFileIds []string `json:"deleted_file_ids,omitempty"`
 }

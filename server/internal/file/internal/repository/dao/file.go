@@ -53,11 +53,14 @@ type FileUsage struct {
 type EntityType string
 
 const (
-	EntityTypePost EntityType = "post"
+	EntityTypePost      EntityType = "post"
+	EntityTypePostDraft EntityType = "post-draft"
+	EntityTypeAsset     EntityType = "asset"
 )
 
 type IFileDao interface {
 	Save(ctx context.Context, file *File) (string, error)
+	FindByFileId(ctx context.Context, fileId []byte) (*File, error)
 	PushIntoUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error
 	PullUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error
 	FindByFileName(ctx context.Context, filename string) (*File, error)
@@ -72,6 +75,10 @@ func NewFileDao(db *mongox.Database) *FileDao {
 
 type FileDao struct {
 	coll *mongox.Collection[File]
+}
+
+func (d *FileDao) FindByFileId(ctx context.Context, fileId []byte) (*File, error) {
+	return d.coll.Finder().Filter(query.Eq("file_id", fileId)).FindOne(ctx)
 }
 
 func (d *FileDao) FindPageByFileType(ctx context.Context, pageNum int64, pageSize int64, fileType []string) ([]*File, int64, error) {
@@ -100,18 +107,18 @@ func (d *FileDao) PullUsedIn(ctx context.Context, fileId []byte, fileUsage FileU
 	if err != nil {
 		return errors.Wrapf(err, "pull used in error, file id: %s, file usage: %+v", fileId, fileUsage)
 	}
-	if updateOne.ModifiedCount == 0 {
+	if updateOne.MatchedCount == 0 {
 		return fmt.Errorf("pull used in error, file id: %s, file usage: %+v", fileId, fileUsage)
 	}
 	return nil
 }
 
 func (d *FileDao) PushIntoUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error {
-	updateOne, err := d.coll.Updater().Filter(bsonx.M("file_id", fileId)).Updates(update.NewBuilder().Push("used_in", fileUsage).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
+	updateOne, err := d.coll.Updater().Filter(bsonx.M("file_id", fileId)).Updates(update.NewBuilder().AddToSet("used_in", fileUsage).Set("updated_at", time.Now().Local()).Build()).UpdateOne(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "push into used in error, file id: %s, file usage: %+v", fileId, fileUsage)
 	}
-	if updateOne.ModifiedCount == 0 {
+	if updateOne.MatchedCount == 0 {
 		return fmt.Errorf("push into used in error, file id: %s, file usage: %+v", fileId, fileUsage)
 	}
 	return nil

@@ -15,7 +15,13 @@
 package web
 
 type FileVO struct {
-	FileId   string `json:"file_id"`
-	FileName string `json:"file_name"`
-	Url      string `json:"url"`
+	FileId   string        `json:"file_id"`
+	FileName string        `json:"file_name"`
+	Url      string        `json:"url"`
+	UsedIn   []FileUsageVO `json:"used_in,omitempty"`
+}
+
+type FileUsageVO struct {
+	Type string `json:"type"`
+	Id   string `json:"id"`
 }

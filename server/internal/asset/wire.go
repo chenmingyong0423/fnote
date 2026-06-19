@@ -21,6 +21,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/web"
+	"github.com/chenmingyong0423/fnote/server/internal/file"
 	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
 )
@@ -35,9 +36,10 @@ var AssetProviders = wire.NewSet(web.NewAssetHandler, service.NewAssetService, r
 	wire.Bind(new(dao.IAssetFolderDao), new(*dao.AssetFolderDao)),
 )
 
-func InitAssetModule(db *mongox.Database) *Module {
+func InitAssetModule(db *mongox.Database, fileModule *file.Module) *Module {
 	panic(wire.Build(
 		AssetProviders,
+		wire.FieldsOf(new(*file.Module), "Svc"),
 		wire.Struct(new(Module), "Svc", "Hdl"),
 	))
 }

@@ -98,10 +98,15 @@ func (h *FileHandler) GetFiles(ctx *gin.Context, req PageRequest) (*apiwrap.Resp
 func (h *FileHandler) toVOs(files []*domain.File) []FileVO {
 	voList := make([]FileVO, len(files))
 	for i, file := range files {
+		usedIn := make([]FileUsageVO, 0, len(file.UsedIn))
+		for _, usage := range file.UsedIn {
+			usedIn = append(usedIn, FileUsageVO{Type: usage.EntityType, Id: usage.EntityId})
+		}
 		voList[i] = FileVO{
 			FileId:   file.FileId,
 			FileName: file.FileName,
 			Url:      file.Url,
+			UsedIn:   usedIn,
 		}
 	}
 	return voList

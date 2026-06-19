@@ -13,6 +13,13 @@ type fakeAssetDAO struct {
 	assets []*dao.Asset
 }
 
+func (f *fakeAssetDAO) FindById(context.Context, bson.ObjectID) (*dao.Asset, error) {
+	if len(f.assets) == 0 {
+		return nil, nil
+	}
+	return f.assets[0], nil
+}
+
 func (f *fakeAssetDAO) FindByIds(context.Context, []bson.ObjectID) ([]*dao.Asset, error) {
 	return f.assets, nil
 }

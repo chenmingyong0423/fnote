@@ -73,14 +73,14 @@ func initializeApp() (*gin.Engine, error) {
 	validators := ioc.InitGinValidators()
 	post_indexModule := post_index.InitPostIndexModule(website_configModule, categoryModule, tagModule, postModule, module)
 	postIndexHandler := post_indexModule.Hdl
-	post_draftModule := post_draft.InitPostDraftModule(database)
+	post_draftModule := post_draft.InitPostDraftModule(database, eventBus)
 	postDraftHandler := post_draftModule.Hdl
 	aggregate_postModule := aggregate_post.InitAggregatePostModule(postModule, post_draftModule)
 	aggregatePostHandler := aggregate_postModule.Hdl
 	postLikeHandler := post_likeModule.Hdl
 	post_visitModule := post_visit.InitPostVisitModule(database)
 	postVisitHandler := post_visitModule.Hdl
-	assetModule := asset.InitAssetModule(database)
+	assetModule := asset.InitAssetModule(database, module)
 	assetHandler := assetModule.Hdl
 	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, messageTemplateHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v2, validators, postIndexHandler, postDraftHandler, aggregatePostHandler, postLikeHandler, postVisitHandler, assetHandler)
 	if err != nil {

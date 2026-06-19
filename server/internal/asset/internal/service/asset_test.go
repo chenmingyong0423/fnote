@@ -6,12 +6,21 @@ import (
 	"testing"
 
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/domain"
+	"github.com/chenmingyong0423/fnote/server/internal/file"
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 )
 
 type fakeAssetRepository struct {
 	addCalls    int
 	deleteCount int64
+	asset       *domain.Asset
+}
+
+func (f *fakeAssetRepository) FindById(context.Context, string) (*domain.Asset, error) {
+	if f.asset != nil {
+		return f.asset, nil
+	}
+	return &domain.Asset{}, nil
 }
 
 func (f *fakeAssetRepository) FindByIds(context.Context, []string) ([]*domain.Asset, error) {
@@ -31,6 +40,27 @@ type fakeAssetFolderRepository struct {
 	folder    *domain.AssetFolder
 	pullCalls int
 	putCalls  int
+}
+
+type fakeFileUsageService struct {
+	file.Service
+	indexed int
+	deleted int
+	inUse   bool
+}
+
+func (f *fakeFileUsageService) HasOtherUsages(context.Context, []byte, string, string) (bool, error) {
+	return f.inUse, nil
+}
+
+func (f *fakeFileUsageService) IndexFileMeta(context.Context, []byte, string, string) error {
+	f.indexed++
+	return nil
+}
+
+func (f *fakeFileUsageService) DeleteIndexFileMeta(context.Context, []byte, string, string) error {
+	f.deleted++
+	return nil
 }
 
 func (f *fakeAssetFolderRepository) FindByAssetTypeAndType(context.Context, string, string) ([]*domain.AssetFolder, error) {
@@ -82,7 +112,7 @@ func (f *fakeAssetFolderRepository) PullAssetId(context.Context, string, string)
 func TestDeleteAssetRestoresFolderReferenceWhenAssetDeleteFails(t *testing.T) {
 	folderRepo := &fakeAssetFolderRepository{}
 	assetRepo := &fakeAssetRepository{deleteCount: 0}
-	service := NewAssetService(folderRepo, assetRepo)
+	service := NewAssetService(folderRepo, assetRepo, &fakeFileUsageService{})
 
 	err := service.DeleteAsset(context.Background(), "folder-id", "asset-id")
 	if err == nil {
@@ -99,7 +129,7 @@ func TestDeleteAssetRestoresFolderReferenceWhenAssetDeleteFails(t *testing.T) {
 func TestAddAssetRejectsMismatchedFolderType(t *testing.T) {
 	folderRepo := &fakeAssetFolderRepository{folder: &domain.AssetFolder{AssetType: "image", Type: "post-editor"}}
 	assetRepo := &fakeAssetRepository{}
-	service := NewAssetService(folderRepo, assetRepo)
+	service := NewAssetService(folderRepo, assetRepo, &fakeFileUsageService{})
 
 	_, err := service.AddAsset(context.Background(), "folder-id", &domain.Asset{AssetType: "video", Type: "post-editor"})
 	if err == nil {
@@ -130,7 +160,7 @@ func TestDeleteFolderHonorsCapabilitiesAndContent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			service := NewAssetService(&fakeAssetFolderRepository{folder: tt.folder}, &fakeAssetRepository{})
+			service := NewAssetService(&fakeAssetFolderRepository{folder: tt.folder}, &fakeAssetRepository{}, &fakeFileUsageService{})
 			_, err := service.DeleteFolderById(context.Background(), "folder-id")
 			if err == nil {
 				t.Fatal("expected folder deletion to be rejected")
@@ -144,5 +174,55 @@ func TestDeleteFolderHonorsCapabilitiesAndContent(t *testing.T) {
 				t.Fatalf("expected status %d, got %d", tt.status, responseErr.HttpCode)
 			}
 		})
+	}
+}
+
+func TestAddAndDeleteImageAssetMaintainFileUsage(t *testing.T) {
+	fileUsage := &fakeFileUsageService{}
+	asset := &domain.Asset{
+		AssetType: "image",
+		Type:      "post-editor",
+		Metadata:  map[string]any{"file_id": "00112233445566778899aabbccddeeff"},
+	}
+	assetRepo := &fakeAssetRepository{deleteCount: 1, asset: asset}
+	service := NewAssetService(
+		&fakeAssetFolderRepository{folder: &domain.AssetFolder{AssetType: "image", Type: "post-editor"}},
+		assetRepo,
+		fileUsage,
+	)
+
+	if _, err := service.AddAsset(context.Background(), "folder-id", asset); err != nil {
+		t.Fatalf("AddAsset() error = %v", err)
+	}
+	if fileUsage.indexed != 1 {
+		t.Fatalf("expected file usage to be indexed once, got %d", fileUsage.indexed)
+	}
+	if err := service.DeleteAsset(context.Background(), "folder-id", "asset-id"); err != nil {
+		t.Fatalf("DeleteAsset() error = %v", err)
+	}
+	if fileUsage.deleted != 1 {
+		t.Fatalf("expected file usage to be deleted once, got %d", fileUsage.deleted)
+	}
+}
+
+func TestDeleteImageAssetRejectsReferencedFile(t *testing.T) {
+	fileUsage := &fakeFileUsageService{inUse: true}
+	asset := &domain.Asset{
+		AssetType: "image",
+		Metadata:  map[string]any{"file_id": "00112233445566778899aabbccddeeff"},
+	}
+	service := NewAssetService(
+		&fakeAssetFolderRepository{},
+		&fakeAssetRepository{deleteCount: 1, asset: asset},
+		fileUsage,
+	)
+
+	err := service.DeleteAsset(context.Background(), "folder-id", "asset-id")
+	if err == nil {
+		t.Fatal("expected referenced asset deletion to fail")
+	}
+	var responseErr apiwrap.ErrorResponseBody
+	if !errors.As(err, &responseErr) || responseErr.HttpCode != 409 {
+		t.Fatalf("expected HTTP 409, got %v", err)
 	}
 }

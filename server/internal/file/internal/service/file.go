@@ -56,6 +56,7 @@ type IFileService interface {
 	Upload(ctx context.Context, fileDTO domain.FileDTO) (*domain.File, error)
 	IndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	DeleteIndexFileMeta(ctx context.Context, fileId []byte, entityId string, entityType string) error
+	HasOtherUsages(ctx context.Context, fileId []byte, entityId string, entityType string) (bool, error)
 	GenerateSitemap(ctx context.Context, postBytes, categoryBytes, tagBytes []byte) error
 	GetSitemap(ctx context.Context) (string, bool, error)
 	GetRobotsTxt(ctx context.Context) (string, bool, error)
@@ -71,12 +72,26 @@ func NewFileService(repo repository.IFileRepository, eventbus *eventbus.EventBus
 		eventBus: eventbus,
 	}
 	go s.subscribePostEvent()
+	go s.subscribePostDraftEvent()
 	return s
 }
 
 type FileService struct {
 	repo     repository.IFileRepository
 	eventBus *eventbus.EventBus
+}
+
+func (s *FileService) HasOtherUsages(ctx context.Context, fileId []byte, entityId string, entityType string) (bool, error) {
+	file, err := s.repo.FindByFileId(ctx, fileId)
+	if err != nil {
+		return false, err
+	}
+	for _, usage := range file.UsedIn {
+		if usage.EntityId != entityId || usage.EntityType != entityType {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func (s *FileService) GetFiles(ctx context.Context, pageDTO domain.PageDTO) ([]*domain.File, int64, error) {
@@ -201,6 +216,9 @@ func (s *FileService) Upload(ctx context.Context, fileDTO domain.FileDTO) (*doma
 	)
 	fileId := uuidx.RearrangeUUID4()
 	if fileDTO.CustomFileName != "" {
+		if filepath.Base(fileDTO.CustomFileName) != fileDTO.CustomFileName || fileDTO.CustomFileName == "." {
+			return nil, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "invalid custom file name")
+		}
 		filename = fileDTO.CustomFileName + fileDTO.FileExt
 		file, err := s.repo.FindByFileName(ctx, filename)
 		if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
@@ -218,13 +236,18 @@ func (s *FileService) Upload(ctx context.Context, fileDTO domain.FileDTO) (*doma
 	if err != nil {
 		return nil, err
 	}
-	create, err := os.Create(staticPath + filename)
+	filePath := filepath.Join(staticPath, filename)
+	create, err := os.Create(filePath)
 	if err != nil {
 		return nil, err
 	}
-	defer create.Close()
-	_, err = create.Write(fileDTO.Content)
-	if err != nil {
+	if _, err = create.Write(fileDTO.Content); err != nil {
+		_ = create.Close()
+		_ = os.Remove(filePath)
+		return nil, err
+	}
+	if err = create.Close(); err != nil {
+		_ = os.Remove(filePath)
 		return nil, err
 	}
 	file := &domain.File{
@@ -233,11 +256,14 @@ func (s *FileService) Upload(ctx context.Context, fileDTO domain.FileDTO) (*doma
 		OriginalFileName: fileDTO.FileName,
 		FileType:         fileDTO.FileType,
 		FileSize:         fileDTO.FileSize,
-		FilePath:         staticPath + filename,
+		FilePath:         filePath,
 		Url:              "/static/" + filename,
 	}
 	err = s.repo.Save(ctx, file)
 	if err != nil {
+		if removeErr := os.Remove(filePath); removeErr != nil && !errors.Is(removeErr, os.ErrNotExist) {
+			return nil, errors.Wrapf(err, "save file metadata failed; rollback file failed: %v", removeErr)
+		}
 		return nil, err
 	}
 	return file, nil
@@ -260,16 +286,68 @@ func (s *FileService) subscribePostEvent() {
 		}
 		switch e.Type {
 		case "create":
-			s.createIndexFileMeta4PostEvent(ctx, e.NewFileId, e.PostId, l)
+			if len(e.AddedFileIds) > 0 {
+				s.indexFileUsages(ctx, e.AddedFileIds, e.PostId, "post", l)
+			} else {
+				s.createIndexFileMeta4PostEvent(ctx, e.NewFileId, e.PostId, l)
+			}
 		case "update":
-			if e.NewFileId != e.OldFileId {
+			if len(e.AddedFileIds) > 0 || len(e.DeletedFileIds) > 0 {
+				s.indexFileUsages(ctx, e.AddedFileIds, e.PostId, "post", l)
+				s.deleteFileUsages(ctx, e.DeletedFileIds, e.PostId, "post", l)
+			} else if e.NewFileId != e.OldFileId {
 				s.createIndexFileMeta4PostEvent(ctx, e.NewFileId, e.PostId, l)
 				s.deleteIndexFileMeta4PostEvent(ctx, e.OldFileId, e.PostId, l)
 			}
 		case "delete":
-			s.deleteIndexFileMeta4PostEvent(ctx, e.OldFileId, e.PostId, l)
+			if len(e.DeletedFileIds) > 0 {
+				s.deleteFileUsages(ctx, e.DeletedFileIds, e.PostId, "post", l)
+			} else {
+				s.deleteIndexFileMeta4PostEvent(ctx, e.OldFileId, e.PostId, l)
+			}
 		}
 		l.InfoContext(ctx, "File: post event: handle successfully")
+	}
+}
+
+func (s *FileService) subscribePostDraftEvent() {
+	eventChan := s.eventBus.Subscribe("post-draft")
+	for event := range eventChan {
+		ctx := context.Background()
+		l := slog.Default()
+		var e domain.ContentFileEvent
+		if err := jsoniter.Unmarshal(event.Payload, &e); err != nil {
+			l.ErrorContext(ctx, "File: post draft event: failed to unmarshal", "error", err)
+			continue
+		}
+		s.indexFileUsages(ctx, e.AddedFileIds, e.EntityId, "post-draft", l)
+		s.deleteFileUsages(ctx, e.DeletedFileIds, e.EntityId, "post-draft", l)
+	}
+}
+
+func (s *FileService) indexFileUsages(ctx context.Context, fileIDs []string, entityID, entityType string, l *slog.Logger) {
+	for _, fileID := range fileIDs {
+		fid, err := hex.DecodeString(fileID)
+		if err != nil {
+			l.ErrorContext(ctx, "failed to decode file id", "file_id", fileID, "error", err)
+			continue
+		}
+		if err = s.IndexFileMeta(ctx, fid, entityID, entityType); err != nil {
+			l.ErrorContext(ctx, "failed to index file usage", "file_id", fileID, "entity_id", entityID, "entity_type", entityType, "error", err)
+		}
+	}
+}
+
+func (s *FileService) deleteFileUsages(ctx context.Context, fileIDs []string, entityID, entityType string, l *slog.Logger) {
+	for _, fileID := range fileIDs {
+		fid, err := hex.DecodeString(fileID)
+		if err != nil {
+			l.ErrorContext(ctx, "failed to decode file id", "file_id", fileID, "error", err)
+			continue
+		}
+		if err = s.DeleteIndexFileMeta(ctx, fid, entityID, entityType); err != nil {
+			l.ErrorContext(ctx, "failed to delete file usage", "file_id", fileID, "entity_id", entityID, "entity_type", entityType, "error", err)
+		}
 	}
 }
 

@@ -11,16 +11,17 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/post_draft/internal/web"
+	"github.com/chenmingyong0423/go-eventbus"
 	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
 )
 
 // Injectors from wire.go:
 
-func InitPostDraftModule(db *mongox.Database) *Module {
+func InitPostDraftModule(db *mongox.Database, eventBus *eventbus.EventBus) *Module {
 	postDraftDao := dao.NewPostDraftDao(db)
 	postDraftRepository := repository.NewPostDraftRepository(postDraftDao)
-	postDraftService := service.NewPostDraftService(postDraftRepository)
+	postDraftService := service.NewPostDraftService(postDraftRepository, eventBus)
 	postDraftHandler := web.NewPostDraftHandler(postDraftService)
 	module := &Module{
 		Svc: postDraftService,

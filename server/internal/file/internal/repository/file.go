@@ -25,6 +25,7 @@ import (
 
 type IFileRepository interface {
 	Save(ctx context.Context, file *domain.File) error
+	FindByFileId(ctx context.Context, fileId []byte) (*domain.File, error)
 	PushIntoUsedIn(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	PullUsedIn(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	FindByFileName(ctx context.Context, filename string) (*domain.File, error)
@@ -39,6 +40,14 @@ func NewFileRepository(dao dao.IFileDao) *FileRepository {
 
 type FileRepository struct {
 	dao dao.IFileDao
+}
+
+func (r *FileRepository) FindByFileId(ctx context.Context, fileId []byte) (*domain.File, error) {
+	file, err := r.dao.FindByFileId(ctx, fileId)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomainFile(file), nil
 }
 
 func (r *FileRepository) FindPageFilesByFileType(ctx context.Context, pageDTO domain.PageDTO) ([]*domain.File, int64, error) {

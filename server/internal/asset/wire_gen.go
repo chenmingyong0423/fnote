@@ -11,18 +11,20 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/repository/dao"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/web"
+	"github.com/chenmingyong0423/fnote/server/internal/file"
 	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/google/wire"
 )
 
 // Injectors from wire.go:
 
-func InitAssetModule(db *mongox.Database) *Module {
+func InitAssetModule(db *mongox.Database, fileModule *file.Module) *Module {
 	assetFolderDao := dao.NewAssetFolderDao(db)
 	assetFolderRepository := repository.NewAssetFolderRepository(assetFolderDao)
 	assetDao := dao.NewAssetDao(db)
 	assetRepository := repository.NewAssetRepository(assetDao)
-	assetService := service.NewAssetService(assetFolderRepository, assetRepository)
+	service2 := fileModule.Svc
+	assetService := service.NewAssetService(assetFolderRepository, assetRepository, service2)
 	assetHandler := web.NewAssetHandler(assetService)
 	module := &Module{
 		Svc: assetService,

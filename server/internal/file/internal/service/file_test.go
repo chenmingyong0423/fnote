@@ -2,12 +2,54 @@ package service
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/chenmingyong0423/fnote/server/internal/file/internal/domain"
 	"github.com/spf13/viper"
 )
+
+type failingFileRepository struct{}
+
+func (failingFileRepository) Save(context.Context, *domain.File) error {
+	return errors.New("save failed")
+}
+func (failingFileRepository) FindByFileId(context.Context, []byte) (*domain.File, error) {
+	return nil, nil
+}
+func (failingFileRepository) PushIntoUsedIn(context.Context, []byte, string, string) error {
+	return nil
+}
+func (failingFileRepository) PullUsedIn(context.Context, []byte, string, string) error { return nil }
+func (failingFileRepository) FindByFileName(context.Context, string) (*domain.File, error) {
+	return nil, nil
+}
+func (failingFileRepository) FindPageFilesByFileType(context.Context, domain.PageDTO) ([]*domain.File, int64, error) {
+	return nil, 0, nil
+}
+
+func TestUploadRemovesPhysicalFileWhenMetadataSaveFails(t *testing.T) {
+	staticPath := t.TempDir()
+	previousStaticPath := viper.GetString("system.static_path")
+	viper.Set("system.static_path", staticPath)
+	t.Cleanup(func() { viper.Set("system.static_path", previousStaticPath) })
+
+	service := &FileService{repo: failingFileRepository{}}
+	_, err := service.Upload(context.Background(), domain.FileDTO{
+		FileName:       "image.png",
+		FileExt:        ".png",
+		CustomFileName: "rollback-test",
+		Content:        []byte("image"),
+	})
+	if err == nil {
+		t.Fatal("expected metadata save to fail")
+	}
+	if _, statErr := os.Stat(filepath.Join(staticPath, "rollback-test.png")); !errors.Is(statErr, os.ErrNotExist) {
+		t.Fatalf("physical file was not rolled back: %v", statErr)
+	}
+}
 
 func TestRobotsTxtLifecycle(t *testing.T) {
 	staticPath := t.TempDir()

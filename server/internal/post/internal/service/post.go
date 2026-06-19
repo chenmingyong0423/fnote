@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"strings"
+	"regexp"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -75,6 +75,37 @@ type PostService struct {
 	eventBus   *eventbus.EventBus
 }
 
+var staticFileIDPattern = regexp.MustCompile(`/static/([[:xdigit:]]+)(?:\.[^/?#)\s]+)?`)
+
+func staticFileIDs(values ...string) []string {
+	seen := make(map[string]struct{})
+	result := make([]string, 0)
+	for _, value := range values {
+		for _, match := range staticFileIDPattern.FindAllStringSubmatch(value, -1) {
+			if _, ok := seen[match[1]]; ok {
+				continue
+			}
+			seen[match[1]] = struct{}{}
+			result = append(result, match[1])
+		}
+	}
+	return result
+}
+
+func diffFileIDs(source, target []string) []string {
+	targetSet := make(map[string]struct{}, len(target))
+	for _, id := range target {
+		targetSet[id] = struct{}{}
+	}
+	result := make([]string, 0)
+	for _, id := range source {
+		if _, ok := targetSet[id]; !ok {
+			result = append(result, id)
+		}
+	}
+	return result
+}
+
 func (s *PostService) UpdatePostCoverImage(ctx context.Context, postId string, coverImage string) error {
 	return s.repo.UpdateCoverImage(ctx, postId, coverImage)
 }
@@ -128,6 +159,8 @@ func (s *PostService) SavePost(ctx context.Context, originalPost *domain.Post, s
 }
 
 func (s *PostService) marshalUpdatePostEvent(post *domain.Post, savedPost *domain.Post) ([]byte, error) {
+	oldFileIDs := staticFileIDs(post.CoverImg, post.Content)
+	newFileIDs := staticFileIDs(savedPost.CoverImg, savedPost.Content)
 	// categories
 	// 被移除的
 	removedCategories := slice.DiffFunc(post.Categories, savedPost.Categories, func(srcItem, dstItem domain.Category4Post) bool {
@@ -177,8 +210,10 @@ func (s *PostService) marshalUpdatePostEvent(post *domain.Post, savedPost *domai
 		DeletedCategoryId: removedCategoryIds,
 		AddedTagId:        addedTagIds,
 		DeletedTagId:      removedTagIds,
-		NewFileId:         strings.Split(savedPost.CoverImg[8:], ".")[0],
-		OldFileId:         strings.Split(post.CoverImg[8:], ".")[0],
+		NewFileId:         firstFileID(staticFileIDs(savedPost.CoverImg)),
+		OldFileId:         firstFileID(staticFileIDs(post.CoverImg)),
+		AddedFileIds:      diffFileIDs(newFileIDs, oldFileIDs),
+		DeletedFileIds:    diffFileIDs(oldFileIDs, newFileIDs),
 		Type:              "update",
 	}
 	return json.Marshal(postEvent)
@@ -206,9 +241,10 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 		DeletedTagId: slice.Map[domain.Tag4Post, string](post.Tags, func(_ int, t domain.Tag4Post) string {
 			return t.Id
 		}),
-		OldFileId:    strings.Split(post.CoverImg[8:], ".")[0],
-		CommentCount: post.CommentCount,
-		Type:         "delete",
+		OldFileId:      firstFileID(staticFileIDs(post.CoverImg)),
+		DeletedFileIds: staticFileIDs(post.CoverImg, post.Content),
+		CommentCount:   post.CommentCount,
+		Type:           "delete",
 	}
 	marshal, err := json.Marshal(postInfo)
 	if err != nil {
@@ -251,14 +287,22 @@ func (s *PostService) marshalPostEvent(post *domain.Post) ([]byte, error) {
 		AddedTagId: slice.Map[domain.Tag4Post, string](post.Tags, func(_ int, t domain.Tag4Post) string {
 			return t.Id
 		}),
-		NewFileId: strings.Split(post.CoverImg[8:], ".")[0],
-		Type:      "create",
+		NewFileId:    firstFileID(staticFileIDs(post.CoverImg)),
+		AddedFileIds: staticFileIDs(post.CoverImg, post.Content),
+		Type:         "create",
 	}
 	marshal, err := json.Marshal(postInfo)
 	if err != nil {
 		return nil, err
 	}
 	return marshal, nil
+}
+
+func firstFileID(ids []string) string {
+	if len(ids) == 0 {
+		return ""
+	}
+	return ids[0]
 }
 
 func (s *PostService) AdminGetPosts(ctx context.Context, page domain.Page) ([]*domain.Post, int64, error) {
