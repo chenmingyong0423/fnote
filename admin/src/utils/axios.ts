@@ -1,5 +1,5 @@
 // src/http/axios.ts
-import axios from 'axios'
+import axios, { AxiosError, CanceledError, type InternalAxiosRequestConfig } from 'axios'
 import { useUserStore } from '@/stores/user'
 import { message } from 'ant-design-vue'
 import router from '@/router'
@@ -20,11 +20,80 @@ const instance = axios.create({
   }
 })
 
+const publicPaths = new Set([
+  '/login',
+  '/configs/check-initialization',
+  '/configs/website/meta'
+])
+const activeRequests = new Set<AbortController>()
+let invalidatedToken = ''
+let handlingUnauthorized = false
+
+type TrackedRequestConfig = InternalAxiosRequestConfig & {
+  sessionController?: AbortController
+}
+
+const isPublicRequest = (config: InternalAxiosRequestConfig) =>
+  publicPaths.has(String(config.url || '').split('?')[0])
+
+const trackRequest = (config: TrackedRequestConfig) => {
+  const controller = new AbortController()
+  const signal = config.signal
+  if (signal) {
+    if (signal.aborted) {
+      controller.abort()
+    } else if (signal.addEventListener) {
+      signal.addEventListener('abort', () => controller.abort(), { once: true })
+    }
+  }
+  config.sessionController = controller
+  config.signal = controller.signal
+  activeRequests.add(controller)
+}
+
+const finishRequest = (config?: TrackedRequestConfig) => {
+  if (config?.sessionController) {
+    activeRequests.delete(config.sessionController)
+  }
+}
+
+const pendingRequest = <T>() => new Promise<T>(() => undefined)
+
+const expireSession = (token: string) => {
+  if (handlingUnauthorized && invalidatedToken === token) return
+
+  handlingUnauthorized = true
+  invalidatedToken = token
+  activeRequests.forEach((controller) => controller.abort())
+  activeRequests.clear()
+
+  const userStore = useUserStore()
+  userStore.clearSession()
+  message.warn('登录过期，请重新登录').then((r) => r)
+  if (router.currentRoute.value.name !== 'login') {
+    router.replace({ name: 'login' }).then((r) => r)
+  }
+}
+
 // 请求拦截器
 instance.interceptors.request.use(
-  (config) => {
+  (config: TrackedRequestConfig) => {
     const userStore = useUserStore()
-    config.headers.set('Authorization', userStore.token)
+    const token = userStore.token
+    if (token && token !== invalidatedToken) {
+      invalidatedToken = ''
+      handlingUnauthorized = false
+    }
+    if (!isPublicRequest(config) && userStore.isSessionExpired) {
+      expireSession(token)
+      return pendingRequest<InternalAxiosRequestConfig>()
+    }
+    if (!isPublicRequest(config) && handlingUnauthorized) {
+      return pendingRequest<InternalAxiosRequestConfig>()
+    }
+
+    trackRequest(config)
+    config.headers.set('Authorization', token)
     // 判断body里是否有 file 参数，有则设置请求头为 multipart/form-data
     if (config.data instanceof FormData) {
       config.headers.set('Content-Type', 'multipart/form-data')
@@ -35,36 +104,39 @@ instance.interceptors.request.use(
   },
   (error) => {
     message.error(error.toString()).then((r) => r)
-    return error
+    return Promise.reject(error)
   }
 )
 
 // 响应拦截器
 instance.interceptors.response.use(
   (response) => {
+    finishRequest(response.config as TrackedRequestConfig)
     return response
   },
-  (error) => {
+  (error: AxiosError) => {
+    finishRequest(error.config as TrackedRequestConfig | undefined)
+    if (error instanceof CanceledError || error.code === 'ERR_CANCELED') {
+      return pendingRequest()
+    }
     // 对响应错误做点什么
     if (!error.response) {
       message.error(error.toString()).then((r) => r)
-      return
+      return Promise.reject(error)
     }
 
     const userStore = useUserStore()
-    const contentType = error.response.headers['content-type']
+    const contentType = String(error.response.headers['content-type'] || '')
 
     switch (error.response.status) {
       case 401:
-        message.warn('登录过期，请重新登录').then((r) => r)
-        userStore.token = ''
-        localStorage.clear()
-        router.push({ path: '/login', replace: true }).then((r) => r)
-        break
+        expireSession(userStore.token || invalidatedToken)
+        return pendingRequest()
       case 500:
-        if (contentType && contentType.includes('application/json') && error.response.data) {
+        if (contentType.includes('application/json') && error.response.data) {
           console.log(error)
-          message.error(error.response.data.message).then((r) => r)
+          const data = error.response.data as { message?: string }
+          message.error(data.message || error.message).then((r) => r)
           return
         } else {
           message.error(error.toString()).then((r) => r)

@@ -100,6 +100,12 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
+  if (to.name !== 'login' && to.name !== 'init' && userStore.isSessionExpired) {
+    userStore.clearSession()
+    message.warn('登录过期，请重新登录').then((r) => r)
+    next({ name: 'login', replace: true })
+    return
+  }
   if (!userStore.initialization) {
     await isInit()
       .then((res) => {
