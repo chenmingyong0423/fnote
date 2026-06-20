@@ -16,9 +16,19 @@
       <a-select v-model:value="fileType" class="w-45" @change="changeFileType">
         <a-select-option value="all">全部文件</a-select-option>
         <a-select-option value="image">图片</a-select-option>
+        <a-select-option value="unused-image">未使用图片</a-select-option>
         <a-select-option value="image/png">PNG</a-select-option>
         <a-select-option value="image/jpeg">JPEG</a-select-option>
       </a-select>
+      <template v-if="selectedFileIds.length > 0">
+        <span class="selection-count">已选 {{ selectedFileIds.length }} 个</span>
+        <a-popconfirm
+          :title="`确认删除所选 ${selectedFileIds.length} 个文件？物理文件也会一并删除。`"
+          @confirm="batchDeleteFiles"
+        >
+          <a-button danger :loading="batchDeleting">删除所选</a-button>
+        </a-popconfirm>
+      </template>
     </div>
 
     <a-table
@@ -26,6 +36,7 @@
       :data-source="files"
       :loading="loading"
       :pagination="pagination"
+      :row-selection="rowSelection"
       row-key="file_id"
       bordered
       @change="changePage"
@@ -103,7 +114,7 @@ import dayjs from 'dayjs'
 import { message, type TableColumnType, type TableProps } from 'ant-design-vue'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 import SimpleUpload from '@/components/upload/SimpleUpload.vue'
-import { DeleteFile, type FileVO, GetFileList } from '@/interfaces/File'
+import { BatchDeleteFiles, DeleteFile, type FileVO, GetFileList } from '@/interfaces/File'
 import { useUserStore } from '@/stores/user'
 import { toErrorMessage } from '@/utils/error'
 
@@ -114,6 +125,8 @@ const userStore = useUserStore()
 const files = ref<FileVO[]>([])
 const loading = ref(false)
 const deletingFileId = ref('')
+const selectedFileIds = ref<string[]>([])
+const batchDeleting = ref(false)
 const fileType = ref('all')
 const pageNum = ref(1)
 const pageSize = ref(10)
@@ -137,19 +150,32 @@ const pagination = computed(() => ({
   showTotal: (value: number) => `共 ${value} 个文件`
 }))
 
+const rowSelection = computed<TableProps<FileVO>['rowSelection']>(() => ({
+  selectedRowKeys: selectedFileIds.value,
+  onChange: (keys) => {
+    selectedFileIds.value = keys.map(String)
+  },
+  getCheckboxProps: (record) => ({
+    disabled: record.used_in.length > 0,
+    name: record.file_name
+  })
+}))
+
 const selectedFileTypes = () => {
   if (fileType.value === 'all') return []
-  if (fileType.value === 'image') return ['image/png', 'image/jpeg']
+  if (fileType.value === 'image' || fileType.value === 'unused-image') return ['image/png', 'image/jpeg']
   return [fileType.value]
 }
 
 const loadFiles = async () => {
+  selectedFileIds.value = []
   loading.value = true
   try {
     const response: any = await GetFileList({
       pageNum: pageNum.value,
       pageSize: pageSize.value,
-      fileType: selectedFileTypes()
+      fileType: selectedFileTypes(),
+      unused: fileType.value === 'unused-image'
     })
     files.value = response.data.data?.list || []
     total.value = response.data.data?.totalCount || 0
@@ -191,6 +217,26 @@ const deleteFile = async (file: FileVO) => {
   }
 }
 
+const batchDeleteFiles = async () => {
+  if (selectedFileIds.value.length === 0 || batchDeleting.value) return
+
+  batchDeleting.value = true
+  try {
+    await BatchDeleteFiles(selectedFileIds.value)
+    message.success(`成功删除 ${selectedFileIds.value.length} 个文件`)
+    selectedFileIds.value = []
+    await loadFiles()
+    if (files.value.length === 0 && pageNum.value > 1) {
+      pageNum.value--
+      await loadFiles()
+    }
+  } catch (error) {
+    message.error(toErrorMessage(error, '批量删除失败'))
+  } finally {
+    batchDeleting.value = false
+  }
+}
+
 const formatFileSize = (size: number) => {
   if (size < 1024) return `${size} B`
   if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
@@ -228,5 +274,9 @@ loadFiles()
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+.selection-count {
+  line-height: 32px;
 }
 </style>

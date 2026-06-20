@@ -19,6 +19,7 @@ export type PageRequest = {
   pageNum: number
   pageSize: number
   fileType: string[]
+  unused: boolean
 }
 
 // type FileVO struct {
@@ -57,5 +58,13 @@ export const DeleteFile = (fileId: string) => {
   return instance({
     url: `/files/${fileId}`,
     method: 'delete'
+  })
+}
+
+export const BatchDeleteFiles = (fileIds: string[]) => {
+  return instance({
+    url: `/files/batch`,
+    method: 'delete',
+    data: { file_ids: fileIds }
   })
 }
