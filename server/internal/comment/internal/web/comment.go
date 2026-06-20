@@ -356,7 +356,9 @@ func (h *CommentHandler) AdminApproveComment(ctx *gin.Context) (*apiwrap.Respons
 	l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 	go func() {
 		// 通知用户评论已通过
-		gErr := h.msgServ.SendEmailWithEmail(notificationCtx, message_template.UserCommentApproved, []string{comment.UserInfo.Email}, "text/plain", comment.PostInfo.PostUrl)
+		gErr := h.msgServ.SendEmailWithEmail(notificationCtx, message_template.UserCommentApproved, []string{comment.UserInfo.Email}, "text/plain", message_template.Data{
+			message_template.VariablePostURL: comment.PostInfo.PostUrl,
+		})
 		if gErr != nil {
 			l.WarnContext(notificationCtx, fmt.Sprintf("%+v", gErr))
 		}
@@ -385,12 +387,16 @@ func (h *CommentHandler) AdminApproveCommentReply(ctx *gin.Context) (*apiwrap.Re
 	l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 	go func() {
 		// 通知用户评论已通过
-		gErr := h.msgServ.SendEmailWithEmail(notificationCtx, message_template.UserCommentApproved, []string{commentReplyWithPostInfo.UserInfo.Email}, "text/plain", commentReplyWithPostInfo.PostInfo.PostUrl)
+		gErr := h.msgServ.SendEmailWithEmail(notificationCtx, message_template.UserCommentApproved, []string{commentReplyWithPostInfo.UserInfo.Email}, "text/plain", message_template.Data{
+			message_template.VariablePostURL: commentReplyWithPostInfo.PostInfo.PostUrl,
+		})
 		if gErr != nil {
 			l.WarnContext(notificationCtx, fmt.Sprintf("%+v", gErr))
 		}
 		// 通知被回复的用户接收到了回复
-		gErr = h.msgServ.SendEmailWithEmail(notificationCtx, message_template.UserCommentReplied, []string{commentReplyWithPostInfo.RepliedUserInfo.Email}, "text/plain", commentReplyWithPostInfo.PostInfo.PostUrl)
+		gErr = h.msgServ.SendEmailWithEmail(notificationCtx, message_template.UserCommentReplied, []string{commentReplyWithPostInfo.RepliedUserInfo.Email}, "text/plain", message_template.Data{
+			message_template.VariablePostURL: commentReplyWithPostInfo.PostInfo.PostUrl,
+		})
 		if gErr != nil {
 			l.WarnContext(notificationCtx, fmt.Sprintf("%+v", gErr))
 		}
@@ -446,7 +452,9 @@ func (h *CommentHandler) AdminBatchApproveComments(ctx *gin.Context, req BatchAp
 		l.InfoContext(notificationCtx, fmt.Sprintf("approvalEmailInfos=%v", approvalEmailInfos))
 		l.InfoContext(notificationCtx, fmt.Sprintf("repliedEmailInfos=%v", repliedEmailInfos))
 		for _, approvalEmailInfo := range approvalEmailInfos {
-			gErr := h.msgServ.SendEmailWithEmail(notificationCtx, message_template.UserCommentApproved, []string{approvalEmailInfo.Email}, "text/plain", approvalEmailInfo.PostUrl)
+			gErr := h.msgServ.SendEmailWithEmail(notificationCtx, message_template.UserCommentApproved, []string{approvalEmailInfo.Email}, "text/plain", message_template.Data{
+				message_template.VariablePostURL: approvalEmailInfo.PostUrl,
+			})
 			if gErr != nil {
 				l.WarnContext(notificationCtx, fmt.Sprintf("%+v", gErr))
 			}
@@ -454,7 +462,9 @@ func (h *CommentHandler) AdminBatchApproveComments(ctx *gin.Context, req BatchAp
 
 		// 通知被回复的用户接收到了回复
 		for _, repliedEmailInfo := range repliedEmailInfos {
-			gErr := h.msgServ.SendEmailWithEmail(notificationCtx, message_template.UserCommentReplied, []string{repliedEmailInfo.Email}, "text/plain", repliedEmailInfo.PostUrl)
+			gErr := h.msgServ.SendEmailWithEmail(notificationCtx, message_template.UserCommentReplied, []string{repliedEmailInfo.Email}, "text/plain", message_template.Data{
+				message_template.VariablePostURL: repliedEmailInfo.PostUrl,
+			})
 			if gErr != nil {
 				l.WarnContext(notificationCtx, fmt.Sprintf("%+v", gErr))
 			}

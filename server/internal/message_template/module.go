@@ -25,6 +25,7 @@ type (
 	Service       = service.IMessageTemplateService
 	Name          = domain.Name
 	RecipientType = domain.RecipientType
+	Data          = domain.Data
 	Module        struct {
 		Svc Service
 		Hdl *Handler
@@ -32,13 +33,16 @@ type (
 )
 
 const (
-	CommentReceived     = domain.CommentReceived
-	UserCommentApproved = domain.UserCommentApproved
-	UserCommentRejected = domain.UserCommentRejected
-	UserCommentReplied  = domain.UserCommentReplied
-	FriendApplied       = domain.FriendApplied
-	UserFriendApproved  = domain.UserFriendApproved
-	UserFriendRejected  = domain.UserFriendRejected
-	RecipientWebmaster  = domain.RecipientWebmaster
-	RecipientUser       = domain.RecipientUser
+	CommentReceived       = domain.CommentReceived
+	UserCommentApproved   = domain.UserCommentApproved
+	UserCommentRejected   = domain.UserCommentRejected
+	UserCommentReplied    = domain.UserCommentReplied
+	FriendApplied         = domain.FriendApplied
+	UserFriendApproved    = domain.UserFriendApproved
+	UserFriendRejected    = domain.UserFriendRejected
+	RecipientWebmaster    = domain.RecipientWebmaster
+	RecipientUser         = domain.RecipientUser
+	VariablePostURL       = domain.VariablePostURL
+	VariableFriendPageURL = domain.VariableFriendPageURL
+	VariableReason        = domain.VariableReason
 )

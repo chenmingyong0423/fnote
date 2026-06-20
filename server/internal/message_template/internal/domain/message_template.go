@@ -14,7 +14,12 @@
 
 package domain
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+	"strings"
+	"text/template"
+)
 
 type Name string
 
@@ -35,12 +40,53 @@ const (
 	RecipientUser
 )
 
+type Data map[string]any
+
+const (
+	VariablePostURL       = "PostURL"
+	VariableFriendPageURL = "FriendPageURL"
+	VariableReason        = "Reason"
+)
+
 type MessageTemplate struct {
 	Name    Name
 	Title   string
 	Content string
 }
 
-func (mt *MessageTemplate) FormatContent(args ...any) {
-	mt.Content = fmt.Sprintf(mt.Content, args...)
+func (mt *MessageTemplate) RenderContent(data Data) error {
+	content := normalizeLegacyContent(mt.Name, mt.Content)
+	if strings.Contains(content, "%s") {
+		return fmt.Errorf("message template %q contains unsupported legacy placeholders", mt.Name)
+	}
+
+	tpl, err := template.New(string(mt.Name)).Option("missingkey=error").Parse(content)
+	if err != nil {
+		return fmt.Errorf("parse message template %q: %w", mt.Name, err)
+	}
+
+	var rendered bytes.Buffer
+	if err = tpl.Execute(&rendered, data); err != nil {
+		return fmt.Errorf("render message template %q: %w", mt.Name, err)
+	}
+	mt.Content = rendered.String()
+	return nil
+}
+
+func normalizeLegacyContent(name Name, content string) string {
+	var variables []string
+	switch name {
+	case UserCommentApproved, UserCommentReplied:
+		variables = []string{VariablePostURL}
+	case UserCommentRejected:
+		variables = []string{VariablePostURL, VariableReason}
+	case UserFriendApproved:
+		variables = []string{VariableFriendPageURL}
+	case UserFriendRejected:
+		variables = []string{VariableFriendPageURL, VariableReason}
+	}
+	for _, variable := range variables {
+		content = strings.Replace(content, "%s", "{{."+variable+"}}", 1)
+	}
+	return content
 }

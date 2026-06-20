@@ -26,7 +26,7 @@ import (
 )
 
 type IMessageService interface {
-	SendEmailWithEmail(ctx context.Context, msgTplName message_template.Name, email []string, contentType string, args ...any) error
+	SendEmailWithEmail(ctx context.Context, msgTplName message_template.Name, email []string, contentType string, data message_template.Data) error
 	SendEmailToWebmaster(ctx context.Context, msgTplName message_template.Name, contentType string) error
 }
 
@@ -49,10 +49,10 @@ type MessageService struct {
 }
 
 func (s *MessageService) SendEmailToWebmaster(ctx context.Context, msgTplName message_template.Name, contentType string) error {
-	return s.sendEmail(ctx, msgTplName, contentType, message_template.RecipientWebmaster, nil)
+	return s.sendEmail(ctx, msgTplName, contentType, message_template.RecipientWebmaster, nil, nil)
 }
 
-func (s *MessageService) sendEmail(ctx context.Context, msgTplName message_template.Name, contentType string, recipientType message_template.RecipientType, email []string, args ...any) error {
+func (s *MessageService) sendEmail(ctx context.Context, msgTplName message_template.Name, contentType string, recipientType message_template.RecipientType, email []string, data message_template.Data) error {
 	emailCfg, err := s.configServ.GetEmailConfig(ctx)
 	if err != nil {
 		return err
@@ -68,8 +68,8 @@ func (s *MessageService) sendEmail(ctx context.Context, msgTplName message_templ
 	if err != nil {
 		return err
 	}
-	if len(args) > 0 {
-		msgTpl.FormatContent(args...)
+	if err = msgTpl.RenderContent(data); err != nil {
+		return err
 	}
 	return s.emailServ.SendEmail(ctx, emailPkg.Email{
 		Host:        emailCfg.Host,
@@ -84,6 +84,6 @@ func (s *MessageService) sendEmail(ctx context.Context, msgTplName message_templ
 	})
 }
 
-func (s *MessageService) SendEmailWithEmail(ctx context.Context, msgTplName message_template.Name, email []string, contentType string, args ...any) error {
-	return s.sendEmail(ctx, msgTplName, contentType, message_template.RecipientUser, email, args...)
+func (s *MessageService) SendEmailWithEmail(ctx context.Context, msgTplName message_template.Name, email []string, contentType string, data message_template.Data) error {
+	return s.sendEmail(ctx, msgTplName, contentType, message_template.RecipientUser, email, data)
 }
