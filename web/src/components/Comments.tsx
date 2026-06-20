@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { getCommentsByPostId, CommentItem } from "@/src/api/comments";
-import { message, Divider, Card } from "antd";
+import { App, Divider, Card } from "antd";
 import { CommentOutlined } from "@ant-design/icons";
 
 import { CommentForm } from "./CommentForm";
@@ -13,6 +13,7 @@ interface CommentsProps {
 }
 
 export const Comments: React.FC<CommentsProps> = ({ postId, initialComments }) => {
+  const { message } = App.useApp();
   const [comments, setComments] = useState<CommentItem[]>(initialComments ?? []);
   const [loading, setLoading] = useState(false);
   // 用于标记当前在哪条评论下方显示回复表单
@@ -30,7 +31,7 @@ export const Comments: React.FC<CommentsProps> = ({ postId, initialComments }) =
     } finally {
       setLoading(false);
     }
-  }, [postId]);
+  }, [message, postId]);
 
   useEffect(() => {
     if (initialComments) {

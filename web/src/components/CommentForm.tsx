@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import {message} from "antd";
+import { App } from "antd";
 import {addComment, AddCommentBody} from "@/src/api/comments";
 import {BaseCommentForm} from "./BaseCommentForm";
 import type { FormInstance } from 'antd';
@@ -12,6 +12,7 @@ interface CommentFormProps {
 }
 
 export const CommentForm: React.FC<CommentFormProps> = ({postId, onSuccessAction}) => {
+    const { message } = App.useApp();
     const [preview, setPreview] = React.useState(false);
     const formRef = React.useRef<FormInstance>(null);
     const handleFinish = async (values: AddCommentBody) => {

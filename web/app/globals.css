@@ -254,6 +254,13 @@ svg {
 }
 
 .markdown-body {
+  color-scheme: light;
+  --fgColor-default: #1f2328;
+  --fgColor-muted: #59636e;
+  --fgColor-accent: #0969da;
+  --bgColor-muted: #f6f8fa;
+  --borderColor-default: #d1d9e0;
+  --borderColor-muted: #d1d9e0b3;
   background: transparent;
   max-width: 100%;
   overflow-wrap: anywhere;
@@ -272,6 +279,13 @@ svg {
 
 /* 暗黑模式支持 */
 .dark .markdown-body {
+  color-scheme: dark;
+  --fgColor-default: #f0f6fc;
+  --fgColor-muted: #9198a1;
+  --fgColor-accent: #4493f8;
+  --bgColor-muted: #151b23;
+  --borderColor-default: #3d444d;
+  --borderColor-muted: #3d444db3;
   background: transparent;
   color: #e6e6e6;
 }

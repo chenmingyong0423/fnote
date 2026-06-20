@@ -1,4 +1,5 @@
 "use client";
+import "@ant-design/v5-patch-for-react-19";
 import React, { useEffect, useState } from "react";
 import { App, ConfigProvider, theme as antdTheme } from "antd";
 import zhCN from "antd/locale/zh_CN";

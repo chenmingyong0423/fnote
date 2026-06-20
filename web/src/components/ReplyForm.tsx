@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { message } from "antd";
+import { App } from "antd";
 import { addReply, AddReplyBody } from "@/src/api/comments";
 import { BaseCommentForm } from "./BaseCommentForm";
 import {getUserFriendlyError} from "@/src/utils/errorMessage";
@@ -14,6 +14,7 @@ interface ReplyFormProps {
 }
 
 export const ReplyForm: React.FC<ReplyFormProps> = ({ postId, commentId, replyToId, onSuccessAction }) => {
+  const { message } = App.useApp();
   const [preview, setPreview] = React.useState(false);
   const [formKey, setFormKey] = React.useState(0);
   const handleFinish = async (values: AddReplyBody) => {
