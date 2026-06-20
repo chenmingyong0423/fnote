@@ -239,7 +239,7 @@ db.getCollection("message_templates").insertOne({
 db.getCollection("message_templates").insertOne({
     name: "user-comment-approval",
     title: "评论审核通过通知",
-    content: "您好，您在 %s 文章中发表的评论已通过审核。",
+    content: "您好，您在 {{.PostURL}} 文章中发表的评论已通过审核。",
     created_at: new Date(),
     updated_at: new Date(),
     recipient_type: 1,
@@ -249,7 +249,7 @@ db.getCollection("message_templates").insertOne({
 db.getCollection("message_templates").insertOne({
     name: "user-comment-disapproval",
     title: "评论被驳回通知",
-    content: "您好，您在 %s 文章中发表的评论未通过审核，原因：%s",
+    content: "您好，您在 {{.PostURL}} 文章中发表的评论未通过审核，原因：{{.Reason}}",
     created_at: new Date(),
     updated_at: new Date(),
     recipient_type: 1,
@@ -259,7 +259,7 @@ db.getCollection("message_templates").insertOne({
 db.getCollection("message_templates").insertOne({
     name: "user-comment-reply",
     title: "评论被回复通知",
-    content: "您好，您在 %s 文章中发表的评论有新的回复。",
+    content: "您好，您在 {{.PostURL}} 文章中发表的评论有新的回复。",
     created_at: new Date(),
     updated_at: new Date(),
     recipient_type: 1,
@@ -279,7 +279,7 @@ db.getCollection("message_templates").insertOne({
 db.getCollection("message_templates").insertOne({
     name: "friend-approval",
     title: "友链申请通过通知",
-    content: "您好，您在 %s 网站里提交的友链申请已通过审核并展示在页面上。",
+    content: "您好，您在 {{.FriendPageURL}} 网站里提交的友链申请已通过审核并展示在页面上。",
     created_at: new Date(),
     updated_at: new Date(),
     recipient_type: 1,
@@ -289,7 +289,7 @@ db.getCollection("message_templates").insertOne({
 db.getCollection("message_templates").insertOne({
     name: "friend-rejection",
     title: "友链申请不通过通知",
-    content: "您好，您在 %s 网站里提交的友链申请未通过审核，原因：%s",
+    content: "您好，您在 {{.FriendPageURL}} 网站里提交的友链申请未通过审核，原因：{{.Reason}}",
     created_at: new Date(),
     updated_at: new Date(),
     recipient_type: 1,
