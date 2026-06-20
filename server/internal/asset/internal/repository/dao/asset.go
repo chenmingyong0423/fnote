@@ -41,6 +41,7 @@ type Asset struct {
 type IAssetDao interface {
 	FindById(ctx context.Context, objectID bson.ObjectID) (*Asset, error)
 	FindByIds(ctx context.Context, objIDs []bson.ObjectID) ([]*Asset, error)
+	FindByFileID(ctx context.Context, fileID string) (*Asset, error)
 	Add(ctx context.Context, asset *Asset) (bson.ObjectID, error)
 	DeleteById(ctx context.Context, objectID bson.ObjectID) (int64, error)
 }
@@ -57,6 +58,10 @@ type AssetDao struct {
 
 func (d *AssetDao) FindById(ctx context.Context, objectID bson.ObjectID) (*Asset, error) {
 	return d.coll.Finder().Filter(query.Id(objectID)).FindOne(ctx)
+}
+
+func (d *AssetDao) FindByFileID(ctx context.Context, fileID string) (*Asset, error) {
+	return d.coll.Finder().Filter(query.Eq("metadata.file_id", fileID)).FindOne(ctx)
 }
 
 func (d *AssetDao) DeleteById(ctx context.Context, objectID bson.ObjectID) (int64, error) {

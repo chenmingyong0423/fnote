@@ -25,6 +25,7 @@ import (
 type IAssetRepository interface {
 	FindById(ctx context.Context, id string) (*domain.Asset, error)
 	FindByIds(ctx context.Context, ids []string) ([]*domain.Asset, error)
+	FindByFileID(ctx context.Context, fileID string) (*domain.Asset, error)
 	Add(ctx context.Context, asset *domain.Asset) (string, error)
 	DeleteById(ctx context.Context, id string) (int64, error)
 }
@@ -37,6 +38,14 @@ func NewAssetRepository(dao dao.IAssetDao) *AssetRepository {
 
 type AssetRepository struct {
 	dao dao.IAssetDao
+}
+
+func (r *AssetRepository) FindByFileID(ctx context.Context, fileID string) (*domain.Asset, error) {
+	asset, err := r.dao.FindByFileID(ctx, fileID)
+	if err != nil {
+		return nil, err
+	}
+	return r.toDomain(asset), nil
 }
 
 func (r *AssetRepository) FindById(ctx context.Context, id string) (*domain.Asset, error) {

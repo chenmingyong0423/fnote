@@ -14,6 +14,11 @@
 
 package domain
 
+const (
+	AssetTypeImage    = "image"
+	AssetUseTypePostEditor = "post-editor"
+)
+
 type Asset struct {
 	Id string
 	// 素材标题

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"net/http"
 	"testing"
 
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/domain"
@@ -16,6 +17,8 @@ type fakeAssetRepository struct {
 	asset       *domain.Asset
 	assets      []*domain.Asset
 	foundIDs    []string
+	fileAsset   *domain.Asset
+	fileFindErr error
 }
 
 func (f *fakeAssetRepository) FindById(context.Context, string) (*domain.Asset, error) {
@@ -23,6 +26,10 @@ func (f *fakeAssetRepository) FindById(context.Context, string) (*domain.Asset, 
 		return f.asset, nil
 	}
 	return &domain.Asset{}, nil
+}
+
+func (f *fakeAssetRepository) FindByFileID(context.Context, string) (*domain.Asset, error) {
+	return f.fileAsset, f.fileFindErr
 }
 
 func (f *fakeAssetRepository) FindByIds(_ context.Context, ids []string) ([]*domain.Asset, error) {
@@ -149,11 +156,16 @@ func TestDeleteAssetReturnsErrorWithoutManualCompensation(t *testing.T) {
 }
 
 func TestAddAssetRejectsMismatchedFolderType(t *testing.T) {
-	folderRepo := &fakeAssetFolderRepository{folder: &domain.AssetFolder{AssetType: "image", Type: "post-editor"}}
+	folderRepo := &fakeAssetFolderRepository{folder: &domain.AssetFolder{AssetType: "image", Type: "legacy"}}
 	assetRepo := &fakeAssetRepository{}
 	service := NewAssetService(folderRepo, assetRepo, &fakeFileUsageService{}, &fakeTransactionRunner{})
 
-	_, err := service.AddAsset(context.Background(), "folder-id", &domain.Asset{AssetType: "video", Type: "post-editor"})
+	_, err := service.AddAsset(context.Background(), "folder-id", &domain.Asset{
+		Content:   "/static/test.png",
+		AssetType: domain.AssetTypeImage,
+		Type:      domain.AssetUseTypePostEditor,
+		Metadata:  map[string]any{"file_id": "00112233445566778899aabbccddeeff"},
+	})
 	if err == nil {
 		t.Fatal("expected mismatched asset type to be rejected")
 	}
@@ -202,6 +214,7 @@ func TestDeleteFolderHonorsCapabilitiesAndContent(t *testing.T) {
 func TestAddAndDeleteImageAssetMaintainFileUsage(t *testing.T) {
 	fileUsage := &fakeFileUsageService{}
 	asset := &domain.Asset{
+		Content:   "/static/test.png",
 		AssetType: "image",
 		Type:      "post-editor",
 		Metadata:  map[string]any{"file_id": "00112233445566778899aabbccddeeff"},
@@ -225,6 +238,74 @@ func TestAddAndDeleteImageAssetMaintainFileUsage(t *testing.T) {
 	}
 	if fileUsage.deleted != 1 {
 		t.Fatalf("expected file usage to be deleted once, got %d", fileUsage.deleted)
+	}
+}
+
+func TestAddAssetValidatesClassificationAndImageURL(t *testing.T) {
+	tests := []struct {
+		name  string
+		asset *domain.Asset
+	}{
+		{
+			name:  "unsupported asset type",
+			asset: &domain.Asset{AssetType: "video", Type: domain.AssetUseTypePostEditor},
+		},
+		{
+			name:  "unsupported use type",
+			asset: &domain.Asset{AssetType: domain.AssetTypeImage, Type: "cover"},
+		},
+		{
+			name: "invalid image URL",
+			asset: &domain.Asset{
+				Content:   "javascript:alert(1)",
+				AssetType: domain.AssetTypeImage,
+				Type:      domain.AssetUseTypePostEditor,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assetRepo := &fakeAssetRepository{}
+			service := NewAssetService(&fakeAssetFolderRepository{}, assetRepo, &fakeFileUsageService{}, &fakeTransactionRunner{})
+			if _, err := service.AddAsset(context.Background(), "folder-id", tt.asset); err == nil {
+				t.Fatal("expected invalid asset to be rejected")
+			}
+			if assetRepo.addCalls != 0 {
+				t.Fatal("invalid asset should not be persisted")
+			}
+		})
+	}
+}
+
+func TestAddAssetRejectsDuplicateFile(t *testing.T) {
+	assetRepo := &fakeAssetRepository{fileAsset: &domain.Asset{Id: "existing-asset"}}
+	service := NewAssetService(
+		&fakeAssetFolderRepository{folder: &domain.AssetFolder{AssetType: domain.AssetTypeImage, Type: domain.AssetUseTypePostEditor}},
+		assetRepo,
+		&fakeFileUsageService{},
+		&fakeTransactionRunner{},
+	)
+	asset := &domain.Asset{
+		Content:   "/static/test.png",
+		AssetType: domain.AssetTypeImage,
+		Type:      domain.AssetUseTypePostEditor,
+		Metadata:  map[string]any{"file_id": "00112233445566778899AABBCCDDEEFF"},
+	}
+
+	_, err := service.AddAsset(context.Background(), "folder-id", asset)
+	if err == nil {
+		t.Fatal("expected duplicate file to be rejected")
+	}
+	var responseErr apiwrap.ErrorResponseBody
+	if !errors.As(err, &responseErr) || responseErr.HttpCode != http.StatusConflict {
+		t.Fatalf("expected HTTP 409, got %v", err)
+	}
+	if asset.Metadata["file_id"] != "00112233445566778899aabbccddeeff" {
+		t.Fatalf("file ID was not normalized: %v", asset.Metadata["file_id"])
+	}
+	if assetRepo.addCalls != 0 {
+		t.Fatal("duplicate asset should not be persisted")
 	}
 }
 

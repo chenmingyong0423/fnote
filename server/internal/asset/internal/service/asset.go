@@ -18,6 +18,8 @@ import (
 	"context"
 	"encoding/hex"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/asset/internal/repository"
@@ -25,6 +27,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/pkg/mongotx"
 	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type IAssetService interface {
@@ -102,6 +105,14 @@ func (s *AssetService) DeleteAsset(ctx context.Context, folderId string, assetId
 }
 
 func (s *AssetService) AddAsset(ctx context.Context, folderId string, asset *domain.Asset) (string, error) {
+	if err := validateAssetClassification(asset.AssetType, asset.Type); err != nil {
+		return "", err
+	}
+	if asset.AssetType == domain.AssetTypeImage {
+		if err := validateImageURL(asset.Content); err != nil {
+			return "", err
+		}
+	}
 	fileID, hasFile, err := assetFileID(asset)
 	if err != nil {
 		return "", apiwrap.NewErrorResponseBody(http.StatusBadRequest, err.Error())
@@ -115,6 +126,15 @@ func (s *AssetService) AddAsset(ctx context.Context, folderId string, asset *dom
 		}
 		if folder.AssetType != asset.AssetType || folder.Type != asset.Type {
 			return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "asset type does not match folder")
+		}
+		if hasFile {
+			existing, findErr := s.assetRepo.FindByFileID(txCtx, asset.Metadata["file_id"].(string))
+			if findErr != nil && !errors.Is(findErr, mongo.ErrNoDocuments) {
+				return findErr
+			}
+			if existing != nil {
+				return apiwrap.NewErrorResponseBody(http.StatusConflict, "file already exists as an asset")
+			}
 		}
 
 		assetId, txErr = s.assetRepo.Add(txCtx, asset)
@@ -139,7 +159,7 @@ func (s *AssetService) AddAsset(ctx context.Context, folderId string, asset *dom
 }
 
 func assetFileID(asset *domain.Asset) ([]byte, bool, error) {
-	if asset.AssetType != "image" {
+	if asset.AssetType != domain.AssetTypeImage {
 		return nil, false, nil
 	}
 	value, ok := asset.Metadata["file_id"]
@@ -151,10 +171,34 @@ func assetFileID(asset *domain.Asset) ([]byte, bool, error) {
 		return nil, false, errors.New("image asset metadata.file_id must be a non-empty string")
 	}
 	decoded, err := hex.DecodeString(fileID)
-	if err != nil {
+	if err != nil || len(decoded) != 16 {
 		return nil, false, errors.New("image asset metadata.file_id is invalid")
 	}
+	asset.Metadata["file_id"] = hex.EncodeToString(decoded)
 	return decoded, true, nil
+}
+
+func validateAssetClassification(assetType, useType string) error {
+	if assetType != domain.AssetTypeImage {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "unsupported asset_type")
+	}
+	if useType != domain.AssetUseTypePostEditor {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "unsupported type")
+	}
+	return nil
+}
+
+func validateImageURL(content string) error {
+	parsed, err := url.ParseRequestURI(content)
+	if err != nil {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "invalid image URL")
+	}
+	isHTTPURL := parsed.Host != "" && (parsed.Scheme == "http" || parsed.Scheme == "https")
+	isStaticPath := parsed.Host == "" && parsed.Scheme == "" && strings.HasPrefix(parsed.Path, "/static/")
+	if !isHTTPURL && !isStaticPath {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "invalid image URL")
+	}
+	return nil
 }
 
 func (s *AssetService) GetAssetFolderById(ctx context.Context, id string) (*domain.AssetFolder, error) {
@@ -173,6 +217,9 @@ func (s *AssetService) ModifyFolderNameById(ctx context.Context, id string, name
 }
 
 func (s *AssetService) AddSubFolder(ctx context.Context, id string, assetFolder *domain.AssetFolder) (int64, string, error) {
+	if err := validateAssetClassification(assetFolder.AssetType, assetFolder.Type); err != nil {
+		return 0, "", err
+	}
 	folder, err := s.assetFolderRepo.FindById(ctx, id)
 	if err != nil {
 		return 0, "", err
@@ -187,6 +234,9 @@ func (s *AssetService) AddSubFolder(ctx context.Context, id string, assetFolder 
 }
 
 func (s *AssetService) ModifySubFolderById(ctx context.Context, id string, assetFolder *domain.AssetFolder) (int64, error) {
+	if err := validateAssetClassification(assetFolder.AssetType, assetFolder.Type); err != nil {
+		return 0, err
+	}
 	folder, err := s.assetFolderRepo.FindById(ctx, id)
 	if err != nil {
 		return 0, err
@@ -236,6 +286,9 @@ func (s *AssetService) DeleteFolderById(ctx context.Context, id string) (int64, 
 }
 
 func (s *AssetService) ModifyFolderById(ctx context.Context, assetFolder *domain.AssetFolder) (int64, error) {
+	if err := validateAssetClassification(assetFolder.AssetType, assetFolder.Type); err != nil {
+		return 0, err
+	}
 	existing, err := s.assetFolderRepo.FindById(ctx, assetFolder.Id)
 	if err != nil {
 		return 0, err
@@ -247,10 +300,16 @@ func (s *AssetService) ModifyFolderById(ctx context.Context, assetFolder *domain
 }
 
 func (s *AssetService) AddFolder(ctx context.Context, assetFolder *domain.AssetFolder) (string, error) {
+	if err := validateAssetClassification(assetFolder.AssetType, assetFolder.Type); err != nil {
+		return "", err
+	}
 	return s.assetFolderRepo.Add(ctx, assetFolder)
 }
 
 func (s *AssetService) GetFoldersByAssetTypeAndType(ctx context.Context, assertType string, typ string) ([]*domain.AssetFolder, error) {
+	if err := validateAssetClassification(assertType, typ); err != nil {
+		return nil, err
+	}
 	return s.assetFolderRepo.FindByAssetTypeAndType(ctx, assertType, typ)
 }
 

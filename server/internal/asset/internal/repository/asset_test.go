@@ -24,6 +24,13 @@ func (f *fakeAssetDAO) FindByIds(context.Context, []bson.ObjectID) ([]*dao.Asset
 	return f.assets, nil
 }
 
+func (f *fakeAssetDAO) FindByFileID(context.Context, string) (*dao.Asset, error) {
+	if len(f.assets) == 0 {
+		return nil, nil
+	}
+	return f.assets[0], nil
+}
+
 func (f *fakeAssetDAO) Add(context.Context, *dao.Asset) (bson.ObjectID, error) {
 	return bson.NilObjectID, nil
 }

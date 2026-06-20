@@ -22,9 +22,9 @@ type PostAssetRequest struct {
 	// 素材描述
 	Description string `json:"description"`
 	// 素材类型，image ···
-	AssetType string `json:"asset_type" binding:"required"`
+	AssetType string `json:"asset_type" binding:"required,oneof=image"`
 	// 文件夹类型，post-editor ···
-	Type string `json:"type" binding:"required"`
+	Type string `json:"type" binding:"required,oneof=post-editor"`
 	// 元数据
 	Metadata map[string]any `json:"metadata"`
 }
@@ -32,9 +32,9 @@ type PostAssetRequest struct {
 type AssetFolderRequest struct {
 	Name string `json:"name" binding:"required"`
 	// 文件夹归属的素材类型，image ···
-	AssetType string `json:"asset_type" binding:"required"`
+	AssetType string `json:"asset_type" binding:"required,oneof=image"`
 	// 文件夹类型，post-editor ···
-	Type          string `json:"type" binding:"required"`
+	Type          string `json:"type" binding:"required,oneof=post-editor"`
 	SupportDelete *bool  `json:"support_delete" binding:"required"`
 	SupportEdit   *bool  `json:"support_edit" binding:"required"`
 	SupportAdd    *bool  `json:"support_add" binding:"required"`
