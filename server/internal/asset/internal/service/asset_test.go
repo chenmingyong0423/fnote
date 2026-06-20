@@ -14,6 +14,8 @@ type fakeAssetRepository struct {
 	addCalls    int
 	deleteCount int64
 	asset       *domain.Asset
+	assets      []*domain.Asset
+	foundIDs    []string
 }
 
 func (f *fakeAssetRepository) FindById(context.Context, string) (*domain.Asset, error) {
@@ -23,8 +25,9 @@ func (f *fakeAssetRepository) FindById(context.Context, string) (*domain.Asset, 
 	return &domain.Asset{}, nil
 }
 
-func (f *fakeAssetRepository) FindByIds(context.Context, []string) ([]*domain.Asset, error) {
-	return nil, nil
+func (f *fakeAssetRepository) FindByIds(_ context.Context, ids []string) ([]*domain.Asset, error) {
+	f.foundIDs = ids
+	return f.assets, nil
 }
 
 func (f *fakeAssetRepository) Add(context.Context, *domain.Asset) (string, error) {
@@ -38,6 +41,8 @@ func (f *fakeAssetRepository) DeleteById(context.Context, string) (int64, error)
 
 type fakeAssetFolderRepository struct {
 	folder    *domain.AssetFolder
+	assetIDs  []string
+	total     int64
 	pullCalls int
 	putCalls  int
 }
@@ -86,6 +91,10 @@ func (f *fakeAssetFolderRepository) ModifyById(context.Context, *domain.AssetFol
 
 func (f *fakeAssetFolderRepository) FindById(context.Context, string) (*domain.AssetFolder, error) {
 	return f.folder, nil
+}
+
+func (f *fakeAssetFolderRepository) FindAssetIDPageById(context.Context, string, int64, int64) ([]string, int64, error) {
+	return f.assetIDs, f.total, nil
 }
 
 func (f *fakeAssetFolderRepository) DeleteById(context.Context, string) (int64, error) {
@@ -239,5 +248,22 @@ func TestDeleteImageAssetRejectsReferencedFile(t *testing.T) {
 	var responseErr apiwrap.ErrorResponseBody
 	if !errors.As(err, &responseErr) || responseErr.HttpCode != 409 {
 		t.Fatalf("expected HTTP 409, got %v", err)
+	}
+}
+
+func TestGetAssetsByFolderIdUsesPagedAssetIDs(t *testing.T) {
+	folderRepo := &fakeAssetFolderRepository{assetIDs: []string{"asset-2", "asset-3"}, total: 5}
+	assetRepo := &fakeAssetRepository{assets: []*domain.Asset{{Id: "asset-2"}, {Id: "asset-3"}}}
+	service := NewAssetService(folderRepo, assetRepo, &fakeFileUsageService{}, &fakeTransactionRunner{})
+
+	assets, total, err := service.GetAssetsByFolderId(context.Background(), "folder-id", 2, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if total != 5 || len(assets) != 2 {
+		t.Fatalf("unexpected page: total=%d assets=%#v", total, assets)
+	}
+	if len(assetRepo.foundIDs) != 2 || assetRepo.foundIDs[0] != "asset-2" || assetRepo.foundIDs[1] != "asset-3" {
+		t.Fatalf("unexpected queried IDs: %#v", assetRepo.foundIDs)
 	}
 }

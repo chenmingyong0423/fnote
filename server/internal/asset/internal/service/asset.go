@@ -37,7 +37,7 @@ type IAssetService interface {
 	DeleteSubFolderById(ctx context.Context, id string, subId string) (int64, error)
 	ModifyFolderNameById(ctx context.Context, id string, name string) (int64, error)
 	GetAssetFolderById(ctx context.Context, id string) (*domain.AssetFolder, error)
-	GetAssetsByIDs(ctx context.Context, id string) ([]*domain.Asset, error)
+	GetAssetsByFolderId(ctx context.Context, id string, pageNo, pageSize int64) ([]*domain.Asset, int64, error)
 	AddAsset(ctx context.Context, folderId string, asset *domain.Asset) (string, error)
 	DeleteAsset(ctx context.Context, folderId string, assetId string) error
 }
@@ -254,15 +254,16 @@ func (s *AssetService) GetFoldersByAssetTypeAndType(ctx context.Context, assertT
 	return s.assetFolderRepo.FindByAssetTypeAndType(ctx, assertType, typ)
 }
 
-func (s *AssetService) GetAssetsByIDs(ctx context.Context, id string) ([]*domain.Asset, error) {
-	assetFolder, err := s.assetFolderRepo.FindById(ctx, id)
+func (s *AssetService) GetAssetsByFolderId(ctx context.Context, id string, pageNo, pageSize int64) ([]*domain.Asset, int64, error) {
+	assetIDs, total, err := s.assetFolderRepo.FindAssetIDPageById(ctx, id, pageNo, pageSize)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	if assetFolder.Assets != nil {
-		return s.assetRepo.FindByIds(ctx, assetFolder.Assets)
+	if len(assetIDs) == 0 {
+		return nil, total, nil
 	}
-	return nil, nil
+	assets, err := s.assetRepo.FindByIds(ctx, assetIDs)
+	return assets, total, err
 }
 
 func findChildFolder(folders []*domain.AssetFolder, id string) *domain.AssetFolder {

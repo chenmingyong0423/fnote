@@ -43,11 +43,17 @@ type AssetFolder struct {
 	SupportAdd    bool            `bson:"support_add"`
 }
 
+type AssetIDPage struct {
+	Assets []bson.ObjectID `bson:"assets"`
+	Total  int64           `bson:"total"`
+}
+
 type IAssetFolderDao interface {
 	FindByAssetTypeAndType(ctx context.Context, assertType string, typ string) ([]*AssetFolder, error)
 	Add(ctx context.Context, assetFolder *AssetFolder) (bson.ObjectID, error)
 	ModifyById(ctx context.Context, assetFolder *AssetFolder) (int64, error)
 	FindById(ctx context.Context, objectID bson.ObjectID) (*AssetFolder, error)
+	FindAssetIDPageById(ctx context.Context, objectID bson.ObjectID, skip, limit int64) (*AssetIDPage, error)
 	DeleteById(ctx context.Context, objectID bson.ObjectID) (int64, error)
 	AddSubFolder(ctx context.Context, id bson.ObjectID, assetFolder *AssetFolder) (int64, error)
 	ModifySubFolderById(ctx context.Context, objectID bson.ObjectID, assetFolder *AssetFolder) (int64, error)
@@ -143,6 +149,36 @@ func (d *AssetFolderDao) DeleteById(ctx context.Context, objectID bson.ObjectID)
 
 func (d *AssetFolderDao) FindById(ctx context.Context, objectID bson.ObjectID) (*AssetFolder, error) {
 	return d.coll.Finder().Filter(query.Id(objectID)).FindOne(ctx)
+}
+
+func (d *AssetFolderDao) FindAssetIDPageById(ctx context.Context, objectID bson.ObjectID, skip, limit int64) (*AssetIDPage, error) {
+	pipeline := mongo.Pipeline{
+		bson.D{{Key: "$match", Value: query.Id(objectID)}},
+		bson.D{{Key: "$project", Value: bson.D{
+			{Key: "_id", Value: 0},
+			{Key: "assets", Value: bson.D{{Key: "$slice", Value: bson.A{
+				bson.D{{Key: "$ifNull", Value: bson.A{"$assets", bson.A{}}}}, skip, limit,
+			}}}},
+			{Key: "total", Value: bson.D{{Key: "$size", Value: bson.D{{Key: "$ifNull", Value: bson.A{"$assets", bson.A{}}}}}}},
+		}}},
+	}
+	cursor, err := d.coll.Collection().Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	if !cursor.Next(ctx) {
+		if err = cursor.Err(); err != nil {
+			return nil, err
+		}
+		return nil, mongo.ErrNoDocuments
+	}
+	var page AssetIDPage
+	if err = cursor.Decode(&page); err != nil {
+		return nil, err
+	}
+	return &page, nil
 }
 
 func (d *AssetFolderDao) ModifyById(ctx context.Context, assetFolder *AssetFolder) (int64, error) {

@@ -30,6 +30,7 @@ type IAssetFolderRepository interface {
 	Add(ctx context.Context, assetFolder *domain.AssetFolder) (string, error)
 	ModifyById(ctx context.Context, assetFolder *domain.AssetFolder) (int64, error)
 	FindById(ctx context.Context, id string) (*domain.AssetFolder, error)
+	FindAssetIDPageById(ctx context.Context, id string, pageNo, pageSize int64) ([]string, int64, error)
 	DeleteById(ctx context.Context, id string) (int64, error)
 	AddSubFolder(ctx context.Context, id string, assetFolder *domain.AssetFolder) (int64, string, error)
 	ModifySubFolderById(ctx context.Context, id string, assetFolder *domain.AssetFolder) (int64, error)
@@ -158,6 +159,22 @@ func (r *AssetFolderRepository) FindById(ctx context.Context, id string) (*domai
 		return nil, err
 	}
 	return r.toDomain(assetFolder), nil
+}
+
+func (r *AssetFolderRepository) FindAssetIDPageById(ctx context.Context, id string, pageNo, pageSize int64) ([]string, int64, error) {
+	objID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, 0, err
+	}
+	page, err := r.dao.FindAssetIDPageById(ctx, objID, (pageNo-1)*pageSize, pageSize)
+	if err != nil {
+		return nil, 0, err
+	}
+	assetIDs := make([]string, len(page.Assets))
+	for i, assetID := range page.Assets {
+		assetIDs[i] = assetID.Hex()
+	}
+	return assetIDs, page.Total, nil
 }
 
 func (r *AssetFolderRepository) ModifyById(ctx context.Context, assetFolder *domain.AssetFolder) (int64, error) {

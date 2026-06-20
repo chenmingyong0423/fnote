@@ -43,3 +43,8 @@ type AssetFolderRequest struct {
 type ModifyFolderNameRequest struct {
 	Name string `json:"name" binding:"required"`
 }
+
+type AssetPageRequest struct {
+	PageNo   int64 `form:"pageNo" binding:"required,min=1"`
+	PageSize int64 `form:"pageSize" binding:"required,min=1,max=100"`
+}

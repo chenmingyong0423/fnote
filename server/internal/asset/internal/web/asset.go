@@ -50,7 +50,7 @@ func (h *AssetHandler) RegisterGinRoutes(engine *gin.Engine) {
 	baseFolderIdGroup.DELETE("/subfolders/:subId", apiwrap.Wrap(h.DeleteSubAssetFolder))
 
 	// 文件 API
-	baseFolderIdGroup.GET("/assets", apiwrap.Wrap(h.GetAssetsByFolderId))
+	baseFolderIdGroup.GET("/assets", apiwrap.WrapWithBody(h.GetAssetsByFolderId))
 	baseFolderIdGroup.POST("/assets", apiwrap.WrapWithBody(h.AddAsset))
 	// 删除文件
 	baseFolderIdGroup.DELETE("/assets/:assetId", apiwrap.Wrap(h.DeleteAsset))
@@ -201,13 +201,13 @@ func (h *AssetHandler) ModifyAssetFolderName(ctx *gin.Context, req ModifyFolderN
 	return apiwrap.SuccessResponse(), nil
 }
 
-func (h *AssetHandler) GetAssetsByFolderId(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[AssetVO]], error) {
+func (h *AssetHandler) GetAssetsByFolderId(ctx *gin.Context, req AssetPageRequest) (*apiwrap.ResponseBody[*apiwrap.PageVO[AssetVO]], error) {
 	folderId := ctx.Param("folderId")
-	assets, err := h.assetServ.GetAssetsByIDs(ctx, folderId)
+	assets, total, err := h.assetServ.GetAssetsByFolderId(ctx, folderId, req.PageNo, req.PageSize)
 	if err != nil {
 		return nil, err
 	}
-	return apiwrap.SuccessResponseWithData[apiwrap.ListVO[AssetVO]](apiwrap.NewListVO[AssetVO](h.toAssetVOs(assets))), nil
+	return apiwrap.SuccessResponseWithData(apiwrap.NewPageVO(req.PageNo, req.PageSize, total, h.toAssetVOs(assets))), nil
 }
 
 func (h *AssetHandler) toAssetVOs(assets []*domain.Asset) []AssetVO {
