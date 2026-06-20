@@ -17,6 +17,7 @@ package dao
 import (
 	"context"
 
+	"github.com/chenmingyong0423/fnote/server/internal/message_template/internal/domain"
 	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 
 	"github.com/chenmingyong0423/go-mongox/v2"
@@ -31,11 +32,11 @@ type MessageTemplate struct {
 	// 0 未激活，1 激活
 	Active uint `bson:"active"`
 	// 0 webmaster 站长， 1 user 用户
-	RecipientType uint `bson:"recipient_type"`
+	RecipientType domain.RecipientType `bson:"recipient_type"`
 }
 
 type IMessageTemplateDao interface {
-	FindMsgTplByName(ctx context.Context, name string, recipientType uint) (*MessageTemplate, error)
+	FindMsgTplByName(ctx context.Context, name string, recipientType domain.RecipientType) (*MessageTemplate, error)
 }
 
 var _ IMessageTemplateDao = (*MessageTemplateDao)(nil)
@@ -48,7 +49,7 @@ type MessageTemplateDao struct {
 	coll *mongox.Collection[MessageTemplate]
 }
 
-func (d *MessageTemplateDao) FindMsgTplByName(ctx context.Context, name string, recipientType uint) (*MessageTemplate, error) {
+func (d *MessageTemplateDao) FindMsgTplByName(ctx context.Context, name string, recipientType domain.RecipientType) (*MessageTemplate, error) {
 	msgTpl, err := d.coll.Finder().Filter(
 		query.NewBuilder().Eq("name", name).Eq("active", 1).Eq("recipient_type", recipientType).Build(),
 	).FindOne(ctx)

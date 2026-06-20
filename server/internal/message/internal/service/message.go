@@ -49,10 +49,10 @@ type MessageService struct {
 }
 
 func (s *MessageService) SendEmailToWebmaster(ctx context.Context, msgTplName message_template.Name, contentType string) error {
-	return s.sendEmail(ctx, msgTplName, contentType, 0, nil)
+	return s.sendEmail(ctx, msgTplName, contentType, message_template.RecipientWebmaster, nil)
 }
 
-func (s *MessageService) sendEmail(ctx context.Context, msgTplName message_template.Name, contentType string, recipientType uint, email []string, args ...any) error {
+func (s *MessageService) sendEmail(ctx context.Context, msgTplName message_template.Name, contentType string, recipientType message_template.RecipientType, email []string, args ...any) error {
 	emailCfg, err := s.configServ.GetEmailConfig(ctx)
 	if err != nil {
 		return err
@@ -85,5 +85,5 @@ func (s *MessageService) sendEmail(ctx context.Context, msgTplName message_templ
 }
 
 func (s *MessageService) SendEmailWithEmail(ctx context.Context, msgTplName message_template.Name, email []string, contentType string, args ...any) error {
-	return s.sendEmail(ctx, msgTplName, contentType, 1, email, args...)
+	return s.sendEmail(ctx, msgTplName, contentType, message_template.RecipientUser, email, args...)
 }

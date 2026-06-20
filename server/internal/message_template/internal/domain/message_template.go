@@ -18,6 +18,8 @@ import "fmt"
 
 type Name string
 
+type RecipientType uint
+
 const (
 	CommentReceived     Name = "comment"
 	UserCommentApproved Name = "user-comment-approval"
@@ -26,6 +28,11 @@ const (
 	FriendApplied       Name = "friend"
 	UserFriendApproved  Name = "friend-approval"
 	UserFriendRejected  Name = "friend-rejection"
+)
+
+const (
+	RecipientWebmaster RecipientType = iota
+	RecipientUser
 )
 
 type MessageTemplate struct {

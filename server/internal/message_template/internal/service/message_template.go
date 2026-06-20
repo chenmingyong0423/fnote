@@ -23,7 +23,7 @@ import (
 )
 
 type IMessageTemplateService interface {
-	FindMsgTplByNameAndRcpType(ctx context.Context, name domain.Name, recipientType uint) (*domain.MessageTemplate, error)
+	FindMsgTplByNameAndRcpType(ctx context.Context, name domain.Name, recipientType domain.RecipientType) (*domain.MessageTemplate, error)
 }
 
 var _ IMessageTemplateService = (*MessageTemplateService)(nil)
@@ -32,7 +32,7 @@ type MessageTemplateService struct {
 	repo repository.IMessageTemplateRepository
 }
 
-func (s *MessageTemplateService) FindMsgTplByNameAndRcpType(ctx context.Context, name domain.Name, recipientType uint) (*domain.MessageTemplate, error) {
+func (s *MessageTemplateService) FindMsgTplByNameAndRcpType(ctx context.Context, name domain.Name, recipientType domain.RecipientType) (*domain.MessageTemplate, error) {
 	return s.repo.FindMessageTemplateByNameAndRcpType(ctx, name, recipientType)
 }
 

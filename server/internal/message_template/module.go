@@ -21,10 +21,11 @@ import (
 )
 
 type (
-	Handler = web.MessageTemplateHandler
-	Service = service.IMessageTemplateService
-	Name    = domain.Name
-	Module  struct {
+	Handler       = web.MessageTemplateHandler
+	Service       = service.IMessageTemplateService
+	Name          = domain.Name
+	RecipientType = domain.RecipientType
+	Module        struct {
 		Svc Service
 		Hdl *Handler
 	}
@@ -38,4 +39,6 @@ const (
 	FriendApplied       = domain.FriendApplied
 	UserFriendApproved  = domain.UserFriendApproved
 	UserFriendRejected  = domain.UserFriendRejected
+	RecipientWebmaster  = domain.RecipientWebmaster
+	RecipientUser       = domain.RecipientUser
 )
