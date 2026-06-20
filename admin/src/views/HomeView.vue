@@ -45,6 +45,7 @@ import {
   TagsOutlined,
   TeamOutlined,
   SettingOutlined,
+  MailOutlined,
   FolderOpenOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined
@@ -158,6 +159,12 @@ const items = reactive([
         key: '/home/setting',
         label: '博客设置',
         title: '博客设置'
+      },
+      {
+        key: '/home/message-template',
+        label: '消息模板',
+        title: '消息模板',
+        icon: () => h(MailOutlined)
       },
       {
         key: '/home/backup',
