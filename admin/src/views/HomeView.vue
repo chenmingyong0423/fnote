@@ -150,6 +150,32 @@ const items = reactive([
     ]
   },
   {
+    key: 'sub template',
+    icon: () => h(MailOutlined),
+    label: '模板管理',
+    title: '模板管理',
+    children: [
+      {
+        key: '/home/message-template',
+        label: '消息模板',
+        title: '消息模板'
+      }
+    ]
+  },
+  {
+    key: 'sub file',
+    icon: () => h(FolderOpenOutlined),
+    label: '文件管理',
+    title: '文件管理',
+    children: [
+      {
+        key: '/home/file',
+        label: '文件列表',
+        title: '文件列表'
+      }
+    ]
+  },
+  {
     key: 'sub blog',
     icon: () => h(SettingOutlined),
     label: '系统',
@@ -161,21 +187,9 @@ const items = reactive([
         title: '博客设置'
       },
       {
-        key: '/home/message-template',
-        label: '消息模板',
-        title: '消息模板',
-        icon: () => h(MailOutlined)
-      },
-      {
         key: '/home/backup',
         label: '备份',
         title: '备份'
-      },
-      {
-        key: '/home/file',
-        label: '文件管理',
-        title: '文件管理',
-        icon: () => h(FolderOpenOutlined)
       }
     ]
   }
