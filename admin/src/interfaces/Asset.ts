@@ -87,10 +87,14 @@ export const DeleteAssetFolder = (id: string) => {
   })
 }
 
-export const GetAssetList = (folderId: string) => {
+export const GetAssetList = (folderId: string, pageNo: number, pageSize: number) => {
   return instance({
     url: `/assets/folders/${folderId}/assets`,
-    method: 'get'
+    method: 'get',
+    params: {
+      pageNo,
+      pageSize
+    }
   })
 }
 

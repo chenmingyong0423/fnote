@@ -123,6 +123,15 @@
             </div>
           </div>
         </div>
+        <div class="absolute bottom-10 w-full flex justify-center">
+          <a-pagination
+            v-model:current="pagination.pageNo"
+            :page-size="pagination.pageSize"
+            :total="pagination.totalCount"
+            :show-size-changer="false"
+            @change="getImages"
+          />
+        </div>
         <div class="absolute bottom-0 w-full flex gap-x-1 justify-end">
           <a-popconfirm title="确认删除？" ok-text="是" cancel-text="否" @confirm="deleteAsset">
             <a-button type="primary" :disabled="state.selectedImgIndex == ''"> 删除图片 </a-button>
@@ -193,6 +202,11 @@ const getFolders = async () => {
 getFolders()
 
 const images = ref<AssetVO[]>([])
+const pagination = reactive({
+  pageNo: 1,
+  pageSize: 12,
+  totalCount: 0
+})
 
 const selectImage = (id: string) => {
   state.selectedImgIndex = state.selectedImgIndex == id ? '' : id
@@ -212,6 +226,8 @@ const insert = () => {
 }
 
 const menuItemChanged = (id: string) => {
+  pagination.pageNo = 1
+  state.selectedImgIndex = ''
   state.selectedMenuItem = id
 }
 
@@ -359,13 +375,23 @@ const deleteAssetFolder = async (id: string) => {
 }
 
 const getImages = async () => {
+  if (!state.selectedMenuItem) {
+    images.value = []
+    pagination.totalCount = 0
+    return
+  }
   try {
-    const response: any = await GetAssetList(state.selectedMenuItem)
+    const response: any = await GetAssetList(
+      state.selectedMenuItem,
+      pagination.pageNo,
+      pagination.pageSize
+    )
     if (response.data.code !== 0) {
       message.error(response.data.message)
       return
     }
     images.value = response.data.data?.list || []
+    pagination.totalCount = response.data.data?.totalCount || 0
   } catch (error) {
     console.log(error)
     message.error('获取图片列表失败')
@@ -397,6 +423,7 @@ const uploadAsset = async (fileId: string, fileUrl: string) => {
       return
     }
     message.success('上传成功')
+    pagination.pageNo = Math.max(1, Math.ceil((pagination.totalCount + 1) / pagination.pageSize))
     await getImages()
   } catch (error) {
     console.log(error)
@@ -426,6 +453,9 @@ const deleteAsset = async () => {
     }
     message.success('删除成功')
     state.selectedImgIndex = ''
+    if (images.value.length === 1 && pagination.pageNo > 1) {
+      pagination.pageNo--
+    }
     await getImages()
   } catch (error) {
     console.log(error)
