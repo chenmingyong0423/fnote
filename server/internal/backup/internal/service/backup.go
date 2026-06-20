@@ -238,6 +238,13 @@ func (s *BackupService) exportCollections(ctx context.Context, dataDir string) e
 				}
 			}
 		}
+		if collectionName == "file_meta" {
+			for _, document := range documents {
+				if err = encodeFileID(document); err != nil {
+					return err
+				}
+			}
+		}
 
 		fileContent, err := json.MarshalIndent(documents, "", "    ")
 		if err != nil {
@@ -530,6 +537,13 @@ func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colNam
 				}
 			}
 		}
+		if colName == "file_meta" {
+			fileID, fErr2 := decodeFileID(doc["file_id"])
+			if fErr2 != nil {
+				return fErr2
+			}
+			doc["file_id"] = fileID
+		}
 		if createdAt, ok := doc["created_at"].(string); ok {
 			parse, fErr2 := time.Parse(time.RFC3339, createdAt)
 			if fErr2 != nil {
@@ -558,6 +572,27 @@ func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colNam
 		return err
 	}
 	return nil
+}
+
+func encodeFileID(document bson.M) error {
+	fileID, ok := document["file_id"].(bson.Binary)
+	if !ok {
+		return fmt.Errorf("invalid file_meta.file_id type: %T", document["file_id"])
+	}
+	document["file_id"] = hex.EncodeToString(fileID.Data)
+	return nil
+}
+
+func decodeFileID(value any) ([]byte, error) {
+	fileID, ok := value.(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid backup file_meta.file_id type: %T", value)
+	}
+	decoded, err := hex.DecodeString(fileID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid backup file_meta.file_id: %w", err)
+	}
+	return decoded, nil
 }
 
 func encodeSocialID(value any) {
