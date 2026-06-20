@@ -41,6 +41,8 @@ export interface FileVO {
 export interface FileUsageVO {
   type: string
   id: string
+  name: string
+  locations: string[]
 }
 
 export const GetFileList = (pageRequest: PageRequest) => {

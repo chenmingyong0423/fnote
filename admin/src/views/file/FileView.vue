@@ -54,9 +54,16 @@
         <template v-else-if="column.key === 'usage'">
           <span v-if="record.used_in.length === 0">未使用</span>
           <div v-else class="file-usages">
-            <a-tag v-for="usage in record.used_in" :key="`${usage.type}:${usage.id}`" color="blue">
-              {{ usage.type }}：{{ usage.id }}
-            </a-tag>
+            <a-tooltip
+              v-for="usage in record.used_in"
+              :key="`${usage.type}:${usage.id}`"
+              :title="usage.id"
+            >
+              <a-tag color="blue">
+                {{ usageTypeName(usage.type) }}：{{ usage.name || usage.id }}
+                <template v-if="usage.locations?.length">（{{ usage.locations.join('、') }}）</template>
+              </a-tag>
+            </a-tooltip>
           </div>
         </template>
 
@@ -191,6 +198,16 @@ const formatFileSize = (size: number) => {
 }
 
 const formatTime = (timestamp: number) => dayjs.unix(timestamp).format('YYYY-MM-DD HH:mm:ss')
+
+const usageTypeName = (type: string) => {
+  const names: Record<string, string> = {
+    post: '文章',
+    'post-draft': '草稿',
+    config: '配置',
+    asset: '素材'
+  }
+  return names[type] || type
+}
 
 loadFiles()
 </script>
