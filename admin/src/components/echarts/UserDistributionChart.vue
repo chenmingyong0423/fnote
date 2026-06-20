@@ -115,7 +115,8 @@ const getUserDistribution = async () => {
     userDistributionData.seriesData = []
     userDistributionData.legendData = []
     userDistributionData.totalUsers = 0
-    apiResponse.data?.list.forEach((item: UserDistributionVO) => {
+    const list = apiResponse.data?.list ?? []
+    list.forEach((item: UserDistributionVO) => {
       userDistributionData.seriesData.push({ name: item.location, value: item.user_count })
       userDistributionData.legendData.push(item.location)
       userDistributionData.totalUsers += item.user_count
