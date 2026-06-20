@@ -119,3 +119,30 @@ func TestMessageTemplateRenderLegacyContent(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateContent(t *testing.T) {
+	tests := []struct {
+		name      string
+		tplName   Name
+		content   string
+		wantError bool
+	}{
+		{name: "valid variables", tplName: UserCommentRejected, content: "post={{.PostURL}}, reason={{.Reason}}"},
+		{name: "no variables required", tplName: CommentReceived, content: "new comment"},
+		{name: "missing required variable", tplName: UserCommentRejected, content: "post={{.PostURL}}", wantError: true},
+		{name: "unknown variable", tplName: UserCommentApproved, content: "post={{.Unknown}}", wantError: true},
+		{name: "legacy placeholder", tplName: UserCommentApproved, content: "post=%s", wantError: true},
+		{name: "unsupported action", tplName: UserCommentApproved, content: "{{if .PostURL}}{{.PostURL}}{{end}}", wantError: true},
+		{name: "invalid syntax", tplName: UserCommentApproved, content: "{{.PostURL", wantError: true},
+		{name: "empty content", tplName: CommentReceived, content: "  ", wantError: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ValidateContent(tt.tplName, tt.content)
+			if (err != nil) != tt.wantError {
+				t.Fatalf("ValidateContent() error = %v, wantError = %v", err, tt.wantError)
+			}
+		})
+	}
+}

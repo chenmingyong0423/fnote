@@ -15,7 +15,9 @@
 package web
 
 import (
+	"github.com/chenmingyong0423/fnote/server/internal/message_template/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/message_template/internal/service"
+	apiwrap "github.com/chenmingyong0423/fnote/server/internal/pkg/web/wrap"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,5 +32,48 @@ type MessageTemplateHandler struct {
 }
 
 func (h *MessageTemplateHandler) RegisterGinRoutes(engine *gin.Engine) {
+	group := engine.Group("/admin-api/message-templates")
+	group.GET("", apiwrap.Wrap(h.FindAll))
+	group.PUT("/:id", apiwrap.WrapWithBody(h.Update))
+	group.PUT("/:id/active", apiwrap.WrapWithBody(h.UpdateActive))
+}
 
+func (h *MessageTemplateHandler) FindAll(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[MessageTemplateVO]], error) {
+	templates, err := h.serv.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]MessageTemplateVO, 0, len(templates))
+	for _, messageTemplate := range templates {
+		result = append(result, toVO(messageTemplate))
+	}
+	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(result)), nil
+}
+
+func (h *MessageTemplateHandler) Update(ctx *gin.Context, req UpdateMessageTemplateRequest) (*apiwrap.ResponseBody[any], error) {
+	if err := h.serv.Update(ctx, ctx.Param("id"), req.Title, req.Content); err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponse(), nil
+}
+
+func (h *MessageTemplateHandler) UpdateActive(ctx *gin.Context, req UpdateMessageTemplateActiveRequest) (*apiwrap.ResponseBody[any], error) {
+	if err := h.serv.UpdateActive(ctx, ctx.Param("id"), *req.Active); err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponse(), nil
+}
+
+func toVO(messageTemplate domain.MessageTemplate) MessageTemplateVO {
+	return MessageTemplateVO{
+		Id:            messageTemplate.Id,
+		Name:          string(messageTemplate.Name),
+		Title:         messageTemplate.Title,
+		Content:       messageTemplate.Content,
+		Active:        messageTemplate.Active,
+		RecipientType: uint(messageTemplate.RecipientType),
+		Variables:     domain.RequiredVariables(messageTemplate.Name),
+		CreatedAt:     messageTemplate.CreatedAt,
+		UpdatedAt:     messageTemplate.UpdatedAt,
+	}
 }
