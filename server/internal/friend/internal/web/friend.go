@@ -26,6 +26,7 @@ import (
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/friend/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/message"
+	"github.com/chenmingyong0423/fnote/server/internal/message_template"
 	"github.com/chenmingyong0423/fnote/server/internal/pkg"
 
 	"github.com/chenmingyong0423/fnote/server/internal/website_config"
@@ -121,7 +122,7 @@ func (h *FriendHandler) ApplyForFriend(ctx *gin.Context, req FriendRequest) (*ap
 	notificationCtx := context.WithoutCancel(ctx.Request.Context())
 	l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 	go func() {
-		gErr := h.msgServ.SendEmailToWebmaster(notificationCtx, "friend", "text/plain")
+		gErr := h.msgServ.SendEmailToWebmaster(notificationCtx, message_template.FriendApplied, "text/plain")
 		if gErr != nil {
 			l.WarnContext(notificationCtx, fmt.Sprintf("%+v", gErr))
 		}
@@ -191,7 +192,7 @@ func (h *FriendHandler) AdminApproveFriend(ctx *gin.Context) (*apiwrap.ResponseB
 	notificationCtx := context.WithoutCancel(ctx.Request.Context())
 	l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 	go func() {
-		gErr := h.msgServ.SendEmailWithEmail(notificationCtx, "friend-approval", []string{email}, "text/plain", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000")+"/friend")
+		gErr := h.msgServ.SendEmailWithEmail(notificationCtx, message_template.UserFriendApproved, []string{email}, "text/plain", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000")+"/friend")
 		if gErr != nil {
 			l.WarnContext(notificationCtx, fmt.Sprintf("%+v", gErr))
 		}
@@ -208,7 +209,7 @@ func (h *FriendHandler) AdminRejectFriend(ctx *gin.Context, req FriendRejectReq)
 	notificationCtx := context.WithoutCancel(ctx.Request.Context())
 	l := slog.Default().With("X-Request-ID", ctx.GetString("X-Request-ID"))
 	go func() {
-		gErr := h.msgServ.SendEmailWithEmail(notificationCtx, "friend-rejection", []string{email}, "text/plain", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000")+"/friend", req.Reason)
+		gErr := h.msgServ.SendEmailWithEmail(notificationCtx, message_template.UserFriendRejected, []string{email}, "text/plain", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000")+"/friend", req.Reason)
 		if gErr != nil {
 			l.WarnContext(notificationCtx, fmt.Sprintf("%+v", gErr))
 		}

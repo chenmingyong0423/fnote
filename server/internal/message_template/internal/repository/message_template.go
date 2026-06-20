@@ -23,7 +23,7 @@ import (
 )
 
 type IMessageTemplateRepository interface {
-	FindMessageTemplateByNameAndRcpType(ctx context.Context, name string, recipientType uint) (*domain.MessageTemplate, error)
+	FindMessageTemplateByNameAndRcpType(ctx context.Context, name domain.Name, recipientType uint) (*domain.MessageTemplate, error)
 }
 
 var _ IMessageTemplateRepository = (*MessageTemplateRepository)(nil)
@@ -36,13 +36,13 @@ type MessageTemplateRepository struct {
 	dao dao.IMessageTemplateDao
 }
 
-func (r *MessageTemplateRepository) FindMessageTemplateByNameAndRcpType(ctx context.Context, name string, recipientType uint) (*domain.MessageTemplate, error) {
-	MessageTemplateByName, err := r.dao.FindMsgTplByName(ctx, name, recipientType)
+func (r *MessageTemplateRepository) FindMessageTemplateByNameAndRcpType(ctx context.Context, name domain.Name, recipientType uint) (*domain.MessageTemplate, error) {
+	MessageTemplateByName, err := r.dao.FindMsgTplByName(ctx, string(name), recipientType)
 	if err != nil {
 		return nil, err
 	}
 	return &domain.MessageTemplate{
-		Name:    MessageTemplateByName.Name,
+		Name:    domain.Name(MessageTemplateByName.Name),
 		Title:   MessageTemplateByName.Title,
 		Content: MessageTemplateByName.Content,
 	}, nil

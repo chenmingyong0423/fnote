@@ -16,8 +16,20 @@ package domain
 
 import "fmt"
 
+type Name string
+
+const (
+	CommentReceived     Name = "comment"
+	UserCommentApproved Name = "user-comment-approval"
+	UserCommentRejected Name = "user-comment-disapproval"
+	UserCommentReplied  Name = "user-comment-reply"
+	FriendApplied       Name = "friend"
+	UserFriendApproved  Name = "friend-approval"
+	UserFriendRejected  Name = "friend-rejection"
+)
+
 type MessageTemplate struct {
-	Name    string
+	Name    Name
 	Title   string
 	Content string
 }

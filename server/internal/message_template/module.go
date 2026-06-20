@@ -15,6 +15,7 @@
 package message_template
 
 import (
+	"github.com/chenmingyong0423/fnote/server/internal/message_template/internal/domain"
 	"github.com/chenmingyong0423/fnote/server/internal/message_template/internal/service"
 	"github.com/chenmingyong0423/fnote/server/internal/message_template/internal/web"
 )
@@ -22,8 +23,19 @@ import (
 type (
 	Handler = web.MessageTemplateHandler
 	Service = service.IMessageTemplateService
+	Name    = domain.Name
 	Module  struct {
 		Svc Service
 		Hdl *Handler
 	}
+)
+
+const (
+	CommentReceived     = domain.CommentReceived
+	UserCommentApproved = domain.UserCommentApproved
+	UserCommentRejected = domain.UserCommentRejected
+	UserCommentReplied  = domain.UserCommentReplied
+	FriendApplied       = domain.FriendApplied
+	UserFriendApproved  = domain.UserFriendApproved
+	UserFriendRejected  = domain.UserFriendRejected
 )

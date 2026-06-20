@@ -26,8 +26,8 @@ import (
 )
 
 type IMessageService interface {
-	SendEmailWithEmail(ctx context.Context, msgTplName string, email []string, contentType string, args ...any) error
-	SendEmailToWebmaster(ctx context.Context, msgTplName, contentType string) error
+	SendEmailWithEmail(ctx context.Context, msgTplName message_template.Name, email []string, contentType string, args ...any) error
+	SendEmailToWebmaster(ctx context.Context, msgTplName message_template.Name, contentType string) error
 }
 
 var (
@@ -48,11 +48,11 @@ type MessageService struct {
 	msgTplService message_template.Service
 }
 
-func (s *MessageService) SendEmailToWebmaster(ctx context.Context, msgTplName, contentType string) error {
+func (s *MessageService) SendEmailToWebmaster(ctx context.Context, msgTplName message_template.Name, contentType string) error {
 	return s.sendEmail(ctx, msgTplName, contentType, 0, nil)
 }
 
-func (s *MessageService) sendEmail(ctx context.Context, msgTplName, contentType string, recipientType uint, email []string, args ...any) error {
+func (s *MessageService) sendEmail(ctx context.Context, msgTplName message_template.Name, contentType string, recipientType uint, email []string, args ...any) error {
 	emailCfg, err := s.configServ.GetEmailConfig(ctx)
 	if err != nil {
 		return err
@@ -84,6 +84,6 @@ func (s *MessageService) sendEmail(ctx context.Context, msgTplName, contentType 
 	})
 }
 
-func (s *MessageService) SendEmailWithEmail(ctx context.Context, msgTplName string, email []string, contentType string, args ...any) error {
+func (s *MessageService) SendEmailWithEmail(ctx context.Context, msgTplName message_template.Name, email []string, contentType string, args ...any) error {
 	return s.sendEmail(ctx, msgTplName, contentType, 1, email, args...)
 }
