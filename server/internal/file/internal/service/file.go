@@ -331,8 +331,15 @@ func (s *FileService) Upload(ctx context.Context, fileDTO domain.FileDTO) (*doma
 		filename = fileId + fileDTO.FileExt
 	}
 
-	staticPath := viper.GetString("system.static_path")
-	err := os.MkdirAll(staticPath, os.ModePerm)
+	configuredStaticPath := viper.GetString("system.static_path")
+	if configuredStaticPath == "" {
+		return nil, errors.New("system.static_path is empty")
+	}
+	staticPath, err := filepath.Abs(configuredStaticPath)
+	if err != nil {
+		return nil, err
+	}
+	err = os.MkdirAll(staticPath, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}

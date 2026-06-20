@@ -547,11 +547,11 @@ func (s *BackupService) DeleteAndInsertCollectionDoc(ctx context.Context, colNam
 			if !ok || fileName == "" || filepath.Base(fileName) != fileName || strings.Contains(fileName, `\`) {
 				return fmt.Errorf("invalid backup file_meta.file_name: %v", doc["file_name"])
 			}
-			staticPath := viper.GetString("system.static_path")
-			if staticPath == "" {
-				return fmt.Errorf("system.static_path is empty")
+			filePath, fErr2 := staticTargetPath(fileName)
+			if fErr2 != nil {
+				return fErr2
 			}
-			doc["file_path"] = filepath.Join(staticPath, fileName)
+			doc["file_path"] = filePath
 		}
 		if createdAt, ok := doc["created_at"].(string); ok {
 			parse, fErr2 := time.Parse(time.RFC3339, createdAt)
