@@ -95,7 +95,7 @@ func (r *MessageTemplateRepository) toDomain(messageTemplate *dao.MessageTemplat
 		Id:            messageTemplate.ID.Hex(),
 		Name:          domain.Name(messageTemplate.Name),
 		Title:         messageTemplate.Title,
-		Content:       domain.NormalizeContent(domain.Name(messageTemplate.Name), messageTemplate.Content),
+		Content:       messageTemplate.Content,
 		Active:        messageTemplate.Active == 1,
 		RecipientType: messageTemplate.RecipientType,
 		CreatedAt:     messageTemplate.CreatedAt.Unix(),

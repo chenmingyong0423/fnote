@@ -23,15 +23,6 @@ func TestMessageTemplateRenderContent(t *testing.T) {
 			want: "post=https://example.com/posts/1, reason=spam",
 		},
 		{
-			name: "legacy positional variables",
-			tpl: MessageTemplate{
-				Name:    UserFriendRejected,
-				Content: "page=%s, reason=%s",
-			},
-			data: Data{VariableFriendPageURL: "https://example.com/friend", VariableReason: "invalid URL"},
-			want: "page=https://example.com/friend, reason=invalid URL",
-		},
-		{
 			name: "missing variable",
 			tpl: MessageTemplate{
 				Name:    UserCommentApproved,
@@ -63,58 +54,6 @@ func TestMessageTemplateRenderContent(t *testing.T) {
 			}
 			if tt.tpl.Content != tt.want {
 				t.Fatalf("RenderContent() content = %q, want %q", tt.tpl.Content, tt.want)
-			}
-		})
-	}
-}
-
-func TestMessageTemplateRenderLegacyContent(t *testing.T) {
-	tests := []struct {
-		name    Name
-		content string
-		data    Data
-		want    string
-	}{
-		{
-			name:    UserCommentApproved,
-			content: "post=%s",
-			data:    Data{VariablePostURL: "post-url"},
-			want:    "post=post-url",
-		},
-		{
-			name:    UserCommentRejected,
-			content: "post=%s, reason=%s",
-			data:    Data{VariablePostURL: "post-url", VariableReason: "reason"},
-			want:    "post=post-url, reason=reason",
-		},
-		{
-			name:    UserCommentReplied,
-			content: "post=%s",
-			data:    Data{VariablePostURL: "post-url"},
-			want:    "post=post-url",
-		},
-		{
-			name:    UserFriendApproved,
-			content: "page=%s",
-			data:    Data{VariableFriendPageURL: "friend-page-url"},
-			want:    "page=friend-page-url",
-		},
-		{
-			name:    UserFriendRejected,
-			content: "page=%s, reason=%s",
-			data:    Data{VariableFriendPageURL: "friend-page-url", VariableReason: "reason"},
-			want:    "page=friend-page-url, reason=reason",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(string(tt.name), func(t *testing.T) {
-			tpl := MessageTemplate{Name: tt.name, Content: tt.content}
-			if err := tpl.RenderContent(tt.data); err != nil {
-				t.Fatalf("RenderContent() error = %v", err)
-			}
-			if tpl.Content != tt.want {
-				t.Fatalf("RenderContent() content = %q, want %q", tpl.Content, tt.want)
 			}
 		})
 	}

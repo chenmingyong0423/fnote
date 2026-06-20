@@ -63,12 +63,11 @@ type MessageTemplate struct {
 }
 
 func (mt *MessageTemplate) RenderContent(data Data) error {
-	content := NormalizeContent(mt.Name, mt.Content)
-	if strings.Contains(content, "%s") {
+	if strings.Contains(mt.Content, "%s") {
 		return fmt.Errorf("message template %q contains unsupported legacy placeholders", mt.Name)
 	}
 
-	tpl, err := template.New(string(mt.Name)).Option("missingkey=error").Parse(content)
+	tpl, err := template.New(string(mt.Name)).Option("missingkey=error").Parse(mt.Content)
 	if err != nil {
 		return fmt.Errorf("parse message template %q: %w", mt.Name, err)
 	}
@@ -79,24 +78,6 @@ func (mt *MessageTemplate) RenderContent(data Data) error {
 	}
 	mt.Content = rendered.String()
 	return nil
-}
-
-func NormalizeContent(name Name, content string) string {
-	var variables []string
-	switch name {
-	case UserCommentApproved, UserCommentReplied:
-		variables = []string{VariablePostURL}
-	case UserCommentRejected:
-		variables = []string{VariablePostURL, VariableReason}
-	case UserFriendApproved:
-		variables = []string{VariableFriendPageURL}
-	case UserFriendRejected:
-		variables = []string{VariableFriendPageURL, VariableReason}
-	}
-	for _, variable := range variables {
-		content = strings.Replace(content, "%s", "{{."+variable+"}}", 1)
-	}
-	return content
 }
 
 var placeholderPattern = regexp.MustCompile(`^{{\s*\.([A-Za-z][A-Za-z0-9]*)\s*}}$`)
