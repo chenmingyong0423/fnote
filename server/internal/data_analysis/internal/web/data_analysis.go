@@ -173,7 +173,7 @@ func (h *DataAnalysisHandler) GetUserDistributionStats(ctx *gin.Context) (*apiwr
 	if err != nil {
 		return nil, err
 	}
-	var result []UserDistributionVO
+	result := make([]UserDistributionVO, 0)
 	if len(ips) != 0 {
 		userInfos, err := h.ipAPiServ.BatchGetLocation(ctx, ips)
 		if err != nil {
