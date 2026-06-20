@@ -31,6 +31,8 @@ type File struct {
 type FileUsage struct {
 	EntityId   string
 	EntityType string
+	Name       string
+	Locations  []string
 }
 
 type FileDTO struct {

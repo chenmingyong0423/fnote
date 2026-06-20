@@ -56,7 +56,47 @@ const (
 	EntityTypePost      EntityType = "post"
 	EntityTypePostDraft EntityType = "post-draft"
 	EntityTypeAsset     EntityType = "asset"
+	EntityTypeConfig    EntityType = "config"
 )
+
+type UsageContent struct {
+	ID       string `bson:"_id"`
+	Title    string `bson:"title"`
+	Content  string `bson:"content"`
+	CoverImg string `bson:"cover_img"`
+}
+
+type UsageAsset struct {
+	ID    bson.ObjectID `bson:"_id"`
+	Title string        `bson:"title"`
+	Type  string        `bson:"type"`
+}
+
+type UsageConfig struct {
+	ID    bson.ObjectID    `bson:"_id"`
+	Typ   string           `bson:"typ"`
+	Props UsageConfigProps `bson:"props"`
+}
+
+type UsageConfigProps struct {
+	WebsiteIcon        string            `bson:"website_icon"`
+	WebsiteOwnerAvatar string            `bson:"website_owner_avatar"`
+	WebsiteRecords     []string          `bson:"website_records"`
+	OgImage            string            `bson:"og_image"`
+	Content            string            `bson:"content"`
+	Introduction       string            `bson:"introduction"`
+	List               []UsageConfigItem `bson:"list"`
+	SocialInfoList     []UsageSocialInfo `bson:"social_info_list"`
+}
+
+type UsageConfigItem struct {
+	Image    string `bson:"image"`
+	CoverImg string `bson:"cover_img"`
+}
+
+type UsageSocialInfo struct {
+	SocialValue string `bson:"social_value"`
+}
 
 type IFileDao interface {
 	Save(ctx context.Context, file *File) (string, error)
@@ -65,17 +105,59 @@ type IFileDao interface {
 	PullUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error
 	FindByFileName(ctx context.Context, filename string) (*File, error)
 	FindPageByFileType(ctx context.Context, pageNum int64, pageSize int64, fileType []string) ([]*File, int64, error)
+	FindUsagePosts(ctx context.Context, ids []string) ([]*UsageContent, error)
+	FindUsagePostDrafts(ctx context.Context, ids []string) ([]*UsageContent, error)
+	FindUsageConfigs(ctx context.Context, ids []bson.ObjectID) ([]*UsageConfig, error)
+	FindUsageAssets(ctx context.Context, ids []bson.ObjectID) ([]*UsageAsset, error)
 	DeleteUnusedByFileId(ctx context.Context, fileId []byte) (int64, error)
 }
 
 var _ IFileDao = (*FileDao)(nil)
 
 func NewFileDao(db *mongox.Database) *FileDao {
-	return &FileDao{coll: mongox.NewCollection[File](db, "file_meta")}
+	return &FileDao{
+		coll:          mongox.NewCollection[File](db, "file_meta"),
+		postColl:      mongox.NewCollection[UsageContent](db, "posts"),
+		postDraftColl: mongox.NewCollection[UsageContent](db, "post_draft"),
+		configColl:    mongox.NewCollection[UsageConfig](db, "configs"),
+		assetColl:     mongox.NewCollection[UsageAsset](db, "assets"),
+	}
 }
 
 type FileDao struct {
-	coll *mongox.Collection[File]
+	coll          *mongox.Collection[File]
+	postColl      *mongox.Collection[UsageContent]
+	postDraftColl *mongox.Collection[UsageContent]
+	configColl    *mongox.Collection[UsageConfig]
+	assetColl     *mongox.Collection[UsageAsset]
+}
+
+func (d *FileDao) FindUsagePosts(ctx context.Context, ids []string) ([]*UsageContent, error) {
+	if len(ids) == 0 {
+		return []*UsageContent{}, nil
+	}
+	return d.postColl.Finder().Filter(query.In("_id", ids...)).Find(ctx)
+}
+
+func (d *FileDao) FindUsagePostDrafts(ctx context.Context, ids []string) ([]*UsageContent, error) {
+	if len(ids) == 0 {
+		return []*UsageContent{}, nil
+	}
+	return d.postDraftColl.Finder().Filter(query.In("_id", ids...)).Find(ctx)
+}
+
+func (d *FileDao) FindUsageConfigs(ctx context.Context, ids []bson.ObjectID) ([]*UsageConfig, error) {
+	if len(ids) == 0 {
+		return []*UsageConfig{}, nil
+	}
+	return d.configColl.Finder().Filter(query.In("_id", ids...)).Find(ctx)
+}
+
+func (d *FileDao) FindUsageAssets(ctx context.Context, ids []bson.ObjectID) ([]*UsageAsset, error) {
+	if len(ids) == 0 {
+		return []*UsageAsset{}, nil
+	}
+	return d.assetColl.Finder().Filter(query.In("_id", ids...)).Find(ctx)
 }
 
 func (d *FileDao) FindByFileId(ctx context.Context, fileId []byte) (*File, error) {

@@ -26,6 +26,8 @@ type FileVO struct {
 }
 
 type FileUsageVO struct {
-	Type string `json:"type"`
-	Id   string `json:"id"`
+	Type      string   `json:"type"`
+	Id        string   `json:"id"`
+	Name      string   `json:"name"`
+	Locations []string `json:"locations"`
 }

@@ -108,7 +108,12 @@ func (h *FileHandler) toVOs(files []*domain.File) []FileVO {
 	for i, file := range files {
 		usedIn := make([]FileUsageVO, 0, len(file.UsedIn))
 		for _, usage := range file.UsedIn {
-			usedIn = append(usedIn, FileUsageVO{Type: usage.EntityType, Id: usage.EntityId})
+			usedIn = append(usedIn, FileUsageVO{
+				Type:      usage.EntityType,
+				Id:        usage.EntityId,
+				Name:      usage.Name,
+				Locations: usage.Locations,
+			})
 		}
 		voList[i] = FileVO{
 			FileId:           file.FileId,
