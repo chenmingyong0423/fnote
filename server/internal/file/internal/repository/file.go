@@ -30,6 +30,7 @@ type IFileRepository interface {
 	PullUsedIn(ctx context.Context, fileId []byte, entityId string, entityType string) error
 	FindByFileName(ctx context.Context, filename string) (*domain.File, error)
 	FindPageFilesByFileType(ctx context.Context, pageDTO domain.PageDTO) ([]*domain.File, int64, error)
+	DeleteUnusedByFileId(ctx context.Context, fileId []byte) (int64, error)
 }
 
 var _ IFileRepository = (*FileRepository)(nil)
@@ -40,6 +41,10 @@ func NewFileRepository(dao dao.IFileDao) *FileRepository {
 
 type FileRepository struct {
 	dao dao.IFileDao
+}
+
+func (r *FileRepository) DeleteUnusedByFileId(ctx context.Context, fileId []byte) (int64, error) {
+	return r.dao.DeleteUnusedByFileId(ctx, fileId)
 }
 
 func (r *FileRepository) FindByFileId(ctx context.Context, fileId []byte) (*domain.File, error) {

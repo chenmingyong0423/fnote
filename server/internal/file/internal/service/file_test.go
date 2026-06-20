@@ -29,6 +29,25 @@ func (failingFileRepository) FindByFileName(context.Context, string) (*domain.Fi
 func (failingFileRepository) FindPageFilesByFileType(context.Context, domain.PageDTO) ([]*domain.File, int64, error) {
 	return nil, 0, nil
 }
+func (failingFileRepository) DeleteUnusedByFileId(context.Context, []byte) (int64, error) {
+	return 0, nil
+}
+
+type deletableFileRepository struct {
+	failingFileRepository
+	file        *domain.File
+	deleteCount int64
+	deleteCalls int
+}
+
+func (r *deletableFileRepository) FindByFileId(context.Context, []byte) (*domain.File, error) {
+	return r.file, nil
+}
+
+func (r *deletableFileRepository) DeleteUnusedByFileId(context.Context, []byte) (int64, error) {
+	r.deleteCalls++
+	return r.deleteCount, nil
+}
 
 func TestUploadRemovesPhysicalFileWhenMetadataSaveFails(t *testing.T) {
 	staticPath := t.TempDir()
@@ -48,6 +67,58 @@ func TestUploadRemovesPhysicalFileWhenMetadataSaveFails(t *testing.T) {
 	}
 	if _, statErr := os.Stat(filepath.Join(staticPath, "rollback-test.png")); !errors.Is(statErr, os.ErrNotExist) {
 		t.Fatalf("physical file was not rolled back: %v", statErr)
+	}
+}
+
+func TestDeleteFileRemovesUnusedMetadataAndPhysicalFile(t *testing.T) {
+	staticPath := t.TempDir()
+	previousStaticPath := viper.GetString("system.static_path")
+	viper.Set("system.static_path", staticPath)
+	t.Cleanup(func() { viper.Set("system.static_path", previousStaticPath) })
+
+	filePath := filepath.Join(staticPath, "unused.png")
+	if err := os.WriteFile(filePath, []byte("image"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	repo := &deletableFileRepository{
+		file:        &domain.File{FilePath: filePath},
+		deleteCount: 1,
+	}
+	service := &FileService{repo: repo}
+	if err := service.DeleteFile(context.Background(), "00112233445566778899aabbccddeeff"); err != nil {
+		t.Fatal(err)
+	}
+	if repo.deleteCalls != 1 {
+		t.Fatalf("delete calls = %d, want 1", repo.deleteCalls)
+	}
+	if _, err := os.Stat(filePath); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("physical file still exists: %v", err)
+	}
+}
+
+func TestDeleteFileRejectsReferencedFile(t *testing.T) {
+	staticPath := t.TempDir()
+	previousStaticPath := viper.GetString("system.static_path")
+	viper.Set("system.static_path", staticPath)
+	t.Cleanup(func() { viper.Set("system.static_path", previousStaticPath) })
+
+	filePath := filepath.Join(staticPath, "used.png")
+	if err := os.WriteFile(filePath, []byte("image"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	repo := &deletableFileRepository{file: &domain.File{
+		FilePath: filePath,
+		UsedIn:   []domain.FileUsage{{EntityId: "post-1", EntityType: "post"}},
+	}}
+	service := &FileService{repo: repo}
+	if err := service.DeleteFile(context.Background(), "00112233445566778899aabbccddeeff"); err == nil {
+		t.Fatal("expected referenced file deletion to fail")
+	}
+	if repo.deleteCalls != 0 {
+		t.Fatalf("delete calls = %d, want 0", repo.deleteCalls)
+	}
+	if _, err := os.Stat(filePath); err != nil {
+		t.Fatalf("referenced physical file was removed: %v", err)
 	}
 }
 

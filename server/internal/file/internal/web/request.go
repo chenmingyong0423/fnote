@@ -17,7 +17,7 @@ package web
 type FileRequest struct{}
 
 type PageRequest struct {
-	PageNum  int64    `form:"pageNum"`
-	PageSize int64    `form:"pageSize"`
+	PageNum  int64    `form:"pageNum" binding:"required,min=1"`
+	PageSize int64    `form:"pageSize" binding:"required,min=1,max=100"`
 	FileType []string `form:"fileType"`
 }

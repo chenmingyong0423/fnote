@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/chenmingyong0423/fnote/server/internal/pkg"
@@ -62,6 +63,7 @@ type IFileService interface {
 	GetRobotsTxt(ctx context.Context) (string, bool, error)
 	SaveRobotsTxt(ctx context.Context, content string) error
 	GetFiles(ctx context.Context, pageDTO domain.PageDTO) ([]*domain.File, int64, error)
+	DeleteFile(ctx context.Context, fileId string) error
 }
 
 var _ IFileService = (*FileService)(nil)
@@ -79,6 +81,50 @@ func NewFileService(repo repository.IFileRepository, eventbus *eventbus.EventBus
 type FileService struct {
 	repo     repository.IFileRepository
 	eventBus *eventbus.EventBus
+}
+
+func (s *FileService) DeleteFile(ctx context.Context, fileId string) error {
+	decodedFileID, err := hex.DecodeString(fileId)
+	if err != nil || len(decodedFileID) != 16 {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "invalid file id")
+	}
+	file, err := s.repo.FindByFileId(ctx, decodedFileID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return apiwrap.NewErrorResponseBody(http.StatusNotFound, "file not found")
+		}
+		return err
+	}
+	if len(file.UsedIn) > 0 {
+		return apiwrap.NewErrorResponseBody(http.StatusConflict, "file is still in use")
+	}
+	if !isPathWithinStaticDirectory(file.FilePath) {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "invalid file path")
+	}
+	deletedCount, err := s.repo.DeleteUnusedByFileId(ctx, decodedFileID)
+	if err != nil {
+		return err
+	}
+	if deletedCount == 0 {
+		return apiwrap.NewErrorResponseBody(http.StatusConflict, "file is still in use")
+	}
+	if err = os.Remove(file.FilePath); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return errors.Wrap(err, "file metadata was deleted but physical file removal failed")
+	}
+	return nil
+}
+
+func isPathWithinStaticDirectory(filePath string) bool {
+	staticPath, err := filepath.Abs(viper.GetString("system.static_path"))
+	if err != nil {
+		return false
+	}
+	absFilePath, err := filepath.Abs(filePath)
+	if err != nil {
+		return false
+	}
+	relativePath, err := filepath.Rel(staticPath, absFilePath)
+	return err == nil && relativePath != ".." && !strings.HasPrefix(relativePath, ".."+string(filepath.Separator))
 }
 
 func (s *FileService) HasOtherUsages(ctx context.Context, fileId []byte, entityId string, entityType string) (bool, error) {

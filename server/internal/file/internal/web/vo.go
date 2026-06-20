@@ -15,10 +15,14 @@
 package web
 
 type FileVO struct {
-	FileId   string        `json:"file_id"`
-	FileName string        `json:"file_name"`
-	Url      string        `json:"url"`
-	UsedIn   []FileUsageVO `json:"used_in,omitempty"`
+	FileId           string        `json:"file_id"`
+	FileName         string        `json:"file_name"`
+	OriginalFileName string        `json:"original_file_name"`
+	FileType         string        `json:"file_type"`
+	FileSize         int64         `json:"file_size"`
+	Url              string        `json:"url"`
+	UsedIn           []FileUsageVO `json:"used_in"`
+	CreatedAt        int64         `json:"created_at"`
 }
 
 type FileUsageVO struct {

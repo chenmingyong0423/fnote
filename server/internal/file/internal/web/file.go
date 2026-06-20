@@ -41,6 +41,14 @@ func (h *FileHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin-api/files")
 	adminGroup.POST("/upload", apiwrap.Wrap(h.UploadFile))
 	adminGroup.GET("", apiwrap.WrapWithBody(h.GetFiles))
+	adminGroup.DELETE("/:fileId", apiwrap.Wrap(h.DeleteFile))
+}
+
+func (h *FileHandler) DeleteFile(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
+	if err := h.serv.DeleteFile(ctx, ctx.Param("fileId")); err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponse(), nil
 }
 
 func (h *FileHandler) UploadFile(ctx *gin.Context) (*apiwrap.ResponseBody[FileVO], error) {
@@ -103,10 +111,14 @@ func (h *FileHandler) toVOs(files []*domain.File) []FileVO {
 			usedIn = append(usedIn, FileUsageVO{Type: usage.EntityType, Id: usage.EntityId})
 		}
 		voList[i] = FileVO{
-			FileId:   file.FileId,
-			FileName: file.FileName,
-			Url:      file.Url,
-			UsedIn:   usedIn,
+			FileId:           file.FileId,
+			FileName:         file.FileName,
+			OriginalFileName: file.OriginalFileName,
+			FileType:         file.FileType,
+			FileSize:         file.FileSize,
+			Url:              file.Url,
+			UsedIn:           usedIn,
+			CreatedAt:        file.CreatedAt,
 		}
 	}
 	return voList
