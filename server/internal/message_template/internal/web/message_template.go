@@ -34,8 +34,25 @@ type MessageTemplateHandler struct {
 func (h *MessageTemplateHandler) RegisterGinRoutes(engine *gin.Engine) {
 	group := engine.Group("/admin-api/message-templates")
 	group.GET("", apiwrap.Wrap(h.FindAll))
+	group.POST("", apiwrap.WrapWithBody(h.Create))
 	group.PUT("/:id", apiwrap.WrapWithBody(h.Update))
 	group.PUT("/:id/active", apiwrap.WrapWithBody(h.UpdateActive))
+	group.PUT("/:id/default", apiwrap.Wrap(h.SetDefault))
+	group.DELETE("/:id", apiwrap.Wrap(h.Delete))
+}
+
+func (h *MessageTemplateHandler) Create(ctx *gin.Context, req CreateMessageTemplateRequest) (*apiwrap.ResponseBody[any], error) {
+	err := h.serv.Create(ctx, domain.MessageTemplate{
+		Type:    domain.Type(req.Type),
+		Name:    req.Name,
+		Title:   req.Title,
+		Content: req.Content,
+		Active:  req.Active,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponse(), nil
 }
 
 func (h *MessageTemplateHandler) FindAll(ctx *gin.Context) (*apiwrap.ResponseBody[apiwrap.ListVO[MessageTemplateVO]], error) {
@@ -51,7 +68,21 @@ func (h *MessageTemplateHandler) FindAll(ctx *gin.Context) (*apiwrap.ResponseBod
 }
 
 func (h *MessageTemplateHandler) Update(ctx *gin.Context, req UpdateMessageTemplateRequest) (*apiwrap.ResponseBody[any], error) {
-	if err := h.serv.Update(ctx, ctx.Param("id"), req.Title, req.Content); err != nil {
+	if err := h.serv.Update(ctx, ctx.Param("id"), req.Name, req.Title, req.Content); err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponse(), nil
+}
+
+func (h *MessageTemplateHandler) SetDefault(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
+	if err := h.serv.SetDefault(ctx, ctx.Param("id")); err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponse(), nil
+}
+
+func (h *MessageTemplateHandler) Delete(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
+	if err := h.serv.Delete(ctx, ctx.Param("id")); err != nil {
 		return nil, err
 	}
 	return apiwrap.SuccessResponse(), nil
@@ -67,12 +98,14 @@ func (h *MessageTemplateHandler) UpdateActive(ctx *gin.Context, req UpdateMessag
 func toVO(messageTemplate domain.MessageTemplate) MessageTemplateVO {
 	return MessageTemplateVO{
 		Id:            messageTemplate.Id,
-		Name:          string(messageTemplate.Name),
+		Type:          string(messageTemplate.Type),
+		Name:          messageTemplate.Name,
 		Title:         messageTemplate.Title,
 		Content:       messageTemplate.Content,
 		Active:        messageTemplate.Active,
+		IsDefault:     messageTemplate.IsDefault,
 		RecipientType: uint(messageTemplate.RecipientType),
-		Variables:     domain.RequiredVariables(messageTemplate.Name),
+		Variables:     domain.RequiredVariables(messageTemplate.Type),
 		CreatedAt:     messageTemplate.CreatedAt,
 		UpdatedAt:     messageTemplate.UpdatedAt,
 	}

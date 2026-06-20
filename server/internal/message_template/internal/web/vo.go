@@ -16,10 +16,12 @@ package web
 
 type MessageTemplateVO struct {
 	Id            string   `json:"id"`
+	Type          string   `json:"type"`
 	Name          string   `json:"name"`
 	Title         string   `json:"title"`
 	Content       string   `json:"content"`
 	Active        bool     `json:"active"`
+	IsDefault     bool     `json:"is_default"`
 	RecipientType uint     `json:"recipient_type"`
 	Variables     []string `json:"variables"`
 	CreatedAt     int64    `json:"created_at"`

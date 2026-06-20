@@ -217,17 +217,25 @@ db.getCollection("friends").createIndex({
 
 // message_templates
 db.createCollection("message_templates");
-// 创建 name 升序索引
+// 同一类型下的模板名称唯一
 db.getCollection("message_templates").createIndex({
+    type: NumberInt("1"),
     name: NumberInt("1")
 }, {
-    name: "unique_name",
+    name: "unique_type_name",
     unique: true
 });
+// 每个类型只能有一个默认模板
+db.getCollection("message_templates").createIndex(
+    { type: NumberInt("1"), is_default: NumberInt("1") },
+    { name: "unique_default_per_type", unique: true, partialFilterExpression: { is_default: true } }
+);
 
 
 db.getCollection("message_templates").insertOne({
-    name: "comment",
+    type: "comment",
+    name: "默认模板",
+    is_default: true,
     title: "文章评论通知",
     content: "您好，您在文章有新的评论，详情请前往后台进行查看。",
     created_at: new Date(),
@@ -237,7 +245,9 @@ db.getCollection("message_templates").insertOne({
 });
 
 db.getCollection("message_templates").insertOne({
-    name: "user-comment-approval",
+    type: "user-comment-approval",
+    name: "默认模板",
+    is_default: true,
     title: "评论审核通过通知",
     content: "您好，您在 {{.PostURL}} 文章中发表的评论已通过审核。",
     created_at: new Date(),
@@ -247,7 +257,9 @@ db.getCollection("message_templates").insertOne({
 });
 
 db.getCollection("message_templates").insertOne({
-    name: "user-comment-disapproval",
+    type: "user-comment-disapproval",
+    name: "默认模板",
+    is_default: true,
     title: "评论被驳回通知",
     content: "您好，您在 {{.PostURL}} 文章中发表的评论未通过审核，原因：{{.Reason}}",
     created_at: new Date(),
@@ -257,7 +269,9 @@ db.getCollection("message_templates").insertOne({
 });
 
 db.getCollection("message_templates").insertOne({
-    name: "user-comment-reply",
+    type: "user-comment-reply",
+    name: "默认模板",
+    is_default: true,
     title: "评论被回复通知",
     content: "您好，您在 {{.PostURL}} 文章中发表的评论有新的回复。",
     created_at: new Date(),
@@ -267,7 +281,9 @@ db.getCollection("message_templates").insertOne({
 });
 
 db.getCollection("message_templates").insertOne({
-    name: "friend",
+    type: "friend",
+    name: "默认模板",
+    is_default: true,
     title: "友链申请通知",
     content: "您好，您的网站有了新的友链申请，详情可前往后台查看。",
     created_at: new Date(),
@@ -277,7 +293,9 @@ db.getCollection("message_templates").insertOne({
 });
 
 db.getCollection("message_templates").insertOne({
-    name: "friend-approval",
+    type: "friend-approval",
+    name: "默认模板",
+    is_default: true,
     title: "友链申请通过通知",
     content: "您好，您在 {{.FriendPageURL}} 网站里提交的友链申请已通过审核并展示在页面上。",
     created_at: new Date(),
@@ -287,7 +305,9 @@ db.getCollection("message_templates").insertOne({
 });
 
 db.getCollection("message_templates").insertOne({
-    name: "friend-rejection",
+    type: "friend-rejection",
+    name: "默认模板",
+    is_default: true,
     title: "友链申请不通过通知",
     content: "您好，您在 {{.FriendPageURL}} 网站里提交的友链申请未通过审核，原因：{{.Reason}}",
     created_at: new Date(),

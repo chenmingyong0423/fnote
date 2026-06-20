@@ -14,7 +14,16 @@
 
 package web
 
+type CreateMessageTemplateRequest struct {
+	Type    string `json:"type" binding:"required"`
+	Name    string `json:"name" binding:"required"`
+	Title   string `json:"title" binding:"required"`
+	Content string `json:"content" binding:"required"`
+	Active  bool   `json:"active"`
+}
+
 type UpdateMessageTemplateRequest struct {
+	Name    string `json:"name" binding:"required"`
 	Title   string `json:"title" binding:"required"`
 	Content string `json:"content" binding:"required"`
 }

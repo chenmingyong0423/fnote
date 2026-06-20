@@ -24,11 +24,14 @@ import (
 )
 
 type IMessageTemplateRepository interface {
-	FindMessageTemplateByNameAndRcpType(ctx context.Context, name domain.Name, recipientType domain.RecipientType) (*domain.MessageTemplate, error)
+	FindDefaultByTypeAndRecipientType(ctx context.Context, templateType domain.Type, recipientType domain.RecipientType) (*domain.MessageTemplate, error)
 	FindAll(ctx context.Context) ([]domain.MessageTemplate, error)
 	FindById(ctx context.Context, id string) (domain.MessageTemplate, error)
-	Update(ctx context.Context, id, title, content string) error
+	Create(ctx context.Context, messageTemplate domain.MessageTemplate) error
+	Update(ctx context.Context, id, name, title, content string) error
 	UpdateActive(ctx context.Context, id string, active bool) error
+	SetDefault(ctx context.Context, id string, templateType domain.Type) error
+	Delete(ctx context.Context, id string) error
 }
 
 var _ IMessageTemplateRepository = (*MessageTemplateRepository)(nil)
@@ -41,12 +44,12 @@ type MessageTemplateRepository struct {
 	dao dao.IMessageTemplateDao
 }
 
-func (r *MessageTemplateRepository) FindMessageTemplateByNameAndRcpType(ctx context.Context, name domain.Name, recipientType domain.RecipientType) (*domain.MessageTemplate, error) {
-	MessageTemplateByName, err := r.dao.FindMsgTplByName(ctx, string(name), recipientType)
+func (r *MessageTemplateRepository) FindDefaultByTypeAndRecipientType(ctx context.Context, templateType domain.Type, recipientType domain.RecipientType) (*domain.MessageTemplate, error) {
+	messageTemplateByType, err := r.dao.FindDefaultByType(ctx, string(templateType), recipientType)
 	if err != nil {
 		return nil, err
 	}
-	messageTemplate := r.toDomain(MessageTemplateByName)
+	messageTemplate := r.toDomain(messageTemplateByType)
 	return &messageTemplate, nil
 }
 
@@ -74,12 +77,44 @@ func (r *MessageTemplateRepository) FindById(ctx context.Context, id string) (do
 	return r.toDomain(messageTemplate), nil
 }
 
-func (r *MessageTemplateRepository) Update(ctx context.Context, id, title, content string) error {
+func (r *MessageTemplateRepository) Create(ctx context.Context, messageTemplate domain.MessageTemplate) error {
+	active := uint(0)
+	if messageTemplate.Active {
+		active = 1
+	}
+	return r.dao.Create(ctx, &dao.MessageTemplate{
+		Type:          string(messageTemplate.Type),
+		Name:          messageTemplate.Name,
+		Title:         messageTemplate.Title,
+		Content:       messageTemplate.Content,
+		Active:        active,
+		IsDefault:     false,
+		RecipientType: messageTemplate.RecipientType,
+	})
+}
+
+func (r *MessageTemplateRepository) Update(ctx context.Context, id, name, title, content string) error {
 	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
-	return r.dao.Update(ctx, objectID, title, content)
+	return r.dao.Update(ctx, objectID, name, title, content)
+}
+
+func (r *MessageTemplateRepository) SetDefault(ctx context.Context, id string, templateType domain.Type) error {
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	return r.dao.SetDefault(ctx, objectID, string(templateType))
+}
+
+func (r *MessageTemplateRepository) Delete(ctx context.Context, id string) error {
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	return r.dao.Delete(ctx, objectID)
 }
 
 func (r *MessageTemplateRepository) UpdateActive(ctx context.Context, id string, active bool) error {
@@ -93,10 +128,12 @@ func (r *MessageTemplateRepository) UpdateActive(ctx context.Context, id string,
 func (r *MessageTemplateRepository) toDomain(messageTemplate *dao.MessageTemplate) domain.MessageTemplate {
 	return domain.MessageTemplate{
 		Id:            messageTemplate.ID.Hex(),
-		Name:          domain.Name(messageTemplate.Name),
+		Type:          domain.Type(messageTemplate.Type),
+		Name:          messageTemplate.Name,
 		Title:         messageTemplate.Title,
 		Content:       messageTemplate.Content,
 		Active:        messageTemplate.Active == 1,
+		IsDefault:     messageTemplate.IsDefault,
 		RecipientType: messageTemplate.RecipientType,
 		CreatedAt:     messageTemplate.CreatedAt.Unix(),
 		UpdatedAt:     messageTemplate.UpdatedAt.Unix(),

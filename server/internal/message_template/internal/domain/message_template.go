@@ -24,18 +24,18 @@ import (
 	"text/template"
 )
 
-type Name string
+type Type string
 
 type RecipientType uint
 
 const (
-	CommentReceived     Name = "comment"
-	UserCommentApproved Name = "user-comment-approval"
-	UserCommentRejected Name = "user-comment-disapproval"
-	UserCommentReplied  Name = "user-comment-reply"
-	FriendApplied       Name = "friend"
-	UserFriendApproved  Name = "friend-approval"
-	UserFriendRejected  Name = "friend-rejection"
+	CommentReceived     Type = "comment"
+	UserCommentApproved Type = "user-comment-approval"
+	UserCommentRejected Type = "user-comment-disapproval"
+	UserCommentReplied  Type = "user-comment-reply"
+	FriendApplied       Type = "friend"
+	UserFriendApproved  Type = "friend-approval"
+	UserFriendRejected  Type = "friend-rejection"
 )
 
 const (
@@ -53,10 +53,12 @@ const (
 
 type MessageTemplate struct {
 	Id            string
-	Name          Name
+	Type          Type
+	Name          string
 	Title         string
 	Content       string
 	Active        bool
+	IsDefault     bool
 	RecipientType RecipientType
 	CreatedAt     int64
 	UpdatedAt     int64
@@ -64,26 +66,37 @@ type MessageTemplate struct {
 
 func (mt *MessageTemplate) RenderContent(data Data) error {
 	if strings.Contains(mt.Content, "%s") {
-		return fmt.Errorf("message template %q contains unsupported legacy placeholders", mt.Name)
+		return fmt.Errorf("message template %q contains unsupported legacy placeholders", mt.Type)
 	}
 
-	tpl, err := template.New(string(mt.Name)).Option("missingkey=error").Parse(mt.Content)
+	tpl, err := template.New(string(mt.Type)).Option("missingkey=error").Parse(mt.Content)
 	if err != nil {
-		return fmt.Errorf("parse message template %q: %w", mt.Name, err)
+		return fmt.Errorf("parse message template %q: %w", mt.Type, err)
 	}
 
 	var rendered bytes.Buffer
 	if err = tpl.Execute(&rendered, data); err != nil {
-		return fmt.Errorf("render message template %q: %w", mt.Name, err)
+		return fmt.Errorf("render message template %q: %w", mt.Type, err)
 	}
 	mt.Content = rendered.String()
 	return nil
 }
 
+func RecipientForType(name Type) (RecipientType, bool) {
+	switch name {
+	case CommentReceived, FriendApplied:
+		return RecipientWebmaster, true
+	case UserCommentApproved, UserCommentRejected, UserCommentReplied, UserFriendApproved, UserFriendRejected:
+		return RecipientUser, true
+	default:
+		return 0, false
+	}
+}
+
 var placeholderPattern = regexp.MustCompile(`^{{\s*\.([A-Za-z][A-Za-z0-9]*)\s*}}$`)
 var actionPattern = regexp.MustCompile(`{{[^{}]*}}`)
 
-func RequiredVariables(name Name) []string {
+func RequiredVariables(name Type) []string {
 	switch name {
 	case UserCommentApproved, UserCommentReplied:
 		return []string{VariablePostURL}
@@ -98,7 +111,7 @@ func RequiredVariables(name Name) []string {
 	}
 }
 
-func ValidateContent(name Name, content string) error {
+func ValidateContent(name Type, content string) error {
 	if strings.TrimSpace(content) == "" {
 		return errors.New("message template content cannot be empty")
 	}

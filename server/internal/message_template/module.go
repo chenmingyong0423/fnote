@@ -23,7 +23,7 @@ import (
 type (
 	Handler       = web.MessageTemplateHandler
 	Service       = service.IMessageTemplateService
-	Name          = domain.Name
+	Type          = domain.Type
 	RecipientType = domain.RecipientType
 	Data          = domain.Data
 	Module        struct {

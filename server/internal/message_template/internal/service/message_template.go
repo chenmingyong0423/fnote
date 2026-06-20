@@ -29,10 +29,13 @@ import (
 )
 
 type IMessageTemplateService interface {
-	FindMsgTplByNameAndRcpType(ctx context.Context, name domain.Name, recipientType domain.RecipientType) (*domain.MessageTemplate, error)
+	FindDefaultByTypeAndRecipientType(ctx context.Context, templateType domain.Type, recipientType domain.RecipientType) (*domain.MessageTemplate, error)
 	FindAll(ctx context.Context) ([]domain.MessageTemplate, error)
-	Update(ctx context.Context, id, title, content string) error
+	Create(ctx context.Context, messageTemplate domain.MessageTemplate) error
+	Update(ctx context.Context, id, name, title, content string) error
 	UpdateActive(ctx context.Context, id string, active bool) error
+	SetDefault(ctx context.Context, id string) error
+	Delete(ctx context.Context, id string) error
 }
 
 var _ IMessageTemplateService = (*MessageTemplateService)(nil)
@@ -41,34 +44,87 @@ type MessageTemplateService struct {
 	repo repository.IMessageTemplateRepository
 }
 
-func (s *MessageTemplateService) FindMsgTplByNameAndRcpType(ctx context.Context, name domain.Name, recipientType domain.RecipientType) (*domain.MessageTemplate, error) {
-	return s.repo.FindMessageTemplateByNameAndRcpType(ctx, name, recipientType)
+func (s *MessageTemplateService) FindDefaultByTypeAndRecipientType(ctx context.Context, templateType domain.Type, recipientType domain.RecipientType) (*domain.MessageTemplate, error) {
+	return s.repo.FindDefaultByTypeAndRecipientType(ctx, templateType, recipientType)
 }
 
 func (s *MessageTemplateService) FindAll(ctx context.Context) ([]domain.MessageTemplate, error) {
 	return s.repo.FindAll(ctx)
 }
 
-func (s *MessageTemplateService) Update(ctx context.Context, id, title, content string) error {
+func (s *MessageTemplateService) Create(ctx context.Context, messageTemplate domain.MessageTemplate) error {
+	recipientType, ok := domain.RecipientForType(messageTemplate.Type)
+	if !ok {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "unknown message template type")
+	}
+	messageTemplate.RecipientType = recipientType
+	if err := validateTemplate(messageTemplate.Type, messageTemplate.Name, messageTemplate.Title, messageTemplate.Content); err != nil {
+		return err
+	}
+	if err := s.repo.Create(ctx, messageTemplate); err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return apiwrap.NewErrorResponseBody(http.StatusConflict, "message template name already exists in this type")
+		}
+		return err
+	}
+	return nil
+}
+
+func (s *MessageTemplateService) Update(ctx context.Context, id, name, title, content string) error {
 	messageTemplate, err := s.findById(ctx, id)
 	if err != nil {
 		return err
 	}
-	title = strings.TrimSpace(title)
-	if title == "" {
-		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "message template title cannot be empty")
+	if err = validateTemplate(messageTemplate.Type, name, title, content); err != nil {
+		return err
 	}
-	if err = domain.ValidateContent(messageTemplate.Name, content); err != nil {
-		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, err.Error())
+	if err = s.repo.Update(ctx, id, strings.TrimSpace(name), strings.TrimSpace(title), content); mongo.IsDuplicateKeyError(err) {
+		return apiwrap.NewErrorResponseBody(http.StatusConflict, "message template name already exists in this type")
 	}
-	return s.repo.Update(ctx, id, title, content)
+	return err
 }
 
 func (s *MessageTemplateService) UpdateActive(ctx context.Context, id string, active bool) error {
-	if _, err := s.findById(ctx, id); err != nil {
+	messageTemplate, err := s.findById(ctx, id)
+	if err != nil {
 		return err
 	}
+	if messageTemplate.IsDefault && !active {
+		return apiwrap.NewErrorResponseBody(http.StatusConflict, "default message template cannot be disabled")
+	}
 	return s.repo.UpdateActive(ctx, id, active)
+}
+
+func (s *MessageTemplateService) SetDefault(ctx context.Context, id string) error {
+	messageTemplate, err := s.findById(ctx, id)
+	if err != nil {
+		return err
+	}
+	return s.repo.SetDefault(ctx, id, messageTemplate.Type)
+}
+
+func (s *MessageTemplateService) Delete(ctx context.Context, id string) error {
+	messageTemplate, err := s.findById(ctx, id)
+	if err != nil {
+		return err
+	}
+	if messageTemplate.IsDefault {
+		return apiwrap.NewErrorResponseBody(http.StatusConflict, "default message template cannot be deleted")
+	}
+	return s.repo.Delete(ctx, id)
+}
+
+func validateTemplate(templateType domain.Type, name, title, content string) error {
+	if strings.TrimSpace(name) == "" {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "message template name cannot be empty")
+	}
+	if strings.TrimSpace(title) == "" {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "message template title cannot be empty")
+	}
+	if err := domain.ValidateContent(templateType, content); err != nil {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, err.Error())
+	}
+	return nil
 }
 
 func (s *MessageTemplateService) findById(ctx context.Context, id string) (domain.MessageTemplate, error) {

@@ -16,7 +16,7 @@ func TestMessageTemplateRenderContent(t *testing.T) {
 		{
 			name: "named variables",
 			tpl: MessageTemplate{
-				Name:    UserCommentRejected,
+				Type:    UserCommentRejected,
 				Content: "post={{.PostURL}}, reason={{.Reason}}",
 			},
 			data: Data{VariablePostURL: "https://example.com/posts/1", VariableReason: "spam"},
@@ -25,7 +25,7 @@ func TestMessageTemplateRenderContent(t *testing.T) {
 		{
 			name: "missing variable",
 			tpl: MessageTemplate{
-				Name:    UserCommentApproved,
+				Type:    UserCommentApproved,
 				Content: "post={{.PostURL}}",
 			},
 			wantErr: "map has no entry for key \"PostURL\"",
@@ -33,7 +33,7 @@ func TestMessageTemplateRenderContent(t *testing.T) {
 		{
 			name: "invalid syntax",
 			tpl: MessageTemplate{
-				Name:    UserCommentApproved,
+				Type:    UserCommentApproved,
 				Content: "post={{.PostURL",
 			},
 			wantErr: "unclosed action",
@@ -62,7 +62,7 @@ func TestMessageTemplateRenderContent(t *testing.T) {
 func TestValidateContent(t *testing.T) {
 	tests := []struct {
 		name      string
-		tplName   Name
+		tplName   Type
 		content   string
 		wantError bool
 	}{
