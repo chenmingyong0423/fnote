@@ -87,6 +87,11 @@ const router = createRouter({
           path: '/home/backup',
           name: 'backup',
           component: () => import('@/views/backup/BackupView.vue')
+        },
+        {
+          path: '/home/file',
+          name: 'file',
+          component: () => import('@/views/file/FileView.vue')
         }
       ]
     }

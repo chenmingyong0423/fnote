@@ -45,6 +45,7 @@ import {
   TagsOutlined,
   TeamOutlined,
   SettingOutlined,
+  FolderOpenOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined
 } from '@ant-design/icons-vue'
@@ -162,6 +163,12 @@ const items = reactive([
         key: '/home/backup',
         label: '备份',
         title: '备份'
+      },
+      {
+        key: '/home/file',
+        label: '文件管理',
+        title: '文件管理',
+        icon: () => h(FolderOpenOutlined)
       }
     ]
   }

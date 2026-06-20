@@ -30,7 +30,17 @@ export type PageRequest = {
 export interface FileVO {
   file_id: string
   file_name: string
+  original_file_name: string
+  file_type: string
+  file_size: number
   url: string
+  used_in: FileUsageVO[]
+  created_at: number
+}
+
+export interface FileUsageVO {
+  type: string
+  id: string
 }
 
 export const GetFileList = (pageRequest: PageRequest) => {
@@ -38,5 +48,12 @@ export const GetFileList = (pageRequest: PageRequest) => {
     url: `/files`,
     method: 'get',
     params: pageRequest
+  })
+}
+
+export const DeleteFile = (fileId: string) => {
+  return instance({
+    url: `/files/${fileId}`,
+    method: 'delete'
   })
 }
