@@ -41,7 +41,15 @@ func (h *FileHandler) RegisterGinRoutes(engine *gin.Engine) {
 	adminGroup := engine.Group("/admin-api/files")
 	adminGroup.POST("/upload", apiwrap.Wrap(h.UploadFile))
 	adminGroup.GET("", apiwrap.WrapWithBody(h.GetFiles))
+	adminGroup.DELETE("/batch", apiwrap.WrapWithBody(h.BatchDeleteFiles))
 	adminGroup.DELETE("/:fileId", apiwrap.Wrap(h.DeleteFile))
+}
+
+func (h *FileHandler) BatchDeleteFiles(ctx *gin.Context, req BatchDeleteFileRequest) (*apiwrap.ResponseBody[any], error) {
+	if err := h.serv.DeleteFiles(ctx, req.FileIds); err != nil {
+		return nil, err
+	}
+	return apiwrap.SuccessResponse(), nil
 }
 
 func (h *FileHandler) DeleteFile(ctx *gin.Context) (*apiwrap.ResponseBody[any], error) {
@@ -91,6 +99,7 @@ func (h *FileHandler) GetFiles(ctx *gin.Context, req PageRequest) (*apiwrap.Resp
 		PageNum:  req.PageNum,
 		PageSize: req.PageSize,
 		FileType: req.FileType,
+		Unused:   req.Unused,
 	})
 	if err != nil {
 		return nil, err

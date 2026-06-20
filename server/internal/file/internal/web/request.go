@@ -16,8 +16,13 @@ package web
 
 type FileRequest struct{}
 
+type BatchDeleteFileRequest struct {
+	FileIds []string `json:"file_ids" binding:"required,min=1,max=100,dive,required"`
+}
+
 type PageRequest struct {
 	PageNum  int64    `form:"pageNum" binding:"required,min=1"`
 	PageSize int64    `form:"pageSize" binding:"required,min=1,max=100"`
 	FileType []string `form:"fileType"`
+	Unused   bool     `form:"unused"`
 }

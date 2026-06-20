@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/chenmingyong0423/go-mongox/v2"
+	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -32,6 +33,10 @@ func TestFileIDBackupAndRecovery(t *testing.T) {
 	databaseName := "fnote_backup_file_id_test"
 	database := mongox.NewClient(client, &mongox.Config{}).NewDatabase(databaseName)
 	t.Cleanup(func() { _ = database.Database().Drop(context.Background()) })
+	staticPath := t.TempDir()
+	previousStaticPath := viper.GetString("system.static_path")
+	viper.Set("system.static_path", staticPath)
+	t.Cleanup(func() { viper.Set("system.static_path", previousStaticPath) })
 	want := []byte{0x00, 0x11, 0x22, 0x33}
 	_, err = database.Database().Collection("file_meta").InsertOne(ctx, bson.M{
 		"file_id":    want,
@@ -64,12 +69,16 @@ func TestFileIDBackupAndRecovery(t *testing.T) {
 		t.Fatal(err)
 	}
 	var restored struct {
-		FileID []byte `bson:"file_id"`
+		FileID   []byte `bson:"file_id"`
+		FilePath string `bson:"file_path"`
 	}
 	if err = database.Database().Collection("file_meta").FindOne(ctx, bson.M{}).Decode(&restored); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(restored.FileID, want) {
 		t.Fatalf("restored file id = %x, want %x", restored.FileID, want)
+	}
+	if restored.FilePath != filepath.Join(staticPath, "test.png") {
+		t.Fatalf("restored file path = %q", restored.FilePath)
 	}
 }

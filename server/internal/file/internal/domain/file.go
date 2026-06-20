@@ -48,4 +48,5 @@ type PageDTO struct {
 	PageNum  int64
 	PageSize int64
 	FileType []string
+	Unused   bool
 }

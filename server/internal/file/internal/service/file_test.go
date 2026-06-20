@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"os"
 	"path/filepath"
@@ -38,6 +39,21 @@ type deletableFileRepository struct {
 	file        *domain.File
 	deleteCount int64
 	deleteCalls int
+}
+
+type batchDeleteFileRepository struct {
+	failingFileRepository
+	files       map[string]*domain.File
+	deleteCalls int
+}
+
+func (r *batchDeleteFileRepository) FindByFileId(_ context.Context, fileID []byte) (*domain.File, error) {
+	return r.files[hex.EncodeToString(fileID)], nil
+}
+
+func (r *batchDeleteFileRepository) DeleteUnusedByFileId(context.Context, []byte) (int64, error) {
+	r.deleteCalls++
+	return 1, nil
 }
 
 func (r *deletableFileRepository) FindByFileId(context.Context, []byte) (*domain.File, error) {
@@ -81,7 +97,7 @@ func TestDeleteFileRemovesUnusedMetadataAndPhysicalFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	repo := &deletableFileRepository{
-		file:        &domain.File{FilePath: filePath},
+		file:        &domain.File{FileName: "unused.png", FilePath: "/old/static/unused.png"},
 		deleteCount: 1,
 	}
 	service := &FileService{repo: repo}
@@ -107,6 +123,7 @@ func TestDeleteFileRejectsReferencedFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	repo := &deletableFileRepository{file: &domain.File{
+		FileName: "used.png",
 		FilePath: filePath,
 		UsedIn:   []domain.FileUsage{{EntityId: "post-1", EntityType: "post"}},
 	}}
@@ -119,6 +136,40 @@ func TestDeleteFileRejectsReferencedFile(t *testing.T) {
 	}
 	if _, err := os.Stat(filePath); err != nil {
 		t.Fatalf("referenced physical file was removed: %v", err)
+	}
+}
+
+func TestDeleteFilesValidatesAllFilesBeforeDeletion(t *testing.T) {
+	staticPath := t.TempDir()
+	previousStaticPath := viper.GetString("system.static_path")
+	viper.Set("system.static_path", staticPath)
+	t.Cleanup(func() { viper.Set("system.static_path", previousStaticPath) })
+
+	unusedID := "00112233445566778899aabbccddeeff"
+	usedID := "ffeeddccbbaa99887766554433221100"
+	repo := &batchDeleteFileRepository{files: map[string]*domain.File{
+		unusedID: {FileName: "unused.png", FilePath: filepath.Join(staticPath, "unused.png")},
+		usedID: {
+			FileName: "used.png",
+			FilePath: filepath.Join(staticPath, "used.png"),
+			UsedIn:   []domain.FileUsage{{EntityId: "post-1", EntityType: "post"}},
+		},
+	}}
+	service := &FileService{repo: repo}
+	if err := service.DeleteFiles(context.Background(), []string{unusedID, usedID}); err == nil {
+		t.Fatal("expected batch deletion to reject referenced file")
+	}
+	if repo.deleteCalls != 0 {
+		t.Fatalf("delete calls = %d, want 0", repo.deleteCalls)
+	}
+}
+
+func TestResolveStaticFilePathRejectsTraversal(t *testing.T) {
+	if _, ok := resolveStaticFilePath("../outside.png"); ok {
+		t.Fatal("expected traversal file name to be rejected")
+	}
+	if _, ok := resolveStaticFilePath(`folder\outside.png`); ok {
+		t.Fatal("expected backslash file name to be rejected")
 	}
 }
 

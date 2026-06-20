@@ -104,7 +104,7 @@ type IFileDao interface {
 	PushIntoUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error
 	PullUsedIn(ctx context.Context, fileId []byte, fileUsage FileUsage) error
 	FindByFileName(ctx context.Context, filename string) (*File, error)
-	FindPageByFileType(ctx context.Context, pageNum int64, pageSize int64, fileType []string) ([]*File, int64, error)
+	FindPageByFileType(ctx context.Context, pageNum int64, pageSize int64, fileType []string, unused bool) ([]*File, int64, error)
 	FindUsagePosts(ctx context.Context, ids []string) ([]*UsageContent, error)
 	FindUsagePostDrafts(ctx context.Context, ids []string) ([]*UsageContent, error)
 	FindUsageConfigs(ctx context.Context, ids []bson.ObjectID) ([]*UsageConfig, error)
@@ -178,10 +178,16 @@ func (d *FileDao) DeleteUnusedByFileId(ctx context.Context, fileId []byte) (int6
 	return result.DeletedCount, nil
 }
 
-func (d *FileDao) FindPageByFileType(ctx context.Context, pageNum int64, pageSize int64, fileType []string) ([]*File, int64, error) {
+func (d *FileDao) FindPageByFileType(ctx context.Context, pageNum int64, pageSize int64, fileType []string, unused bool) ([]*File, int64, error) {
 	filter := bson.D{}
 	if len(fileType) > 0 {
-		filter = query.In("file_type", fileType...)
+		filter = append(filter, query.In("file_type", fileType...)...)
+	}
+	if unused {
+		filter = append(filter, bson.E{Key: "$or", Value: bson.A{
+			bson.M{"used_in": bson.M{"$exists": false}},
+			bson.M{"used_in": bson.M{"$size": 0}},
+		}})
 	}
 	count, err := d.coll.Finder().Filter(filter).Count(ctx)
 	if err != nil {

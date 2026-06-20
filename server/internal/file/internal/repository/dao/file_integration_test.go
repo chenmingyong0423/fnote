@@ -49,3 +49,37 @@ func TestDeleteUnusedByFileId(t *testing.T) {
 		t.Fatalf("delete used file = (%d, %v), want (0, nil)", deleted, err)
 	}
 }
+
+func TestFindPageByFileTypeFiltersUnusedFiles(t *testing.T) {
+	uri := os.Getenv("MONGODB_TEST_URI")
+	if uri == "" {
+		t.Skip("MONGODB_TEST_URI is not set")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(options.Client().ApplyURI(uri))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Disconnect(ctx)
+
+	database := mongox.NewClient(client, &mongox.Config{}).NewDatabase("fnote_file_filter_test")
+	t.Cleanup(func() { _ = database.Database().Drop(context.Background()) })
+	_, err = database.Database().Collection("file_meta").InsertMany(ctx, []any{
+		bson.M{"file_id": []byte{0x01}, "file_type": "image/png", "used_in": bson.A{}},
+		bson.M{"file_id": []byte{0x02}, "file_type": "image/jpeg", "used_in": bson.A{bson.M{"entity_id": "post-1", "entity_type": "post"}}},
+		bson.M{"file_id": []byte{0x03}, "file_type": "text/plain", "used_in": bson.A{}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	files, total, err := NewFileDao(database).FindPageByFileType(ctx, 1, 10, []string{"image/png", "image/jpeg"}, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if total != 1 || len(files) != 1 || files[0].FileType != "image/png" {
+		t.Fatalf("files = %v, total = %d; want one unused PNG file", files, total)
+	}
+}
