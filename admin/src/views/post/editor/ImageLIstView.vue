@@ -1,161 +1,165 @@
 <template>
-  <a-card>
-    <div class="asset-browser flex h-500px">
-      <div class="asset-browser-sidebar w-30% h-500px border-r-1 border-r-solid relative">
+  <div class="image-assets">
+    <aside class="folder-panel">
+      <div class="panel-header">
         <div>
-          <ul class="h-full overflow-y-auto p-1">
-            <li
-              v-for="item in folders"
-              :key="item.id"
-              class=""
-              :class="[
-                'asset-folder box-border flex items-center justify-between p-4 rounded-lg cursor-pointer group h-54px m-y-2',
-                { 'asset-folder-selected': state.selectedMenuItem == item.id }
-              ]"
-              @click="menuItemChanged(item.id)"
-            >
-              <div>
-                <span class="asset-folder-icon">
-                  <component :is="item.icon" />
-                </span>
-                <span class="ml-2">{{ item.name }}</span>
-              </div>
-              <div class="hidden group-hover:block">
-                <a-button
-                  shape="circle"
-                  size="small"
-                  v-if="item.support_edit"
-                  @click="preEdit(item)"
-                >
-                  <template #icon>
-                    <FormOutlined />
-                  </template>
-                </a-button>
-
-                <a-button shape="circle" size="small" v-if="item.support_delete">
-                  <template #icon>
-                    <a-popconfirm
-                      title="确认删除？"
-                      ok-text="是"
-                      cancel-text="否"
-                      @confirm="deleteAssetFolder(item.id)"
-                    >
-                      <DeleteOutlined />
-                    </a-popconfirm>
-                  </template>
-                </a-button>
-              </div>
-            </li>
-          </ul>
+          <div class="panel-title">图片分类</div>
+          <div class="panel-subtitle">按用途整理常用图片</div>
         </div>
-        <a-button
-          class="asset-folder-add absolute bottom-0"
-          @click="
-            () => {
-              visible = true
-              modalLabel = '新增分类'
-            }
-          "
-        >
-          <template #icon>
-            <FolderAddOutlined />
-          </template>
-          新增分类
-        </a-button>
-        <a-modal v-model:visible="visible" :title="modalLabel" @ok="handleOk" @cancel="cancel">
-          <a-input addon-before="分类名称" v-model:value="assetFolder.name" />
-        </a-modal>
+        <a-tooltip title="新增分类">
+          <a-button type="text" shape="circle" :icon="h(FolderAddOutlined)" @click="openCreator" />
+        </a-tooltip>
       </div>
-      <div class="w-69% ml-1% flex flex-col gap-y-2 relative">
-        <div class="flex gap-x-1">
+
+      <a-spin :spinning="folderLoading">
+        <a-empty v-if="!folders.length" :image="simpleImage" description="暂无分类">
+          <a-button type="primary" size="small" @click="openCreator">创建分类</a-button>
+        </a-empty>
+        <div v-else class="folder-list">
+          <button
+            v-for="item in folders"
+            :key="item.id"
+            type="button"
+            :class="['folder-item', { active: state.selectedMenuItem === item.id }]"
+            @click="menuItemChanged(item.id)"
+          >
+            <span class="folder-label">
+              <PictureOutlined />
+              <span class="folder-name">{{ item.name }}</span>
+            </span>
+            <span class="folder-actions" @click.stop>
+              <a-tooltip v-if="item.support_edit" title="重命名">
+                <EditOutlined @click="preEdit(item)" />
+              </a-tooltip>
+              <a-popconfirm
+                v-if="item.support_delete"
+                title="确定删除这个空分类吗？"
+                ok-text="删除"
+                cancel-text="取消"
+                @confirm="deleteAssetFolder(item.id)"
+              >
+                <a-tooltip title="删除分类"><DeleteOutlined /></a-tooltip>
+              </a-popconfirm>
+            </span>
+          </button>
+        </div>
+      </a-spin>
+    </aside>
+
+    <section class="gallery-panel">
+      <header class="gallery-header">
+        <div>
+          <div class="gallery-title-row">
+            <span class="panel-title">{{ selectedFolder?.name || '图片素材' }}</span>
+            <a-tag v-if="selectedFolder" color="blue">{{ pagination.totalCount }} 张</a-tag>
+          </div>
+          <div class="panel-subtitle">选择图片后可插入文章，支持 JPG、PNG，最大 1MB</div>
+        </div>
+        <a-space v-if="state.selectedMenuItem">
           <SimpleUpload
             @success:imageUrl="uploadAsset"
             :authorization="userStore.token"
             :action="serverHost + '/admin-api/files/upload'"
-            label="上传图片"
+            label="上传新图片"
             :fileTypes="['image/jpeg', 'image/png']"
             :maxSize="1048576"
           />
-          <a-button @click="visible4ExistImageModal = true">
-            <template #icon><FileImageOutlined /></template>
-            选择已有图片
+          <a-button :icon="h(FileImageOutlined)" @click="visible4ExistImageModal = true">
+            从文件库选择
           </a-button>
-        </div>
-        <div class="flex gap-2 flex-wrap">
-          <PreviewImg v-model="visible4PreviewImgModal" :image-url="previewImgUrl" />
-          <div
+        </a-space>
+      </header>
+
+      <a-spin class="gallery-loading" :spinning="imageLoading">
+        <div v-if="images.length" class="image-grid">
+          <button
             v-for="image in images"
             :key="image.id"
+            type="button"
+            :class="['image-card', { selected: isSelected(image.id) }]"
+            :aria-label="`选择图片 ${fileName(image.content)}`"
             @click="selectImage(image.id)"
-            class="relative box-border border rounded w-27 h-27 cursor-pointer"
+            @dblclick="selectAndInsert(image.id)"
           >
-            <img
-              :src="serverHost + image.content"
-              class="box-border w-27 h-27 object-contain"
-              alt="image"
-            />
-
-            <div
-              :class="[
-                'w-full h-full absolute top-0 duration-300 ease-in-out group',
-                {
-                  'bg-black bg-opacity-40': isSelected(image.id),
-                  'hover:bg-black hover:bg-opacity-40': !isSelected(image.id)
-                }
-              ]"
-            >
-              <div
-                class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 group-hover:block duration-300 ease-in-out group"
-              >
-                <div class="flex space-x-2">
-                  <a-button shape="circle" :ghost="true" @click.stop="preview(image.content)">
-                    <template #icon><EyeOutlined /></template>
-                  </a-button>
-                </div>
-              </div>
-            </div>
-
-            <div v-if="isSelected(image.id)" class="absolute top-2 right-2 opacity-100">
-              <span
-                class="bg-blue-500 text-white text-xl rounded-full w-6 h-6 lh-6 flex items-center justify-center"
-                >√</span
-              >
-            </div>
-          </div>
+            <span class="image-stage">
+              <img :src="serverHost + image.content" :alt="fileName(image.content)" />
+              <span class="image-overlay">
+                <a-tooltip title="查看大图">
+                  <span class="preview-button" @click.stop="preview(image.content)">
+                    <EyeOutlined />
+                  </span>
+                </a-tooltip>
+              </span>
+              <CheckCircleFilled v-if="isSelected(image.id)" class="selected-mark" />
+            </span>
+            <span class="image-name" :title="fileName(image.content)">
+              {{ fileName(image.content) }}
+            </span>
+          </button>
         </div>
-        <div class="absolute bottom-10 w-full flex justify-center">
-          <a-pagination
-            v-model:current="pagination.pageNo"
-            :page-size="pagination.pageSize"
-            :total="pagination.totalCount"
-            :show-size-changer="false"
-            @change="getImages"
-          />
-        </div>
-        <div class="absolute bottom-0 w-full flex gap-x-1 justify-end">
-          <a-popconfirm title="确认删除？" ok-text="是" cancel-text="否" @confirm="deleteAsset">
-            <a-button type="primary" :disabled="state.selectedImgIndex == ''"> 删除图片 </a-button>
+        <a-empty
+          v-else
+          class="gallery-empty"
+          :image="simpleImage"
+          :description="state.selectedMenuItem ? '该分类还没有图片' : '请先创建或选择分类'"
+        />
+      </a-spin>
+
+      <footer class="gallery-footer">
+        <a-pagination
+          v-if="pagination.totalCount > pagination.pageSize"
+          v-model:current="pagination.pageNo"
+          :page-size="pagination.pageSize"
+          :total="pagination.totalCount"
+          :show-size-changer="false"
+          size="small"
+          @change="getImages"
+        />
+        <span v-else></span>
+        <a-space>
+          <a-popconfirm
+            title="确定删除选中的图片吗？"
+            ok-text="删除"
+            cancel-text="取消"
+            @confirm="deleteAsset"
+          >
+            <a-button danger :disabled="!state.selectedImgIndex">删除</a-button>
           </a-popconfirm>
-
-          <a-button type="primary" :disabled="state.selectedImgIndex == ''" @click="insert">
+          <a-button type="primary" :disabled="!state.selectedImgIndex" @click="insert">
             插入图片
           </a-button>
-        </div>
-      </div>
-    </div>
-    <ImageList v-model="visible4ExistImageModal" @insertImg="uploadAsset"></ImageList>
-  </a-card>
+        </a-space>
+      </footer>
+    </section>
+
+    <a-modal v-model:open="visible" :title="modalLabel" @ok="handleOk" @cancel="cancel">
+      <a-form layout="vertical">
+        <a-form-item label="分类名称" required>
+          <a-input
+            v-model:value="assetFolder.name"
+            :maxlength="30"
+            show-count
+            placeholder="例如：文章配图"
+            @press-enter="handleOk"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+    <PreviewImg v-model="visible4PreviewImgModal" :image-url="previewImgUrl" />
+    <ImageList v-model="visible4ExistImageModal" @insertImg="uploadAsset" />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { defineEmits, h, reactive, ref, watch } from 'vue'
+import { computed, defineEmits, h, reactive, ref, watch } from 'vue'
 import {
   PictureOutlined,
   FolderAddOutlined,
-  FormOutlined,
+  EditOutlined,
   DeleteOutlined,
   FileImageOutlined,
-  EyeOutlined
+  EyeOutlined,
+  CheckCircleFilled
 } from '@ant-design/icons-vue'
 import {
   AddAsset,
@@ -170,7 +174,7 @@ import {
   GetAssetFolderList,
   GetAssetList
 } from '@/interfaces/Asset'
-import { message } from 'ant-design-vue'
+import { Empty, message } from 'ant-design-vue'
 import originalAxios from 'axios'
 import { useUserStore } from '@/stores/user'
 import SimpleUpload from '@/components/upload/SimpleUpload.vue'
@@ -183,19 +187,26 @@ const state = reactive({
 })
 
 const folders = ref<AssetFolderVO[]>([])
+const folderLoading = ref(false)
+const imageLoading = ref(false)
+const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
+const selectedFolder = computed(() =>
+  folders.value.find((folder) => folder.id === state.selectedMenuItem)
+)
 
 const getFolders = async () => {
+  folderLoading.value = true
   try {
     const response = await GetAssetFolderList('image', 'post-editor')
     folders.value = response.data.data?.list || []
-    if (folders.value.length > 0) {
-      folders.value.forEach((item) => {
-        item.icon = h(PictureOutlined)
-      })
-      state.selectedMenuItem = folders.value[0].id
+    if (!folders.value.some((folder) => folder.id === state.selectedMenuItem)) {
+      state.selectedMenuItem = folders.value[0]?.id || ''
     }
   } catch (error) {
     console.log(error)
+    message.error('获取图片分类失败')
+  } finally {
+    folderLoading.value = false
   }
 }
 
@@ -225,6 +236,13 @@ const insert = () => {
   emit('insertImg', `![](${image?.content})`)
 }
 
+const selectAndInsert = (id: string) => {
+  state.selectedImgIndex = id
+  insert()
+}
+
+const fileName = (path: string) => path.split('/').pop() || '图片'
+
 const menuItemChanged = (id: string) => {
   pagination.pageNo = 1
   state.selectedImgIndex = ''
@@ -233,6 +251,12 @@ const menuItemChanged = (id: string) => {
 
 const visible = ref(false)
 const modalLabel = ref('')
+
+const openCreator = () => {
+  resetAssetFolder()
+  modalLabel.value = '新增分类'
+  visible.value = true
+}
 
 const assetFolder = reactive<AddAssetFolderRequest>({
   name: '',
@@ -380,6 +404,8 @@ const getImages = async () => {
     pagination.totalCount = 0
     return
   }
+  state.selectedImgIndex = ''
+  imageLoading.value = true
   try {
     const response: any = await GetAssetList(
       state.selectedMenuItem,
@@ -395,6 +421,8 @@ const getImages = async () => {
   } catch (error) {
     console.log(error)
     message.error('获取图片列表失败')
+  } finally {
+    imageLoading.value = false
   }
 }
 
@@ -465,18 +493,265 @@ const deleteAsset = async () => {
 </script>
 
 <style scoped>
-.asset-browser,
-.asset-folder-icon,
-.asset-folder-add {
-  color: var(--app-text-secondary);
+.image-assets {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  height: 560px;
+  overflow: hidden;
+  border: 1px solid var(--app-border, #f0f0f0);
+  border-radius: 10px;
+  background: var(--app-surface, #fff);
 }
 
-.asset-browser-sidebar {
-  border-right-color: var(--app-border);
+.folder-panel {
+  min-width: 0;
+  padding: 18px 14px;
+  overflow-y: auto;
+  border-right: 1px solid var(--app-border, #f0f0f0);
+  background: var(--app-surface-muted, #fafafa);
 }
 
-.asset-folder:hover,
-.asset-folder-selected {
-  background: var(--app-surface-muted);
+.panel-header,
+.gallery-header,
+.gallery-footer,
+.gallery-title-row,
+.folder-label,
+.folder-actions {
+  display: flex;
+  align-items: center;
+}
+
+.panel-header,
+.gallery-header,
+.gallery-footer {
+  justify-content: space-between;
+}
+
+.panel-header {
+  margin-bottom: 14px;
+  padding: 0 4px;
+}
+
+.panel-title {
+  color: var(--app-text, rgba(0, 0, 0, 0.88));
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.panel-subtitle {
+  margin-top: 3px;
+  color: var(--app-text-secondary, rgba(0, 0, 0, 0.45));
+  font-size: 12px;
+}
+
+.folder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--app-text-secondary, rgba(0, 0, 0, 0.65));
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.folder-item:hover {
+  background: var(--app-surface, #fff);
+}
+
+.folder-item.active {
+  border-color: #91caff;
+  color: #1677ff;
+  background: #e6f4ff;
+}
+
+.folder-label {
+  min-width: 0;
+  gap: 8px;
+}
+
+.folder-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-actions {
+  display: none;
+  flex-shrink: 0;
+  gap: 9px;
+}
+
+.folder-item:hover .folder-actions,
+.folder-item.active .folder-actions {
+  display: flex;
+}
+
+.gallery-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  padding: 18px;
+}
+
+.gallery-header {
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--app-border, #f0f0f0);
+}
+
+.gallery-title-row {
+  gap: 8px;
+}
+
+.gallery-loading {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.gallery-loading :deep(.ant-spin-container) {
+  min-height: 100%;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  padding: 16px 2px;
+}
+
+.image-card {
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--app-border, #d9d9d9);
+  border-radius: 8px;
+  color: inherit;
+  background: var(--app-surface, #fff);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.image-card:hover {
+  border-color: #69b1ff;
+  box-shadow: 0 5px 14px rgba(22, 119, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.image-card.selected {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.16);
+}
+
+.image-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background-image:
+    linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+    linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+    linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+  background-position:
+    0 0,
+    0 6px,
+    6px -6px,
+    -6px 0;
+  background-size: 12px 12px;
+}
+
+.image-stage img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  background: rgba(0, 0, 0, 0.42);
+  transition: opacity 0.2s ease;
+}
+
+.image-card:hover .image-overlay {
+  opacity: 1;
+}
+
+.preview-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 17px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.selected-mark {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  color: #1677ff;
+  font-size: 22px;
+  filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.8));
+}
+
+.image-name {
+  display: block;
+  padding: 8px 9px;
+  overflow: hidden;
+  color: var(--app-text-secondary, rgba(0, 0, 0, 0.65));
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gallery-empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 350px;
+}
+
+.gallery-footer {
+  min-height: 48px;
+  padding-top: 12px;
+  border-top: 1px solid var(--app-border, #f0f0f0);
+}
+
+@media (max-width: 760px) {
+  .image-assets {
+    grid-template-columns: 180px minmax(0, 1fr);
+  }
+
+  .gallery-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 </style>

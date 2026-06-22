@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -9,6 +9,8 @@ import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
 
 export default defineConfig(({ mode }) => {
   const isDocker = mode === 'docker'
+  const env = loadEnv(mode, process.cwd(), '')
+  const apiHost = env.VITE_API_HOST
 
   return {
     plugins: [
@@ -36,6 +38,17 @@ export default defineConfig(({ mode }) => {
 
     build: {
       outDir: `dist/${process.env.VITE_BUILD_DIR || ''}`
+    },
+
+    server: {
+      proxy: apiHost
+        ? {
+            '/static': {
+              target: apiHost,
+              changeOrigin: true
+            }
+          }
+        : undefined
     },
 
     resolve: {
