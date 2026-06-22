@@ -88,9 +88,12 @@ func (h *FileHandler) UploadFile(ctx *gin.Context) (*apiwrap.ResponseBody[FileVO
 
 	}
 	return apiwrap.SuccessResponseWithData(FileVO{
-		FileId:   fileInfo.FileId,
-		FileName: fileInfo.FileName,
-		Url:      fileInfo.Url,
+		FileId:           fileInfo.FileId,
+		FileName:         fileInfo.FileName,
+		OriginalFileName: fileInfo.OriginalFileName,
+		FileType:         fileInfo.FileType,
+		FileSize:         fileInfo.FileSize,
+		Url:              fileInfo.Url,
 	}), nil
 }
 
@@ -100,6 +103,7 @@ func (h *FileHandler) GetFiles(ctx *gin.Context, req PageRequest) (*apiwrap.Resp
 		PageSize: req.PageSize,
 		FileType: req.FileType,
 		Unused:   req.Unused,
+		Keyword:  req.Keyword,
 	})
 	if err != nil {
 		return nil, err

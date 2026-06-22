@@ -49,4 +49,5 @@ type PageDTO struct {
 	PageSize int64
 	FileType []string
 	Unused   bool
+	Keyword  string
 }

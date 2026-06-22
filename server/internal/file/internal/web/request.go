@@ -25,4 +25,5 @@ type PageRequest struct {
 	PageSize int64    `form:"pageSize" binding:"required,min=1,max=100"`
 	FileType []string `form:"fileType"`
 	Unused   bool     `form:"unused"`
+	Keyword  string   `form:"keyword" binding:"max=100"`
 }

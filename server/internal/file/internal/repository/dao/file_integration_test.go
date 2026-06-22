@@ -67,15 +67,15 @@ func TestFindPageByFileTypeFiltersUnusedFiles(t *testing.T) {
 	database := mongox.NewClient(client, &mongox.Config{}).NewDatabase("fnote_file_filter_test")
 	t.Cleanup(func() { _ = database.Database().Drop(context.Background()) })
 	_, err = database.Database().Collection("file_meta").InsertMany(ctx, []any{
-		bson.M{"file_id": []byte{0x01}, "file_type": "image/png", "used_in": bson.A{}},
-		bson.M{"file_id": []byte{0x02}, "file_type": "image/jpeg", "used_in": bson.A{bson.M{"entity_id": "post-1", "entity_type": "post"}}},
-		bson.M{"file_id": []byte{0x03}, "file_type": "text/plain", "used_in": bson.A{}},
+		bson.M{"file_id": []byte{0x01}, "file_type": "image/png", "original_file_name": "cover.png", "used_in": bson.A{}},
+		bson.M{"file_id": []byte{0x02}, "file_type": "image/jpeg", "original_file_name": "avatar.jpeg", "used_in": bson.A{bson.M{"entity_id": "post-1", "entity_type": "post"}}},
+		bson.M{"file_id": []byte{0x03}, "file_type": "text/plain", "original_file_name": "notes.txt", "used_in": bson.A{}},
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	files, total, err := NewFileDao(database).FindPageByFileType(ctx, 1, 10, []string{"image/png", "image/jpeg"}, true)
+	files, total, err := NewFileDao(database).FindPageByFileType(ctx, 1, 10, []string{"image/png", "image/jpeg"}, true, "cover")
 	if err != nil {
 		t.Fatal(err)
 	}

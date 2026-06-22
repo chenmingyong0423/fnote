@@ -58,7 +58,7 @@ func (r *FileRepository) FindByFileId(ctx context.Context, fileId []byte) (*doma
 }
 
 func (r *FileRepository) FindPageFilesByFileType(ctx context.Context, pageDTO domain.PageDTO) ([]*domain.File, int64, error) {
-	files, cnt, err := r.dao.FindPageByFileType(ctx, pageDTO.PageNum, pageDTO.PageSize, pageDTO.FileType, pageDTO.Unused)
+	files, cnt, err := r.dao.FindPageByFileType(ctx, pageDTO.PageNum, pageDTO.PageSize, pageDTO.FileType, pageDTO.Unused, pageDTO.Keyword)
 	if err != nil {
 		return nil, 0, err
 	}
