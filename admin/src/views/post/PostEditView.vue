@@ -805,11 +805,11 @@ const handleUploadImage = async (event: any, insertImage: any, files: any) => {
 
 const toolbar = {
   template: {
-    title: '模板',
-    icon: 'v-md-icon-tip',
+    title: '素材库',
+    icon: 'v-md-icon-img',
     menus: [
       {
-        name: 'personal-images',
+        name: 'image-assets',
         text: '图片素材',
         action(editor: any) {
           visible4Template.value = true
