@@ -273,6 +273,16 @@
     >
       <ImageLIstView @insertImg="insertImg" />
     </a-modal>
+    <a-modal
+      v-model:visible="textTemplateVisible"
+      width="1000px"
+      title="文字模板"
+      :footer="null"
+      :destroyOnClose="true"
+      @cancel="closeTextTemplate"
+    >
+      <TextTemplateListView @insertTemplate="insertTextTemplate" />
+    </a-modal>
   </div>
 </template>
 
@@ -301,6 +311,7 @@ import { FileUpload } from '@/interfaces/File'
 import { useUserStore } from '@/stores/user'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
 import ImageLIstView from '@/views/post/editor/ImageLIstView.vue'
+import TextTemplateListView from '@/views/post/editor/TextTemplateListView.vue'
 import { toErrorMessage } from '@/utils/error'
 import TaxonomyCreateForm from '@/components/form/TaxonomyCreateForm.vue'
 import { normalizeSlug, shouldAutoFillSlug, validateSlug } from '@/utils/slug'
@@ -806,13 +817,21 @@ const handleUploadImage = async (event: any, insertImage: any, files: any) => {
 const toolbar = {
   template: {
     title: '素材库',
-    icon: 'v-md-icon-img',
+    icon: 'v-md-icon-toc',
     menus: [
       {
         name: 'image-assets',
         text: '图片素材',
         action(editor: any) {
           visible4Template.value = true
+          globalEditor.value = editor
+        }
+      },
+      {
+        name: 'text-templates',
+        text: '文字模板',
+        action(editor: any) {
+          textTemplateVisible.value = true
           globalEditor.value = editor
         }
       }
@@ -840,6 +859,22 @@ const insertImg = (content: string) => {
   })
   visible4Template.value = false
   globalEditor.value = null
+}
+
+const textTemplateVisible = ref(false)
+
+const closeTextTemplate = () => {
+  textTemplateVisible.value = false
+  globalEditor.value = null
+}
+
+const insertTextTemplate = (content: string) => {
+  if (!globalEditor.value) return
+  globalEditor.value.insert(() => ({
+    text: content,
+    selected: content
+  }))
+  closeTextTemplate()
 }
 
 const quickCategoryVisible = ref(false)
