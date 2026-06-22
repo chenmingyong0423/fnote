@@ -44,8 +44,12 @@ const handleChange = async (info: UploadChangeParam) => {
   }
 
   if (info.file.status === 'done') {
-    console.log(123)
-    emit('success:imageUrl', info.file.response.data.file_id, info.file.response.data.url)
+    emit(
+      'success:imageUrl',
+      info.file.response.data.file_id,
+      info.file.response.data.url,
+      info.file.response.data.original_file_name
+    )
     fileList.value = []
   }
 
@@ -64,7 +68,8 @@ const beforeUpload = (file: any) => {
   }
   if (props.maxSize) {
     if (file.size > props.maxSize) {
-      message.error(`你只能上传小于 ${props.maxSize}MB 的文件。`)
+      const maxSizeMB = props.maxSize / 1024 / 1024
+      message.error(`你只能上传小于 ${maxSizeMB}MB 的文件。`)
       return false
     }
   }

@@ -19,7 +19,8 @@ export type PageRequest = {
   pageNum: number
   pageSize: number
   fileType: string[]
-  unused: boolean
+  unused?: boolean
+  keyword?: string
 }
 
 // type FileVO struct {

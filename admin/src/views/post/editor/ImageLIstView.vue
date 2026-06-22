@@ -77,12 +77,12 @@
             :key="image.id"
             type="button"
             :class="['image-card', { selected: isSelected(image.id) }]"
-            :aria-label="`选择图片 ${fileName(image.content)}`"
+            :aria-label="`选择图片 ${assetName(image)}`"
             @click="selectImage(image.id)"
             @dblclick="selectAndInsert(image.id)"
           >
             <span class="image-stage">
-              <img :src="serverHost + image.content" :alt="fileName(image.content)" />
+              <img :src="serverHost + image.content" :alt="assetName(image)" />
               <span class="image-overlay">
                 <a-tooltip title="查看大图">
                   <span class="preview-button" @click.stop="preview(image.content)">
@@ -92,8 +92,8 @@
               </span>
               <CheckCircleFilled v-if="isSelected(image.id)" class="selected-mark" />
             </span>
-            <span class="image-name" :title="fileName(image.content)">
-              {{ fileName(image.content) }}
+            <span class="image-name" :title="assetName(image)">
+              {{ assetName(image) }}
             </span>
           </button>
         </div>
@@ -180,6 +180,7 @@ import { useUserStore } from '@/stores/user'
 import SimpleUpload from '@/components/upload/SimpleUpload.vue'
 import ImageList from '@/components/file/ImageList.vue'
 import PreviewImg from '@/components/image/PreviewImg.vue'
+import { toErrorMessage } from '@/utils/error'
 
 const state = reactive({
   selectedMenuItem: '',
@@ -230,10 +231,9 @@ const isSelected = (id: string) => {
 const emit = defineEmits(['insertImg'])
 
 const insert = () => {
-  // 从 images 里面找到对应元素
   const image = images.value.find((item) => item.id == state.selectedImgIndex)
-  // 告诉父组件
-  emit('insertImg', `![](${image?.content})`)
+  if (!image) return
+  emit('insertImg', markdownImage(assetName(image), image.content))
 }
 
 const selectAndInsert = (id: string) => {
@@ -242,6 +242,11 @@ const selectAndInsert = (id: string) => {
 }
 
 const fileName = (path: string) => path.split('/').pop() || '图片'
+const assetName = (asset: AssetVO) => asset.title || fileName(asset.content)
+const markdownImage = (alt: string, url: string) => {
+  const escapedAlt = alt.replace(/\\/g, '\\\\').replace(/\]/g, '\\]')
+  return `![${escapedAlt}](${url})`
+}
 
 const menuItemChanged = (id: string) => {
   pagination.pageNo = 1
@@ -436,9 +441,15 @@ watch(
 const serverHost = import.meta.env.VITE_API_HOST
 const userStore = useUserStore()
 
-const uploadAsset = async (fileId: string, fileUrl: string) => {
+const uploadAsset = async (
+  fileId: string,
+  fileUrl: string,
+  originalFileName = '',
+  insertAfterAdd = false
+) => {
   try {
     const response: any = await AddAsset(state.selectedMenuItem, {
+      title: originalFileName,
       content: fileUrl,
       asset_type: 'image',
       type: 'post-editor',
@@ -450,12 +461,15 @@ const uploadAsset = async (fileId: string, fileUrl: string) => {
       message.error(response.data.message)
       return
     }
-    message.success('上传成功')
+    message.success(originalFileName ? '已加入素材库' : '上传成功')
+    if (insertAfterAdd) {
+      emit('insertImg', markdownImage(originalFileName || fileName(fileUrl), fileUrl))
+    }
     pagination.pageNo = Math.max(1, Math.ceil((pagination.totalCount + 1) / pagination.pageSize))
     await getImages()
   } catch (error) {
     console.log(error)
-    message.error('上传失败')
+    message.error(toErrorMessage(error, '加入素材库失败'))
   }
 }
 
