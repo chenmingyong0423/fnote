@@ -27,6 +27,7 @@ type IAssetRepository interface {
 	FindByIds(ctx context.Context, ids []string) ([]*domain.Asset, error)
 	FindByFileID(ctx context.Context, fileID string) (*domain.Asset, error)
 	Add(ctx context.Context, asset *domain.Asset) (string, error)
+	ModifyById(ctx context.Context, asset *domain.Asset) (int64, error)
 	DeleteById(ctx context.Context, id string) (int64, error)
 }
 
@@ -74,6 +75,16 @@ func (r *AssetRepository) Add(ctx context.Context, asset *domain.Asset) (string,
 		return "", err
 	}
 	return objectID.Hex(), nil
+}
+
+func (r *AssetRepository) ModifyById(ctx context.Context, asset *domain.Asset) (int64, error) {
+	objectID, err := bson.ObjectIDFromHex(asset.Id)
+	if err != nil {
+		return 0, err
+	}
+	daoAsset := r.toDao(asset)
+	daoAsset.ID = objectID
+	return r.dao.ModifyById(ctx, daoAsset)
 }
 
 func (r *AssetRepository) FindByIds(ctx context.Context, ids []string) ([]*domain.Asset, error) {

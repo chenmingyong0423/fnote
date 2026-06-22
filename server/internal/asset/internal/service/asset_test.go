@@ -13,6 +13,7 @@ import (
 
 type fakeAssetRepository struct {
 	addCalls    int
+	modifyCalls int
 	deleteCount int64
 	asset       *domain.Asset
 	assets      []*domain.Asset
@@ -40,6 +41,11 @@ func (f *fakeAssetRepository) FindByIds(_ context.Context, ids []string) ([]*dom
 func (f *fakeAssetRepository) Add(context.Context, *domain.Asset) (string, error) {
 	f.addCalls++
 	return "asset-id", nil
+}
+
+func (f *fakeAssetRepository) ModifyById(context.Context, *domain.Asset) (int64, error) {
+	f.modifyCalls++
+	return 1, nil
 }
 
 func (f *fakeAssetRepository) DeleteById(context.Context, string) (int64, error) {
@@ -346,5 +352,82 @@ func TestGetAssetsByFolderIdUsesPagedAssetIDs(t *testing.T) {
 	}
 	if len(assetRepo.foundIDs) != 2 || assetRepo.foundIDs[0] != "asset-2" || assetRepo.foundIDs[1] != "asset-3" {
 		t.Fatalf("unexpected queried IDs: %#v", assetRepo.foundIDs)
+	}
+}
+
+func TestAddTextAsset(t *testing.T) {
+	assetRepo := &fakeAssetRepository{}
+	service := NewAssetService(
+		&fakeAssetFolderRepository{folder: &domain.AssetFolder{AssetType: domain.AssetTypeText, Type: domain.AssetUseTypePostEditor}},
+		assetRepo,
+		&fakeFileUsageService{},
+		&fakeTransactionRunner{},
+	)
+
+	_, err := service.AddAsset(context.Background(), "folder-id", &domain.Asset{
+		Title:     "常用介绍",
+		Content:   "这是一段可复用的文字。",
+		AssetType: domain.AssetTypeText,
+		Type:      domain.AssetUseTypePostEditor,
+	})
+	if err != nil {
+		t.Fatalf("AddAsset() error = %v", err)
+	}
+	if assetRepo.addCalls != 1 {
+		t.Fatalf("expected text asset to be persisted, got %d add calls", assetRepo.addCalls)
+	}
+}
+
+func TestModifyTextAsset(t *testing.T) {
+	assetRepo := &fakeAssetRepository{asset: &domain.Asset{
+		Id:        "asset-id",
+		AssetType: domain.AssetTypeText,
+		Type:      domain.AssetUseTypePostEditor,
+	}}
+	service := NewAssetService(
+		&fakeAssetFolderRepository{folder: &domain.AssetFolder{
+			AssetType: domain.AssetTypeText,
+			Type:      domain.AssetUseTypePostEditor,
+			Assets:    []string{"asset-id"},
+		}},
+		assetRepo,
+		&fakeFileUsageService{},
+		&fakeTransactionRunner{},
+	)
+
+	_, err := service.ModifyAsset(context.Background(), "folder-id", &domain.Asset{
+		Id:        "asset-id",
+		Title:     "更新后的标题",
+		Content:   "更新后的正文",
+		AssetType: domain.AssetTypeText,
+		Type:      domain.AssetUseTypePostEditor,
+	})
+	if err != nil {
+		t.Fatalf("ModifyAsset() error = %v", err)
+	}
+	if assetRepo.modifyCalls != 1 {
+		t.Fatalf("expected text asset to be modified, got %d calls", assetRepo.modifyCalls)
+	}
+}
+
+func TestAddTextAssetRequiresTitle(t *testing.T) {
+	assetRepo := &fakeAssetRepository{}
+	service := NewAssetService(
+		&fakeAssetFolderRepository{folder: &domain.AssetFolder{AssetType: domain.AssetTypeText, Type: domain.AssetUseTypePostEditor}},
+		assetRepo,
+		&fakeFileUsageService{},
+		&fakeTransactionRunner{},
+	)
+
+	_, err := service.AddAsset(context.Background(), "folder-id", &domain.Asset{
+		Content:   "正文",
+		AssetType: domain.AssetTypeText,
+		Type:      domain.AssetUseTypePostEditor,
+	})
+	if err == nil {
+		t.Fatal("expected text asset without title to be rejected")
+	}
+	if assetRepo.addCalls != 0 {
+		t.Fatalf("invalid text asset should not be persisted, got %d add calls", assetRepo.addCalls)
 	}
 }

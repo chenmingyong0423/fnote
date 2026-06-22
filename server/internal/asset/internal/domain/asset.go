@@ -15,7 +15,8 @@
 package domain
 
 const (
-	AssetTypeImage    = "image"
+	AssetTypeImage         = "image"
+	AssetTypeText          = "text"
 	AssetUseTypePostEditor = "post-editor"
 )
 

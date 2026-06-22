@@ -42,6 +42,7 @@ type IAssetService interface {
 	GetAssetFolderById(ctx context.Context, id string) (*domain.AssetFolder, error)
 	GetAssetsByFolderId(ctx context.Context, id string, pageNo, pageSize int64) ([]*domain.Asset, int64, error)
 	AddAsset(ctx context.Context, folderId string, asset *domain.Asset) (string, error)
+	ModifyAsset(ctx context.Context, folderId string, asset *domain.Asset) (int64, error)
 	DeleteAsset(ctx context.Context, folderId string, assetId string) error
 }
 
@@ -108,6 +109,9 @@ func (s *AssetService) AddAsset(ctx context.Context, folderId string, asset *dom
 	if err := validateAssetClassification(asset.AssetType, asset.Type); err != nil {
 		return "", err
 	}
+	if err := validateTextAsset(asset); err != nil {
+		return "", err
+	}
 	if asset.AssetType == domain.AssetTypeImage {
 		if err := validateImageURL(asset.Content); err != nil {
 			return "", err
@@ -158,6 +162,45 @@ func (s *AssetService) AddAsset(ctx context.Context, folderId string, asset *dom
 	return assetId, err
 }
 
+func (s *AssetService) ModifyAsset(ctx context.Context, folderId string, asset *domain.Asset) (int64, error) {
+	if err := validateAssetClassification(asset.AssetType, asset.Type); err != nil {
+		return 0, err
+	}
+	if err := validateTextAsset(asset); err != nil {
+		return 0, err
+	}
+	if asset.AssetType == domain.AssetTypeImage {
+		if err := validateImageURL(asset.Content); err != nil {
+			return 0, err
+		}
+	}
+
+	folder, err := s.assetFolderRepo.FindById(ctx, folderId)
+	if err != nil {
+		return 0, err
+	}
+	if folder.AssetType != asset.AssetType || folder.Type != asset.Type || !containsAsset(folder.Assets, asset.Id) {
+		return 0, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "asset does not belong to folder")
+	}
+	existing, err := s.assetRepo.FindById(ctx, asset.Id)
+	if err != nil {
+		return 0, err
+	}
+	if existing.AssetType != asset.AssetType || existing.Type != asset.Type {
+		return 0, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "asset classification cannot be changed")
+	}
+	if asset.AssetType == domain.AssetTypeImage {
+		_, _, err = assetFileID(asset)
+		if err != nil {
+			return 0, apiwrap.NewErrorResponseBody(http.StatusBadRequest, err.Error())
+		}
+		if existing.Metadata["file_id"] != asset.Metadata["file_id"] {
+			return 0, apiwrap.NewErrorResponseBody(http.StatusBadRequest, "image asset file_id cannot be changed")
+		}
+	}
+	return s.assetRepo.ModifyById(ctx, asset)
+}
+
 func assetFileID(asset *domain.Asset) ([]byte, bool, error) {
 	if asset.AssetType != domain.AssetTypeImage {
 		return nil, false, nil
@@ -179,11 +222,24 @@ func assetFileID(asset *domain.Asset) ([]byte, bool, error) {
 }
 
 func validateAssetClassification(assetType, useType string) error {
-	if assetType != domain.AssetTypeImage {
+	if assetType != domain.AssetTypeImage && assetType != domain.AssetTypeText {
 		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "unsupported asset_type")
 	}
 	if useType != domain.AssetUseTypePostEditor {
 		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "unsupported type")
+	}
+	return nil
+}
+
+func validateTextAsset(asset *domain.Asset) error {
+	if asset.AssetType != domain.AssetTypeText {
+		return nil
+	}
+	if strings.TrimSpace(asset.Title) == "" {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "text asset title is required")
+	}
+	if strings.TrimSpace(asset.Content) == "" {
+		return apiwrap.NewErrorResponseBody(http.StatusBadRequest, "text asset content is required")
 	}
 	return nil
 }
@@ -332,4 +388,13 @@ func findChildFolder(folders []*domain.AssetFolder, id string) *domain.AssetFold
 		}
 	}
 	return nil
+}
+
+func containsAsset(assetIDs []string, id string) bool {
+	for _, assetID := range assetIDs {
+		if assetID == id {
+			return true
+		}
+	}
+	return false
 }

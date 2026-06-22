@@ -35,6 +35,10 @@ func (f *fakeAssetDAO) Add(context.Context, *dao.Asset) (bson.ObjectID, error) {
 	return bson.NilObjectID, nil
 }
 
+func (f *fakeAssetDAO) ModifyById(context.Context, *dao.Asset) (int64, error) {
+	return 1, nil
+}
+
 func (f *fakeAssetDAO) DeleteById(context.Context, bson.ObjectID) (int64, error) {
 	return 0, nil
 }

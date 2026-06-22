@@ -16,9 +16,11 @@ package dao
 
 import (
 	"context"
+	"time"
 
 	"github.com/chenmingyong0423/go-mongox/v2"
 	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -43,6 +45,7 @@ type IAssetDao interface {
 	FindByIds(ctx context.Context, objIDs []bson.ObjectID) ([]*Asset, error)
 	FindByFileID(ctx context.Context, fileID string) (*Asset, error)
 	Add(ctx context.Context, asset *Asset) (bson.ObjectID, error)
+	ModifyById(ctx context.Context, asset *Asset) (int64, error)
 	DeleteById(ctx context.Context, objectID bson.ObjectID) (int64, error)
 }
 
@@ -78,6 +81,23 @@ func (d *AssetDao) Add(ctx context.Context, asset *Asset) (bson.ObjectID, error)
 		return bson.NilObjectID, err
 	}
 	return insertOneResult.InsertedID.(bson.ObjectID), nil
+}
+
+func (d *AssetDao) ModifyById(ctx context.Context, asset *Asset) (int64, error) {
+	updateResult, err := d.coll.Updater().
+		Filter(query.Id(asset.ID)).
+		Updates(update.NewBuilder().
+			Set("title", asset.Title).
+			Set("content", asset.Content).
+			Set("description", asset.Description).
+			Set("metadata", asset.Metadata).
+			Set("updated_at", time.Now()).
+			Build()).
+		UpdateOne(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return updateResult.ModifiedCount, nil
 }
 
 func (d *AssetDao) FindByIds(ctx context.Context, objIDs []bson.ObjectID) ([]*Asset, error) {

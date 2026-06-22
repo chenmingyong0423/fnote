@@ -52,6 +52,7 @@ func (h *AssetHandler) RegisterGinRoutes(engine *gin.Engine) {
 	// 文件 API
 	baseFolderIdGroup.GET("/assets", apiwrap.WrapWithBody(h.GetAssetsByFolderId))
 	baseFolderIdGroup.POST("/assets", apiwrap.WrapWithBody(h.AddAsset))
+	baseFolderIdGroup.PUT("/assets/:assetId", apiwrap.WrapWithBody(h.ModifyAsset))
 	// 删除文件
 	baseFolderIdGroup.DELETE("/assets/:assetId", apiwrap.Wrap(h.DeleteAsset))
 }
@@ -69,10 +70,6 @@ func (h *AssetHandler) GetAssetFolders(ctx *gin.Context) (*apiwrap.ResponseBody[
 	if err != nil {
 		return nil, err
 	}
-	if assetFolders == nil {
-		return nil, apiwrap.NewErrorResponseBody(http.StatusNotFound, "asset folder not found")
-	}
-
 	return apiwrap.SuccessResponseWithData(apiwrap.NewListVO(h.toVOs(assetFolders))), nil
 }
 
@@ -95,6 +92,7 @@ func (h *AssetHandler) AddAssetFolder(ctx *gin.Context, req AssetFolderRequest) 
 		Type:          req.Type,
 		SupportDelete: gkit.GetValueOrDefault(req.SupportDelete),
 		SupportEdit:   gkit.GetValueOrDefault(req.SupportEdit),
+		SupportAdd:    gkit.GetValueOrDefault(req.SupportAdd),
 	})
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
@@ -114,6 +112,7 @@ func (h *AssetHandler) ModifyAssetFolder(ctx *gin.Context, req AssetFolderReques
 		Type:          req.Type,
 		SupportDelete: gkit.GetValueOrDefault(req.SupportDelete),
 		SupportEdit:   gkit.GetValueOrDefault(req.SupportEdit),
+		SupportAdd:    gkit.GetValueOrDefault(req.SupportAdd),
 	})
 	if err != nil {
 		return nil, err
@@ -230,6 +229,26 @@ func (h *AssetHandler) AddAsset(ctx *gin.Context, req PostAssetRequest) (*apiwra
 	})
 	if err != nil {
 		return nil, err
+	}
+	return apiwrap.SuccessResponse(), nil
+}
+
+func (h *AssetHandler) ModifyAsset(ctx *gin.Context, req PostAssetRequest) (*apiwrap.ResponseBody[any], error) {
+	folderId := ctx.Param("folderId")
+	modifyCnt, err := h.assetServ.ModifyAsset(ctx, folderId, &domain.Asset{
+		Id:          ctx.Param("assetId"),
+		Title:       req.Title,
+		Content:     req.Content,
+		Description: req.Description,
+		AssetType:   req.AssetType,
+		Type:        req.Type,
+		Metadata:    req.Metadata,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if modifyCnt == 0 {
+		return nil, apiwrap.NewErrorResponseBody(http.StatusNotFound, "asset not found")
 	}
 	return apiwrap.SuccessResponse(), nil
 }
