@@ -106,6 +106,14 @@ export const AddAsset = (folderId: string, assetRequest: AssetRequest) => {
   })
 }
 
+export const UpdateAsset = (folderId: string, assetId: string, assetRequest: AssetRequest) => {
+  return instance({
+    url: `/assets/folders/${folderId}/assets/${assetId}`,
+    method: 'put',
+    data: assetRequest
+  })
+}
+
 export const DeleteAsset = (folderId: string, assetId: string) => {
   return instance({
     url: `/assets/folders/${folderId}/assets/${assetId}`,

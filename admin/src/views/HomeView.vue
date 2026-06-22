@@ -159,6 +159,11 @@ const items = reactive([
         key: '/home/message-template',
         label: '消息模板',
         title: '消息模板'
+      },
+      {
+        key: '/home/text-asset',
+        label: '文字素材',
+        title: '文字素材'
       }
     ]
   },

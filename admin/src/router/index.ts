@@ -89,6 +89,11 @@ const router = createRouter({
           component: () => import('@/views/message-template/MessageTemplateView.vue')
         },
         {
+          path: '/home/text-asset',
+          name: 'text-asset',
+          component: () => import('@/views/asset/TextAssetView.vue')
+        },
+        {
           path: '/home/backup',
           name: 'backup',
           component: () => import('@/views/backup/BackupView.vue')
