@@ -82,7 +82,7 @@ export const Toc: React.FC<{ toc: TocItem[] }> = ({ toc }) => {
           <li key={item.id} style={{ marginLeft: (item.level - 1) * 16 }}>
             <a
               href={`#${item.id}`}
-              className="block px-2 py-1 rounded transition-colors duration-150 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-[#1e293b] dark:hover:text-blue-400 text-gray-700 dark:text-gray-300"
+              className="block! px-2! py-1! rounded! transition-colors! duration-150! hover:bg-blue-50! hover:text-blue-600! dark:hover:bg-[#1e293b]! dark:hover:text-blue-400! text-gray-700! dark:text-gray-300!"
               style={{
                 fontWeight: item.level === 1 ? 600 : 400,
                 fontSize: item.level === 1 ? "1rem" : "0.95rem",
