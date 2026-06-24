@@ -259,7 +259,7 @@
         :disabled-menus="[]"
         @upload-image="handleUploadImage"
         @save="preSave"
-        left-toolbar="undo redo clear | h bold italic strikethrough quote | ul ol table hr | link image code | save | template"
+        left-toolbar="undo redo clear | h bold italic strikethrough quote | ul ol table hr | link image code | save wechatCopy | template"
         :toolbar="toolbar"
       />
     </div>
@@ -315,6 +315,7 @@ import TextTemplateListView from '@/views/post/editor/TextTemplateListView.vue'
 import { toErrorMessage } from '@/utils/error'
 import TaxonomyCreateForm from '@/components/form/TaxonomyCreateForm.vue'
 import { normalizeSlug, shouldAutoFillSlug, validateSlug } from '@/utils/slug'
+import { copyMarkdownAsWechat } from '@/utils/wechat'
 
 const emit = defineEmits(['publish', 'saveDraft'])
 const userStore = useUserStore()
@@ -815,6 +816,13 @@ const handleUploadImage = async (event: any, insertImage: any, files: any) => {
 }
 
 const toolbar = {
+  wechatCopy: {
+    title: '复制公众号格式',
+    text: '公众号',
+    async action() {
+      await copyCurrentPostAsWechat()
+    }
+  },
   template: {
     title: '素材库',
     icon: 'v-md-icon-toc',
@@ -836,6 +844,21 @@ const toolbar = {
         }
       }
     ]
+  }
+}
+
+const copyCurrentPostAsWechat = async () => {
+  const content = post4Edit.content?.trim() || ''
+  if (!content) {
+    message.warning('正文为空，无法复制公众号格式')
+    return
+  }
+
+  try {
+    await copyMarkdownAsWechat(post4Edit.content || '', { author: post4Edit.author })
+    message.success('公众号格式已复制')
+  } catch (error) {
+    message.error(toErrorMessage(error, '公众号格式复制失败'))
   }
 }
 

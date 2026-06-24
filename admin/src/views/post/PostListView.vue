@@ -48,7 +48,7 @@
         :columns="columns"
         :data-source="posts"
         :pagination="pagination"
-        :scroll="{ x: 1470 }"
+        :scroll="{ x: 1570 }"
         row-key="id"
         @change="change"
         bordered
@@ -130,6 +130,16 @@
                 </a-button>
               </span>
               <span>
+                <a-button
+                  type="link"
+                  size="small"
+                  :loading="isWechatCopying(record.id)"
+                  @click="copyPostWechatContent(record.id)"
+                >
+                  复制公众号格式
+                </a-button>
+              </span>
+              <span>
                 <a @click="router.push(`/home/post/draft/${record.id}`)">编辑</a>
               </span>
               <span>
@@ -169,6 +179,7 @@ import { GetSelectedTags, type SelectTag } from '@/interfaces/Tag'
 import StaticUpload from '@/components/upload/StaticUpload.vue'
 import { useUserStore } from '@/stores/user'
 import { toErrorMessage } from '@/utils/error'
+import { copyMarkdownAsWechat } from '@/utils/wechat'
 
 document.title = '文章列表 - 后台管理'
 
@@ -253,7 +264,7 @@ const columns = computed<TableColumnType[]>(() => {
     {
       title: '操作',
       dataIndex: 'operation',
-      width: 210,
+      width: 310,
       fixed: 'right'
     }
   ]
@@ -311,6 +322,7 @@ const displayUpdatingIds = ref<Set<string>>(new Set())
 const commentUpdatingIds = ref<Set<string>>(new Set())
 const deletingIds = ref<Set<string>>(new Set())
 const contentCopyingIds = ref<Set<string>>(new Set())
+const wechatCopyingIds = ref<Set<string>>(new Set())
 
 const setPending = (source: typeof displayUpdatingIds, id: string, pending: boolean) => {
   const next = new Set(source.value)
@@ -329,6 +341,8 @@ const isCommentUpdating = (id: string) => commentUpdatingIds.value.has(id)
 const isDeleting = (id: string) => deletingIds.value.has(id)
 
 const isContentCopying = (id: string) => contentCopyingIds.value.has(id)
+
+const isWechatCopying = (id: string) => wechatCopyingIds.value.has(id)
 
 const formatPostStats = (wordCount?: number) => {
   if (!wordCount) {
@@ -529,6 +543,32 @@ const copyPostContent = async (id: string) => {
     message.error(toErrorMessage(error, '正文复制失败'))
   } finally {
     setPending(contentCopyingIds, id, false)
+  }
+}
+
+const copyPostWechatContent = async (id: string) => {
+  if (isWechatCopying(id)) {
+    return
+  }
+  try {
+    setPending(wechatCopyingIds, id, true)
+    const response = await GetPostById(id)
+    if (response.data.code !== 0) {
+      message.error(response.data.message)
+      return
+    }
+    const post = response.data.data
+    const content = post?.content || ''
+    if (!content.trim()) {
+      message.warning('正文为空，无法复制公众号格式')
+      return
+    }
+    await copyMarkdownAsWechat(content, { author: post?.author })
+    message.success('公众号格式已复制')
+  } catch (error) {
+    message.error(toErrorMessage(error, '公众号格式复制失败'))
+  } finally {
+    setPending(wechatCopyingIds, id, false)
   }
 }
 </script>
