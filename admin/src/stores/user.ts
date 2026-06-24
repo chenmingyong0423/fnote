@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import { login, type LoginRequest } from '@/interfaces/User'
+import { login, type LoginRequest, type LoginResponse, type LoginVO } from '@/interfaces/User'
 import { message } from 'ant-design-vue'
+import type { AxiosResponse } from 'axios'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    userInfo: {
+    ownerInfo: {
       username: '',
       picture: ''
     },
@@ -24,26 +25,34 @@ export const useUserStore = defineStore('user', {
       this.token = ''
       this.tokenExpiration = 0
       this.isLoggedIn = false
-      this.userInfo = { username: '', picture: '' }
+      this.ownerInfo = { username: '', picture: '' }
       localStorage.removeItem('token')
       localStorage.removeItem('token-expiration')
     },
     async loginIn(req: LoginRequest): Promise<boolean> {
       try {
-        const res: any = await login(req)
-        if (res.data.code === 40101) {
+        const res: AxiosResponse<LoginResponse> = await login(req)
+
+        const body = res.data
+
+        if (body.code === 40101) {
           message.error('用户名或密码错误').then((r) => r)
           return false
         }
-        if (res.data.code === 0) {
-          this.token = res.data.data.token || ''
-          this.tokenExpiration = Number(res.data.data.expiration) || 0
+
+        if (body.code === 0) {
+          this.token = body.data.token || ''
+          this.tokenExpiration = Number(body.data.expiration) || 0
           this.isLoggedIn = true
+          this.ownerInfo = body.data.owner_info
+
           localStorage.setItem('token', this.token)
           localStorage.setItem('token-expiration', String(this.tokenExpiration))
+
           message.success('登录成功').then((r) => r)
           return true
         }
+
         return false
       } catch (error) {
         console.error(error)

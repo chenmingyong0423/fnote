@@ -100,6 +100,10 @@ export interface WebsiteConfigVO {
 export interface WebsiteConfigMetaVO {
   website_name: string
   website_icon: string
+  website_owner: string
+  website_owner_profile: string
+  website_owner_avatar: string
+  website_runtime?: number
 }
 
 export const GetWebSiteMeta = () => {

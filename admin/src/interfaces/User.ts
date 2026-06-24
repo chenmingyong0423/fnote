@@ -5,8 +5,18 @@ export interface LoginRequest {
 }
 
 export interface LoginVO {
+  owner_info: {
+    username: string
+    picture: string
+  }
   token: string
   expiration: number
+}
+
+export interface LoginResponse {
+  code: number
+  data: LoginVO
+  message: string
 }
 
 export const login = (data: LoginRequest) => {

@@ -88,6 +88,7 @@
               <a-space>
                 <a @click="openAssetViewer(record)">查看</a>
                 <a @click="copyContent(record)">复制</a>
+                <a @click="copyPostWechatContent(record.content)">复制公众号格式</a>
                 <a @click="openAssetEditor(record)">编辑</a>
                 <a-popconfirm title="确定删除这个文字模板吗？" @confirm="removeAsset(record)">
                   <a class="danger-link">删除</a>
@@ -203,6 +204,8 @@ import {
   type AssetVO
 } from '@/interfaces/Asset'
 import { toErrorMessage } from '@/utils/error'
+import { copyMarkdownAsWechat } from '@/utils/wechat'
+import { useUserStore } from '@/stores/user'
 
 document.title = '文字素材 - 后台管理'
 
@@ -359,6 +362,21 @@ const openAssetCreator = () => {
   Object.assign(assetForm, { title: '', content: '', description: '' })
   assetFormRef.value?.clearValidate()
   assetEditorOpen.value = true
+}
+
+const userStore = useUserStore()
+
+const copyPostWechatContent = async (content: string) => {
+  try {
+    if (!content.trim()) {
+      message.warning('正文为空，无法复制公众号格式')
+      return
+    }
+    await copyMarkdownAsWechat(content, { author: userStore.ownerInfo.username })
+    message.success('公众号格式已复制')
+  } catch (error) {
+    message.error(toErrorMessage(error, '公众号格式复制失败'))
+  }
 }
 
 const openAssetEditor = (asset: AssetVO) => {
