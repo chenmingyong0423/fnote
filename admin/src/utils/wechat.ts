@@ -382,7 +382,7 @@ const normalizeElement = (element: Element, signatureText: string, codeFences: C
 
   if (tagName === 'blockquote') {
     const marker = document.createElement('section')
-    marker.innerHTML = `<span style="display:inline-block;padding:1px 8px;border-radius:999px;background:${accentSoftColor};color:${accentColor};font-size:12px;font-weight:700;letter-spacing:0.5px;line-height:1.8">${escapeHtml(signatureText)}</span><span style="display:inline-block;width:44px;height:2px;margin-left:8px;vertical-align:middle;border-radius:999px;background:${accentColor}"></span>`
+    marker.innerHTML = `<span style="display:inline-block;padding:1px 8px;border-radius:999px;background:${accentSoftColor};color:${accentColor};font-size:12px;font-weight:700;letter-spacing:0.5px;line-height:1.8">${escapeHtml(signatureText)}</span>`
     marker.setAttribute('style', 'margin:0 0 12px;line-height:1')
     element.prepend(marker)
   }
