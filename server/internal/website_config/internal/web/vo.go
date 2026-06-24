@@ -111,7 +111,7 @@ type FrontPostCountConfigVO struct {
 }
 
 type LoginVO struct {
-	AdminInfo  AdminInfoVO `json:"admin_info"`
+	AdminInfo  AdminInfoVO `json:"owner_info"`
 	Expiration int64       `json:"expiration"`
 	Token      string      `json:"token"`
 }

@@ -451,11 +451,20 @@ func (h *WebsiteConfigHandler) AdminLogin(ctx *gin.Context, req LoginRequest) (*
 	if adminConfig == nil || adminConfig.Username != req.Username || adminConfig.Password != req.Password {
 		return nil, *apiwrap.NewResponseBody[any](40101, "username or password is incorrect", nil)
 	}
+
+	websiteConfig, err := h.serv.GetWebSiteConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	jwt, exp, err := jwtutil.GenerateJwt()
 	if err != nil {
 		return nil, err
 	}
-	return apiwrap.SuccessResponseWithData(LoginVO{Token: jwt, Expiration: exp}), nil
+	return apiwrap.SuccessResponseWithData(LoginVO{AdminInfo: AdminInfoVO{
+		Username: websiteConfig.WebsiteOwner,
+		Picture:  websiteConfig.WebsiteOwnerAvatar,
+	}, Token: jwt, Expiration: exp}), nil
 }
 
 func (h *WebsiteConfigHandler) GetInitStatus(_ *gin.Context) (*apiwrap.ResponseBody[map[string]bool], error) {
@@ -550,8 +559,12 @@ func (h *WebsiteConfigHandler) AdminGetWebsiteConfig4Meta(ctx *gin.Context) (*ap
 		return nil, err
 	}
 	return apiwrap.SuccessResponseWithData(WebsiteConfigMetaVO{
-		WebsiteName: config.WebsiteName,
-		WebsiteIcon: config.WebsiteIcon,
+		WebsiteName:         config.WebsiteName,
+		WebsiteIcon:         config.WebsiteIcon,
+		WebsiteOwner:        config.WebsiteOwner,
+		WebsiteOwnerProfile: config.WebsiteOwnerProfile,
+		WebsiteOwnerAvatar:  config.WebsiteOwnerAvatar,
+		WebsiteRuntime:      config.WebsiteRuntime.Unix(),
 	}), nil
 }
 
