@@ -1,4 +1,5 @@
 import VMdEditor from '@kangc/v-md-editor'
+import githubTheme from '@kangc/v-md-editor/lib/theme/github.js'
 import hljs from 'highlight.js/lib/core'
 import c from 'highlight.js/lib/languages/c'
 import css from 'highlight.js/lib/languages/css'
@@ -22,6 +23,10 @@ hljs.registerLanguage('shell', shell)
 hljs.registerLanguage('typescript', typescript)
 hljs.registerLanguage('xml', xml)
 
+VMdEditor.use(githubTheme, {
+  Hljs: hljs
+})
+
 const apiHost = String(import.meta.env.VITE_API_HOST || '').replace(/\/$/, '')
 
 const rootStyle = [
@@ -29,7 +34,8 @@ const rootStyle = [
   'font-size:17px',
   'line-height:1.9',
   'color:#2b2f36',
-  'word-break:break-word'
+  'word-break:normal',
+  'overflow-wrap:break-word'
 ].join(';')
 
 const accentColor = '#2f8cff'
@@ -48,13 +54,13 @@ const elementStyles: Record<string, string> = {
   strong: `font-weight:700;color:${accentColor}`,
   em: 'font-style:italic',
   blockquote:
-    `margin:24px 0;padding:18px 20px;border:1px solid #d8eaff;border-radius:10px;background:linear-gradient(135deg, ${accentLighterColor} 0%, #ffffff 58%, #ffffff 100%);box-shadow:0 10px 28px rgba(47,140,255,0.12);color:#2b2f36`,
+    `margin:24px 0;padding:18px 20px;border:1px solid #b8d8ff;border-radius:10px;background:linear-gradient(135deg, ${accentLighterColor} 0%, #ffffff 58%, #ffffff 100%);box-shadow:0 2px 5px rgba(18,74,150,0.18),0 8px 18px rgba(47,140,255,0.22);color:#2b2f36`,
   ul: 'margin:0 0 18px;padding-left:1.4em',
   ol: 'margin:0 0 18px;padding-left:1.4em',
   li: 'margin:6px 0;line-height:1.9',
   img: 'display:block;max-width:100%;height:auto;margin:16px auto;border-radius:4px',
-  pre: `margin:0;padding:34px 16px 28px;overflow-x:auto;border-radius:8px;border:1px solid #d8eaff;background:${accentLighterColor};color:#1f6f9d;font-size:14px;line-height:1.7;white-space:pre-wrap;tab-size:2`,
-  code: `padding:2px 6px;border-radius:4px;background:${accentSoftColor};color:#1677ff;font-family:Menlo,Consolas,Monaco,monospace;font-size:0.92em`,
+  pre: `margin:0;padding:18px 16px 28px;overflow-x:auto;border-radius:8px;border:1px solid #d8eaff;background:${accentLighterColor};color:#1f6f9d;font-size:14px;line-height:1.7;white-space:pre-wrap;tab-size:2`,
+  code: `display:inline;padding:2px 6px;border-radius:4px;background:${accentSoftColor};color:#1677ff;font-family:Menlo,Consolas,Monaco,monospace;font-size:0.92em;line-height:1.6;white-space:normal;vertical-align:baseline`,
   table: 'width:100%;margin:18px 0;border-collapse:collapse;font-size:14px;line-height:1.6',
   th: `padding:8px 10px;border:1px solid #cae4f4;background:${accentLighterColor};font-weight:700;text-align:left;color:${accentColor}`,
   td: 'padding:8px 10px;border:1px solid #cae4f4;text-align:left',
@@ -62,12 +68,12 @@ const elementStyles: Record<string, string> = {
 }
 
 const blockquoteParagraphStyle = 'margin:0;font-size:17px;line-height:1.9;color:#2b2f36'
+const listItemParagraphStyle = 'margin:0;font-size:17px;line-height:1.9;color:#2b2f36'
 const preCodeStyle =
   'display:block;padding:0;background:transparent;color:inherit;font-family:Menlo,Consolas,Monaco,monospace;font-size:14px;line-height:1.7;white-space:pre-wrap;tab-size:2'
 const codeLineStyle =
   'min-height:1.7em;font-family:Menlo,Consolas,Monaco,monospace;font-size:14px;line-height:1.7;white-space:nowrap'
 const codeBlockWrapperStyle = 'position:relative;margin:18px 0'
-const codeLanguageBadgeStyle = `position:absolute;right:12px;top:8px;z-index:1;padding:1px 8px;border-radius:999px;background:#ffffff;color:${accentColor};font-size:12px;font-family:Menlo,Consolas,Monaco,monospace;line-height:1.7;border:1px solid #d8eaff`
 const codeSignatureBadgeStyle =
   'position:absolute;right:12px;bottom:7px;z-index:1;color:#8a96a3;font-size:12px;line-height:1.7'
 
@@ -98,13 +104,23 @@ const highlightStyles: Array<{ classes: string[]; style: string }> = [
   }
 ]
 
+const getHighlightStyle = (element: Element) => {
+  return highlightStyles.find((item) =>
+    item.classes.some((className) => element.classList.contains(className))
+  )?.style
+}
+
 type CopyWechatOptions = {
   author?: string
 }
 
 type CodeFence = {
-  language: string
   code: string
+}
+
+type PreparedMarkdown = {
+  markdown: string
+  fences: CodeFence[]
 }
 
 const getSignatureText = (author?: string) => {
@@ -117,83 +133,48 @@ const getSignatureText = (author?: string) => {
   return normalizedAuthor.startsWith('程序员') ? normalizedAuthor : `程序员${normalizedAuthor}`
 }
 
-const languageNames: Record<string, string> = {
-  bash: 'Shell',
-  c: 'C',
-  cpp: 'C++',
-  css: 'CSS',
-  go: 'Go',
-  golang: 'Go',
-  html: 'HTML',
-  java: 'Java',
-  javascript: 'JavaScript',
-  js: 'JavaScript',
-  json: 'JSON',
-  markdown: 'Markdown',
-  md: 'Markdown',
-  python: 'Python',
-  py: 'Python',
-  shell: 'Shell',
-  sh: 'Shell',
-  sql: 'SQL',
-  ts: 'TypeScript',
-  typescript: 'TypeScript',
-  xml: 'XML',
-  yaml: 'YAML',
-  yml: 'YAML'
-}
-
-const hljsLanguageNames: Record<string, string> = {
-  bash: 'shell',
-  golang: 'go',
-  html: 'xml',
-  js: 'javascript',
-  py: 'python',
-  sh: 'shell',
-  ts: 'typescript',
-  yml: 'yaml'
-}
-
-const getCodeBlockLanguage = (pre: Element) => {
-  const code = pre.querySelector('code')
-  const classNames = [...pre.classList, ...(code ? [...code.classList] : [])]
-  const languageClass = classNames.find((className) => /^(language|lang)-/.test(className))
-  const rawLanguage = languageClass?.replace(/^(language|lang)-/, '').trim().toLowerCase()
-
-  if (!rawLanguage) {
-    return 'Code'
-  }
-
-  return languageNames[rawLanguage] || rawLanguage.toUpperCase()
-}
-
-const formatLanguageName = (language?: string) => {
-  const rawLanguage = language?.trim().toLowerCase()
-
-  if (!rawLanguage) {
-    return ''
-  }
-
-  return languageNames[rawLanguage] || rawLanguage.toUpperCase()
-}
-
-const getFenceLanguage = (info: string) => {
-  return info.trim().split(/\s+/)[0]?.replace(/[{}]/g, '') || ''
-}
-
-const extractCodeFences = (markdown: string): CodeFence[] => {
+const prepareCodeFences = (markdown: string): PreparedMarkdown => {
   const fences: CodeFence[] = []
-  const fencePattern = /^( {0,3})(`{3,}|~{3,})([^\n]*)\n([\s\S]*?)^\1\2[ \t]*$/gm
-  let match: RegExpExecArray | null
+  const lines = markdown.replace(/\r\n?/g, '\n').split('\n')
+  const outputLines: string[] = []
+  let index = 0
 
-  while ((match = fencePattern.exec(markdown)) !== null) {
+  while (index < lines.length) {
+    const openingMatch = lines[index].match(/^( {0,3})(`{3,}|~{3,})(.*)$/)
+
+    if (!openingMatch) {
+      outputLines.push(lines[index])
+      index += 1
+      continue
+    }
+
+    const fenceMarker = openingMatch[2]
+    const fenceChar = fenceMarker[0]
+    const minFenceLength = fenceMarker.length
+    const closingPattern = new RegExp(`^ {0,3}\\${fenceChar}{${minFenceLength},}[ \\t]*$`)
+    const codeLines: string[] = []
+    index += 1
+
+    while (index < lines.length && !closingPattern.test(lines[index])) {
+      codeLines.push(lines[index])
+      index += 1
+    }
+
+    const fenceId = fences.length
     fences.push({
-      language: getFenceLanguage(match[3] || ''),
-      code: match[4].replace(/\n$/, '')
+      code: codeLines.join('\n')
     })
+    outputLines.push(`<section data-wechat-code-id="${fenceId}"></section>`)
+
+    if (index < lines.length) {
+      index += 1
+    }
   }
 
-  return fences
+  return {
+    markdown: outputLines.join('\n'),
+    fences
+  }
 }
 
 const escapeHtml = (content: string) =>
@@ -210,20 +191,11 @@ const escapeCodeText = (content: string) =>
     .replace(/ {2}/g, '&nbsp;&nbsp;')
     .replace(/ /g, '&nbsp;')
 
-const normalizeHighlightLanguage = (language: string) => {
-  const rawLanguage = language.trim().toLowerCase()
-  return hljsLanguageNames[rawLanguage] || rawLanguage
-}
-
-const highlightCode = (code: string, language: string) => {
-  const highlightLanguage = normalizeHighlightLanguage(language)
-
-  if (highlightLanguage && hljs.getLanguage(highlightLanguage)) {
-    try {
-      return hljs.highlight(code, { language: highlightLanguage, ignoreIllegals: true }).value
-    } catch (error) {
-      console.warn('Code highlight failed, falling back to escaped plain text.', error)
-    }
+const highlightCode = (code: string) => {
+  try {
+    return hljs.highlightAuto(code).value
+  } catch (error) {
+    console.warn('Code highlight failed, falling back to escaped plain text.', error)
   }
 
   return escapeHtml(code)
@@ -274,14 +246,41 @@ const createCodeBlockContent = (fence?: CodeFence) => {
   const content = document.createElement('section')
   content.setAttribute('style', preCodeStyle)
 
-  codeHtmlToLines(highlightCode(fence.code, fence.language)).forEach((lineHtml) => {
+  codeHtmlToLines(highlightCode(fence.code)).forEach((lineHtml) => {
     const line = document.createElement('section')
     line.setAttribute('style', codeLineStyle)
     line.innerHTML = lineHtml
+    line.querySelectorAll('*').forEach((token) => {
+      const highlightStyle = getHighlightStyle(token)
+      if (highlightStyle) {
+        token.setAttribute('style', highlightStyle)
+      }
+      token.removeAttribute('class')
+    })
     content.appendChild(line)
   })
 
   return content
+}
+
+const createCodeBlockElement = (signatureText: string, fence: CodeFence) => {
+  const wrapper = document.createElement('section')
+  wrapper.setAttribute('data-wechat-code-block', 'true')
+  wrapper.setAttribute('style', codeBlockWrapperStyle)
+
+  const pre = document.createElement('pre')
+  pre.setAttribute('style', elementStyles.pre)
+  const codeContent = createCodeBlockContent(fence)
+  if (codeContent) {
+    pre.appendChild(codeContent)
+  }
+
+  const signatureBadge = document.createElement('section')
+  signatureBadge.textContent = signatureText
+  signatureBadge.setAttribute('style', codeSignatureBadgeStyle)
+
+  wrapper.append(pre, signatureBadge)
+  return wrapper
 }
 
 const renderMarkdown = (markdown: string) => {
@@ -334,13 +333,124 @@ const applyHighlightStyle = (element: Element) => {
     return
   }
 
-  const highlightStyle = highlightStyles.find((item) =>
-    item.classes.some((className) => element.classList.contains(className))
-  )
+  const highlightStyle = getHighlightStyle(element)
 
   if (highlightStyle) {
-    applyStyle(element, highlightStyle.style)
+    applyStyle(element, highlightStyle)
   }
+}
+
+const startsWithInlineContinuation = (content?: string | null) => {
+  const text = content?.trimStart() || ''
+  return /^[：:、，,；;）)\/\\]/.test(text)
+}
+
+const getNextMeaningfulSibling = (node: Node) => {
+  let sibling = node.nextSibling
+
+  while (sibling && sibling.nodeType === Node.TEXT_NODE && !sibling.textContent?.trim()) {
+    sibling = sibling.nextSibling
+  }
+
+  return sibling
+}
+
+const isListItemBlockChild = (node: Node) => {
+  if (!(node instanceof HTMLElement)) {
+    return false
+  }
+
+  return [
+    'address',
+    'article',
+    'aside',
+    'blockquote',
+    'div',
+    'dl',
+    'figure',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'hr',
+    'ol',
+    'p',
+    'pre',
+    'section',
+    'table',
+    'ul'
+  ].includes(node.tagName.toLowerCase())
+}
+
+const wrapInlineListItemContent = (element: Element) => {
+  const nodes = Array.from(element.childNodes)
+  let paragraph: HTMLParagraphElement | null = null
+
+  const closeParagraph = () => {
+    paragraph = null
+  }
+
+  nodes.forEach((node) => {
+    if (!node.parentNode) {
+      return
+    }
+
+    if (node.nodeType === Node.TEXT_NODE && !node.textContent?.trim()) {
+      if (paragraph) {
+        paragraph.appendChild(node)
+      }
+      return
+    }
+
+    if (isListItemBlockChild(node)) {
+      closeParagraph()
+      return
+    }
+
+    if (!paragraph) {
+      paragraph = document.createElement('p')
+      paragraph.setAttribute('style', listItemParagraphStyle)
+      element.insertBefore(paragraph, node)
+    }
+
+    paragraph.appendChild(node)
+  })
+}
+
+const mergeListItemColonDescriptions = (element: Element) => {
+  wrapInlineListItemContent(element)
+
+  const paragraphs = Array.from(element.children).filter(
+    (child) => child.tagName.toLowerCase() === 'p'
+  )
+
+  paragraphs.forEach((paragraph) => {
+    const next = getNextMeaningfulSibling(paragraph)
+
+    if (!(next instanceof HTMLElement) || next.tagName.toLowerCase() !== 'p') {
+      return
+    }
+
+    if (!startsWithInlineContinuation(next.textContent)) {
+      return
+    }
+
+    while (next.firstChild) {
+      paragraph.appendChild(next.firstChild)
+    }
+    next.remove()
+  })
+
+  element.querySelectorAll('br').forEach((lineBreak) => {
+    const next = getNextMeaningfulSibling(lineBreak)
+
+    if (next?.nodeType === Node.TEXT_NODE && startsWithInlineContinuation(next.textContent)) {
+      lineBreak.remove()
+    }
+  })
+
 }
 
 const decorateCodeBlock = (pre: Element, signatureText: string, fence?: CodeFence) => {
@@ -348,30 +458,51 @@ const decorateCodeBlock = (pre: Element, signatureText: string, fence?: CodeFenc
     return
   }
 
+  const codeContent = createCodeBlockContent(fence || { code: pre.textContent || '' })
+  if (codeContent) {
+    pre.replaceChildren(codeContent)
+  }
+
   const wrapper = document.createElement('section')
   wrapper.setAttribute('data-wechat-code-block', 'true')
   wrapper.setAttribute('style', codeBlockWrapperStyle)
-
-  const languageBadge = document.createElement('section')
-  languageBadge.textContent = formatLanguageName(fence?.language) || getCodeBlockLanguage(pre)
-  languageBadge.setAttribute('style', codeLanguageBadgeStyle)
 
   const signatureBadge = document.createElement('section')
   signatureBadge.textContent = signatureText
   signatureBadge.setAttribute('style', codeSignatureBadgeStyle)
 
-  const codeContent = createCodeBlockContent(fence)
-  if (codeContent) {
-    pre.replaceChildren(codeContent)
-  }
-
   pre.parentNode?.insertBefore(wrapper, pre)
-  wrapper.append(languageBadge, pre, signatureBadge)
+  wrapper.append(pre, signatureBadge)
 }
 
 const normalizeElement = (element: Element, signatureText: string, codeFences: CodeFence[]) => {
   const tagName = element.tagName.toLowerCase()
+  const codeFenceId = element.getAttribute('data-wechat-code-id')
+
+  if (codeFenceId !== null) {
+    const fence = codeFences[Number(codeFenceId)]
+    if (fence) {
+      element.replaceWith(createCodeBlockElement(signatureText, fence))
+    } else {
+      element.remove()
+    }
+    return
+  }
+
+  if (tagName === 'li') {
+    mergeListItemColonDescriptions(element)
+  }
+
   const isCodeInPre = tagName === 'code' && Boolean(element.closest('pre'))
+
+  if (tagName === 'code' && !isCodeInPre) {
+    const inlineCode = document.createElement('span')
+    inlineCode.innerHTML = element.innerHTML
+    inlineCode.setAttribute('style', elementStyles.code)
+    element.replaceWith(inlineCode)
+    return
+  }
+
   const style = isCodeInPre ? preCodeStyle : elementStyles[tagName]
 
   if (style) {
@@ -389,6 +520,10 @@ const normalizeElement = (element: Element, signatureText: string, codeFences: C
 
   if (tagName === 'p' && element.closest('blockquote')) {
     element.setAttribute('style', blockquoteParagraphStyle)
+  }
+
+  if (tagName === 'p' && element.closest('li')) {
+    element.setAttribute('style', listItemParagraphStyle)
   }
 
   if (tagName === 'img') {
@@ -412,10 +547,11 @@ const normalizeElement = (element: Element, signatureText: string, codeFences: C
 }
 
 const buildWechatHtml = (markdown: string, options: CopyWechatOptions = {}) => {
+  const preparedMarkdown = prepareCodeFences(markdown)
   const template = document.createElement('template')
-  template.innerHTML = renderMarkdown(markdown)
+  template.innerHTML = renderMarkdown(preparedMarkdown.markdown)
   const signatureText = getSignatureText(options.author)
-  const codeFences = extractCodeFences(markdown)
+  const codeFences = preparedMarkdown.fences
   template.content
     .querySelectorAll('*')
     .forEach((element) => normalizeElement(element, signatureText, codeFences))

@@ -19,7 +19,10 @@ const initWebsiteStore = async () => {
       const response: any = await GetWebSiteMeta()
       if (response.data.code === 0) {
         const data: WebsiteConfigMetaVO = response.data.data
-        websiteStore.Update(data.website_name || 'fnote', data.website_icon)
+        websiteStore.Update({
+          ...data,
+          website_name: data.website_name || 'fnote'
+        })
       }
     } catch (error) {
       console.log(error)
