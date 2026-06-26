@@ -56,7 +56,7 @@ const elementStyles: Record<string, string> = {
   strong: `font-weight:700;color:${accentColor}`,
   em: 'font-style:italic',
   blockquote:
-    `margin:24px 0;padding:18px 20px;border:1px solid ${accentBorderColor};border-radius:10px;background:${accentLighterColor};box-shadow:0 2px 6px rgba(47,140,255,0.16),0 8px 18px rgba(47,140,255,0.14)`,
+    `margin:24px 0;padding:18px 20px;border:1px solid ${accentBorderColor};border-radius:10px;background:${accentLighterColor};box-shadow:0 2px 6px rgba(47,140,255,0.16),0 8px 18px rgba(47,140,255,0.14);text-align:left;text-align-last:left;letter-spacing:0;word-spacing:0`,
   ul: 'margin:0 0 18px;padding-left:1.4em',
   ol: 'margin:0 0 18px;padding-left:1.4em',
   li: 'margin:6px 0;line-height:1.9',
@@ -69,7 +69,8 @@ const elementStyles: Record<string, string> = {
   hr: `height:1px;margin:26px 0;border:0;background:${accentColor}`
 }
 
-const blockquoteParagraphStyle = 'margin:0;font-size:17px;line-height:1.9'
+const blockquoteParagraphStyle =
+  'margin:0;font-size:17px;line-height:1.9;text-align:left;text-align-last:left;letter-spacing:0;word-spacing:0'
 const listItemParagraphStyle = 'margin:0;font-size:17px;line-height:1.9'
 const preCodeStyle =
   'display:block;padding:0;background:transparent;color:inherit;font-family:Menlo,Consolas,Monaco,monospace;font-size:14px;line-height:1.7;white-space:pre-wrap;tab-size:2'
