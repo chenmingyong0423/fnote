@@ -1,5 +1,6 @@
 declare module '@kangc/v-md-editor'
 declare module '@kangc/v-md-editor/lib/theme/github.js'
+declare module '@kangc/v-md-editor/lib/plugins/copy-code/index'
 
 declare module 'highlight.js/lib/core'
 // 按需引入语言包

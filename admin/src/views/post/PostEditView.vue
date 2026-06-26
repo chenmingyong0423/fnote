@@ -252,7 +252,7 @@
         />
       </a-modal>
     </div>
-    <div>
+    <div class="blog-markdown-editor">
       <v-md-editor
         v-model="post4Edit.content"
         height="800px"

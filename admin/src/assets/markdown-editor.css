@@ -199,3 +199,423 @@
 .theme-dark .github-markdown-body .hljs-class .hljs-title {
   color: #ffa657;
 }
+
+.blog-markdown-editor .github-markdown-body {
+  --blog-accent: #2f8cff;
+  --blog-accent-soft: rgba(47, 140, 255, 0.1);
+  --blog-accent-lighter: rgba(47, 140, 255, 0.06);
+  --blog-accent-border: rgba(47, 140, 255, 0.28);
+  --blog-subtle-border: rgba(47, 140, 255, 0.18);
+  --blog-muted: #7a8794;
+  --blog-code-keyword: #e25563;
+  --blog-code-string: #2fb344;
+  --blog-code-title: #8b5cf6;
+  --blog-code-attr: #2f8cff;
+  --blog-code-number: #f59e0b;
+  --blog-code-comment: #8b949e;
+  --blog-code-tag: #38bdf8;
+  --blog-code-operator: #94a3b8;
+  color: #1f2937;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.9;
+  word-break: normal;
+  overflow-wrap: break-word;
+  background: transparent;
+}
+
+.blog-markdown-editor .github-markdown-body > :first-child {
+  margin-top: 0;
+}
+
+.blog-markdown-editor .github-markdown-body h1 {
+  margin: 34px 0 26px;
+  padding: 0 0 10px;
+  border-bottom: 2px solid var(--blog-accent);
+  color: var(--blog-accent);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.blog-markdown-editor .github-markdown-body h2 {
+  margin: 30px 0 18px;
+  padding: 4px 0 4px 14px;
+  border: 0;
+  border-left: 5px solid var(--blog-accent);
+  background: linear-gradient(90deg, var(--blog-accent-soft), transparent);
+  color: var(--blog-accent);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.blog-markdown-editor .github-markdown-body h3 {
+  margin: 26px 0 14px;
+  color: var(--blog-accent);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.blog-markdown-editor .github-markdown-body h4 {
+  margin: 22px 0 12px;
+  color: var(--blog-accent);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.blog-markdown-editor .github-markdown-body h5 {
+  margin: 20px 0 10px;
+  color: var(--blog-accent);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.blog-markdown-editor .github-markdown-body h6 {
+  margin: 18px 0 8px;
+  color: #4b89a8;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.blog-markdown-editor .github-markdown-body p {
+  margin: 0 0 18px;
+  font-size: 17px;
+  line-height: 1.9;
+}
+
+.blog-markdown-editor .github-markdown-body a {
+  color: var(--blog-accent);
+  text-decoration: none;
+}
+
+.blog-markdown-editor .github-markdown-body a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.blog-markdown-editor .github-markdown-body strong {
+  color: var(--blog-accent);
+  font-weight: 700;
+}
+
+.blog-markdown-editor .github-markdown-body blockquote {
+  margin: 24px 0;
+  padding: 18px 20px;
+  border: 1px solid var(--blog-accent-border);
+  border-radius: 10px;
+  background: var(--blog-accent-lighter);
+  box-shadow:
+    0 2px 6px rgba(47, 140, 255, 0.16),
+    0 8px 18px rgba(47, 140, 255, 0.14);
+  color: inherit;
+}
+
+.blog-markdown-editor .github-markdown-body blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.blog-markdown-editor .github-markdown-body ul,
+.blog-markdown-editor .github-markdown-body ol {
+  margin: 0 0 18px;
+  padding-left: 1.4em;
+}
+
+.blog-markdown-editor .github-markdown-body li {
+  margin: 6px 0;
+  line-height: 1.9;
+}
+
+.blog-markdown-editor .github-markdown-body li > p {
+  margin: 0;
+}
+
+.blog-markdown-editor .github-markdown-body img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 16px auto;
+  border-radius: 4px;
+  background: transparent;
+}
+
+.blog-markdown-editor .github-markdown-body div[class*='v-md-pre-wrapper-'] {
+  margin: 18px 0;
+  overflow: hidden;
+  border: 1px solid var(--blog-accent-border);
+  border-radius: 8px;
+  background: var(--blog-accent-lighter);
+}
+
+.blog-markdown-editor .github-markdown-body div[class*='v-md-pre-wrapper-']::before {
+  display: block;
+  min-height: 36px;
+  padding: 9px 88px 8px 14px;
+  border-bottom: 1px solid var(--blog-subtle-border);
+  background: rgba(47, 140, 255, 0.08);
+  color: var(--blog-accent);
+  font-family: Menlo, Consolas, Monaco, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-transform: lowercase;
+  content: "text";
+}
+
+.blog-markdown-editor
+  .github-markdown-body
+  div[class*='v-md-pre-wrapper-'].copy-code-mode:hover::before {
+  display: block;
+}
+
+.blog-markdown-editor .github-markdown-body div[class*='v-md-pre-wrapper-'] pre,
+.blog-markdown-editor
+  .github-markdown-body
+  div[class*='v-md-pre-wrapper-']
+  pre[class*='v-md-prism-'] {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 14px;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+.blog-markdown-editor .github-markdown-body pre code,
+.blog-markdown-editor .github-markdown-body pre tt {
+  display: block;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-family: Menlo, Consolas, Monaco, monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre;
+}
+
+.blog-markdown-editor .github-markdown-body :not(pre) > code,
+.blog-markdown-editor .github-markdown-body :not(pre) > tt {
+  display: inline;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--blog-accent-soft);
+  color: #1677ff;
+  font-family: Menlo, Consolas, Monaco, monospace;
+  font-size: 0.92em;
+  line-height: 1.6;
+  white-space: normal;
+  vertical-align: baseline;
+}
+
+.blog-markdown-editor .github-markdown-body .v-md-copy-code-btn {
+  top: 6px;
+  right: 10px;
+  width: auto;
+  min-width: 58px;
+  height: 24px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--blog-muted);
+  visibility: visible;
+  opacity: 1;
+}
+
+.blog-markdown-editor .github-markdown-body .v-md-copy-code-btn::after {
+  margin-left: 5px;
+  font-size: 12px;
+  line-height: 1.4;
+  content: "Copy";
+}
+
+.blog-markdown-editor .github-markdown-body .v-md-copy-code-btn:hover,
+.blog-markdown-editor .github-markdown-body .v-md-copy-code-btn:focus-visible {
+  border-color: var(--blog-accent-border);
+  background: var(--blog-accent-soft);
+  color: var(--blog-accent);
+  outline: none;
+}
+
+.blog-markdown-editor .github-markdown-body table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 18px 0;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.blog-markdown-editor .github-markdown-body table th {
+  padding: 8px 10px;
+  border: 1px solid var(--blog-subtle-border);
+  background: var(--blog-accent-lighter);
+  color: var(--blog-accent);
+  font-weight: 700;
+  text-align: left;
+}
+
+.blog-markdown-editor .github-markdown-body table td {
+  padding: 8px 10px;
+  border: 1px solid var(--blog-subtle-border);
+  text-align: left;
+}
+
+.blog-markdown-editor .github-markdown-body hr {
+  height: 1px;
+  margin: 26px 0;
+  border: 0;
+  background: var(--blog-accent);
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-c']::before {
+  content: "c";
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-css']::before {
+  content: "css";
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-go']::before,
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-golang']::before {
+  content: "go";
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-html']::before,
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-xml']::before,
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-markup']::before {
+  content: "html";
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-java']::before {
+  content: "java";
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-js']::before,
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-javascript']::before {
+  content: "javascript";
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-json']::before {
+  content: "json";
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-md']::before,
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-markdown']::before {
+  content: "markdown";
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-py']::before,
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-python']::before {
+  content: "python";
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-sh']::before,
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-bash']::before,
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-shell']::before {
+  content: "shell";
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-ts']::before,
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-typescript']::before {
+  content: "typescript";
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-vue']::before {
+  content: "vue";
+}
+
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-yaml']::before,
+.blog-markdown-editor .github-markdown-body div[class~='v-md-pre-wrapper-yml']::before {
+  content: "yaml";
+}
+
+.blog-markdown-editor .github-markdown-body .hljs-keyword,
+.blog-markdown-editor .github-markdown-body .hljs-selector-tag,
+.blog-markdown-editor .github-markdown-body .hljs-doctag,
+.blog-markdown-editor .github-markdown-body .hljs-meta,
+.blog-markdown-editor .github-markdown-body .hljs-template-tag {
+  color: var(--blog-code-keyword);
+  font-weight: 700;
+}
+
+.blog-markdown-editor .github-markdown-body .hljs-string,
+.blog-markdown-editor .github-markdown-body .hljs-regexp,
+.blog-markdown-editor .github-markdown-body .hljs-symbol,
+.blog-markdown-editor .github-markdown-body .hljs-bullet,
+.blog-markdown-editor .github-markdown-body .hljs-addition {
+  color: var(--blog-code-string);
+}
+
+.blog-markdown-editor .github-markdown-body .hljs-title,
+.blog-markdown-editor .github-markdown-body .hljs-section,
+.blog-markdown-editor .github-markdown-body .hljs-selector-id,
+.blog-markdown-editor .github-markdown-body .hljs-function {
+  color: var(--blog-code-title);
+  font-weight: 700;
+}
+
+.blog-markdown-editor .github-markdown-body .hljs-attr,
+.blog-markdown-editor .github-markdown-body .hljs-attribute,
+.blog-markdown-editor .github-markdown-body .hljs-variable,
+.blog-markdown-editor .github-markdown-body .hljs-template-variable {
+  color: var(--blog-code-attr);
+  font-weight: 600;
+}
+
+.blog-markdown-editor .github-markdown-body .hljs-number,
+.blog-markdown-editor .github-markdown-body .hljs-literal,
+.blog-markdown-editor .github-markdown-body .hljs-type,
+.blog-markdown-editor .github-markdown-body .hljs-built_in,
+.blog-markdown-editor .github-markdown-body .hljs-builtin-name {
+  color: var(--blog-code-number);
+  font-weight: 600;
+}
+
+.blog-markdown-editor .github-markdown-body .hljs-comment,
+.blog-markdown-editor .github-markdown-body .hljs-quote,
+.blog-markdown-editor .github-markdown-body .hljs-deletion {
+  color: var(--blog-code-comment);
+  font-style: italic;
+}
+
+.blog-markdown-editor .github-markdown-body .hljs-params,
+.blog-markdown-editor .github-markdown-body .hljs-property,
+.blog-markdown-editor .github-markdown-body .hljs-name,
+.blog-markdown-editor .github-markdown-body .hljs-tag {
+  color: var(--blog-code-tag);
+}
+
+.blog-markdown-editor .github-markdown-body .hljs-operator,
+.blog-markdown-editor .github-markdown-body .hljs-punctuation {
+  color: var(--blog-code-operator);
+}
+
+.theme-dark .blog-markdown-editor .github-markdown-body {
+  --blog-accent-soft: rgba(96, 165, 250, 0.14);
+  --blog-accent-lighter: rgba(96, 165, 250, 0.08);
+  --blog-accent-border: rgba(96, 165, 250, 0.32);
+  --blog-subtle-border: rgba(96, 165, 250, 0.22);
+  --blog-muted: #94a3b8;
+  color: #e5e7eb;
+  background: transparent;
+}
+
+.theme-dark .blog-markdown-editor .github-markdown-body div[class*='v-md-pre-wrapper-'],
+.theme-dark .blog-markdown-editor .github-markdown-body blockquote {
+  color: #e5e7eb;
+}
