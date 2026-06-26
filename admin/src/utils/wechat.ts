@@ -33,74 +33,84 @@ const rootStyle = [
   'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif',
   'font-size:17px',
   'line-height:1.9',
-  'color:#2b2f36',
   'word-break:normal',
   'overflow-wrap:break-word'
 ].join(';')
 
 const accentColor = '#2f8cff'
-const accentSoftColor = '#eaf4ff'
-const accentLighterColor = '#f6fbff'
+const accentSoftColor = 'rgba(47,140,255,0.10)'
+const accentLighterColor = 'rgba(47,140,255,0.06)'
+const accentBorderColor = 'rgba(47,140,255,0.28)'
+const subtleBorderColor = 'rgba(47,140,255,0.18)'
+const mutedTextColor = '#7a8794'
 
 const elementStyles: Record<string, string> = {
   h1: `margin:34px 0 26px;padding:0 0 10px;border-bottom:2px solid ${accentColor};text-align:center;font-size:26px;line-height:1.35;font-weight:700;color:${accentColor}`,
-  h2: `margin:30px 0 18px;padding:4px 0 4px 14px;border-left:5px solid ${accentColor};font-size:22px;line-height:1.4;font-weight:700;color:${accentColor};background:linear-gradient(90deg, ${accentSoftColor}, rgba(255,255,255,0))`,
+  h2: `margin:30px 0 18px;padding:4px 0 4px 14px;border-left:5px solid ${accentColor};font-size:22px;line-height:1.4;font-weight:700;color:${accentColor};background:linear-gradient(90deg, ${accentSoftColor}, transparent)`,
   h3: `margin:26px 0 14px;font-size:19px;line-height:1.45;font-weight:700;color:${accentColor}`,
   h4: `margin:22px 0 12px;font-size:18px;line-height:1.45;font-weight:700;color:${accentColor}`,
   h5: `margin:20px 0 10px;font-size:17px;line-height:1.45;font-weight:700;color:${accentColor}`,
   h6: 'margin:18px 0 8px;font-size:16px;line-height:1.45;font-weight:700;color:#4b89a8',
-  p: 'margin:0 0 18px;font-size:17px;line-height:1.9;color:#2b2f36',
+  p: 'margin:0 0 18px;font-size:17px;line-height:1.9',
   a: `color:${accentColor};text-decoration:none`,
   strong: `font-weight:700;color:${accentColor}`,
   em: 'font-style:italic',
   blockquote:
-    `margin:24px 0;padding:18px 20px;border:1px solid #b8d8ff;border-radius:10px;background:linear-gradient(135deg, ${accentLighterColor} 0%, #ffffff 58%, #ffffff 100%);box-shadow:0 2px 5px rgba(18,74,150,0.18),0 8px 18px rgba(47,140,255,0.22);color:#2b2f36`,
+    `margin:24px 0;padding:18px 20px;border:1px solid ${accentBorderColor};border-radius:10px;background:${accentLighterColor};box-shadow:0 2px 6px rgba(47,140,255,0.16),0 8px 18px rgba(47,140,255,0.14)`,
   ul: 'margin:0 0 18px;padding-left:1.4em',
   ol: 'margin:0 0 18px;padding-left:1.4em',
   li: 'margin:6px 0;line-height:1.9',
   img: 'display:block;max-width:100%;height:auto;margin:16px auto;border-radius:4px',
-  pre: `margin:0;padding:18px 16px 28px;overflow-x:auto;border-radius:8px;border:1px solid #d8eaff;background:${accentLighterColor};color:#1f6f9d;font-size:14px;line-height:1.7;white-space:pre-wrap;tab-size:2`,
+  pre: `margin:0;padding:18px 16px 10px;overflow-x:auto;border-radius:8px;border:1px solid ${accentBorderColor};background:${accentLighterColor};color:inherit;font-size:14px;line-height:1.7;white-space:pre-wrap;tab-size:2`,
   code: `display:inline;padding:2px 6px;border-radius:4px;background:${accentSoftColor};color:#1677ff;font-family:Menlo,Consolas,Monaco,monospace;font-size:0.92em;line-height:1.6;white-space:normal;vertical-align:baseline`,
   table: 'width:100%;margin:18px 0;border-collapse:collapse;font-size:14px;line-height:1.6',
-  th: `padding:8px 10px;border:1px solid #cae4f4;background:${accentLighterColor};font-weight:700;text-align:left;color:${accentColor}`,
-  td: 'padding:8px 10px;border:1px solid #cae4f4;text-align:left',
+  th: `padding:8px 10px;border:1px solid ${subtleBorderColor};background:${accentLighterColor};font-weight:700;text-align:left;color:${accentColor}`,
+  td: `padding:8px 10px;border:1px solid ${subtleBorderColor};text-align:left`,
   hr: `height:1px;margin:26px 0;border:0;background:${accentColor}`
 }
 
-const blockquoteParagraphStyle = 'margin:0;font-size:17px;line-height:1.9;color:#2b2f36'
-const listItemParagraphStyle = 'margin:0;font-size:17px;line-height:1.9;color:#2b2f36'
+const blockquoteParagraphStyle = 'margin:0;font-size:17px;line-height:1.9'
+const listItemParagraphStyle = 'margin:0;font-size:17px;line-height:1.9'
 const preCodeStyle =
   'display:block;padding:0;background:transparent;color:inherit;font-family:Menlo,Consolas,Monaco,monospace;font-size:14px;line-height:1.7;white-space:pre-wrap;tab-size:2'
 const codeLineStyle =
   'min-height:1.7em;font-family:Menlo,Consolas,Monaco,monospace;font-size:14px;line-height:1.7;white-space:nowrap'
-const codeBlockWrapperStyle = 'position:relative;margin:18px 0'
+const codeBlockWrapperStyle = 'margin:18px 0'
 const codeSignatureBadgeStyle =
-  'position:absolute;right:12px;bottom:7px;z-index:1;color:#8a96a3;font-size:12px;line-height:1.7'
+  `display:block;margin-top:2px;text-align:right;color:${mutedTextColor};font-size:12px;line-height:1.2`
 
 const highlightStyles: Array<{ classes: string[]; style: string }> = [
   {
     classes: ['hljs-keyword', 'hljs-selector-tag', 'hljs-doctag', 'hljs-meta', 'hljs-template-tag'],
-    style: 'color:#d73a49;font-weight:600'
+    style: 'color:#e25563;font-weight:700'
   },
   {
     classes: ['hljs-string', 'hljs-regexp', 'hljs-symbol', 'hljs-bullet', 'hljs-addition'],
-    style: 'color:#22863a'
+    style: 'color:#2fb344'
   },
   {
     classes: ['hljs-title', 'hljs-section', 'hljs-selector-id', 'hljs-function'],
-    style: 'color:#6f42c1;font-weight:600'
+    style: 'color:#8b5cf6;font-weight:700'
   },
   {
     classes: ['hljs-attr', 'hljs-attribute', 'hljs-variable', 'hljs-template-variable'],
-    style: 'color:#005cc5'
+    style: 'color:#2f8cff;font-weight:600'
   },
   {
     classes: ['hljs-number', 'hljs-literal', 'hljs-type', 'hljs-built_in', 'hljs-builtin-name'],
-    style: 'color:#e36209'
+    style: 'color:#f59e0b;font-weight:600'
   },
   {
     classes: ['hljs-comment', 'hljs-quote', 'hljs-deletion'],
-    style: 'color:#6a737d;font-style:italic'
+    style: 'color:#8b949e;font-style:italic'
+  },
+  {
+    classes: ['hljs-params', 'hljs-property', 'hljs-name', 'hljs-tag'],
+    style: 'color:#38bdf8'
+  },
+  {
+    classes: ['hljs-operator', 'hljs-punctuation'],
+    style: 'color:#94a3b8'
   }
 ]
 
@@ -115,6 +125,7 @@ type CopyWechatOptions = {
 }
 
 type CodeFence = {
+  language?: string
   code: string
 }
 
@@ -133,6 +144,32 @@ const getSignatureText = (author?: string) => {
   return normalizedAuthor.startsWith('程序员') ? normalizedAuthor : `程序员${normalizedAuthor}`
 }
 
+const languageAliases: Record<string, string> = {
+  bash: 'shell',
+  golang: 'go',
+  html: 'xml',
+  js: 'javascript',
+  jsx: 'javascript',
+  py: 'python',
+  sh: 'shell',
+  ts: 'typescript',
+  tsx: 'typescript'
+}
+
+const getFenceLanguage = (info: string) => {
+  return info.trim().split(/\s+/)[0]?.replace(/[{}]/g, '').toLowerCase() || ''
+}
+
+const normalizeHighlightLanguage = (language?: string) => {
+  const rawLanguage = language?.trim().toLowerCase()
+
+  if (!rawLanguage) {
+    return ''
+  }
+
+  return languageAliases[rawLanguage] || rawLanguage
+}
+
 const prepareCodeFences = (markdown: string): PreparedMarkdown => {
   const fences: CodeFence[] = []
   const lines = markdown.replace(/\r\n?/g, '\n').split('\n')
@@ -149,6 +186,7 @@ const prepareCodeFences = (markdown: string): PreparedMarkdown => {
     }
 
     const fenceMarker = openingMatch[2]
+    const language = getFenceLanguage(openingMatch[3] || '')
     const fenceChar = fenceMarker[0]
     const minFenceLength = fenceMarker.length
     const closingPattern = new RegExp(`^ {0,3}\\${fenceChar}{${minFenceLength},}[ \\t]*$`)
@@ -162,6 +200,7 @@ const prepareCodeFences = (markdown: string): PreparedMarkdown => {
 
     const fenceId = fences.length
     fences.push({
+      language,
       code: codeLines.join('\n')
     })
     outputLines.push(`<section data-wechat-code-id="${fenceId}"></section>`)
@@ -191,7 +230,17 @@ const escapeCodeText = (content: string) =>
     .replace(/ {2}/g, '&nbsp;&nbsp;')
     .replace(/ /g, '&nbsp;')
 
-const highlightCode = (code: string) => {
+const highlightCode = (code: string, language?: string) => {
+  const highlightLanguage = normalizeHighlightLanguage(language)
+
+  if (highlightLanguage && hljs.getLanguage(highlightLanguage)) {
+    try {
+      return hljs.highlight(code, { language: highlightLanguage, ignoreIllegals: true }).value
+    } catch (error) {
+      console.warn('Code highlight failed, falling back to auto detection.', error)
+    }
+  }
+
   try {
     return hljs.highlightAuto(code).value
   } catch (error) {
@@ -246,7 +295,7 @@ const createCodeBlockContent = (fence?: CodeFence) => {
   const content = document.createElement('section')
   content.setAttribute('style', preCodeStyle)
 
-  codeHtmlToLines(highlightCode(fence.code)).forEach((lineHtml) => {
+  codeHtmlToLines(highlightCode(fence.code, fence.language)).forEach((lineHtml) => {
     const line = document.createElement('section')
     line.setAttribute('style', codeLineStyle)
     line.innerHTML = lineHtml
@@ -279,7 +328,8 @@ const createCodeBlockElement = (signatureText: string, fence: CodeFence) => {
   signatureBadge.textContent = signatureText
   signatureBadge.setAttribute('style', codeSignatureBadgeStyle)
 
-  wrapper.append(pre, signatureBadge)
+  pre.appendChild(signatureBadge)
+  wrapper.appendChild(pre)
   return wrapper
 }
 
@@ -321,6 +371,29 @@ const toAbsoluteUrl = (url: string) => {
 
   const baseUrl = apiHost || window.location.origin
   return new URL(url, `${baseUrl}/`).href
+}
+
+const getMarkdownLinkText = (element: Element) => {
+  const text = element.textContent?.trim()
+  return text || element.getAttribute('href') || ''
+}
+
+const replaceTextLinkWithMarkdownSource = (element: Element) => {
+  if (element.querySelector('img')) {
+    return false
+  }
+
+  const href = element.getAttribute('href') || ''
+  const text = getMarkdownLinkText(element)
+  const linkSource = document.createElement('span')
+  linkSource.innerHTML = `[${escapeHtml(text)}](${escapeHtml(href)})`
+  linkSource.setAttribute(
+    'style',
+    'display:inline-block;max-width:100%;text-align:left;text-align-last:left;letter-spacing:0;word-spacing:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word;vertical-align:baseline'
+  )
+
+  element.replaceWith(linkSource)
+  return true
 }
 
 const applyStyle = (element: Element, style: string) => {
@@ -472,7 +545,8 @@ const decorateCodeBlock = (pre: Element, signatureText: string, fence?: CodeFenc
   signatureBadge.setAttribute('style', codeSignatureBadgeStyle)
 
   pre.parentNode?.insertBefore(wrapper, pre)
-  wrapper.append(pre, signatureBadge)
+  pre.appendChild(signatureBadge)
+  wrapper.appendChild(pre)
 }
 
 const normalizeElement = (element: Element, signatureText: string, codeFences: CodeFence[]) => {
@@ -532,6 +606,10 @@ const normalizeElement = (element: Element, signatureText: string, codeFences: C
   }
 
   if (tagName === 'a') {
+    if (replaceTextLinkWithMarkdownSource(element)) {
+      return
+    }
+
     const href = element.getAttribute('href') || ''
     element.setAttribute('href', toAbsoluteUrl(href))
   }
