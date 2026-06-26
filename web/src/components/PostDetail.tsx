@@ -91,7 +91,11 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
               标签：{post.tags.map((t) => t.name).join(", ")}
             </div>
             <article className="glass-card overflow-hidden rounded-lg px-4 py-5 md:px-7 md:py-6 prose prose-sm md:prose-lg max-w-none dark:prose-invert">
-              <MarkdownPreview content={post.content} />
+              <MarkdownPreview
+                content={post.content}
+                theme="blog"
+                signatureText={post.author}
+              />
             </article>
             {/* 版权信息区 */}
             <div className="mt-8 md:mt-10 p-3 md:p-4 rounded-lg border border-white/70 bg-white/45 text-xs md:text-sm text-gray-600 backdrop-blur dark:border-white/10 dark:bg-slate-900/35 dark:text-gray-400">
