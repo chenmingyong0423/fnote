@@ -95,7 +95,7 @@ export default function ArticleList({
               {list.map((item) => (
                 <div
                   key={item.sug}
-                  className="glass-card w-full rounded-lg overflow-hidden transition-transform duration-200 group/article md:hover:-translate-y-2 relative"
+                  className="glass-card w-full rounded-lg overflow-hidden p-3 transition-transform duration-200 group/article md:p-4 md:hover:-translate-y-2 relative"
                 >
                   {/* 下划线动画，item hover 时从中间向两边展开 */}
                   <span className="pointer-events-none absolute left-1/2 bottom-0 w-0 h-0.5 bg-blue-500 rounded-full transition-all duration-300 group-hover/article:w-full group-hover/article:left-0"></span>
@@ -106,9 +106,9 @@ export default function ArticleList({
                     className="w-full group block"
                   >
                     {/* 移动端：纵向布局，桌面端：横向布局 */}
-                    <div className="flex flex-col md:grid md:grid-cols-6">
+                    <div className="flex flex-col gap-4 md:grid md:grid-cols-6 md:gap-5">
                       {/* 图片区域 - 移动端全宽，桌面端 2/6 */}
-                      <div className="w-full md:col-span-2 h-40 sm:h-48 md:h-32 relative flex items-center justify-center bg-white/40 overflow-hidden md:pr-4 dark:bg-slate-950/30">
+                      <div className="w-full md:col-span-2 h-40 sm:h-48 md:h-32 relative flex items-center justify-center overflow-hidden rounded-md border border-white/60 bg-white/35 shadow-sm dark:border-slate-500/20 dark:bg-slate-950/30">
                         {/* 标签区悬浮在图片左上角，初始隐藏，hover 时滑入 */}
                         <div className="absolute top-2 left-2 right-2 flex flex-wrap gap-1.5 md:gap-2 z-10 transition-all duration-300 md:-translate-x-6 md:opacity-0 md:group-hover/article:translate-x-0 md:group-hover/article:opacity-100">
                           {item.categories?.map((cat, index) => (
@@ -118,10 +118,10 @@ export default function ArticleList({
                             <Tag key={`tag-${tag}-${index}`} color="#FB923C" style={{ color: '#fff', border: 'none', fontSize: '12px' }}>#{tag}</Tag>
                           ))}
                         </div>
-                        <Image src={item.cover_img} alt={item.title} fill className="object-cover" />
+                        <Image src={item.cover_img} alt={item.title} fill className="object-contain" />
                       </div>
                       {/* 内容区域 - 移动端全宽，桌面端 4/6 */}
-                      <div className="w-full md:col-span-4 flex flex-col justify-between p-3 md:p-4 relative">
+                      <div className="w-full md:col-span-4 flex flex-col justify-between md:py-1 relative">
                         <div className="text-base md:text-lg font-bold mb-2 group-hover:text-blue-600 transition-colors dark:text-gray-200 dark:group-hover:text-gray-100 line-clamp-2">{item.title}</div>
                         <div className="text-gray-700 mb-3 line-clamp-3 text-sm dark:text-gray-400 flex-1">{item.summary}</div>
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-xs text-gray-400 mt-auto dark:text-gray-500">
