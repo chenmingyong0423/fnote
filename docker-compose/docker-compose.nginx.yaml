@@ -107,7 +107,7 @@ services:
       - admin
       - server
     environment:
-      SERVER_NAME: ${SERVER_NAME}
+      NGINX_SERVER_NAME: ${NGINX_SERVER_NAME}
       SSL_CERT_FILE: ${SSL_CERT_FILE}
       SSL_KEY_FILE: ${SSL_KEY_FILE}
     ports:
@@ -117,7 +117,7 @@ services:
       - ./nginx/conf.d/default.conf:/etc/nginx/templates/default.conf.template:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
     command: >
-      /bin/sh -c "envsubst '$$SERVER_NAME $$SSL_CERT_FILE $$SSL_KEY_FILE' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+      /bin/sh -c "envsubst '$$NGINX_SERVER_NAME $$SSL_CERT_FILE $$SSL_KEY_FILE' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
     networks:
       - fnote-network
 

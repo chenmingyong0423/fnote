@@ -39,7 +39,7 @@
    - `WEBSITE_BASE_HOST`
    - `WEBSITE_ADMIN_HOST`
    - `WEBSITE_SERVER_HOST`
-   - `SERVER_NAME`
+   - `NGINX_SERVER_NAME`
    - `SSL_CERT_FILE`
    - `SSL_KEY_FILE`
 3. 把证书文件放到 `nginx/ssl/`

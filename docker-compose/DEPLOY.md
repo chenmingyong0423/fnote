@@ -24,7 +24,7 @@ cp .env.nginx.example .env.nginx
 WEBSITE_BASE_HOST=https://你的域名
 WEBSITE_ADMIN_HOST=https://你的域名/admin
 WEBSITE_SERVER_HOST=https://你的域名
-SERVER_NAME=你的域名
+NGINX_SERVER_NAME=你的域名
 SSL_CERT_FILE=fullchain.pem
 SSL_KEY_FILE=privkey.pem
 ```

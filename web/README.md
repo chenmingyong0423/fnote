@@ -41,7 +41,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - `.env.local`: local dev (already present)
 - `.env.production`: production values for running Next.js (example domains)
 - `.env.docker`: defaults for container network (`api` service on 8080)
-- `.env.nginx`: vars for nginx reverse proxy (`UPSTREAM_WEB`, `SERVER_NAME`)
+- `.env.nginx`: vars for nginx reverse proxy (`UPSTREAM_WEB`, `NGINX_SERVER_NAME`)
 
 ### Build & run Next.js container
 ```bash
