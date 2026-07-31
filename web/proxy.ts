@@ -27,7 +27,7 @@ function getAdminHost(request: NextRequest) {
   return fallbackUrl.toString();
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   try {
     const res = await fetch(`${getServerHost()}${INIT_CHECK_PATH}`, {
       cache: "no-store",

@@ -38,7 +38,7 @@ export default function InteractiveBackdrop() {
     let width = 0;
     let height = 0;
     let rafId = 0;
-    let start = performance.now();
+    const start = performance.now();
     let particles: Particle[] = [];
     const pointer: PointerState = {
       active: false,

@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "1.2.0",
@@ -14,7 +14,7 @@
     "antd": "^5.29.3",
     "blueimp-md5": "^2.19.0",
     "github-markdown-css": "^5.8.1",
-    "next": "15.3.3",
+    "next": "16.2.12",
     "postcss": "^8.5.6",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
@@ -32,7 +32,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.3.3",
+    "eslint-config-next": "16.2.12",
     "tailwindcss": "^4.1.10",
     "typescript": "^5"
   }

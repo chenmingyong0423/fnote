@@ -77,7 +77,7 @@ function SearchPage({
           <div className="mt-3 text-sm text-gray-500 dark:text-gray-400 break-words">
             搜索关键词：
             <span className="font-medium text-blue-600 dark:text-blue-400">
-              "{keyword}"
+              &quot;{keyword}&quot;
             </span>
             {total > 0 && (
               <span className="block sm:inline sm:ml-2">找到 {total} 篇相关文章</span>

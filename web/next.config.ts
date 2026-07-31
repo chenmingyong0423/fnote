@@ -5,11 +5,6 @@ const serverUrl = new URL(process.env.SERVER_HOST || "http://localhost:8080");
 const serverHost = process.env.SERVER_HOST || "http://localhost:8080";
 
 const nextConfig: NextConfig = {
-  // 🚨 关键：让 Docker build 不因为 ESLint 报错失败
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   async rewrites() {
     return [
       {
