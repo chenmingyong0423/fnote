@@ -29,12 +29,15 @@ VMdEditor.use(githubTheme, {
 
 const apiHost = String(import.meta.env.VITE_API_HOST || '').replace(/\/$/, '')
 
+const leftAlignedTextStyle =
+  'text-align:left;text-align-last:left;letter-spacing:0;word-spacing:0'
 const rootStyle = [
   'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif',
   'font-size:17px',
   'line-height:1.9',
   'word-break:normal',
-  'overflow-wrap:break-word'
+  'overflow-wrap:break-word',
+  leftAlignedTextStyle
 ].join(';')
 
 const accentColor = '#2f8cff'
@@ -51,12 +54,12 @@ const elementStyles: Record<string, string> = {
   h4: `margin:22px 0 12px;font-size:18px;line-height:1.45;font-weight:700;color:${accentColor}`,
   h5: `margin:20px 0 10px;font-size:17px;line-height:1.45;font-weight:700;color:${accentColor}`,
   h6: 'margin:18px 0 8px;font-size:16px;line-height:1.45;font-weight:700;color:#4b89a8',
-  p: 'margin:0 0 18px;font-size:17px;line-height:1.9',
+  p: `margin:0 0 18px;font-size:17px;line-height:1.9;${leftAlignedTextStyle}`,
   a: `color:${accentColor};text-decoration:none`,
   strong: `font-weight:700;color:${accentColor}`,
   em: 'font-style:italic',
   blockquote:
-    `margin:24px 0;padding:18px 20px;border:1px solid ${accentBorderColor};border-radius:10px;background:${accentLighterColor};box-shadow:0 2px 6px rgba(47,140,255,0.16),0 8px 18px rgba(47,140,255,0.14);text-align:left;text-align-last:left;letter-spacing:0;word-spacing:0`,
+    `margin:24px 0;padding:18px 20px;border:1px solid ${accentBorderColor};border-radius:10px;background:${accentLighterColor};box-shadow:0 2px 6px rgba(47,140,255,0.16),0 8px 18px rgba(47,140,255,0.14);${leftAlignedTextStyle}`,
   ul: 'margin:0 0 18px;padding-left:1.4em',
   ol: 'margin:0 0 18px;padding-left:1.4em',
   li: 'margin:6px 0;line-height:1.9',
@@ -70,8 +73,8 @@ const elementStyles: Record<string, string> = {
 }
 
 const blockquoteParagraphStyle =
-  'margin:0;font-size:17px;line-height:1.9;text-align:left;text-align-last:left;letter-spacing:0;word-spacing:0'
-const listItemParagraphStyle = 'margin:0;font-size:17px;line-height:1.9'
+  `margin:0;font-size:17px;line-height:1.9;${leftAlignedTextStyle}`
+const listItemParagraphStyle = `margin:0;font-size:17px;line-height:1.9;${leftAlignedTextStyle}`
 const preCodeStyle =
   'display:block;padding:0;background:transparent;color:inherit;font-family:Menlo,Consolas,Monaco,monospace;font-size:14px;line-height:1.7;white-space:pre-wrap;tab-size:2'
 const codeLineStyle =
