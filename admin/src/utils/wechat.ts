@@ -63,7 +63,7 @@ const elementStyles: Record<string, string> = {
   ol: 'margin:0 0 18px;padding-left:1.4em',
   li: 'margin:6px 0;line-height:1.9',
   img: 'display:block;max-width:100%;height:auto;margin:16px auto;border-radius:4px',
-  pre: `margin:0;padding:18px 16px 10px;overflow-x:auto;border-radius:8px;border:1px solid ${accentBorderColor};background:${accentLighterColor};color:inherit;font-size:14px;line-height:1.7;white-space:pre-wrap;tab-size:2`,
+  pre: `margin:0;padding:18px 16px 4px;overflow-x:auto;border:0;background:transparent;color:inherit;font-size:14px;line-height:1.7;white-space:pre-wrap;tab-size:2`,
   code: `display:inline;padding:2px 6px;border-radius:4px;background:${accentSoftColor};color:#1677ff;font-family:Menlo,Consolas,Monaco,monospace;font-size:0.92em;line-height:1.6;white-space:normal;vertical-align:baseline`,
   table: 'width:100%;margin:18px 0;border-collapse:collapse;font-size:14px;line-height:1.6',
   th: `padding:8px 10px;border:1px solid ${subtleBorderColor};background:${accentLighterColor};font-weight:700;text-align:left;color:${accentColor}`,
@@ -78,9 +78,10 @@ const preCodeStyle =
   'display:block;padding:0;background:transparent;color:inherit;font-family:Menlo,Consolas,Monaco,monospace;font-size:14px;line-height:1.7;white-space:pre-wrap;tab-size:2'
 const codeLineStyle =
   'min-height:1.7em;font-family:Menlo,Consolas,Monaco,monospace;font-size:14px;line-height:1.7;white-space:nowrap'
-const codeBlockWrapperStyle = 'margin:18px 0'
+const codeBlockWrapperStyle =
+  `margin:18px 0;overflow:hidden;border:1px solid ${accentBorderColor};border-radius:8px;background:${accentLighterColor}`
 const codeSignatureBadgeStyle =
-  `display:block;margin-top:2px;text-align:right;color:${mutedTextColor};font-size:12px;line-height:1.2`
+  `display:block;padding:2px 12px 10px;text-align:right;color:${mutedTextColor};font-size:12px;line-height:1.2`
 
 const highlightStyles: Array<{ classes: string[]; style: string }> = [
   {
@@ -331,15 +332,29 @@ const createCodeBlockElement = (signatureText: string, fence: CodeFence) => {
   signatureBadge.textContent = signatureText
   signatureBadge.setAttribute('style', codeSignatureBadgeStyle)
 
-  pre.appendChild(signatureBadge)
-  wrapper.appendChild(pre)
+  wrapper.append(pre, signatureBadge)
   return wrapper
 }
 
 const renderMarkdown = (markdown: string) => {
   try {
     const parser = (VMdEditor as any).vMdParser
-    const html = parser?.parse?.(markdown)
+    const markdownParser = parser?.themeConfig?.markdownParser
+    const originalBreaks = markdownParser?.options?.breaks
+    const canConfigureBreaks = markdownParser?.set && typeof originalBreaks === 'boolean'
+
+    if (canConfigureBreaks) {
+      markdownParser.set({ breaks: false })
+    }
+
+    let html: unknown
+    try {
+      html = parser?.parse?.(markdown)
+    } finally {
+      if (canConfigureBreaks) {
+        markdownParser.set({ breaks: originalBreaks })
+      }
+    }
 
     if (typeof html === 'string') {
       return html
@@ -392,7 +407,7 @@ const replaceTextLinkWithMarkdownSource = (element: Element) => {
   linkSource.innerHTML = `[${escapeHtml(text)}](${escapeHtml(href)})`
   linkSource.setAttribute(
     'style',
-    'display:inline-block;max-width:100%;text-align:left;text-align-last:left;letter-spacing:0;word-spacing:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word;vertical-align:baseline'
+    'display:inline;white-space:normal;overflow-wrap:anywhere;word-break:break-word;vertical-align:baseline'
   )
 
   element.replaceWith(linkSource)
@@ -548,8 +563,7 @@ const decorateCodeBlock = (pre: Element, signatureText: string, fence?: CodeFenc
   signatureBadge.setAttribute('style', codeSignatureBadgeStyle)
 
   pre.parentNode?.insertBefore(wrapper, pre)
-  pre.appendChild(signatureBadge)
-  wrapper.appendChild(pre)
+  wrapper.append(pre, signatureBadge)
 }
 
 const normalizeElement = (element: Element, signatureText: string, codeFences: CodeFence[]) => {
