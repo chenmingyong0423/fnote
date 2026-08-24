@@ -30,7 +30,7 @@ VMdEditor.use(githubTheme, {
 const apiHost = String(import.meta.env.VITE_API_HOST || '').replace(/\/$/, '')
 
 const leftAlignedTextStyle =
-  'text-align:left;text-align-last:left;letter-spacing:0;word-spacing:0'
+  'text-align:left;text-align-last:left;letter-spacing:0;word-spacing:0;line-break:anywhere'
 const rootStyle = [
   'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif',
   'font-size:17px',
@@ -369,28 +369,6 @@ const renderMarkdown = (markdown: string) => {
     .join('')
 }
 
-const addWechatBreakOpportunities = (root: Node) => {
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
-  const textNodes: Text[] = []
-  let currentNode = walker.nextNode()
-
-  while (currentNode) {
-    textNodes.push(currentNode as Text)
-    currentNode = walker.nextNode()
-  }
-
-  textNodes.forEach((textNode) => {
-    const parentElement = textNode.parentElement
-    const text = textNode.textContent || ''
-
-    if (!text.includes(' ') || parentElement?.closest('pre, code, a, script, style')) {
-      return
-    }
-
-    textNode.textContent = text.replace(/ /g, ' \u200b')
-  })
-}
-
 const stripOpeningQrCodeBlock = (markdown: string) => {
   const normalizedMarkdown = markdown.replace(/\r\n/g, '\n')
 
@@ -667,7 +645,6 @@ const buildWechatHtml = (markdown: string, options: CopyWechatOptions = {}) => {
   const preparedMarkdown = prepareCodeFences(markdown)
   const template = document.createElement('template')
   template.innerHTML = renderMarkdown(preparedMarkdown.markdown)
-  addWechatBreakOpportunities(template.content)
   const signatureText = getSignatureText(options.author)
   const codeFences = preparedMarkdown.fences
   template.content
@@ -684,7 +661,7 @@ const buildWechatHtml = (markdown: string, options: CopyWechatOptions = {}) => {
 const getPlainText = (html: string) => {
   const container = document.createElement('div')
   container.innerHTML = html
-  return container.innerText.replace(/\u200b/g, '').trim()
+  return container.innerText.trim()
 }
 
 const copyHtmlWithSelection = async (html: string, plainText: string) => {
