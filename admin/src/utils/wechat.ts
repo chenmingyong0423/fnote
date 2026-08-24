@@ -369,6 +369,28 @@ const renderMarkdown = (markdown: string) => {
     .join('')
 }
 
+const addWechatBreakOpportunities = (root: Node) => {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  const textNodes: Text[] = []
+  let currentNode = walker.nextNode()
+
+  while (currentNode) {
+    textNodes.push(currentNode as Text)
+    currentNode = walker.nextNode()
+  }
+
+  textNodes.forEach((textNode) => {
+    const parentElement = textNode.parentElement
+    const text = textNode.textContent || ''
+
+    if (!text.includes(' ') || parentElement?.closest('pre, code, a, script, style')) {
+      return
+    }
+
+    textNode.textContent = text.replace(/ /g, ' \u200b')
+  })
+}
+
 const stripOpeningQrCodeBlock = (markdown: string) => {
   const normalizedMarkdown = markdown.replace(/\r\n/g, '\n')
 
@@ -645,6 +667,7 @@ const buildWechatHtml = (markdown: string, options: CopyWechatOptions = {}) => {
   const preparedMarkdown = prepareCodeFences(markdown)
   const template = document.createElement('template')
   template.innerHTML = renderMarkdown(preparedMarkdown.markdown)
+  addWechatBreakOpportunities(template.content)
   const signatureText = getSignatureText(options.author)
   const codeFences = preparedMarkdown.fences
   template.content
@@ -661,7 +684,7 @@ const buildWechatHtml = (markdown: string, options: CopyWechatOptions = {}) => {
 const getPlainText = (html: string) => {
   const container = document.createElement('div')
   container.innerHTML = html
-  return container.innerText.trim()
+  return container.innerText.replace(/\u200b/g, '').trim()
 }
 
 const copyHtmlWithSelection = async (html: string, plainText: string) => {
