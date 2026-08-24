@@ -36,8 +36,7 @@ const rootStyle = [
   'font-size:17px',
   'line-height:1.9',
   'word-break:normal',
-  'overflow-wrap:break-word',
-  leftAlignedTextStyle
+  'overflow-wrap:break-word'
 ].join(';')
 
 const accentColor = '#2f8cff'
@@ -48,7 +47,7 @@ const subtleBorderColor = 'rgba(47,140,255,0.18)'
 const mutedTextColor = '#7a8794'
 
 const elementStyles: Record<string, string> = {
-  h1: `margin:34px 0 26px;padding:0 0 10px;border-bottom:2px solid ${accentColor};text-align:center;font-size:26px;line-height:1.35;font-weight:700;color:${accentColor}`,
+  h1: `margin:34px 0 26px;padding:0 0 10px;border-bottom:2px solid ${accentColor};text-align:center;text-align-last:center;font-size:26px;line-height:1.35;font-weight:700;color:${accentColor}`,
   h2: `margin:30px 0 18px;padding:4px 0 4px 14px;border-left:5px solid ${accentColor};font-size:22px;line-height:1.4;font-weight:700;color:${accentColor};background:linear-gradient(90deg, ${accentSoftColor}, transparent)`,
   h3: `margin:26px 0 14px;font-size:19px;line-height:1.45;font-weight:700;color:${accentColor}`,
   h4: `margin:22px 0 12px;font-size:18px;line-height:1.45;font-weight:700;color:${accentColor}`,
