@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/chenmingyong0423/fnote/server/internal/file/internal/domain"
@@ -226,5 +227,37 @@ func TestGetSitemap(t *testing.T) {
 	content, exists, err = service.GetSitemap(context.Background())
 	if err != nil || !exists || content != want {
 		t.Fatalf("GetSitemap() = (%q, %t, %v), want (%q, true, nil)", content, exists, err, want)
+	}
+}
+
+func TestGenerateSitemapUsesCurrentPublicRoutes(t *testing.T) {
+	staticPath := t.TempDir()
+	previousStaticPath := viper.GetString("system.static_path")
+	viper.Set("system.static_path", staticPath)
+	t.Cleanup(func() { viper.Set("system.static_path", previousStaticPath) })
+	t.Setenv("WEBSITE_BASE_HOST", "https://chenmingyong.cn/")
+	t.Setenv("UPLOADER_HOST", "https://chenmingyong.cn/")
+
+	service := &FileService{}
+	posts := []byte(`[{"_id":"about-me","updated_at":1700000000}]`)
+	if err := service.GenerateSitemap(context.Background(), posts, []byte(`[]`), []byte(`[]`)); err != nil {
+		t.Fatalf("GenerateSitemap() error = %v", err)
+	}
+
+	content, exists, err := service.GetSitemap(context.Background())
+	if err != nil || !exists {
+		t.Fatalf("GetSitemap() = (_, %t, %v), want existing sitemap", exists, err)
+	}
+	if !strings.Contains(content, "<loc>https://chenmingyong.cn/about-me</loc>") {
+		t.Fatal("sitemap does not contain the current /about-me route")
+	}
+	if strings.Contains(content, "<loc>https://chenmingyong.cn/about</loc>") {
+		t.Fatal("sitemap contains the removed /about route")
+	}
+	if strings.Contains(content, "/search") {
+		t.Fatal("sitemap contains a noindex search route")
+	}
+	if strings.Contains(content, "chenmingyong.cn//") {
+		t.Fatal("sitemap contains a double slash after the host")
 	}
 }

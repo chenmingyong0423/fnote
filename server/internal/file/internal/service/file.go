@@ -199,6 +199,8 @@ func (s *FileService) GetFiles(ctx context.Context, pageDTO domain.PageDTO) ([]*
 }
 
 func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryBytes, tagBytes []byte) error {
+	baseHost := strings.TrimRight(pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000"), "/")
+	uploaderHost := strings.TrimRight(pkg.GetOrDefault4String(os.Getenv("UPLOADER_HOST"), "http://localhost:8080"), "/")
 	var aboutMeLastMod string
 	var posts []post.Post
 	err := jsoniter.Unmarshal(postBytes, &posts)
@@ -218,7 +220,7 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 	sitemapBuilder := sitemap.NewSitemap().
 		XmlnsImage("https://www.google.com/schemas/sitemap-image/1.1").
 		Url(
-			pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000"),
+			baseHost,
 			sitemap.WithLastMod(time.Now().Format(time.DateOnly)),
 			sitemap.WithChangeFreq("always"),
 			sitemap.WithPriority(1.0),
@@ -229,16 +231,16 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 			continue
 		}
 		sitemapBuilder.Url(
-			fmt.Sprintf("%s/posts/%s", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000"), p.Id),
+			fmt.Sprintf("%s/posts/%s", baseHost, p.Id),
 			sitemap.WithLastMod(time.Unix(p.UpdatedAt, 0).Format(time.DateOnly)),
 			sitemap.WithChangeFreq("monthly"),
 			sitemap.WithPriority(0.9),
-			sitemap.WithImage(sitemap.NewUrlImage(fmt.Sprintf("%s%s", pkg.GetOrDefault4String(os.Getenv("UPLOADER_HOST"), "http://localhost:8080"), p.CoverImg))),
+			sitemap.WithImage(sitemap.NewUrlImage(fmt.Sprintf("%s%s", uploaderHost, p.CoverImg))),
 		)
 	}
 	for _, c := range categories {
 		sitemapBuilder.Url(
-			fmt.Sprintf("%s/categories/%s", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000"), c.Route),
+			fmt.Sprintf("%s/categories/%s", baseHost, c.Route),
 			sitemap.WithLastMod(time.Unix(c.UpdatedAt, 0).Format(time.DateOnly)),
 			sitemap.WithChangeFreq("weekly"),
 			sitemap.WithPriority(0.8),
@@ -246,25 +248,22 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 	}
 	for _, t := range tags {
 		sitemapBuilder.Url(
-			fmt.Sprintf("%s/tags/%s", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000"), t.Route),
+			fmt.Sprintf("%s/tags/%s", baseHost, t.Route),
 			sitemap.WithLastMod(time.Unix(t.UpdatedAt, 0).Format(time.DateOnly)),
 			sitemap.WithChangeFreq("weekly"),
 			sitemap.WithPriority(0.8),
 		)
 	}
+	if aboutMeLastMod != "" {
+		sitemapBuilder.Url(
+			fmt.Sprintf("%s/about-me", baseHost),
+			sitemap.WithLastMod(aboutMeLastMod),
+			sitemap.WithChangeFreq("monthly"),
+			sitemap.WithPriority(0.9),
+		)
+	}
 	sitemapBuilder.Url(
-		fmt.Sprintf("%s/about-me", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000")),
-		sitemap.WithLastMod(aboutMeLastMod),
-		sitemap.WithChangeFreq("monthly"),
-		sitemap.WithPriority(0.9),
-	)
-	sitemapBuilder.Url(
-		fmt.Sprintf("%s/search", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000")),
-		sitemap.WithChangeFreq("weekly"),
-		sitemap.WithPriority(0.7),
-	)
-	sitemapBuilder.Url(
-		fmt.Sprintf("%s/friend", pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000")),
+		fmt.Sprintf("%s/friend", baseHost),
 		sitemap.WithChangeFreq("always"),
 		sitemap.WithPriority(0.5),
 	)
