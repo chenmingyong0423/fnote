@@ -61,6 +61,7 @@ export default async function TagPage({
     <ArticleList
       list={posts.list}
       total={posts.totalCount}
+      pageHeading={`${tagName}标签文章`}
       siteOwner={{
         name: owner.website_owner,
         avatar: owner.website_owner_avatar,

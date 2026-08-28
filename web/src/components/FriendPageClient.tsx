@@ -116,14 +116,14 @@ export const FriendPageClient: React.FC<Props> = ({
     <div className="w-full max-w-7xl mx-auto px-4 md:px-6 py-5 md:py-8 flex flex-col gap-7 md:gap-12 dark:text-gray-300">
       {contextHolder}
       <section className={sectionClassName}>
-        <Title level={2} className={titleClassName}>
+        <Title level={1} className={titleClassName}>
           友链
         </Title>
         <Paragraph type="secondary" className={secondaryTextClassName}>
           欢迎互换友链，先看看申请须知和注意事项。
         </Paragraph>
         {summary ? (
-          <MarkdownPreview content={summary} />
+          <MarkdownPreview content={summary} headingLevelOffset={1} />
         ) : (
           <Empty
             description={hasSummaryError ? "网站数据暂时异常" : "暂无申请须知"}
@@ -133,7 +133,7 @@ export const FriendPageClient: React.FC<Props> = ({
       </section>
 
       <section className={sectionClassName}>
-        <Title level={3} className={titleClassName}>
+        <Title level={2} className={titleClassName}>
           友链列表
         </Title>
         {friends && friends.length > 0 ? (
@@ -149,7 +149,7 @@ export const FriendPageClient: React.FC<Props> = ({
       </section>
 
       <section className={sectionClassName}>
-        <Title level={3} className={titleClassName}>
+        <Title level={2} className={titleClassName}>
           申请友链
         </Title>
         <Paragraph type="secondary" className={`mb-4 ${secondaryTextClassName}`}>

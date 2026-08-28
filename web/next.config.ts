@@ -5,6 +5,16 @@ const serverUrl = new URL(process.env.SERVER_HOST || "http://localhost:8080");
 const serverHost = process.env.SERVER_HOST || "http://localhost:8080";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/about",
+        destination: "/about-me",
+        permanent: true,
+      },
+    ];
+  },
+
   async rewrites() {
     return [
       {

@@ -12,6 +12,7 @@ interface MarkdownPreviewProps {
     content: string;
     className?: string;
     headingIdGenerator?: (text: string) => string;
+    headingLevelOffset?: number;
     theme?: "default" | "blog";
     signatureText?: string;
 }
@@ -103,6 +104,7 @@ const BlogCodeBlock: React.FC<BlogCodeBlockProps> = ({
 export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({
     content,
     className = "",
+    headingLevelOffset = 0,
     theme = "default",
     signatureText,
 }) => {
@@ -121,13 +123,27 @@ export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({
         className,
     ].filter(Boolean).join(" ");
     const displaySignature = signatureText?.trim() || "FNote";
+    const Heading = ({
+        level,
+        children,
+        node,
+        ...props
+    }: {
+        level: number;
+        children: React.ReactNode;
+        node: unknown;
+    } & React.HTMLAttributes<HTMLHeadingElement>) => {
+        const resolvedLevel = Math.min(6, level + Math.max(0, headingLevelOffset));
+        const Tag = `h${resolvedLevel}` as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+        return <Tag id={getHeadingId(children, node)} {...props}>{children}</Tag>;
+    };
     const components: Components = {
-        h1: ({children, node, ...props}) => <h1 id={getHeadingId(children, node)} {...props}>{children}</h1>,
-        h2: ({children, node, ...props}) => <h2 id={getHeadingId(children, node)} {...props}>{children}</h2>,
-        h3: ({children, node, ...props}) => <h3 id={getHeadingId(children, node)} {...props}>{children}</h3>,
-        h4: ({children, node, ...props}) => <h4 id={getHeadingId(children, node)} {...props}>{children}</h4>,
-        h5: ({children, node, ...props}) => <h5 id={getHeadingId(children, node)} {...props}>{children}</h5>,
-        h6: ({children, node, ...props}) => <h6 id={getHeadingId(children, node)} {...props}>{children}</h6>,
+        h1: ({children, node, ...props}) => <Heading level={1} node={node} {...props}>{children}</Heading>,
+        h2: ({children, node, ...props}) => <Heading level={2} node={node} {...props}>{children}</Heading>,
+        h3: ({children, node, ...props}) => <Heading level={3} node={node} {...props}>{children}</Heading>,
+        h4: ({children, node, ...props}) => <Heading level={4} node={node} {...props}>{children}</Heading>,
+        h5: ({children, node, ...props}) => <Heading level={5} node={node} {...props}>{children}</Heading>,
+        h6: ({children, node, ...props}) => <Heading level={6} node={node} {...props}>{children}</Heading>,
         ...(isBlogTheme
             ? {
                 blockquote: ({children, ...props}) => (

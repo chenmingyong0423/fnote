@@ -3,7 +3,6 @@ import { MarkdownPreview } from "@/src/components/MarkdownPreview";
 import { extractToc, Toc } from "@/src/components/Toc";
 import { PostActions } from "@/src/components/PostActions";
 import { Comments } from "@/src/components/Comments";
-import PostSeoClient from "@/src/components/PostSeoClient";
 import { formatDate } from "@/src/utils/date";
 import type { CommentItem } from "@/src/api/comments";
 
@@ -57,12 +56,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
 
   return (
     <>
-      <PostSeoClient
-        title={post.title}
-        description={post.meta_description || post.summary || ""}
-        keywords={post.meta_keywords || post.tags?.map((t) => t.name).join(",")}
-        coverImg={post.cover_img}
-      />
       <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
         <div className="glass-surface flex flex-col lg:flex-row gap-5 lg:gap-8 rounded-xl p-4 md:p-6 mb-8 md:mb-12">
           <div className="flex-1 min-w-0">
@@ -94,6 +87,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
               <MarkdownPreview
                 content={post.content}
                 theme="blog"
+                headingLevelOffset={1}
                 signatureText={post.author}
               />
             </article>

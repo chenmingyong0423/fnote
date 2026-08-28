@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       openGraph: {
         title: `关于 - ${config.seo_meta.og_title || siteTitle}`,
         description,
-        url: process.env.BASE_HOST + "/about",
+        url: process.env.BASE_HOST + "/about-me",
         images: config.seo_meta.og_image
           ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }]
           : undefined,
@@ -53,7 +53,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: `${post.data.title} - ${config.seo_meta.og_title || siteTitle}`,
       description: post.data.meta_description || post.data.summary,
-      url: process.env.BASE_HOST + "/about",
+      url: process.env.BASE_HOST + "/about-me",
       images: post.data.cover_img ? [{ url: resolvePublicUrl(post.data.cover_img) }] : undefined,
       siteName: config.website_meta.website_name,
       type: "article",

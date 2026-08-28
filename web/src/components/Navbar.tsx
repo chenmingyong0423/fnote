@@ -12,7 +12,7 @@ const staticNav = [
   { label: "首页", href: "/" },
   { label: "文章导航", href: "/navigation" },
   { label: "友链", href: "/friend" },
-  { label: "关于", href: "/about" },
+  { label: "关于", href: "/about-me" },
 ];
 
 const mobileNavLinkClass =
@@ -43,7 +43,7 @@ const Navbar: React.FC<{ menus: MenuVO[]; loading?: boolean }> = ({
     if (
       normalizedPathname === "/navigation" ||
       normalizedPathname === "/friend" ||
-      normalizedPathname === "/about"
+      normalizedPathname === "/about-me"
     ) {
       return [normalizedPathname];
     }

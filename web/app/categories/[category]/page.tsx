@@ -61,6 +61,7 @@ export default async function CategoryPage({
     <ArticleList
       list={posts.list}
       total={posts.totalCount}
+      pageHeading={`${categoryName}分类文章`}
       siteOwner={{
         name: owner.website_owner,
         avatar: owner.website_owner_avatar,

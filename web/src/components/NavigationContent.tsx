@@ -28,6 +28,9 @@ export default function NavigationContent({
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-6 py-5 md:py-8 flex flex-col gap-7 md:gap-12 text-gray-900 dark:text-gray-100">
+      <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 md:text-2xl">
+        全部分类与标签
+      </h1>
       <section>
         <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 flex items-center gap-2 text-gray-900 dark:text-gray-100">
           <AppstoreOutlined /> 分类导航
@@ -42,9 +45,9 @@ export default function NavigationContent({
               >
                 <div className="flex flex-col items-start mb-2 text-gray-900 dark:text-gray-100">
                   <ProductOutlined className="mb-1 text-lg md:text-2xl" />
-                  <span className="text-sm md:text-xl font-bold text-left line-clamp-2">
+                  <h3 className="text-sm md:text-xl font-bold text-left line-clamp-2">
                     {cat.name}
-                  </span>
+                  </h3>
                 </div>
                 <div className="text-xs truncate mb-2 text-left text-gray-600 dark:text-gray-400 line-clamp-2">
                   {cat.description}

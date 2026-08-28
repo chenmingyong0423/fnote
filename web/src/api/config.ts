@@ -71,7 +71,7 @@ export const DEFAULT_COMMON_CONFIG: CommonConfigVO = {
     baidu_site_verification: "",
     keywords: "",
     author: "Fnote",
-    robots: "noindex, nofollow",
+    robots: "index, follow",
   },
   pay_info_config: [],
   third_party_site_verification: [],

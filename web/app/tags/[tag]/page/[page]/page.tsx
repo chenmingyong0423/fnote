@@ -16,11 +16,11 @@ export async function generateMetadata({
   const tagName = await getTagNameByRoute(tag);
   const config = await getCommonConfig();
   return {
-    title: `${tagName} - 标签文章 - ${config.seo_meta.title || config.website_meta.website_name}`,
-    description: `浏览${tagName}标签下的全部文章。`,
+    title: `${tagName} - 标签文章 - 第 ${page} 页 - ${config.seo_meta.title || config.website_meta.website_name}`,
+    description: `浏览${tagName}标签下的文章，第 ${page} 页。`,
     openGraph: {
-      title: `${tagName} - 标签文章 - ${config.seo_meta.og_title || config.website_meta.website_name}`,
-      description: `浏览${tagName}标签下的全部文章。`,
+      title: `${tagName} - 标签文章 - 第 ${page} 页 - ${config.seo_meta.og_title || config.website_meta.website_name}`,
+      description: `浏览${tagName}标签下的文章，第 ${page} 页。`,
       url: process.env.BASE_HOST + `/tags/${tag}/page/${page}`,
       images: config.seo_meta.og_image
         ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }]
@@ -61,6 +61,7 @@ export default async function TagPageWithPagination({
     <ArticleList
       list={posts.list}
       total={posts.totalCount}
+      pageHeading={`${tagName}标签文章 - 第 ${pageNumber} 页`}
       siteOwner={{
         name: owner.website_owner,
         avatar: owner.website_owner_avatar,

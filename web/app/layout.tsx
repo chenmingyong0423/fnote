@@ -6,7 +6,6 @@ import React from "react";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import Footer from "../src/components/Footer";
 import Header from "../src/components/Header";
-import SeoHead from "../src/components/SeoHead";
 import { DEFAULT_COMMON_CONFIG, getCommonConfig } from "@/src/api/config";
 import { AntdThemeProvider } from "@/src/components/AntdThemeProvider";
 import LogVisitClient from "../src/components/LogVisitClient";
@@ -16,6 +15,8 @@ import { isBackendUnavailableError } from "@/src/utils/http";
 import { resolvePublicUrl } from "@/src/utils/publicUrl";
 import BackTopButton from "@/src/components/BackTopButton";
 import InteractiveBackdrop from "@/src/components/InteractiveBackdrop";
+import { getSiteUrl, normalizeRobots } from "@/src/utils/seo";
+import { headers } from "next/headers";
 export const dynamic = 'force-dynamic'
 
 const geistSans = Geist({
@@ -72,22 +73,42 @@ function ensureInitialized() {
 
 // 动态生成 metadata
 export async function generateMetadata(): Promise<Metadata> {
+  const requestHeaders = await headers();
+  const pathname = requestHeaders.get("x-fnote-pathname") || "/";
+  const siteUrl = getSiteUrl();
+
   try {
     await ensureInitialized();
     const config = await getCommonConfig();
     return {
+      metadataBase: siteUrl,
       title: config.seo_meta.title || config.website_meta.website_name,
       description: config.seo_meta.description,
       keywords: config.seo_meta.keywords,
       authors: [{ name: config.seo_meta.author || config.website_meta.website_owner }],
-      robots: config.seo_meta.robots || "index, follow",
+      robots: normalizeRobots(config.seo_meta.robots),
+      alternates: {
+        canonical: pathname,
+      },
+      icons: config.website_meta.website_icon
+        ? { icon: resolvePublicUrl(config.website_meta.website_icon) }
+        : undefined,
       openGraph: {
         title: config.seo_meta.og_title || config.website_meta.website_name,
         description: config.seo_meta.description,
-        url: process.env.BASE_HOST,
+        url: pathname,
         images: config.seo_meta.og_image ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }] : undefined,
         siteName: config.website_meta.website_name,
+        locale: "zh_CN",
         type: "website",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: config.seo_meta.og_title || config.website_meta.website_name,
+        description: config.seo_meta.description,
+        images: config.seo_meta.og_image
+          ? [resolvePublicUrl(config.seo_meta.og_image)!]
+          : undefined,
       },
       verification: {
         // 百度验证通过 other 字段处理
@@ -104,9 +125,12 @@ export async function generateMetadata(): Promise<Metadata> {
   } catch (error) {
     if (isBackendUnavailableError(error)) {
       return {
+        metadataBase: siteUrl,
         title: DEFAULT_COMMON_CONFIG.seo_meta.title,
         description: DEFAULT_COMMON_CONFIG.seo_meta.description,
-        robots: DEFAULT_COMMON_CONFIG.seo_meta.robots,
+        alternates: {
+          canonical: pathname,
+        },
       };
     }
     throw error;
@@ -131,7 +155,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="zh-CN" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -152,7 +176,6 @@ export default async function RootLayout({
                   网站数据暂时异常，部分内容可能无法显示，请稍后再试。
                 </div>
               )}
-              <SeoHead config={config} />
               <main>{children}</main>
               <LogVisitClient />
               <Footer websiteRecords={config.records || []} />

@@ -7,11 +7,14 @@ import { getCarouselList } from "@/src/api/carousel";
 import { getLatestComments } from "@/src/api/comments";
 import {
   DEFAULT_NOTICE_CONFIG,
+  DEFAULT_COMMON_CONFIG,
   DEFAULT_WEBSITE_OWNER_CONFIG,
+  getCommonConfig,
   getNoticeConfig,
   getWebsiteOwnerConfig,
 } from "@/src/api/config";
 import { DEFAULT_WEBSITE_STATS, getWebsiteStats } from "@/src/api/stats";
+import { buildWebsiteJsonLd, serializeJsonLd } from "@/src/utils/seo";
 
 async function settleWithFallback<T>(promise: Promise<T>, fallback: T) {
   try {
@@ -22,7 +25,7 @@ async function settleWithFallback<T>(promise: Promise<T>, fallback: T) {
 }
 
 export default async function Home() {
-  const [latestArticles, carouselItems, latestComments, notice, config, stats] =
+  const [latestArticles, carouselItems, latestComments, notice, config, stats, commonConfig] =
     await Promise.all([
       settleWithFallback(getLatestPosts(), []),
       settleWithFallback(getCarouselList(), []),
@@ -30,10 +33,20 @@ export default async function Home() {
       settleWithFallback(getNoticeConfig(), DEFAULT_NOTICE_CONFIG),
       settleWithFallback(getWebsiteOwnerConfig(), DEFAULT_WEBSITE_OWNER_CONFIG),
       settleWithFallback(getWebsiteStats(), DEFAULT_WEBSITE_STATS),
+      settleWithFallback(getCommonConfig(), DEFAULT_COMMON_CONFIG),
     ]);
+
+  const websiteJsonLd = buildWebsiteJsonLd(commonConfig.data);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteJsonLd) }}
+      />
+      <h1 className="sr-only">
+        {commonConfig.data.website_meta.website_name || commonConfig.data.seo_meta.title}
+      </h1>
       <div className="flex flex-col md:grid md:grid-cols-12 gap-6 md:gap-8">
         <div className="w-full md:col-span-8 flex flex-col gap-6 md:gap-8 min-w-0">
           <HomeNotice notice={notice.data} hasError={notice.failed} />

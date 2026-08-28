@@ -18,10 +18,14 @@ const Header = async ({ websiteMetaConfig }: HeaderProps) => {
     >
       {/* 左侧 Logo 区 1/12 */}
       <div className="md:col-span-1 flex items-center">
-        <Link href="/" className="flex min-w-0 items-center">
+        <Link
+          href="/"
+          aria-label={`${websiteMetaConfig?.website_name || "Fnote"}首页`}
+          className="flex min-w-0 items-center"
+        >
           <img
             src={websiteMetaConfig?.website_icon || "/logo.png"}
-            alt="logo"
+            alt={websiteMetaConfig?.website_name || "Fnote"}
             width={36}
             height={36}
             loading="lazy"

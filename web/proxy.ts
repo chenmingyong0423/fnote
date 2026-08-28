@@ -27,6 +27,17 @@ function getAdminHost(request: NextRequest) {
   return fallbackUrl.toString();
 }
 
+function nextWithPathname(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-fnote-pathname", request.nextUrl.pathname);
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+}
+
 export async function proxy(request: NextRequest) {
   try {
     const res = await fetch(`${getServerHost()}${INIT_CHECK_PATH}`, {
@@ -34,7 +45,7 @@ export async function proxy(request: NextRequest) {
     });
 
     if (!res.ok) {
-      return NextResponse.next();
+      return nextWithPathname(request);
     }
 
     const body = (await res.json()) as InitStatusResponse;
@@ -43,10 +54,10 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(getAdminHost(request), 307);
     }
   } catch {
-    return NextResponse.next();
+    return nextWithPathname(request);
   }
 
-  return NextResponse.next();
+  return nextWithPathname(request);
 }
 
 export const config = {

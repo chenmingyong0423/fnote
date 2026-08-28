@@ -16,11 +16,11 @@ export async function generateMetadata({
   const categoryName = await getCategoryNameStringByRoute(category);
   const config = await getCommonConfig();
   return {
-    title: `${categoryName} - 分类文章 - ${config.seo_meta.title || config.website_meta.website_name}`,
-    description: `浏览${categoryName}分类下的全部文章。`,
+    title: `${categoryName} - 分类文章 - 第 ${page} 页 - ${config.seo_meta.title || config.website_meta.website_name}`,
+    description: `浏览${categoryName}分类下的文章，第 ${page} 页。`,
     openGraph: {
-      title: `${categoryName} - 分类文章 - ${config.seo_meta.og_title || config.website_meta.website_name}`,
-      description: `浏览${categoryName}分类下的全部文章。`,
+      title: `${categoryName} - 分类文章 - 第 ${page} 页 - ${config.seo_meta.og_title || config.website_meta.website_name}`,
+      description: `浏览${categoryName}分类下的文章，第 ${page} 页。`,
       url: process.env.BASE_HOST + `/categories/${category}/page/${page}`,
       images: config.seo_meta.og_image
         ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }]
@@ -61,6 +61,7 @@ export default async function CategoryPageWithPagination({
     <ArticleList
       list={posts.list}
       total={posts.totalCount}
+      pageHeading={`${categoryName}分类文章 - 第 ${pageNumber} 页`}
       siteOwner={{
         name: owner.website_owner,
         avatar: owner.website_owner_avatar,

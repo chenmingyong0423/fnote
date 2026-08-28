@@ -12,6 +12,7 @@ import { formatDate } from "../utils/date";
 interface ArticleListProps {
   list: LatestPostVO[];
   total: number;
+  pageHeading?: string;
   siteOwner?: SiteOwnerCardProps;
   field?: "latest" | "oldest" | "likes";
   currentPage?: number;
@@ -24,6 +25,7 @@ interface ArticleListProps {
 export default function ArticleList({
   list,
   total,
+  pageHeading,
   siteOwner,
   field = "latest",
   currentPage = 1,
@@ -71,6 +73,11 @@ export default function ArticleList({
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
+      {pageHeading && (
+        <h1 className="mb-5 text-xl font-bold text-gray-900 dark:text-gray-100 md:mb-6 md:text-2xl">
+          {pageHeading}
+        </h1>
+      )}
       {/* 移动端：纵向布局，桌面端：网格布局 */}
       <div className="flex flex-col md:grid md:grid-cols-12 gap-6 md:gap-8 dark:text-gray-200">
         {/* 左侧主内容区 - 移动端全宽，桌面端 8/12 */}
@@ -122,7 +129,7 @@ export default function ArticleList({
                       </div>
                       {/* 内容区域 - 移动端全宽，桌面端 4/6 */}
                       <div className="w-full md:col-span-4 flex flex-col justify-between md:py-1 relative">
-                        <div className="text-base md:text-lg font-bold mb-2 group-hover:text-blue-600 transition-colors dark:text-gray-200 dark:group-hover:text-gray-100 line-clamp-2">{item.title}</div>
+                        <h2 className="text-base md:text-lg font-bold mb-2 group-hover:text-blue-600 transition-colors dark:text-gray-200 dark:group-hover:text-gray-100 line-clamp-2">{item.title}</h2>
                         <div className="text-gray-700 mb-3 line-clamp-3 text-sm dark:text-gray-400 flex-1">{item.summary}</div>
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-xs text-gray-400 mt-auto dark:text-gray-500">
                           <div className="flex flex-wrap items-center gap-3 md:gap-4">
