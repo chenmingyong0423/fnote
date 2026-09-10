@@ -239,8 +239,10 @@ func TestGenerateSitemapUsesCurrentPublicRoutes(t *testing.T) {
 	t.Setenv("UPLOADER_HOST", "https://chenmingyong.cn/")
 
 	service := &FileService{}
-	posts := []byte(`[{"_id":"about-me","updated_at":1700000000}]`)
-	if err := service.GenerateSitemap(context.Background(), posts, []byte(`[]`), []byte(`[]`)); err != nil {
+	posts := []byte(`[{"_id":"about-me","updated_at":1700000000},{"_id":"go-example","updated_at":1700000000,"tags":[{"name":"Go"}],"category":[{"name":"Backend"}]}]`)
+	tags := []byte(`[{"Name":"Go","Route":"go","PostCount":0},{"Name":"Vue","Route":"vue","PostCount":10}]`)
+	categories := []byte(`[{"Name":"Backend","Route":"backend"},{"Name":"Empty","Route":"empty"}]`)
+	if err := service.GenerateSitemap(context.Background(), posts, categories, tags); err != nil {
 		t.Fatalf("GenerateSitemap() error = %v", err)
 	}
 
@@ -259,5 +261,15 @@ func TestGenerateSitemapUsesCurrentPublicRoutes(t *testing.T) {
 	}
 	if strings.Contains(content, "chenmingyong.cn//") {
 		t.Fatal("sitemap contains a double slash after the host")
+	}
+	for _, route := range []string{"/navigation", "/posts/go-example", "/tags/go", "/categories/backend"} {
+		if !strings.Contains(content, "<loc>https://chenmingyong.cn"+route+"</loc>") {
+			t.Fatalf("sitemap is missing %s", route)
+		}
+	}
+	for _, route := range []string{"/posts/about-me", "/tags/vue", "/categories/empty"} {
+		if strings.Contains(content, "<loc>https://chenmingyong.cn"+route+"</loc>") {
+			t.Fatalf("sitemap contains noncanonical or empty route %s", route)
+		}
 	}
 }

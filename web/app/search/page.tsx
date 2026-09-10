@@ -1,119 +1,14 @@
-import { getPostList, type PostListResponse } from "@/src/api/posts";
-import {
-  DEFAULT_COMMON_CONFIG,
-  DEFAULT_WEBSITE_OWNER_CONFIG,
-  getCommonConfig,
-  getWebsiteOwnerConfig,
-} from "@/src/api/config";
-import { DEFAULT_WEBSITE_STATS, getWebsiteStats } from "@/src/api/stats";
-import type { Metadata } from "next";
-import SearchPageClient from "./SearchPageClient";
-import { resolvePublicUrl } from "@/src/utils/publicUrl";
+import { searchMetadata, renderSearch } from "@/src/components/SearchResultsPage";
+import type { ListSearchParams } from "@/src/utils/pagination";
 
-const DEFAULT_POST_LIST: PostListResponse = {
-  PageNo: 1,
-  PageSize: 10,
-  totalPages: 0,
-  totalCount: 0,
-  list: [],
+type Props = {
+  searchParams: Promise<ListSearchParams>;
 };
 
-async function settleWithFallback<T>(promise: Promise<T>, fallback: T) {
-  try {
-    return { data: await promise, failed: false };
-  } catch {
-    return { data: fallback, failed: true };
-  }
+export async function generateMetadata({ searchParams }: Props) {
+  return searchMetadata(undefined, await searchParams);
 }
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ keyword?: string }>;
-}): Promise<Metadata> {
-  const resolvedSearchParams = await searchParams;
-  const keyword = resolvedSearchParams?.keyword || "";
-  const config = await getCommonConfig().catch(() => DEFAULT_COMMON_CONFIG);
-  const siteTitle = config.seo_meta.title || config.website_meta.website_name;
-  const title = keyword
-    ? `搜索：${keyword} - ${siteTitle}`
-    : `搜索文章 - ${siteTitle}`;
-  const description = keyword
-    ? `搜索与“${keyword}”相关的全部文章。`
-    : "搜索本站全部文章。";
-
-  return {
-    title,
-    description,
-    robots: {
-      index: false,
-      follow: true,
-    },
-    openGraph: {
-      title,
-      description,
-      url:
-        process.env.BASE_HOST +
-        `/search` +
-        (keyword ? `?keyword=${encodeURIComponent(keyword)}` : ""),
-      images: config.seo_meta.og_image
-        ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }]
-        : undefined,
-      siteName: config.website_meta.website_name,
-      type: "website",
-    },
-  };
-}
-
-export default async function SearchPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    filter?: string;
-    pageSize?: string;
-    page?: string;
-    keyword?: string;
-  }>;
-}) {
-  const resolvedSearchParams = await searchParams;
-  const field =
-    (resolvedSearchParams?.filter as "latest" | "oldest" | "likes") || "latest";
-  const pageNumber = Number(resolvedSearchParams?.page || 1);
-  const pageSize = Number(resolvedSearchParams?.pageSize || 10);
-  const keyword = resolvedSearchParams?.keyword || "";
-
-  const [posts, owner, stats] = await Promise.all([
-    settleWithFallback(
-      getPostList({
-        pageNo: pageNumber,
-        pageSize,
-        sortField: field === "likes" ? "like_count" : "created_at",
-        sortOrder: field === "oldest" ? "ASC" : "DESC",
-        keyword,
-      }),
-      { ...DEFAULT_POST_LIST, PageNo: pageNumber, PageSize: pageSize },
-    ),
-    settleWithFallback(getWebsiteOwnerConfig(), DEFAULT_WEBSITE_OWNER_CONFIG),
-    settleWithFallback(getWebsiteStats(), DEFAULT_WEBSITE_STATS),
-  ]);
-
-  return (
-    <SearchPageClient
-      keyword={keyword}
-      field={field}
-      page={pageNumber}
-      pageSize={pageSize}
-      list={posts.data.list}
-      total={posts.data.totalCount}
-      hasError={posts.failed}
-      siteOwner={{
-        name: owner.data.website_owner,
-        avatar: owner.data.website_owner_avatar,
-        bio: owner.data.website_owner_profile,
-        socialInfo: owner.data.social_info_list,
-        stats: stats.data,
-        hasError: owner.failed || stats.failed,
-      }}
-    />
-  );
+export default async function Page({ searchParams }: Props) {
+  return renderSearch(undefined, await searchParams);
 }

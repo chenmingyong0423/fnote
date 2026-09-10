@@ -15,6 +15,7 @@
 package web
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/chenmingyong0423/fnote/server/internal/category/internal/domain"
@@ -103,6 +104,9 @@ func (h *CategoryHandler) GetCategoryByRoute(ctx *gin.Context) (*apiwrap.Respons
 	route := ctx.Param("route")
 	category, err := h.serv.GetCategoryByRoute(ctx, route)
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, apiwrap.NewErrorResponseBody(http.StatusNotFound, "Category not found.")
+		}
 		return nil, err
 	}
 	return apiwrap.SuccessResponseWithData(CategoryNameVO{Name: category.Name}), nil

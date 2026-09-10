@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:seo": "node scripts/test-seo.cjs"
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "1.2.0",

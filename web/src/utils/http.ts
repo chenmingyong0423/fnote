@@ -6,6 +6,13 @@ type ApiLikeResponse<T = unknown> = {
   data?: T;
 };
 
+export class HttpError extends Error {
+  constructor(public readonly status: number, message: string) {
+    super(message);
+    this.name = "HttpError";
+  }
+}
+
 export class BackendUnavailableError extends Error {
   constructor(message = "后端服务暂不可用") {
     super(message);
@@ -57,7 +64,7 @@ export async function request<T = never>(
   if (!res.ok) {
     const backendMessage =
         body?.message?.trim() || res.statusText || "请求失败";
-    throw new Error(backendMessage);
+    throw new HttpError(res.status, backendMessage);
   }
 
   return (body as T) ?? ({} as T);

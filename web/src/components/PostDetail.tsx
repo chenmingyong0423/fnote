@@ -95,7 +95,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
             <div className="mt-8 md:mt-10 p-3 md:p-4 rounded-lg border border-white/70 bg-white/45 text-xs md:text-sm text-gray-600 backdrop-blur dark:border-white/10 dark:bg-slate-900/35 dark:text-gray-400">
               <div className="break-all">
                 本文链接：
-                <span>{`${process.env.BASE_HOST || ""}/posts/${post._id}`}</span>
+                <span>{`${process.env.BASE_HOST || ""}${post._id === "about-me" ? "/about-me" : `/posts/${post._id}`}`}</span>
               </div>
               <div className="mt-2">
                 版权声明：本文由{" "}

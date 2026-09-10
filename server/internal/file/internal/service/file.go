@@ -217,6 +217,17 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 	if err != nil {
 		return err
 	}
+	// posts 来自公开文章查询。使用实际关联，而不是可能滞后的 PostCount。
+	usedTags := make(map[string]bool)
+	usedCategories := make(map[string]bool)
+	for _, p := range posts {
+		for _, t := range p.Tags {
+			usedTags[t.Name] = true
+		}
+		for _, c := range p.Categories {
+			usedCategories[c.Name] = true
+		}
+	}
 	sitemapBuilder := sitemap.NewSitemap().
 		XmlnsImage("https://www.google.com/schemas/sitemap-image/1.1").
 		Url(
@@ -239,6 +250,9 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 		)
 	}
 	for _, c := range categories {
+		if !usedCategories[c.Name] {
+			continue
+		}
 		sitemapBuilder.Url(
 			fmt.Sprintf("%s/categories/%s", baseHost, c.Route),
 			sitemap.WithLastMod(time.Unix(c.UpdatedAt, 0).Format(time.DateOnly)),
@@ -247,6 +261,9 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 		)
 	}
 	for _, t := range tags {
+		if !usedTags[t.Name] {
+			continue
+		}
 		sitemapBuilder.Url(
 			fmt.Sprintf("%s/tags/%s", baseHost, t.Route),
 			sitemap.WithLastMod(time.Unix(t.UpdatedAt, 0).Format(time.DateOnly)),
@@ -267,6 +284,7 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 		sitemap.WithChangeFreq("always"),
 		sitemap.WithPriority(0.5),
 	)
+	sitemapBuilder.Url(fmt.Sprintf("%s/navigation", baseHost))
 	err = sitemapBuilder.GenerateXml()
 	if err != nil {
 		return err

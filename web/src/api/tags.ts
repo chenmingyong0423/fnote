@@ -1,4 +1,4 @@
-import { request } from "../utils/http";
+import { HttpError, request } from "../utils/http";
 import type { Response } from "./types";
 
 export interface TagVO {
@@ -19,7 +19,12 @@ export async function getTags(): Promise<TagVO[]> {
 
 // 根据路由获取标签名称
 export async function getTagNameByRoute(route: string): Promise<string> {
-  const res = await request<{ code: number; message: string; data: { name: string } }>(`/api/tags/route/${route}`);
-  if (res.code !== 0 || !res.data) throw new Error(res.message || "Failed to fetch tag name");
-  return res.data.name;
+  try {
+    const res = await request<{ code: number; message: string; data: { name: string } }>(`/api/tags/route/${encodeURIComponent(route)}`);
+    if (res.code !== 0 || !res.data) throw new Error(res.message || "Failed to fetch tag name");
+    return res.data.name;
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 404) return "";
+    throw error;
+  }
 }

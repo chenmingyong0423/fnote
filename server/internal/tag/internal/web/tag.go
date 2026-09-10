@@ -15,6 +15,7 @@
 package web
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/chenmingyong0423/fnote/server/internal/tag/internal/domain"
@@ -80,6 +81,9 @@ func (h *TagHandler) GetTagByRoute(ctx *gin.Context) (*apiwrap.ResponseBody[TagN
 	route := ctx.Param("route")
 	tag, err := h.serv.GetTagByRoute(ctx, route)
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, apiwrap.NewErrorResponseBody(http.StatusNotFound, "Tag not found.")
+		}
 		return nil, err
 	}
 	return apiwrap.SuccessResponseWithData(TagNameVO{Name: tag.Name}), nil

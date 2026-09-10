@@ -1,4 +1,4 @@
-import { request } from "../utils/http";
+import { HttpError, request } from "../utils/http";
 import type { Response } from "./types";
 
 export interface CategoryResponse {
@@ -35,7 +35,7 @@ export async function getCategories(): Promise<CategoryWithCountVO[]> {
 
 // 根据路由获取分类名称
 export async function getCategoryNameByRoute(route: string): Promise<CategoryNameVO> {
-  const res = await request<Response<CategoryNameVO>>(`${API_PREFIX}/route/${route}`);
+  const res = await request<Response<CategoryNameVO>>(`${API_PREFIX}/route/${encodeURIComponent(route)}`);
   if (res.code !== 0) throw new Error(res.message);
   return res.data;
 }
@@ -49,6 +49,11 @@ export async function getMenus(): Promise<MenuVO[]> {
 
 // 获取分类名称字符串
 export async function getCategoryNameStringByRoute(route: string): Promise<string> {
-  const res = await getCategoryNameByRoute(route);
-  return res.name;
+  try {
+    const res = await getCategoryNameByRoute(route);
+    return res.name;
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 404) return "";
+    throw error;
+  }
 }

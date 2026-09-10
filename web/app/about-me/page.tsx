@@ -31,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ? "网站数据暂时异常"
       : "关于页面暂未配置";
     return {
+      alternates: { canonical: "/about-me" },
       title: `关于 - ${siteTitle}`,
       description,
       openGraph: {
@@ -47,6 +48,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
+    alternates: { canonical: "/about-me" },
     title: `${post.data.title} - ${siteTitle}`,
     description: post.data.meta_description || post.data.summary,
     keywords: post.data.meta_keywords || config.seo_meta.keywords,
