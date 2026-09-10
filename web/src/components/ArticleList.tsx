@@ -1,11 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Pagination, Tag, Tabs } from "antd";
+import { Pagination, Tag, Tabs, type PaginationProps } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { EyeOutlined, LikeOutlined, MessageOutlined } from "@ant-design/icons";
 import SiteOwnerCard, { SiteOwnerCardProps } from "./SiteOwnerCard";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { LatestPostVO } from "../api/posts";
 import { formatDate } from "../utils/date";
 
@@ -19,7 +19,6 @@ interface ArticleListProps {
   pageSize?: number;
   hasError?: boolean;
   hideSiteOwnerOnMobile?: boolean;
-  onPageChange?: (page: number, pageSize: number, field: string) => void;
 }
 
 export default function ArticleList({
@@ -32,13 +31,27 @@ export default function ArticleList({
   pageSize = 10,
   hasError = false,
   hideSiteOwnerOnMobile = false,
-  onPageChange,
 }: ArticleListProps) {
   const [localField, setLocalField] = useState(field);
   const [localPage, setLocalPage] = useState(currentPage);
   const [localPageSize, setLocalPageSize] = useState(pageSize);
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const basePath = pathname.replace(/\/page\/[0-9]+$/, "");
+
+  // 与点击跳转共用地址，确保服务端 HTML 中就有可抓取的分页链接。
+  const getPageHref = (page: number, size = localPageSize, sort = localField) => {
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    params.delete("page");
+    if (size === 10) params.delete("pageSize");
+    else params.set("pageSize", String(size));
+    if (sort === "latest") params.delete("filter");
+    else params.set("filter", sort);
+    const query = params.toString();
+    const path = page === 1 ? basePath : `${basePath}/page/${page}`;
+    return query ? `${path}?${query}` : path;
+  };
 
   useEffect(() => {
     setLocalField(field);
@@ -50,25 +63,44 @@ export default function ArticleList({
   const handleFilterChange = (value: string) => {
     setLocalField(value as "latest" | "oldest" | "likes");
     setLocalPage(1);
-    if (onPageChange) onPageChange(1, localPageSize, value);
-    // 跳回第一页
-    const params = new URLSearchParams(searchParams?.toString() ?? "");
-    params.set("filter", value);
-    params.delete("page");
-    const base = window.location.pathname.replace(/\/page\/[0-9]+$/, "");
-    router.push(`${base}?${params.toString()}`, { scroll: true });
+    router.push(getPageHref(1, localPageSize, value as typeof localField), { scroll: true });
   };
 
   // 分页切换
   const handlePageChange = (page: number, size: number) => {
-    setLocalPage(page);
+    const targetPage = size === localPageSize ? page : 1;
+    setLocalPage(targetPage);
     setLocalPageSize(size);
-    if (onPageChange) onPageChange(page, size, localField);
-    const params = new URLSearchParams(searchParams?.toString() ?? "");
-    params.set("pageSize", String(size));
-    const base = window.location.pathname.replace(/\/page\/[0-9]+$/, "");
-    const targetPage = page === 1 ? "" : `/page/${page}`;
-    router.push(`${base}${targetPage}?${params.toString()}`, { scroll: true });
+    router.push(getPageHref(targetPage, size), { scroll: true });
+  };
+
+  const renderPaginationItem: NonNullable<PaginationProps["itemRender"]> = (page, type, element) => {
+    const totalPages = Math.ceil(total / localPageSize);
+    if (page < 1 || page > totalPages ||
+      (type === "prev" && localPage <= 1) ||
+      (type === "next" && localPage >= totalPages)) return element;
+
+    const original = React.isValidElement<{ className?: string; children?: React.ReactNode }>(element)
+      ? element.props : undefined;
+    const label = type === "prev" ? "上一页" : type === "next" ? "下一页" : `第 ${page} 页`;
+    return (
+      <a
+        href={getPageHref(page)}
+        className={original?.className}
+        aria-label={label}
+        aria-current={type === "page" && page === localPage ? "page" : undefined}
+        onKeyDown={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          // 避免父级 Pagination 重复导航，保留 Ctrl/Cmd 点击等浏览器行为。
+          event.stopPropagation();
+          if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+          event.preventDefault();
+          handlePageChange(page, localPageSize);
+        }}
+      >
+        {original?.children ?? label}
+      </a>
+    );
   };
 
   return (
@@ -156,6 +188,7 @@ export default function ArticleList({
               pageSize={localPageSize}
               total={total}
               onChange={handlePageChange}
+              itemRender={renderPaginationItem}
               showSizeChanger={{
                 getPopupContainer: () => document.body,
                 classNames: {
@@ -165,7 +198,6 @@ export default function ArticleList({
                 },
               }}
               pageSizeOptions={["5", "10", "20", "50"]}
-              onShowSizeChange={(_, size) => handlePageChange(1, size)}
               showQuickJumper={true}
               showTotal={total => `共 ${total} 篇文章`}
               responsive={true}

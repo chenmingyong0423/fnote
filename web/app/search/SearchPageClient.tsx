@@ -40,22 +40,6 @@ function SearchPage({
     router.replace("/search?" + newParams.toString());
   };
 
-  const handlePageChange = (
-    targetPage: number,
-    size: number,
-    currentField: string
-  ) => {
-    const newParams = new URLSearchParams(params?.toString());
-    newParams.set("pageSize", String(size));
-    newParams.set("filter", currentField);
-
-    if (targetPage === 1) {
-      router.push(`/search?${newParams.toString()}`);
-    } else {
-      router.push(`/search/page/${targetPage}?${newParams.toString()}`);
-    }
-  };
-
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
       <div className="glass-surface mb-5 md:mb-6 rounded-lg p-4 md:p-6">
@@ -94,7 +78,6 @@ function SearchPage({
         field={field}
         currentPage={page}
         pageSize={pageSize}
-        onPageChange={handlePageChange}
       />
     </div>
   );
