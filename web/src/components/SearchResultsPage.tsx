@@ -5,8 +5,7 @@ import { getPostList } from "@/src/api/posts";
 import { DEFAULT_COMMON_CONFIG, DEFAULT_WEBSITE_OWNER_CONFIG, getCommonConfig, getWebsiteOwnerConfig } from "@/src/api/config";
 import { DEFAULT_WEBSITE_STATS, getWebsiteStats } from "@/src/api/stats";
 import { ensurePageExists, resolvePagination, type ListSearchParams } from "@/src/utils/pagination";
-import { resolvePublicUrl } from "@/src/utils/publicUrl";
-import { getSiteUrl } from "@/src/utils/seo";
+import { buildPageMetadata } from "@/src/utils/seo";
 import SearchPageClient from "@/app/search/SearchPageClient";
 
 const loadSearch = cache(async (rawPage: string | undefined, query: ListSearchParams) => {
@@ -28,22 +27,13 @@ export async function searchMetadata(rawPage: string | undefined, query: ListSea
   const search = await loadSearch(rawPage, query);
   const config = await getCommonConfig().catch(() => DEFAULT_COMMON_CONFIG);
   const pageTitle = `${search.keyword ? `搜索：${search.keyword}` : "搜索文章"}${search.page > 1 ? ` - 第 ${search.page} 页` : ""}`;
-  const title = `${pageTitle} - ${config.seo_meta.title || config.website_meta.website_name}`;
   const description = search.keyword ? `搜索与“${search.keyword}”相关的文章。` : "搜索本站全部文章。";
-  return {
-    title,
+  return buildPageMetadata(config, {
+    title: pageTitle,
     description,
-    robots: { index: false, follow: true },
-    alternates: { canonical: search.pathname },
-    openGraph: {
-      title,
-      description,
-      url: new URL(search.pathname, getSiteUrl()).toString(),
-      images: config.seo_meta.og_image ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }] : undefined,
-      siteName: config.website_meta.website_name,
-      type: "website",
-    },
-  };
+    noindex: true,
+    pathname: search.pathname,
+  });
 }
 
 export async function renderSearch(rawPage: string | undefined, query: ListSearchParams) {

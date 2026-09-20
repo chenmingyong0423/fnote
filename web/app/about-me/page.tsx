@@ -2,7 +2,7 @@ import PostDetail from "@/src/components/PostDetail";
 import { getPostDetailOrNull, type PostDetail as PostDetailType } from "@/src/api/posts";
 import type { Metadata } from "next";
 import { DEFAULT_COMMON_CONFIG, getCommonConfig } from "@/src/api/config";
-import { resolvePublicUrl } from "@/src/utils/publicUrl";
+import { buildPageMetadata } from "@/src/utils/seo";
 import { getCommentsByPostId } from "@/src/api/comments";
 
 async function getAboutPost() {
@@ -24,43 +24,25 @@ export async function generateMetadata(): Promise<Metadata> {
     getAboutPost(),
     getCommonConfig().catch(() => DEFAULT_COMMON_CONFIG),
   ]);
-  const siteTitle = config.seo_meta.title || config.website_meta.website_name;
 
   if (!post.data) {
     const description = post.failed
       ? "网站数据暂时异常"
       : "关于页面暂未配置";
-    return {
-      alternates: { canonical: "/about-me" },
-      title: `关于 - ${siteTitle}`,
+    return buildPageMetadata(config, {
+      pathname: "/about-me",
+      title: "关于",
       description,
-      openGraph: {
-        title: `关于 - ${config.seo_meta.og_title || siteTitle}`,
-        description,
-        url: process.env.BASE_HOST + "/about-me",
-        images: config.seo_meta.og_image
-          ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }]
-          : undefined,
-        siteName: config.website_meta.website_name,
-        type: "website",
-      },
-    };
+      noindex: true,
+    });
   }
 
-  return {
-    alternates: { canonical: "/about-me" },
-    title: `${post.data.title} - ${siteTitle}`,
+  return buildPageMetadata(config, {
+    pathname: "/about-me",
+    title: post.data.title,
     description: post.data.meta_description || post.data.summary,
-    keywords: post.data.meta_keywords || config.seo_meta.keywords,
-    openGraph: {
-      title: `${post.data.title} - ${config.seo_meta.og_title || siteTitle}`,
-      description: post.data.meta_description || post.data.summary,
-      url: process.env.BASE_HOST + "/about-me",
-      images: post.data.cover_img ? [{ url: resolvePublicUrl(post.data.cover_img) }] : undefined,
-      siteName: config.website_meta.website_name,
-      type: "article",
-    },
-  };
+    image: post.data.cover_img,
+  });
 }
 
 function AboutState({ hasError }: { hasError: boolean }) {

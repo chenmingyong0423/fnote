@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/hex"
+	"encoding/xml"
 	"errors"
 	"os"
 	"path/filepath"
@@ -270,6 +271,69 @@ func TestGenerateSitemapUsesCurrentPublicRoutes(t *testing.T) {
 	for _, route := range []string{"/posts/about-me", "/tags/vue", "/categories/empty"} {
 		if strings.Contains(content, "<loc>https://chenmingyong.cn"+route+"</loc>") {
 			t.Fatalf("sitemap contains noncanonical or empty route %s", route)
+		}
+	}
+}
+
+func TestGenerateSitemapDatesAndImages(t *testing.T) {
+	previousStaticPath := viper.GetString("system.static_path")
+	viper.Set("system.static_path", t.TempDir())
+	t.Cleanup(func() { viper.Set("system.static_path", previousStaticPath) })
+	t.Setenv("WEBSITE_BASE_HOST", "https://example.com/")
+	t.Setenv("UPLOADER_HOST", "https://cdn.example.com/")
+	service := &FileService{}
+	posts := []byte(`[
+		{"_id":"relative","created_at":1700000000,"cover_img":"/static/cover.jpg"},
+		{"_id":"absolute","created_at":1600000000,"updated_at":1700000000,"cover_img":"https://images.example.com/a.jpg"},
+		{"_id":"empty"},
+		{"_id":"about-me"}
+	]`)
+	if err := service.GenerateSitemap(context.Background(), posts, []byte(`[]`), []byte(`[]`)); err != nil {
+		t.Fatal(err)
+	}
+	content, _, err := service.GetSitemap(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var document struct {
+		URLs []struct {
+			Loc     string `xml:"loc"`
+			LastMod string `xml:"lastmod"`
+			Images  []struct {
+				Loc string `xml:"loc"`
+			} `xml:"image"`
+		} `xml:"url"`
+	}
+	if err := xml.Unmarshal([]byte(content), &document); err != nil {
+		t.Fatal(err)
+	}
+	seen := make(map[string]bool)
+	for _, entry := range document.URLs {
+		seen[entry.Loc] = true
+		wantsDate := strings.HasSuffix(entry.Loc, "/relative") || strings.HasSuffix(entry.Loc, "/absolute")
+		if wantsDate && entry.LastMod != "2023-11-14T22:13:20Z" {
+			t.Fatalf("incorrect modification time for %s: %s", entry.Loc, entry.LastMod)
+		}
+		if !wantsDate && entry.LastMod != "" {
+			t.Fatalf("invented modification time for %s: %s", entry.Loc, entry.LastMod)
+		}
+		wantImage := ""
+		if strings.HasSuffix(entry.Loc, "/relative") {
+			wantImage = "https://cdn.example.com/static/cover.jpg"
+		}
+		if strings.HasSuffix(entry.Loc, "/absolute") {
+			wantImage = "https://images.example.com/a.jpg"
+		}
+		if wantImage == "" && len(entry.Images) != 0 {
+			t.Fatalf("unexpected image for %s", entry.Loc)
+		}
+		if wantImage != "" && (len(entry.Images) != 1 || entry.Images[0].Loc != wantImage) {
+			t.Fatalf("incorrect image for %s: %+v", entry.Loc, entry.Images)
+		}
+	}
+	for _, path := range []string{"/", "/posts/relative", "/posts/absolute", "/posts/empty", "/about-me"} {
+		if !seen["https://example.com"+path] {
+			t.Fatalf("missing sitemap URL %s", path)
 		}
 	}
 }

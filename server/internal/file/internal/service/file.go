@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -201,7 +202,7 @@ func (s *FileService) GetFiles(ctx context.Context, pageDTO domain.PageDTO) ([]*
 func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryBytes, tagBytes []byte) error {
 	baseHost := strings.TrimRight(pkg.GetOrDefault4String(os.Getenv("WEBSITE_BASE_HOST"), "http://localhost:3000"), "/")
 	uploaderHost := strings.TrimRight(pkg.GetOrDefault4String(os.Getenv("UPLOADER_HOST"), "http://localhost:8080"), "/")
-	var aboutMeLastMod string
+	var aboutMe *post.Post
 	var posts []post.Post
 	err := jsoniter.Unmarshal(postBytes, &posts)
 	if err != nil {
@@ -230,23 +231,19 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 	}
 	sitemapBuilder := sitemap.NewSitemap().
 		XmlnsImage("https://www.google.com/schemas/sitemap-image/1.1").
-		Url(
-			baseHost,
-			sitemap.WithLastMod(time.Now().Format(time.DateOnly)),
-			sitemap.WithChangeFreq("always"),
-			sitemap.WithPriority(1.0),
-		).Output(filepath.Join(viper.GetString("system.static_path"), "sitemap.xml"))
+		// 首页和归档页没有可靠的页面修改时间，省略 lastmod。
+		Url(baseHost + "/").Output(filepath.Join(viper.GetString("system.static_path"), "sitemap.xml"))
 	for _, p := range posts {
 		if p.Id == "about-me" {
-			aboutMeLastMod = time.Unix(p.UpdatedAt, 0).Format(time.DateOnly)
+			aboutMe = &p
 			continue
 		}
+		opts := sitemapPostOptions(p)
+		if image := sitemapImageURL(uploaderHost, p.CoverImg); image != "" {
+			opts = append(opts, sitemap.WithImage(sitemap.NewUrlImage(image)))
+		}
 		sitemapBuilder.Url(
-			fmt.Sprintf("%s/posts/%s", baseHost, p.Id),
-			sitemap.WithLastMod(time.Unix(p.UpdatedAt, 0).Format(time.DateOnly)),
-			sitemap.WithChangeFreq("monthly"),
-			sitemap.WithPriority(0.9),
-			sitemap.WithImage(sitemap.NewUrlImage(fmt.Sprintf("%s%s", uploaderHost, p.CoverImg))),
+			fmt.Sprintf("%s/posts/%s", baseHost, url.PathEscape(p.Id)), opts...,
 		)
 	}
 	for _, c := range categories {
@@ -254,10 +251,7 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 			continue
 		}
 		sitemapBuilder.Url(
-			fmt.Sprintf("%s/categories/%s", baseHost, c.Route),
-			sitemap.WithLastMod(time.Unix(c.UpdatedAt, 0).Format(time.DateOnly)),
-			sitemap.WithChangeFreq("weekly"),
-			sitemap.WithPriority(0.8),
+			fmt.Sprintf("%s/categories/%s", baseHost, url.PathEscape(c.Route)),
 		)
 	}
 	for _, t := range tags {
@@ -265,31 +259,48 @@ func (s *FileService) GenerateSitemap(_ context.Context, postBytes, categoryByte
 			continue
 		}
 		sitemapBuilder.Url(
-			fmt.Sprintf("%s/tags/%s", baseHost, t.Route),
-			sitemap.WithLastMod(time.Unix(t.UpdatedAt, 0).Format(time.DateOnly)),
-			sitemap.WithChangeFreq("weekly"),
-			sitemap.WithPriority(0.8),
+			fmt.Sprintf("%s/tags/%s", baseHost, url.PathEscape(t.Route)),
 		)
 	}
-	if aboutMeLastMod != "" {
+	if aboutMe != nil {
 		sitemapBuilder.Url(
 			fmt.Sprintf("%s/about-me", baseHost),
-			sitemap.WithLastMod(aboutMeLastMod),
-			sitemap.WithChangeFreq("monthly"),
-			sitemap.WithPriority(0.9),
+			sitemapPostOptions(*aboutMe)...,
 		)
 	}
-	sitemapBuilder.Url(
-		fmt.Sprintf("%s/friend", baseHost),
-		sitemap.WithChangeFreq("always"),
-		sitemap.WithPriority(0.5),
-	)
+	sitemapBuilder.Url(fmt.Sprintf("%s/friend", baseHost))
 	sitemapBuilder.Url(fmt.Sprintf("%s/navigation", baseHost))
 	err = sitemapBuilder.GenerateXml()
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func sitemapPostOptions(p post.Post) []sitemap.URLOption {
+	modified := p.UpdatedAt
+	if modified <= 0 {
+		modified = p.CreatedAt
+	}
+	if modified <= 0 {
+		return nil
+	}
+	return []sitemap.URLOption{sitemap.WithLastMod(time.Unix(modified, 0).UTC().Format(time.RFC3339))}
+}
+
+func sitemapImageURL(host, cover string) string {
+	if strings.TrimSpace(cover) == "" {
+		return ""
+	}
+	base, err := url.Parse(host + "/")
+	if err != nil {
+		return ""
+	}
+	image, err := base.Parse(cover)
+	if err != nil || (image.Scheme != "http" && image.Scheme != "https") || image.Host == "" {
+		return ""
+	}
+	return image.String()
 }
 
 func (s *FileService) GetSitemap(_ context.Context) (string, bool, error) {

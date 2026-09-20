@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { CommonConfigVO } from "@/src/api/config";
-import type { PostDetail } from "@/src/api/posts";
+import type { LatestPostVO, PostDetail } from "@/src/api/posts";
 import { resolvePublicUrl } from "@/src/utils/publicUrl";
 
 const DEFAULT_SITE_URL = "http://localhost:3000";
@@ -32,6 +32,77 @@ export function getSiteUrl() {
   } catch {
     return new URL(DEFAULT_SITE_URL);
   }
+}
+
+export function getPostPath(id: string) {
+  return id === "about-me" ? "/about-me" : `/posts/${encodeURIComponent(id)}`;
+}
+
+/** Keep page, Open Graph and Twitter metadata in sync instead of inheriting the home card. */
+export function buildPageMetadata(config: CommonConfigVO, page: {
+  title: string;
+  description: string;
+  pathname: string;
+  image?: string;
+  noindex?: boolean;
+}): Metadata {
+  const title = `${page.title} - ${config.seo_meta.title || config.website_meta.website_name}`;
+  const image = resolvePublicUrl(page.image || config.seo_meta.og_image);
+  return {
+    title,
+    description: page.description,
+    alternates: { canonical: page.pathname },
+    ...(page.noindex ? { robots: { index: false, follow: true } } : {}),
+    openGraph: {
+      title,
+      description: page.description,
+      url: new URL(page.pathname, getSiteUrl()).toString(),
+      siteName: config.website_meta.website_name,
+      locale: "zh_CN",
+      type: "website",
+      images: image ? [{ url: image, alt: page.title }] : [],
+    },
+    twitter: {
+      card: image ? "summary_large_image" : "summary",
+      title,
+      description: page.description,
+      images: image ? [{ url: image, alt: page.title }] : [],
+    },
+  };
+}
+
+export type BreadcrumbItem = { name: string; pathname: string };
+
+export function buildBreadcrumbJsonLd(items: BreadcrumbItem[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: new URL(item.pathname, getSiteUrl()).toString(),
+    })),
+  };
+}
+
+export function buildCollectionJsonLd(name: string, pathname: string, posts: LatestPostVO[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    url: new URL(pathname, getSiteUrl()).toString(),
+    inLanguage: "zh-CN",
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: posts.map((post, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: post.title,
+        url: new URL(getPostPath(post.sug), getSiteUrl()).toString(),
+      })),
+    },
+  };
 }
 
 /**
@@ -102,7 +173,7 @@ export function buildWebsiteJsonLd(config: CommonConfigVO) {
 
 export function buildBlogPostingJsonLd(post: PostDetail, config: CommonConfigVO) {
   const siteUrl = getSiteUrl();
-  const articleUrl = new URL(`/posts/${post._id}`, siteUrl).toString();
+  const articleUrl = new URL(getPostPath(post._id), siteUrl).toString();
   const authorUrl = new URL("/about-me", siteUrl).toString();
   const siteName = config.website_meta.website_name || config.seo_meta.title;
   const owner = config.seo_meta.author || config.website_meta.website_owner;

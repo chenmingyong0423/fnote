@@ -1,4 +1,4 @@
-import { request } from "../utils/http";
+import { HttpError, request } from "../utils/http";
 import type { Response } from "./types";
 
 export interface LatestPostVO {
@@ -108,7 +108,7 @@ export interface PostDetailResponse {
  * @param id 文章ID
  */
 export async function getPostDetail(id: string) {
-  return request<PostDetailResponse>(`/api/posts/${id}`);
+  return request<PostDetailResponse>(`/api/posts/${encodeURIComponent(id)}`);
 }
 
 const POST_NOT_FOUND_MESSAGES = new Set([
@@ -123,12 +123,18 @@ function isPostNotFoundError(error: unknown) {
 export async function getPostDetailOrNull(id: string): Promise<PostDetail | null> {
   try {
     const res = await getPostDetail(id);
-    if (res.code !== 0 || !res.data) {
+    if (res.code !== 0) {
+      if (res.code === 404 || POST_NOT_FOUND_MESSAGES.has(res.message)) return null;
+      throw new Error(res.message || "Failed to fetch post");
+    }
+    if (!res.data) {
       return null;
     }
     return res.data;
   } catch (error) {
-    if (isPostNotFoundError(error)) {
+    if (error instanceof HttpError
+      ? error.status === 404 || (error.status === 400 && isPostNotFoundError(error))
+      : isPostNotFoundError(error)) {
       return null;
     }
     throw error;

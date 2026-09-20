@@ -2,7 +2,7 @@ import { DEFAULT_COMMON_CONFIG, getCommonConfig } from "@/src/api/config";
 import { getFriendSummary, getFriends } from "@/src/api/friend";
 import FriendPageClient from "@/src/components/FriendPageClient";
 import type { Metadata } from "next";
-import { resolvePublicUrl } from "@/src/utils/publicUrl";
+import { buildPageMetadata } from "@/src/utils/seo";
 
 async function settleWithFallback<T>(promise: Promise<T>, fallback: T) {
   try {
@@ -15,22 +15,11 @@ async function settleWithFallback<T>(promise: Promise<T>, fallback: T) {
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getCommonConfig().catch(() => DEFAULT_COMMON_CONFIG);
 
-  return {
-    title: `友链 - ${config.seo_meta.title || config.website_meta.website_name}`,
-    description: config.seo_meta.description || config.website_meta.website_name,
-    openGraph: {
-      title: `友链 - ${
-        config.seo_meta.og_title || config.website_meta.website_name
-      }`,
-      description: config.seo_meta.description,
-      url: process.env.BASE_HOST + "/friend",
-      images: config.seo_meta.og_image
-        ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }]
-        : undefined,
-      siteName: config.website_meta.website_name,
-      type: "website",
-    },
-  };
+  return buildPageMetadata(config, {
+    title: "友链",
+    description: `浏览${config.website_meta.website_name}的友情链接及友链申请说明。`,
+    pathname: "/friend",
+  });
 }
 
 export default async function FriendPage() {

@@ -3,7 +3,7 @@ import { getTags } from "@/src/api/tags";
 import type { Metadata } from "next";
 import { DEFAULT_COMMON_CONFIG, getCommonConfig } from "@/src/api/config";
 import NavigationContent from "@/src/components/NavigationContent";
-import { resolvePublicUrl } from "@/src/utils/publicUrl";
+import { buildPageMetadata } from "@/src/utils/seo";
 
 async function settleWithFallback<T>(promise: Promise<T>, fallback: T) {
   try {
@@ -16,24 +16,11 @@ async function settleWithFallback<T>(promise: Promise<T>, fallback: T) {
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getCommonConfig().catch(() => DEFAULT_COMMON_CONFIG);
 
-  return {
-    title: `全部分类与标签 - ${
-      config.seo_meta.title || config.website_meta.website_name
-    }`,
+  return buildPageMetadata(config, {
+    title: "全部分类与标签",
     description: "浏览本站文章分类与标签。",
-    openGraph: {
-      title: `全部分类与标签 - ${
-        config.seo_meta.og_title || config.website_meta.website_name
-      }`,
-      description: "浏览本站文章分类与标签。",
-      url: process.env.BASE_HOST + "/navigation",
-      images: config.seo_meta.og_image
-        ? [{ url: resolvePublicUrl(config.seo_meta.og_image) }]
-        : undefined,
-      siteName: config.website_meta.website_name,
-      type: "website",
-    },
-  };
+    pathname: "/navigation",
+  });
 }
 
 export default async function NavigationPage() {

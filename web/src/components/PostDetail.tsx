@@ -1,4 +1,9 @@
 import React from "react";
+import Link from "next/link";
+import { getCategories } from "@/src/api/category";
+import { getTags } from "@/src/api/tags";
+import { getPostPath, getSiteUrl } from "@/src/utils/seo";
+import Breadcrumbs from "./Breadcrumbs";
 import { MarkdownPreview } from "@/src/components/MarkdownPreview";
 import { extractToc, Toc } from "@/src/components/Toc";
 import { PostActions } from "@/src/components/PostActions";
@@ -49,7 +54,26 @@ const getReadingMinutes = (wordCount: number) => {
   return Math.max(1, Math.ceil(wordCount / 400));
 };
 
-const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
+const PostDetail = async ({ post, initialComments }: PostDetailProps) => {
+  const [categories, tags] = await Promise.all([
+    getCategories().catch(() => []),
+    getTags().catch(() => []),
+  ]);
+  const categoryRoutes = new Map(categories.map(item => [item.name, item.route]));
+  const tagRoutes = new Map(tags.map(item => [item.name, item.route]));
+  const renderTerms = (terms: Array<{ id: string; name: string }>, routes: Map<string, string>, kind: "categories" | "tags") =>
+    terms.map((term, index) => {
+      const route = routes.get(term.name);
+      return <React.Fragment key={term.id}>
+        {index > 0 && ", "}
+        {route
+          ? <Link href={`/${kind}/${encodeURIComponent(route)}`} className="hover:underline">{term.name}</Link>
+          : term.name}
+      </React.Fragment>;
+    });
+  const postPath = getPostPath(post._id);
+  const articleUrl = new URL(postPath, getSiteUrl()).toString();
+  const category = post.category.find(item => categoryRoutes.has(item.name));
   const toc = extractToc(post.content);
   const wordCount = getDisplayWordCount(post);
   const readingMinutes = getReadingMinutes(wordCount);
@@ -57,6 +81,11 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
   return (
     <>
       <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
+        <Breadcrumbs items={[
+          { name: "首页", pathname: "/" },
+          ...(category && post._id !== "about-me" ? [{ name: category.name, pathname: `/categories/${encodeURIComponent(categoryRoutes.get(category.name)!)}` }] : []),
+          { name: post.title, pathname: postPath },
+        ]} />
         <div className="glass-surface flex flex-col lg:flex-row gap-5 lg:gap-8 rounded-xl p-4 md:p-6 mb-8 md:mb-12">
           <div className="flex-1 min-w-0">
             <h1 className="text-xl leading-snug md:text-3xl font-bold mb-4 dark:text-gray-100">
@@ -64,11 +93,14 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
             </h1>
             <div className="flex flex-wrap gap-x-3 gap-y-2 md:gap-4 text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-5 md:mb-6">
               <span>作者：{post.author}</span>
-              <span>分类：{post.category.map((c) => c.name).join(", ")}</span>
+              <span>分类：{renderTerms(post.category, categoryRoutes, "categories")}</span>
               <span className="hidden sm:inline">
-                标签：{post.tags.map((t) => t.name).join(", ")}
+                标签：{renderTerms(post.tags, tagRoutes, "tags")}
               </span>
-              <span>发布：{formatDate(post.created_at)}</span>
+              <span>发布：<time dateTime={new Date(post.created_at * 1000).toISOString()}>{formatDate(post.created_at)}</time></span>
+              {post.updated_at > post.created_at && (
+                <span>更新：<time dateTime={new Date(post.updated_at * 1000).toISOString()}>{formatDate(post.updated_at)}</time></span>
+              )}
               {wordCount > 0 && (
                 <>
                   <span>字数：{wordCount}</span>
@@ -81,7 +113,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
             </div>
             {/* 移动端显示标签 */}
             <div className="sm:hidden mb-4 text-xs text-gray-500 dark:text-gray-400">
-              标签：{post.tags.map((t) => t.name).join(", ")}
+              标签：{renderTerms(post.tags, tagRoutes, "tags")}
             </div>
             <article className="glass-card overflow-hidden rounded-lg px-4 py-5 md:px-7 md:py-6 prose prose-sm md:prose-lg max-w-none dark:prose-invert">
               <MarkdownPreview
@@ -95,7 +127,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, initialComments }) => {
             <div className="mt-8 md:mt-10 p-3 md:p-4 rounded-lg border border-white/70 bg-white/45 text-xs md:text-sm text-gray-600 backdrop-blur dark:border-white/10 dark:bg-slate-900/35 dark:text-gray-400">
               <div className="break-all">
                 本文链接：
-                <span>{`${process.env.BASE_HOST || ""}${post._id === "about-me" ? "/about-me" : `/posts/${post._id}`}`}</span>
+                <Link href={postPath} className="hover:underline">{articleUrl}</Link>
               </div>
               <div className="mt-2">
                 版权声明：本文由{" "}
