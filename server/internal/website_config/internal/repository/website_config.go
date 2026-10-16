@@ -37,6 +37,7 @@ import (
 )
 
 type IWebsiteConfigRepository interface {
+	IAIAssistantConfigRepository
 	IConfigCheckStateRepository
 	FindByTyp(ctx context.Context, typ string) (any, error)
 	Increase(ctx context.Context, field string) error

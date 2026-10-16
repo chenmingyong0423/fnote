@@ -14,6 +14,27 @@
 
 package web
 
+type UpdateAIAssistantConfigReq struct {
+	Enabled          *bool                 `json:"enabled" binding:"required"`
+	AssistantName    string                `json:"assistant_name"`
+	SystemPrompt     string                `json:"system_prompt"`
+	EnabledTools     []string              `json:"enabled_tools"`
+	ActiveProviderId string                `json:"active_provider_id"`
+	Providers        []UpdateAIProviderReq `json:"providers"`
+}
+
+type UpdateAIProviderReq struct {
+	Id              string `json:"id"`
+	Name            string `json:"name"`
+	ApiType         string `json:"api_type"`
+	BaseUrl         string `json:"base_url"`
+	Model           string `json:"model"`
+	ApiKey          string `json:"api_key"`
+	MaxOutputTokens *int   `json:"max_output_tokens"`
+	ReasoningEffort string `json:"reasoning_effort"`
+	ThinkingMode    string `json:"thinking_mode"`
+}
+
 type UpdateWebsiteConfigReq struct {
 	WebsiteName         string `json:"website_name" binding:"required"`
 	WebsiteIcon         string `json:"website_icon" binding:"required"`

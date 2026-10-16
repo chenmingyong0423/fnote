@@ -20,7 +20,9 @@ import (
 func InitWebsiteConfigModule(db *mongox.Database) *Module {
 	websiteConfigDao := dao.NewWebsiteConfigDao(db)
 	websiteConfigRepository := repository.NewWebsiteConfigRepository(websiteConfigDao)
-	websiteConfigService := service.NewWebsiteConfigService(websiteConfigRepository)
+	aiKeyCipher := initAIKeyCipher()
+	aiProviderTester := initAIProviderTester()
+	websiteConfigService := service.NewWebsiteConfigService(websiteConfigRepository, aiKeyCipher, aiProviderTester)
 	websiteConfigHandler := web.NewWebsiteConfigHandler(websiteConfigService)
 	module := &Module{
 		Svc: websiteConfigService,
@@ -31,4 +33,4 @@ func InitWebsiteConfigModule(db *mongox.Database) *Module {
 
 // wire.go:
 
-var ConfigProviders = wire.NewSet(web.NewWebsiteConfigHandler, service.NewWebsiteConfigService, repository.NewWebsiteConfigRepository, dao.NewWebsiteConfigDao, wire.Bind(new(service.IWebsiteConfigService), new(*service.WebsiteConfigService)), wire.Bind(new(repository.IWebsiteConfigRepository), new(*repository.WebsiteConfigRepository)), wire.Bind(new(dao.IWebsiteConfigDao), new(*dao.WebsiteConfigDao)))
+var ConfigProviders = wire.NewSet(initAIKeyCipher, initAIProviderTester, web.NewWebsiteConfigHandler, service.NewWebsiteConfigService, repository.NewWebsiteConfigRepository, dao.NewWebsiteConfigDao, wire.Bind(new(service.IWebsiteConfigService), new(*service.WebsiteConfigService)), wire.Bind(new(repository.IWebsiteConfigRepository), new(*repository.WebsiteConfigRepository)), wire.Bind(new(dao.IWebsiteConfigDao), new(*dao.WebsiteConfigDao)))

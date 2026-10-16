@@ -25,7 +25,7 @@ import (
 	"github.com/google/wire"
 )
 
-var ConfigProviders = wire.NewSet(web.NewWebsiteConfigHandler, service.NewWebsiteConfigService, repository.NewWebsiteConfigRepository, dao.NewWebsiteConfigDao,
+var ConfigProviders = wire.NewSet(initAIKeyCipher, initAIProviderTester, web.NewWebsiteConfigHandler, service.NewWebsiteConfigService, repository.NewWebsiteConfigRepository, dao.NewWebsiteConfigDao,
 	wire.Bind(new(service.IWebsiteConfigService), new(*service.WebsiteConfigService)),
 	wire.Bind(new(repository.IWebsiteConfigRepository), new(*repository.WebsiteConfigRepository)),
 	wire.Bind(new(dao.IWebsiteConfigDao), new(*dao.WebsiteConfigDao)))

@@ -14,6 +14,34 @@
 
 package web
 
+type AIAssistantConfigVO struct {
+	Enabled          bool           `json:"enabled"`
+	AssistantName    string         `json:"assistant_name"`
+	SystemPrompt     string         `json:"system_prompt"`
+	EnabledTools     []string       `json:"enabled_tools"`
+	ActiveProviderId string         `json:"active_provider_id"`
+	Providers        []AIProviderVO `json:"providers"`
+}
+
+type AIProviderVO struct {
+	Id              string `json:"id"`
+	Name            string `json:"name"`
+	ApiType         string `json:"api_type"`
+	BaseUrl         string `json:"base_url"`
+	Model           string `json:"model"`
+	HasApiKey       bool   `json:"has_api_key"`
+	MaxOutputTokens *int   `json:"max_output_tokens,omitempty"`
+	ReasoningEffort string `json:"reasoning_effort,omitempty"`
+	ThinkingMode    string `json:"thinking_mode,omitempty"`
+}
+
+type AIProviderTestResultVO struct {
+	Success    bool   `json:"success"`
+	Message    string `json:"message"`
+	Reply      string `json:"reply,omitempty"`
+	DurationMs int64  `json:"duration_ms"`
+}
+
 // IndexConfigVO 首页信息
 type IndexConfigVO struct {
 	WebsiteConfig      WebsiteConfigVO    `json:"website_config"`

@@ -52,6 +52,9 @@ type WebsiteConfigHandler struct {
 func (h *WebsiteConfigHandler) RegisterGinRoutes(engine *gin.Engine) {
 	routerGroup := engine.Group("/configs")
 	adminGroup := engine.Group("/admin-api/configs")
+	adminGroup.GET("/ai-assistant", apiwrap.Wrap(h.AdminGetAIAssistantConfig))
+	adminGroup.PUT("/ai-assistant", h.AdminUpdateAIAssistantConfig)
+	adminGroup.POST("/ai-assistant/test-provider", h.AdminTestAIProvider)
 
 	// 获取首页的配置信息
 	routerGroup.GET("/index", apiwrap.Wrap(h.GetIndexConfig))

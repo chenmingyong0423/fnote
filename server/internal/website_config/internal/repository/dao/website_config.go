@@ -39,6 +39,7 @@ type WebsiteConfig struct {
 }
 
 type IWebsiteConfigDao interface {
+	IAIAssistantConfigDao
 	IConfigCheckStateDao
 	FindByTyp(ctx context.Context, typ string) (*WebsiteConfig, error)
 	Increase(ctx context.Context, field string) error

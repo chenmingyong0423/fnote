@@ -16,6 +16,7 @@ package service
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -31,6 +32,7 @@ import (
 )
 
 type IWebsiteConfigService interface {
+	IAIAssistantConfigService
 	GetWebSiteConfig(ctx context.Context) (*domain.WebsiteConfig, error)
 	GetEmailConfig(ctx context.Context) (*domain.EmailConfig, error)
 	GetIndexConfig(ctx context.Context) (*domain.IndexConfig, error)
@@ -78,14 +80,19 @@ type IWebsiteConfigService interface {
 
 var _ IWebsiteConfigService = (*WebsiteConfigService)(nil)
 
-func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository) *WebsiteConfigService {
+func NewWebsiteConfigService(repo repository.IWebsiteConfigRepository, aiKeyCipher *AIKeyCipher, aiProviderTester *AIProviderTester) *WebsiteConfigService {
 	return &WebsiteConfigService{
-		repo: repo,
+		repo:             repo,
+		aiKeyCipher:      aiKeyCipher,
+		aiProviderTester: aiProviderTester,
 	}
 }
 
 type WebsiteConfigService struct {
-	repo repository.IWebsiteConfigRepository
+	repo             repository.IWebsiteConfigRepository
+	aiKeyCipher      *AIKeyCipher
+	aiProviderTester *AIProviderTester
+	aiConfigMutex    sync.Mutex
 }
 
 func (s *WebsiteConfigService) GetCommonConfig(ctx context.Context) (*domain.CommonConfig, error) {

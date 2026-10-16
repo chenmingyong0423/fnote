@@ -43,3 +43,7 @@ gravatar:
 push:
   baidu:
     endpoint: http://data.zz.baidu.com/urls
+
+ai_assistant:
+  # 用于加密模型 API Key，需保持固定；更换后需要重新填写模型密钥。
+  encryption_key: "DMAj+oRnSeEHHnTUAKKDPscdPdiZNXUU6po+gzU7egc="
