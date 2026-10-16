@@ -139,6 +139,7 @@ import {
   PictureOutlined,
   QrcodeOutlined,
   ReloadOutlined,
+  RobotOutlined,
   SafetyCertificateOutlined,
   SearchOutlined,
   SendOutlined,
@@ -159,6 +160,7 @@ import PushView from '@/views/setting/PushView.vue'
 import CarouselView from '@/views/setting/CarouselView.vue'
 import SiteMapVIew from '@/views/setting/SiteMapVIew.vue'
 import RobotsView from '@/views/setting/RobotsView.vue'
+import AiAssistantView from '@/views/setting/AiAssistantView.vue'
 import {
   GetConfigHealth,
   UpdateConfigCheckState,
@@ -217,6 +219,7 @@ const settingGroups: SettingGroup[] = [
     key: 'interaction',
     label: '互动与联系',
     items: [
+      { key: 'ai-assistant', label: 'AI 助手', icon: RobotOutlined, component: AiAssistantView },
       { key: 'comment', label: '评论设置', icon: CommentOutlined, component: CommentSwitchView },
       { key: 'friend', label: '友链申请', icon: LinkOutlined, component: FriendSwitchView },
       { key: 'email', label: '邮件通知', icon: MailOutlined, component: EmailView },
