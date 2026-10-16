@@ -5,6 +5,7 @@ const serverUrl = new URL(process.env.SERVER_HOST || "http://localhost:8080");
 const serverHost = process.env.SERVER_HOST || "http://localhost:8080";
 
 const nextConfig: NextConfig = {
+  experimental: { proxyTimeout: 120000 },
   async redirects() {
     return [
       {

@@ -14,6 +14,7 @@ import { redirect } from "next/navigation";
 import { isBackendUnavailableError } from "@/src/utils/http";
 import { resolvePublicUrl } from "@/src/utils/publicUrl";
 import BackTopButton from "@/src/components/BackTopButton";
+import AiAssistant from "@/src/components/ai/AiAssistant";
 import InteractiveBackdrop from "@/src/components/InteractiveBackdrop";
 import { getSiteUrl, normalizeRobots } from "@/src/utils/seo";
 import { headers } from "next/headers";
@@ -180,6 +181,7 @@ export default async function RootLayout({
               <LogVisitClient />
               <Footer websiteRecords={config.records || []} />
               <BackTopButton />
+              <AiAssistant logoSrc={config.website_meta.website_icon || "/assistant-logo.png"} />
             </div>
           </AntdThemeProvider>
         </AntdRegistry>

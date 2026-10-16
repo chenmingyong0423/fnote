@@ -7,11 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test:seo": "node scripts/test-seo.cjs"
+    "test:seo": "node scripts/test-seo.cjs",
+    "test:ai": "node scripts/test-ai.cjs"
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "1.2.0",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@ant-design/x": "^1.6.1",
     "antd": "^5.29.3",
     "blueimp-md5": "^2.19.0",
     "github-markdown-css": "^5.8.1",
