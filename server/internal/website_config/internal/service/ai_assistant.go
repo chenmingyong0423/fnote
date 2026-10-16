@@ -17,6 +17,7 @@ type IAIAssistantConfigService interface {
 	GetAIAssistantConfig(ctx context.Context) (domain.AIAssistantConfig, error)
 	UpdateAIAssistantConfig(ctx context.Context, cfg domain.AIAssistantConfig) error
 	GetAIProviderKey(ctx context.Context, providerId string) (string, error)
+	GetAIProvider(ctx context.Context, providerId string) (domain.AIProvider, error)
 	TestAIProvider(ctx context.Context, provider domain.AIProvider) (domain.AIProviderTestResult, error)
 }
 
@@ -89,16 +90,27 @@ func (s *WebsiteConfigService) UpdateAIAssistantConfig(ctx context.Context, cfg 
 }
 
 func (s *WebsiteConfigService) GetAIProviderKey(ctx context.Context, providerId string) (string, error) {
+	provider, err := s.GetAIProvider(ctx, providerId)
+	return provider.ApiKey, err
+}
+
+// Return connection settings and their decrypted credential from the same read.
+// Configuration edits must never pair a new key with an old provider address.
+func (s *WebsiteConfigService) GetAIProvider(ctx context.Context, providerId string) (domain.AIProvider, error) {
 	cfg, err := s.GetAIAssistantConfig(ctx)
 	if err != nil {
-		return "", err
+		return domain.AIProvider{}, err
 	}
 	for _, provider := range cfg.Providers {
 		if provider.Id == providerId && provider.EncryptedApiKey != "" {
-			return s.aiKeyCipher.Decrypt(provider.Id, provider.EncryptedApiKey)
+			provider.ApiKey, err = s.aiKeyCipher.Decrypt(provider.Id, provider.EncryptedApiKey)
+			if err != nil {
+				return domain.AIProvider{}, err
+			}
+			return provider, nil
 		}
 	}
-	return "", invalidAIConfig("模型服务未配置 API Key")
+	return domain.AIProvider{}, invalidAIConfig("模型服务未配置 API Key")
 }
 
 func normalizeAndValidateAIConfig(cfg *domain.AIAssistantConfig) error {

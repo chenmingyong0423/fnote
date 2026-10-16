@@ -40,6 +40,8 @@ import (
 )
 
 type IPostService interface {
+	SearchPublicPosts(ctx context.Context, keyword string, limit int64) ([]*domain.Post, int64, error)
+	GetPublicPostById(ctx context.Context, id string) (*domain.Post, error)
 	GetLatestPosts(ctx context.Context, count int64) ([]*domain.Post, error)
 	GetPosts(ctx context.Context, pageRequest *domain.PostRequest) ([]*domain.Post, int64, error)
 	GetPunishedPostById(ctx context.Context, id string) (*domain.Post, error)
@@ -58,6 +60,19 @@ type IPostService interface {
 }
 
 var _ IPostService = (*PostService)(nil)
+
+// Public read methods have no analytics side effects and accept ordinary contexts.
+func (s *PostService) GetPublicPostById(ctx context.Context, id string) (*domain.Post, error) {
+	return s.repo.GetPunishedPostById(ctx, id)
+}
+
+func (s *PostService) SearchPublicPosts(ctx context.Context, keyword string, limit int64) ([]*domain.Post, int64, error) {
+	if limit < 1 || limit > 8 {
+		limit = 8
+	}
+	keyword = regexp.QuoteMeta(keyword)
+	return s.repo.QueryPostsPage(ctx, domain.PostsQueryCondition{Size: limit, Keyword: &keyword})
+}
 
 func NewPostService(repo repository.IPostRepository, cfgService website_config.Service, eventBus *eventbus.EventBus) *PostService {
 	s := &PostService{

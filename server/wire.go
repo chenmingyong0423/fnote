@@ -18,6 +18,7 @@ package main
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
+	"github.com/chenmingyong0423/fnote/server/internal/ai_assistant"
 	"github.com/chenmingyong0423/fnote/server/internal/asset"
 	"github.com/chenmingyong0423/fnote/server/internal/backup"
 	"github.com/chenmingyong0423/fnote/server/internal/category"
@@ -55,6 +56,8 @@ func initializeApp() (*gin.Engine, error) {
 
 		website_config.InitWebsiteConfigModule,
 		wire.FieldsOf(new(*website_config.Module), "Hdl"),
+		ai_assistant.InitAIAssistantModule,
+		wire.FieldsOf(new(*ai_assistant.Module), "Hdl"),
 		post_index.InitPostIndexModule,
 		wire.FieldsOf(new(*post_index.Module), "Hdl"),
 		post_draft.InitPostDraftModule,

@@ -22,6 +22,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chenmingyong0423/fnote/server/internal/ai_assistant"
+
 	"github.com/chenmingyong0423/fnote/server/internal/asset"
 
 	"github.com/chenmingyong0423/fnote/server/internal/backup"
@@ -67,7 +69,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func NewGinEngine(fileHdr *file.Handler, ctgHdr *category.Handler, cmtHdr *comment.Handler, cfgHdr *website_config.Handler, frdHdr *friend.Handler, postHdr *post.Handler, vlHdr *visit_log.Handler, msgTplHandler *message_template.Handler, tagsHandler *tag.Handler, daHandler *data_analysis.Handler, csHandler *count_stats.Handler, backupHandler *backup.Handler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler, postVisitHdr *post_visit.Handler, postAssetHdr *asset.AssetHandler) (*gin.Engine, error) {
+func NewGinEngine(fileHdr *file.Handler, ctgHdr *category.Handler, cmtHdr *comment.Handler, cfgHdr *website_config.Handler, frdHdr *friend.Handler, postHdr *post.Handler, vlHdr *visit_log.Handler, msgTplHandler *message_template.Handler, tagsHandler *tag.Handler, daHandler *data_analysis.Handler, csHandler *count_stats.Handler, backupHandler *backup.Handler, middleware []gin.HandlerFunc, validators Validators, postIndexHdr *post_index.Handler, postDraftHdr *post_draft.Handler, aggregatePostHdr *aggregate_post.Handler, postLikesHdr *post_like.Handler, postVisitHdr *post_visit.Handler, postAssetHdr *asset.AssetHandler, aiHdr *ai_assistant.Handler) (*gin.Engine, error) {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 
@@ -104,6 +106,7 @@ func NewGinEngine(fileHdr *file.Handler, ctgHdr *category.Handler, cmtHdr *comme
 		postLikesHdr.RegisterGinRoutes(engine)
 		postVisitHdr.RegisterGinRoutes(engine)
 		postAssetHdr.RegisterGinRoutes(engine)
+		aiHdr.RegisterGinRoutes(engine)
 	}
 	return engine, nil
 }
@@ -127,7 +130,7 @@ func InitMiddlewares(writer io.Writer, isWebsiteInitialized func() bool) []gin.H
 			}
 		}(viper.GetString("logger.level")), log.WithSkipPaths([]string{"/admin-api/files/upload", "/admin-api/recovery", "/admin-api/backup", "/admin-api/configs/ai-assistant", "/admin-api/configs/ai-assistant/test-provider"}), log.WithSkipFunc(func(ctx *gin.Context) bool {
 			url := ctx.Request.URL.Path
-			return strings.HasPrefix(url, "/static/")
+			return strings.HasPrefix(url, "/static/") || strings.HasPrefix(url, "/ai/")
 		}))),
 		cors.New(cors.Config{
 			AllowCredentials: true,

@@ -23,6 +23,7 @@ import (
 type (
 	AIAssistantConfig = domain.AIAssistantConfig
 	AIProvider        = domain.AIProvider
+	WebsiteConfig     = domain.WebsiteConfig
 	Handler           = web.WebsiteConfigHandler
 	Service           = service.IWebsiteConfigService
 	Module            struct {

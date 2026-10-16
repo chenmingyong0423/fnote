@@ -8,6 +8,7 @@ package main
 
 import (
 	"github.com/chenmingyong0423/fnote/server/internal/aggregate_post"
+	"github.com/chenmingyong0423/fnote/server/internal/ai_assistant"
 	"github.com/chenmingyong0423/fnote/server/internal/asset"
 	"github.com/chenmingyong0423/fnote/server/internal/backup"
 	"github.com/chenmingyong0423/fnote/server/internal/category"
@@ -82,7 +83,12 @@ func initializeApp() (*gin.Engine, error) {
 	postVisitHandler := post_visitModule.Hdl
 	assetModule := asset.InitAssetModule(database, module)
 	assetHandler := assetModule.Hdl
-	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, messageTemplateHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v2, validators, postIndexHandler, postDraftHandler, aggregatePostHandler, postLikeHandler, postVisitHandler, assetHandler)
+	ai_assistantModule, err := ai_assistant.InitAIAssistantModule(database, website_configModule, postModule)
+	if err != nil {
+		return nil, err
+	}
+	aiAssistantHandler := ai_assistantModule.Hdl
+	engine, err := ioc.NewGinEngine(fileHandler, categoryHandler, commentHandler, websiteConfigHandler, friendHandler, postHandler, visitLogHandler, messageTemplateHandler, tagHandler, dataAnalysisHandler, countStatsHandler, backupHandler, v2, validators, postIndexHandler, postDraftHandler, aggregatePostHandler, postLikeHandler, postVisitHandler, assetHandler, aiAssistantHandler)
 	if err != nil {
 		return nil, err
 	}

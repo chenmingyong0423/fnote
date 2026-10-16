@@ -105,6 +105,10 @@ func TestAIConfigDefaultsAndKeyLifecycle(t *testing.T) {
 	if key, err = svc.GetAIProviderKey(ctx, "p1"); err != nil || key != "test-secret-2" {
 		t.Fatal("new key must replace the saved credential")
 	}
+	resolved, err := svc.GetAIProvider(ctx, "p1")
+	if err != nil || resolved.ApiKey != "test-secret-2" || resolved.BaseUrl != "https://example.com/v1" || resolved.Model != "configured-model" {
+		t.Fatal("a resolved provider must pair connection settings with their own saved key")
+	}
 	cfg, _ = svc.GetAIAssistantConfig(ctx)
 	cfg.Enabled = false
 	cfg.ActiveProviderId = ""
